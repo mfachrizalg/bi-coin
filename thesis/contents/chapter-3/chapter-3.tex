@@ -1,0 +1,726 @@
+\chapter{Metode Penelitian}
+
+\section{Metode yang Digunakan}
+
+Metode yang digunakan adalah \textit{prototyping} dengan tahapan perancangan,
+implementasi, dan pengujian. Sistem dibangun sebagai purwarupa fungsional yang
+kemudian dievaluasi kinerjanya secara kuantitatif menggunakan Hyperledger
+Caliper. Siklus SDLC metode \textit{prototyping} yang diterapkan ditunjukkan
+pada Gambar~\ref{fig:sdlc-proto}: keempat fase (analisis kebutuhan, perancangan,
+implementasi, dan evaluasi) diulang secara iteratif hingga purwarupa memenuhi
+spesifikasi.
+
+\input{contents/figures/sdlc-prototyping}
+
+\subsection{Metode Perancangan}
+
+Perancangan sistem dimulai dari analisis kebutuhan berdasarkan model Rupiah
+Digital dua jenjang, kemudian dituangkan ke dalam activity diagram, arsitektur
+sistem, arsitektur jaringan, perancangan use case, dan model data
+\textit{ledger}.
+
+\subsubsection{Analisis Kebutuhan Sistem}
+
+Analisis kebutuhan mengidentifikasi aktor sistem (Bank Indonesia, bank
+validator, PJP, pedagang, pelanggan ritel, supervisor, dan pengamat OJK) beserta
+kebutuhan fungsionalnya, yaitu penerbitan dan distribusi likuiditas berjenjang,
+pengelolaan KYC berbasis risiko, penurunan tingkatan dan limit dompet, transfer
+antarpelanggan serta pelanggan-ke-pedagang, pengawasan, dan
+pelaporan. Kebutuhan ini menjadi dasar perancangan activity diagram dan arsitektur
+pada subbab berikutnya.
+
+\subsubsection{Perancangan Activity Diagram}
+
+Alur setiap proses utama dimodelkan dengan activity diagram bergaya
+\textit{swimlane} tiga jalur, yaitu jalur aktor, jalur \textit{backend API}, dan
+jalur \textit{blockchain} (\textit{chaincode}). Proses utama
+yaitu pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
+(Gambar~\ref{fig:ad02}), distribusi likuiditas ke PJP (Gambar~\ref{fig:ad03}),
+onboarding KYC pelanggan (Gambar~\ref{fig:ad04}), transfer saldo ritel
+(Gambar~\ref{fig:ad05}),
+pembekuan dan pencairan peserta (Gambar~\ref{fig:ad08}), serta laporan dan
+pengawasan (Gambar~\ref{fig:ad10}).
+
+\input{contents/figures/activity-diagrams}
+
+\subsubsection{Perancangan Arsitektur Sistem Blockchain}
+
+Secara konseptual, sistem mengimplementasikan model Rupiah Digital dua jenjang
+sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}. Jenjang
+pertama (\textit{wholesale}) menghubungkan Bank Indonesia selaku penerbit dengan
+bank validator (HimbaraBank dan CommercialBank) serta PJP melalui jaringan
+Hyperledger Fabric. Jenjang kedua (\textit{retail}) menyediakan layanan
+pembayaran kepada pelanggan melalui PJP, termasuk transfer antarpelanggan,
+transfer pelanggan-ke-pedagang, dan kontrol kepatuhan berbasis KYC.
+
+\input{contents/figures/two-tier-cbdc}
+
+Arsitektur teknologi Rupiah Digital dalam White Paper CBDC Bank Indonesia
+terdiri atas lapisan platform teknologi, lapisan aset digital, dan lapisan use
+case. Komponen dasarnya mencakup \textit{sandbox}, API, \textit{smart contract},
+layanan identitas, layanan regulasi, dan pengamanan kriptografi sebagaimana
+ditunjukkan pada Gambar~\ref{fig:bi-whitepaper-technology-architecture}
+\cite{bi_whitepaper2022}. Purwarupa \textit{bi-coin-fabric} memetakan gagasan
+tersebut secara terbatas melalui API backend, \textit{chaincode}, identitas dan
+KYC, peran pengawasan, serta \textit{ledger} Hyperledger Fabric. Dengan
+demikian, purwarupa ini digunakan sebagai model eksperimental yang selaras
+dengan prinsip arsitektur BI, tetapi tidak merepresentasikan arsitektur produksi
+Rupiah Digital secara penuh.
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth]{contents/figures/reference/bi-whitepaper-technology-architecture.png}
+    \caption{Arsitektur teknologi Rupiah Digital menurut White Paper CBDC Bank Indonesia. Sumber: Bank Indonesia \cite{bi_whitepaper2022}.}
+    \label{fig:bi-whitepaper-technology-architecture}
+\end{figure}
+
+Sistem dirancang sebagai arsitektur layanan \textit{backend API} dan jaringan
+\textit{blockchain} sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur}.
+Lapisan \textit{backend API} bertindak sebagai \textit{gateway} yang
+menerjemahkan permintaan HTTP menjadi pemanggilan \textit{chaincode} sekaligus
+menegakkan kontrol akses berbasis peran, sedangkan lapisan jaringan
+\textit{blockchain} menjalankan \textit{chaincode} serta menyimpan
+\textit{ledger}.
+
+Berdasarkan klasifikasi model pembayaran pada Bab~2, purwarupa
+\textit{bi-coin-fabric} dikategorikan sebagai model dompet ritel berbasis akun
+(\textit{account-based wallet model}) yang diimplementasikan di atas
+\textit{ledger} Hyperledger Fabric. Klasifikasi ini diturunkan dari rancangan
+data \textit{on-chain}: objek \texttt{Wallet} menyimpan \texttt{OwnerID},
+\texttt{Tier}, dan \texttt{Balance}; fungsi \texttt{Transfer} memeriksa status
+KYC, limit tingkatan, status beku, dan saldo, kemudian mendebit saldo pengirim
+serta mengkredit saldo penerima. Sistem tidak membentuk objek token pembawa
+(\textit{bearer token}), UTXO, atau nomor seri token yang berpindah antarpemilik.
+Dengan demikian, mekanisme pembayaran purwarupa bukan model token murni,
+melainkan penyederhanaan dompet berbasis akun untuk menguji KYC bertingkat,
+limit saldo/transaksi, dan auditabilitas transfer ritel.
+
+\input{contents/figures/system-architecture}
+
+Jaringan \textit{blockchain} dirancang dengan lima organisasi peserta dan satu
+organisasi \textit{orderer}, merepresentasikan ekosistem Rupiah Digital
+multipihak. Setiap organisasi memiliki MSP dan \textit{peer} tersendiri dengan
+basis data status CouchDB. Rincian organisasi disajikan pada
+Tabel~\ref{tab:jaringan}.
+
+\begingroup
+\renewcommand{\arraystretch}{1.3}
+\begin{table}[H]
+	\caption{Organisasi pada jaringan Rupiah Digital}
+	\label{tab:jaringan}
+	\centering
+	\begin{tabular}{p{3.6cm} p{3.2cm} p{5.6cm}}
+	\toprule
+	\textbf{Organisasi}  & \textbf{Peran} & \textbf{Keterangan}                         \\
+	\midrule
+	BankIndonesiaOrg     & Penerbit       & Penerbitan dan penarikan Digital Rupiah,
+	pengawasan                                                                          \\
+	HimbaraBankOrg       & Validator      & Bank distributor likuiditas ke PJP          \\
+	CommercialBank\allowbreak Org & Validator & Bank distributor likuiditas ke PJP          \\
+	PJPOrg               & PJP            & Penyedia jasa pembayaran ke pelanggan ritel \\
+	OJKObserverOrg       & Observer       & Pengamatan/pengawasan (baca)                \\
+	BankIndonesia\allowbreak Orderer & Orderer & Layanan pengurutan (Raft)                   \\
+	\bottomrule
+	\end{tabular}
+\end{table}
+\endgroup
+
+Seluruh peserta tergabung dalam satu kanal (\textit{channel}) dengan kebijakan
+dukungan \textit{majority}, sehingga pemutakhiran \textit{ledger} memerlukan
+dukungan dari mayoritas organisasi. Komunikasi antarsimpul diamankan dengan TLS.
+Topologi jaringan secara lengkap ditunjukkan pada
+Gambar~\ref{fig:arsitektur-jaringan}, yang memperlihatkan hubungan antara
+\textit{orderer}, kelima \textit{peer}, basis data CouchDB masing-masing
+organisasi, serta \textit{backend API} yang terhubung ke jaringan melalui
+\textit{Fabric Gateway SDK}.
+
+\input{contents/figures/network-architecture}
+
+Kebutuhan fungsional sistem dimodelkan dengan diagram use case. Aktor sistem
+terdiri atas Bank Indonesia, bank validator, PJP, pedagang (\textit{merchant}),
+pelanggan ritel, supervisor, dan pengamat OJK. Diagram use case keseluruhan
+ditunjukkan pada Gambar~\ref{fig:uc01}, sedangkan rincian operasi
+\textit{wholesale} dan \textit{retail} ditunjukkan pada Gambar~\ref{fig:uc02}
+dan Gambar~\ref{fig:uc03}.
+
+\input{contents/figures/use-case-diagrams}
+
+Pemetaan aktor pada diagram tersebut mengikuti kendali peran pada lapisan
+\textit{backend}. Pendaftaran peserta diajukan oleh PJP atau Bank Indonesia
+(\texttt{POST /participants}), lalu disetujui oleh Bank Indonesia atau supervisor
+(\texttt{/approve}), sehingga pengajuan dan persetujuan terpisah (\textit{four-eyes}).
+Pengamat OJK dan bank validator hadir sebagai organisasi pada jaringan Fabric
+(\textit{peer} dengan akses baca pada \textit{ledger}), bukan sebagai peran
+\textit{backend} tersendiri; karena itu asosiasi OJK pada \textit{use case}
+Laporan \& Pengawasan digambarkan sebagai pengamatan tingkat \textit{ledger}.
+Pada operasi ritel, data KYC disediakan oleh pelanggan, tetapi pengajuan profil
+KYC ke sistem (\texttt{POST /kyc/profiles}) dilakukan oleh operator PJP, bukan
+oleh pelanggan secara mandiri.
+
+Status sistem disimpan pada \textit{world state} dalam bentuk objek-objek yang
+dirangkum pada Tabel~\ref{tab:model-data}. Objek-objek ini menjadi dasar seluruh
+operasi \textit{chaincode}.
+
+\begingroup
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{>{\RaggedRight\arraybackslash}p{4.4cm}
+                  >{\RaggedRight\arraybackslash}p{8.5cm}}
+	\caption{Objek status utama pada ledger}\label{tab:model-data}                        \\
+	\toprule
+	\textbf{Objek}             & \textbf{Keterangan}                                      \\
+	\midrule
+	\endfirsthead
+	\toprule
+	\textbf{Objek}             & \textbf{Keterangan}                                      \\
+	\midrule
+	\endhead
+	\bottomrule
+	\endlastfoot
+	\texttt{Participant}       & Entitas peserta (validator/observer/PJP) beserta status
+	siklus hidup                                                                          \\
+	\texttt{Wallet}            & Dompet dengan saldo, tingkatan ritel, status beku, serta
+	penghitung keluar harian/bulanan dan masuk bulanan                                    \\
+	\texttt{TierLimit}         & Batas saldo, per transaksi, keluar, dan masuk per tingkatan \\
+	\texttt{KycProfile}        & Jangkar KYC: jenis subjek, status, risiko, uji tuntas,
+	persetujuan senior, masa berlaku, dan hash dokumen                                    \\
+	\texttt{Transaction\allowbreak Record} & Catatan transaksi untuk audit dan pelaporan  \\
+	\texttt{SystemLimit}       & Batas tingkat sistem (pasokan global, saldo per peserta,
+	nilai per transaksi)                                                                  \\
+\end{longtable}
+\endgroup
+
+\subsubsection{Perancangan Basis Data Luring}
+
+Selain status \textit{on-chain} pada \textit{world state} yang dirangkum pada
+Tabel~\ref{tab:model-data}, sistem memerlukan basis data relasional luring
+(\textit{off-chain}) pada PostgreSQL untuk menyimpan data yang tidak layak atau
+tidak perlu ditempatkan pada \textit{ledger}, yaitu kredensial autentikasi portal,
+pengayaan data KYC (nama legal, jenis dan nomor dokumen), serta riwayat pemeriksaan
+penyedia dan jejak audit yang bersifat \textit{append-only}. Rancangan basis data
+luring tersebut ditunjukkan dengan diagram \textit{Entity-Relationship} pada
+Gambar~\ref{fig:erd-offchain}. Tabel \texttt{auth\_users} berdiri sendiri untuk
+autentikasi portal, sedangkan \texttt{kyc\_profiles} menjadi pusat relasi yang
+ditautkan oleh \texttt{kyc\_provider\_checks} melalui kendala \textit{foreign key}
+berkebijakan \textit{ON DELETE CASCADE}. Tautan lain, yakni
+\texttt{kyc\_audit\_events} dan \texttt{retail\_customers}, menggunakan referensi
+lunak (tanpa kendala basis data) karena pengidentifikasinya seperti
+\texttt{subject\_id} dan \texttt{wallet\_account\_id} mencerminkan
+pengidentifikasi \textit{on-chain} yang otoritasnya berada pada \textit{ledger}.
+
+\input{contents/figures/erd-offchain}
+
+\subsection{Metode Implementasi}
+
+Pemilihan teknologi dalam implementasi didasarkan pada kesesuaian dengan
+karakteristik sistem Rupiah Digital yang bersifat \textit{permissioned},
+multijenjang, dan memerlukan kueri status yang kompleks.
+
+\subsubsection{Software Development Life Cycle}
+
+Metode \textit{prototyping} dipilih sebagai SDLC penelitian ini. Sistem dibangun
+sebagai purwarupa fungsional yang mencakup seluruh komponen inti (\textit{chaincode},
+jaringan Fabric, dan \textit{backend API}), kemudian dievaluasi secara
+kuantitatif. Pendekatan ini sesuai dengan karakteristik penelitian eksplorasi
+pada sistem \textit{blockchain} yang belum memiliki spesifikasi teknis baku dari
+regulator \cite{bi_consultative}.
+
+\subsubsection{Kerangka Kerja Blockchain}
+
+Hyperledger Fabric 2.5 dipilih sebagai kerangka kerja \textit{blockchain} karena
+mendukung model keanggotaan berbasis MSP yang sesuai dengan struktur hierarkis
+Rupiah Digital dua jenjang \cite{androulaki2018}. Fabric memungkinkan pembatasan
+akses per peran melalui \textit{endorsement policy}, pemisahan kanal, dan
+integrasi basis data status yang fleksibel.
+
+\subsubsection{Mekanisme Konsensus}
+
+Konsensus Raft (\textit{etcdraft}) dipilih karena mendukung model \textit{crash
+fault tolerance} (CFT) yang memadai untuk skenario jaringan berizin
+antarpeserta terpercaya \cite{androulaki2018}. Dibanding Kafka, Raft memiliki
+latensi \textit{ordering} lebih rendah dan tidak bergantung pada infrastruktur
+tambahan.
+
+\subsubsection{State Database}
+
+CouchDB dipilih sebagai basis data status \textit{world state} menggantikan
+LevelDB bawaan. CouchDB mendukung kueri kaya berbasis JSON (\textit{rich query})
+yang diperlukan untuk pelaporan portofolio dompet, pemfilteran KYC, dan
+pengawasan saldo. Kemampuan ini tidak dapat dicapai dengan efisien menggunakan
+LevelDB yang hanya mendukung kueri berbasis kunci. Perbandingan kedua pilihan
+tersebut dirangkum pada Tabel~\ref{tab:state-database}.
+
+\begin{table}[H]
+    \caption{Perbandingan basis data status Hyperledger Fabric. Diadaptasi dari Hanif \cite{hanif2024meetcoin} dan dokumentasi resmi Hyperledger Fabric \cite{hyperledger_fabric_couchdb}.}
+    \label{tab:state-database}
+    \centering
+    \small
+    \begin{tabular}{@{}p{2.8cm}p{4.5cm}p{4.5cm}@{}}
+        \toprule
+        \textbf{Kriteria} & \textbf{LevelDB} & \textbf{CouchDB} \\
+        \midrule
+        Model data & Pasangan kunci--nilai yang tertanam pada proses \textit{peer} & Dokumen JSON pada layanan basis data terpisah \\
+        Kueri & Pembacaan berdasarkan kunci dan rentang kunci & Kueri kaya berbasis bidang JSON dan selector \\
+        Indeks & Tidak menyediakan indeks JSON & Mendukung indeks JSON untuk kueri yang deterministik \\
+        Operasional & Konfigurasi dan kebutuhan sumber daya lebih sederhana & Memerlukan kontainer dan pengelolaan indeks tambahan \\
+        Kesesuaian & Status sederhana dengan pola akses berbasis kunci & Pelaporan dompet, pemfilteran KYC, dan pengawasan saldo \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Basis Data Luring}
+
+Sementara CouchDB menampung \textit{world state} Fabric, basis data luring
+(\textit{off-chain}) yang menampung data sensitif memerlukan paradigma yang
+berbeda. Pemilihan basis data relasional PostgreSQL didasarkan pada lima
+kriteria yang dipaparkan berikut ini, kemudian dirangkum pada
+Tabel~\ref{tab:ch3-db-comparison}.
+
+\textbf{Relasional versus non-relasional.} Data KYC dan kredensial autentikasi
+merupakan data terstruktur dengan skema kaku, hubungan antarentitas yang jelas
+(profil $\rightarrow$ pemeriksaan penyedia $\rightarrow$ jejak audit), serta
+persyaratan integritas transaksional yang ketat. Basis data relasional
+menjamin ketiga aspek tersebut melalui kepatuhan ACID penuh, kendala
+\textit{foreign key}, dan transaksi DDL yang atomik. Sebaliknya, basis data
+dokumen NoSQL (mis. MongoDB) dirancang untuk data semiterstruktur dengan skema
+fleksibel serta beban baca dominan, dan secara tradisional mengorbankan
+konsistensi transaksional demi skalabilitas horizontal \cite{ispirer2024nosqlfinance}.
+Untuk jejak audit yang bersifat \textit{append-only} dan riwayat pemeriksaan
+KYC, penjaminan bahwa suatu peristiwa benar-benar tersimpan sebelum komit
+(MVCC tanpa \textit{read skew}) merupakan kebutuhan mutlak, bukan opsional.
+
+\textbf{PostgreSQL versus MySQL dan SQL Server.} Antara Alternatif relasional,
+PostgreSQL dipilih berdasarkan pertimbangan teknis berikut:
+
+\begin{enumerate}
+    \item \textit{JSON/JSONB dengan indeks GIN.} Dokumen pendukung KYC (luisan
+    metadata, struktur respons penyedia) disimpan sebagai \texttt{JSONB} yang
+    dapat diindeks secara native melalui GIN, memungkinkan kueri \textit{rich}
+    tanpa kehilangan kepatuhan ACID \cite{postgresql_docs}. MySQL hanya
+    mendukung tipe \texttt{JSON} dengan kapabilitas pengindeksan yang lebih
+    terbatas.
+    \item \textit{Row-Level Security (RLS).} PostgreSQL menyediakan RLS secara
+    native, sehingga kebijakan isolasi data antarorganisasi peserta (mis.
+    bank validator hanya membaca KYC nasabahnya sendiri) dapat ditegakkan pada
+    tingkat basis data, bukan sekadar lapisan aplikasi. Hal ini sejalan dengan
+    prinsip regulasi UU Pelindungan Data Pribadi (UU PDP) yang mensyaratkan
+    kontrol akses berbasis peran. MySQL tidak memiliki fitur ini dan SQL Server
+    hanya menyediakannya pada edisi Enterprise \cite{postgresql_docs}.
+    \item \textit{MVCC dan transaksi DDL.} PostgreSQL mengelola konkurensi
+    via MVCC tanpa \textit{lock} memblokir pembaca, dan membungkus perubahan
+    skema (DDL) dalam transaksi yang dapat dieksekusi secara atomik --- fitur
+    yang tidak dimiliki MySQL karena DDL-nya bersifat \textit{implicit commit}
+    \cite{logicmonitor2025pgmysql}.
+    \item \textit{Lisensi terbuka.} Lisensi PostgreSQL mirip BSD memungkinkan
+    penggunaan, modifikasi, dan distribusi tanpa biaya royalti, menghindari
+    \textit{vendor lock-in}. SQL Server bersifat proprietari, sedangkan MySQL
+    berlisensi ganda (GPL/komersial) yang membatasi integrasi pada produk
+    berlisensi tidak kompatibel \cite{logicmonitor2025pgmysql}.
+    \item \textit{Kesesuaian ekosistem Fabric.} Pola arsitektur Fabric
+    merekomendasikan penyimpanan data sensitif di luar \textit{ledger} melalui
+    \textit{private data collections} atau basis data eksternal, dengan hanya
+    hash kriptografis yang dibukukan \cite{hyperledger2024offchain}. PostgreSQL
+    merupakan \textit{backend} relasional yang banyak diadopsi dalam
+    implementasi Fabric pendidikan dan industri, sehingga ketersediaan
+    \textit{driver} Go (\texttt{pgx}) dan pola integrasi yang teruji lebih
+    matang dibandingkan alternatif lain.
+\end{enumerate}
+
+Pola pemisahan on-chain/off-chain yang diadopsi penelitian ini sejalan dengan
+rekomendasi BIS untuk arsitektur CBDC ritel hibrid, yakni bank sentral
+mempertahankan jangkar kriptografis pada \textit{ledger} sementara perantara
+menyimpan data identitas pada sistem terpisah yang menjalankan KYC
+\cite{Auer2020The}. Pendekatan serupa terlihat pada proyek Sand Dollar
+(Bahama) yang mengelola data KYC pada \textit{layer} identitas digital terpisah
+dari buku besar \cite{centralbankbahamas2020sanddollar}, serta uji coba e-Krona
+(Swedia) yang memisahkan registri peserta dari \textit{ledger} token
+\cite{riksbank2021ekrona}.
+
+\begin{table}[H]
+    \caption{Perbandingan basis data kandidat untuk penyimpanan luring KYC.}
+    \vspace{0.5em}
+    \centering
+    \small
+    \begin{tabular}{@{}p{0.22\textwidth}p{0.22\textwidth}p{0.22\textwidth}p{0.22\textwidth}@{}}
+        \toprule
+        \textbf{Kriteria} & \textbf{PostgreSQL} & \textbf{MySQL} & \textbf{SQL Server} \\
+        \midrule
+        Kepatuhan ACID penuh & Ya (DDL transaksional) & Sebagian (DDL non-atomik) & Ya \\
+        \addlinespace
+        JSONB + indeks GIN & Native & Terbatas & Terbatas \\
+        \addlinespace
+        Row-Level Security & Native & Tidak ada & Edisi Enterprise saja \\
+        \addlinespace
+        MVCC tanpa \textit{lock} baca & Ya & Ya (InnoDB) & Ya (snapshot) \\
+        \addlinespace
+        Lisensi & BSD-like (bebas) & GPL / komersial & Proprietari \\
+        \addlinespace
+        Adopsi ekosistem Fabric & Umum & Jarang & Jarang \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:ch3-db-comparison}
+\end{table}
+
+\subsubsection{Bahasa Pemrograman}
+
+\textit{Chaincode} dan \textit{backend API} ditulis dalam bahasa Go. Go dipilih
+karena (1) SDK \textit{Fabric Contract API} dan \textit{Fabric Gateway SDK}
+tersedia secara resmi dan aktif dipelihara untuk ekosistem Fabric; (2) model
+konkurensi goroutine cocok untuk beban I/O tinggi pada \textit{backend API};
+dan (3) kompilasi statis mempermudah distribusi kontainer tanpa dependensi
+eksternal \cite{androulaki2018}.
+
+\subsection{Metode Pengujian}
+
+Pengujian terdiri atas pengujian fungsional dan pengujian kinerja. Pengujian
+fungsional memverifikasi bahwa setiap alur proses berjalan sesuai rancangan,
+termasuk penegakan limit dan kontrol akses. Pengujian kinerja dilakukan
+menggunakan Hyperledger Caliper untuk mengukur \textit{throughput} dan latensi
+pada berbagai skenario beban.
+
+Skenario pengujian kinerja dirancang untuk mengamati pengaruh laju pengiriman
+transaksi (\textit{send rate}), jumlah \textit{worker} Caliper, dan jenis fungsi
+rantai blok terhadap \textit{throughput} dan latensi. Pengujian transfer ritel
+dijalankan dengan 1, 2, dan 4 \textit{worker}. Pengujian fungsi lain dijalankan
+terpisah agar hasil transfer, KYC, operasi moneter, pembacaan pengawasan, dan
+kebijakan administratif tidak dicampur menjadi satu angka TPS umum. Konfigurasi
+ronde pengujian yang digunakan dirangkum pada Tabel~\ref{tab:skenario}.
+
+\begingroup
+\renewcommand{\arraystretch}{1.3}
+\begin{table}[H]
+	\caption{Skenario beban pengujian kinerja}
+	\label{tab:skenario}
+	\centering
+	\begin{tabular}{p{3.2cm} p{2cm} p{2cm} p{4.6cm}}
+	\toprule
+	\textbf{Ronde}    & \textbf{Jumlah tx} & \textbf{Laju (TPS)} & \textbf{Beban kerja}                    \\
+	\midrule
+	Pemanasan         & 40                 & 10                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Beban stabil      & 40                 & 30                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Beban puncak      & 40                 & 60                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Fungsional terpisah & 40--80           & 5--30               & KYC, moneter, pengawasan, administratif \\
+	\bottomrule
+	\end{tabular}
+\end{table}
+\endgroup
+
+Metrik yang diukur meliputi \textit{throughput} (TPS), latensi rata-rata,
+latensi maksimum dan minimum, serta tingkat keberhasilan transaksi
+\cite{hlf_metrics}. Mengikuti definisi metrik kinerja blockchain dan formulasi
+yang digunakan Hanif \cite{hanif2024meetcoin}, tingkat keberhasilan transaksi
+dihitung dengan Persamaan~\ref{eq:benchmark-success-rate}.
+
+\begin{equation}
+    R_s = \frac{N_{\mathrm{valid}}}{N_{\mathrm{submitted}}} \times 100\%
+    \label{eq:benchmark-success-rate}
+\end{equation}
+
+\textit{Throughput} valid dihitung dengan Persamaan~\ref{eq:benchmark-throughput}.
+
+\begin{equation}
+    T = \frac{N_{\mathrm{valid}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
+    \label{eq:benchmark-throughput}
+\end{equation}
+
+Latensi transaksi ke-$i$ dihitung dengan Persamaan~\ref{eq:benchmark-latency}.
+
+\begin{equation}
+    L_i = t_{\mathrm{confirm},i} - t_{\mathrm{submit},i}
+    \label{eq:benchmark-latency}
+\end{equation}
+
+Pada persamaan tersebut, $N_{\mathrm{valid}}$ adalah jumlah transaksi valid,
+$N_{\mathrm{submitted}}$ adalah jumlah transaksi yang dikirim, dan selang
+$t_{\mathrm{end}}-t_{\mathrm{start}}$ dinyatakan dalam detik. Kegagalan
+transaksi akibat konflik MVCC dicatat dan dianalisis sebagai bagian dari
+karakterisasi sistem, bukan dihilangkan dari hasil pengukuran.
+
+\paragraph{Justifikasi pemilihan parameter.}
+Parameter pengujian dipilih berdasarkan dua pertimbangan: literatur dan
+rekayasa sistem.
+
+\noindent\textit{Berdasarkan literatur.}
+Variasi 1, 2, dan 4 \textit{worker} digunakan untuk memisahkan pengaruh
+pembangkit beban Caliper dari kapasitas jaringan Fabric. Dengan kebijakan
+\textit{endorsement majority} (3 dari 5 organisasi), penambahan \textit{worker}
+tidak otomatis meningkatkan kapasitas jaringan karena bottleneck dapat berpindah
+ke eksekusi \textit{peer}, validasi blok, atau pemrosesan \textit{orderer}
+\cite{androulaki2018, fabric_perf2023, hlf_caliper}.
+Kontrol laju \textit{fixed-rate} dipilih karena menahan laju pengiriman sebagai
+variabel independen sehingga penurunan \textit{throughput} dan peningkatan
+latensi dapat diamati sebagai fungsi dari laju tersebut; kontrol \textit{fixed-load}
+menyesuaikan TPS secara otomatis berdasarkan latensi sehingga menyembunyikan
+perilaku saturasi \cite{hlf_caliper}. Laju 10 TPS digunakan sebagai garis dasar,
+30 TPS sebagai beban stabil, dan 60 TPS sebagai beban puncak pada purwarupa lokal.
+Nilai tersebut dipilih agar seluruh profil dapat dijalankan pada topologi Garuda
+lokal dengan target keberhasilan 100\%, bukan untuk mengklaim kapasitas produksi
+nasional.
+
+\noindent\textit{Berdasarkan pertimbangan teknis sistem.}
+Setiap ronde transfer mengirim 40 permintaan terukur. Profil 1 \textit{worker}
+menggunakan 40 slot transaksi per \textit{worker}, 80 pelanggan, dan 10 pedagang;
+profil 2 \textit{worker} menggunakan 20 slot, 80 pelanggan, dan 10 pedagang per
+\textit{worker}; profil 4 \textit{worker} menggunakan 10 slot, 40 pelanggan, dan
+10 pedagang per \textit{worker}. Populasi tersebut menyediakan pengirim, penerima
+STANDARD, dan pedagang yang berbeda untuk setiap transaksi yang memutasi
+\textit{world state}. Jenis transaksi ditentukan secara deterministik berdasarkan
+slot global yang diskalakan terhadap jumlah slot sehingga komposisi gabungan tetap
+70\% transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
+pembacaan dompet pada setiap profil \textit{worker}. Pemilihan kunci tanpa
+pengulangan digunakan untuk memperoleh garis dasar kapasitas jaringan tanpa
+mencampurkan saturasi pemrosesan dengan konflik MVCC akibat dompet yang sama.
+Skenario \textit{hot-wallet contention} tidak digunakan karena penelitian tidak
+memiliki jejak transaksi empiris untuk menetapkan konsentrasi akses maupun
+kebijakan \textit{retry/backoff} yang
+representatif. Saldo awal STANDARD ditetapkan Rp5 juta dari batas Rp20 juta dan
+saldo BASIC Rp500 ribu dari batas Rp2 juta. Populasi pelanggan terdiri atas
+20\% BASIC dan 80\% STANDARD, sedangkan seluruh pedagang memperoleh MERCHANT
+dari profil KYC. Seluruh nilai ini merupakan pilihan rekayasa, bukan estimasi
+distribusi pengguna nasional.
+
+\paragraph{Kesesuaian dengan skenario CBDC ritel.}
+Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
+Digital ritel secara struktural. Campuran transaksi terdiri atas 70\% transfer
+antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\% pembacaan dompet.
+Komposisi ini dipilih karena CBDC ritel adalah instrumen pembayaran umum yang
+harus melayani pembayaran antarpengguna dan pembayaran ke pedagang, bukan hanya
+setelmen antarlembaga. Literatur teknologi CBDC ritel menempatkan desain dompet,
+privasi, dan arsitektur distribusi sebagai elemen inti sistem pembayaran publik
+\cite{Auer2020The}, sedangkan e-CNY dan eNaira menunjukkan preseden operasional
+bahwa dompet ritel dapat dibedakan menurut tingkat identifikasi dan limit
+\cite{pboc2021ecny, cbn2021enaira}. Oleh karena itu, beban kerja yang hanya
+menguji transfer institusional tidak memadai untuk menjawab rumusan masalah
+purwarupa Rupiah Digital ritel.
+
+Model dua jenjang penerbitan (BI\,→\,bank\,→\,PJP\,→\,pelanggan ritel) sesuai
+dengan rancangan Rupiah Digital yang ditetapkan dalam dokumen konsultatif Bank
+Indonesia \cite{bi_consultative, bi_garuda_poc}. Logika bisnis yang diuji bukan
+beban sintetik yang terlepas dari sistem, melainkan \textit{chaincode} aktual
+yang mengimplementasikan profil KYC, penurunan tingkatan BASIC, STANDARD, dan
+MERCHANT, limit transaksi masuk dan keluar, serta pembacaan status dompet.
+Penggunaan Caliper dan metrik \textit{throughput}/latensi mengikuti praktik
+pengukuran kinerja blockchain yang menekankan laju transaksi, latensi, dan
+karakterisasi kegagalan transaksi \cite{hlf_caliper, hlf_metrics,
+fabric_perf2023}.
+
+Perbedaan utama dengan sistem CBDC ritel produksi adalah skala (200 pelanggan
+per \textit{worker} berbanding jutaan pengguna nyata), topologi jaringan (satu
+\textit{peer} per organisasi dalam satu mesin lokal berbanding jaringan terdistribusi
+geografis), dan integrasi KYC nyata (disimulasikan secara terprogram). Keterbatasan
+ini berlaku umum pada studi prototipe CBDC berbasis \textit{permissioned blockchain}
+\cite{sethaput2025} dan bukan kelemahan metodologis melainkan batasan cakupan
+yang dinyatakan secara eksplisit pada Batasan Penelitian (Bab~I).
+
+\section{Alur Tugas Akhir}
+
+Tugas akhir ini dilaksanakan melalui tahapan berikut. Gambar~\ref{fig:alur-penelitian}
+menyajikan alur pelaksanaan penelitian secara keseluruhan, mulai dari studi
+literatur hingga analisis hasil, dengan umpan balik iteratif antara implementasi
+dan pengujian sesuai siklus \textit{prototyping}.
+
+\input{contents/figures/alur-penelitian}
+
+\subsection{Mempelajari Proses Bisnis \& Sistem Blockchain}
+
+Penelitian diawali dengan mempelajari konsep Rupiah Digital berdasarkan dokumen
+White Paper dan Consultative Paper Bank Indonesia \cite{bi_whitepaper2022,
+bi_consultative, bi_garuda_poc}, serta memahami mekanisme \textit{blockchain}
+permissioned berbasis Hyperledger Fabric sebagai landasan implementasi.
+
+\subsection{Melakukan Studi Literatur}
+
+Mengkaji konsep CBDC, desain Rupiah Digital, Hyperledger Fabric, KYC berbasis
+risiko, dan limit dompet sebagai dasar perancangan sistem.
+
+\subsection{Menentukan Metode Penelitian}
+
+Menentukan aktor, kebutuhan fungsional, dan aturan bisnis sistem Rupiah Digital
+ritel berdasarkan model dua jenjang, serta menetapkan metode prototyping,
+pemilihan teknologi, dan parameter pengujian.
+
+\subsection{Pengembangan Sistem Blockchain bi-coin}
+
+Pengembangan sistem dilakukan secara iteratif meliputi instalasi infrastruktur
+Fabric, konfigurasi jaringan, \textit{deploy chaincode}, pengembangan
+\textit{gateway}, dan pengembangan \textit{backend API}.
+
+\subsubsection{Instalasi Kerangka Kerja Hyperledger Fabric}
+
+Lingkungan pengembangan disiapkan dengan memasang Docker, Docker Compose, dan
+biner Fabric. Material kriptografi (sertifikat MSP dan TLS) dibangkitkan
+menggunakan \texttt{cryptogen}. Blok genesis dan profil konfigurasi kanal
+dibuat dengan \texttt{configtxgen}.
+
+\subsubsection{Konfigurasi Jaringan Blockchain}
+
+Jaringan Fabric dibangun melalui skrip otomatisasi yang membangkitkan material
+kriptografi, blok genesis, dan konfigurasi kanal, kemudian menjalankan kontainer
+untuk lima \textit{peer}, lima CouchDB, dan satu \textit{orderer}. Chaincode
+dipaketkan, dipasang pada seluruh organisasi, disetujui sesuai kebijakan
+dukungan, lalu di-\textit{commit} ke kanal.
+
+\subsubsection{Deploy Chaincode}
+
+Logika bisnis Rupiah Digital ditulis dalam bahasa Go menggunakan \textit{Fabric
+	Contract API} v2. Chaincode mengimplementasikan fungsi penerbitan
+(\texttt{Mint}, \texttt{RequestIssuance}), penarikan (\texttt{Burn},
+\texttt{RequestRedemption}), distribusi berjenjang
+(\texttt{DistributeToParticipant}), transfer dengan penegakan limit
+(\texttt{Transfer}), KYC berbasis risiko, serta pelaporan dan pengawasan.
+
+Gambar~\ref{lst:mint} menunjukkan implementasi fungsi \texttt{Mint} yang
+menambah saldo dompet setelah memverifikasi status beku dan batas tingkatan.
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Go]
+func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface,
+    walletID string, amount int64) error {
+    if amount <= 0 {
+        return fmt.Errorf("amount must be positive")
+    }
+    wallet, err := s.getWallet(ctx, walletID)
+    if err != nil { return err }
+    if wallet.Frozen {
+        return fmt.Errorf("wallet %s is frozen", walletID)
+    }
+    limit, err := s.getLimit(ctx, wallet.Tier)
+    newBalance := wallet.Balance + amount
+    if newBalance > limit.MaxBalance {
+        return fmt.Errorf("mint would exceed max balance for tier %s",
+            wallet.Tier)
+    }
+    wallet.Balance = newBalance
+    wallet.UpdatedAt = txNow(ctx).Format(time.RFC3339)
+    _ = s.emitAudit(ctx, "MINT", walletID, "", amount)
+    return s.recordTransaction(ctx, TxMint, walletID, "", amount, TxSettled, "")
+}
+\end{lstlisting}
+\caption{Implementasi fungsi \texttt{Mint} pada \textit{chaincode}: memverifikasi status beku dan batas saldo tingkatan sebelum menambah saldo dompet}
+\label{lst:mint}
+\end{figure}
+
+Gambar~\ref{lst:transfer} menunjukkan pemanggilan kebijakan transfer bersama.
+Fungsi kebijakan memeriksa batas per transaksi, pengeluaran harian dan bulanan,
+penerimaan bulanan, saldo pengirim, serta saldo maksimum penerima sebelum
+memperbarui penghitung secara deterministik.
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Go]
+func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface,
+    senderID string, receiverID string, amount int64) error {
+    // ... periksa sender & receiver tidak beku ...
+    senderLimit, _ := s.getLimit(ctx, sender.Tier)
+    receiverLimit, _ := s.getLimit(ctx, receiver.Tier)
+    if err := applyRetailTransferPolicy(&sender, &receiver, amount,
+        senderLimit, receiverLimit, txNow(ctx)); err != nil {
+        return err
+    }
+    sender.Balance -= amount
+    receiver.Balance += amount
+    // ... putWallet, recordTransaction ...
+}
+\end{lstlisting}
+\caption{Penegakan kebijakan transfer bersama untuk batas keluar, batas masuk, saldo maksimum, dan kecukupan saldo}
+\label{lst:transfer}
+\end{figure}
+
+Gambar~\ref{lst:tier-derivation} menunjukkan penurunan tingkatan dari bukti KYC.
+Peserta institusional ditolak dari fungsi ini karena memakai batas tingkat
+sistem, bukan tingkatan dompet ritel.
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Go]
+func deriveWalletTier(profile KycProfile, now time.Time) (WalletTier, error) {
+    if err := validateKycEligibility(profile, now); err != nil {
+        return "", err
+    }
+    if profile.SubjectType == SubjectParticipant {
+        return "", fmt.Errorf("participant wallets are outside retail tiering")
+    }
+    if profile.DueDiligenceLevel == DueDiligenceSimplified &&
+       profile.SubjectType == SubjectRetailCustomer &&
+       profile.RiskLevel == RiskLow {
+        return TierBasic, nil
+    }
+    if profile.SubjectType == SubjectMerchant {
+        return TierMerchant, nil
+    }
+    return TierStandard, nil
+}
+\end{lstlisting}
+\caption{Penurunan tingkatan dompet ritel dari jenis subjek, risiko, dan tingkat uji tuntas KYC}
+\label{lst:tier-derivation}
+\end{figure}
+
+\subsubsection{Pengembangan Fabric Gateway}
+
+\textit{Fabric Gateway SDK} v1.8 digunakan untuk menghubungkan \textit{backend
+	API} ke jaringan Fabric melalui gRPC. \textit{Gateway} mengelola siklus
+transaksi mulai dari pembuatan proposal, pengumpulan \textit{endorsement},
+pengiriman ke \textit{orderer}, hingga konfirmasi blok, sehingga lapisan
+\textit{backend} tidak perlu menangani protokol Fabric secara langsung.
+
+\subsubsection{Pengembangan Backend}
+
+Lapisan \textit{backend} ditulis dalam bahasa Go menggunakan Gorilla mux dan
+\textit{Fabric Gateway SDK}. Backend menyediakan antarmuka REST, menegakkan
+kontrol akses berbasis peran melalui \textit{middleware}, serta menerjemahkan
+permintaan menjadi pemanggilan \texttt{SubmitTransaction} atau
+\texttt{EvaluateTransaction} pada \textit{chaincode}. Gambar~\ref{lst:routes}
+menunjukkan pengelompokan rute REST berdasarkan peran akses menggunakan
+\textit{middleware} \texttt{RequireRole}.
+
+\begin{figure}[H]
+\begin{lstlisting}[language=Go]
+func (h *Handler) RegisterRoutes(r *mux.Router) {
+    // Publik: tidak memerlukan autentikasi
+    r.HandleFunc("/health", h.Health).Methods("GET")
+
+    // Pembacaan dompet oleh aktor terautentikasi
+    auth := r.NewRoute().Subrouter()
+    auth.Use(middleware.RequireRole(
+        middleware.RoleAuthenticated, middleware.RoleKycVerified,
+        middleware.RoleBankPjp, middleware.RoleBankIndonesia))
+    auth.HandleFunc("/wallets", h.ListWallets).Methods("GET")
+
+    // Bank/PJP melakukan onboarding dan keputusan KYC
+    kycMutation := r.NewRoute().Subrouter()
+    kycMutation.Use(middleware.RequireRole(middleware.RoleBankPjp))
+    kycMutation.HandleFunc("/kyc/profiles", h.SubmitKycProfile).Methods("POST")
+    kycMutation.HandleFunc("/kyc/profiles/{id}/refresh",
+        h.RefreshKycProfile).Methods("POST")
+    kycMutation.HandleFunc("/wallets", h.CreateWallet).Methods("POST")
+
+    // Pelanggan/pedagang yang disetujui melakukan transfer
+    payments := r.NewRoute().Subrouter()
+    payments.Use(middleware.RequireRole(
+        middleware.RoleKycVerified, middleware.RoleMerchant))
+    payments.HandleFunc("/transfers", h.Transfer).Methods("POST")
+}
+\end{lstlisting}
+\caption{Pengelompokan rute REST \textit{backend} berdasarkan peran akses: setiap subrouter menerapkan \textit{middleware} \texttt{RequireRole} yang berbeda sesuai hierarki wewenang}
+\label{lst:routes}
+\end{figure}
+
+\subsection{Pengujian Sistem Blockchain bi-coin}
+
+Pengujian mencakup dua tahap: pengujian fungsional untuk memverifikasi kebenaran
+seluruh alur proses, dan pengujian kinerja menggunakan Hyperledger Caliper untuk
+mengukur \textit{throughput} dan latensi.
+
+\subsubsection{Konfigurasi Hyperledger Caliper}
+
+Hyperledger Caliper dikonfigurasi dengan file jaringan (\textit{network config})
+yang mendeskripsikan topologi \textit{peer}, \textit{orderer}, kanal, dan
+identitas MSP. Modul beban kerja (\textit{workload modules}) ditulis dalam
+JavaScript untuk mensimulasikan transfer antarpelanggan, transfer
+pelanggan-ke-pedagang, pembacaan dompet, KYC, operasi moneter, kueri pengawasan,
+dan kebijakan administratif sesuai Tabel~\ref{tab:skenario}.
+
+\subsubsection{Menjalankan Pengujian Hyperledger Caliper}
+
+Pengujian dijalankan dengan kontrol laju \textit{fixed-rate}. Profil transfer
+ritel dijalankan untuk 1, 2, dan 4 \textit{worker}, sedangkan profil fungsi lain
+dijalankan secara terpisah. Caliper mengumpulkan metrik \textit{throughput}
+(TPS), latensi rata-rata, latensi maksimum, dan tingkat keberhasilan transaksi,
+yang kemudian dianalisis pada BAB IV.

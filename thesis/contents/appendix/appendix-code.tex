@@ -1,0 +1,48 @@
+% Auto-generated source-code appendix. Listings live in thesis/listings/.
+\lstset{basicstyle=\ttfamily\scriptsize,frame=single,columns=fullflexible,
+  breaklines=true,breakatwhitespace=false,keepspaces=true,tabsize=2,
+  showstringspaces=false,numbers=left,numberstyle=\tiny\color{codegray}}
+
+\section{Source Code Tipe Data dan Struktur \textit{Chaincode}}
+Bagian ini memuat kode sumber definisi paket, impor, serta tipe data dan struktur utama (berkas \texttt{chaincode/digital\_rupiah.go}).
+\lstinputlisting[language=Go]{listings/cc-00-types.go}
+
+\section{Source Code Inisialisasi \textit{Ledger}}
+Bagian ini memuat kode sumber fungsi \texttt{InitLedger} yang menanamkan batas tingkatan dan batas sistem (berkas \texttt{chaincode/digital\_rupiah.go}).
+\lstinputlisting[language=Go]{listings/cc-01-init.go}
+
+\section{Source Code Penerbitan dan Distribusi Likuiditas}
+Bagian ini memuat kode sumber fungsi \texttt{Mint}, \texttt{Burn}, \texttt{RequestIssuance}, dan \texttt{DistributeToParticipant} (berkas \texttt{chaincode/digital\_rupiah.go}).
+\lstinputlisting[language=Go]{listings/cc-02-issuance.go}
+
+\section{Source Code Transfer dan Penegakan Limit}
+Bagian ini memuat kode sumber fungsi \texttt{Transfer} dengan penegakan limit per transaksi, harian, dan bulanan (berkas \texttt{chaincode/digital\_rupiah.go}).
+\lstinputlisting[language=Go]{listings/cc-03-transfer.go}
+
+\section{Source Code Kepatuhan KYC}
+Bagian ini memuat kode sumber fungsi \texttt{SubmitKycProfile} dan \texttt{RefreshKycProfile} (berkas \texttt{chaincode/digital\_rupiah.go}).
+\lstinputlisting[language=Go]{listings/cc-07-kyc.go}
+
+\section{Source Code Pengawasan dan Rekonsiliasi}
+Bagian ini memuat kode sumber fungsi laporan rekonsiliasi, metrik, dan emisi \textit{event} pengawasan (berkas \texttt{chaincode/digital\_rupiah.go}).
+\lstinputlisting[language=Go]{listings/cc-08-supervision.go}
+
+\section{Source Code Konfigurasi Jaringan Caliper}
+Bagian ini memuat kode sumber konfigurasi koneksi Caliper ke jaringan Fabric (berkas \texttt{benchmark/networkconfig.yaml}).
+\lstinputlisting{listings/cal-networkconfig.yaml}
+
+\section{Source Code Konfigurasi \textit{Benchmark} Caliper}
+Bagian ini memuat kode sumber definisi ronde pengujian, laju, dan durasi (berkas \texttt{benchmark/benchconfig.yaml}).
+\lstinputlisting{listings/cal-benchconfig.yaml}
+
+\section{Source Code Skrip Pembangkit Aset Jaringan Caliper}
+Bagian ini memuat kode sumber skrip penyiapan aset jaringan untuk Caliper (berkas \texttt{benchmark/gen-network-assets.sh}).
+\lstinputlisting[language=bash]{listings/cal-gen-network-assets.sh}
+
+\section{Source Code \textit{Workload} Transfer Ritel}
+Bagian ini memuat kode sumber modul beban transfer antarpelanggan, transfer pelanggan-ke-pedagang, dan pembacaan dompet (berkas \texttt{benchmark/workloads/retail-transfer.js}).
+\lstinputlisting{listings/cal-retail-transfer.js}
+
+\section{Source Code \textit{Workload} Beban Dasar Ritel}
+Bagian ini memuat kode sumber modul inisialisasi populasi dan beban dasar (berkas \texttt{benchmark/workloads/retail-base.js}).
+\lstinputlisting{listings/cal-retail-base.js}

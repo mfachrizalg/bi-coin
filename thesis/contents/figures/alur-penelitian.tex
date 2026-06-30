@@ -1,0 +1,66 @@
+% Alur penelitian tugas akhir (TikZ).
+% Di-input dari BAB III §3.2 Alur Tugas Akhir.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  proc/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
+    text width=4.25cm, minimum height=1.15cm, inner sep=4pt,
+    align=center, font=\footnotesize},
+  phase/.style={draw=gray!70, fill=gray!3, rectangle, rounded corners=10pt,
+    minimum width=5.2cm, minimum height=5.4cm},
+  startstop/.style={draw=black, fill=white, rectangle, rounded corners=8pt,
+    minimum width=2.2cm, minimum height=0.8cm, align=center, font=\footnotesize},
+  ar/.style={-{Stealth}, thick},
+  feedback/.style={-{Stealth}, thick, dashed},
+  lab/.style={font=\scriptsize, midway, align=center},
+]
+
+%--- Kontainer fase (digambar lebih dahulu agar berada di belakang node) ---
+\node[phase] (prep) at (0, 2.9) {};
+\node[phase] (dev)  at (6, 2.9) {};
+\node[phase] (test) at (12, 2.9) {};
+
+\node[font=\scriptsize, anchor=north west] at ([xshift=0.2cm,yshift=-0.18cm]prep.north west)
+  {Persiapan};
+\node[font=\scriptsize, anchor=north west] at ([xshift=0.2cm,yshift=-0.18cm]dev.north west)
+  {Pengembangan};
+\node[font=\scriptsize, anchor=north west] at ([xshift=0.2cm,yshift=-0.18cm]test.north west)
+  {Pengujian};
+
+%--- Persiapan ---
+\node[startstop] (start) at (0, 6.5) {Mulai};
+\node[proc] (s1) at (0, 4.2)
+  {Studi Literatur \&\\Analisis Dokumen Bank Indonesia};
+\node[proc] (s2) at (0, 2.1)
+  {Perancangan Sistem\\(\textit{Activity Diagram}, Arsitektur, \textit{Use Case})};
+
+%--- Pengembangan ---
+\node[proc, minimum height=1.55cm] (s3) at (6, 3.1)
+  {Implementasi Sistem\\(\textit{Chaincode}, Jaringan Fabric, \textit{Backend} API)};
+
+%--- Pengujian ---
+\node[proc] (s4) at (12, 4.2)
+  {Pengujian\\(Fungsional + Kinerja dengan Hyperledger Caliper)};
+\node[proc] (s5) at (12, 2.1)
+  {Analisis Hasil \&\\Penarikan Kesimpulan};
+\node[startstop] (finish) at (12, -0.6) {Selesai};
+
+%--- Alur utama ---
+\draw[ar] (start.south) -- (s1.north);
+\draw[ar] (s1.south) -- (s2.north);
+\draw[ar] (s2.east) -- (s3.west);
+\draw[ar] (s3.east) -- (s4.west);
+\draw[ar] (s4.south) -- (s5.north);
+\draw[ar] (s5.south) -- (finish.north);
+
+%--- Umpan balik iteratif (prototype loop) ---
+\draw[feedback] (s4.north west) to[out=145,in=35,looseness=1.35]
+  node[lab,below,pos=0.5]{revisi jika perlu} (s3.north east);
+
+\end{tikzpicture}%
+}
+\caption{Alur pelaksanaan tugas akhir: dari studi literatur hingga penarikan kesimpulan, dengan umpan balik iteratif antara implementasi dan pengujian}
+\label{fig:alur-penelitian}
+\end{figure}

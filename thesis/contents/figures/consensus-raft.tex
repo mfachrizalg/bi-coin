@@ -1,0 +1,78 @@
+% Siklus transaksi Hyperledger Fabric dengan konsensus Raft (TikZ).
+% Di-input dari BAB II pada subbagian Hyperledger Fabric.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  proc/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
+    minimum width=3.4cm, minimum height=1.0cm, align=center, font=\footnotesize},
+  raftbox/.style={draw=black, fill=gray!10, rectangle, rounded corners=3pt,
+    minimum width=3.4cm, minimum height=1.0cm, align=center, font=\footnotesize},
+  commitbox/.style={draw=black, fill=black!8, rectangle, rounded corners=3pt,
+    minimum width=3.4cm, minimum height=1.0cm, align=center, font=\footnotesize},
+  stepnum/.style={draw=black, circle, fill=black, text=white,
+    inner sep=0pt, minimum size=0.45cm, font=\footnotesize\bfseries},
+  phasebox/.style={draw=black, dashed, rounded corners=5pt,
+    fill=none, inner sep=10pt},
+  ar/.style={-{Stealth}, thick},
+  pathlabel/.style={font=\scriptsize, midway, align=center},
+]
+
+%--- Fase 1: Endorsement ---
+\node[proc]     (client1)   at (0,    0)    {Klien};
+\node[proc]     (endorse)   at (0,   -2.4)  {Endorsing Peers\\(BI, HIMBARA,\\COMMERCIAL)};
+\node[stepnum]  at (-0.15, -0.85) {1};
+\node[stepnum]  at ( 0.15, -1.55) {2};
+
+\draw[ar] ([xshift=-0.65cm]client1.south) --
+  node[pathlabel,left]{\textit{proposal tx}\\(simulasi)}
+  ([xshift=-0.65cm]endorse.north);
+\draw[ar] ([xshift=0.65cm]endorse.north) --
+  node[pathlabel,right]{RWSet +\\tanda tangan}
+  ([xshift=0.65cm]client1.south);
+
+\node[phasebox, fit=(client1)(endorse),
+  label={[font=\footnotesize\bfseries]above:Fase \textit{Endorsement}}] (ph1) {};
+
+%--- Fase 2: Ordering (Raft) ---
+\node[proc]    (client2) at (5.2,  0)    {Klien\\(kumpul \textit{endorsement})};
+\node[raftbox] (leader)  at (5.2, -2.0)  {Orderer (Raft Leader)\\orderer.paynet:7050};
+\node[proc]    (follower) at (5.2, -3.8) {\textit{Raft followers}:\\replikasi log, \textit{commit}};
+\node[stepnum] at (3.2, -1.0) {3};
+
+\draw[ar] (client2.south) --
+  node[pathlabel,right]{submit \textit{tx}\\terendorsement} (leader.north);
+\draw[ar] (leader.south) --
+  node[pathlabel,right]{replikasi log Raft} (follower.north);
+
+\node[phasebox, fit=(client2)(leader)(follower),
+  label={[font=\footnotesize\bfseries]above:Fase \textit{Ordering} (Raft)}] (ph2) {};
+
+%--- Fase 3: Validasi & Commit ---
+\node[proc]      (peers)    at (10.5,  0)    {Semua Peer\\(5 organisasi)};
+\node[proc]      (validate) at (10.5, -2.0)  {Validasi:\\MVCC + kebijakan\\
+                                               \textit{endorsement}};
+\node[commitbox] (world)    at (10.5, -3.8)  {Commit ke \textit{ledger}\\
+                                               (World State / CouchDB)};
+\node[stepnum] at (8.5, -1.0) {4};
+\node[stepnum] at (8.5, -2.9) {5};
+
+\draw[ar] (peers.south) --
+  node[pathlabel,right]{periksa blok} (validate.north);
+\draw[ar] (validate.south) --
+  node[pathlabel,right]{tulis status} (world.north);
+
+\node[phasebox, fit=(peers)(validate)(world),
+  label={[font=\footnotesize\bfseries]above:Fase Validasi \& \textit{Commit}}] (ph3) {};
+
+%--- Inter-phase arrows ---
+\draw[ar] (client1.east) --
+  node[pathlabel,above]{\textit{Tx} + RWSet} (client2.west);
+\draw[ar] (ph2.east) -- node[pathlabel,above]{Blok terurut} (ph3.west);
+
+\end{tikzpicture}%
+}
+\caption{Siklus transaksi Hyperledger Fabric dengan mekanisme konsensus Raft}
+\label{fig:konsensus-raft}
+\end{figure}

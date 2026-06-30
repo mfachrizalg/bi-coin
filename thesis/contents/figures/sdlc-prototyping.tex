@@ -1,0 +1,44 @@
+% Siklus SDLC metode prototyping (TikZ).
+% Di-input dari BAB III §3.1.2.1.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.72\textwidth}{!}{%
+\begin{tikzpicture}[
+  phase/.style={draw=black, fill=white, rectangle, rounded corners=4pt,
+    minimum width=3.2cm, minimum height=1.0cm, align=center, font=\footnotesize\bfseries},
+  center/.style={draw=none, fill=none, align=center, font=\small\itshape},
+  ar/.style={-{Stealth}, very thick},
+]
+
+%--- Empat fase membentuk lingkaran ---
+%  0°=kanan, 90°=atas  →  posisi fase:
+%  Atas: Analisis Kebutuhan
+%  Kanan: Perancangan
+%  Bawah: Implementasi
+%  Kiri: Evaluasi
+
+\node[phase] (req)   at ( 0,  3.4) {Analisis\\Kebutuhan};
+\node[phase] (design) at ( 3.4, 0) {Perancangan\\Purwarupa};
+\node[phase] (impl)  at ( 0, -3.4) {Implementasi};
+\node[phase] (eval)  at (-3.4, 0) {Evaluasi \&\\Pengujian};
+
+\node[center] at (0, 0) {Siklus\\\textit{Prototyping}};
+
+%--- Panah siklus (searah jarum jam) ---
+\draw[ar] (req.east)   to[bend left=25]  (design.north);
+\draw[ar] (design.south) to[bend left=25] (impl.east);
+\draw[ar] (impl.west)  to[bend left=25]  (eval.south);
+\draw[ar] (eval.north) to[bend left=25]  (req.west);
+
+%--- Label panah ---
+\node[font=\scriptsize, align=center] at ( 2.8,  2.4) {rancang\\\textit{prototype}};
+\node[font=\scriptsize, align=center] at ( 2.8, -2.4) {bangun\\\textit{prototype}};
+\node[font=\scriptsize, align=center] at (-2.8, -2.4) {uji \&\\evaluasi};
+\node[font=\scriptsize, align=center] at (-2.8,  2.4) {perbaiki\\kebutuhan};
+
+\end{tikzpicture}%
+}
+\caption{Siklus SDLC dengan metode \textit{prototyping}: empat fase berulang hingga purwarupa memenuhi kebutuhan fungsional dan kinerja}
+\label{fig:sdlc-proto}
+\end{figure}

@@ -1,0 +1,66 @@
+test:
+  name: Digital Rupiah Retail CBDC Benchmark
+  description: Performance evaluation of direct retail Digital Rupiah transfers on Hyperledger Fabric
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: retail-warmup
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-default
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+
+    - label: retail-sustained
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-default
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+
+    - label: retail-peak
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-default
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+
+observer:
+  type: local
+  interval: 1
+
+monitor:
+  type: docker
+  docker:
+    name:
+      - peer0.bi.paynet
+      - peer0.himbara.paynet
+      - peer0.commercial.paynet
+      - peer0.pjp.paynet
+      - orderer.paynet
+  interval: 1

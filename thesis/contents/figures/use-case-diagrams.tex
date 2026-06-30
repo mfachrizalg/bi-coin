@@ -1,0 +1,125 @@
+% Diagram use case sistem Rupiah Digital (TikZ).
+% Di-input dari BAB III.
+
+\tikzset{
+  uactor/.style={draw=none, fill=none, minimum width=0.9cm,
+    minimum height=1.3cm, inner sep=0pt},
+  ucase/.style={draw=black, fill=white, ellipse, minimum width=3.2cm,
+    minimum height=0.95cm, inner sep=2pt, align=center, font=\scriptsize},
+  ubox/.style={draw=black, dashed, fill=none, rectangle},
+  udep/.style={draw=black, dashed, -{Stealth}, font=\scriptsize},
+  uassoc/.style={draw=black, -{Stealth}},
+}
+
+% UML stick-figure actor: #1=node id, #2=(x,y) position, #3=label
+\newcommand{\umlactor}[3]{%
+  \node[uactor] (#1) at #2 {};%
+  \begin{scope}[shift={#2}]
+    \draw[thick] (0,0.30) circle (0.13);          % kepala
+    \draw[thick] (0,0.17) -- (0,-0.18);           % badan
+    \draw[thick] (-0.22,0.02) -- (0.22,0.02);     % lengan
+    \draw[thick] (0,-0.18) -- (-0.18,-0.5);       % kaki kiri
+    \draw[thick] (0,-0.18) -- (0.18,-0.5);        % kaki kanan
+  \end{scope}
+  \node[font=\scriptsize, align=center, anchor=north] at ($#2+(0,-0.58)$) {#3};%
+}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}
+\umlactor{bi}{(0,8)}{Bank\\Indonesia}
+\umlactor{bv}{(0,6)}{Bank\\Validator}
+\umlactor{pjp}{(0,4)}{PJP}
+\umlactor{m}{(12,8)}{Merchant}
+\umlactor{pr}{(12,6)}{Pelanggan\\Ritel}
+\umlactor{sv}{(12,4)}{Supervisor}
+\umlactor{ojk}{(12,2)}{OJK\\Observer}
+
+\node[ubox, minimum width=8cm, minimum height=8.5cm] (sys) at (6,5) {};
+\node[font=\footnotesize\bfseries] at (6,9.6) {Sistem Rupiah Digital (bi-coin-fabric)};
+
+\node[ucase] (uc1) at (6,9) {Mendaftarkan Peserta};
+\node[ucase] (uc2) at (6,8) {Menerbitkan Digital Rupiah};
+\node[ucase] (uc3) at (6,7) {Mendistribusikan Likuiditas};
+\node[ucase] (uc4) at (6,6) {Mengelola KYC Pelanggan};
+\node[ucase] (uc5) at (6,5) {Mentransfer Saldo};
+\node[ucase] (uc6) at (6,4) {Transfer ke Pedagang};
+\node[ucase] (uc7) at (6,2.8) {Bekukan/Cairkan Peserta};
+\node[ucase] (uc9) at (6,0.4) {Laporan \& Pengawasan};
+
+\draw[uassoc] (bi) -- (uc1);
+\draw[uassoc] (pjp) to[out=70,in=188] (uc1.west);
+\draw[uassoc] (bi) -- (uc2);
+\draw[uassoc] (bi) -- (uc7);
+\draw[uassoc] (bv) -- (uc3);
+\draw[uassoc] (m) -- (uc6);
+\draw[uassoc] (pr) -- (uc5);
+\draw[uassoc] (pr) -- (uc6);
+\draw[uassoc] (pjp) -- (uc4);
+\draw[uassoc] (sv) -- (uc7);
+\draw[uassoc] (sv) -- (uc9);
+\draw[uassoc] (bi) to[out=-95,in=172] (uc9.west);
+\draw[uassoc, dashed] (ojk) -- (uc9) node[midway, above, sloped, font=\scriptsize]{$\langle\langle$observasi$\rangle\rangle$};
+\end{tikzpicture}%
+}
+\caption{Diagram use case keseluruhan sistem Rupiah Digital}
+\label{fig:uc01}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}
+\umlactor{bi}{(0,6)}{Bank\\Indonesia}
+\umlactor{bv}{(0,3.5)}{Bank\\Validator}
+\umlactor{sv}{(10,3.5)}{Supervisor}
+
+\node[ubox, minimum width=6cm, minimum height=6.5cm] (sys) at (5,3.5) {};
+\node[font=\footnotesize\bfseries] at (5,7.2) {Operasi Wholesale};
+
+\node[ucase] (w1) at (5,6) {Menerbitkan Digital Rupiah};
+\node[ucase] (w2) at (5,5) {Mendistribusikan Likuiditas};
+\node[ucase] (w3) at (5,4) {Mengelola Siklus Hidup Peserta};
+\node[ucase] (w4) at (5,3) {Mengelola Kebijakan Limit};
+\node[ucase] (w6) at (5,1) {Laporan \& Metrik};
+
+\draw[uassoc] (bi) -- (w1);
+\draw[uassoc] (bi) -- (w3);
+\draw[uassoc] (bi) -- (w4);
+\draw[uassoc] (bv) -- (w2);
+\draw[uassoc] (sv) -- (w1);
+\draw[uassoc] (sv) -- (w3);
+\draw[uassoc] (sv) -- (w4);
+\draw[uassoc] (sv) -- (w6);
+\draw[udep] (w2) -- (w1) node[midway, above, sloped] {$\langle\langle$include$\rangle\rangle$};
+\end{tikzpicture}%
+}
+\caption{Diagram use case operasi wholesale}
+\label{fig:uc02}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}
+\umlactor{pr}{(0,6)}{Pelanggan\\Ritel}
+\umlactor{m}{(10,6)}{Merchant}
+
+\node[ubox, minimum width=6cm, minimum height=5.5cm] (sys) at (5,4) {};
+\node[font=\footnotesize\bfseries] at (5,7.2) {Operasi Retail};
+
+\node[ucase] (r1) at (5,6) {Menyediakan Data KYC};
+\node[ucase] (r2) at (5,5) {Mentransfer Saldo};
+\node[ucase] (r3) at (5,4) {Transfer Antarpelanggan};
+\node[ucase] (r4) at (5,3) {Transfer ke Pedagang};
+\draw[uassoc] (pr) -- (r1);
+\draw[uassoc] (pr) -- (r2);
+\draw[uassoc] (pr) -- (r4);
+\draw[uassoc] (m) -- (r3);
+\draw[udep] (r4) -- (r3) node[midway, above, sloped] {$\langle\langle$include$\rangle\rangle$};
+\end{tikzpicture}%
+}
+\caption{Diagram use case operasi retail}
+\label{fig:uc03}
+\end{figure}

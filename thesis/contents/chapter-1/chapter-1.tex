@@ -1,0 +1,267 @@
+\chapter{Pendahuluan}
+
+\section{Latar Belakang}
+
+Transformasi digital pada sektor sistem pembayaran Indonesia berlangsung
+sangat cepat dalam satu dekade terakhir. Penetrasi telepon pintar dan
+pertumbuhan ekonomi digital mendorong masyarakat beralih dari uang tunai menuju
+instrumen pembayaran nontunai. Bank Indonesia melalui Blueprint Sistem
+Pembayaran Indonesia (BSPI) menempatkan digitalisasi sebagai agenda utama untuk
+menjaga kedaulatan moneter, mendorong inklusi keuangan, serta memperkuat
+integrasi ekonomi dan keuangan digital nasional \cite{bi_bspi2025}. Dalam
+konteks tersebut, kehadiran mata uang digital bank sentral atau \textit{Central
+	Bank Digital Currency} (CBDC) menjadi salah satu inisiatif strategis untuk
+melengkapi uang kartal dan uang elektronik yang telah ada.
+
+Pertumbuhan ekosistem digital tersebut, bagaimanapun, juga membawa risiko
+baru bagi stabilitas sistem keuangan. Pada tahun 2022, penetrasi internet
+Indonesia mencapai 74\% dengan 204,7 juta pengguna, sementara pelanggan
+seluler mencapai 370,1 juta atau setara 133\% populasi; pandemi COVID-19
+menambah 21 juta konsumen digital baru yang sebelumnya belum terlayani
+secara daring sebagaimana dirangkum dalam Tabel 1 White Paper CBDC Bank
+Indonesia \cite{bi_whitepaper2022}. Di sisi lain, kapitalisasi pasar
+aset kripto global melonjak hingga hampir 3 triliun dolar AS, tumbuh
+1.393\% antara 2019 dan 2021, sementara investor aset kripto di Indonesia
+mencapai 16,3 juta per September 2022 dengan laju pertumbuhan 81,6\%
+\textit{year-over-year} \cite{bi_whitepaper2022}. Fenomena ini memunculkan
+\textit{cryptoization}, yaitu kondisi di mana adopsi aset kripto oleh
+penduduk menyebar lebih cepat dibandingkan mata uang resmi
+\cite{bi_whitepaper2022}. Lebih jauh, disrupsi digital tidak lagi terbatas
+pada isu \textit{shadow banking}, melainkan telah merambah pada fenomena
+\textit{shadow currency} dan \textit{shadow central banking} yang mengikis
+efektivitas kebijakan bank sentral \cite{bi_whitepaper2022}.
+\textit{Stablecoin} dan aset kripto tanpa aset dasar memperbesar risiko
+pencucian uang (\textit{money laundering}), pendanaan terorisme, serta
+risiko makrofinansial berupa melemahnya kendali otoritas atas stabilitas
+moneter dan sistem keuangan \cite{bi_whitepaper2022}. Dalam menghadapi
+tantangan tersebut, kehadiran mata uang digital bank sentral menjadi
+instrumen strategis untuk menjaga kepercayaan publik terhadap uang,
+mempertahankan kedaulatan moneter, dan memastikan bank sentral tetap
+relevan sebagai jangkar stabilitas di era ekonomi digital
+\cite{bi_whitepaper2022, Auer2022Central}.
+
+CBDC merupakan representasi digital dari uang yang diterbitkan dan menjadi
+kewajiban langsung bank sentral, sehingga memiliki kualitas bebas risiko yang
+setara dengan uang tunai \cite{unknown2024p}. Berbeda dengan uang elektronik
+yang diterbitkan oleh penyelenggara swasta dan merupakan kewajiban penerbitnya,
+CBDC menempatkan bank sentral sebagai penjamin nilai akhir. Bagi Indonesia,
+Bank Indonesia menamai inisiatif CBDC sebagai Rupiah Digital melalui Proyek
+Garuda, yang menempuh pendekatan bertahap dimulai dari Rupiah Digital
+\textit{wholesale} (w-Digital Rupiah) untuk transaksi antarlembaga, kemudian
+diperluas menuju Rupiah Digital \textit{retail} (r-Digital Rupiah) bagi
+masyarakat luas \cite{bi_whitepaper2022, bi_garuda_poc}. Desain Rupiah Digital
+mengadopsi model dua jenjang (\textit{two-tier}), yaitu Bank Indonesia
+menerbitkan dan mengelola Rupiah Digital pada tingkat \textit{wholesale},
+sementara distribusi kepada masyarakat dilakukan melalui pihak perantara seperti
+perbankan dan penyedia jasa pembayaran \cite{bi_consultative}.
+
+Salah satu pilihan teknologi yang banyak dikaji untuk menopang CBDC adalah
+\textit{Distributed Ledger Technology} (DLT) berbasis \textit{blockchain}.
+Teknologi ini menawarkan keunggulan berupa integritas data yang terjaga melalui
+catatan yang tidak dapat diubah (\textit{immutable}), jejak audit yang
+transparan, serta kemampuan otomasi aturan bisnis melalui \textit{smart
+	contract} \cite{unknown2022, sethaput2025}. Untuk kebutuhan bank sentral, jenis
+\textit{blockchain} yang sesuai adalah \textit{permissioned blockchain}, yaitu
+jaringan dengan keanggotaan terbatas dan teridentifikasi, sehingga bank sentral
+tetap memegang kendali atas tata kelola jaringan \cite{bhawana2021}. Hyperledger
+Fabric merupakan salah satu kerangka kerja \textit{permissioned blockchain}
+paling matang yang banyak digunakan pada ranah keuangan. Fabric mendukung
+arsitektur modular, identitas berbasis \textit{Membership Service Provider}
+(MSP), pemisahan transaksi melalui kanal (\textit{channel}), serta model
+eksekusi \textit{execute-order-validate} yang memungkinkan throughput tinggi
+tanpa bergantung pada mekanisme \textit{proof-of-work} yang boros energi
+\cite{androulaki2018}.
+
+Meskipun kajian mengenai CBDC berkembang pesat, fokus literaturnya masih
+timpang. Sebagian besar penelitian menelaah CBDC dari sisi makroekonomi,
+kebijakan moneter, dan stabilitas keuangan \cite{Barrdear2021The,
+	Auer2022Central, unknown2024p}, atau dari sisi taksonomi desain tingkat tinggi
+seperti pilihan \textit{token-based} versus \textit{account-based} dan model
+satu jenjang versus dua jenjang \cite{Auer2020The, Kiff2020A, Allen2020Design,
+	Tsareva2024Retail}. Sebaliknya, artefak teknis yang utuh, terbuka, dan dapat
+diuji secara empiris untuk konteks CBDC ritel masih jarang tersedia.
+
+Pada ranah teknis pun, penelitian terdahulu cenderung menyoroti satu aspek
+secara terpisah. Sejumlah studi berfokus pada privasi dan auditabilitas
+\cite{islam2023, Pocher2022Privacy, Michalopoulos2025Privacy}, keamanan dan
+pemodelan ancaman \cite{hans2023}, atau arsitektur jaringan \cite{bhawana2021,
+	sun2017}. Padahal kelayakan sebuah sistem CBDC
+ritel justru ditentukan oleh keterpaduan aspek-aspek tersebut. Belum banyak
+penelitian yang mengintegrasikan penerbitan dan distribusi likuiditas berjenjang,
+kepatuhan KYC dan limit berbasis tingkatan dompet, transfer ritel, serta pengawasan ke dalam satu sistem yang utuh
+sekaligus terukur kinerjanya.
+
+Untuk konteks Indonesia, Bank Indonesia telah menetapkan arah desain Rupiah
+Digital berupa model dua jenjang dan interoperabilitas sistem pembayaran
+\cite{bi_whitepaper2022, bi_consultative}, dan sejumlah kajian merumuskan desain
+CBDC yang sesuai bagi perekonomian Indonesia \cite{zams2020delphi,
+	Syarifuddin2024OPTIMAL, aryani2023critlit}. Namun, realisasi teknis Proyek
+Garuda yang terdokumentasi secara publik baru mencakup lapisan
+\textit{wholesale} \cite{bi_garuda_poc}, sedangkan purwarupa lapisan
+\textit{retail} yang selaras dengan spesifikasi tersebut belum tersedia secara
+terbuka. Dari sisi evaluasi kinerja, CBDC ritel yang telah diluncurkan maupun
+yang masih berupa pilot (seperti eNaira di Nigeria \cite{ree2023enaira} dan
+pilot ritel di Thailand \cite{Bhensook2025Public}) belum menyertakan tolok ukur
+kinerja terstandar yang dapat direproduksi, sementara sistem berkinerja tinggi
+seperti Hamilton/OpenCBDC justru meninggalkan model \textit{blockchain} dan
+memakai arsitektur \textit{account-based} terpusat \cite{Lovejoy2022A}.
+Akibatnya, data \textit{throughput} dan latensi yang terukur untuk skenario CBDC
+ritel di atas \textit{permissioned blockchain}, khususnya untuk Rupiah Digital,
+masih langka.
+
+Penelitian sebelumnya di lingkungan Departemen Teknik Elektro dan Teknologi
+Informasi telah menunjukkan kelayakan pembangunan sistem \textit{blockchain}
+berbasis Hyperledger Fabric untuk aplikasi token sederhana
+\cite{hanif2024meetcoin}, namun belum mencakup karakteristik khusus CBDC ritel.
+Dengan demikian, celah penelitian ini terletak pada irisan keempat hal di atas,
+yaitu belum tersedianya purwarupa CBDC ritel yang sekaligus (i) mengintegrasikan
+penerbitan berjenjang, kepatuhan, transfer ritel, serta pengawasan dalam satu sistem; (ii) selaras dengan
+rancangan dua jenjang Bank Indonesia; dan (iii) dievaluasi kinerjanya secara
+dapat direproduksi menggunakan Hyperledger Caliper. Berdasarkan celah tersebut,
+penelitian ini melakukan rancang bangun sistem Rupiah Digital ritel berbasis
+Hyperledger Fabric yang merepresentasikan ekosistem multipihak (Bank Indonesia,
+bank validator, penyedia jasa pembayaran (PJP), pedagang, pelanggan ritel,
+pengawas, serta pengamat dari Otoritas Jasa Keuangan (OJK)) dilengkapi
+mekanisme pengawasan terdesentralisasi. Sistem yang
+dibangun selanjutnya dievaluasi kinerjanya menggunakan Hyperledger Caliper untuk
+mengukur \textit{throughput} dan latensi pada berbagai skenario beban, sehingga
+dapat diketahui kelayakannya sebagai purwarupa infrastruktur Rupiah Digital.
+
+\section{Rumusan Masalah}
+
+Berdasarkan latar belakang di atas, rumusan masalah pada penelitian ini adalah
+sebagai berikut.
+\begin{enumerate}
+	\item Bagaimana merancang dan membangun sistem Rupiah Digital ritel berbasis
+	      Hyperledger Fabric yang mendukung model penerbitan dan distribusi likuiditas
+	      berjenjang dari Bank Indonesia menuju bank, penyedia jasa pembayaran, dan
+	      pelanggan ritel?
+	\item Bagaimana menerapkan kontrol kepatuhan pada lapisan \textit{chaincode}
+	      berupa KYC berbasis risiko, penurunan tingkatan dompet, limit transaksi,
+	      dan pengawasan transaksi?
+	\item Bagaimana kinerja sistem yang dibangun dari sisi \textit{throughput}
+	      dan latensi pada berbagai skenario beban transaksi yang diukur menggunakan
+	      Hyperledger Caliper?
+\end{enumerate}
+
+\section{Tujuan Penelitian}
+
+Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
+\begin{enumerate}
+	\item Merancang dan membangun purwarupa sistem Rupiah Digital ritel berbasis
+	      Hyperledger Fabric dengan arsitektur multipihak yang mendukung penerbitan dan
+	      distribusi likuiditas berjenjang.
+	\item Mengimplementasikan kontrol kepatuhan pada \textit{chaincode} berupa
+	      KYC berbasis risiko, penurunan tingkatan dompet, limit transaksi masuk
+	      dan keluar, serta pengawasan transaksi.
+	\item Mengevaluasi kinerja sistem dari sisi \textit{throughput} dan latensi
+	      pada berbagai skenario beban menggunakan Hyperledger Caliper.
+\end{enumerate}
+
+\section{Batasan Penelitian}
+
+\begin{enumerate}
+	\item Sistem yang dibangun merupakan purwarupa (\textit{prototype}) yang
+	      dijalankan pada lingkungan jaringan tersimulasi secara lokal menggunakan
+	      \textit{container}, bukan sistem produksi.
+	\item Jaringan \textit{blockchain} menggunakan Hyperledger Fabric versi 2.5
+	      dengan lima organisasi peserta dan mekanisme konsensus \textit{ordering}
+	      berbasis Raft (etcdraft).
+	\item Penelitian berfokus pada perancangan, implementasi, dan evaluasi
+	      kinerja fungsional; aspek hukum, kebijakan moneter, dan dampak makroekonomi
+	      dari penerapan Rupiah Digital berada di luar cakupan. Analisis strategi
+	      kebijakan moneter dan dampak makroekonomi CBDC---termasuk peran
+	      \textit{CBDC rate}---didelegasikan pada studi terpisah seperti
+	      \cite{SyarifuddinBakhtiar2021Monetary}.
+	\item Evaluasi kinerja dilakukan menggunakan Hyperledger Caliper dengan beban
+	      yang dihasilkan oleh sejumlah \textit{worker} pada lingkungan pengujian lokal.
+	\item Pengujian dijalankan pada satu inang
+	      (\textit{single host}) dengan dua \textit{worker} Caliper dan satu
+	      \textit{peer} per organisasi, tanpa latensi jaringan dan persebaran geografis
+	      yang nyata. Karena itu, angka \textit{throughput} dan latensi yang diperoleh
+	      tidak dapat langsung digeneralisasi ke perangkat keras maupun topologi
+	      produksi \cite{Lovejoy2022A, fabric_perf2023}.
+	\item Komposisi beban transaksi dan distribusi
+	      nilai yang digunakan merupakan asumsi desain yang menyerupai pola pembayaran
+	      ritel di Indonesia, bukan jejak transaksi empiris. Pada setiap \textit{worker},
+	      ronde pemanasan memakai 100 pelanggan dan 20 pedagang, sedangkan ronde stabil
+	      dan puncak masing-masing memakai 600 pelanggan dan 80 pedagang.
+	\item Evaluasi kinerja menggunakan skenario tanpa perebutan dompet
+	      (\textit{contention-free}), yaitu setiap kunci dompet yang dimutasi dipilih
+	      secara deterministik dan digunakan paling banyak satu kali dalam satu ronde
+	      terukur. Skenario \textit{hot-wallet contention}, seperti banyak pelanggan
+	      yang membayar pedagang yang sama secara bersamaan, tidak diuji. Pembatasan ini
+	      dipilih untuk memisahkan kapasitas dasar pemrosesan jaringan dari konflik MVCC
+	      akibat konsentrasi akses. Penelitian juga tidak memiliki jejak transaksi
+	      empiris untuk menetapkan tingkat konsentrasi maupun kebijakan
+	      \textit{retry/backoff} yang representatif. Oleh karena itu, hasil kinerja
+	      menggambarkan kondisi terbaik tanpa perebutan kunci dan tidak mewakili beban
+	      pedagang populer atau dompet bersama.
+	\item Purwarupa ini tidak
+	      mengimplementasikan pembayaran CBDC tanpa koneksi jaringan. Kemampuan
+	      tersebut memerlukan desain perangkat aman, verifikasi kriptografis,
+	      pencegahan \textit{double-spending}, dan rekonsiliasi setelah konektivitas
+	      kembali \cite{polaris_security, polaris_handbook}. Dengan demikian, hasil
+	      penelitian hanya merepresentasikan transaksi yang diselesaikan melalui
+	      koneksi ke \textit{ledger}.
+	\item Proses KYC disimulasikan secara
+	      terprogram tanpa integrasi penyedia identitas nyata, dan sistem belum
+	      menyediakan privasi transaksi (tanpa \textit{private data collection} maupun
+	      teknik kriptografi penjaga privasi) sehingga seluruh \textit{ledger} bersifat
+	      transparan bagi peserta berwenang. Dengan demikian, kompromi
+	      (\textit{trade-off}) antara privasi dan keterlacakan belum ditangani
+	      \cite{Pocher2022Privacy, Soana2024Central, Said2026Designing}.
+	\item Proyek Garuda menetapkan tiga prinsip 3i sebagai prasyarat
+	      desain Rupiah Digital: integrasi dengan infrastruktur pasar keuangan (IPK)
+	      domestik, interoperabilitas teknis dan semantik dengan sistem yang ada maupun
+	      yang akan datang, serta interkoneksi lintas batas untuk jaringan CBDC
+	      antarnegara \cite{bi_whitepaper2022}. Purwarupa ini memenuhi prinsip tersebut
+	      hanya pada tataran internal: alur penerbitan--distribusi--pembayaran--pengawasan
+	      berjalan secara terpadu dalam satu jaringan Hyperledger Fabric. Namun,
+	      integrasi eksternal dengan BI-RTGS dan BI-FAST hanya dimodelkan sebagai titik
+	      masuk (\textit{stub}) tanpa koneksi nyata, Penyimpan Digital Rupiah (KDR)
+	      belum diimplementasikan, konformitas terhadap standar SNAP API nasional tidak
+	      diterapkan, dan tidak ada gerbang (\textit{gateway}) menuju IPK domestik
+	      maupun jaringan CBDC lintas batas. Dengan demikian, pemenuhan prinsip 3i
+	      secara penuh merupakan pekerjaan lanjutan yang berada di luar cakupan
+	      purwarupa ini.
+\end{enumerate}
+
+\section{Manfaat Penelitian}
+
+Penelitian ini diharapkan memberikan manfaat sebagai berikut.
+\begin{enumerate}
+	\item \textbf{Manfaat teoretis}, yaitu memberikan referensi rancang bangun
+	      sistem CBDC ritel berbasis \textit{permissioned blockchain} yang utuh,
+	      meliputi model penerbitan berjenjang, kontrol kepatuhan, transfer ritel,
+	      dan pengawasan, sehingga dapat menjadi acuan bagi penelitian lanjutan.
+	\item \textbf{Manfaat praktis}, yaitu menyediakan purwarupa yang dapat
+	      digunakan sebagai bahan eksperimen dan diskusi teknis bagi pemangku
+	      kepentingan dalam pengembangan Rupiah Digital, khususnya pada aspek
+	      arsitektur teknis dan evaluasi kinerja.
+\end{enumerate}
+
+\section{Sistematika Penulisan}
+
+Penulisan skripsi ini disusun ke dalam lima bab dengan sistematika sebagai
+berikut.
+
+\noindent BAB I PENDAHULUAN berisi latar belakang, rumusan masalah,
+tujuan penelitian, batasan penelitian, manfaat penelitian, dan sistematika
+penulisan.
+
+\noindent BAB II TINJAUAN PUSTAKA DAN DASAR TEORI memaparkan tinjauan
+terhadap penelitian terdahulu yang relevan serta dasar teori yang mendasari
+penelitian, meliputi CBDC, \textit{blockchain} dan DLT, Hyperledger Fabric,
+Hyperledger Caliper, KYC berbasis risiko, dan limit transaksi.
+
+\noindent BAB III METODE PENELITIAN menguraikan alat dan bahan, metode
+perancangan, metode implementasi, metode pengujian, serta alur penelitian yang
+ditempuh.
+
+\noindent BAB IV HASIL DAN PEMBAHASAN menyajikan hasil implementasi
+sistem, hasil evaluasi kinerja menggunakan Hyperledger Caliper, serta
+perbandingan dengan penelitian terdahulu.
+
+\noindent BAB V KESIMPULAN DAN SARAN memuat kesimpulan yang menjawab
+rumusan masalah serta saran untuk pengembangan penelitian selanjutnya.

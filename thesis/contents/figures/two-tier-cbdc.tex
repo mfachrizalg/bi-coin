@@ -1,0 +1,82 @@
+% Arsitektur dua jenjang sistem Rupiah Digital (TikZ).
+% Di-input dari BAB III §3.2.1 sebelum fig:arsitektur.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  actor/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
+    minimum width=3.2cm, minimum height=1.0cm, align=center, font=\footnotesize\bfseries},
+  wbox/.style={draw=black, fill=gray!10, rectangle, rounded corners=2pt,
+    minimum width=3.0cm, minimum height=0.9cm, align=center, font=\scriptsize},
+  zonebox/.style={draw=black, dashed, rounded corners=6pt, fill=none, inner sep=14pt},
+  pl/.style={font=\scriptsize, midway, align=center},
+  ar/.style={-{Stealth}, thick},
+  dar/.style={-{Stealth}, thick, dashed},
+]
+
+%── Jenjang 1: Wholesale ──────────────────────────────────────────────────────
+
+\node[actor] (bi)         at (0,    0)    {Bank Indonesia\\(Penerbit)};
+\node[actor] (himbara)    at (6.0,  1.5)  {Himbara Bank\\(Validator)};
+\node[actor] (commercial) at (6.0, -1.5)  {Commercial Bank\\(Validator)};
+\node[actor] (ojk)        at (11.5, 0)    {OJK\\(Observer)};
+
+% BI → Banks (penerbitan dan distribusi)
+\draw[ar] (bi.east) to[out=15,in=175]
+  node[pl, above, sloped]{Penerbitan} (himbara.west);
+\draw[ar] (bi.east) to[out=-15,in=-175]
+  node[pl, below, sloped]{Distribusi} (commercial.west);
+
+% BI ↔ OJK (laporan dan pengawasan)
+\draw[dar] (bi.north east) to[bend left=15]
+  node[pl, above]{Laporan} (ojk.north west);
+\draw[dar] (ojk.south west) to[bend left=15]
+  node[pl, below]{Pengawasan} (bi.south east);
+
+% Validator banks → OJK (pelaporan)
+\draw[dar] (himbara.east)    -- (ojk.north west);
+\draw[dar] (commercial.east) -- (ojk.south west);
+
+\node[zonebox,
+  fit=(bi)(himbara)(commercial)(ojk),
+  label={[font=\footnotesize\bfseries, anchor=south west]north west:%
+    Jenjang 1: \textit{Wholesale}}] (j1) {};
+
+%── Batas tier ────────────────────────────────────────────────────────────────
+
+\draw[dashed, thick, gray!70] (-1.0, -2.8) -- (13.5, -2.8);
+\node[font=\scriptsize, gray!70, anchor=east] at (13.5, -2.55)
+  {Batas \textit{tier}};
+
+%── Distribusi lintas jenjang ─────────────────────────────────────────────────
+
+\node[actor] (pjp) at (6.0, -4.5) {PJP\\(Penyedia Jasa Pembayaran)};
+
+\draw[ar] (himbara.south)    to[out=-90, in=75]
+  node[pl, right, pos=0.65]{Distribusi Likuiditas} (pjp.north east);
+\draw[ar] (commercial.south) to[out=-90, in=105] (pjp.north west);
+
+%── Jenjang 2: Retail ────────────────────────────────────────────────────────
+
+\node[wbox] (tbasic)    at (3.0, -6.8) {Dompet BASIC\\(Dasar)};
+\node[wbox] (tstandard) at (6.0, -6.8) {Dompet STANDARD\\(Standar)};
+\node[wbox] (tmerchant) at (9.0, -6.8) {Dompet MERCHANT\\(Pedagang)};
+
+\draw[ar] (pjp) -- (tbasic);
+\draw[ar] (pjp) -- (tstandard);
+\draw[ar] (pjp) -- (tmerchant);
+
+\node[zonebox,
+  fit=(pjp)(tbasic)(tstandard)(tmerchant),
+  label={[font=\footnotesize\bfseries, anchor=south west]north west:%
+    Jenjang 2: \textit{Retail}}] (j2) {};
+
+\node[font=\scriptsize, gray] at (6.0, -7.8)
+  {Transfer P2P/pedagang $\cdot$ KYC-\textit{gated}};
+
+\end{tikzpicture}%
+}
+\caption{Arsitektur dua jenjang sistem Rupiah Digital}
+\label{fig:arsitektur-dua-jenjang}
+\end{figure}

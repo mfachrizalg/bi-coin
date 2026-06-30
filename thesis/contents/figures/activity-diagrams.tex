@@ -1,0 +1,44 @@
+% Activity diagram sistem Rupiah Digital.
+% Gambar di-render dari berkas PlantUML:
+%   bi-coin-fabric/docs/diagrams/plantuml/activity-diagrams.puml
+% Untuk merender:
+%   cd /path/to/bi-coin && python3 render-activity-diagrams.py
+% Di-input dari BAB III §3.2.4.
+
+\newcommand{\actfig}[3]{%
+  \begin{figure}[p]\centering
+  \IfFileExists{contents/figures/activity/#1.png}{%
+    \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]%
+      {contents/figures/activity/#1.png}%
+  }{%
+    \fbox{\parbox{0.9\textwidth}{\centering\small
+      \textit{[Gambar belum di-render. Jalankan:
+      \texttt{python3 render-activity-diagrams.py}]}\\
+      \texttt{#1.png}}}%
+  }%
+  \caption{#2}
+  \label{#3}
+  \end{figure}
+}
+
+\actfig{AD01-Pendaftaran-Peserta}%
+  {Activity diagram pendaftaran peserta}{fig:ad01}
+
+\actfig{AD02-Penerbitan-Digital-Rupiah}%
+  {Activity diagram penerbitan Digital Rupiah}{fig:ad02}
+
+\actfig{AD03-Distribusi-Likuiditas-PJP}%
+  {Activity diagram distribusi likuiditas ke PJP}{fig:ad03}
+
+\actfig{AD04-Onboarding-KYC-Pelanggan}%
+  {Activity diagram onboarding KYC pelanggan}{fig:ad04}
+
+\actfig{AD05-Transfer-Saldo-Ritel}%
+  {Activity diagram transfer saldo ritel}{fig:ad05}
+
+
+\actfig{AD08-Pembekuan-Peserta}%
+  {Activity diagram pembekuan dan pencairan peserta}{fig:ad08}
+
+\actfig{AD10-Laporan-Supervisi}%
+  {Activity diagram laporan dan pengawasan supervisi}{fig:ad10}

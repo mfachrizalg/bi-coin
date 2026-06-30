@@ -1,0 +1,39 @@
+\textit{
+Central Bank Digital Currency (CBDC) is a strategic Bank Indonesia initiative
+under Project Garuda. Publicly documented Project Garuda experiments focus on
+wholesale CBDC, leaving a technical gap for a testable retail prototype that
+combines two-tier distribution, risk-based customer due diligence, deterministic
+wallet limits, and institutional supervision. This study designs and implements
+a retail Digital Rupiah prototype on a permissioned Hyperledger Fabric network.
+}
+
+\textit{
+The prototyping method covers requirements analysis, architecture design,
+implementation, and functional and performance testing. Go chaincode stores only
+KYC status, risk, due-diligence level, senior-approval status, expiry, and document
+hashes; raw identity data remains in PostgreSQL. Retail wallet tiers are derived
+from the approved KYC profile rather than selected by a user. BASIC, STANDARD,
+and MERCHANT policies enforce per-transaction, daily outgoing, monthly outgoing,
+monthly incoming, and maximum-balance limits using the Fabric transaction
+timestamp. Institutional Bank Indonesia, bank, and payment-service-provider
+wallets remain outside retail tiering and use system-level limits. Hyperledger
+Caliper is configured for a transfer-only workload consisting of 70\% customer-to-
+customer transfers, 25\% customer-to-merchant transfers, and 5\% reads.
+}
+
+\textit{
+Automated tests verify tier derivation, high-risk enhanced-due-diligence rules,
+incoming and outgoing limit enforcement, privacy separation, and role boundaries.
+The resulting prototype demonstrates a coherent separation of responsibilities:
+customers provide identity data, banks or payment service providers perform KYC,
+and Bank Indonesia supervises institutions and ledger events. Performance claims
+are limited to reproducible measurements produced by the specified Caliper
+protocol. The prototype therefore provides an auditable technical basis for
+studying retail Digital Rupiah policy, without claiming production readiness or
+legal limit equivalence.
+}
+
+\vspace{0.5cm}
+
+\noindent\textbf{Keywords} : Digital Rupiah, retail CBDC, Hyperledger Fabric,
+risk-based KYC, wallet limits

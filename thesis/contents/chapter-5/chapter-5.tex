@@ -1,0 +1,73 @@
+\chapter{Kesimpulan dan Saran}
+
+\section{Kesimpulan}
+
+Berdasarkan hasil rancang bangun dan pengujian, kesimpulan penelitian adalah
+sebagai berikut.
+\begin{enumerate}
+    \item Purwarupa Rupiah Digital ritel dibangun pada Hyperledger Fabric 2.5
+    dengan lima organisasi, \textit{backend} Go, CouchDB, dan PostgreSQL. Model
+    distribusi dua jenjang memisahkan Bank Indonesia, bank validator, PJP, dan
+    pengguna ritel. Dompet institusional berada di luar tingkatan KYC ritel.
+    \item Kebijakan KYC diterapkan sebagai penurunan tingkatan yang
+    deterministik. Pelanggan memberikan data identitas; bank/PJP melakukan uji
+    tuntas dan keputusan KYC; Bank Indonesia serta pengawas membaca jangkar
+    kepatuhan dan peristiwa pengawasan. Data identitas mentah tidak disimpan
+    pada buku besar. Risiko tinggi memerlukan EDD dan persetujuan senior.
+    \item Tingkatan BASIC, STANDARD, dan MERCHANT menegakkan batas saldo
+    maksimum, per transaksi, keluar harian, keluar bulanan, dan masuk bulanan.
+    Jalur transfer yang sama menangani transaksi antarpelanggan dan
+    pelanggan-ke-pedagang, sehingga pemeriksaan KYC dan limit tidak terduplikasi.
+    \item Pengujian otomatis memverifikasi pemetaan KYC, penolakan risiko
+    terlarang, persyaratan risiko tinggi, penghitung limit deterministik,
+    pemisahan data privat, dan batas peran. Klaim kinerja hanya boleh dibuat
+    dari laporan Caliper versi 2.0 dengan beban transfer yang didokumentasikan;
+    hasil beban kerja lama tidak digunakan kembali.
+\end{enumerate}
+
+\section{Saran}
+
+\begin{enumerate}
+    \item Mengulang protokol Caliper pada beberapa perangkat keras, topologi
+    jaringan, dan jumlah \textit{worker} yang lebih luas, lalu melaporkan
+    konfigurasi, versi \textit{chaincode}, jumlah sukses/gagal, latensi,
+    \textit{throughput}, konflik MVCC, dan pengulangan setiap skenario bersama
+    hasilnya.
+    \item Memperluas pemisahan profil benchmark fungsional. Pengujian penelitian
+    ini telah memisahkan transfer ritel, KYC/\textit{onboarding}, operasi
+    moneter, kueri pengawasan, dan kebijakan administratif; penelitian lanjutan
+    perlu menambahkan variasi ukuran data, distribusi baca/tulis, dan pengulangan
+    statistik agar setiap profil dapat dibandingkan secara lebih kuat.
+    \item Menambahkan skenario \textit{hot-wallet contention} sebagai
+    eksperimen terpisah dari garis dasar tanpa perebutan kunci. Skenario ini
+    tidak digunakan pada pengujian utama karena tingkat konsentrasi pedagang dan
+    pola pengulangan transaksi belum didasarkan pada jejak transaksi empiris,
+    sehingga dapat menambahkan asumsi yang belum tervalidasi. Pengujian lanjutan
+    perlu menetapkan konsentrasi akses dari jejak transaksi yang dianonimkan atau
+    distribusi sintetis yang parameternya dilaporkan eksplisit, lalu mengukur
+    konflik MVCC awal, keberhasilan setelah \textit{retry}, \textit{throughput}
+    akhir, serta latensi persentil ke-95 dan ke-99. Mekanisme \textit{retry}
+    harus terbatas, memakai \textit{backoff}, dan menjaga idempotensi agar
+    transaksi tidak diterapkan lebih dari satu kali.
+    \item Memvalidasi angka limit dan distribusi tingkatan bersama Bank
+    Indonesia, bank/PJP, serta ahli APU/PPT. Nilai penelitian adalah parameter
+    purwarupa dan tidak boleh diperlakukan sebagai ketentuan CBDC.
+    \item Mengkaji remunerasi CBDC (\textit{CBDC rate})---berbunga untuk
+    \textit{wholesale} dan tanpa bunga untuk ritel---beserta dampaknya terhadap
+    kebijakan moneter dan risiko \textit{disintermediation} sebagai studi
+    makroekonomi terpisah, melengkapi purwarupa fungsional ini
+    \cite{SyarifuddinBakhtiar2021Monetary, Syarifuddin2024OPTIMAL}.
+    \item Mengintegrasikan penyedia eKYC nyata dan menerapkan kontrol retensi,
+    enkripsi, penghapusan, serta audit akses untuk data identitas di PostgreSQL.
+    \item Menguji \textit{private data collection} atau teknik kriptografi
+    penjaga privasi untuk mengurangi keterlihatan metadata transaksi tanpa
+    menghilangkan kemampuan pengawasan \cite{Pocher2022Privacy,
+    Soana2024Central, Said2026Designing}.
+    \item Mengembangkan integrasi, interoperabilitas, dan interkoneksi dengan
+    infrastruktur pasar keuangan pada penelitian terpisah setelah kebijakan
+    buku besar ritel tervalidasi \cite{bi_whitepaper2022}.
+    \item Mengembangkan pembayaran tanpa konektivitas sebagai lingkup terpisah
+    yang mencakup perangkat aman, pencegahan \textit{double-spending}, dan
+    rekonsiliasi sesuai Project Polaris \cite{polaris_security,
+    polaris_handbook}.
+\end{enumerate}

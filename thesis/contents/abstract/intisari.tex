@@ -1,0 +1,36 @@
+Mata uang digital bank sentral (\textit{Central Bank Digital Currency}, CBDC)
+merupakan inisiatif strategis Bank Indonesia melalui Proyek Garuda. Eksperimen
+Proyek Garuda yang terdokumentasi publik berfokus pada CBDC grosir, sehingga masih
+terdapat celah teknis untuk purwarupa ritel yang dapat diuji dan menggabungkan
+distribusi dua jenjang, uji tuntas nasabah berbasis risiko, limit dompet
+deterministik, dan pengawasan institusional. Penelitian ini merancang dan
+mengimplementasikan purwarupa Rupiah Digital ritel pada jaringan
+\textit{permissioned} Hyperledger Fabric.
+
+Metode \textit{prototyping} mencakup analisis kebutuhan, perancangan arsitektur,
+implementasi, serta pengujian fungsional dan kinerja. \textit{Chaincode} Go hanya
+menyimpan status KYC, risiko, tingkat uji tuntas, persetujuan pejabat senior, masa
+berlaku, dan hash dokumen; data identitas mentah tetap berada di PostgreSQL.
+Tingkatan dompet ritel diturunkan dari profil KYC yang disetujui dan tidak dipilih
+oleh pengguna. Kebijakan BASIC, STANDARD, dan MERCHANT menegakkan batas per
+transaksi, pengeluaran harian, pengeluaran bulanan, penerimaan bulanan, dan saldo
+maksimum menggunakan stempel waktu transaksi Fabric. Dompet institusional Bank
+Indonesia, bank, dan penyedia jasa pembayaran berada di luar tingkatan ritel serta
+menggunakan batas tingkat sistem. Hyperledger Caliper dikonfigurasi dengan beban
+khusus transfer yang terdiri atas 70\% transfer antarpelanggan, 25\% transfer
+pelanggan-ke-pedagang, dan 5\% pembacaan.
+
+Pengujian otomatis memverifikasi penurunan tingkatan, kewajiban uji tuntas
+lanjutan untuk risiko tinggi, penegakan batas masuk dan keluar, pemisahan data
+privat, serta batas peran. Purwarupa memisahkan tanggung jawab secara eksplisit:
+pelanggan memberikan data identitas, bank atau PJP melakukan KYC, sedangkan Bank
+Indonesia mengawasi institusi dan peristiwa buku besar. Klaim kinerja dibatasi
+pada pengukuran yang dihasilkan oleh protokol Caliper yang dapat direproduksi.
+Purwarupa ini menjadi dasar teknis yang dapat diaudit untuk mengkaji kebijakan
+Rupiah Digital ritel tanpa mengklaim kesiapan produksi atau kesetaraan limit
+dengan ketentuan hukum.
+
+\vspace{0.5cm}
+
+\noindent{Kata kunci} : Rupiah Digital, CBDC ritel, Hyperledger Fabric, KYC
+berbasis risiko, limit dompet

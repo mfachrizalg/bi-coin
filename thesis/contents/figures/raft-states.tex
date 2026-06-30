@@ -1,0 +1,50 @@
+% Diagram transisi state algoritme konsensus Raft (TikZ automata).
+% Di-input dari BAB II §2.2.1.2.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.78\textwidth}{!}{%
+\begin{tikzpicture}[
+  shorten >=1pt,
+  node distance=4.2cm,
+  on grid,
+  auto,
+  state/.style={draw=black, circle, fill=white, minimum size=2.0cm,
+    align=center, font=\footnotesize\bfseries},
+  ar/.style={-{Stealth}, thick},
+  lab/.style={font=\scriptsize, align=center},
+]
+
+\node[state] (follower)   at (0,   0)   {Follower};
+\node[state] (candidate)  at (5.2, 0)   {Candidate};
+\node[state] (leader)     at (10.4, 0)  {Leader};
+
+% Follower → Candidate
+\draw[ar] (follower)  to[bend left=20]
+  node[above, lab]{\textit{timeout;} mulai\\\textit{election}} (candidate);
+
+% Candidate → Leader
+\draw[ar] (candidate) to[bend left=20]
+  node[above, lab]{suara mayoritas\\diperoleh} (leader);
+
+% Candidate → Follower
+\draw[ar] (candidate) to[bend left=20]
+  node[below, lab]{\textit{leader} ditemukan\\ atau \textit{term} lebih tinggi} (follower);
+
+% Leader → Follower
+\draw[ar] (leader) to[bend left=20]
+  node[below, lab]{\textit{term} lebih tinggi\\\textit{(step down)}} (candidate);
+
+% Self-loop Leader: heartbeat
+\draw[ar] (leader.north) to[loop above, looseness=5]
+  node[above, lab]{\textit{heartbeat}\\\textit{AppendEntries}} (leader.north);
+
+% Self-loop Follower: receive heartbeat
+\draw[ar] (follower.south) to[loop below, looseness=5]
+  node[below, lab]{terima \textit{heartbeat};\\\textit{reset timer}} (follower.south);
+
+\end{tikzpicture}%
+}
+\caption{Diagram transisi \textit{state} algoritme konsensus Raft: setiap simpul berstatus \textit{Follower}, \textit{Candidate}, atau \textit{Leader}}
+\label{fig:raft-states}
+\end{figure}

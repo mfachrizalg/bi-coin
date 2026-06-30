@@ -1,0 +1,50 @@
+% Dualitas komponen ledger Hyperledger Fabric (TikZ).
+% Di-input dari BAB II §2.2.3.2.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.90\textwidth}{!}{%
+\begin{tikzpicture}[
+  blk/.style={draw=black, fill=gray!15, rectangle, minimum width=1.8cm,
+    minimum height=1.0cm, align=center, font=\scriptsize},
+  wsrow/.style={draw=black, fill=white, rectangle, minimum width=3.8cm,
+    minimum height=0.5cm, align=center, font=\scriptsize},
+  wshdr/.style={draw=black, fill=gray!25, rectangle, minimum width=3.8cm,
+    minimum height=0.6cm, align=center, font=\scriptsize\bfseries},
+  boxlabel/.style={draw=black, dashed, rounded corners=4pt, fill=none, inner sep=8pt},
+  ar/.style={-{Stealth}, thick},
+  lab/.style={font=\scriptsize, midway, align=center},
+]
+
+%--- Sisi kiri: Blockchain (catatan historis) ---
+% Block chain
+\node[blk] (bl1) at (0, 0)    {Blk 0};
+\node[blk] (bl2) at (2.0, 0)  {Blk 1};
+\node[blk] (bl3) at (4.0, 0)  {Blk 2};
+\node[font=\small] at (5.2, 0) {$\cdots$};
+
+\draw[ar] (bl1.east) -- (bl2.west);
+\draw[ar] (bl2.east) -- (bl3.west);
+
+\node[boxlabel, fit=(bl1)(bl2)(bl3),
+  label={[font=\footnotesize\bfseries]above:\textit{Blockchain} (Catatan Historis Transaksi)},
+  label={[font=\scriptsize]below:tidak dapat diubah (\textit{immutable})}] (bcbox) {};
+
+%--- Sisi kanan: World State (CouchDB) ---
+\node[wshdr] (wsh) at (9.5, 1.0) {World State (CouchDB)};
+\node[wsrow, below=0pt of wsh] (ws1) {\texttt{wallet:alice} → \{balance:500000\}};
+\node[wsrow, below=0pt of ws1] (ws2) {\texttt{wallet:bob} → \{balance:200000\}};
+\node[wsrow, below=0pt of ws2] (ws3) {\texttt{kyc:alice} → \{tier:STANDARD\}};
+\node[wsrow, below=0pt of ws3] (ws4) {\texttt{kyc:profil001} → \{status:approved, risk:low\}};
+
+\node[boxlabel, fit=(wsh)(ws1)(ws2)(ws3)(ws4),
+  label={[font=\scriptsize]below:nilai terkini; dapat dikueri (\textit{rich query})}] (wsbox) {};
+
+%--- Panah: Blockchain memperbarui World State ---
+\draw[ar, thick] (bcbox.east) -- node[lab,above]{Validasi \&\\\textit{commit}} (wsbox.west);
+
+\end{tikzpicture}%
+}
+\caption{Dualitas komponen \textit{ledger} Hyperledger Fabric: \textit{blockchain} sebagai catatan transaksi historis yang tidak dapat diubah, dan \textit{world state} sebagai representasi status terkini pada CouchDB}
+\label{fig:fabric-ledger}
+\end{figure}

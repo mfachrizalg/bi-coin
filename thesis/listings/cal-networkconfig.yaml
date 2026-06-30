@@ -1,0 +1,47 @@
+---
+name: PayNet Garuda Network
+version: "2.0.0"
+caliper:
+  blockchain: fabric
+
+channels:
+  - channelName: mychannel
+    contracts:
+      - id: digital-rupiah
+
+organizations:
+  - mspid: BankIndonesiaOrgMSP
+    identities:
+      certificates:
+        - name: User1
+          clientSignedCert:
+            path: network/organizations/peerOrganizations/bi.paynet/users/User1@bi.paynet/msp/signcerts/cert.pem
+          clientPrivateKey:
+            path: network/organizations/peerOrganizations/bi.paynet/users/User1@bi.paynet/msp/keystore/key.pem
+    connectionProfile:
+      path: network/organizations/peerOrganizations/bi.paynet/connection-bi.json
+      discover: true
+
+  - mspid: HimbaraBankOrgMSP
+    identities:
+      certificates:
+        - name: User1
+          clientSignedCert:
+            path: network/organizations/peerOrganizations/himbara.paynet/users/User1@himbara.paynet/msp/signcerts/cert.pem
+          clientPrivateKey:
+            path: network/organizations/peerOrganizations/himbara.paynet/users/User1@himbara.paynet/msp/keystore/key.pem
+    connectionProfile:
+      path: network/organizations/peerOrganizations/himbara.paynet/connection-himbara.json
+      discover: true
+
+  - mspid: CommercialBankOrgMSP
+    identities:
+      certificates:
+        - name: User1
+          clientSignedCert:
+            path: network/organizations/peerOrganizations/commercial.paynet/users/User1@commercial.paynet/msp/signcerts/cert.pem
+          clientPrivateKey:
+            path: network/organizations/peerOrganizations/commercial.paynet/users/User1@commercial.paynet/msp/keystore/key.pem
+    connectionProfile:
+      path: network/organizations/peerOrganizations/commercial.paynet/connection-commercial.json
+      discover: true

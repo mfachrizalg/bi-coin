@@ -1,0 +1,50 @@
+% Taksonomi CBDC berdasarkan segmen pengguna dan model distribusi (TikZ).
+% Di-input dari BAB II §2.2.1.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.88\textwidth}{!}{%
+\begin{tikzpicture}[
+  root/.style={draw=black, fill=gray!30, rectangle, rounded corners=3pt,
+    minimum width=2.8cm, minimum height=0.9cm, align=center, font=\small\bfseries},
+  node1/.style={draw=black, fill=gray!12, rectangle, rounded corners=3pt,
+    minimum width=3.0cm, minimum height=0.9cm, align=center, font=\footnotesize\bfseries},
+  node2/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
+    minimum width=3.8cm, minimum height=1.6cm, align=center, font=\footnotesize},
+  selected/.style={draw=black, fill=black!15, rectangle, rounded corners=3pt,
+    minimum width=3.8cm, minimum height=1.6cm, align=center, font=\footnotesize\bfseries},
+  ar/.style={-{Stealth}, thick},
+]
+
+%--- Akar ---
+\node[root] (cbdc) at (5.5, 4.5) {CBDC};
+
+%--- Level 1 ---
+\node[node1] (wh) at (2.2, 3.0)  {Wholesale\\(Antarlembaga)};
+\node[node1] (rt) at (8.8, 3.0)  {Retail\\(Masyarakat Umum)};
+
+%--- Level 2 (Retail sub-types) ---
+\node[node2] (one) at (6.4, 1.5)
+  {Satu Jenjang\\(\textit{Direct})\\Bank Sentral\\$\to$ Publik};
+\node[selected] (two) at (11.2, 1.5)
+  {Dua Jenjang\\(\textit{Two-Tier})\\BI $\to$ Bank/PJP\\$\to$ Publik};
+
+%--- Arrows ---
+\draw[ar] (cbdc.south) to[out=-150,in=90] (wh.north);
+\draw[ar] (cbdc.south) to[out=-30,in=90]  (rt.north);
+\draw[ar] (rt.south)   to[out=-150,in=90] (one.north);
+\draw[ar] (rt.south)   to[out=-30,in=90]  (two.north);
+
+%--- Contoh ---
+\node[font=\scriptsize, align=center] at (2.2, 1.8)
+  {Contoh: Garuda PoC\\\cite{bi_garuda_poc}};
+\node[font=\scriptsize, align=center, anchor=north] at (6.4, 0.45)
+  {Contoh: DCash (Karibia)};
+\node[font=\scriptsize, align=center, anchor=north] at (11.2, 0.45)
+  {Contoh: eNaira, e-CNY,\\Rupiah Digital};
+
+\end{tikzpicture}%
+}
+\caption{Taksonomi CBDC berdasarkan segmen pengguna dan model distribusi; model dua jenjang yang diadopsi pada penelitian ini ditampilkan dengan latar abu-abu sesuai rancangan Rupiah Digital Bank Indonesia}
+\label{fig:cbdc-taxonomy}
+\end{figure}

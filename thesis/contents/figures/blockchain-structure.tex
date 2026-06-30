@@ -1,0 +1,83 @@
+% Struktur rantai blok dan pohon Merkle (TikZ).
+% Di-input dari BAB II §2.2.1.1.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  blkbody/.style={draw=black, fill=white, rectangle, minimum width=3.6cm,
+    minimum height=0.5cm, align=center, font=\scriptsize, inner sep=2pt},
+  blkhdr/.style={draw=black, fill=gray!20, rectangle, minimum width=3.6cm,
+    minimum height=0.6cm, align=center, font=\scriptsize\bfseries, inner sep=2pt},
+  ar/.style={-{Stealth}, thick},
+]
+
+%--- Blok 0 (Genesis) ---
+\node[blkhdr] (b0h)  at (0, 0)     {Blok 0 (Genesis)};
+\node[blkbody, below=0pt of b0h] (b0p) {Hash sebelumnya: \texttt{0x000\ldots}};
+\node[blkbody, below=0pt of b0p] (b0m) {Merkle Root: \texttt{A1B2}};
+\node[blkbody, below=0pt of b0m] (b0t) {Data Tx: [Issuance BI]};
+
+%--- Blok 1 ---
+\node[blkhdr] (b1h)  at (4.8, 0)   {Blok 1};
+\node[blkbody, below=0pt of b1h] (b1p) {Hash sebelumnya: \texttt{H(Blok\,0)}};
+\node[blkbody, below=0pt of b1p] (b1m) {Merkle Root: \texttt{C3D4}};
+\node[blkbody, below=0pt of b1m] (b1t) {Data Tx: [Transfer]};
+
+%--- Blok 2 ---
+\node[blkhdr] (b2h)  at (9.6, 0)   {Blok 2};
+\node[blkbody, below=0pt of b2h] (b2p) {Hash sebelumnya: \texttt{H(Blok\,1)}};
+\node[blkbody, below=0pt of b2p] (b2m) {Merkle Root: \texttt{E5F6}};
+\node[blkbody, below=0pt of b2m] (b2t) {Data Tx: [Transfer, KYC Audit]};
+
+%--- Panah antar blok ---
+\draw[ar] (b0h.east |- b1p.west) -- node[above,font=\scriptsize]{hash} (b1p.west);
+\draw[ar] (b1h.east |- b2p.west) -- node[above,font=\scriptsize]{hash} (b2p.west);
+
+\node[font=\small] at (12.0, -0.6) {$\cdots$};
+
+\end{tikzpicture}%
+}
+\caption{Struktur rantai blok: setiap blok memuat \textit{hash} kriptografis dari blok sebelumnya}
+\label{fig:block-structure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.72\textwidth}{!}{%
+\begin{tikzpicture}[
+  leaf/.style={draw=black, fill=white, rectangle, minimum width=2.0cm,
+    minimum height=0.6cm, align=center, font=\scriptsize},
+  inode/.style={draw=black, fill=gray!15, rectangle, minimum width=2.4cm,
+    minimum height=0.6cm, align=center, font=\scriptsize},
+  root/.style={draw=black, fill=gray!35, rectangle, minimum width=2.6cm,
+    minimum height=0.7cm, align=center, font=\scriptsize\bfseries},
+  ar/.style={-{Stealth}, thick},
+]
+
+%--- Daun ---
+\node[leaf] (t1) at (0,   0) {H(Tx\textsubscript{1})};
+\node[leaf] (t2) at (2.6, 0) {H(Tx\textsubscript{2})};
+\node[leaf] (t3) at (5.2, 0) {H(Tx\textsubscript{3})};
+\node[leaf] (t4) at (7.8, 0) {H(Tx\textsubscript{4})};
+
+%--- Tingkat 1 ---
+\node[inode] (n12) at (1.3, 1.4) {H(T\textsubscript{1}+T\textsubscript{2})};
+\node[inode] (n34) at (6.5, 1.4) {H(T\textsubscript{3}+T\textsubscript{4})};
+
+%--- Akar ---
+\node[root] (root) at (3.9, 2.8) {Merkle Root};
+
+%--- Panah ---
+\draw[ar] (t1.north)  -- (n12.south west);
+\draw[ar] (t2.north)  -- (n12.south east);
+\draw[ar] (t3.north)  -- (n34.south west);
+\draw[ar] (t4.north)  -- (n34.south east);
+\draw[ar] (n12.north) -- (root.south west);
+\draw[ar] (n34.north) -- (root.south east);
+
+\end{tikzpicture}%
+}
+\caption{Pohon Merkle: \textit{hash} transaksi digabungkan secara berjenjang membentuk Merkle Root yang disimpan dalam kepala blok}
+\label{fig:merkle-tree}
+\end{figure}

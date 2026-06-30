@@ -1,0 +1,214 @@
+Organizations:
+  - &BankIndonesiaOrg
+    Name: BankIndonesiaOrg
+    ID: BankIndonesiaOrgMSP
+    MSPDir: organizations/peerOrganizations/bi.paynet/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.peer','BankIndonesiaOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('BankIndonesiaOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('BankIndonesiaOrgMSP.member')"
+    AnchorPeers:
+      - Host: peer0.bi.paynet
+        Port: 7051
+
+  - &HimbaraBankOrg
+    Name: HimbaraBankOrg
+    ID: HimbaraBankOrgMSP
+    MSPDir: organizations/peerOrganizations/himbara.paynet/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.peer','HimbaraBankOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('HimbaraBankOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('HimbaraBankOrgMSP.member')"
+    AnchorPeers:
+      - Host: peer0.himbara.paynet
+        Port: 9051
+
+  - &CommercialBankOrg
+    Name: CommercialBankOrg
+    ID: CommercialBankOrgMSP
+    MSPDir: organizations/peerOrganizations/commercial.paynet/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('CommercialBankOrgMSP.admin','CommercialBankOrgMSP.peer','CommercialBankOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('CommercialBankOrgMSP.admin','CommercialBankOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('CommercialBankOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('CommercialBankOrgMSP.member')"
+    AnchorPeers:
+      - Host: peer0.commercial.paynet
+        Port: 11051
+
+  - &OJKObserverOrg
+    Name: OJKObserverOrg
+    ID: OJKObserverOrgMSP
+    MSPDir: organizations/peerOrganizations/ojk.paynet/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OJKObserverOrgMSP.admin','OJKObserverOrgMSP.peer','OJKObserverOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OJKObserverOrgMSP.admin','OJKObserverOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OJKObserverOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('OJKObserverOrgMSP.member')"
+    AnchorPeers:
+      - Host: peer0.ojk.paynet
+        Port: 12051
+
+  - &PJPOrg
+    Name: PJPOrg
+    ID: PJPOrgMSP
+    MSPDir: organizations/peerOrganizations/pjp.paynet/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('PJPOrgMSP.admin','PJPOrgMSP.peer','PJPOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('PJPOrgMSP.admin','PJPOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('PJPOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('PJPOrgMSP.member')"
+    AnchorPeers:
+      - Host: peer0.pjp.paynet
+        Port: 13051
+
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: organizations/ordererOrganizations/paynet/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer.paynet:7050
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+    V2_5: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.paynet:7050
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.paynet
+        Port: 7050
+        ClientTLSCert: organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls/server.crt
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 10 MB
+    PreferredMaxBytes: 2 MB
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities: *ChannelCapabilities
+
+# Fabric v3 channel-participation: a single application-channel profile producing the
+# channel genesis block (no system channel, no Consortiums).
+Profiles:
+  GarudaApplicationChannel:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities: *OrdererCapabilities
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *BankIndonesiaOrg
+        - *HimbaraBankOrg
+        - *CommercialBankOrg
+        - *OJKObserverOrg
+        - *PJPOrg
+      Capabilities: *ApplicationCapabilities

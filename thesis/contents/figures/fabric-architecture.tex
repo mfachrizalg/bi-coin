@@ -1,0 +1,80 @@
+% Arsitektur komponen Hyperledger Fabric (TikZ).
+% Di-input dari BAB II §2.2.3.1.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  comp/.style={draw=black, fill=white, rectangle, rounded corners=2pt,
+    minimum width=2.8cm, minimum height=0.9cm, align=center, font=\footnotesize},
+  peerbox/.style={draw=black, fill=none, rectangle, rounded corners=4pt,
+    inner sep=8pt},
+  ordbox/.style={draw=black, fill=black!8, rectangle, rounded corners=3pt,
+    minimum width=3.4cm, minimum height=1.0cm, align=center, font=\footnotesize\bfseries},
+  clibox/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
+    minimum width=2.6cm, minimum height=0.9cm, align=center, font=\footnotesize},
+  cabox/.style={draw=black, fill=gray!15, rectangle, rounded corners=3pt,
+    minimum width=2.6cm, minimum height=0.9cm, align=center, font=\footnotesize},
+  ledger/.style={draw=black, fill=gray!20, rectangle,
+    minimum width=2.4cm, minimum height=0.6cm, align=center, font=\scriptsize},
+  chan/.style={draw=black, dashed, rounded corners=5pt, fill=none, inner sep=10pt},
+  ar/.style={-{Stealth}, thick},
+  dar/.style={-{Stealth}, thick, dashed},
+  lab/.style={font=\scriptsize, midway, align=center},
+]
+
+%--- Aplikasi Klien ---
+\node[clibox] (app) at (0, 6.0) {Aplikasi Klien\\(SDK Go/Node.js)};
+
+%--- Certificate Authority ---
+\node[cabox] (ca) at (10, 6.0) {Certificate\\Authority (CA)\\MSP};
+
+%--- Ordering Service ---
+\node[ordbox] (ord) at (5, 6.0) {Ordering Service\\(Raft Leader)};
+
+%--- Peer Org1 ---
+\node[font=\footnotesize\bfseries] (p1t) at (1.5, 3.95) {Peer Org\,1};
+\node[comp] (p1cc) at (1.5, 3.2) {Chaincode};
+\node[comp] (p1e)  at (1.5, 2.2) {Endorser};
+\node[ledger] (p1l) at (1.5, 1.2) {Ledger (WS + BC)};
+\node[peerbox, fit=(p1t)(p1cc)(p1e)(p1l)] (peer1) {};
+
+%--- Peer Org2 ---
+\node[font=\footnotesize\bfseries] (p2t) at (5, 3.95) {Peer Org\,2};
+\node[comp] (p2cc) at (5, 3.2) {Chaincode};
+\node[comp] (p2e)  at (5, 2.2) {Committer};
+\node[ledger] (p2l) at (5, 1.2) {Ledger (WS + BC)};
+\node[peerbox, fit=(p2t)(p2cc)(p2e)(p2l)] (peer2) {};
+
+%--- Peer Org3 ---
+\node[font=\footnotesize\bfseries] (p3t) at (8.5, 3.95) {Peer Org\,3};
+\node[comp] (p3cc) at (8.5, 3.2) {Chaincode};
+\node[comp] (p3e)  at (8.5, 2.2) {Committer};
+\node[ledger] (p3l) at (8.5, 1.2) {Ledger (WS + BC)};
+\node[peerbox, fit=(p3t)(p3cc)(p3e)(p3l)] (peer3) {};
+
+%--- Channel bounding box ---
+\node[chan, fit=(peer1)(peer2)(peer3),
+  label={[font=\footnotesize\bfseries]below:\textit{Channel} (kebijakan dukungan mayoritas)}] (chan) {};
+
+%--- Arrows ---
+\draw[ar] (app.east) -- node[lab,above]{Proposal} (ord.west);
+\draw[ar] (app.south) to[out=-90,in=180]
+  node[lab,left,pos=0.55]{\textit{endorse}\\\textit{request}}
+  (peer1.west);
+\draw[ar] (ord.south) to[out=-90,in=90]
+  node[lab,fill=white,inner sep=1pt,right,pos=0.15]{Blok}
+  ([xshift=0.85cm]peer2.north);
+\draw[ar] ([xshift=-0.75cm]ord.south) to[out=-90,in=90]
+  ([xshift=0.85cm]peer1.north);
+\draw[ar] ([xshift=0.75cm]ord.south) to[out=-90,in=90]
+  ([xshift=0.85cm]peer3.north);
+\draw[dar] (ca.south) to[out=-90,in=0]
+  node[lab,right]{Sertifikat} (peer3.east);
+\draw[dar] (ca.south west) to[out=-150,in=90] (ord.north east);
+
+\end{tikzpicture}%
+}
+\caption{Arsitektur komponen Hyperledger Fabric: klien berinteraksi dengan \textit{peer endorser}, transaksi diurutkan oleh \textit{orderer} berbasis Raft, lalu didistribusikan ke semua \textit{peer} dalam \textit{channel}}
+\label{fig:fabric-arch}
+\end{figure}

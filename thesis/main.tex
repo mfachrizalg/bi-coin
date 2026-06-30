@@ -1,0 +1,213 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Filename: main.tex
+%%%  ---
+%%%  Template for Bachelor Thesis at DTETI UGM
+%%%  Created using thesisdtetiugm.cls
+%%%  ---
+%%%  Original Written by Canggih Puspo Wibowo
+%%%  [canggihpw@gmail.com]
+%%%
+%%% Developed by Dr.-Ing. Yohan Fajar Sidik [DTETI FT UGM]
+%%% [yohanfajarsidik@ugm.ac.id]
+%%% Github repo: https://github.com/Dr-Sidik/template_thesis_latex_dteti
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Use option "bahasa" or "english"
+%%    to change the basic language used
+%% User option "bachelor", "master", or "doctoral"
+%% 	  to change the degree
+% \documentclass[<bachelor/master/doctoral>,<bahasa/english>]{thesisdtetiugm}
+\documentclass[bachelor,bahasa]{thesisdtetiugm}
+%\documentclass[bachelor,english]{thesisdtetiugm}
+%======================================
+% Information Input
+%======================================
+% Input author's name and ID number
+% TODO(penulis): isi nama dan NIM Anda
+\author{Muhammad Fachrizal Giffari}{22/504570/TK/55192}
+% Input the thesis' title
+\title{Rancang Bangun Rupiah Digital Ritel Berbasis Hyperledger Fabric}
+% Program and the head of the program
+% TODO(penulis): isi nama koordinator prodi dan NIP
+\program{Teknologi Informasi}{Dr. Ir. Ahmad Nasikun, S.T., M.Sc., IPM.}{NIP. 198801082024061001}
+% Name of department head and NIP
+% TODO(penulis): isi nama kepala departemen dan NIP
+\departmenthead{Prof. Ir. Hanung Adi Nugroho, S.T., M.Eng., Ph.D., IPM., SMIEEE.}{NIP. 197802242002121001}
+\major{Teknologi Informasi}
+\yearsubmit{2026}
+% TODO(penulis): isi tanggal pendadaran
+\examdate{8 - 13 Juli 2026}
+% Name of thesis supervisors/promotors
+\addsupervisor{Teguh Bharata Adji, S.T., M.T., M.Eng., Ph.D.}{NIP. 196909201995121001}
+\addsupervisor{Dr. Ir. Guntur Dharma Putra, S.T., M.Sc.}{NIP. 111199104201802102}
+%\addsupervisor{<<Supervisor 3>>}{<<NIP>>}
+% Name of examiners
+%\addexaminer{<<Examiner 1>>}{<<NIP 1>>}
+%\addexaminer{<<Examiner 2>>}{<<NIP 2>>}
+%\addexaminer{<<Examiner 3>>}{<<NIP 3>>}
+%\addexaminer{<<Examiner 4>>}{<<NIP 4>>}
+%\addexaminer{<<Examiner 5>>}{<<NIP 5>>}
+%\addexaminer{<<Examiner 6>>}{<<NIP 6>>}
+%\addexaminer{<<Examiner 7>>}{<<NIP 7>>}
+%\addexaminer{<<Examiner 8>>}{<<NIP 8>>}
+%\addexaminer{<<Examiner 9>>}{<<NIP 9>>}
+
+%======================================
+
+% correct bad hyphenation here [example]
+% \babelhyphenation[<<english/bahasa>>]{op-tical net-works semi-conduc-tor}
+%% Uncomment block of code below to disable hyphenation
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+
+%% Tambahan paket untuk diagram (TikZ) dan tabel
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc,automata,trees}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+%% Definisi bahasa Go untuk lstlisting
+\lstdefinelanguage{Go}{
+  morekeywords={break,case,chan,const,continue,default,defer,else,fallthrough,
+    for,func,go,goto,if,import,interface,map,package,range,return,select,
+    struct,switch,type,var,error,string,int,int64,int32,bool,nil,true,false,
+    iota,byte,rune,float64},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]`,
+}
+
+\begin{document}
+%======================================
+% Create cover etc
+%======================================
+
+%---- COVER ----
+%\printcover{sample/logougm.png}{Pendadaran/Tesis/Ringkasan Tesis*}
+\printcover{sample/logougm.png}{Bachelor}
+% *Choose one
+
+%---- ENDORSEMENT PAGE ----
+% Select endorsement page type. If you want to use your own PDF file,
+% 	use \printendorsementpdf, or if you want to use JPG file, use
+% 	\printendorsementjpg. Otherwise, use \printendorsement.
+% 	Choose one only. Comment out unused command(s).
+%
+\cleardoublepage \phantomsection
+\printendorsement
+%\printendorsementpdf
+%\printendorsementjpg{sample/scanned-endorsement.jpg}
+
+%---- DEDICATION PAGE ----
+\cleardoublepage \phantomsection
+\chapterstatement{contents/statement/statement}
+%\chapterstatementjpg{sample/scanned-statement.jpg}
+
+\cleardoublepage \phantomsection
+\chapterdedication{contents/dedication/dedication}
+
+%---- STATEMENT PAGE ----
+% Select statement page type. If you want to use your own JPG file,
+%	use \chapterstatementjpg{<your *.jpg file path>}. Otherwise,
+%	use \chapterstatement{contents/statement/statement}.
+%	Choose one only. Comment out unused command(s).
+%
+
+
+%---- PREFACE PAGE ----
+\cleardoublepage \phantomsection
+\chapterpreface{contents/preface/preface}
+
+%======================================
+% Create Table of Contents, List of Figures, List of Tables
+% <Do not change this part>
+%======================================
+\cleardoublepage \phantomsection
+\thetoc
+\onehalfspacing
+\tableofcontents
+\singlespacing
+\cleardoublepage \phantomsection
+\thelot
+\listoftables
+\cleardoublepage \phantomsection
+\thelof
+\listoffigures
+
+%======================================
+
+%---- NOMENCLATURE PAGE ----
+\cleardoublepage \phantomsection
+\chapternomenclature{contents/nomenclature/nomenclature}
+
+%---- INTISARI PAGE----
+\cleardoublepage \phantomsection
+\chapterintisari{contents/abstract/intisari}
+
+%---- ABSTRACT PAGE----
+\cleardoublepage \phantomsection
+\chapterabstract{contents/abstract/abstract}
+
+
+%======================================
+
+
+
+%======================================
+%  MAIN TEXT
+%======================================
+\startmain
+% You can change
+%    the filename and location of the files inputted
+\cleardoublepage \phantomsection
+\include{contents/chapter-1/chapter-1}
+\cleardoublepage \phantomsection
+\include{contents/chapter-2/chapter-2}
+\cleardoublepage \phantomsection
+\include{contents/chapter-3/chapter-3}
+\cleardoublepage \phantomsection
+\include{contents/chapter-4/chapter-4}
+\cleardoublepage \phantomsection
+\include{contents/chapter-5/chapter-5}
+
+%======================================
+
+%======================================
+%  References
+%======================================
+\cleardoublepage \phantomsection
+\thereferences
+% You can change
+%    the filename and location of the files inputted
+\bibliography{references}
+
+%======================================
+
+%======================================
+%  Appendix
+%======================================
+% You can change
+%    the filename and location of the files inputted
+%    use \chapterappendix for the first page of the appendix
+%    use \chapterappendixadd for the next page
+
+\appendix
+\appendixtables
+\appendixfigures
+
+\cleardoublepage \phantomsection
+\chapterappendix{contents/appendix/appendix-isi-lampiran}
+\chapterappendixadd{contents/appendix/appendix-code}
+
+
+
+
+%======================================
+
+\end{document}
