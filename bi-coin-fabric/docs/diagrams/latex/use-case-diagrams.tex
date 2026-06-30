@@ -1,0 +1,124 @@
+\documentclass{article}
+\usepackage{tikz}
+\usepackage{geometry}
+\geometry{a4paper, margin=1.5cm}
+\usepackage{float}
+
+\tikzset{
+  actor/.style={draw=black, fill=white, circle, minimum size=0.8cm},
+  usecase/.style={draw=black, fill=white, ellipse, minimum width=3cm, minimum height=1cm, inner sep=2pt, font=\footnotesize},
+  system/.style={draw=black, dashed, fill=none, rectangle, minimum width=10cm, minimum height=8cm},
+  dependency/.style={draw=black, dashed, -{Stealth}},
+  association/.style={draw=black, -{Stealth}},
+  note/.style={draw=black, fill=white},
+}
+
+\begin{document}
+
+\section*{UC01 — Sistem Keseluruhan (Overall System)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.5cm]
+
+\node[actor] (bi) at (0,8) {Bank\\Indonesia};
+\node[actor] (bv) at (0,6) {Bank\\Validator};
+\node[actor] (pjp) at (0,4) {PJP};
+\node[actor] (m) at (12,8) {Merchant};
+\node[actor] (pr) at (12,6) {Pelanggan\\Ritel};
+\node[actor] (sv) at (12,4) {Supervisor};
+\node[actor] (ojk) at (12,2) {OJK\\Observer};
+
+\node[system, label=above:{\textbf{Sistem bi-coin-fabric}}] (sys) at (6,0) {};
+
+\node[usecase] (uc1) at (3,8.5) {Mendaftarkan Peserta};
+\node[usecase] (uc2) at (9,8.5) {Menerbitkan Digital Rupiah};
+\node[usecase] (uc3) at (3,7) {Mendistribusikan Likuiditas};
+\node[usecase] (uc4) at (9,7) {Mengelola KYC Pelanggan};
+\node[usecase] (uc5) at (3,5.5) {Mentransfer Saldo};
+\node[usecase] (uc6) at (9,5.5) {Transfer ke Pedagang};
+\node[usecase] (uc7) at (3,2.5) {Bekukan/Cairkan Peserta};
+\node[usecase] (uc9) at (9,2.5) {Laporan Supervisi};
+
+\draw[association] (bi) -- (uc1);
+\draw[association] (bi) -- (uc2);
+\draw[association] (bv) -- (uc1);
+\draw[association] (bv) -- (uc3);
+\draw[association] (pjp) -- (uc1);
+\draw[association] (pjp) -- (uc4);
+\draw[association] (m) -- (uc6);
+\draw[association] (pr) -- (uc5);
+\draw[association] (pr) -- (uc6);
+\draw[association] (sv) -- (uc7);
+\draw[association] (sv) -- (uc9);
+\draw[association] (ojk) -- (uc9);
+
+\draw[dependency] (uc1) -- (uc4) node[midway, above, sloped] {\texttt{<<include>>}};
+\draw[dependency] (uc7) -- (uc1) node[midway, above, sloped] {\texttt{<<extend>>}};
+
+\end{tikzpicture}
+\end{figure}
+
+\clearpage
+
+\section*{UC02 — Operasi Wholesale (Wholesale Operations)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.5cm]
+
+\node[actor] (bi) at (0,6) {Bank\\Indonesia};
+\node[actor] (bv) at (0,4) {Bank\\Validator};
+\node[actor] (pjp) at (0,2) {PJP};
+\node[actor] (sv) at (12,6) {Supervisor};
+
+\node[system, label=above:{\textbf{Operasi Wholesale}}] (sys) at (6,1) {};
+
+\node[usecase] (uc1) at (7,6.5) {Menerbitkan Digital Rupiah};
+\node[usecase] (uc2) at (9,5) {Mendistribusikan Likuiditas};
+\node[usecase] (uc3) at (3,5) {Mengelola Siklus Hidup};
+\node[usecase] (uc4) at (7,4) {Mengelola Kebijakan Limit};
+\node[usecase] (uc6) at (9,2) {Laporan \& Metrik};
+
+\draw[association] (bi) -- (uc1);
+\draw[association] (bi) -- (uc3);
+\draw[association] (bi) -- (uc4);
+\draw[association] (bi) -- (uc6);
+\draw[association] (bv) -- (uc2);
+\draw[association] (pjp) -- (uc3);
+\draw[association] (sv) -- (uc6);
+
+\draw[dependency] (uc2) -- (uc1) node[midway, above, sloped] {\texttt{<<include>>}};
+
+\end{tikzpicture}
+\end{figure}
+
+\clearpage
+
+\section*{UC03 — Operasi Retail (Retail Operations)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.5cm]
+
+\node[actor] (pr) at (0,6) {Pelanggan\\Ritel};
+\node[actor] (m) at (12,6) {Merchant};
+
+\node[system, label=above:{\textbf{Operasi Retail}}] (sys) at (6,1) {};
+
+\node[usecase] (uc1) at (3,7) {Registrasi KYC};
+\node[usecase] (uc2) at (9,7) {Mentransfer Saldo};
+\node[usecase] (uc3) at (9,5) {Transfer Antarpelanggan};
+\node[usecase] (uc4) at (4,5) {Transfer ke Pedagang};
+
+\draw[association] (pr) -- (uc1);
+\draw[association] (pr) -- (uc2);
+\draw[association] (pr) -- (uc4);
+\draw[association] (m) -- (uc3);
+
+\draw[dependency] (uc4) -- (uc3) node[midway, above, sloped] {\texttt{<<include>>}};
+
+\end{tikzpicture}
+\end{figure}
+
+\end{document}

@@ -1,0 +1,122 @@
+@startuml
+skinparam monochrome true
+left to right direction
+skinparam packageBorderColor black
+skinparam packageBackgroundColor none
+skinparam usecaseBorderColor black
+skinparam usecaseBackgroundColor white
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+skinparam arrowColor black
+
+title <<UC01>> Sistem Keseluruhan (Overall System)
+
+left to right direction
+
+actor "Bank Indonesia" as BI
+actor "Bank Validator" as BV
+actor "PJP" as PJP
+actor "Merchant" as M
+actor "Pelanggan\nRitel" as PR
+actor "Supervisor" as SV
+actor "OJK\nObserver" as OJK
+
+rectangle "Sistem bi-coin-fabric" {
+  usecase "Mendaftarkan\nPeserta" as UC1
+  usecase "Menerbitkan\nDigital Rupiah" as UC2
+  usecase "Mendistribusikan\nLikuiditas" as UC3
+  usecase "Mengelola KYC\nPelanggan" as UC4
+  usecase "Mentransfer\nSaldo" as UC5
+  usecase "Transfer ke\nPedagang" as UC6
+  usecase "Membekukan/\nMencairkan Peserta" as UC8
+  usecase "Mengakses Laporan\nSupervisi" as UC10
+}
+
+BI --> UC1
+BI --> UC2
+BI --> UC8
+BV --> UC1
+BV --> UC3
+PJP --> UC1
+PJP --> UC4
+M --> UC6
+SV --> UC8
+SV --> UC10
+OJK --> UC10
+
+UC1 ..> UC4 : <<include>>
+UC8 ..> UC1 : <<extend>>
+
+@enduml
+
+@startuml
+skinparam monochrome true
+left to right direction
+skinparam packageBorderColor black
+skinparam packageBackgroundColor none
+skinparam usecaseBorderColor black
+skinparam usecaseBackgroundColor white
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+skinparam arrowColor black
+
+title <<UC02>> Operasi Wholesale (Wholesale Operations)
+
+actor "Bank Indonesia" as BI
+actor "Bank Validator" as BV
+actor "PJP" as PJP
+actor "Supervisor" as SV
+
+rectangle "Operasi Wholesale" {
+  usecase "Menerbitkan\nDigital Rupiah" as UC1
+  usecase "Mendistribusikan\nLikuiditas" as UC2
+  usecase "Mengelola Siklus\nHidup Peserta" as UC3
+  usecase "Mengelola\nKebijakan Limit" as UC4
+  usecase "Mengakses\nLaporan & Metrik" as UC6
+}
+
+BI --> UC1
+BI --> UC3
+BI --> UC4
+BI --> UC6
+BV --> UC2
+PJP --> UC3
+SV --> UC6
+
+UC2 ..> UC1 : <<include>>
+
+@enduml
+
+@startuml
+skinparam monochrome true
+left to right direction
+skinparam packageBorderColor black
+skinparam packageBackgroundColor none
+skinparam usecaseBorderColor black
+skinparam usecaseBackgroundColor white
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+skinparam arrowColor black
+
+title <<UC03>> Operasi Retail (Retail Operations)
+
+actor "Pelanggan\nRitel" as PR
+actor "Merchant" as M
+
+rectangle "Operasi Retail" {
+  usecase "Registrasi KYC" as UC1
+  usecase "Mentransfer Saldo" as UC2
+  usecase "Transfer\nAntarpelanggan" as UC3
+  usecase "Transfer ke Pedagang" as UC4
+}
+
+PR --> UC1
+PR --> UC2
+PR --> UC4
+M --> UC3
+
+UC4 ..> UC3 : <<include>>
+UC7 ..> UC5 : <<include>>
+UC8 ..> UC7 : <<extend>>
+
+@enduml

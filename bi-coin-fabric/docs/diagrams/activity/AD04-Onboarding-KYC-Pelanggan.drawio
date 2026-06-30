@@ -1,0 +1,137 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="lane-a" value="&lt;i&gt;&lt;b&gt;Operator&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=1;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;fontSize=12;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="0" width="900" height="500" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane-b" value="&lt;i&gt;&lt;b&gt;Backend API&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=1;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;fontSize=12;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="500" width="900" height="800" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane-c" value="&lt;i&gt;&lt;b&gt;Blockchain&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=1;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;fontSize=12;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="1300" width="900" height="600" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="start4" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="lane-a">
+      <mxGeometry x="380" y="50" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d1" value="Mengirim data KYC&lt;br&gt;pelanggan" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-a">
+      <mxGeometry x="330" y="120" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d2" value="Terima data KYC&lt;br&gt;(POST /kyc/profiles)" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="100" y="50" width="170" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d3" value="Validasi kelengkapan&lt;br&gt;data KYC" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="370" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d4" value="[data lengkap?]" style="rhombus;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="365" y="170" width="150" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d5" value="Kirim error validasi" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="550" y="190" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="end4a" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;double=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="605" y="290" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d6" value="Kirim ke blockchain" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="100" y="300" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d7" value="SubmitKycProfile()&lt;br&gt;→ status = pending" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-c">
+      <mxGeometry x="100" y="50" width="180" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d8" value="Simpan profil KYC pending" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="100" y="430" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d9" value="Proses verifikasi KYC&lt;br&gt;(POST /kyc/profiles/{id}/refresh)" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="370" y="430" width="180" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d10" value="RefreshKycProfile()&lt;br&gt;Periksa dokumen &amp; risiko" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-c">
+      <mxGeometry x="100" y="210" width="180" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d11" value="[hasil verifikasi?]" style="rhombus;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-c">
+      <mxGeometry x="115" y="330" width="150" height="80" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d12" value="status = approved" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-c">
+      <mxGeometry x="370" y="195" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d13" value="status = rejected" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-c">
+      <mxGeometry x="370" y="340" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="d14" value="Kirim notifikasi hasil KYC" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="330" y="560" width="140" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="end4b" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;double=1;" vertex="1" parent="lane-b">
+      <mxGeometry x="385" y="660" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e1" edge="1" parent="1" source="start4" target="d1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="d1" target="d2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" edge="1" parent="1" source="d2" target="d3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" edge="1" parent="1" source="d3" target="d4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="[tidak]" edge="1" parent="1" source="d4" target="d5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" edge="1" parent="1" source="d5" target="end4a" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="[ya]" edge="1" parent="1" source="d4" target="d6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" edge="1" parent="1" source="d6" target="d7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" edge="1" parent="1" source="d7" target="d8" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" edge="1" parent="1" source="d8" target="d9" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" edge="1" parent="1" source="d9" target="d10" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" edge="1" parent="1" source="d10" target="d11" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="[disetujui]" edge="1" parent="1" source="d11" target="d12" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" value="[ditolak]" edge="1" parent="1" source="d11" target="d13" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15" edge="1" parent="1" source="d12" target="d14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e16" edge="1" parent="1" source="d13" target="d14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e17" edge="1" parent="1" source="d14" target="end4b" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

@@ -1,0 +1,74 @@
+{
+  "run": {
+    "date": "2026-06-30",
+    "status": "completed",
+    "durationSeconds": 367.505,
+    "ledger": "clean and initialized with InitLedger",
+    "fabricVersion": "2.5.16",
+    "chaincode": {
+      "name": "digital-rupiah",
+      "version": "2.0",
+      "sequence": 1
+    },
+    "workers": 2,
+    "workload": {
+      "customerToCustomerPercent": 70,
+      "customerToMerchantPercent": 25,
+      "walletReadPercent": 5,
+      "writableKeySelection": "deterministic and unique per measured transaction"
+    }
+  },
+  "rounds": [
+    {
+      "name": "retail-warmup",
+      "configuredTransactions": 100,
+      "configuredRateTps": 10,
+      "successfulTransactions": 100,
+      "failedTransactions": 0,
+      "successRatePercent": 100.0,
+      "sendRateTps": 10.2,
+      "throughputTps": 9.0,
+      "latencySeconds": {
+        "minimum": 0.01,
+        "average": 0.61,
+        "maximum": 2.14
+      }
+    },
+    {
+      "name": "retail-sustained",
+      "configuredTransactions": 600,
+      "configuredRateTps": 50,
+      "successfulTransactions": 600,
+      "failedTransactions": 0,
+      "successRatePercent": 100.0,
+      "sendRateTps": 50.1,
+      "throughputTps": 45.9,
+      "latencySeconds": {
+        "minimum": 0.01,
+        "average": 1.18,
+        "maximum": 2.12
+      }
+    },
+    {
+      "name": "retail-peak",
+      "configuredTransactions": 600,
+      "configuredRateTps": 150,
+      "successfulTransactions": 600,
+      "failedTransactions": 0,
+      "successRatePercent": 100.0,
+      "sendRateTps": 148.8,
+      "throughputTps": 57.7,
+      "latencySeconds": {
+        "minimum": 0.01,
+        "average": 4.2,
+        "maximum": 6.74
+      }
+    }
+  ],
+  "verification": {
+    "mvccReadConflicts": 0,
+    "dailyLimitRejections": 0,
+    "otherPolicyRejections": 0,
+    "workloadTestsPassed": 2
+  }
+}

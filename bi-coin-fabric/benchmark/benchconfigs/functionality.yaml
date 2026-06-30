@@ -1,0 +1,74 @@
+test:
+  name: Digital Rupiah Functional Benchmark Profiles
+  description: Separate benchmark profiles for onboarding, monetary operations, supervision reads, and administrative policy writes
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: kyc-onboarding
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: benchmark/workloads/retail-onboarding.js
+        arguments:
+          scenario: kyc-onboarding
+          tier: STANDARD
+
+    - label: monetary-ops
+      txNumber: 80
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 20
+      workload:
+        module: benchmark/workloads/monetary-ops.js
+        arguments:
+          scenario: monetary-ops
+          wallets: 50
+          transactionSlots: 40
+          initialStandardBalance: 1000000
+          initialBasicBalance: 100000
+
+    - label: supervision-reads
+      txNumber: 80
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/supervision-reads.js
+        arguments:
+          scenario: supervision-reads
+          customers: 50
+          merchants: 10
+          transactionSlots: 40
+          seedTransfers: 5
+
+    - label: admin-policy
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: benchmark/workloads/admin-policy.js
+        arguments:
+          scenario: admin-policy
+
+observer:
+  type: local
+  interval: 1
+
+monitor:
+  type: docker
+  docker:
+    name:
+      - peer0.bi.paynet
+      - peer0.himbara.paynet
+      - peer0.commercial.paynet
+      - peer0.pjp.paynet
+      - orderer.paynet
+  interval: 1

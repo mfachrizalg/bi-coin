@@ -1,0 +1,1154 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Garuda Digital Rupiah API Gateway — Role: multi",
+    "description": "Filtered API spec for thesis role: **supervisor**.\n\nIncluded OpenAPI tag groups: ['kyc', 'limits', 'network', 'privacy', 'supervision']\n\nThis embedded role-filtered API spec is maintained with the backend role surface.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/network/topology": {
+      "get": {
+        "tags": [
+          "network"
+        ],
+        "summary": "Get logical Indonesia CBDC topology",
+        "description": "Returns the thesis/prototype logical node map. Observer, policy, security, and API nodes are visible here but do not vote in Sumeragi consensus. Retail users and merchants access the ledger through participant APIs, not as ledger nodes.",
+        "operationId": "network_topology_network_topology_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/retail/customers": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "List retail customer identity bindings",
+        "description": "Returns retail customer shells without raw identity documents.",
+        "operationId": "list_retail_customers_retail_customers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/kyc/profiles/{profile_id}": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "Get KYC/KYB profile",
+        "description": "Returns one KYC/KYB profile without raw documents.",
+        "operationId": "get_kyc_profile_kyc_profiles__profile_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles/{profile_id}/provider-checks": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "List provider checks for KYC/KYB profile",
+        "description": "Returns immutable provider decision snapshots for audit.",
+        "operationId": "list_kyc_provider_checks_kyc_profiles__profile_id__provider_checks_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles/{profile_id}/audit-events": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "List KYC/KYB audit events",
+        "description": "Returns local KYC state transition audit events.",
+        "operationId": "list_kyc_audit_events_kyc_profiles__profile_id__audit_events_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/limits": {
+      "post": {
+        "tags": [
+          "limits"
+        ],
+        "summary": "Set system policy limit",
+        "description": "Configure limits on supply, per-participant balance, or per-tx amount.",
+        "operationId": "set_limit_limits_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLimitRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "limits"
+        ],
+        "summary": "List system policy limits",
+        "description": "Returns all configured system limits.",
+        "operationId": "list_limits_limits_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scope"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "tags": [
+          "supervision"
+        ],
+        "summary": "List normalized transaction history",
+        "description": "Returns canonical transaction records across issuance, redemption, direct transfers, retail transfers.",
+        "operationId": "transactions_transactions_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "participant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Participant Id"
+            }
+          },
+          {
+            "name": "transaction_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Transaction Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "from_timestamp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Timestamp"
+            }
+          },
+          {
+            "name": "to_timestamp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Timestamp"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supervision/events": {
+      "get": {
+        "tags": [
+          "supervision"
+        ],
+        "summary": "List supervision ledger events",
+        "description": "Returns audit-friendly events for onboarding, issuance, redemption, and transfer flows.",
+        "operationId": "supervision_events_supervision_events_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/reports/reconciliation": {
+      "get": {
+        "tags": [
+          "supervision"
+        ],
+        "summary": "Generate reconciliation report",
+        "description": "Compares issued minus redeemed value against ledger supply and participant balances.",
+        "operationId": "reconciliation_report_reports_reconciliation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/reports/metrics": {
+      "get": {
+        "tags": [
+          "supervision"
+        ],
+        "summary": "List workflow metrics",
+        "description": "Returns timing/status metrics captured during simulated workflow execution.",
+        "operationId": "metrics_report_reports_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AmountRequestBody": {
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Participant Id",
+            "description": "Participant requesting issuance or redemption.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Amount",
+            "description": "Wholesale Rupiah Digital amount represented as a decimal string.",
+            "examples": [
+              "100"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant_id",
+          "amount"
+        ],
+        "title": "AmountRequestBody",
+        "example": {
+          "amount": "100",
+          "participant_id": "bank-a"
+        }
+      },
+      "CreateWalletRequestBody": {
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Participant Id",
+            "description": "Participant who owns the wallet.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "wallet_type": {
+            "$ref": "#/components/schemas/WalletType",
+            "description": "Hot wallet (online) or cold wallet.",
+            "default": "hot",
+            "examples": [
+              "hot"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant_id"
+        ],
+        "title": "CreateWalletRequestBody",
+        "example": {
+          "participant_id": "bank-a",
+          "wallet_type": "hot"
+        }
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "KycProfileRequestBody": {
+        "properties": {
+          "subject_type": {
+            "$ref": "#/components/schemas/KycSubjectType",
+            "description": "Entity being verified: participant institution, retail customer, or merchant.",
+            "examples": [
+              "retail_customer",
+              "merchant"
+            ]
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Subject Id",
+            "description": "Subject identifier.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "provider_case_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Provider Case Id",
+            "description": "External KYC/KYB provider case reference.",
+            "examples": [
+              "sumsub-case-bank-a"
+            ]
+          },
+          "document_hashes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Document Hashes",
+            "description": "Opaque document hashes only. Raw identity documents are not stored.",
+            "examples": [
+              [
+                "sha256:document-hash"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject_type",
+          "subject_id",
+          "provider_case_id",
+          "document_hashes"
+        ],
+        "title": "KycProfileRequestBody",
+        "example": {
+          "document_hashes": [
+            "sha256:document-hash"
+          ],
+          "provider_case_id": "sumsub-case-bank-a",
+          "subject_id": "bank-a",
+          "subject_type": "participant"
+        }
+      },
+      "KycProviderResultRequestBody": {
+        "properties": {
+          "provider_case_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Provider Case Id",
+            "description": "Provider case reference."
+          },
+          "status": {
+            "$ref": "#/components/schemas/KycStatus",
+            "description": "Provider decision status."
+          },
+          "risk_level": {
+            "$ref": "#/components/schemas/KycRiskLevel",
+            "description": "Provider risk classification."
+          },
+          "checks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Checks",
+            "description": "Provider check names and normalized outcomes."
+          },
+          "document_hashes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Document Hashes",
+            "description": "Opaque hashes for documents used by the provider."
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason",
+            "description": "Reason for rejection."
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "KYC expiry timestamp."
+          },
+          "due_diligence_level": {
+            "$ref": "#/components/schemas/DueDiligenceLevel"
+          },
+          "senior_approval": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider_case_id",
+          "status",
+          "risk_level",
+          "document_hashes",
+          "due_diligence_level",
+          "senior_approval"
+        ],
+        "title": "KycProviderResultRequestBody",
+        "example": {
+          "checks": {
+            "adverse_media": "clear",
+            "identity_or_business_verification": "pass",
+            "pep": "clear",
+            "sanctions": "clear"
+          },
+          "document_hashes": [
+            "sha256:document-hash"
+          ],
+          "provider_case_id": "sumsub-case-bank-a",
+          "risk_level": "low",
+          "status": "approved"
+        }
+      },
+      "KycRiskLevel": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "prohibited"
+        ],
+        "title": "KycRiskLevel"
+      },
+      "KycStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "in_review",
+          "approved",
+          "rejected",
+          "expired",
+          "suspended"
+        ],
+        "title": "KycStatus"
+      },
+      "KycSubjectType": {
+        "type": "string",
+        "enum": [
+          "participant",
+          "retail_customer",
+          "merchant"
+        ],
+        "title": "KycSubjectType"
+      },
+      "LimitScope": {
+        "type": "string",
+        "enum": [
+          "global_supply",
+          "per_participant_balance",
+          "per_tx_amount"
+        ],
+        "title": "LimitScope"
+      },
+      "OnboardingRequestBody": {
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Participant Id",
+            "description": "Unique participant code used by BI supervision and payment workflows.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Legal or demo display name for the participating institution.",
+            "examples": [
+              "Bank A Demo"
+            ]
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Domain",
+            "description": "Iroha domain namespace assigned to the participant.",
+            "examples": [
+              "bank-a.paynet"
+            ]
+          },
+          "account_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Account Id",
+            "description": "Iroha account that will hold wholesale Rupiah Digital balances.",
+            "examples": [
+              "bank-a-account"
+            ]
+          },
+          "participant_type": {
+            "$ref": "#/components/schemas/ParticipantType",
+            "description": "Participant category in the wholesale Digital Rupiah network.",
+            "examples": [
+              "validator"
+            ]
+          },
+          "initial_reserve_balance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Initial Reserve Balance",
+            "description": "Mock BI-RTGS reserve balance available for future issuance requests.",
+            "default": "0",
+            "examples": [
+              "1000"
+            ]
+          },
+          "compliance_status": {
+            "type": "string",
+            "title": "Compliance Status",
+            "description": "Legacy demo field. KYC approval is enforced through KYC profile endpoints.",
+            "default": "active",
+            "examples": [
+              "active"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant_id",
+          "name",
+          "domain",
+          "account_id",
+          "participant_type"
+        ],
+        "title": "OnboardingRequestBody",
+        "example": {
+          "account_id": "bank-a-account",
+          "compliance_status": "active",
+          "domain": "bank-a.paynet",
+          "initial_reserve_balance": "1000",
+          "name": "Bank A Demo",
+          "participant_id": "bank-a",
+          "participant_type": "validator"
+        }
+      },
+      "ParticipantType": {
+        "type": "string",
+        "enum": [
+          "validator",
+          "non_validator",
+          "no_node"
+        ],
+        "title": "ParticipantType"
+      },
+      "RegisterTriggerRequestBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Trigger name.",
+            "examples": [
+              "tax_withholding"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Human-readable description.",
+            "default": "",
+            "examples": [
+              "Auto tax withholding"
+            ]
+          },
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Action Type",
+            "description": "Trigger event: on_transfer, on_issuance, on_redemption, periodic.",
+            "examples": [
+              "on_transfer"
+            ]
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "description": "Arbitrary key-value parameters for the trigger logic."
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "action_type"
+        ],
+        "title": "RegisterTriggerRequestBody",
+        "example": {
+          "action_type": "on_transfer",
+          "description": "Automatically withhold tax on transfers above threshold",
+          "name": "tax_withholding",
+          "params": {
+            "rate": "0.10",
+            "threshold": "10000"
+          }
+        }
+      },
+      "RetailCustomerRequestBody": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Customer Id",
+            "description": "Internal retail customer identifier.",
+            "examples": [
+              "cust-001"
+            ]
+          },
+          "legal_name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Legal Name",
+            "description": "Legal name kept in the participant provider system.",
+            "examples": [
+              "Retail Customer 001"
+            ]
+          },
+          "wallet_account_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Wallet Account Id",
+            "description": "Ledger wallet account bound to this retail customer.",
+            "examples": [
+              "cust-001-wallet"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "legal_name",
+          "wallet_account_id"
+        ],
+        "title": "RetailCustomerRequestBody",
+        "example": {
+          "customer_id": "cust-001",
+          "legal_name": "Retail Customer 001",
+          "wallet_account_id": "cust-001-wallet"
+        }
+      },
+      "SetLimitRequestBody": {
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/LimitScope",
+            "description": "Limit scope: global_supply, per_participant_balance, or per_tx_amount."
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Value",
+            "description": "Maximum value for the given scope.",
+            "examples": [
+              "1000000"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "scope",
+          "value"
+        ],
+        "title": "SetLimitRequestBody",
+        "example": {
+          "scope": "global_supply",
+          "value": "1000000"
+        }
+      },
+      "TransferRequestBody": {
+        "properties": {
+          "sender_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Sender Id",
+            "description": "Participant whose Rupiah Digital balance will be debited.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "receiver_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Receiver Id",
+            "description": "Participant whose Rupiah Digital balance will be credited.",
+            "examples": [
+              "bank-b"
+            ]
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Amount",
+            "description": "Wholesale transfer amount. ",
+            "examples": [
+              "75"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "sender_id",
+          "receiver_id",
+          "amount"
+        ],
+        "title": "TransferRequestBody",
+        "example": {
+          "amount": "75",
+          "receiver_id": "bank-b",
+          "sender_id": "bank-a"
+        }
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WalletType": {
+        "type": "string",
+        "enum": [
+          "hot",
+          "cold"
+        ],
+        "title": "WalletType"
+      },
+      "DueDiligenceLevel": {
+        "type": "string",
+        "enum": [
+          "simplified",
+          "standard",
+          "enhanced"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "kyc",
+      "description": "KYC/KYB profile submission, provider refresh, and audit."
+    },
+    {
+      "name": "supervision",
+      "description": "Events, metrics, and reconciliation reports."
+    },
+    {
+      "name": "limits",
+      "description": "System policy limits for monetary control."
+    },
+    {
+      "name": "network",
+      "description": "Logical CBDC network topology and consensus profile."
+    }
+  ]
+}

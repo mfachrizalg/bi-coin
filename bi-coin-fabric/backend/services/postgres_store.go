@@ -1,0 +1,369 @@
+package services
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/middleware"
+	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/models"
+)
+
+type PostgresStore struct {
+	db *sql.DB
+}
+
+type BootstrapUser struct {
+	Username     string          `json:"username"`
+	Password     string          `json:"password,omitempty"`
+	PasswordHash string          `json:"password_hash,omitempty"`
+	Role         middleware.Role `json:"role"`
+}
+
+func NewPostgresStore(ctx context.Context, databaseURL string) (*PostgresStore, error) {
+	db, err := sql.Open("pgx", databaseURL)
+	if err != nil {
+		return nil, err
+	}
+	if err := db.PingContext(ctx); err != nil {
+		db.Close()
+		return nil, err
+	}
+	store := &PostgresStore{db: db}
+	if err := store.migrate(ctx); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return store, nil
+}
+
+func (s *PostgresStore) Close() error {
+	if s == nil || s.db == nil {
+		return nil
+	}
+	return s.db.Close()
+}
+
+func (s *PostgresStore) migrate(ctx context.Context) error {
+	_, err := s.db.ExecContext(ctx, `
+CREATE TABLE IF NOT EXISTS auth_users (
+	username TEXT PRIMARY KEY,
+	password_hash TEXT NOT NULL,
+	role TEXT NOT NULL,
+	active BOOLEAN NOT NULL DEFAULT TRUE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS retail_customers (
+	customer_id TEXT PRIMARY KEY,
+	legal_name TEXT NOT NULL,
+	identity_hash TEXT NOT NULL,
+	wallet_account_id TEXT NOT NULL,
+	kyc_profile_id TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS kyc_profiles (
+	profile_id TEXT PRIMARY KEY,
+	subject_type TEXT NOT NULL,
+	subject_id TEXT NOT NULL,
+	provider_case_id TEXT,
+	legal_name TEXT,
+	document_type TEXT,
+	document_number TEXT,
+	document_hashes JSONB NOT NULL DEFAULT '[]',
+	status TEXT NOT NULL,
+	risk_level TEXT NOT NULL,
+	due_diligence_level TEXT NOT NULL DEFAULT 'simplified',
+	senior_approval BOOLEAN NOT NULL DEFAULT FALSE,
+	rejection_reason TEXT,
+	expires_at TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS kyc_provider_checks (
+	check_id TEXT PRIMARY KEY,
+	profile_id TEXT NOT NULL REFERENCES kyc_profiles(profile_id) ON DELETE CASCADE,
+	provider_case_id TEXT,
+	status TEXT NOT NULL,
+	risk_level TEXT NOT NULL,
+	due_diligence_level TEXT NOT NULL DEFAULT 'simplified',
+	senior_approval BOOLEAN NOT NULL DEFAULT FALSE,
+	checks JSONB NOT NULL DEFAULT '{}',
+	document_hashes JSONB NOT NULL DEFAULT '[]',
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS kyc_audit_events (
+	event_id TEXT PRIMARY KEY,
+	profile_id TEXT NOT NULL,
+	action TEXT NOT NULL,
+	details TEXT NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS due_diligence_level TEXT NOT NULL DEFAULT 'simplified';
+ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS senior_approval BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE kyc_provider_checks ADD COLUMN IF NOT EXISTS due_diligence_level TEXT NOT NULL DEFAULT 'simplified';
+ALTER TABLE kyc_provider_checks ADD COLUMN IF NOT EXISTS senior_approval BOOLEAN NOT NULL DEFAULT FALSE;
+`)
+	return err
+}
+
+func (s *PostgresStore) EnsureBootstrapUsers(ctx context.Context, rawJSON string) error {
+	if rawJSON == "" {
+		return nil
+	}
+	var users []BootstrapUser
+	if err := json.Unmarshal([]byte(rawJSON), &users); err != nil {
+		return fmt.Errorf("AUTH_BOOTSTRAP_USERS_JSON: %w", err)
+	}
+	for _, user := range users {
+		if user.Username == "" || user.Role == "" {
+			return fmt.Errorf("bootstrap user username and role are required")
+		}
+		hash := user.PasswordHash
+		if hash == "" {
+			if user.Password == "" {
+				return fmt.Errorf("bootstrap user %s needs password or password_hash", user.Username)
+			}
+			var err error
+			hash, err = HashPassword(user.Password)
+			if err != nil {
+				return fmt.Errorf("hash bootstrap user %s: %w", user.Username, err)
+			}
+		}
+		_, err := s.db.ExecContext(ctx, `
+INSERT INTO auth_users (username, password_hash, role, active)
+VALUES ($1, $2, $3, TRUE)
+ON CONFLICT (username) DO UPDATE
+SET password_hash = EXCLUDED.password_hash,
+    role = EXCLUDED.role,
+    active = TRUE,
+    updated_at = now()
+`, user.Username, hash, string(user.Role))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *PostgresStore) FindAuthUser(username string) (*AuthUser, error) {
+	var user AuthUser
+	var role string
+	err := s.db.QueryRowContext(context.Background(),
+		`SELECT username, password_hash, role, active FROM auth_users WHERE username = $1`, username).
+		Scan(&user.Username, &user.PasswordHash, &role, &user.Active)
+	if err == sql.ErrNoRows {
+		return nil, ErrInvalidCredentials
+	}
+	if err != nil {
+		return nil, err
+	}
+	user.Role = middleware.Role(role)
+	return &user, nil
+}
+
+func (s *PostgresStore) CreateRetailCustomer(ctx context.Context, req models.RetailCustomerRequest, identityHash string) (*models.RetailCustomer, error) {
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := s.db.ExecContext(ctx, `
+INSERT INTO retail_customers (customer_id, legal_name, identity_hash, wallet_account_id, kyc_profile_id)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (customer_id) DO UPDATE
+SET legal_name = EXCLUDED.legal_name,
+    identity_hash = EXCLUDED.identity_hash,
+    wallet_account_id = EXCLUDED.wallet_account_id,
+    kyc_profile_id = EXCLUDED.kyc_profile_id,
+    updated_at = now()
+`, req.CustomerID, req.LegalName, identityHash, req.WalletAccountID, nullableString(req.KycProfileID))
+	if err != nil {
+		return nil, err
+	}
+	return &models.RetailCustomer{
+		CustomerID:      req.CustomerID,
+		LegalName:       req.LegalName,
+		IdentityHash:    identityHash,
+		WalletAccountID: req.WalletAccountID,
+		KycProfileID:    req.KycProfileID,
+		CreatedAt:       now,
+	}, nil
+}
+
+func (s *PostgresStore) ListRetailCustomers(ctx context.Context) ([]*models.RetailCustomer, error) {
+	rows, err := s.db.QueryContext(ctx, `
+SELECT customer_id, legal_name, identity_hash, wallet_account_id, COALESCE(kyc_profile_id, ''), created_at
+FROM retail_customers ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var customers []*models.RetailCustomer
+	for rows.Next() {
+		var c models.RetailCustomer
+		var created time.Time
+		if err := rows.Scan(&c.CustomerID, &c.LegalName, &c.IdentityHash, &c.WalletAccountID, &c.KycProfileID, &created); err != nil {
+			return nil, err
+		}
+		c.CreatedAt = created.UTC().Format(time.RFC3339)
+		customers = append(customers, &c)
+	}
+	return customers, rows.Err()
+}
+
+func (s *PostgresStore) SubmitKycProfile(ctx context.Context, req models.KycProfileRequest, anchor models.KycProfile) (*models.KycProfile, error) {
+	hashesJSON, _ := json.Marshal(anchor.DocumentHashes)
+	_, err := s.db.ExecContext(ctx, `
+INSERT INTO kyc_profiles (
+	profile_id, subject_type, subject_id, provider_case_id, legal_name,
+	document_type, document_number, document_hashes, status, risk_level, expires_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+`, anchor.ProfileID, string(req.SubjectType), req.SubjectID, nullableString(req.ProviderCaseID), nullableString(req.LegalName),
+		nullableString(req.DocumentType), nullableString(req.DocumentNumber), string(hashesJSON), string(anchor.Status), string(anchor.RiskLevel), nullableString(""))
+	if err != nil {
+		return nil, err
+	}
+	_ = s.insertAudit(ctx, anchor.ProfileID, "profile_created", "KYC profile submitted off-chain")
+	return &anchor, nil
+}
+
+func (s *PostgresStore) RefreshKycProfile(ctx context.Context, profileID string, req models.KycProviderResultRequest, anchor models.KycProfile) (*models.KycProfile, error) {
+	hashesJSON, _ := json.Marshal(anchor.DocumentHashes)
+	checksJSON, _ := json.Marshal(req.Checks)
+	rejection := ""
+	if req.RejectionReason != nil {
+		rejection = *req.RejectionReason
+	}
+	expires := ""
+	if req.ExpiresAt != nil {
+		expires = *req.ExpiresAt
+	}
+	_, err := s.db.ExecContext(ctx, `
+UPDATE kyc_profiles
+SET provider_case_id = COALESCE(NULLIF($2, ''), provider_case_id),
+    document_hashes = $3,
+    status = $4,
+    risk_level = $5,
+	due_diligence_level = $6,
+	senior_approval = $7,
+    rejection_reason = NULLIF($8, ''),
+    expires_at = NULLIF($9, ''),
+    updated_at = now()
+WHERE profile_id = $1
+`, profileID, req.ProviderCaseID, string(hashesJSON), string(req.Status), string(req.RiskLevel), string(req.DueDiligenceLevel), req.SeniorApproval, rejection, expires)
+	if err != nil {
+		return nil, err
+	}
+	checkID := fmt.Sprintf("chk_%s_%d", profileID, time.Now().UTC().UnixNano())
+	_, err = s.db.ExecContext(ctx, `
+INSERT INTO kyc_provider_checks (check_id, profile_id, provider_case_id, status, risk_level, due_diligence_level, senior_approval, checks, document_hashes)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+`, checkID, profileID, nullableString(req.ProviderCaseID), string(req.Status), string(req.RiskLevel), string(req.DueDiligenceLevel), req.SeniorApproval, string(checksJSON), string(hashesJSON))
+	if err != nil {
+		return nil, err
+	}
+	_ = s.insertAudit(ctx, profileID, "profile_refreshed", fmt.Sprintf("Provider decision: %s risk=%s due_diligence=%s senior_approval=%t", req.Status, req.RiskLevel, req.DueDiligenceLevel, req.SeniorApproval))
+	anchor.ProviderCaseID = req.ProviderCaseID
+	anchor.RejectionReason = req.RejectionReason
+	return &anchor, nil
+}
+
+func (s *PostgresStore) GetKycProfile(ctx context.Context, profileID string) (*models.KycProfile, error) {
+	var p models.KycProfile
+	var subjectType, status, risk, hashesRaw string
+	var providerCaseID, rejection, expires sql.NullString
+	var created, updated time.Time
+	err := s.db.QueryRowContext(ctx, `
+SELECT profile_id, subject_type, subject_id, provider_case_id, document_hashes,
+       status, risk_level, due_diligence_level, senior_approval, rejection_reason, expires_at, created_at, updated_at
+FROM kyc_profiles WHERE profile_id = $1`, profileID).
+		Scan(&p.ProfileID, &subjectType, &p.SubjectID, &providerCaseID, &hashesRaw,
+			&status, &risk, &p.DueDiligenceLevel, &p.SeniorApproval, &rejection, &expires, &created, &updated)
+	if err != nil {
+		return nil, err
+	}
+	_ = json.Unmarshal([]byte(hashesRaw), &p.DocumentHashes)
+	p.SubjectType = models.KycSubjectType(subjectType)
+	p.Status = models.KycStatus(status)
+	p.RiskLevel = models.KycRiskLevel(risk)
+	if providerCaseID.Valid {
+		p.ProviderCaseID = providerCaseID.String
+	}
+	if rejection.Valid {
+		p.RejectionReason = &rejection.String
+	}
+	if expires.Valid {
+		p.ExpiresAt = &expires.String
+	}
+	p.CreatedAt = created.UTC().Format(time.RFC3339)
+	p.UpdatedAt = updated.UTC().Format(time.RFC3339)
+	return &p, nil
+}
+
+func (s *PostgresStore) ListKycProviderChecks(ctx context.Context, profileID string) ([]*models.KycProviderCheck, error) {
+	rows, err := s.db.QueryContext(ctx, `
+SELECT check_id, profile_id, COALESCE(provider_case_id, ''), status, risk_level, due_diligence_level, senior_approval, checks, document_hashes, created_at
+FROM kyc_provider_checks WHERE profile_id = $1 ORDER BY created_at DESC`, profileID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var checks []*models.KycProviderCheck
+	for rows.Next() {
+		var c models.KycProviderCheck
+		var status, risk, checksRaw, hashesRaw string
+		var created time.Time
+		if err := rows.Scan(&c.CheckID, &c.ProfileID, &c.ProviderCaseID, &status, &risk, &c.DueDiligenceLevel, &c.SeniorApproval, &checksRaw, &hashesRaw, &created); err != nil {
+			return nil, err
+		}
+		c.Status = models.KycStatus(status)
+		c.RiskLevel = models.KycRiskLevel(risk)
+		_ = json.Unmarshal([]byte(checksRaw), &c.Checks)
+		_ = json.Unmarshal([]byte(hashesRaw), &c.DocumentHashes)
+		c.CreatedAt = created.UTC().Format(time.RFC3339)
+		checks = append(checks, &c)
+	}
+	return checks, rows.Err()
+}
+
+func (s *PostgresStore) ListKycAuditEvents(ctx context.Context, profileID string) ([]*models.KycAuditEvent, error) {
+	rows, err := s.db.QueryContext(ctx, `
+SELECT event_id, profile_id, action, details, created_at
+FROM kyc_audit_events WHERE profile_id = $1 ORDER BY created_at DESC`, profileID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var events []*models.KycAuditEvent
+	for rows.Next() {
+		var ev models.KycAuditEvent
+		var created time.Time
+		if err := rows.Scan(&ev.EventID, &ev.ProfileID, &ev.Action, &ev.Details, &created); err != nil {
+			return nil, err
+		}
+		ev.Timestamp = created.UTC().Format(time.RFC3339)
+		events = append(events, &ev)
+	}
+	return events, rows.Err()
+}
+
+func (s *PostgresStore) insertAudit(ctx context.Context, profileID string, action string, details string) error {
+	_, err := s.db.ExecContext(ctx, `
+INSERT INTO kyc_audit_events (event_id, profile_id, action, details)
+VALUES ($1, $2, $3, $4)`,
+		fmt.Sprintf("evt_%s_%d", profileID, time.Now().UTC().UnixNano()), profileID, action, details)
+	return err
+}
+
+func nullableString(value string) interface{} {
+	if value == "" {
+		return nil
+	}
+	return value
+}

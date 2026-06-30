@@ -1,0 +1,21 @@
+{
+  "name": "himbara-paynet",
+  "version": "1.0.0",
+  "client": { "organization": "HimbaraBankOrg" },
+  "channels": {
+    "mychannel": { "peers": { "peer0.himbara.paynet": {} } }
+  },
+  "organizations": {
+    "HimbaraBankOrg": { "mspid": "HimbaraBankOrgMSP", "peers": ["peer0.himbara.paynet"] }
+  },
+  "peers": {
+    "peer0.himbara.paynet": {
+      "url": "grpcs://localhost:9051",
+      "tlsCACerts": { "path": "/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/network/organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls/ca.crt" },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.himbara.paynet",
+        "hostnameOverride": "peer0.himbara.paynet"
+      }
+    }
+  }
+}

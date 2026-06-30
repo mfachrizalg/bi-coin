@@ -1,0 +1,67 @@
+{
+  "run": {
+    "date": "2026-06-30",
+    "status": "completed",
+    "ledger": "clean and initialized with InitLedger",
+    "fabricVersion": "2.5.16",
+    "chaincode": {
+      "name": "digital-rupiah",
+      "version": "2.0",
+      "sequence": 1
+    },
+    "workers": 2
+  },
+  "rounds": [
+    {
+      "name": "retail-warmup",
+      "configuredTransactions": 100,
+      "configuredRateTps": 10,
+      "successfulTransactions": 97,
+      "failedTransactions": 3,
+      "successRatePercent": 97.0,
+      "sendRateTps": 10.2,
+      "throughputTps": 8.8,
+      "latencySeconds": {
+        "minimum": 0.01,
+        "average": 0.66,
+        "maximum": 2.11
+      }
+    },
+    {
+      "name": "retail-sustained",
+      "configuredTransactions": 600,
+      "configuredRateTps": 50,
+      "successfulTransactions": 502,
+      "failedTransactions": 98,
+      "successRatePercent": 83.67,
+      "sendRateTps": 50.2,
+      "throughputTps": 41.8,
+      "latencySeconds": {
+        "minimum": 0.01,
+        "average": 0.63,
+        "maximum": 2.4
+      }
+    },
+    {
+      "name": "retail-peak",
+      "configuredTransactions": 600,
+      "configuredRateTps": 150,
+      "successfulTransactions": 251,
+      "failedTransactions": 349,
+      "successRatePercent": 41.83,
+      "sendRateTps": 135.3,
+      "throughputTps": 77.1,
+      "latencySeconds": {
+        "minimum": 0.01,
+        "average": 2.7,
+        "maximum": 4.4
+      }
+    }
+  ],
+  "observations": [
+    "Peak throughput reached 77.1 TPS while average latency increased to 2.70 seconds.",
+    "Observed failures included MVCC_READ_CONFLICT and policy rejections caused by daily transaction limits.",
+    "Caliper reported that no resource monitor was active, so CPU and memory measurements are unavailable.",
+    "This artifact records one valid run; repeated runs are required before reporting mean and standard deviation."
+  ]
+}

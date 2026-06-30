@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="l1" value="&lt;i&gt;&lt;b&gt;Supervisor&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="0" width="900" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="l2" value="&lt;i&gt;&lt;b&gt;Backend API&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="200" width="900" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="l3" value="&lt;i&gt;&lt;b&gt;Blockchain&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="600" width="900" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l1">
+      <mxGeometry x="435" y="10" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="s1" value="Akses dashboard&lt;br&gt;supervisi" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l1">
+      <mxGeometry x="210" y="70" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="b1" value="Terima permintaan&lt;br&gt;laporan" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="210" y="70" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="fork" value="" style="endArrow=none;startArrow=none;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l2">
+      <mxGeometry x="250" y="160" width="80" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="b2" value="GET /supervision/events" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="50" y="200" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="b3" value="GET /reconciliation" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="250" y="200" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="b4" value="GET /metrics" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="450" y="200" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1" value="GetSupervisionEvents()&lt;br&gt;Kembalikan audit" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="50" y="60" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="GetReconciliationReport()&lt;br&gt;Supply, issued, burned" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="250" y="60" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="GetMetrics()&lt;br&gt;Statistik transaksi" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="450" y="60" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="join" value="" style="endArrow=none;startArrow=none;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l2">
+      <mxGeometry x="250" y="300" width="80" height="8" as="geometry"/>
+    </mxCell>
+    <mxCell id="b5" value="Gabungkan hasil&lt;br&gt;laporan" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="210" y="330" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="b6" value="Format laporan&lt;br&gt;supervisi" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="210" y="410" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="end1" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l2">
+      <mxGeometry x="265" y="500" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" edge="1" parent="1" source="start" target="s1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="s1" target="b1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" edge="1" parent="1" source="b1" target="fork" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" edge="1" parent="1" source="fork" target="b2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" edge="1" parent="1" source="fork" target="b3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" edge="1" parent="1" source="fork" target="b4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" edge="1" parent="1" source="b2" target="c1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" edge="1" parent="1" source="b3" target="c2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" edge="1" parent="1" source="b4" target="c3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" edge="1" parent="1" source="c1" target="join" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" edge="1" parent="1" source="c2" target="join" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" edge="1" parent="1" source="c3" target="join" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" edge="1" parent="1" source="join" target="b5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" edge="1" parent="1" source="b5" target="b6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15" edge="1" parent="1" source="b6" target="end1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

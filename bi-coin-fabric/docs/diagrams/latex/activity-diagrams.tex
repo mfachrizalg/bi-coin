@@ -1,0 +1,333 @@
+% Activity Diagrams Track A — CBDC Digital Rupiah (Hyperledger Fabric)
+% Simplified LaTeX representation for Luthfi thesis
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{newtxtext,newtxmath}
+\geometry{margin=2.5cm}
+
+\begin{document}
+
+% ────────────── AD01 — Pendaftaran Peserta ──────────────
+\begin{figure}[H]
+\centering
+\caption{Gambar A.1 Activity Diagram Proses Pendaftaran Peserta}
+\label{fig:ad01}
+\begin{tabular}{@{}p{3cm}|p{4cm}|p{4cm}@{}}
+\textit{\textbf{Klien/Bank}} & \textit{\textbf{Backend API}} & \textit{\textbf{Blockchain}} \\
+\hline
+$\bullet$ Mulai & & \\
+$\downarrow$ & & \\
+Kirim data pendaftaran & $\rightarrow$ & \\
+& Terima \& teruskan & $\rightarrow$ \\
+& & $\downarrow$ \\
+& & SubmitParticipant() \\
+& & $\downarrow$ \\
+& & status = pending \\
+& $\leftarrow$ & / \\
+& $\downarrow$ & \\
+& Simpan data pending & \\
+& $\downarrow$ & \\
+& $\diamond$ Disetujui? & \\
+& $\swarrow$[tidak] \hspace{1cm} $\searrow$[ya] & \\
+Notifikasi penolakan & \hspace{1.5cm} POST approve & \\
+$\downarrow$ & $\downarrow$ & \\
+$\bullet\times$ Selesai & & $\rightarrow$ \\
+& & $\downarrow$ \\
+& & ApproveParticipant() \\
+& & $\downarrow$ \\
+& & status = active \\
+& & $\downarrow$ \\
+& & Buat wallet (wlt\_\textless{}ID\textgreater{}) \\
+& $\leftarrow$ & / \\
+& $\downarrow$ & \\
+& Konfirmasi aktif & \\
+& $\downarrow$ & \\
+& $\bullet\times$ Selesai & \\
+\end{tabular}
+\end{figure}
+
+% ────────────── AD02 — Penerbitan Digital Rupiah ──────────────
+\begin{figure}[H]
+\centering
+\caption{Gambar A.2 Activity Diagram Proses Penerbitan Digital Rupiah}
+\label{fig:ad02}
+\begin{tabular}{@{}p{3cm}|p{4cm}|p{4cm}@{}}
+\textit{\textbf{Bank Indonesia}} & \textit{\textbf{Backend API}} & \textit{\textbf{Blockchain}} \\
+\hline
+$\bullet$ Mulai & & \\
+$\downarrow$ & & \\
+Inisiasi penerbitan & $\rightarrow$ & \\
+& Terima request & \\
+& $\downarrow$ & \\
+& Validasi role (BI) & \\
+& $\downarrow$ & \\
+& $\diamond$ Role valid? & \\
+& $\swarrow$[tidak] \hspace{1.5cm} $\searrow$[ya] & \\
+& Error 403 & Teruskan & $\rightarrow$ \\
+& $\downarrow$ & & $\downarrow$ \\
+& $\bullet\times$ & & RequestIssuance() \\
+& & & $\downarrow$ \\
+& & & $\diamond$ Bukan PJP? \\
+& & & $\swarrow$[tidak] \hspace{1cm} $\searrow$[ya] \\
+& & Tolak penerbitan & Mint() \\
+& & $\downarrow$ & $\downarrow$ \\
+& & $\bullet\times$ & balance += amount \\
+& & & $\downarrow$ \\
+& & & Catat transaksi \\
+& & $\leftarrow$ & / \\
+& & $\downarrow$ & \\
+& & Kirim sukses & \\
+& & $\downarrow$ & \\
+& & $\bullet\times$ Selesai & \\
+\end{tabular}
+\end{figure}
+
+% ────────────── AD03 — Distribusi Likuiditas ke PJP ──────────────
+\begin{figure}[H]
+\centering
+\caption{Gambar A.3 Activity Diagram Proses Distribusi Likuiditas ke PJP}
+\label{fig:ad03}
+\begin{tabular}{@{}p{3cm}|p{4cm}|p{4cm}@{}}
+\textit{\textbf{Bank Validator}} & \textit{\textbf{Backend API}} & \textit{\textbf{Blockchain}} \\
+\hline
+$\bullet$ Mulai & & \\
+$\downarrow$ & & \\
+Inisiasi distribusi & $\rightarrow$ & \\
+& Terima request & \\
+& $\downarrow$ & \\
+& Validasi pengirim & \\
+& $\downarrow$ & \\
+& $\diamond$ Validator? & \\
+& $\swarrow$[tidak] \hspace{1.5cm} $\searrow$[ya] & \\
+& Kirim error & Teruskan & $\rightarrow$ \\
+& $\downarrow$ & & $\downarrow$ \\
+& $\bullet\times$ & & Validasi PJP \\
+& & & $\downarrow$ \\
+& & & $\diamond$ Penerima PJP? \\
+& & & $\swarrow$[tidak] \hspace{1.2cm} $\searrow$[ya] \\
+& & Tolak & \hspace{1cm} Burn(sender) \\
+& & $\downarrow$ & $\downarrow$ \\
+& & $\bullet\times$ & kurangi saldo validator \\
+& & & $\downarrow$ \\
+& & & Mint(receiver) \\
+& & & $\downarrow$ \\
+& & & tambah saldo PJP \\
+& & & $\downarrow$ \\
+& & & Catat transaksi \\
+& & $\leftarrow$ & / \\
+& & $\downarrow$ & \\
+& & Konfirmasi & \\
+& & $\downarrow$ & \\
+& & $\bullet\times$ Selesai & \\
+\end{tabular}
+\end{figure}
+
+% ────────────── AD04 — Onboarding KYC Pelanggan ──────────────
+\begin{figure}[H]
+\centering
+\caption{Gambar A.4 Activity Diagram Proses Onboarding KYC Pelanggan}
+\label{fig:ad04}
+\begin{tabular}{@{}p{3cm}|p{4cm}|p{4cm}@{}}
+\textit{\textbf{Operator}} & \textit{\textbf{Backend API}} & \textit{\textbf{Blockchain}} \\
+\hline
+$\bullet$ Mulai & & \\
+$\downarrow$ & & \\
+Kirim data KYC & $\rightarrow$ & \\
+& Terima (POST) & \\
+& $\downarrow$ & \\
+& Validasi kelengkapan & \\
+& $\downarrow$ & \\
+& $\diamond$ Data lengkap? & \\
+& $\swarrow$[tidak] \hspace{1.3cm} $\searrow$[ya] & \\
+& Error validasi & Kirim ke blockchain & $\rightarrow$ \\
+& $\downarrow$ & & $\downarrow$ \\
+& $\bullet\times$ & & SubmitKycProfile() \\
+& & & $\downarrow$ \\
+& & & status = pending \\
+& & $\leftarrow$ & / \\
+& & $\downarrow$ & \\
+& & Simpan KYC pending & \\
+& & $\downarrow$ & \\
+& & Verifikasi KYC (refresh) & $\rightarrow$ \\
+& & & $\downarrow$ \\
+& & & RefreshKycProfile() \\
+& & & $\downarrow$ \\
+& & & Periksa dokumen \\
+& & & $\downarrow$ \\
+& & & $\diamond$ Hasil verifikasi? \\
+& & & $\swarrow$[disetujui] \hspace{0.5cm} $\searrow$[ditolak] \\
+& & & approved \hspace{1.2cm} rejected \\
+& & $\leftarrow$ & / \\
+& & $\downarrow$ & \\
+& & Notifikasi hasil KYC & \\
+& & $\downarrow$ & \\
+& & $\bullet\times$ Selesai & \\
+\end{tabular}
+\end{figure}
+
+\end{document}
+
+
+% Activity Diagrams Track B — CBDC Digital Rupiah (Hyperledger Fabric)
+% Simplified LaTeX representation for Luthfi thesis
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{newtxtext,newtxmath}
+\geometry{margin=2.5cm}
+
+\begin{document}
+
+% ────────────── AD05 — Transfer Saldo Ritel ──────────────
+\begin{figure}[H]
+\centering
+\caption{Gambar 3.5 Activity Diagram Proses Transfer Saldo Ritel}
+\label{fig:ad05}
+\begin{tabular}{@{}p{3cm}|p{4cm}|p{4cm}@{}}
+\textit{\textbf{Pelanggan}} & \textit{\textbf{Backend API}} & \textit{\textbf{Blockchain}} \\
+\hline
+$\bullet$ Mulai & & \\
+$\downarrow$ & & \\
+Inisiasi transfer & $\rightarrow$ & \\
+& POST /transfers & \\
+& $\downarrow$ & \\
+& Validasi token & \\
+& $\downarrow$ & \\
+& $\diamond$ Token valid? & \\
+& $\swarrow$[tidak] \hspace{1.5cm} $\searrow$[ya] & \\
+& Error 401 & Kirim ke Blockchain & $\rightarrow$ \\
+& $\downarrow$ & & $\downarrow$ \\
+& $\bullet\times$ Selesai & & Periksa saldo pengirim \\
+& & & $\downarrow$ \\
+& & & $\diamond$ Saldo cukup? \\
+& & & $\swarrow$[tidak] \hspace{1.2cm} $\searrow$[ya] \\
+& & Tolak transfer & Validasi limit \\
+& & $\downarrow$ & (per-tx, harian, bulanan) \\
+& & $\bullet\times$ & $\downarrow$ \\
+& & & $\diamond$ Dalam limit? \\
+& & & $\swarrow$[tidak] \hspace{1.2cm} $\searrow$[ya] \\
+& & Tolak transfer & Validasi tier penerima \\
+& & $\downarrow$ & $\downarrow$ \\
+& & $\bullet\times$ & Debit pengirim \\
+& & & $\downarrow$ \\
+& & & Kredit penerima \\
+& & & $\downarrow$ \\
+& & & $\diamond$ Saldo \textless{} min? \\
+& & & $\swarrow$[ya] \hspace{1.3cm} $\searrow$[tidak] \\
+& & Auto-redeem sisa saldo & \\
+& & $\downarrow$ & \\
+& & Catat transaksi & Catat transaksi \\
+& & $\leftarrow$ & / \\
+& & $\downarrow$ & \\
+& & Kirim konfirmasi & \\
+& & $\downarrow$ & \\
+& & $\bullet\times$ Selesai & \\
+\end{tabular}
+\end{figure}
+
+\section*{AD08 — Pembekuan Peserta (Participant Freeze)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 1.2cm]
+
+\node[swimlane=Supervisor] (L1) at (0,0) {};
+\node[swimlane=Backend API] (L2) at (0,-5.5) {};
+\node[swimlane=Blockchain] (L3) at (0,-11) {};
+
+\node[startnode] (start) at (0,-0.8) {};
+\node[action] (s1) at (-3,-2) {Inisiasi pembekuan\\peserta};
+\node[action] (s2) at (-3,-4) {Inisiasi pembukaan\\blokir};
+
+\node[action] (b1) at (-3,-6.3) {POST\\participants/\{id\}/freeze};
+\node[action] (b2) at (0,-6.3) {Validasi otorisasi\\supervisor};
+\node[decision] (d1) at (0,-7.5) {Otorisasi\\valid?};
+\node[action] (b3) at (4,-8.5) {Kirim error};
+\node[action] (b4) at (-3,-9.3) {POST\\participants/\{id\}/unfreeze};
+\node[endnode] (e1) at (4,-9.8) {};
+
+\node[action] (c1) at (-5,-11.8) {FreezeParticipant()\\ubah status frozen};
+\node[action] (c2) at (-2,-11.8) {Freeze wallet\\terkait (cascade)};
+\node[action] (c3) at (2,-11.8) {Catat supervision\\participant\_frozen};
+\node[decision] (d2) at (2,-13.2) {Akan di-\\unfreeze?};
+\node[endnode] (e2) at (5,-13.5) {};
+\node[action] (c4) at (-5,-14.5) {UnfreezeParticipant()\\status active};
+\node[action] (c5) at (-2,-14.5) {Unfreeze wallet};
+\node[action] (c6) at (2,-14.5) {Catat supervision\\participant\_unfrozen};
+\node[endnode] (e3) at (4,-15.2) {};
+
+\draw[arr] (start) -- (s1);
+\draw[arr] (s1) -- (b1);
+\draw[arr] (b1) -- (b2);
+\draw[arr] (b2) -- (d1);
+\draw[arr] (d1) -- (b3) node[lab, above] {tidak};
+\draw[arr] (b3) -- (e1);
+\draw[arr] (d1) -- (c1) node[lab, right] {ya};
+\draw[arr] (c1) -- (c2);
+\draw[arr] (c2) -- (c3);
+\draw[arr] (c3) -- (d2);
+\draw[arr] (d2) -- (e2) node[lab, above] {tidak};
+\draw[arr] (d2) -- (s2) node[lab, above] {ya};
+\draw[arr] (s2) -- (b4);
+\draw[arr] (b4) -- (c4);
+\draw[arr] (c4) -- (c5);
+\draw[arr] (c5) -- (c6);
+\draw[arr] (c6) -- (e3);
+
+\end{tikzpicture}
+\end{figure}
+
+\clearpage
+
+\section*{AD10 — Laporan Supervisi (Supervision Reports)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.8cm and 1.2cm]
+
+\node[swimlane=Supervisor] (L1) at (0,0) {};
+\node[swimlane=Backend API] (L2) at (0,-3.5) {};
+\node[swimlane=Blockchain] (L3) at (0,-8) {};
+
+\node[startnode] (start) at (0,-0.8) {};
+\node[action] (s1) at (-3,-2) {Akses dashboard\\supervisi};
+
+\node[action] (b1) at (-3,-4.3) {Terima permintaan\\laporan};
+
+\node[action] (b2) at (-5.5,-5.5) {GET supervision/events};
+\node[action] (b3) at (-3,-5.5) {GET reconciliation};
+\node[action] (b4) at (0,-5.5) {GET metrics};
+
+\node[action] (c1) at (-5.5,-8.8) {GetSupervisionEvents()};
+\node[action] (c2) at (-3,-8.8) {GetReconciliationReport()};
+\node[action] (c3) at (0,-8.8) {GetMetrics()};
+
+\node[action] (bf) at (-3,-7) {Gabungkan hasil};
+\node[action] (bf2) at (-3,-8) {Format laporan supervisi};
+\node[endnode] (e1) at (-3,-9.3) {};
+
+\draw[arr] (start) -- (s1);
+\draw[arr] (s1) -- (b1);
+\draw[arr] (b1) -- (b2);
+\draw[arr] (b1) -- (b3);
+\draw[arr] (b1) -- (b4);
+\draw[arr] (b2) -- (c1);
+\draw[arr] (b3) -- (c2);
+\draw[arr] (b4) -- (c3);
+\draw[arr] (c1) -- (bf);
+\draw[arr] (c2) -- (bf);
+\draw[arr] (c3) -- (bf);
+\draw[arr] (bf) -- (bf2);
+\draw[arr] (bf2) -- (e1);
+
+\end{tikzpicture}
+\end{figure}
+
+\end{document}

@@ -1,0 +1,66 @@
+test:
+  name: Digital Rupiah Retail Transfer Benchmark - 1 Worker
+  description: Contention-free retail transfer baseline with one Caliper worker
+  workers:
+    type: local
+    number: 1
+  rounds:
+    - label: retail-warmup-w1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w1
+          customers: 80
+          merchants: 10
+          transactionSlots: 40
+          fundedRatio: 1
+
+    - label: retail-sustained-w1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w1
+          customers: 80
+          merchants: 10
+          transactionSlots: 40
+          fundedRatio: 1
+
+    - label: retail-peak-w1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w1
+          customers: 80
+          merchants: 10
+          transactionSlots: 40
+          fundedRatio: 1
+
+observer:
+  type: local
+  interval: 1
+
+monitor:
+  type: docker
+  docker:
+    name:
+      - peer0.bi.paynet
+      - peer0.himbara.paynet
+      - peer0.commercial.paynet
+      - peer0.pjp.paynet
+      - orderer.paynet
+  interval: 1

@@ -1,0 +1,106 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title <<AD08>> Pembekuan Peserta (Participant Freeze)
+
+|Supervisor|
+start
+:Inisiasi pembekuan peserta;
+
+|Backend API|
+:POST /participants/{id}/freeze;
+:Validasi otorisasi supervisor;
+
+if (Otorisasi valid?) then (tidak)
+  :Kirim error;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:FreezeParticipant()
+Ubah status peserta ke frozen;
+:Freeze wallet terkait (cascade);
+:Catat supervision event
+participant_frozen;
+
+if (Akan di-unfreeze?) then (tidak)
+  end
+else (ya)
+endif
+
+|Supervisor|
+:Inisiasi pembukaan blokir;
+
+|Backend API|
+:POST /participants/{id}/unfreeze;
+
+|Blockchain|
+:UnfreezeParticipant()
+status kembali ke active;
+:Unfreeze wallet;
+:Catat supervision event
+participant_unfrozen;
+end
+
+@enduml
+
+@startuml
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title <<AD10>> Laporan Supervisi (Supervision Reports)
+
+|Supervisor|
+start
+:Akses dashboard supervisi;
+
+|Backend API|
+:Terima permintaan laporan;
+
+fork
+  :GET /supervision/events;
+  :GET /reports/reconciliation;
+  :GET /reports/metrics;
+fork again
+  |Blockchain|
+  :GetSupervisionEvents()
+  Kembalikan event audit;
+fork again
+  |Blockchain|
+  :GetReconciliationReport()
+  Total supply, issued, burned;
+fork again
+  |Blockchain|
+  :GetMetrics()
+  Statistik transaksi;
+end fork
+
+|Backend API|
+:Gabungkan hasil laporan;
+:Format laporan supervisi;
+:Kirim laporan ke Supervisor;
+end
+
+@enduml

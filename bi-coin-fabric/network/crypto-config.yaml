@@ -1,0 +1,64 @@
+OrdererOrgs:
+  - Name: BankIndonesiaOrderer
+    Domain: paynet
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - localhost
+          - 127.0.0.1
+
+PeerOrgs:
+  - Name: BankIndonesiaOrg
+    Domain: bi.paynet
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+    Users:
+      Count: 1
+
+  - Name: HimbaraBankOrg
+    Domain: himbara.paynet
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+    Users:
+      Count: 1
+
+  - Name: CommercialBankOrg
+    Domain: commercial.paynet
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+    Users:
+      Count: 1
+
+  - Name: OJKObserverOrg
+    Domain: ojk.paynet
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+    Users:
+      Count: 1
+
+  - Name: PJPOrg
+    Domain: pjp.paynet
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+    Users:
+      Count: 1

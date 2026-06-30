@@ -1,0 +1,43 @@
+{
+  "run": {
+    "date": "2026-06-30",
+    "stamp": "2026-06-30-113543",
+    "status": "completed",
+    "network": "Garuda Fabric topology",
+    "fabricVersion": "2.5.16",
+    "chaincode": {
+      "name": "digital-rupiah",
+      "version": "2.0"
+    },
+    "setup": "Garuda Docker network reset with volumes, chaincode redeployed in NETWORK_MODE=garuda, InitLedger executed, chaincode containers warmed"
+  },
+  "verification": {
+    "totalSuccessfulRequests": 616,
+    "totalFailedRequests": 0,
+    "successRatePercent": 100,
+    "mvccReadConflicts": 0,
+    "policyOrLimitRejections": 0,
+    "workloadTestsPassed": 7
+  },
+  "results": [
+    { "profile": "transfer-w1", "round": "retail-warmup-w1", "workers": 1, "successful": 40, "failed": 0, "sendRateTps": 10.3, "throughputTps": 7.8, "latencySeconds": { "minimum": 0.01, "average": 0.78, "maximum": 2.14 } },
+    { "profile": "transfer-w1", "round": "retail-sustained-w1", "workers": 1, "successful": 40, "failed": 0, "sendRateTps": 30.8, "throughputTps": 12.7, "latencySeconds": { "minimum": 0.00, "average": 0.62, "maximum": 2.15 } },
+    { "profile": "transfer-w1", "round": "retail-peak-w1", "workers": 1, "successful": 40, "failed": 0, "sendRateTps": 57.6, "throughputTps": 14.5, "latencySeconds": { "minimum": 0.07, "average": 0.66, "maximum": 2.32 } },
+    { "profile": "transfer-w2", "round": "retail-warmup-w2", "workers": 2, "successful": 40, "failed": 0, "sendRateTps": 10.5, "throughputTps": 7.8, "latencySeconds": { "minimum": 0.01, "average": 0.80, "maximum": 2.14 } },
+    { "profile": "transfer-w2", "round": "retail-sustained-w2", "workers": 2, "successful": 40, "failed": 0, "sendRateTps": 31.6, "throughputTps": 12.3, "latencySeconds": { "minimum": 0.01, "average": 0.64, "maximum": 2.25 } },
+    { "profile": "transfer-w2", "round": "retail-peak-w2", "workers": 2, "successful": 40, "failed": 0, "sendRateTps": 61.0, "throughputTps": 14.5, "latencySeconds": { "minimum": 0.03, "average": 0.69, "maximum": 2.27 } },
+    { "profile": "transfer-w4", "round": "retail-warmup-w4", "workers": 4, "successful": 40, "failed": 0, "sendRateTps": 11.1, "throughputTps": 8.0, "latencySeconds": { "minimum": 0.01, "average": 0.81, "maximum": 2.18 } },
+    { "profile": "transfer-w4", "round": "retail-sustained-w4", "workers": 4, "successful": 40, "failed": 0, "sendRateTps": 33.3, "throughputTps": 12.9, "latencySeconds": { "minimum": 0.01, "average": 0.64, "maximum": 2.16 } },
+    { "profile": "transfer-w4", "round": "retail-peak-w4", "workers": 4, "successful": 40, "failed": 0, "sendRateTps": 65.9, "throughputTps": 14.5, "latencySeconds": { "minimum": 0.01, "average": 0.70, "maximum": 2.30 } },
+    { "profile": "functionality", "round": "kyc-onboarding", "workers": 2, "successful": 56, "failed": 0, "sendRateTps": 4.4, "throughputTps": 3.7, "latencySeconds": { "minimum": 0.13, "average": 0.88, "maximum": 2.29 } },
+    { "profile": "functionality", "round": "monetary-ops", "workers": 2, "successful": 80, "failed": 0, "sendRateTps": 20.5, "throughputTps": 19.9, "latencySeconds": { "minimum": 0.10, "average": 0.32, "maximum": 0.53 } },
+    { "profile": "functionality", "round": "supervision-reads", "workers": 2, "successful": 80, "failed": 0, "sendRateTps": 30.8, "throughputTps": 17.0, "latencySeconds": { "minimum": 0.01, "average": 1.10, "maximum": 3.24 } },
+    { "profile": "functionality", "round": "admin-policy", "workers": 2, "successful": 40, "failed": 0, "sendRateTps": 5.3, "throughputTps": 5.2, "latencySeconds": { "minimum": 0.09, "average": 0.91, "maximum": 1.72 } }
+  ],
+  "artifacts": {
+    "transferW1Report": "benchmark/results/2026-06-30-113543-transfer-w1.html",
+    "transferW2Report": "benchmark/results/2026-06-30-113543-transfer-w2.html",
+    "transferW4Report": "benchmark/results/2026-06-30-113543-transfer-w4.html",
+    "functionalityReport": "benchmark/results/2026-06-30-113543-functionality.html"
+  }
+}

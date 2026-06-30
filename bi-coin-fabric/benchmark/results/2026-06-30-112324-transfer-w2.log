@@ -1,0 +1,441 @@
+
+> bi-coin-fabric@1.0.0 benchmark:transfer:w2
+> caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-2.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .
+
+2026.06.30-11:32:22.786[32m info [39m [caliper] [cli-launch-manager] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.06.30-11:32:22.786[32m info [39m [caliper] [cli-launch-manager] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml
+2026.06.30-11:32:22.786[32m info [39m [caliper] [cli-launch-manager] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.06.30-11:32:22.787[32m info [39m [caliper] [cli-launch-manager] 	Set SUT type: fabric
+2026.06.30-11:32:22.802[32m info [39m [caliper] [caliper-engine] 	Starting benchmark flow
+2026.06.30-11:32:22.802[32m info [39m [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.start" is not present, skipping start command
+2026.06.30-11:32:23.275[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.06.30-11:32:23.280[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.06.30-11:32:23.281[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.06.30-11:32:23.282[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.06.30-11:32:23.283[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Fabric-Gateway SDK version: 1.5.0 for Peer-Gateway connector; TLS based on BankIndonesiaOrgMSP: server
+2026.06.30-11:32:23.283[32m info [39m [caliper] [caliper-engine] 	Executed "init" step in 0 seconds
+2026.06.30-11:32:23.283[33m warn [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Install smart contract not available for the Fabric Peer Gateway connector
+2026.06.30-11:32:23.284[32m info [39m [caliper] [caliper-engine] 	Executed "install" step in 0.001 seconds
+2026.06.30-11:32:23.285[32m info [39m [caliper] [monitor.js] 	No resource monitors specified
+2026.06.30-11:32:23.286[32m info [39m [caliper] [default-observer] 	Observer interval set to 5000 milliseconds
+2026.06.30-11:32:23.288[32m info [39m [caliper] [round-orchestrator] 	Preparing worker connections
+2026.06.30-11:32:23.289[32m info [39m [caliper] [worker-orchestrator] 	Launching worker 1 of 2
+2026.06.30-11:32:23.294[32m info [39m [caliper] [worker-orchestrator] 	Launching worker 2 of 2
+2026.06.30-11:32:23.296[32m info [39m [caliper] [worker-orchestrator] 	Messenger not configured, entering configure phase...
+2026.06.30-11:32:23.297[32m info [39m [caliper] [worker-orchestrator] 	No existing workers detected, entering worker launch phase...
+2026.06.30-11:32:23.298[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be connected...
+2026.06.30-11:32:23.573[32m info [39m [caliper] [cli-launch-worker] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.06.30-11:32:23.574[32m info [39m [caliper] [cli-launch-worker] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml
+2026.06.30-11:32:23.574[32m info [39m [caliper] [cli-launch-worker] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.06.30-11:32:23.574[32m info [39m [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.06.30-11:32:23.590[32m info [39m [caliper] [cli-launch-worker] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.06.30-11:32:23.591[32m info [39m [caliper] [cli-launch-worker] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml
+2026.06.30-11:32:23.591[32m info [39m [caliper] [cli-launch-worker] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.06.30-11:32:23.591[32m info [39m [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.06.30-11:32:23.621[32m info [39m [caliper] [worker-orchestrator] 	2 workers connected, progressing to worker assignment phase.
+2026.06.30-11:32:23.621[32m info [39m [caliper] [worker-orchestrator] 	Workers currently unassigned, awaiting index assignment...
+2026.06.30-11:32:23.622[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be assigned...
+2026.06.30-11:32:23.649[32m info [39m [caliper] [worker-orchestrator] 	2 workers assigned, progressing to worker initialization phase.
+2026.06.30-11:32:23.649[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be ready...
+2026.06.30-11:32:23.650[32m info [39m [caliper] [worker-message-handler] 	Initializing Worker#0...
+2026.06.30-11:32:23.650[32m info [39m [caliper] [worker-message-handler] 	Initializing Worker#1...
+2026.06.30-11:32:24.113[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.06.30-11:32:24.118[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.06.30-11:32:24.119[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.06.30-11:32:24.119[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.06.30-11:32:24.121[32m info [39m [caliper] [worker-message-handler] 	Worker#0 initialized
+2026.06.30-11:32:24.130[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.06.30-11:32:24.135[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.06.30-11:32:24.136[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.06.30-11:32:24.137[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.06.30-11:32:24.139[32m info [39m [caliper] [worker-message-handler] 	Worker#1 initialized
+2026.06.30-11:32:24.139[32m info [39m [caliper] [worker-orchestrator] 	2 workers ready, progressing to test preparation phase.
+2026.06.30-11:32:24.139[32m info [39m [caliper] [round-orchestrator] 	Started round 1 (retail-warmup-w2)
+2026.06.30-11:32:24.140[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#0
+2026.06.30-11:32:24.141[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#0
+2026.06.30-11:32:24.154[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.06.30-11:32:24.154[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.06.30-11:32:24.158[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:32:24.158[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:32:24.160[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.06.30-11:32:24.160[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.06.30-11:32:24.160[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is starting...
+2026.06.30-11:32:24.161[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is starting...
+2026.06.30-11:32:45.403[32m info [39m [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 0: Error: insufficient contention-free population: need 50 senders, 35 STANDARD receivers, and 12 merchants
+    at RetailTransferWorkload.configureMeasuredTraffic (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:49:19)
+    at RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:26:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.06.30-11:32:45.404[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.06.30-11:32:45.404[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:32:45.404[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.06.30-11:32:45.404[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.06.30-11:32:45.406[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.06.30-11:32:45.406[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.06.30-11:32:45.406[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is completed
+2026.06.30-11:32:45.407[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (964239): Error: insufficient contention-free population: need 50 senders, 35 STANDARD receivers, and 12 merchants
+    at RetailTransferWorkload.configureMeasuredTraffic (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:49:19)
+    at RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:26:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.06.30-11:32:45.409[31m error[39m [caliper] [round-orchestrator] 	Failed round 1 (retail-warmup-w2): Error: Error: insufficient contention-free population: need 50 senders, 35 STANDARD receivers, and 12 merchants
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:508:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:508:28)
+    at emit (node:internal/child_process:948:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)
+2026.06.30-11:32:45.409[32m info [39m [caliper] [round-orchestrator] 	Started round 2 (retail-sustained-w2)
+2026.06.30-11:32:45.410[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#1
+2026.06.30-11:32:45.410[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#1
+2026.06.30-11:32:45.411[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is starting...
+2026.06.30-11:32:45.416[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.06.30-11:32:45.419[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:32:45.422[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.06.30-11:32:45.423[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is starting...
+2026.06.30-11:32:45.611[32m info [39m [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 0: Error: insufficient contention-free population: need 50 senders, 35 STANDARD receivers, and 13 merchants
+    at RetailTransferWorkload.configureMeasuredTraffic (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:49:19)
+    at RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:26:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.06.30-11:32:45.611[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.06.30-11:32:45.611[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:32:45.611[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.06.30-11:32:45.611[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.06.30-11:32:45.612[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.06.30-11:32:45.612[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.06.30-11:32:45.612[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is completed
+2026.06.30-11:32:45.613[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (964238): Error: insufficient contention-free population: need 50 senders, 35 STANDARD receivers, and 13 merchants
+    at RetailTransferWorkload.configureMeasuredTraffic (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:49:19)
+    at RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:26:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.06.30-11:32:45.613[31m error[39m [caliper] [round-orchestrator] 	Failed round 2 (retail-sustained-w2): Error: Error: insufficient contention-free population: need 50 senders, 35 STANDARD receivers, and 13 merchants
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:508:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:508:28)
+    at emit (node:internal/child_process:948:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)
+2026.06.30-11:32:45.613[32m info [39m [caliper] [round-orchestrator] 	Started round 3 (retail-peak-w2)
+2026.06.30-11:32:45.616[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_5,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_5"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.617[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#2
+2026.06.30-11:32:45.618[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 2 is starting...
+2026.06.30-11:32:45.619[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_5,m_transfer-w2_w0_r1_5,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.623[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_8,merchant,m_transfer-w2_w0_r1_8,["sha256:m_transfer-w2_w0_r1_8"]],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.627[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_8,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_8"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.629[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_8,m_transfer-w2_w0_r1_8,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.632[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_9,merchant,m_transfer-w2_w0_r1_9,["sha256:m_transfer-w2_w0_r1_9"]],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.635[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_9,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_9"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.637[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_9,m_transfer-w2_w0_r1_9,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.640[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_3,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_3"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.643[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_3,m_transfer-w2_w0_r1_3,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.657[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_0,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_0"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.657[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_1,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_1"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.657[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_6,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_6"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.658[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_4,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_4"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.658[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_m_transfer-w2_w0_r1_2,approved,low,standard,false,["sha256:m_transfer-w2_w0_r1_2"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.671[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_0,m_transfer-w2_w0_r1_0,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.672[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_1,m_transfer-w2_w0_r1_1,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.672[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_6,m_transfer-w2_w0_r1_6,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.672[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_4,m_transfer-w2_w0_r1_4,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.672[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_2,m_transfer-w2_w0_r1_2,MERCHANT],  with error: Error: Channel has been shut down
+2026.06.30-11:32:45.672[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#2
+2026.06.30-11:32:45.677[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.06.30-11:32:45.682[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:32:45.686[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.06.30-11:32:45.686[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is starting...
+2026.06.30-11:33:07.534[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_56,c_transfer-w2_w0_r2_56,STANDARD],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.pjp.paynet:13051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:07.561[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_56,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_56 not found
+2026.06.30-11:33:07.686[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_56,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_56 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_56 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_56 not found
+2026.06.30-11:33:07.776[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_56,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_56 not found
+-  peer0.ojk.paynet:12051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_56 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_56 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_56 not found
+2026.06.30-11:33:07.784[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w1_r2_60,approved,low,simplified,false,["sha256:c_transfer-w2_w1_r2_60"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_60 not found
+-  peer0.ojk.paynet:12051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_60 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_60 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_60 not found
+2026.06.30-11:33:07.793[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w1_r2_61,approved,low,standard,false,["sha256:c_transfer-w2_w1_r2_61"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_61 not found
+-  peer0.ojk.paynet:12051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_61 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_61 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_61 not found
+2026.06.30-11:33:07.806[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r2_58,c_transfer-w2_w1_r2_58,STANDARD],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.ojk.paynet:12051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.pjp.paynet:13051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:07.834[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_57,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_57 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_57 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_57 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_57 not found
+2026.06.30-11:33:07.838[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r1_64,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_64 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_64 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_64 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_64 not found
+2026.06.30-11:33:07.880[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r1_60,c_transfer-w2_w1_r1_60,BASIC],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.himbara.paynet:9051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.commercial.paynet:11051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.pjp.paynet:13051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:07.884[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_58,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_58 not found
+2026.06.30-11:33:07.900[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r2_61,c_transfer-w2_w1_r2_61,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:07.904[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r2_60,c_transfer-w2_w1_r2_60,BASIC],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:07.923[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_60,500000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_60 not found
+2026.06.30-11:33:07.945[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_60,500000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_60 not found
+2026.06.30-11:33:07.948[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_61,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_61 not found
+2026.06.30-11:33:07.953[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r1_59,c_transfer-w2_w1_r1_59,STANDARD],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.himbara.paynet:9051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.pjp.paynet:13051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.004[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r2_60,approved,low,simplified,false,["sha256:c_transfer-w2_w0_r2_60"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r2_60 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r2_60 not found
+2026.06.30-11:33:08.107[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_59,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_59 not found
+2026.06.30-11:33:08.114[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_57,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_57 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_57 not found
+2026.06.30-11:33:08.114[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r2_59,approved,low,standard,false,["sha256:c_transfer-w2_w0_r2_59"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r2_59 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r2_59 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r2_59 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r2_59 not found
+2026.06.30-11:33:08.120[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_60,c_transfer-w2_w0_r2_60,BASIC],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.124[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w1_r2_63,approved,low,standard,false,["sha256:c_transfer-w2_w1_r2_63"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_63 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_63 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_63 not found
+2026.06.30-11:33:08.125[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r1_67,approved,low,standard,false,["sha256:c_transfer-w2_w0_r1_67"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_67 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_67 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_67 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_67 not found
+2026.06.30-11:33:08.129[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r1_66,approved,low,standard,false,["sha256:c_transfer-w2_w0_r1_66"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_66 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_66 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_66 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_66 not found
+2026.06.30-11:33:08.160[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_60,500000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_60 not found
+2026.06.30-11:33:08.164[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r2_63,c_transfer-w2_w1_r2_63,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.170[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_59,c_transfer-w2_w0_r2_59,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.175[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r1_66,c_transfer-w2_w0_r1_66,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.181[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r1_67,c_transfer-w2_w0_r1_67,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.184[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_63,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_63 not found
+2026.06.30-11:33:08.195[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r1_66,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_66 not found
+2026.06.30-11:33:08.199[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_59,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_59 not found
+2026.06.30-11:33:08.206[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r1_67,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_67 not found
+2026.06.30-11:33:08.263[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_57,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.ojk.paynet:12051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_57 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_57 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_57 not found
+2026.06.30-11:33:08.399[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w1_r2_62,approved,low,standard,false,["sha256:c_transfer-w2_w1_r2_62"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_62 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_62 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w1_r2_62 not found
+2026.06.30-11:33:08.402[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_59,5000000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_59 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_59 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_59 not found
+2026.06.30-11:33:08.448[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r2_62,c_transfer-w2_w1_r2_62,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.477[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r1_68,approved,low,standard,false,["sha256:c_transfer-w2_w0_r1_68"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_68 not found
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_68 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_68 not found
+2026.06.30-11:33:08.533[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r2_62,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r2_62 not found
+2026.06.30-11:33:08.576[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r1_65,500000],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_65 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_65 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_65 not found
+2026.06.30-11:33:08.594[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r1_69,approved,low,standard,false,["sha256:c_transfer-w2_w0_r1_69"],2099-12-31T23:59:59Z],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_69 not found
+-  peer0.commercial.paynet:11051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_69 not found
+-  peer0.himbara.paynet:9051:chaincode response 500, KYC profile kyc_c_transfer-w2_w0_r1_69 not found
+2026.06.30-11:33:08.599[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r1_68,c_transfer-w2_w0_r1_68,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.668[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_61,c_transfer-w2_w0_r2_61,STANDARD],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+-  peer0.commercial.paynet:11051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.722[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r1_68,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_68 not found
+2026.06.30-11:33:08.726[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_61,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r2_61 not found
+2026.06.30-11:33:08.736[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r1_69,c_transfer-w2_w0_r1_69,STANDARD],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, derive wallet tier: KYC status pending does not allow spending
+2026.06.30-11:33:08.889[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r1_69,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w0_r1_69 not found
+2026.06.30-11:33:12.994[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.06.30-11:33:12.995[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:33:12.995[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.06.30-11:33:12.995[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.06.30-11:33:12.995[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.06.30-11:33:12.996[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.06.30-11:33:12.996[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is completed
+2026.06.30-11:33:12.996[32m info [39m [caliper] [worker-message-handler] 	Worker#0 prepared for Round#1
+2026.06.30-11:33:13.001[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_c_transfer-w2_w0_r2_78,retail_customer,c_transfer-w2_w0_r2_78,["sha256:c_transfer-w2_w0_r2_78"]],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.004[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r2_78,approved,low,standard,false,["sha256:c_transfer-w2_w0_r2_78"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.008[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_78,c_transfer-w2_w0_r2_78,STANDARD],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.011[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_78,5000000],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.016[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_c_transfer-w2_w0_r2_79,retail_customer,c_transfer-w2_w0_r2_79,["sha256:c_transfer-w2_w0_r2_79"]],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.019[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RefreshKycProfile] using arguments [kyc_c_transfer-w2_w0_r2_79,approved,low,standard,false,["sha256:c_transfer-w2_w0_r2_79"],2099-12-31T23:59:59Z],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.021[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_79,c_transfer-w2_w0_r2_79,STANDARD],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.024[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_79,5000000],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.028[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_76,5000000],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.035[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w0_r2_77,c_transfer-w2_w0_r2_77,STANDARD],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.037[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_77,5000000],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.039[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r2_75,500000],  with error: Error: Channel has been shut down
+2026.06.30-11:33:13.131[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.06.30-11:33:13.131[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:33:13.131[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.06.30-11:33:13.131[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is completed
+2026.06.30-11:33:13.131[32m info [39m [caliper] [worker-message-handler] 	Worker#0 prepared for Round#2
+2026.06.30-11:33:15.135[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.06.30-11:33:15.135[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:33:15.135[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.06.30-11:33:15.135[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.06.30-11:33:15.135[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.06.30-11:33:15.135[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.06.30-11:33:15.136[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 2 is completed
+2026.06.30-11:33:15.136[32m info [39m [caliper] [worker-message-handler] 	Worker#1 prepared for Round#2
+2026.06.30-11:33:15.136[32m info [39m [caliper] [worker-orchestrator] 	2 workers prepared, progressing to test phase.
+2026.06.30-11:33:15.137[32m info [39m [caliper] [round-orchestrator] 	Monitors successfully started
+2026.06.30-11:33:15.140[32m info [39m [caliper] [worker-message-handler] 	Worker#0 is starting Round#2
+2026.06.30-11:33:15.142[32m info [39m [caliper] [worker-message-handler] 	Worker#1 is starting Round#2
+2026.06.30-11:33:15.145[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.06.30-11:33:15.146[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.06.30-11:33:15.148[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:33:15.148[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:33:15.151[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.06.30-11:33:15.152[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.06.30-11:33:15.153[32m info [39m [caliper] [caliper-worker] 	Worker #1 starting workload loop
+2026.06.30-11:33:15.155[32m info [39m [caliper] [caliper-worker] 	Worker #0 starting workload loop
+(node:964239) TimeoutNegativeWarning: -2 is a negative number.
+Timeout duration was set to 1.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:964238) TimeoutNegativeWarning: -2 is a negative number.
+Timeout duration was set to 1.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026.06.30-11:33:15.166[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_77,5000000],  with error: Error: Channel has been shut down
+2026.06.30-11:33:15.175[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r1_78,c_transfer-w2_w1_r1_78,STANDARD],  with error: Error: Channel has been shut down
+2026.06.30-11:33:15.181[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_c_transfer-w2_w1_r1_79,c_transfer-w2_w1_r1_79,STANDARD],  with error: Error: Channel has been shut down
+2026.06.30-11:33:15.192[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_78,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_78 not found
+2026.06.30-11:33:15.193[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r1_79,5000000],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_c_transfer-w2_w1_r1_79 not found
+2026.06.30-11:33:15.195[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.06.30-11:33:15.195[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.06.30-11:33:15.195[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.06.30-11:33:15.195[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.06.30-11:33:15.196[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.06.30-11:33:15.196[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.06.30-11:33:15.196[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is completed
+2026.06.30-11:33:15.196[32m info [39m [caliper] [worker-message-handler] 	Worker#1 prepared for Round#1
+/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:308
+                this.workers[workerId].phases[phase].resolve();
+                                                     ^
+
+TypeError: this.workers[workerId].phases[phase].resolve is not a function
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:308:54)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:508:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:508:28)
+    at emit (node:internal/child_process:948:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)
+
+Node.js v24.14.1
+2026.06.30-11:33:15.209[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_transfer-w2_w1_r2_0,wlt_c_transfer-w2_w1_r2_21,65431],  with error: Error: Channel has been shut down
+2026.06.30-11:33:15.213[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_transfer-w2_w1_r2_1,wlt_c_transfer-w2_w1_r2_22,67219],  with error: Error: Channel has been shut down
+2026.06.30-11:33:15.288[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_transfer-w2_w1_r2_2,wlt_c_transfer-w2_w1_r2_23,1245286],  with error: Error: Channel has been shut down
+2026.06.30-11:33:15.321[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_transfer-w2_w1_r2_3,wlt_c_transfer-w2_w1_r2_24,100845],  with error: Error: Channel has been shut down

@@ -1,0 +1,21 @@
+{
+  "name": "commercial-paynet",
+  "version": "1.0.0",
+  "client": { "organization": "CommercialBankOrg" },
+  "channels": {
+    "mychannel": { "peers": { "peer0.commercial.paynet": {} } }
+  },
+  "organizations": {
+    "CommercialBankOrg": { "mspid": "CommercialBankOrgMSP", "peers": ["peer0.commercial.paynet"] }
+  },
+  "peers": {
+    "peer0.commercial.paynet": {
+      "url": "grpcs://localhost:11051",
+      "tlsCACerts": { "path": "/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/network/organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls/ca.crt" },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.commercial.paynet",
+        "hostnameOverride": "peer0.commercial.paynet"
+      }
+    }
+  }
+}
