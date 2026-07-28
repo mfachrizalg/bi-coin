@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/middleware"
+	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/services"
 )
 
 func TestOfflineRoutesAreNotRegistered(t *testing.T) {
@@ -49,6 +50,9 @@ func TestCurrentRetailRoutesAreRegistered(t *testing.T) {
 		{http.MethodPost, "/kyc/profiles/kyc_budi/refresh", middleware.RoleBankPjp},
 		{http.MethodPost, "/transfers", middleware.RoleKycVerified},
 		{http.MethodPost, "/transfers", middleware.RoleMerchant},
+		{http.MethodPost, "/qris/resolve", middleware.RoleKycVerified},
+		{http.MethodPost, "/qris/pay", middleware.RoleKycVerified},
+		{http.MethodPost, "/qris/intents", middleware.RoleMerchant},
 	}
 
 	for _, route := range currentRoutes {
@@ -60,6 +64,19 @@ func TestCurrentRetailRoutesAreRegistered(t *testing.T) {
 			t.Fatalf("%s %s role %s got %d, want request validation 422",
 				route.method, route.path, route.role, response.Code)
 		}
+	}
+}
+
+func TestKycVerifiedCannotCreateQrisIntent(t *testing.T) {
+	router := mux.NewRouter()
+	New(nil, nil).RegisterRoutes(router)
+
+	req := httptest.NewRequest(http.MethodPost, "/qris/intents", strings.NewReader(`{}`))
+	req = requestWithRole(req, middleware.RoleKycVerified)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, req)
+	if response.Code != http.StatusForbidden {
+		t.Fatalf("kyc_verified create qris got %d, want 403", response.Code)
 	}
 }
 
@@ -87,6 +104,28 @@ func TestRetailKycMutationIsRestrictedToBankPjp(t *testing.T) {
 	}
 }
 
+func TestSupervisorCanReadParticipantsButCannotSubmit(t *testing.T) {
+	router := mux.NewRouter()
+	svc := services.NewLedgerServiceForTest(routeTestContract{}, nil, "")
+	New(svc, nil).RegisterRoutes(router)
+
+	readReq := httptest.NewRequest(http.MethodGet, "/participants", nil)
+	readReq = requestWithRole(readReq, middleware.RoleSupervisor)
+	readResponse := httptest.NewRecorder()
+	router.ServeHTTP(readResponse, readReq)
+	if readResponse.Code != http.StatusOK {
+		t.Fatalf("supervisor participant read got %d, want 200", readResponse.Code)
+	}
+
+	writeReq := httptest.NewRequest(http.MethodPost, "/participants", strings.NewReader("{}"))
+	writeReq = requestWithRole(writeReq, middleware.RoleSupervisor)
+	writeResponse := httptest.NewRecorder()
+	router.ServeHTTP(writeResponse, writeReq)
+	if writeResponse.Code != http.StatusForbidden {
+		t.Fatalf("supervisor participant submit got %d, want 403", writeResponse.Code)
+	}
+}
+
 func TestMerchantCanReachTransferValidation(t *testing.T) {
 	router := mux.NewRouter()
 	New(nil, nil).RegisterRoutes(router)
@@ -103,6 +142,16 @@ func requestWithRole(req *http.Request, role middleware.Role) *http.Request {
 	ctx := context.WithValue(req.Context(), middleware.RoleKey, role)
 	ctx = context.WithValue(ctx, middleware.AuthenticatedKey, true)
 	return req.WithContext(ctx)
+}
+
+type routeTestContract struct{}
+
+func (routeTestContract) SubmitTransaction(name string, args ...string) ([]byte, error) {
+	return []byte("{}"), nil
+}
+
+func (routeTestContract) EvaluateTransaction(name string, args ...string) ([]byte, error) {
+	return []byte("[]"), nil
 }
 
 func mustParseURL(t *testing.T, path string) *url.URL {

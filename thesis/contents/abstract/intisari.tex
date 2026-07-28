@@ -1,36 +1,33 @@
-Mata uang digital bank sentral (\textit{Central Bank Digital Currency}, CBDC)
-merupakan inisiatif strategis Bank Indonesia melalui Proyek Garuda. Eksperimen
-Proyek Garuda yang terdokumentasi publik berfokus pada CBDC grosir, sehingga masih
-terdapat celah teknis untuk purwarupa ritel yang dapat diuji dan menggabungkan
-distribusi dua jenjang, uji tuntas nasabah berbasis risiko, limit dompet
-deterministik, dan pengawasan institusional. Penelitian ini merancang dan
-mengimplementasikan purwarupa Rupiah Digital ritel pada jaringan
-\textit{permissioned} Hyperledger Fabric.
+Eksperimen publik Proyek Garuda Bank Indonesia berfokus pada mata uang digital
+bank sentral (\textit{Central Bank Digital Currency}, CBDC)
+\textit{wholesale}. Penelitian ini mengkaji cara purwarupa Rupiah Digital ritel
+merepresentasikan distribusi dua jenjang, kebijakan dompet, dan pengawasan
+institusional pada buku besar \textit{permissioned}. Purwarupa menggunakan Hyperledger Fabric 2.5,
+\textit{chaincode} dan layanan \textit{backend} Go, CouchDB, serta PostgreSQL.
 
-Metode \textit{prototyping} mencakup analisis kebutuhan, perancangan arsitektur,
-implementasi, serta pengujian fungsional dan kinerja. \textit{Chaincode} Go hanya
-menyimpan status KYC, risiko, tingkat uji tuntas, persetujuan pejabat senior, masa
-berlaku, dan hash dokumen; data identitas mentah tetap berada di PostgreSQL.
-Tingkatan dompet ritel diturunkan dari profil KYC yang disetujui dan tidak dipilih
-oleh pengguna. Kebijakan BASIC, STANDARD, dan MERCHANT menegakkan batas per
-transaksi, pengeluaran harian, pengeluaran bulanan, penerimaan bulanan, dan saldo
-maksimum menggunakan stempel waktu transaksi Fabric. Dompet institusional Bank
-Indonesia, bank, dan penyedia jasa pembayaran berada di luar tingkatan ritel serta
-menggunakan batas tingkat sistem. Hyperledger Caliper dikonfigurasi dengan beban
-khusus transfer yang terdiri atas 70\% transfer antarpelanggan, 25\% transfer
-pelanggan-ke-pedagang, dan 5\% pembacaan.
+Data identitas mentah disimpan di PostgreSQL, sedangkan buku besar memuat
+status KYC, risiko, masa berlaku, dan hash dokumen. Pemisahan ini tidak memberi
+privasi transaksi pada kanal bersama. Bank atau PJP memasok keputusan KYC.
+\textit{Chaincode} menurunkan tingkatan dompet BASIC, STANDARD, dan MERCHANT
+serta memvalidasi limit transaksi, harian, bulanan, dan saldo. Pemeriksaan
+kepemilikan pada \textit{backend} dan MSP pada \textit{chaincode} membatasi
+pengguna dan organisasi. Kontrol ini tidak membuktikan kepatuhan APU/PPT
+menyeluruh atau persetujuan empat mata.
 
-Pengujian otomatis memverifikasi penurunan tingkatan, kewajiban uji tuntas
-lanjutan untuk risiko tinggi, penegakan batas masuk dan keluar, pemisahan data
-privat, serta batas peran. Purwarupa memisahkan tanggung jawab secara eksplisit:
-pelanggan memberikan data identitas, bank atau PJP melakukan KYC, sedangkan Bank
-Indonesia mengawasi institusi dan peristiwa buku besar. Klaim kinerja dibatasi
-pada pengukuran yang dihasilkan oleh protokol Caliper yang dapat direproduksi.
-Purwarupa ini menjadi dasar teknis yang dapat diaudit untuk mengkaji kebijakan
-Rupiah Digital ritel tanpa mengklaim kesiapan produksi atau kesetaraan limit
-dengan ketentuan hukum.
+Pengujian otomatis dan jalur negatif dengan diagnostik yang spesifik
+mengevaluasi otorisasi serta penegakan kebijakan. Hyperledger Caliper
+mengevaluasi populasi ritel tetap pada beban 10, 30, dan 60 TPS dengan buku
+besar bersih untuk setiap profil, \textit{seed} deterministik, pengulangan beban
+puncak, dan skenario pengeluaran agregat yang melebihi saldo. Pada beban 30 TPS,
+\textit{throughput} sukses mencapai 29,5 TPS tanpa kegagalan; pada 60 TPS,
+nilainya 41,2--47,0 TPS. Ketujuh kasus negatif ditolak dengan alasan yang tepat.
+Pada skenario pengeluaran berlebih, 4 dari 200 transfer dikomit dan saldo akhir
+tetap nonnegatif. Hasil ini merupakan garis dasar purwarupa lokal yang dapat
+diulang, bukan bukti reproduksibilitas lintas mesin atau kapasitas produksi.
+Purwarupa ini merupakan artefak yang dapat diaudit untuk eksperimen kebijakan
+Rupiah Digital ritel dalam batas yang dinyatakan.
 
 \vspace{0.5cm}
 
-\noindent{Kata kunci} : Rupiah Digital, CBDC ritel, Hyperledger Fabric, KYC
+\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, Hyperledger Fabric, KYC
 berbasis risiko, limit dompet

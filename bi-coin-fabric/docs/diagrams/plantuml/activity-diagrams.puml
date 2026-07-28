@@ -1,4 +1,4 @@
-@startuml
+@startuml AD01-Pendaftaran-Peserta
 skinparam monochrome true
 skinparam defaultFontSize 11
 skinparam activityFontSize 11
@@ -12,15 +12,265 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title <<AD08>> Pembekuan Peserta (Participant Freeze)
+title Pendaftaran Peserta
 
-|Supervisor|
+|Bank/PJP|
+start
+:Kirim data pendaftaran peserta;
+
+|Backend API|
+:POST /participants;
+:Validasi peran dan data pendaftaran;
+if (Data valid?) then (tidak)
+  :Kirim error validasi;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:SubmitParticipant()
+status = pending;
+
+|Bank Indonesia|
+:Tinjau pengajuan peserta;
+if (Pengajuan disetujui?) then (ya)
+  |Backend API|
+  :POST /participants/{id}/approve;
+  |Blockchain|
+  :ApproveParticipant()
+  status = active;
+  :Buat dompet peserta;
+else (tidak)
+  |Backend API|
+  :POST /participants/{id}/reject;
+  |Blockchain|
+  :RejectParticipant()
+  status = rejected;
+endif
+
+|Backend API|
+:Kirim hasil pendaftaran;
+stop
+@enduml
+
+@startuml AD02-Penerbitan-Digital-Rupiah
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title Penerbitan Digital Rupiah
+
+|Bank Indonesia|
+start
+:Inisiasi permintaan penerbitan;
+
+|Backend API|
+:POST /issuance-requests;
+:Validasi peran Bank Indonesia;
+if (Peran valid?) then (tidak)
+  :Kirim error 403;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:RequestIssuance();
+:Validasi peserta tujuan;
+if (Peserta valid?) then (tidak)
+  :Tolak penerbitan;
+  end
+else (ya)
+endif
+:Tambah saldo penerbitan;
+:Catat transaksi dan audit;
+
+|Backend API|
+:Kirim respons penerbitan;
+stop
+@enduml
+
+@startuml AD03-Distribusi-Likuiditas-PJP
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title Distribusi Likuiditas ke PJP
+
+|Bank Indonesia|
+start
+:Inisiasi distribusi likuiditas;
+
+|Backend API|
+:POST /distribute;
+:Validasi peran Bank Indonesia;
+if (Peran valid?) then (tidak)
+  :Kirim error 403;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:Validasi peserta penerima;
+if (Penerima aktif?) then (tidak)
+  :Tolak distribusi;
+  end
+else (ya)
+endif
+:Kurangi saldo sumber;
+:Tambah saldo peserta penerima;
+:Catat transaksi distribusi;
+
+|Backend API|
+:Kirim konfirmasi distribusi;
+stop
+@enduml
+
+@startuml AD04-Onboarding-KYC-Pelanggan
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title Onboarding KYC Pelanggan
+
+|Operator PJP|
+start
+:Kirim data KYC pelanggan;
+
+|Backend API|
+:POST /kyc/profiles;
+:Validasi kelengkapan data;
+if (Data lengkap?) then (tidak)
+  :Kirim error validasi;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:SubmitKycProfile()
+status = pending;
+
+|Operator PJP|
+:Proses verifikasi KYC;
+
+|Backend API|
+:POST /kyc/profiles/{id}/refresh;
+
+|Blockchain|
+:RefreshKycProfile();
+:Periksa dokumen dan risiko;
+if (Verifikasi disetujui?) then (ya)
+  :Ubah status menjadi approved;
+else (tidak)
+  :Ubah status menjadi rejected;
+endif
+
+|Backend API|
+:Kirim hasil verifikasi;
+stop
+@enduml
+
+@startuml AD05-Transfer-Saldo-Ritel
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title Transfer Saldo Ritel
+
+|Pelanggan|
+start
+:Inisiasi transfer saldo;
+
+|Backend API|
+:POST /transfers;
+:Validasi token autentikasi;
+if (Token valid?) then (tidak)
+  :Kirim error 401;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:Periksa saldo pengirim;
+if (Saldo cukup?) then (tidak)
+  :Tolak transfer;
+  end
+else (ya)
+endif
+:Validasi limit transaksi;
+if (Dalam limit?) then (tidak)
+  :Tolak transfer;
+  end
+else (ya)
+endif
+:Validasi tingkat KYC penerima;
+:Debit pengirim;
+:Kredit penerima;
+:Catat transaksi;
+
+|Backend API|
+:Kirim konfirmasi transfer;
+stop
+@enduml
+
+@startuml AD08-Pembekuan-Peserta
+skinparam monochrome true
+skinparam defaultFontSize 11
+skinparam activityFontSize 11
+skinparam activityBackgroundColor white
+skinparam activityBorderColor black
+skinparam activityDiamondBackgroundColor white
+skinparam activityDiamondBorderColor black
+skinparam arrowColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor black
+skinparam swimlaneBorderColor black
+skinparam partitionBorderColor black
+
+title Pembekuan dan Pencairan Peserta
+
+|Bank Indonesia|
 start
 :Inisiasi pembekuan peserta;
 
 |Backend API|
 :POST /participants/{id}/freeze;
-:Validasi otorisasi supervisor;
+:Validasi peran Bank Indonesia;
 
 if (Otorisasi valid?) then (tidak)
   :Kirim error;
@@ -40,7 +290,7 @@ if (Akan di-unfreeze?) then (tidak)
 else (ya)
 endif
 
-|Supervisor|
+|Bank Indonesia|
 :Inisiasi pembukaan blokir;
 
 |Backend API|
@@ -56,7 +306,7 @@ end
 
 @enduml
 
-@startuml
+@startuml AD10-Laporan-Supervisi
 skinparam monochrome true
 skinparam defaultFontSize 11
 skinparam activityFontSize 11
@@ -70,7 +320,7 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title <<AD10>> Laporan Supervisi (Supervision Reports)
+title Laporan Supervisi
 
 |Supervisor|
 start

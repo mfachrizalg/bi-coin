@@ -1,0 +1,176 @@
+---
+type: entity
+title: "Bank for International Settlements"
+created: 2026-07-23
+updated: 2026-07-23
+tags:
+  - "entity"
+  - "organization"
+status: developing
+entity_type: organization
+role: "Research-corpus entity"
+first_mentioned: "[[A blueprint for energy systems in the era of central bank digital currencies]]"
+related:
+  - "[[A blueprint for energy systems in the era of central bank digital currencies]]"
+  - "[[A framework for Anti-Money Laundering based on AI and SATP in CBDC Transactions]]"
+  - "[[Adoption of central bank digital currencies- Initial evidence from China]]"
+  - "[[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]]"
+  - "[[Assessing disruptive potential of retail central bank digital currency and influence of design considerations- An open innovation approach in Thailand]]"
+  - "[[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]]"
+  - "[[Block-PAD- A blockchain-enabled framework for resilient and flexible CBDC transactions leveraging digital identity]]"
+  - "[[Blockchain and central bank digital currency]]"
+  - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
+  - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
+  - "[[Blockchain CBDC Security Threats Using STRIDE]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
+  - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
+  - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
+  - "[[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]]"
+  - "[[Central bank digital currencies — Design principles for financial stability]]"
+  - "[[Central bank digital currencies- A critical review]]"
+  - "[[Central bank digital currencies foundational principles and core features]]"
+sources:
+  - "[[A blueprint for energy systems in the era of central bank digital currencies]]"
+  - "[[A framework for Anti-Money Laundering based on AI and SATP in CBDC Transactions]]"
+  - "[[Adoption of central bank digital currencies- Initial evidence from China]]"
+  - "[[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]]"
+  - "[[Assessing disruptive potential of retail central bank digital currency and influence of design considerations- An open innovation approach in Thailand]]"
+  - "[[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]]"
+  - "[[Block-PAD- A blockchain-enabled framework for resilient and flexible CBDC transactions leveraging digital identity]]"
+  - "[[Blockchain and central bank digital currency]]"
+  - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
+  - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
+  - "[[Blockchain CBDC Security Threats Using STRIDE]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
+  - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
+  - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
+  - "[[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]]"
+  - "[[Central bank digital currencies — Design principles for financial stability]]"
+  - "[[Central bank digital currencies- A critical review]]"
+  - "[[Central bank digital currencies foundational principles and core features]]"
+  - "[[Central bank digital currency and bank intermediation- Medium of Exchange vs. Savings vehicle]]"
+  - "[[Central bank digital currency and flight to safety]]"
+  - "[[Central bank digital currency and systemic risk]]"
+  - "[[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]]"
+  - "[[Central bank digital currency- A systematic literature review using text mining approach]]"
+  - "[[Central bank digital currency- Central banking for all-]]"
+  - "[[Central bank digital currency- Payment choices and commercial bank profitability]]"
+  - "[[Central Bank Digital Currency What Factors Determine Its Adoption-]]"
+  - "[[Central Bank Digital Currencies A Technical Exploration of Infrastructure Access and CrossBorder Models]]"
+  - "[[Centralized use of decentralized technology- Tokenization of currencies and assets]]"
+  - "[[Designing a Central Bank Digital Currency (CBDC) Retail Model as a Payment System]]"
+  - "[[Designing Central Bank Digital Currency for Indonesia- The Delphi--Analytic Network Process]]"
+  - "[[Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review]]"
+  - "[[Distributed Ledger Technology DLT) and Blockchain]]"
+  - "[[Fast payment systems and central bank digital currencies- Evidence from Pix and the Drex in Brazil]]"
+  - "[[Garuda-Project-Public-Consultation-Report]]"
+  - "[[How does the fintech sector react to signals from central bank digital currencies]]"
+  - "[[Hyperledger in Action Central Bank Digital Currencies v2]]"
+  - "[[Hyperledger in Action Central Bank Digital Currencies]]"
+  - "[[Implementing a retail CBDC- Lessons learned and key insights]]"
+  - "[[Investigating privacy concerns and trust in the digital Euro in Germany]]"
+  - "[[LimboCoin- On the Denial-of-Service of Token based Retail CBDCs]]"
+  - "[[MEASURING THE URGENCY OF A DIGITAL RUPIAH- A SOCIO-LEGAL REVIEW]]"
+  - "[[Monetary Policy Strategy in the Presence of Central Bank Digital Currency]]"
+  - "[[Money in the digital age- Exploring the potential of central bank digital currency with a focus on social adaptation and education]]"
+  - "[[Nigeria's eNaira, one year after]]"
+  - "[[PayOff- A Regulated Central Bank Digital Currency with Private Offline Payments]]"
+  - "[[Privacy and Compliance Design Options in Offline Central Bank Digital Currencies]]"
+  - "[[Project Polaris Part 1- A Handbook for Offline Payments with CBDC]]"
+  - "[[Project Polaris Part 2- A Security and Resilience Framework for CBDC Systems]]"
+  - "[[Project Polaris Part 3- Closing the CBDC Cyber Threat Modelling Gaps]]"
+  - "[[Project Polaris Part 4- A High-Level Design Guide for Offline Payments with CBDC]]"
+  - "[[Redesigning the eNaira central bank digital currency (CBDC) for payments and macroeconomic effectiveness]]"
+  - "[[Retail CBDC purposes and risk transfers to the central bank]]"
+  - "[[Retail Central Bank Digital Currency Global Landscape (IMF Working Paper)]]"
+  - "[[Retail Central Bank Digital Currency Design Choices- Guide for Policymakers]]"
+  - "[[Smart Reserve Vault A Conceptual Model for Issuance and Burning of Digital Rupiah]]"
+  - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs) (2025)]]"
+  - "[[Supporting Literature and Design Analysis for a Bank Indonesia Thesis on Blockchain-Based Digital Mo]]"
+  - "[[Systemic stablecoin and the defensive case for Central Bank Digital Currency- A critique of the Bank of England’s framing]]"
+  - "[[The crowding-out effect of central bank digital currencies- A simple and generalizable payment portfolio model]]"
+  - "[[The determinants of issuing central bank digital currencies]]"
+  - "[[THE IMPACT OF CENTRAL BANK DIGITAL CURRENCIES NEWS ON BANK STABILITY EVIDENCE FROM ASEAN-5 COUNTRIES]]"
+  - "[[The macroeconomics of central bank digital currencies]]"
+  - "[[The technology of retail central bank digital currency]]"
+  - "[[Understanding the rapid development of CBDC in emerging economies]]"
+  - "[[User adoption of digital currency- A systematic review and future agenda using TCCM approach]]"
+  - "[[White-Paper-CBDC-2022 en]]"
+---
+
+# Bank for International Settlements
+
+## Source mentions
+
+- [[A blueprint for energy systems in the era of central bank digital currencies]] — PDF p. 7
+- [[A framework for Anti-Money Laundering based on AI and SATP in CBDC Transactions]] — PDF p. 6
+- [[Adoption of central bank digital currencies- Initial evidence from China]] — PDF p. 1
+- [[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]] — PDF p. 40
+- [[Assessing disruptive potential of retail central bank digital currency and influence of design considerations- An open innovation approach in Thailand]] — PDF p. 23
+- [[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]] — PDF p. 6
+- [[Block-PAD- A blockchain-enabled framework for resilient and flexible CBDC transactions leveraging digital identity]] — PDF p. 23
+- [[Blockchain and central bank digital currency]] — PDF p. 1
+- [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]] — PDF p. 2
+- [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 20
+- [[Blockchain CBDC Security Threats Using STRIDE]] — PDF p. 7
+- [[Blueprint-Pengembangan-Pasar-Uang-2025]] — PDF p. 7
+- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 5
+- [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]] — PDF p. 14
+- [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 3
+- [[Central Bank Digital Currencies (CBDCs) and democratic values]] — PDF p. 5
+- [[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]] — PDF p. 7
+- [[Central bank digital currencies — Design principles for financial stability]] — PDF p. 20
+- [[Central bank digital currencies- A critical review]] — PDF p. 1
+- [[Central bank digital currencies foundational principles and core features]] — PDF p. 1
+- [[Central bank digital currency and bank intermediation- Medium of Exchange vs. Savings vehicle]] — PDF p. 1
+- [[Central bank digital currency and flight to safety]] — PDF p. 25
+- [[Central bank digital currency and systemic risk]] — PDF p. 21
+- [[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]] — PDF p. 9
+- [[Central bank digital currency- A systematic literature review using text mining approach]] — PDF p. 6
+- [[Central bank digital currency- Central banking for all-]] — PDF p. 2
+- [[Central bank digital currency- Payment choices and commercial bank profitability]] — PDF p. 11
+- [[Central Bank Digital Currency What Factors Determine Its Adoption-]] — PDF p. 8
+- [[Central Bank Digital Currencies A Technical Exploration of Infrastructure Access and CrossBorder Models]] — PDF p. 6
+- [[Centralized use of decentralized technology- Tokenization of currencies and assets]] — PDF p. 3
+- [[Designing a Central Bank Digital Currency (CBDC) Retail Model as a Payment System]] — PDF p. 5
+- [[Designing Central Bank Digital Currency for Indonesia- The Delphi--Analytic Network Process]] — PDF p. 4
+- [[Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review]] — PDF p. 20
+- [[Distributed Ledger Technology DLT) and Blockchain]] — PDF p. 25
+- [[Fast payment systems and central bank digital currencies- Evidence from Pix and the Drex in Brazil]] — PDF p. 1
+- [[Garuda-Project-Public-Consultation-Report]] — PDF p. 16
+- [[How does the fintech sector react to signals from central bank digital currencies]] — PDF p. 5
+- [[Hyperledger in Action Central Bank Digital Currencies v2]] — PDF p. 10
+- [[Hyperledger in Action Central Bank Digital Currencies]] — PDF p. 14
+- [[Implementing a retail CBDC- Lessons learned and key insights]] — PDF p. 2
+- [[Investigating privacy concerns and trust in the digital Euro in Germany]] — PDF p. 12
+- [[LimboCoin- On the Denial-of-Service of Token based Retail CBDCs]] — PDF p. 9
+- [[MEASURING THE URGENCY OF A DIGITAL RUPIAH- A SOCIO-LEGAL REVIEW]] — PDF p. 8
+- [[Monetary Policy Strategy in the Presence of Central Bank Digital Currency]] — PDF p. 3
+- [[Money in the digital age- Exploring the potential of central bank digital currency with a focus on social adaptation and education]] — PDF p. 3
+- [[Nigeria's eNaira, one year after]] — PDF p. 9
+- [[PayOff- A Regulated Central Bank Digital Currency with Private Offline Payments]] — PDF p. 14
+- [[Privacy and Compliance Design Options in Offline Central Bank Digital Currencies]] — PDF p. 6
+- [[Project Polaris Part 1- A Handbook for Offline Payments with CBDC]] — PDF p. 3
+- [[Project Polaris Part 2- A Security and Resilience Framework for CBDC Systems]] — PDF p. 1
+- [[Project Polaris Part 3- Closing the CBDC Cyber Threat Modelling Gaps]] — PDF p. 1
+- [[Project Polaris Part 4- A High-Level Design Guide for Offline Payments with CBDC]] — PDF p. 4
+- [[Redesigning the eNaira central bank digital currency (CBDC) for payments and macroeconomic effectiveness]] — PDF p. 16
+- [[Retail CBDC purposes and risk transfers to the central bank]] — PDF p. 1
+- [[Retail Central Bank Digital Currency Global Landscape (IMF Working Paper)]] — PDF p. 8
+- [[Retail Central Bank Digital Currency Design Choices- Guide for Policymakers]] — PDF p. 17
+- [[Smart Reserve Vault A Conceptual Model for Issuance and Burning of Digital Rupiah]] — PDF p. 4
+- [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs) (2025)]] — PDF p. 1
+- [[Supporting Literature and Design Analysis for a Bank Indonesia Thesis on Blockchain-Based Digital Mo]] — PDF p. 1
+- [[Systemic stablecoin and the defensive case for Central Bank Digital Currency- A critique of the Bank of England’s framing]] — PDF p. 2
+- [[The crowding-out effect of central bank digital currencies- A simple and generalizable payment portfolio model]] — PDF p. 5
+- [[The determinants of issuing central bank digital currencies]] — PDF p. 1
+- [[THE IMPACT OF CENTRAL BANK DIGITAL CURRENCIES NEWS ON BANK STABILITY EVIDENCE FROM ASEAN-5 COUNTRIES]] — PDF p. 3
+- [[The macroeconomics of central bank digital currencies]] — PDF p. 3
+- [[The technology of retail central bank digital currency]] — PDF p. 1
+- [[Understanding the rapid development of CBDC in emerging economies]] — PDF p. 5
+- [[User adoption of digital currency- A systematic review and future agenda using TCCM approach]] — PDF p. 1
+- [[White-Paper-CBDC-2022 en]] — PDF p. 10

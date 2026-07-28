@@ -1,4 +1,3 @@
-% Auto-generated source-code appendix. Listings live in thesis/listings/.
 \lstset{basicstyle=\ttfamily\scriptsize,frame=single,columns=fullflexible,
   breaklines=true,breakatwhitespace=false,keepspaces=true,tabsize=2,
   showstringspaces=false,numbers=left,numberstyle=\tiny\color{codegray}}
@@ -6,6 +5,10 @@
 \section{Source Code Tipe Data dan Struktur \textit{Chaincode}}
 Bagian ini memuat kode sumber definisi paket, impor, serta tipe data dan struktur utama (berkas \texttt{chaincode/digital\_rupiah.go}).
 \lstinputlisting[language=Go]{listings/cc-00-types.go}
+
+\section{Source Code Otorisasi MSP \textit{Chaincode}}
+Bagian ini memuat fungsi pemeriksaan identitas organisasi untuk membatasi mutasi pada batas kepercayaan \textit{chaincode}.
+\lstinputlisting[language=Go,firstline=15,lastline=46]{../bi-coin-fabric/chaincode/digital_rupiah.go}
 
 \section{Source Code Inisialisasi \textit{Ledger}}
 Bagian ini memuat kode sumber fungsi \texttt{InitLedger} yang menanamkan batas tingkatan dan batas sistem (berkas \texttt{chaincode/digital\_rupiah.go}).
@@ -31,9 +34,15 @@ Bagian ini memuat kode sumber fungsi laporan rekonsiliasi, metrik, dan emisi \te
 Bagian ini memuat kode sumber konfigurasi koneksi Caliper ke jaringan Fabric (berkas \texttt{benchmark/networkconfig.yaml}).
 \lstinputlisting{listings/cal-networkconfig.yaml}
 
-\section{Source Code Konfigurasi \textit{Benchmark} Caliper}
-Bagian ini memuat kode sumber definisi ronde pengujian, laju, dan durasi (berkas \texttt{benchmark/benchconfig.yaml}).
-\lstinputlisting{listings/cal-benchconfig.yaml}
+\section{Source Code Suite Konfigurasi \textit{Benchmark} Caliper}
+Bagian ini memuat konfigurasi benchmark yang digunakan pada versi tesis saat ini. Berkas dimuat langsung dari sumber otoritatif agar lampiran tidak menyimpang dari konfigurasi eksekusi.
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-1.yaml}
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml}
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-4.yaml}
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/retail-transfer-repeat.yaml}
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/functionality.yaml}
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/negative-path.yaml}
+\lstinputlisting{../bi-coin-fabric/benchmark/benchconfigs/adversarial.yaml}
 
 \section{Source Code Skrip Pembangkit Aset Jaringan Caliper}
 Bagian ini memuat kode sumber skrip penyiapan aset jaringan untuk Caliper (berkas \texttt{benchmark/gen-network-assets.sh}).
@@ -41,8 +50,16 @@ Bagian ini memuat kode sumber skrip penyiapan aset jaringan untuk Caliper (berka
 
 \section{Source Code \textit{Workload} Transfer Ritel}
 Bagian ini memuat kode sumber modul beban transfer antarpelanggan, transfer pelanggan-ke-pedagang, dan pembacaan dompet (berkas \texttt{benchmark/workloads/retail-transfer.js}).
-\lstinputlisting{listings/cal-retail-transfer.js}
+\lstinputlisting{../bi-coin-fabric/benchmark/workloads/retail-transfer.js}
 
 \section{Source Code \textit{Workload} Beban Dasar Ritel}
 Bagian ini memuat kode sumber modul inisialisasi populasi dan beban dasar (berkas \texttt{benchmark/workloads/retail-base.js}).
-\lstinputlisting{listings/cal-retail-base.js}
+\lstinputlisting{../bi-coin-fabric/benchmark/workloads/retail-base.js}
+
+\section{Source Code \textit{Workload Negative-Path}}
+Bagian ini memuat kode sumber modul pengujian konformansi kebijakan yang menargetkan penolakan transaksi tidak sah sebagai keluaran yang diharapkan (berkas \texttt{benchmark/workloads/negative-path.js}).
+\lstinputlisting{../bi-coin-fabric/benchmark/workloads/negative-path.js}
+
+\section{Source Code \textit{Workload Aggregate Overspend}}
+Bagian ini memuat kode sumber modul pengujian dengan satu pengirim bersama, permintaan agregat yang melebihi saldo, klasifikasi alasan penolakan, dan pemeriksaan saldo akhir (berkas \texttt{benchmark/workloads/adversarial-double-spend.js}).
+\lstinputlisting{../bi-coin-fabric/benchmark/workloads/adversarial-double-spend.js}

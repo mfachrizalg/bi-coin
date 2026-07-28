@@ -5,24 +5,33 @@
 Berdasarkan hasil rancang bangun dan pengujian, kesimpulan penelitian adalah
 sebagai berikut.
 \begin{enumerate}
-    \item Purwarupa Rupiah Digital ritel dibangun pada Hyperledger Fabric 2.5
-    dengan lima organisasi, \textit{backend} Go, CouchDB, dan PostgreSQL. Model
-    distribusi dua jenjang memisahkan Bank Indonesia, bank validator, PJP, dan
-    pengguna ritel. Dompet institusional berada di luar tingkatan KYC ritel.
-    \item Kebijakan KYC diterapkan sebagai penurunan tingkatan yang
-    deterministik. Pelanggan memberikan data identitas; bank/PJP melakukan uji
-    tuntas dan keputusan KYC; Bank Indonesia serta pengawas membaca jangkar
-    kepatuhan dan peristiwa pengawasan. Data identitas mentah tidak disimpan
-    pada buku besar. Risiko tinggi memerlukan EDD dan persetujuan senior.
-    \item Tingkatan BASIC, STANDARD, dan MERCHANT menegakkan batas saldo
-    maksimum, per transaksi, keluar harian, keluar bulanan, dan masuk bulanan.
-    Jalur transfer yang sama menangani transaksi antarpelanggan dan
-    pelanggan-ke-pedagang, sehingga pemeriksaan KYC dan limit tidak terduplikasi.
-    \item Pengujian otomatis memverifikasi pemetaan KYC, penolakan risiko
-    terlarang, persyaratan risiko tinggi, penghitung limit deterministik,
-    pemisahan data privat, dan batas peran. Klaim kinerja hanya boleh dibuat
-    dari laporan Caliper versi 2.0 dengan beban transfer yang didokumentasikan;
-    hasil beban kerja lama tidak digunakan kembali.
+    \item Berdasarkan rumusan masalah pertama mengenai perancangan sistem
+    Rupiah Digital ritel berbasis Hyperledger Fabric, penelitian ini berhasil
+    merancang dan membangun purwarupa dengan arsitektur dua jenjang yang
+    memisahkan peran Bank Indonesia, bank validator, PJP, dan pengguna ritel.
+    Implementasi dijalankan pada Hyperledger Fabric 2.5 dengan lima organisasi,
+    \textit{backend} Go, CouchDB, dan PostgreSQL, sehingga alur penerbitan dan
+    distribusi likuiditas berjenjang dapat direalisasikan sebagai artefak teknis
+    yang dapat diuji.
+    \item Berdasarkan rumusan masalah kedua mengenai kontrol kepatuhan pada
+    lapisan \textit{chaincode}, penelitian ini menunjukkan bahwa status dan
+    risiko KYC yang dipasok bank/PJP, penurunan tingkatan dompet, limit
+    transaksi, serta batas peran organisasi dapat divalidasi sesuai aturan
+    purwarupa. Data identitas mentah tetap berada di PostgreSQL, sedangkan
+    \textit{chaincode} menerima jangkar kepatuhan. Cakupan tersebut belum
+    membuktikan kepatuhan APU/PPT menyeluruh, persetujuan empat mata, atau
+    privasi transaksi pada kanal bersama.
+    \item Berdasarkan rumusan masalah ketiga mengenai kinerja sistem, batch
+    Caliper 27 Juli 2026 mencapai 29,5 TPS sukses pada beban 30 TPS tanpa
+    kegagalan. Pada beban 60 TPS, \textit{completion throughput} tetap 58,9 TPS,
+    tetapi \textit{successful throughput} hanya 41,2--47,0 TPS. Lima ronde ulang
+    menghasilkan rerata \textit{successful throughput} 31,46 TPS dengan interval
+    kepercayaan 95\% untuk rerata sebesar $\pm$7,44 TPS. Variasi ini menunjukkan
+    saturasi dan ketidakstabilan \textit{endorsement}, bukan kapasitas produksi.
+    Tujuh kasus negatif ditolak dengan alasan yang tepat. Pada permintaan
+    agregat Rp200.000 dari saldo Rp50.000, empat transfer dikomit, 196 ditolak,
+    dan saldo akhir Rp46.000; hasil ini mendukung invariant saldo nonnegatif pada
+    topologi uji tanpa mengklaim pembuktian formal \textit{double-spend}.
 \end{enumerate}
 
 \section{Saran}
@@ -33,30 +42,22 @@ sebagai berikut.
     konfigurasi, versi \textit{chaincode}, jumlah sukses/gagal, latensi,
     \textit{throughput}, konflik MVCC, dan pengulangan setiap skenario bersama
     hasilnya.
-    \item Memperluas pemisahan profil benchmark fungsional. Pengujian penelitian
-    ini telah memisahkan transfer ritel, KYC/\textit{onboarding}, operasi
-    moneter, kueri pengawasan, dan kebijakan administratif; penelitian lanjutan
-    perlu menambahkan variasi ukuran data, distribusi baca/tulis, dan pengulangan
-    statistik agar setiap profil dapat dibandingkan secara lebih kuat.
-    \item Menambahkan skenario \textit{hot-wallet contention} sebagai
-    eksperimen terpisah dari garis dasar tanpa perebutan kunci. Skenario ini
-    tidak digunakan pada pengujian utama karena tingkat konsentrasi pedagang dan
-    pola pengulangan transaksi belum didasarkan pada jejak transaksi empiris,
-    sehingga dapat menambahkan asumsi yang belum tervalidasi. Pengujian lanjutan
-    perlu menetapkan konsentrasi akses dari jejak transaksi yang dianonimkan atau
-    distribusi sintetis yang parameternya dilaporkan eksplisit, lalu mengukur
-    konflik MVCC awal, keberhasilan setelah \textit{retry}, \textit{throughput}
-    akhir, serta latensi persentil ke-95 dan ke-99. Mekanisme \textit{retry}
-    harus terbatas, memakai \textit{backoff}, dan menjaga idempotensi agar
-    transaksi tidak diterapkan lebih dari satu kali.
+    \item Menelusuri ketidakcocokan \textit{proposal response payload} pada
+    beban 60 TPS dan memisahkan pengaruh propagasi status, kebijakan
+    \textit{endorsement}, kontensi kunci, dan jalur submit \textit{gateway}.
+    \item Memperluas \textit{repeatability run} ke profil KYC, operasi moneter,
+    kueri pengawasan, dan kebijakan administratif agar setiap profil tidak
+    hanya memiliki satu angka \textit{throughput}, tetapi juga simpangan,
+    interval kepercayaan, dan latensi persentil ke-95 serta ke-99.
+    \item Mengembangkan skenario \textit{hot-wallet contention} dari jejak
+    transaksi yang dianonimkan atau distribusi sintetis yang parameternya
+    dilaporkan eksplisit, lalu mengukur konflik MVCC awal, keberhasilan setelah
+    \textit{retry}, \textit{throughput} akhir, dan pengaruh kebijakan
+    \textit{backoff} terhadap idempotensi transaksi.
     \item Memvalidasi angka limit dan distribusi tingkatan bersama Bank
-    Indonesia, bank/PJP, serta ahli APU/PPT. Nilai penelitian adalah parameter
-    purwarupa dan tidak boleh diperlakukan sebagai ketentuan CBDC.
-    \item Mengkaji remunerasi CBDC (\textit{CBDC rate})---berbunga untuk
-    \textit{wholesale} dan tanpa bunga untuk ritel---beserta dampaknya terhadap
-    kebijakan moneter dan risiko \textit{disintermediation} sebagai studi
-    makroekonomi terpisah, melengkapi purwarupa fungsional ini
-    \cite{SyarifuddinBakhtiar2021Monetary, Syarifuddin2024OPTIMAL}.
+    Indonesia, bank/PJP, serta ahli APU/PPT. Nilai yang digunakan dalam
+    penelitian ini merupakan parameter purwarupa dan tidak boleh diperlakukan
+    sebagai ketentuan CBDC.
     \item Mengintegrasikan penyedia eKYC nyata dan menerapkan kontrol retensi,
     enkripsi, penghapusan, serta audit akses untuk data identitas di PostgreSQL.
     \item Menguji \textit{private data collection} atau teknik kriptografi

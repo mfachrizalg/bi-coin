@@ -2,13 +2,17 @@
   "name": "bi-coin-fabric",
   "version": "1.0.0",
   "private": true,
-  "description": "Garuda Digital Rupiah — Hyperledger Fabric CBDC Implementation",
+  "description": "Garuda Digital Rupiah \u2014 Hyperledger Fabric CBDC Implementation",
   "scripts": {
     "benchmark": "caliper launch manager --caliper-benchconfig benchmark/benchconfig.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:transfer:w1": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-1.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:transfer:w2": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-2.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:transfer:w4": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-4.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
-    "benchmark:functionality": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/functionality.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace ."
+    "benchmark:functionality": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/functionality.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
+    "benchmark:negative": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/negative-path.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
+    "benchmark:adversarial": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/adversarial.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
+    "benchmark:transfer:repeat": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-repeat.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
+    "benchmark:boundary": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/boundary-path.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace ."
   },
   "devDependencies": {
     "@hyperledger/caliper-cli": "^0.6.0",

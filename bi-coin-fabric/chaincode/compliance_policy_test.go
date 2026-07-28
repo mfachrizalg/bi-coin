@@ -134,6 +134,89 @@ func TestValidateRetailTransferLimits(t *testing.T) {
 	}
 }
 
+func TestValidateKycEligibility(t *testing.T) {
+	now := time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name    string
+		profile KycProfile
+		wantErr string
+	}{
+		{
+			name:    "approved low risk profile is eligible",
+			profile: approvedProfile(SubjectRetailCustomer, DueDiligenceSimplified, RiskLow, false),
+		},
+		{
+			name:    "expired profile is rejected",
+			profile: KycProfile{Status: KycApproved, RiskLevel: RiskLow, DueDiligenceLevel: DueDiligenceSimplified, ExpiresAt: "2026-06-26T12:00:00Z"},
+			wantErr: "expired",
+		},
+		{
+			name:    "prohibited risk is rejected",
+			profile: approvedProfile(SubjectRetailCustomer, DueDiligenceEnhanced, RiskProhibited, true),
+			wantErr: "prohibited",
+		},
+		{
+			name:    "high risk without enhanced due diligence is rejected",
+			profile: KycProfile{Status: KycApproved, RiskLevel: RiskHigh, DueDiligenceLevel: DueDiligenceStandard, ExpiresAt: "2027-06-27T12:00:00Z"},
+			wantErr: "enhanced due diligence",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateKycEligibility(tt.profile, now)
+			if tt.wantErr != "" {
+				if err == nil || !strings.Contains(strings.ToLower(err.Error()), tt.wantErr) {
+					t.Fatalf("expected error containing %q, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("validate KYC eligibility: %v", err)
+			}
+		})
+	}
+}
+
+func TestResetRetailCounters(t *testing.T) {
+	now := time.Date(2026, time.July, 1, 10, 0, 0, 0, time.UTC)
+
+	t.Run("new day resets daily and monthly across month boundary", func(t *testing.T) {
+		wallet := Wallet{
+			DailySpent:      100_000,
+			MonthlySpent:    700_000,
+			MonthlyReceived: 900_000,
+			LastResetDay:    "2026-06-30",
+			LastResetMonth:  "2026-06",
+		}
+
+		resetRetailCounters(&wallet, now)
+
+		if wallet.DailySpent != 0 || wallet.MonthlySpent != 0 || wallet.MonthlyReceived != 0 {
+			t.Fatalf("wallet counters = %+v, want all counters reset", wallet)
+		}
+		if wallet.LastResetDay != "2026-07-01" || wallet.LastResetMonth != "2026-07" {
+			t.Fatalf("wallet reset markers = %+v, want July markers", wallet)
+		}
+	})
+
+	t.Run("same day keeps counters intact", func(t *testing.T) {
+		wallet := Wallet{
+			DailySpent:      100_000,
+			MonthlySpent:    700_000,
+			MonthlyReceived: 900_000,
+			LastResetDay:    "2026-07-01",
+			LastResetMonth:  "2026-07",
+		}
+
+		resetRetailCounters(&wallet, now)
+
+		if wallet.DailySpent != 100_000 || wallet.MonthlySpent != 700_000 || wallet.MonthlyReceived != 900_000 {
+			t.Fatalf("wallet counters changed unexpectedly: %+v", wallet)
+		}
+	})
+}
+
 func approvedProfile(subject KycSubjectType, diligence DueDiligenceLevel, risk KycRiskLevel, seniorApproval bool) KycProfile {
 	return KycProfile{
 		SubjectType:       subject,

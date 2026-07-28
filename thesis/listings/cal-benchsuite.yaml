@@ -1,0 +1,317 @@
+# benchmark/benchconfigs/retail-transfer-workers-1.yaml
+test:
+  name: Digital Rupiah Retail Transfer Benchmark - 1 Worker
+  description: Contention-free retail transfer baseline with one Caliper worker
+  workers:
+    type: local
+    number: 1
+  rounds:
+    - label: retail-warmup-w1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w1
+          customers: 80
+          merchants: 10
+          transactionSlots: 40
+          fundedRatio: 1
+
+    - label: retail-sustained-w1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w1
+          customers: 80
+          merchants: 10
+          transactionSlots: 40
+          fundedRatio: 1
+
+    - label: retail-peak-w1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w1
+          customers: 80
+          merchants: 10
+          transactionSlots: 40
+          fundedRatio: 1
+
+---
+# benchmark/benchconfigs/retail-transfer-workers-2.yaml
+test:
+  name: Digital Rupiah Retail Transfer Benchmark - 2 Workers
+  description: Contention-free retail transfer baseline with two Caliper workers
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: retail-warmup-w2
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w2
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+
+    - label: retail-sustained-w2
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w2
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+
+    - label: retail-peak-w2
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w2
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+
+---
+# benchmark/benchconfigs/retail-transfer-workers-4.yaml
+test:
+  name: Digital Rupiah Retail Transfer Benchmark - 4 Workers
+  description: Contention-free retail transfer baseline with four Caliper workers
+  workers:
+    type: local
+    number: 4
+  rounds:
+    - label: retail-warmup-w4
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w4
+          customers: 40
+          merchants: 10
+          transactionSlots: 10
+          fundedRatio: 1
+
+    - label: retail-sustained-w4
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w4
+          customers: 40
+          merchants: 10
+          transactionSlots: 10
+          fundedRatio: 1
+
+    - label: retail-peak-w4
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w4
+          customers: 40
+          merchants: 10
+          transactionSlots: 10
+          fundedRatio: 1
+
+---
+# benchmark/benchconfigs/retail-transfer-repeat.yaml
+test:
+  name: Digital Rupiah Retail Transfer - Repetition (mean +/- CI)
+  description: Five identical peak rounds of the contention-free transfer workload so throughput/latency can be reported with a confidence interval
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: retail-peak-rep-1
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: &repeat_workload
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-repeat
+          customers: 80
+          merchants: 10
+          transactionSlots: 20
+          fundedRatio: 1
+    - label: retail-peak-rep-2
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+    - label: retail-peak-rep-3
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+    - label: retail-peak-rep-4
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+    - label: retail-peak-rep-5
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+
+---
+# benchmark/benchconfigs/functionality.yaml
+test:
+  name: Digital Rupiah Functional Benchmark Profiles
+  description: Separate benchmark profiles for onboarding, monetary operations, supervision reads, and administrative policy writes
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: kyc-onboarding
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: benchmark/workloads/retail-onboarding.js
+        arguments:
+          scenario: kyc-onboarding
+          tier: STANDARD
+
+    - label: monetary-ops
+      txNumber: 80
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 20
+      workload:
+        module: benchmark/workloads/monetary-ops.js
+        arguments:
+          scenario: monetary-ops
+          wallets: 50
+          transactionSlots: 40
+          initialStandardBalance: 1000000
+          initialBasicBalance: 100000
+
+    - label: supervision-reads
+      txNumber: 80
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/supervision-reads.js
+        arguments:
+          scenario: supervision-reads
+          customers: 50
+          merchants: 10
+          transactionSlots: 40
+          seedTransfers: 5
+
+    - label: admin-policy
+      txNumber: 40
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: benchmark/workloads/admin-policy.js
+        arguments:
+          scenario: admin-policy
+
+---
+# benchmark/benchconfigs/negative-path.yaml
+test:
+  name: Digital Rupiah Negative-Path Conformance
+  description: Every submission violates one policy rule and must be rejected; a zero-gap run proves enforcement
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: negative-path
+      txNumber: 42
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: benchmark/workloads/negative-path.js
+        arguments:
+          scenario: negative-path
+
+---
+# benchmark/benchconfigs/adversarial.yaml
+test:
+  name: Digital Rupiah Adversarial Double-Spend
+  description: Concurrent transfers from one shared sender to force MVCC version conflicts; rejections evidence double-spend prevention
+  workers:
+    type: local
+    number: 4
+  rounds:
+    - label: double-spend-contention
+      txNumber: 200
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 80
+      workload:
+        module: benchmark/workloads/adversarial-double-spend.js
+        arguments:
+          scenario: double-spend
+          receivers: 20
+          transferAmount: 1000
+          senderFunding: 19000000

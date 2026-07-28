@@ -1,0 +1,74 @@
+test:
+  name: Digital Rupiah Retail Transfer - Repetition (mean +/- CI)
+  description: Five seeded 60-second peak rounds of the low-contention transfer workload for mean and confidence-interval estimation
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: retail-peak-rep-1
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: &repeat_workload
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-repeat
+          customers: 58
+          merchants: 8
+          transactionSlots: 26
+          fundedRatio: 1
+          maxTransferAmount: 50000
+          seed: 20260725
+    - label: retail-peak-rep-2
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+    - label: retail-peak-rep-3
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+    - label: retail-peak-rep-4
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+    - label: retail-peak-rep-5
+      txDuration: 60
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload: *repeat_workload
+
+observer:
+  type: local
+  interval: 1
+
+monitors:
+  resource:
+    - module: docker
+      options:
+        interval: 1
+        cpuUsageNormalization: true
+        containers:
+          - /peer0.bi.paynet
+          - /peer0.himbara.paynet
+          - /peer0.commercial.paynet
+          - /peer0.pjp.paynet
+          - /peer0.ojk.paynet
+          - /couchdb0.bi.paynet
+          - /couchdb0.himbara.paynet
+          - /couchdb0.commercial.paynet
+          - /couchdb0.pjp.paynet
+          - /couchdb0.ojk.paynet
+          - /orderer.paynet

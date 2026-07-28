@@ -1,0 +1,3 @@
+# Paper instructions
+
+@AGENTS.md

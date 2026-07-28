@@ -33,7 +33,9 @@ export default function AuditLog({ walletID }: { walletID: string }) {
           <tr style={{ textAlign: 'left', borderBottom: '2px solid #e5e7eb', background: '#f9fafb' }}>
             <th style={{ padding: '10px 14px' }}>Tx ID</th>
             <th style={{ padding: '10px 14px' }}>Operasi</th>
+            <th style={{ padding: '10px 14px' }}>Counterparty</th>
             <th style={{ padding: '10px 14px' }}>Jumlah</th>
+            <th style={{ padding: '10px 14px' }}>Reference</th>
             <th style={{ padding: '10px 14px' }}>Waktu</th>
           </tr>
         </thead>
@@ -42,12 +44,14 @@ export default function AuditLog({ walletID }: { walletID: string }) {
             <tr key={e.txId} style={{ borderBottom: '1px solid #e5e7eb' }}>
               <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: '0.9rem' }}>{e.txId}</td>
               <td style={{ padding: '10px 14px' }}>{e.operation}</td>
+              <td style={{ padding: '10px 14px' }}>{e.counterpartyId || '—'}</td>
               <td style={{ padding: '10px 14px', fontVariantNumeric: 'tabular-nums' }}>Rp {e.amount.toLocaleString('id-ID')}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: '0.85rem' }}>{e.referenceId || '—'}</td>
               <td style={{ padding: '10px 14px', color: '#6b7280' }}>{e.timestamp}</td>
             </tr>
           ))}
           {entries.length === 0 && (
-            <tr><td colSpan={4} style={{ padding: 20, textAlign: 'center', color: '#9ca3af' }}>Tidak ada transaksi</td></tr>
+            <tr><td colSpan={6} style={{ padding: 20, textAlign: 'center', color: '#9ca3af' }}>Tidak ada transaksi</td></tr>
           )}
         </tbody>
       </table>

@@ -54,41 +54,81 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	payments := r.NewRoute().Subrouter()
 	payments.Use(middleware.RequireRole(middleware.RoleKycVerified, middleware.RoleMerchant))
 	payments.HandleFunc("/transfers", h.Transfer).Methods("POST")
+	payments.HandleFunc("/qris/resolve", h.ResolveQris).Methods("POST")
+	payments.HandleFunc("/qris/pay", h.PayQris).Methods("POST")
 	payments.HandleFunc("/balances", h.GetBalances).Methods("GET")
-	payments.HandleFunc("/redemption-requests", h.RequestRedemption).Methods("POST")
 
-	policy := r.NewRoute().Subrouter()
-	policy.Use(middleware.RequireRole(middleware.RoleBankIndonesia, middleware.RoleSupervisor))
-	policy.HandleFunc("/limits", h.SetSystemLimit).Methods("POST")
-	policy.HandleFunc("/limits", h.ListSystemLimits).Methods("GET")
+	merchantQris := r.NewRoute().Subrouter()
+	merchantQris.Use(middleware.RequireRole(middleware.RoleMerchant))
+	merchantQris.HandleFunc("/qris/intents", h.CreateQrisIntent).Methods("POST")
+	merchantQris.HandleFunc("/qris/intents", h.ListQrisIntents).Methods("GET")
+	merchantQris.HandleFunc("/qris/intents/{intent_id}", h.GetQrisIntent).Methods("GET")
+	merchantQris.HandleFunc("/qris/intents/{intent_id}/cancel", h.CancelQrisIntent).Methods("POST")
 
-	// Bank PJP & Bank Indonesia — participant submission, read, and PJP liquidity distribution
-	banks := r.NewRoute().Subrouter()
-	banks.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleBankIndonesia))
-	banks.HandleFunc("/participants", h.SubmitParticipant).Methods("POST")
-	banks.HandleFunc("/participants", h.ListParticipants).Methods("GET")
-	banks.HandleFunc("/participants/{participant_id}", h.GetParticipant).Methods("GET")
-	banks.HandleFunc("/distribute", h.DistributeToParticipant).Methods("POST")
+	policyMutation := r.NewRoute().Subrouter()
+	policyMutation.Use(middleware.RequireRole(middleware.RoleBankIndonesia))
+	policyMutation.HandleFunc("/limits", h.SetSystemLimit).Methods("POST")
 
-	// Bank Indonesia & Supervisor — full oversight, issuance, and participant lifecycle
-	super := r.NewRoute().Subrouter()
-	super.Use(middleware.RequireRole(middleware.RoleBankIndonesia, middleware.RoleSupervisor))
-	super.HandleFunc("/participants/{participant_id}/approve", h.ApproveParticipant).Methods("POST")
-	super.HandleFunc("/participants/{participant_id}/freeze", h.FreezeParticipant).Methods("POST")
-	super.HandleFunc("/participants/{participant_id}/unfreeze", h.UnfreezeParticipant).Methods("POST")
-	super.HandleFunc("/participants/{participant_id}/reject", h.RejectParticipant).Methods("POST")
-	super.HandleFunc("/participants/{participant_id}/offboard", h.OffboardParticipant).Methods("POST")
-	super.HandleFunc("/issuance-requests", h.RequestIssuance).Methods("POST")
-	super.HandleFunc("/transactions", h.GetTransactions).Methods("GET")
-	super.HandleFunc("/supervision/events", h.GetSupervisionEvents).Methods("GET")
-	super.HandleFunc("/reports/reconciliation", h.GetReconciliationReport).Methods("GET")
-	super.HandleFunc("/reports/metrics", h.GetMetrics).Methods("GET")
-	super.HandleFunc("/ledger/init", h.InitLedger).Methods("POST")
-	super.HandleFunc("/rtgs/issuance-notification", h.RtgsIssuanceNotification).Methods("POST")
+	policyRead := r.NewRoute().Subrouter()
+	policyRead.Use(middleware.RequireRole(middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	policyRead.HandleFunc("/limits", h.ListSystemLimits).Methods("GET")
+
+	// Bank/PJP and Bank Indonesia may submit participant applications.
+	bankMutation := r.NewRoute().Subrouter()
+	bankMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleBankIndonesia))
+	bankMutation.HandleFunc("/participants", h.SubmitParticipant).Methods("POST")
+
+	// Bank PJP, Bank Indonesia, and supervisors can read participant state.
+	participantRead := r.NewRoute().Subrouter()
+	participantRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	participantRead.HandleFunc("/participants", h.ListParticipants).Methods("GET")
+	participantRead.HandleFunc("/participants/{participant_id}", h.GetParticipant).Methods("GET")
+
+	// Bank Indonesia owns monetary policy and participant lifecycle mutations.
+	biMutation := r.NewRoute().Subrouter()
+	biMutation.Use(middleware.RequireRole(middleware.RoleBankIndonesia))
+	biMutation.HandleFunc("/participants/{participant_id}/approve", h.ApproveParticipant).Methods("POST")
+	biMutation.HandleFunc("/participants/{participant_id}/freeze", h.FreezeParticipant).Methods("POST")
+	biMutation.HandleFunc("/participants/{participant_id}/unfreeze", h.UnfreezeParticipant).Methods("POST")
+	biMutation.HandleFunc("/participants/{participant_id}/reject", h.RejectParticipant).Methods("POST")
+	biMutation.HandleFunc("/participants/{participant_id}/offboard", h.OffboardParticipant).Methods("POST")
+	biMutation.HandleFunc("/issuance-requests", h.RequestIssuance).Methods("POST")
+	biMutation.HandleFunc("/redemption-requests", h.RequestRedemption).Methods("POST")
+	biMutation.HandleFunc("/distribute", h.DistributeToParticipant).Methods("POST")
+	biMutation.HandleFunc("/ledger/init", h.InitLedger).Methods("POST")
+	biMutation.HandleFunc("/rtgs/issuance-notification", h.RtgsIssuanceNotification).Methods("POST")
+
+	// Supervisors have read-only oversight.
+	oversightRead := r.NewRoute().Subrouter()
+	oversightRead.Use(middleware.RequireRole(middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	oversightRead.HandleFunc("/transactions", h.GetTransactions).Methods("GET")
+	oversightRead.HandleFunc("/supervision/events", h.GetSupervisionEvents).Methods("GET")
+	oversightRead.HandleFunc("/reports/reconciliation", h.GetReconciliationReport).Methods("GET")
+	oversightRead.HandleFunc("/reports/metrics", h.GetMetrics).Methods("GET")
 }
 
 func withRole(fn http.HandlerFunc, roles ...middleware.Role) http.HandlerFunc {
 	return middleware.RequireRole(roles...)(fn).ServeHTTP
+}
+
+func isRetailActor(role middleware.Role) bool {
+	return role == middleware.RoleKycVerified || role == middleware.RoleMerchant
+}
+
+func (h *Handler) requireOwnedWallet(w http.ResponseWriter, r *http.Request, walletID string) bool {
+	if !isRetailActor(middleware.GetRole(r)) {
+		return true
+	}
+	wallet, err := h.svc.GetWallet(walletID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return false
+	}
+	if wallet.OwnerID != middleware.GetUsername(r) {
+		writeError(w, http.StatusForbidden, "wallet does not belong to authenticated subject")
+		return false
+	}
+	return true
 }
 
 func writeJSON(w http.ResponseWriter, status int, v interface{}) {
@@ -258,6 +298,9 @@ func (h *Handler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ListWallets(w http.ResponseWriter, r *http.Request) {
 	participantID := r.URL.Query().Get("participant_id")
+	if isRetailActor(middleware.GetRole(r)) {
+		participantID = middleware.GetUsername(r)
+	}
 	wallets, err := h.svc.ListWallets(participantID)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -442,7 +485,117 @@ func (h *Handler) Transfer(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "invalid request body")
 		return
 	}
+	if !h.requireOwnedWallet(w, r, req.SenderID) {
+		return
+	}
 	result, err := h.svc.Transfer(req)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (h *Handler) CreateQrisIntent(w http.ResponseWriter, r *http.Request) {
+	var req models.CreateQrisIntentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeValidationError(w, "invalid request body")
+		return
+	}
+	if req.MerchantWalletID == "" {
+		writeValidationError(w, "merchant_wallet_id is required")
+		return
+	}
+	if !h.requireOwnedWallet(w, r, req.MerchantWalletID) {
+		return
+	}
+	req.MerchantID = middleware.GetUsername(r)
+	intent, err := h.svc.CreateQrisIntent(req)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, intent)
+}
+
+func (h *Handler) ListQrisIntents(w http.ResponseWriter, r *http.Request) {
+	merchantID := middleware.GetUsername(r)
+	intents, err := h.svc.ListQrisIntents(merchantID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, intents)
+}
+
+func (h *Handler) GetQrisIntent(w http.ResponseWriter, r *http.Request) {
+	intentID := mux.Vars(r)["intent_id"]
+	intent, err := h.svc.GetQrisIntent(intentID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if intent.MerchantID != middleware.GetUsername(r) {
+		writeError(w, http.StatusForbidden, "QRIS intent does not belong to authenticated merchant")
+		return
+	}
+	writeJSON(w, http.StatusOK, intent)
+}
+
+func (h *Handler) CancelQrisIntent(w http.ResponseWriter, r *http.Request) {
+	intentID := mux.Vars(r)["intent_id"]
+	if intentID == "" {
+		writeValidationError(w, "intent_id is required")
+		return
+	}
+	intent, err := h.svc.GetQrisIntent(intentID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if intent.MerchantID != middleware.GetUsername(r) {
+		writeError(w, http.StatusForbidden, "QRIS intent does not belong to authenticated merchant")
+		return
+	}
+	if err := h.svc.CancelQrisIntent(intentID); err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "cancelled"})
+}
+
+func (h *Handler) ResolveQris(w http.ResponseWriter, r *http.Request) {
+	var req models.ResolveQrisRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeValidationError(w, "invalid request body")
+		return
+	}
+	if req.Payload == "" {
+		writeValidationError(w, "payload is required")
+		return
+	}
+	intent, err := h.svc.ResolveQrisPayload(req.Payload)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, intent)
+}
+
+func (h *Handler) PayQris(w http.ResponseWriter, r *http.Request) {
+	var req models.PayQrisRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeValidationError(w, "invalid request body")
+		return
+	}
+	if req.Payload == "" || req.PayerWalletID == "" {
+		writeValidationError(w, "payload and payer_wallet_id are required")
+		return
+	}
+	if !h.requireOwnedWallet(w, r, req.PayerWalletID) {
+		return
+	}
+	result, err := h.svc.PayQris(req)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return

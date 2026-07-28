@@ -24,15 +24,21 @@ class SupervisionReadsWorkload extends RetailWorkloadBase {
         });
 
         const seedTransfers = this.arg('seedTransfers', 10);
-        for (let i = 0; i < seedTransfers && i < this.customers.length && i < this.standardCustomers.length; i++) {
-            const sender = this.customers[i];
-            const receiver = this.standardCustomers[i];
-            if (sender.id !== receiver.id) {
-                await this.submit('Transfer', [sender.walletId, receiver.walletId, this.retailAmount(sender.perTxCap)]);
-            }
+        const seedTransferAmount = this.arg('seedTransferAmount', 50000);
+        for (const { sender, receiver } of this.planSeedTransfers(seedTransfers)) {
+            await this.submit('Transfer', [sender.walletId, receiver.walletId, seedTransferAmount]);
         }
 
         this.configureMeasuredTraffic(this.arg('transactionSlots', 100));
+    }
+
+    planSeedTransfers(count) {
+        if (this.standardCustomers.length < 2) return [];
+        const total = Math.min(count, this.standardCustomers.length);
+        return Array.from({ length: total }, (_, i) => ({
+            sender: this.standardCustomers[i],
+            receiver: this.standardCustomers[(i + 1) % this.standardCustomers.length],
+        }));
     }
 
     configureMeasuredTraffic(transactionSlots) {
@@ -69,3 +75,4 @@ function createWorkloadModule() {
 }
 
 module.exports.createWorkloadModule = createWorkloadModule;
+module.exports.SupervisionReadsWorkload = SupervisionReadsWorkload;

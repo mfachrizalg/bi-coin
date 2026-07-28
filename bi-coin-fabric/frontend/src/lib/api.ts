@@ -1,6 +1,10 @@
-const API_BASE = 'http://localhost:8080'
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 let currentToken = sessionStorage.getItem('access_token') ?? ''
+export function hasAccessToken() {
+  return Boolean(currentToken)
+}
+
 export function setAccessToken(token: string) {
   currentToken = token
   if (token) sessionStorage.setItem('access_token', token)
@@ -80,7 +84,32 @@ export interface TransactionRecord {
   amount: number
   transaction_type: string
   status: string
+  reference_id?: string
   timestamp: string
+}
+
+export interface QrisIntent {
+  intent_id: string
+  mode: 'static' | 'dynamic'
+  merchant_id: string
+  merchant_wallet_id: string
+  amount: number
+  status: 'active' | 'pending' | 'paid' | 'expired' | 'cancelled'
+  label?: string
+  payload?: string
+  reference_id: string
+  expires_at?: string
+  paid_by_wallet_id?: string
+  paid_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface QrisPayResult {
+  status: string
+  tx_id?: string
+  intent_id: string
+  reference_id: string
 }
 
 export interface TopologyNode {
@@ -180,6 +209,32 @@ export function requestRedemption(data: { participant_id: string; amount: string
 export function submitTransfer(data: { sender_id: string; receiver_id: string; amount: string }) {
   return request('/transfers', { method: 'POST', body: JSON.stringify(data) })
 }
+export function createQrisIntent(data: {
+  mode: 'static' | 'dynamic'
+  merchant_wallet_id: string
+  merchant_id?: string
+  amount?: string
+  label?: string
+  expires_at?: string
+}) {
+  return request<QrisIntent>('/qris/intents', { method: 'POST', body: JSON.stringify(data) })
+}
+export function listQrisIntents(merchantId?: string) {
+  const qs = merchantId ? `?merchant_id=${merchantId}` : ''
+  return request<QrisIntent[]>(`/qris/intents${qs}`)
+}
+export function getQrisIntent(intentId: string) {
+  return request<QrisIntent>(`/qris/intents/${intentId}`)
+}
+export function cancelQrisIntent(intentId: string) {
+  return request<{ status: string }>(`/qris/intents/${intentId}/cancel`, { method: 'POST' })
+}
+export function resolveQrisPayload(payload: string) {
+  return request<QrisIntent>('/qris/resolve', { method: 'POST', body: JSON.stringify({ payload }) })
+}
+export function payQris(data: { payload: string; payer_wallet_id: string; amount?: string }) {
+  return request<QrisPayResult>('/qris/pay', { method: 'POST', body: JSON.stringify(data) })
+}
 export function getBalances() {
   return request<Balance[]>('/balances')
 }
@@ -223,6 +278,8 @@ export interface AuditEntry {
   txId: string
   operation: string
   amount: number
+  referenceId?: string
+  counterpartyId: string
   timestamp: string
 }
 
@@ -232,6 +289,8 @@ export async function getAuditLog(walletID: string): Promise<AuditEntry[]> {
     txId: t.tx_id,
     operation: t.transaction_type,
     amount: t.amount,
+    referenceId: t.reference_id,
+    counterpartyId: t.counterparty_id,
     timestamp: t.timestamp,
   }))
 }

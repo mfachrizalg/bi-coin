@@ -29,29 +29,111 @@ antarpelanggan serta pelanggan-ke-pedagang, pengawasan, dan
 pelaporan. Kebutuhan ini menjadi dasar perancangan activity diagram dan arsitektur
 pada subbab berikutnya.
 
+\subsubsection{Spesifikasi Kebutuhan Perangkat Lunak}
+
+Analisis kebutuhan tersebut diformalkan dalam bentuk Spesifikasi Kebutuhan
+Perangkat Lunak (\textit{Software Requirements Specification}/SRS) yang diadaptasi
+ke struktur tesis ini. SRS digunakan untuk menetapkan ruang lingkup purwarupa,
+aktor dan batas wewenangnya, antarmuka utama sistem, kebutuhan fungsional, dan
+kebutuhan nonfungsional sebelum implementasi dilakukan. Pada penelitian ini,
+ruang lingkup perangkat lunak mencakup empat antarmuka utama, yaitu aplikasi
+klien, \textit{backend API}, basis data luring PostgreSQL, dan jaringan
+\textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya.
+
+Pemangku kepentingan utama terdiri atas Bank Indonesia sebagai penerbit dan
+pengawas, bank validator sebagai distributor likuiditas ke PJP, PJP sebagai
+penyalur layanan ritel, pedagang dan pelanggan ritel sebagai pengguna transaksi,
+serta supervisor dan pengamat OJK sebagai pihak yang membutuhkan fungsi baca dan
+pelaporan. Setiap pemangku kepentingan tersebut kemudian diterjemahkan menjadi
+peran akses pada \textit{backend API} dan aturan bisnis pada \textit{chaincode}
+agar kebutuhan operasional dan kepatuhan dapat ditelusuri secara konsisten.
+
+\begin{table}[H]
+    \caption{Kebutuhan fungsional purwarupa bi-coin}
+    \label{tab:srs-fungsional}
+    \centering
+    \small
+    \begin{tabular}{@{}p{1.5cm}p{9.8cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
+        \midrule
+        FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembekuan, pencairan, dan penghentian peserta sesuai peran Bank Indonesia, bank validator, dan PJP. \\
+        FR-02 & Sistem harus mendukung penerbitan Digital Rupiah oleh Bank Indonesia dan distribusi likuiditas dua jenjang dari bank validator ke PJP. \\
+        FR-03 & Sistem harus mendukung pengajuan dan pembaruan profil KYC secara luring dengan hanya menyimpan jangkar kepatuhan pada \textit{ledger}. \\
+        FR-04 & Sistem harus menurunkan tier dompet BASIC, STANDARD, atau MERCHANT secara deterministik dari profil KYC yang disetujui. \\
+        FR-05 & Sistem harus menolak transfer yang melanggar status KYC, status beku, batas per transaksi, batas keluar harian/bulanan, batas masuk bulanan, atau batas saldo maksimum. \\
+        FR-06 & Sistem harus menyediakan laporan rekonsiliasi, metrik, riwayat transaksi, dan \textit{event} pengawasan bagi peran yang berwenang. \\
+        FR-07 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, terverifikasi KYC, PJP/bank, merchant, dan supervisor. \\
+        FR-08 & Sistem harus menyimpan data autentikasi, data KYC mentah, pemeriksaan penyedia, dan jejak audit pada basis data luring PostgreSQL. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \caption{Kebutuhan nonfungsional purwarupa bi-coin}
+    \label{tab:srs-nonfungsional}
+    \centering
+    \small
+    \begin{tabular}{@{}p{1.7cm}p{9.6cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
+        \midrule
+        NFR-01 & Sistem harus berjalan pada jaringan \textit{permissioned} Hyperledger Fabric yang mendukung partisipasi multipihak dan \textit{endorsement} mayoritas. \\
+        NFR-02 & Sistem harus menjaga kerahasiaan data identitas dengan menempatkan data KYC mentah di PostgreSQL dan hanya menyimpan \textit{hash} atau jangkar kepatuhan pada \textit{ledger}. \\
+        NFR-03 & Sistem harus menyediakan keterlacakan melalui catatan audit, \textit{event} pengawasan, dan relasi data luring yang dapat ditelusuri kembali ke subjek KYC atau peserta terkait. \\
+        NFR-04 & Sistem harus memisahkan antarmuka klien, \textit{backend API}, basis data luring, dan \textit{chaincode} agar kontrol akses dan integrasi dapat dikelola secara modular. \\
+        NFR-05 & Sistem harus dapat dievaluasi kinerjanya secara kuantitatif melalui metrik \textit{throughput}, latensi, dan tingkat keberhasilan transaksi menggunakan Hyperledger Caliper. \\
+        NFR-06 & Sistem harus mendukung pengulangan eksperimen pada lingkungan yang sama melalui konfigurasi, \textit{seed}, hash artefak, topologi jaringan, dan skenario uji yang terdokumentasi. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \caption{Keterlacakan kebutuhan terhadap metode verifikasi}
+    \label{tab:srs-verifikasi}
+    \centering
+    \small
+    \begin{tabular}{@{}p{1.8cm}p{4.7cm}p{4.8cm}@{}}
+        \toprule
+        \textbf{ID kebutuhan} & \textbf{Metode verifikasi utama} & \textbf{Bukti yang dituju} \\
+        \midrule
+        FR-01, FR-02 & Skenario fungsional dan \textit{unit test} \textit{chaincode} & Siklus hidup peserta, penerbitan, dan distribusi dua jenjang berjalan sesuai aturan \\
+        FR-03, FR-08 & \textit{Unit test} \textit{backend}, inspeksi desain data luring, dan pengujian fungsional KYC & Data KYC mentah tetap luring, sedangkan jangkar kepatuhan dicatat pada \textit{ledger} \\
+        FR-04, FR-05 & \textit{Unit test} \textit{chaincode} dan skenario fungsional transfer & Penurunan tier, status beku, dan limit transaksi ditegakkan konsisten \\
+        FR-06, FR-07 & Skenario fungsional, \textit{unit test} \textit{backend}, dan inspeksi rute API & Hak akses, pelaporan, dan \textit{event} pengawasan tersedia bagi peran berwenang \\
+        NFR-01, NFR-04, NFR-06 & Inspeksi arsitektur, konfigurasi, dan manifes benchmark & Struktur jaringan, pemisahan lapisan, dan \textit{repeatability} purwarupa terdokumentasi \\
+        NFR-02, NFR-03 & Inspeksi model data dan \textit{unit test} terpilih & Kerahasiaan data identitas dan keterlacakan audit dapat dipertahankan \\
+        NFR-05 & \textit{Benchmark} Hyperledger Caliper & Nilai \textit{throughput}, latensi, dan tingkat keberhasilan transaksi diperoleh secara kuantitatif \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 \subsubsection{Perancangan Activity Diagram}
 
-Alur setiap proses utama dimodelkan dengan activity diagram bergaya
+Setiap proses utama dimodelkan dengan activity diagram bergaya
 \textit{swimlane} tiga jalur, yaitu jalur aktor, jalur \textit{backend API}, dan
-jalur \textit{blockchain} (\textit{chaincode}). Proses utama
-yaitu pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
-(Gambar~\ref{fig:ad02}), distribusi likuiditas ke PJP (Gambar~\ref{fig:ad03}),
-onboarding KYC pelanggan (Gambar~\ref{fig:ad04}), transfer saldo ritel
-(Gambar~\ref{fig:ad05}),
-pembekuan dan pencairan peserta (Gambar~\ref{fig:ad08}), serta laporan dan
-pengawasan (Gambar~\ref{fig:ad10}).
+jalur \textit{blockchain} (\textit{chaincode}). Diagram tersebut mencakup
+pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
+(Gambar~\ref{fig:ad02}), distribusi likuiditas ke PJP
+(Gambar~\ref{fig:ad03}), dan onboarding KYC pelanggan
+(Gambar~\ref{fig:ad04}). Proses lainnya meliputi transfer saldo ritel
+(Gambar~\ref{fig:ad05}), pembekuan dan pencairan peserta
+(Gambar~\ref{fig:ad08}), serta laporan dan pengawasan
+(Gambar~\ref{fig:ad10}).
 
 \input{contents/figures/activity-diagrams}
 
 \subsubsection{Perancangan Arsitektur Sistem Blockchain}
 
-Secara konseptual, sistem mengimplementasikan model Rupiah Digital dua jenjang
-sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}. Jenjang
-pertama (\textit{wholesale}) menghubungkan Bank Indonesia selaku penerbit dengan
-bank validator (HimbaraBank dan CommercialBank) serta PJP melalui jaringan
-Hyperledger Fabric. Jenjang kedua (\textit{retail}) menyediakan layanan
-pembayaran kepada pelanggan melalui PJP, termasuk transfer antarpelanggan,
-transfer pelanggan-ke-pedagang, dan kontrol kepatuhan berbasis KYC.
+Secara konseptual, sistem menggunakan model distribusi Rupiah Digital dua
+jenjang sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
+Jenjang distribusi institusional menghubungkan Bank Indonesia selaku penerbit
+dengan bank validator (HimbaraBank dan CommercialBank) serta PJP melalui
+jaringan Hyperledger Fabric. Jenjang layanan ritel menyediakan pembayaran
+melalui PJP, termasuk transfer antarpelanggan, transfer pelanggan-ke-pedagang,
+dan kontrol kepatuhan berbasis KYC. Jenjang institusional tersebut menjelaskan
+jalur distribusi menuju layanan ritel, bukan implementasi instrumen w-Digital
+Rupiah yang terpisah.
 
 \input{contents/figures/two-tier-cbdc}
 
@@ -62,14 +144,14 @@ layanan identitas, layanan regulasi, dan pengamanan kriptografi sebagaimana
 ditunjukkan pada Gambar~\ref{fig:bi-whitepaper-technology-architecture}
 \cite{bi_whitepaper2022}. Purwarupa \textit{bi-coin-fabric} memetakan gagasan
 tersebut secara terbatas melalui API backend, \textit{chaincode}, identitas dan
-KYC, peran pengawasan, serta \textit{ledger} Hyperledger Fabric. Dengan
-demikian, purwarupa ini digunakan sebagai model eksperimental yang selaras
-dengan prinsip arsitektur BI, tetapi tidak merepresentasikan arsitektur produksi
-Rupiah Digital secara penuh.
+KYC, peran pengawasan, serta \textit{ledger} Hyperledger Fabric. Pemetaan
+terbatas ini menjadikan purwarupa sebagai model eksperimental yang selaras
+dengan prinsip arsitektur BI, bukan representasi penuh arsitektur produksi
+Rupiah Digital.
 
-\begin{figure}[p]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{contents/figures/reference/bi-whitepaper-technology-architecture.png}
+    \rotatebox{90}{\includegraphics[width=0.78\textheight]{contents/figures/reference/bi-whitepaper-technology-architecture.png}}
     \caption{Arsitektur teknologi Rupiah Digital menurut White Paper CBDC Bank Indonesia. Sumber: Bank Indonesia \cite{bi_whitepaper2022}.}
     \label{fig:bi-whitepaper-technology-architecture}
 \end{figure}
@@ -82,6 +164,16 @@ menegakkan kontrol akses berbasis peran, sedangkan lapisan jaringan
 \textit{blockchain} menjalankan \textit{chaincode} serta menyimpan
 \textit{ledger}.
 
+Kontrol akses memakai dua batas kepercayaan. Backend memvalidasi JWT, membatasi
+rute menurut peran, dan untuk pengguna ritel mencocokkan nama pengguna pada JWT
+dengan \texttt{owner\_id} dompet pengirim. Chaincode memvalidasi MSP pemanggil:
+mutasi moneter, limit, dan siklus hidup peserta hanya menerima
+\texttt{BankIndonesiaOrgMSP}; mutasi institusional menerima MSP BI, bank, atau
+PJP; MSP pengamat tidak dapat memutasi buku besar. Karena transaksi nasabah
+diteruskan melalui identitas gateway organisasi, kepemilikan nasabah tetap
+menjadi batas kepercayaan backend dan belum diverifikasi langsung oleh
+identitas klien pada chaincode.
+
 Berdasarkan klasifikasi model pembayaran pada Bab~2, purwarupa
 \textit{bi-coin-fabric} dikategorikan sebagai model dompet ritel berbasis akun
 (\textit{account-based wallet model}) yang diimplementasikan di atas
@@ -91,9 +183,9 @@ data \textit{on-chain}: objek \texttt{Wallet} menyimpan \texttt{OwnerID},
 KYC, limit tingkatan, status beku, dan saldo, kemudian mendebit saldo pengirim
 serta mengkredit saldo penerima. Sistem tidak membentuk objek token pembawa
 (\textit{bearer token}), UTXO, atau nomor seri token yang berpindah antarpemilik.
-Dengan demikian, mekanisme pembayaran purwarupa bukan model token murni,
-melainkan penyederhanaan dompet berbasis akun untuk menguji KYC bertingkat,
-limit saldo/transaksi, dan auditabilitas transfer ritel.
+Mekanisme pembayaran purwarupa berupa dompet berbasis akun yang disederhanakan,
+bukan model token murni. Model tersebut digunakan untuk menguji KYC
+bertingkat, limit saldo/transaksi, dan auditabilitas transfer ritel.
 
 \input{contents/figures/system-architecture}
 
@@ -115,9 +207,9 @@ Tabel~\ref{tab:jaringan}.
 	\midrule
 	BankIndonesiaOrg     & Penerbit       & Penerbitan dan penarikan Digital Rupiah,
 	pengawasan                                                                          \\
-	HimbaraBankOrg       & Validator      & Bank distributor likuiditas ke PJP          \\
-	CommercialBank\allowbreak Org & Validator & Bank distributor likuiditas ke PJP          \\
-	PJPOrg               & PJP            & Penyedia jasa pembayaran ke pelanggan ritel \\
+	HimbaraBankOrg       & Validator      & Validator jaringan; penerima distribusi BI   \\
+	CommercialBank\allowbreak Org & Validator & Validator jaringan; penerima distribusi BI   \\
+	PJPOrg               & PJP            & Penyedia layanan ritel; penerima distribusi BI \\
 	OJKObserverOrg       & Observer       & Pengamatan/pengawasan (baca)                \\
 	BankIndonesia\allowbreak Orderer & Orderer & Layanan pengurutan (Raft)                   \\
 	\bottomrule
@@ -140,19 +232,18 @@ Kebutuhan fungsional sistem dimodelkan dengan diagram use case. Aktor sistem
 terdiri atas Bank Indonesia, bank validator, PJP, pedagang (\textit{merchant}),
 pelanggan ritel, supervisor, dan pengamat OJK. Diagram use case keseluruhan
 ditunjukkan pada Gambar~\ref{fig:uc01}, sedangkan rincian operasi
-\textit{wholesale} dan \textit{retail} ditunjukkan pada Gambar~\ref{fig:uc02}
-dan Gambar~\ref{fig:uc03}.
+institusional dan ritel ditunjukkan pada Gambar~\ref{fig:uc02} dan
+Gambar~\ref{fig:uc03}.
 
 \input{contents/figures/use-case-diagrams}
 
 Pemetaan aktor pada diagram tersebut mengikuti kendali peran pada lapisan
-\textit{backend}. Pendaftaran peserta diajukan oleh PJP atau Bank Indonesia
-(\texttt{POST /participants}), lalu disetujui oleh Bank Indonesia atau supervisor
-(\texttt{/approve}), sehingga pengajuan dan persetujuan terpisah (\textit{four-eyes}).
-Pengamat OJK dan bank validator hadir sebagai organisasi pada jaringan Fabric
-(\textit{peer} dengan akses baca pada \textit{ledger}), bukan sebagai peran
-\textit{backend} tersendiri; karena itu asosiasi OJK pada \textit{use case}
-Laporan \& Pengawasan digambarkan sebagai pengamatan tingkat \textit{ledger}.
+\textit{backend}. Pendaftaran peserta dapat diajukan oleh institusi, sedangkan
+persetujuan, penolakan, pembekuan, dan \textit{offboarding} hanya dapat
+dilakukan oleh Bank Indonesia. Supervisor dan pengamat OJK hanya memperoleh
+jalur baca pengawasan. Purwarupa belum menerapkan persetujuan dua orang
+(\textit{four-eyes}); parameter persetujuan senior pada profil KYC karena itu
+merupakan status purwarupa, bukan bukti alur persetujuan terpisah.
 Pada operasi ritel, data KYC disediakan oleh pelanggan, tetapi pengajuan profil
 KYC ke sistem (\texttt{POST /kyc/profiles}) dilakukan oleh operator PJP, bukan
 oleh pelanggan secara mandiri.
@@ -194,13 +285,14 @@ operasi \textit{chaincode}.
 Selain status \textit{on-chain} pada \textit{world state} yang dirangkum pada
 Tabel~\ref{tab:model-data}, sistem memerlukan basis data relasional luring
 (\textit{off-chain}) pada PostgreSQL untuk menyimpan data yang tidak layak atau
-tidak perlu ditempatkan pada \textit{ledger}, yaitu kredensial autentikasi portal,
-pengayaan data KYC (nama legal, jenis dan nomor dokumen), serta riwayat pemeriksaan
-penyedia dan jejak audit yang bersifat \textit{append-only}. Rancangan basis data
-luring tersebut ditunjukkan dengan diagram \textit{Entity-Relationship} pada
-Gambar~\ref{fig:erd-offchain}. Tabel \texttt{auth\_users} berdiri sendiri untuk
-autentikasi portal, sedangkan \texttt{kyc\_profiles} menjadi pusat relasi yang
-ditautkan oleh \texttt{kyc\_provider\_checks} melalui kendala \textit{foreign key}
+tidak perlu ditempatkan pada \textit{ledger}. Data tersebut mencakup kredensial
+autentikasi portal, pengayaan data KYC (nama legal, jenis dan nomor dokumen),
+serta riwayat pemeriksaan penyedia dan jejak audit yang bersifat
+\textit{append-only}. Diagram \textit{Entity-Relationship} pada
+Gambar~\ref{fig:erd-offchain} menunjukkan rancangan basis data luring tersebut.
+Tabel \texttt{auth\_users} berdiri sendiri untuk autentikasi portal, sedangkan
+\texttt{kyc\_profiles} menjadi pusat relasi yang ditautkan oleh
+\texttt{kyc\_provider\_checks} melalui kendala \textit{foreign key}
 berkebijakan \textit{ON DELETE CASCADE}. Tautan lain, yakni
 \texttt{kyc\_audit\_events} dan \texttt{retail\_customers}, menggunakan referensi
 lunak (tanpa kendala basis data) karena pengidentifikasinya seperti
@@ -250,7 +342,7 @@ LevelDB yang hanya mendukung kueri berbasis kunci. Perbandingan kedua pilihan
 tersebut dirangkum pada Tabel~\ref{tab:state-database}.
 
 \begin{table}[H]
-    \caption{Perbandingan basis data status Hyperledger Fabric. Diadaptasi dari Hanif \cite{hanif2024meetcoin} dan dokumentasi resmi Hyperledger Fabric \cite{hyperledger_fabric_couchdb}.}
+    \caption{Perbandingan basis data status Hyperledger Fabric berdasarkan dokumentasi resmi \cite{hyperledger_fabric_couchdb}.}
     \label{tab:state-database}
     \centering
     \small
@@ -307,8 +399,8 @@ PostgreSQL dipilih berdasarkan pertimbangan teknis berikut:
     hanya menyediakannya pada edisi Enterprise \cite{postgresql_docs}.
     \item \textit{MVCC dan transaksi DDL.} PostgreSQL mengelola konkurensi
     via MVCC tanpa \textit{lock} memblokir pembaca, dan membungkus perubahan
-    skema (DDL) dalam transaksi yang dapat dieksekusi secara atomik --- fitur
-    yang tidak dimiliki MySQL karena DDL-nya bersifat \textit{implicit commit}
+    skema (DDL) dalam transaksi yang dapat dieksekusi secara atomik. Fitur ini
+    tidak dimiliki MySQL karena DDL-nya bersifat \textit{implicit commit}
     \cite{logicmonitor2025pgmysql}.
     \item \textit{Lisensi terbuka.} Lisensi PostgreSQL mirip BSD memungkinkan
     penggunaan, modifikasi, dan distribusi tanpa biaya royalti, menghindari
@@ -373,17 +465,32 @@ eksternal \cite{androulaki2018}.
 
 Pengujian terdiri atas pengujian fungsional dan pengujian kinerja. Pengujian
 fungsional memverifikasi bahwa setiap alur proses berjalan sesuai rancangan,
-termasuk penegakan limit dan kontrol akses. Pengujian kinerja dilakukan
-menggunakan Hyperledger Caliper untuk mengukur \textit{throughput} dan latensi
-pada berbagai skenario beban.
+termasuk penegakan limit dan kontrol akses. Verifikasi fungsional dilakukan
+melalui dua bentuk pengujian yang saling melengkapi, yaitu skenario fungsional
+\textit{end-to-end} pada purwarupa serta \textit{unit test} otomatis pada logika
+layanan \textit{backend} dan aturan bisnis \textit{chaincode}. Pengujian skenario
+digunakan untuk memastikan integrasi antarkomponen berjalan sesuai rancangan,
+sedangkan \textit{unit test} digunakan untuk memeriksa ketepatan aturan pada
+lapisan yang lebih terisolasi, seperti penurunan tier KYC, penegakan limit
+transaksi, kontrol akses berbasis peran, dan pembaruan status dompet.
+Pengujian kinerja dilakukan menggunakan Hyperledger Caliper untuk mengukur
+\textit{throughput} dan latensi pada berbagai skenario beban. Suite pengujian
+Caliper dibagi menjadi tiga kelompok, yaitu garis dasar transfer ritel, profil
+\textit{repeatability} untuk beban puncak, serta profil khusus yang menekankan
+konformansi kebijakan dan konservasi saldo pada permintaan agregat berlebih.
 
 Skenario pengujian kinerja dirancang untuk mengamati pengaruh laju pengiriman
 transaksi (\textit{send rate}), jumlah \textit{worker} Caliper, dan jenis fungsi
 rantai blok terhadap \textit{throughput} dan latensi. Pengujian transfer ritel
 dijalankan dengan 1, 2, dan 4 \textit{worker}. Pengujian fungsi lain dijalankan
 terpisah agar hasil transfer, KYC, operasi moneter, pembacaan pengawasan, dan
-kebijakan administratif tidak dicampur menjadi satu angka TPS umum. Konfigurasi
-ronde pengujian yang digunakan dirangkum pada Tabel~\ref{tab:skenario}.
+kebijakan administratif tidak dicampur menjadi satu angka TPS umum. Selain itu,
+lima ronde identik pada beban puncak dipakai untuk melaporkan rerata dan
+\textit{confidence interval} rerata, sedangkan dua profil khusus dipakai untuk
+memisahkan bukti penegakan kebijakan dan bukti konservasi saldo
+dari pembacaan \textit{throughput} garis dasar. Konfigurasi ronde pengujian
+dirangkum pada Tabel~\ref{tab:skenario}, sedangkan rincian profil khusus beserta
+hasil yang diharapkan dipaparkan pada Tabel~\ref{tab:uji-fungsional}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -393,12 +500,36 @@ ronde pengujian yang digunakan dirangkum pada Tabel~\ref{tab:skenario}.
 	\centering
 	\begin{tabular}{p{3.2cm} p{2cm} p{2cm} p{4.6cm}}
 	\toprule
-	\textbf{Ronde}    & \textbf{Jumlah tx} & \textbf{Laju (TPS)} & \textbf{Beban kerja}                    \\
+	\textbf{Ronde} & \textbf{Durasi/jumlah} & \textbf{Laju (TPS)} & \textbf{Beban kerja} \\
 	\midrule
-	Pemanasan         & 40                 & 10                  & Transfer ritel, 1/2/4 \textit{worker}  \\
-	Beban stabil      & 40                 & 30                  & Transfer ritel, 1/2/4 \textit{worker}  \\
-	Beban puncak      & 40                 & 60                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Pemanasan         & 30 detik            & 10                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Beban stabil      & 120 detik           & 30                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Beban puncak      & 120 detik           & 60                  & Transfer ritel, 1/2/4 \textit{worker}  \\
+	Pengulangan puncak & 5 $\times$ 60 detik & 60                  & Transfer ritel, 2 \textit{worker}, lima ronde identik \\
 	Fungsional terpisah & 40--80           & 5--30               & KYC, moneter, pengawasan, administratif \\
+	Konformansi kebijakan & 7              & 5                   & \textit{negative-path}, 1 \textit{worker} \\
+	Agregat \textit{overspend} & 200 & 80 & Pengirim bersama, 4 \textit{worker}, permintaan melebihi saldo \\
+	\bottomrule
+	\end{tabular}
+\end{table}
+\endgroup
+
+\begingroup
+\renewcommand{\arraystretch}{1.3}
+\begin{table}[H]
+	\caption{Profil dan kasus uji khusus beserta hasil yang diharapkan}
+	\label{tab:uji-fungsional}
+	\centering
+	\begin{tabular}{p{3.4cm} p{1.1cm} p{1.6cm} p{5.2cm}}
+	\toprule
+	\textbf{Profil} & \textbf{Tx} & \textbf{Laju (TPS)} & \textbf{Hasil yang diharapkan} \\
+	\midrule
+	KYC \& \textit{onboarding} & 40 & 5 & Data KYC mentah tidak ditulis ke buku besar dan tingkatan diturunkan deterministik dari profil \\
+	Operasi moneter & 80 & 20 & \textit{Mint} dan \textit{Burn} berpasangan berhasil sesuai batas sistem \\
+	Kueri pengawasan & 80 & 30 & Fungsi baca-saja mengembalikan data tanpa mengubah status \\
+	Kebijakan administratif & 40 & 5 & Limit per transaksi, harian, dan bulanan ditegakkan serta pembelanjaan ditolak tanpa KYC disetujui \\
+	\textit{Negative-path} & 7 & 5 & Setiap pelanggaran kebijakan ditolak dengan alasan yang tepat; indikator utama adalah \textit{enforced/gaps} dari validator log, bukan rasio sukses/gagal mentah \\
+	Agregat \textit{overspend} & 200 & 80 & Saldo akhir tidak negatif, jumlah komit dan penolakan tercatat, serta sedikitnya satu transfer ditolak \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -406,8 +537,7 @@ ronde pengujian yang digunakan dirangkum pada Tabel~\ref{tab:skenario}.
 
 Metrik yang diukur meliputi \textit{throughput} (TPS), latensi rata-rata,
 latensi maksimum dan minimum, serta tingkat keberhasilan transaksi
-\cite{hlf_metrics}. Mengikuti definisi metrik kinerja blockchain dan formulasi
-yang digunakan Hanif \cite{hanif2024meetcoin}, tingkat keberhasilan transaksi
+\cite{hlf_metrics}. Mengikuti definisi metrik kinerja blockchain, tingkat keberhasilan transaksi
 dihitung dengan Persamaan~\ref{eq:benchmark-success-rate}.
 
 \begin{equation}
@@ -433,7 +563,15 @@ Pada persamaan tersebut, $N_{\mathrm{valid}}$ adalah jumlah transaksi valid,
 $N_{\mathrm{submitted}}$ adalah jumlah transaksi yang dikirim, dan selang
 $t_{\mathrm{end}}-t_{\mathrm{start}}$ dinyatakan dalam detik. Kegagalan
 transaksi akibat konflik MVCC dicatat dan dianalisis sebagai bagian dari
-karakterisasi sistem, bukan dihilangkan dari hasil pengukuran.
+karakterisasi sistem, bukan dihilangkan dari hasil pengukuran. Untuk profil
+garis dasar transfer dan fungsi lain, rasio sukses/gagal Caliper dibaca
+langsung sebagai hasil benchmark. Untuk profil \textit{negative-path},
+penolakan transaksi justru merupakan keluaran yang diharapkan sehingga
+indikator utamanya adalah kecocokan alasan penolakan dengan oracle setiap kasus;
+kegagalan konektor atau alasan lain menandai pengujian tidak valid. Pada profil
+agregat \textit{overspend}, bukti utamanya adalah saldo akhir tidak negatif,
+adanya penolakan karena total permintaan melebihi saldo, dan klasifikasi alasan
+penolakan aktual. Penolakan tidak diasumsikan sebagai konflik MVCC.
 
 \paragraph{Justifikasi pemilihan parameter.}
 Parameter pengujian dipilih berdasarkan dua pertimbangan: literatur dan
@@ -445,52 +583,76 @@ pembangkit beban Caliper dari kapasitas jaringan Fabric. Dengan kebijakan
 \textit{endorsement majority} (3 dari 5 organisasi), penambahan \textit{worker}
 tidak otomatis meningkatkan kapasitas jaringan karena bottleneck dapat berpindah
 ke eksekusi \textit{peer}, validasi blok, atau pemrosesan \textit{orderer}
-\cite{androulaki2018, fabric_perf2023, hlf_caliper}.
-Kontrol laju \textit{fixed-rate} dipilih karena menahan laju pengiriman sebagai
-variabel independen sehingga penurunan \textit{throughput} dan peningkatan
-latensi dapat diamati sebagai fungsi dari laju tersebut; kontrol \textit{fixed-load}
+\cite{androulaki2018, fabric_perf2023, hlf_caliper}. Kontrol laju
+\textit{fixed-rate} dipilih karena menahan laju pengiriman sebagai variabel
+independen sehingga penurunan \textit{throughput} dan peningkatan latensi dapat
+diamati sebagai fungsi dari laju tersebut; kontrol \textit{fixed-load}
 menyesuaikan TPS secara otomatis berdasarkan latensi sehingga menyembunyikan
 perilaku saturasi \cite{hlf_caliper}. Laju 10 TPS digunakan sebagai garis dasar,
-30 TPS sebagai beban stabil, dan 60 TPS sebagai beban puncak pada purwarupa lokal.
-Nilai tersebut dipilih agar seluruh profil dapat dijalankan pada topologi Garuda
-lokal dengan target keberhasilan 100\%, bukan untuk mengklaim kapasitas produksi
-nasional.
+30 TPS sebagai beban stabil, dan 60 TPS sebagai beban puncak pada purwarupa
+lokal. Nilai tersebut dipilih agar profil transfer dasar dapat diamati pada
+topologi Garuda lokal tanpa mengubah semantik bisnis, bukan untuk mengklaim
+kapasitas produksi nasional. Hasil aktual, termasuk kegagalan
+\textit{endorsement} atau konflik versi yang muncul pada ronde tertentu, tetap
+dilaporkan apa adanya.
 
 \noindent\textit{Berdasarkan pertimbangan teknis sistem.}
-Setiap ronde transfer mengirim 40 permintaan terukur. Profil 1 \textit{worker}
-menggunakan 40 slot transaksi per \textit{worker}, 80 pelanggan, dan 10 pedagang;
-profil 2 \textit{worker} menggunakan 20 slot, 80 pelanggan, dan 10 pedagang per
-\textit{worker}; profil 4 \textit{worker} menggunakan 10 slot, 40 pelanggan, dan
-10 pedagang per \textit{worker}. Populasi tersebut menyediakan pengirim, penerima
-STANDARD, dan pedagang yang berbeda untuk setiap transaksi yang memutasi
-\textit{world state}. Jenis transaksi ditentukan secara deterministik berdasarkan
-slot global yang diskalakan terhadap jumlah slot sehingga komposisi gabungan tetap
-70\% transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
-pembacaan dompet pada setiap profil \textit{worker}. Pemilihan kunci tanpa
-pengulangan digunakan untuk memperoleh garis dasar kapasitas jaringan tanpa
-mencampurkan saturasi pemrosesan dengan konflik MVCC akibat dompet yang sama.
-Skenario \textit{hot-wallet contention} tidak digunakan karena penelitian tidak
-memiliki jejak transaksi empiris untuk menetapkan konsentrasi akses maupun
-kebijakan \textit{retry/backoff} yang
-representatif. Saldo awal STANDARD ditetapkan Rp5 juta dari batas Rp20 juta dan
-saldo BASIC Rp500 ribu dari batas Rp2 juta. Populasi pelanggan terdiri atas
-20\% BASIC dan 80\% STANDARD, sedangkan seluruh pedagang memperoleh MERCHANT
-dari profil KYC. Seluruh nilai ini merupakan pilihan rekayasa, bukan estimasi
-distribusi pengguna nasional.
+Ronde pemanasan berlangsung 30 detik, sedangkan ronde stabil dan puncak
+masing-masing berlangsung 120 detik. Ketiga konfigurasi mempertahankan total
+116 pelanggan, 16 pedagang, dan 52 slot transaksi: 116/16/52 pada
+1 \textit{worker}, 58/8/26 per \textit{worker} pada 2 \textit{worker},
+serta 29/4/13 per \textit{worker} pada 4 \textit{worker}. Nilai transfer
+dibatasi Rp50.000 agar penggunaan berulang tetap berada dalam limit harian
+purwarupa. Populasi menyediakan
+pengirim STANDARD, penerima STANDARD, dan pedagang untuk rencana transaksi
+berputar dengan perebutan kunci rendah. Jenis transaksi ditentukan secara
+deterministik berdasarkan slot global sehingga komposisi gabungan tetap 70\%
+transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
+pembacaan dompet. Profil pengulangan puncak menggunakan 2 \textit{worker} dan
+lima ronde berdurasi 60 detik agar rerata serta interval kepercayaan reratanya
+dihitung tanpa mengubah komposisi beban. Setiap ronde memakai ruang nama kunci
+yang berbeda, tetapi kelimanya berjalan pada satu \textit{ledger} profil yang
+sama. Interval tersebut karena itu mengukur \textit{repeatability} dalam satu
+lingkungan, bukan lima replikasi infrastruktur yang independen.
+
+Profil \textit{negative-path} mengirim tujuh permintaan berurutan pada 5 TPS
+dengan 1 \textit{worker}. Setiap permintaan sengaja melanggar satu aturan
+\textit{chaincode}. Setelah Caliper selesai, validator memeriksa detail galat
+\textit{peer} pada log; run valid hanya jika seluruh penolakan cocok dengan
+regex diagnostik kasus tanpa \textit{gap} maupun \textit{oracle error}. Profil
+agregat \textit{overspend} mengirim 200 transfer masing-masing Rp1.000 pada
+80 TPS dengan 4 \textit{worker} dari satu dompet bersaldo awal Rp50.000 menuju
+20 penerima. Karena permintaan agregat Rp200.000 melebihi saldo, skenario
+menguji konservasi saldo sekaligus perebutan satu kunci. Status generik yang
+dikembalikan konektor tidak digunakan untuk menetapkan penyebab setiap
+penolakan. Skenario ini tidak diklaim sebagai simulasi serangan
+\textit{double-spend} protokol.
+
+Setiap profil dijalankan pada jaringan dan buku besar baru. Urutan konfigurasi
+1, 2, dan 4 \textit{worker} diacak secara deterministik dengan \textit{seed}
+20260725. Generator bilangan acak beban kerja juga memakai \textit{seed} yang
+dicampur dengan indeks ronde dan \textit{worker}. Runner menghapus laporan lama
+sebelum eksekusi, membatalkan validitas ronde jika setup gagal, dan mencatat
+status, versi runtime, hash konfigurasi/beban kerja, revisi Git, keadaan
+\textit{working tree}, urutan profil, serta \textit{seed} dalam manifes JSON.
+Langkah ini mendukung \textit{repeatability} pada lingkungan yang sama; hasil
+belum membuktikan \textit{reproducibility} lintas mesin. Saldo awal dan seluruh
+parameter populasi merupakan pilihan rekayasa, bukan estimasi distribusi
+pengguna nasional.
 
 \paragraph{Kesesuaian dengan skenario CBDC ritel.}
 Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
-Digital ritel secara struktural. Campuran transaksi terdiri atas 70\% transfer
-antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\% pembacaan dompet.
-Komposisi ini dipilih karena CBDC ritel adalah instrumen pembayaran umum yang
-harus melayani pembayaran antarpengguna dan pembayaran ke pedagang, bukan hanya
-setelmen antarlembaga. Literatur teknologi CBDC ritel menempatkan desain dompet,
-privasi, dan arsitektur distribusi sebagai elemen inti sistem pembayaran publik
-\cite{Auer2020The}, sedangkan e-CNY dan eNaira menunjukkan preseden operasional
-bahwa dompet ritel dapat dibedakan menurut tingkat identifikasi dan limit
-\cite{pboc2021ecny, cbn2021enaira}. Oleh karena itu, beban kerja yang hanya
-menguji transfer institusional tidak memadai untuk menjawab rumusan masalah
-purwarupa Rupiah Digital ritel.
+Digital ritel secara struktural. Campuran transaksi garis dasar terdiri atas
+70\% transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
+pembacaan dompet. Komposisi ini dipilih karena CBDC ritel adalah instrumen
+pembayaran umum yang harus melayani pembayaran antarpengguna dan pembayaran ke
+pedagang, bukan hanya setelmen antarlembaga. Literatur teknologi CBDC ritel
+menempatkan desain dompet, privasi, dan arsitektur distribusi sebagai elemen
+inti sistem pembayaran publik \cite{Auer2020The}, sedangkan e-CNY dan eNaira
+menunjukkan preseden operasional bahwa dompet ritel dapat dibedakan menurut
+tingkat identifikasi dan limit \cite{pboc2021ecny, cbn2021enaira}. Oleh karena
+itu, beban kerja yang hanya menguji transfer institusional tidak memadai untuk
+menjawab rumusan masalah purwarupa Rupiah Digital ritel.
 
 Model dua jenjang penerbitan (BI\,→\,bank\,→\,PJP\,→\,pelanggan ritel) sesuai
 dengan rancangan Rupiah Digital yang ditetapkan dalam dokumen konsultatif Bank
@@ -501,22 +663,25 @@ MERCHANT, limit transaksi masuk dan keluar, serta pembacaan status dompet.
 Penggunaan Caliper dan metrik \textit{throughput}/latensi mengikuti praktik
 pengukuran kinerja blockchain yang menekankan laju transaksi, latensi, dan
 karakterisasi kegagalan transaksi \cite{hlf_caliper, hlf_metrics,
-fabric_perf2023}.
+fabric_perf2023}. Profil \textit{negative-path} menambah bukti bahwa aturan
+kepatuhan benar-benar menolak transaksi tidak sah, sedangkan profil adversarial
+\textit{double-spend} memeriksa apakah konflik versi pada dompet pengirim
+bersama menghasilkan penolakan yang konsisten.
 
-Perbedaan utama dengan sistem CBDC ritel produksi adalah skala (200 pelanggan
+Perbedaan utama dengan sistem CBDC ritel produksi adalah skala (80 pelanggan
 per \textit{worker} berbanding jutaan pengguna nyata), topologi jaringan (satu
-\textit{peer} per organisasi dalam satu mesin lokal berbanding jaringan terdistribusi
-geografis), dan integrasi KYC nyata (disimulasikan secara terprogram). Keterbatasan
-ini berlaku umum pada studi prototipe CBDC berbasis \textit{permissioned blockchain}
-\cite{sethaput2025} dan bukan kelemahan metodologis melainkan batasan cakupan
-yang dinyatakan secara eksplisit pada Batasan Penelitian (Bab~I).
+\textit{peer} per organisasi dalam satu mesin lokal berbanding jaringan
+terdistribusi geografis), dan integrasi KYC nyata (disimulasikan secara
+terprogram). Keterbatasan ini berlaku umum pada studi prototipe CBDC berbasis
+\textit{permissioned blockchain} \cite{sethaput2025} dan bukan kelemahan
+metodologis melainkan batasan cakupan yang dinyatakan secara eksplisit pada
+Batasan Penelitian (Bab~I).
 
 \section{Alur Tugas Akhir}
 
 Tugas akhir ini dilaksanakan melalui tahapan berikut. Gambar~\ref{fig:alur-penelitian}
-menyajikan alur pelaksanaan penelitian secara keseluruhan, mulai dari studi
-literatur hingga analisis hasil, dengan umpan balik iteratif antara implementasi
-dan pengujian sesuai siklus \textit{prototyping}.
+menyajikan alur dari studi literatur hingga analisis hasil. Implementasi dan
+pengujian saling memberi umpan balik sesuai siklus \textit{prototyping}.
 
 \input{contents/figures/alur-penelitian}
 
@@ -708,6 +873,16 @@ Pengujian mencakup dua tahap: pengujian fungsional untuk memverifikasi kebenaran
 seluruh alur proses, dan pengujian kinerja menggunakan Hyperledger Caliper untuk
 mengukur \textit{throughput} dan latensi.
 
+Pada tahap pengujian fungsional, verifikasi tidak hanya dilakukan melalui
+eksekusi skenario pada aplikasi, tetapi juga melalui \textit{unit test} otomatis
+yang menargetkan dua lapisan utama. Lapisan pertama adalah layanan
+\textit{backend} yang menjembatani permintaan API dengan pemanggilan fungsi pada
+\textit{ledger}. Lapisan kedua adalah \textit{chaincode} yang merealisasikan
+aturan bisnis Rupiah Digital, termasuk siklus hidup peserta, KYC, dompet,
+transfer, dan batas transaksi. Pendekatan ini dipilih agar kebenaran aturan pada
+purwarupa dapat diperiksa secara lebih terisolasi sebelum hasilnya dikaitkan
+dengan pengujian kinerja pada BAB IV.
+
 \subsubsection{Konfigurasi Hyperledger Caliper}
 
 Hyperledger Caliper dikonfigurasi dengan file jaringan (\textit{network config})
@@ -716,6 +891,38 @@ identitas MSP. Modul beban kerja (\textit{workload modules}) ditulis dalam
 JavaScript untuk mensimulasikan transfer antarpelanggan, transfer
 pelanggan-ke-pedagang, pembacaan dompet, KYC, operasi moneter, kueri pengawasan,
 dan kebijakan administratif sesuai Tabel~\ref{tab:skenario}.
+
+Lingkungan pengujian dirangkum pada Tabel~\ref{tab:lingkungan-uji}. Seluruh
+komponen dijalankan pada satu inang lokal berbasis \textit{container} Docker,
+sehingga parameter pemotongan blok \textit{orderer} dan versi perangkat lunak
+menjadi bagian dari konteks yang menentukan batas \textit{throughput} yang
+terukur pada BAB IV.
+
+\begin{table}[H]
+\centering
+\caption{Lingkungan pengujian purwarupa bi-coin}
+\label{tab:lingkungan-uji}
+\begin{tabular}{ll}
+\hline
+\textbf{Komponen} & \textbf{Spesifikasi} \\
+\hline
+Inang & Satu mesin lokal, \textit{container} Docker 29.6.2 \\
+CPU & Intel Core i7-7700HQ @ 2,80 GHz (4 inti, 8 utas) \\
+Memori (RAM) & 16 GB \\
+Sistem operasi & Fedora Linux 44 (\textit{Workstation Edition}), x86\_64 \\
+Hyperledger Fabric & 2.5 (rilis 2.5.16) \\
+Basis data status & CouchDB \\
+Konsensus \textit{ordering} & Raft (\textit{etcdraft}) \\
+\textit{BatchTimeout} \textit{orderer} & 2 detik \\
+\textit{MaxMessageCount} \textit{orderer} & 10 pesan \\
+Ukuran blok maksimum & 10 MB (\textit{preferred} 2 MB) \\
+Kanal & \textit{mychannel}, kebijakan dukungan mayoritas \\
+Chaincode & \textit{digital-rupiah} v2.0 (Go 1.22, \textit{fabric-contract-api-go} v2.0.0) \\
+Backend & Go 1.23, \textit{fabric-gateway} v1.8.0 \\
+Hyperledger Caliper & 0.6.0 \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsubsection{Menjalankan Pengujian Hyperledger Caliper}
 

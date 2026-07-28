@@ -1,0 +1,44 @@
+test:
+  name: Digital Rupiah Aggregate Overspend Contention
+  description: Concurrent transfers request more value than a shared sender owns; the final non-negative balance and classified rejections test the conservation invariant
+  workers:
+    type: local
+    number: 4
+  rounds:
+    - label: aggregate-overspend-contention
+      txNumber: 200
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 80
+      workload:
+        module: benchmark/workloads/adversarial-double-spend.js
+        arguments:
+          scenario: overspend-contention
+          receivers: 20
+          transferAmount: 1000
+          senderFunding: 50000
+          seed: 20260725
+
+observer:
+  type: local
+  interval: 1
+
+monitors:
+  resource:
+    - module: docker
+      options:
+        interval: 1
+        cpuUsageNormalization: true
+        containers:
+          - /peer0.bi.paynet
+          - /peer0.himbara.paynet
+          - /peer0.commercial.paynet
+          - /peer0.pjp.paynet
+          - /peer0.ojk.paynet
+          - /couchdb0.bi.paynet
+          - /couchdb0.himbara.paynet
+          - /couchdb0.commercial.paynet
+          - /couchdb0.pjp.paynet
+          - /couchdb0.ojk.paynet
+          - /orderer.paynet

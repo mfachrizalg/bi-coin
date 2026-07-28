@@ -8,9 +8,11 @@ const { RetailWorkloadBase } = require('./retail-base');
  *   25% customer-to-merchant transfer
  *    5% wallet read
  *
- * Customer population is 20% BASIC and 80% STANDARD. Merchant wallets are
- * policy-derived MERCHANT wallets. All subjects receive approved KYC anchors
- * during deterministic seeding before measured traffic starts.
+ * Customer population is 20% BASIC and 80% STANDARD, while the measured
+ * senders are STANDARD wallets so duration-based rounds do not fail because a
+ * BASIC wallet reaches its deliberately small balance or transaction limit.
+ * Merchant wallets are policy-derived MERCHANT wallets. All subjects receive
+ * approved KYC anchors during deterministic seeding before measured traffic.
  */
 class RetailTransferWorkload extends RetailWorkloadBase {
     async initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext) {
@@ -39,10 +41,8 @@ class RetailTransferWorkload extends RetailWorkloadBase {
         this.transactionSlots = transactionSlots;
         this.totalWorkers = totalWorkers;
 
-        const senders = this.customers.slice(0, transactionSlots);
-        const receivers = this.customers
-            .slice(transactionSlots)
-            .filter(customer => customer.tier === 'STANDARD');
+        const senders = this.standardCustomers.slice(0, transactionSlots);
+        const receivers = this.standardCustomers.slice(transactionSlots);
         const required = Array.from({ length: transactionSlots }, (_, slot) => this.operationKind(slot));
         const requiredReceivers = required.filter(kind => kind === 'customer').length;
         const requiredMerchants = required.filter(kind => kind === 'merchant').length;
@@ -68,8 +68,8 @@ class RetailTransferWorkload extends RetailWorkloadBase {
     }
 
     planTransaction(slot) {
-        const plan = this.transactionPlans && this.transactionPlans[slot];
-        if (!plan) throw new Error(`transaction slot ${slot} exceeds configured contention-free population`);
+        const plan = this.transactionPlans && this.transactionPlans[slot % this.transactionPlans.length];
+        if (!plan) throw new Error(`transaction slot ${slot} exceeds configured rotating population`);
         return plan;
     }
 
@@ -88,3 +88,4 @@ function createWorkloadModule() {
 }
 
 module.exports.createWorkloadModule = createWorkloadModule;
+module.exports.RetailTransferWorkload = RetailTransferWorkload;

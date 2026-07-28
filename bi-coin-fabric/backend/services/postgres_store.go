@@ -108,6 +108,23 @@ CREATE TABLE IF NOT EXISTS kyc_audit_events (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS qris_intents (
+	intent_id TEXT PRIMARY KEY,
+	mode TEXT NOT NULL,
+	merchant_id TEXT NOT NULL,
+	merchant_wallet_id TEXT NOT NULL,
+	amount BIGINT NOT NULL DEFAULT 0,
+	status TEXT NOT NULL,
+	label TEXT,
+	payload TEXT NOT NULL,
+	reference_id TEXT NOT NULL,
+	expires_at TEXT,
+	paid_by_wallet_id TEXT,
+	paid_at TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS due_diligence_level TEXT NOT NULL DEFAULT 'simplified';
 ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS senior_approval BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE kyc_provider_checks ADD COLUMN IF NOT EXISTS due_diligence_level TEXT NOT NULL DEFAULT 'simplified';
@@ -361,9 +378,145 @@ VALUES ($1, $2, $3, $4)`,
 	return err
 }
 
+func (s *PostgresStore) CreateQrisIntent(ctx context.Context, intent models.QrisIntent) (*models.QrisIntent, error) {
+	now := time.Now().UTC().Format(time.RFC3339)
+	_, err := s.db.ExecContext(ctx, `
+INSERT INTO qris_intents (intent_id, mode, merchant_id, merchant_wallet_id, amount, status, label, payload, reference_id, expires_at, paid_by_wallet_id, paid_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+ON CONFLICT (intent_id) DO UPDATE
+SET mode = EXCLUDED.mode,
+    merchant_id = EXCLUDED.merchant_id,
+    merchant_wallet_id = EXCLUDED.merchant_wallet_id,
+    amount = EXCLUDED.amount,
+    status = EXCLUDED.status,
+    label = EXCLUDED.label,
+    payload = EXCLUDED.payload,
+    reference_id = EXCLUDED.reference_id,
+    expires_at = EXCLUDED.expires_at,
+    paid_by_wallet_id = EXCLUDED.paid_by_wallet_id,
+    paid_at = EXCLUDED.paid_at,
+    updated_at = now()
+`, intent.IntentID, string(intent.Mode), intent.MerchantID, intent.MerchantWalletID, intent.Amount, string(intent.Status), nullableString(intent.Label), intent.Payload, intent.ReferenceID, nullablePointerString(intent.ExpiresAt), nullableString(intent.PaidByWalletID), nullablePointerString(intent.PaidAt))
+	if err != nil {
+		return nil, err
+	}
+	intent.CreatedAt = now
+	intent.UpdatedAt = now
+	return &intent, nil
+}
+
+func (s *PostgresStore) GetQrisIntent(ctx context.Context, intentID string) (*models.QrisIntent, error) {
+	var intent models.QrisIntent
+	var mode, status string
+	var label, expiresAt, paidByWalletID, paidAt sql.NullString
+	var created, updated time.Time
+	err := s.db.QueryRowContext(ctx, `
+SELECT intent_id, mode, merchant_id, merchant_wallet_id, amount, status, label, payload, reference_id, expires_at, paid_by_wallet_id, paid_at, created_at, updated_at
+FROM qris_intents WHERE intent_id = $1`, intentID).
+		Scan(&intent.IntentID, &mode, &intent.MerchantID, &intent.MerchantWalletID, &intent.Amount, &status, &label, &intent.Payload, &intent.ReferenceID, &expiresAt, &paidByWalletID, &paidAt, &created, &updated)
+	if err != nil {
+		return nil, err
+	}
+	intent.Mode = models.QrisMode(mode)
+	intent.Status = models.QrisStatus(status)
+	if label.Valid {
+		intent.Label = label.String
+	}
+	if expiresAt.Valid {
+		intent.ExpiresAt = &expiresAt.String
+	}
+	if paidByWalletID.Valid {
+		intent.PaidByWalletID = paidByWalletID.String
+	}
+	if paidAt.Valid {
+		intent.PaidAt = &paidAt.String
+	}
+	intent.CreatedAt = created.UTC().Format(time.RFC3339)
+	intent.UpdatedAt = updated.UTC().Format(time.RFC3339)
+	return &intent, nil
+}
+
+func (s *PostgresStore) ListQrisIntents(ctx context.Context, merchantID string) ([]*models.QrisIntent, error) {
+	query := `
+SELECT intent_id, mode, merchant_id, merchant_wallet_id, amount, status, label, payload, reference_id, expires_at, paid_by_wallet_id, paid_at, created_at, updated_at
+FROM qris_intents`
+	args := []interface{}{}
+	if merchantID != "" {
+		query += ` WHERE merchant_id = $1`
+		args = append(args, merchantID)
+	}
+	query += ` ORDER BY created_at DESC`
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var intents []*models.QrisIntent
+	for rows.Next() {
+		var intent models.QrisIntent
+		var mode, status string
+		var label, expiresAt, paidByWalletID, paidAt sql.NullString
+		var created, updated time.Time
+		if err := rows.Scan(&intent.IntentID, &mode, &intent.MerchantID, &intent.MerchantWalletID, &intent.Amount, &status, &label, &intent.Payload, &intent.ReferenceID, &expiresAt, &paidByWalletID, &paidAt, &created, &updated); err != nil {
+			return nil, err
+		}
+		intent.Mode = models.QrisMode(mode)
+		intent.Status = models.QrisStatus(status)
+		if label.Valid {
+			intent.Label = label.String
+		}
+		if expiresAt.Valid {
+			intent.ExpiresAt = &expiresAt.String
+		}
+		if paidByWalletID.Valid {
+			intent.PaidByWalletID = paidByWalletID.String
+		}
+		if paidAt.Valid {
+			intent.PaidAt = &paidAt.String
+		}
+		intent.CreatedAt = created.UTC().Format(time.RFC3339)
+		intent.UpdatedAt = updated.UTC().Format(time.RFC3339)
+		intents = append(intents, &intent)
+	}
+	return intents, rows.Err()
+}
+
+func (s *PostgresStore) MarkQrisIntentPaid(ctx context.Context, intentID string, txID string, payerWalletID string) error {
+	_ = txID
+	paidAt := time.Now().UTC().Format(time.RFC3339)
+	_, err := s.db.ExecContext(ctx, `
+UPDATE qris_intents
+SET status = $2, paid_by_wallet_id = $3, paid_at = $4, updated_at = now()
+WHERE intent_id = $1`, intentID, string(models.QrisStatusPaid), payerWalletID, paidAt)
+	return err
+}
+
+func (s *PostgresStore) MarkQrisIntentExpired(ctx context.Context, intentID string) error {
+	_, err := s.db.ExecContext(ctx, `
+UPDATE qris_intents
+SET status = $2, updated_at = now()
+WHERE intent_id = $1`, intentID, string(models.QrisStatusExpired))
+	return err
+}
+
+func (s *PostgresStore) CancelQrisIntent(ctx context.Context, intentID string) error {
+	_, err := s.db.ExecContext(ctx, `
+UPDATE qris_intents
+SET status = $2, updated_at = now()
+WHERE intent_id = $1`, intentID, string(models.QrisStatusCancelled))
+	return err
+}
+
 func nullableString(value string) interface{} {
 	if value == "" {
 		return nil
 	}
 	return value
+}
+
+func nullablePointerString(value *string) interface{} {
+	if value == nil || *value == "" {
+		return nil
+	}
+	return *value
 }

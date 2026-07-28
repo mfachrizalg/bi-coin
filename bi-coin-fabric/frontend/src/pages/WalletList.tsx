@@ -4,7 +4,13 @@ import { ParticipantTypeColor, ParticipantTypeLabel } from '../lib/constants'
 
 const fmt = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
 
-export default function WalletList({ onSelect }: { onSelect: (id: string) => void }) {
+export default function WalletList({
+  onSelect,
+  showParticipantBadges = false,
+}: {
+  onSelect: (id: string) => void
+  showParticipantBadges?: boolean
+}) {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [participantMap, setParticipantMap] = useState<Record<string, Participant>>({})
   const [error, setError] = useState('')
@@ -22,14 +28,17 @@ export default function WalletList({ onSelect }: { onSelect: (id: string) => voi
     } finally {
       setLoading(false)
     }
-    // participant badges — optional, silently skip if role lacks permission
-    try {
-      const ps = await listParticipants()
-      const map: Record<string, Participant> = {}
-      for (const p of ps ?? []) map[p.participant_id] = p
-      setParticipantMap(map)
-    } catch {
-      // no access to participants for this role — skip type badges
+    if (showParticipantBadges) {
+      try {
+        const ps = await listParticipants()
+        const map: Record<string, Participant> = {}
+        for (const p of ps ?? []) map[p.participant_id] = p
+        setParticipantMap(map)
+      } catch {
+        setParticipantMap({})
+      }
+    } else {
+      setParticipantMap({})
     }
   }
 

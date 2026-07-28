@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listLimits, type SystemLimit } from '../lib/api'
 
-// Tier limits enforced by chaincode (not exposed via backend REST)
-const TIER_POLICY = [
-  { tier: 'BASIC',    maxBalance: 2_000_000,   dailyOut: 500_000,    monthlyOut: 5_000_000,   monthlyIn: 20_000_000,  perTx: 250_000 },
-  { tier: 'STANDARD', maxBalance: 20_000_000,  dailyOut: 10_000_000, monthlyOut: 40_000_000,  monthlyIn: 40_000_000,  perTx: 2_500_000 },
-  { tier: 'MERCHANT', maxBalance: 200_000_000, dailyOut: 50_000_000, monthlyOut: 500_000_000, monthlyIn: 500_000_000, perTx: 10_000_000 },
-]
-
 const SCOPE_LABELS: Record<string, string> = {
   global_supply:           'Batas Supply Global',
   per_participant_balance: 'Batas Saldo per Peserta',
@@ -29,6 +22,9 @@ export default function Limits() {
   return (
     <div style={{ fontSize: '1rem' }}>
       <h2 style={{ marginBottom: 24, fontSize: '1.4rem' }}>Batas Transaksi</h2>
+      <div style={{ padding: '12px 14px', marginBottom: 18, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8' }}>
+        Halaman ini hanya menampilkan limit live dari backend. Policy tier retail tetap ditegakkan chaincode dan tidak lagi dipresentasikan sebagai tabel pseudo-live terpisah.
+      </div>
 
       {/* System limits from backend */}
       <div style={{ marginBottom: 32 }}>
@@ -66,40 +62,6 @@ export default function Limits() {
             </tbody>
           </table>
         )}
-      </div>
-
-      {/* Tier policy from chaincode defaults */}
-      <div>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: 6, color: '#374151' }}>Kebijakan Tier Dompet (Chaincode)</h3>
-        <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: 12 }}>
-          Batas ini ditentukan oleh chaincode berdasarkan tier KYC. Tier ditetapkan otomatis saat dompet dibuat.
-        </p>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
-            <thead>
-              <tr style={{ background: '#f9fafb' }}>
-                <th style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>Tier</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap' }}>Saldo Maks</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap' }}>Limit Harian</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap' }}>Limit Bulanan Keluar</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap' }}>Limit Bulanan Masuk</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap' }}>Limit per Transaksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {TIER_POLICY.map(t => (
-                <tr key={t.tier} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 700, color: '#1a3c6e' }}>{t.tier}</td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.maxBalance)}</td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.dailyOut)}</td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.monthlyOut)}</td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.monthlyIn)}</td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{fmt(t.perTx)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   )

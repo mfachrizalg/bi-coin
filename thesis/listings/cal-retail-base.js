@@ -8,6 +8,56 @@ const CONTRACT = { contractId: 'digital-rupiah', contractVersion: '2.0' };
 const PER_TX_BASIC = 250000;
 const PER_TX_STANDARD = 2500000;
 
+function transactionStatus(tx) {
+    if (!tx) return '';
+    const value = typeof tx.GetStatus === 'function' ? tx.GetStatus() : tx.status;
+    return String(value || '').toLowerCase();
+}
+
+function transactionDiagnostic(tx) {
+    if (!tx) return 'missing transaction result';
+    const parts = [];
+    for (const key of ['error', 'message', 'status']) {
+        if (tx[key]) parts.push(String(tx[key]));
+    }
+    if (typeof tx.GetResult === 'function') {
+        try {
+            const result = tx.GetResult();
+            if (result) parts.push(Buffer.isBuffer(result) ? result.toString('utf8') : String(result));
+        } catch (error) {
+            parts.push(String(error));
+        }
+    }
+    return parts.join(' | ') || 'transaction failed without diagnostic';
+}
+
+function transactionPayload(tx) {
+    if (!tx) return '';
+    let value = tx.result;
+    if (typeof tx.GetResult === 'function') {
+        value = tx.GetResult();
+    }
+    if (Buffer.isBuffer(value)) return value.toString('utf8');
+    return typeof value === 'string' ? value : JSON.stringify(value || '');
+}
+
+function transactionResults(response) {
+    return Array.isArray(response) ? response : [response];
+}
+
+function assertSuccessfulResponse(fn, response) {
+    const results = transactionResults(response);
+    if (results.length === 0) {
+        throw new Error(`setup ${fn} returned no transaction result`);
+    }
+    for (const tx of results) {
+        const status = transactionStatus(tx);
+        if (status !== 'success') {
+            throw new Error(`setup ${fn} failed: ${transactionDiagnostic(tx)}`);
+        }
+    }
+}
+
 /**
  * Shared base for the retail CBDC workloads.
  *
@@ -25,6 +75,13 @@ class RetailWorkloadBase extends WorkloadModuleBase {
         this.standardCustomers = []; // subset of customers on the STANDARD tier
         this.merchants = []; // { id, walletId }
         this.txIndex = 0;
+        this.randomState = 1;
+    }
+
+    async initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext) {
+        await super.initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext);
+        const configuredSeed = Number(this.arg('seed', 20260725));
+        this.randomState = (configuredSeed + (workerIndex + 1) * 1009 + (roundIndex + 1) * 9176) >>> 0;
     }
 
     arg(name, def) {
@@ -32,11 +89,13 @@ class RetailWorkloadBase extends WorkloadModuleBase {
         return v === undefined ? def : v;
     }
 
-    // Namespace: per-worker+round by default; per-worker only when a fixed scenario is
-    // set, so a follow-up round can address the same population.
+    // Namespace: per-worker+round by default. A scenario prefix lets multiple
+    // benchmark profiles run on the same clean ledger without cross-profile key
+    // collisions while still keeping each round isolated.
     ns() {
         const scenario = this.arg('scenario', null);
-        return scenario ? `${scenario}_w${this.workerIndex}` : `w${this.workerIndex}_r${this.roundIndex}`;
+        const prefix = scenario ? `${scenario}_` : '';
+        return `${prefix}w${this.workerIndex}_r${this.roundIndex}`;
     }
 
     customerId(i) { return `c_${this.ns()}_${i}`; }
@@ -44,8 +103,13 @@ class RetailWorkloadBase extends WorkloadModuleBase {
     walletId(ownerId) { return `wlt_${ownerId}`; }
     isBasic(i) { return i % 5 === 0; } // ~20% BASIC, rest STANDARD
 
-    randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-    pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    random() {
+        this.randomState = (1664525 * this.randomState + 1013904223) >>> 0;
+        return this.randomState / 0x100000000;
+    }
+
+    randInt(min, max) { return Math.floor(this.random() * (max - min + 1)) + min; }
+    pick(arr) { return arr[Math.floor(this.random() * arr.length)]; }
 
     // Run async tasks with bounded concurrency. Seeding is otherwise sequential and, with
     // a 2s orderer BatchTimeout, far too slow; concurrency lets blocks cut on MaxMessageCount.
@@ -61,23 +125,25 @@ class RetailWorkloadBase extends WorkloadModuleBase {
     }
 
     async submit(fn, args, readOnly = false) {
-        await this.sutAdapter.sendRequests({
+        const response = await this.sutAdapter.sendRequests({
             ...CONTRACT,
             contractFunction: fn,
             contractArguments: args.map(String),
             readOnly,
         });
+        assertSuccessfulResponse(fn, response);
+        return response;
     }
 
     // Small-value-heavy distribution typical of retail payments, clamped to cap.
     retailAmount(cap) {
-        const r = Math.random();
+        const r = this.random();
         let a;
         if (r < 0.70) a = this.randInt(5000, 100000);
         else if (r < 0.92) a = this.randInt(100000, 500000);
         else if (r < 0.99) a = this.randInt(500000, 2000000);
         else a = this.randInt(2000000, 2500000);
-        return Math.min(a, cap);
+        return Math.min(a, cap, this.arg('maxTransferAmount', cap));
     }
 
     pickTwoDistinct() {
@@ -104,6 +170,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
      * `fundedRatio` of customers are funded normally; the remainder are underfunded.
      */
     async seedPopulation({ numCustomers, numMerchants, fundedRatio, fundStandard, fundBasic }) {
+        const seedConcurrency = this.arg('seedConcurrency', 2);
         const merchantTasks = [];
         for (let i = 0; i < numMerchants; i++) {
             const id = this.merchantId(i);
@@ -117,7 +184,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
                 await this.submit('CreateWallet', [walletId, id, 'MERCHANT']);
             });
         }
-        await this.runPool(merchantTasks);
+        await this.runPool(merchantTasks, seedConcurrency);
 
         const customerTasks = [];
         for (let i = 0; i < numCustomers; i++) {
@@ -145,9 +212,19 @@ class RetailWorkloadBase extends WorkloadModuleBase {
                 }
             });
         }
-        await this.runPool(customerTasks);
+        await this.runPool(customerTasks, seedConcurrency);
 
     }
 }
 
-module.exports = { RetailWorkloadBase, CONTRACT, PER_TX_BASIC, PER_TX_STANDARD };
+module.exports = {
+    RetailWorkloadBase,
+    CONTRACT,
+    PER_TX_BASIC,
+    PER_TX_STANDARD,
+    assertSuccessfulResponse,
+    transactionDiagnostic,
+    transactionPayload,
+    transactionResults,
+    transactionStatus,
+};

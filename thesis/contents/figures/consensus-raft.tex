@@ -37,16 +37,12 @@
 
 %--- Fase 2: Ordering (Raft) ---
 \node[proc]    (client2) at (5.2,  0)    {Klien\\(kumpul \textit{endorsement})};
-\node[raftbox] (leader)  at (5.2, -2.0)  {Orderer (Raft Leader)\\orderer.paynet:7050};
-\node[proc]    (follower) at (5.2, -3.8) {\textit{Raft followers}:\\replikasi log, \textit{commit}};
+\node[raftbox] (leader)  at (5.2, -2.9)  {Orderer tunggal (Raft)\\orderer.paynet:7050};
 \node[stepnum] at (3.2, -1.0) {3};
 
 \draw[ar] (client2.south) --
   node[pathlabel,right]{submit \textit{tx}\\terendorsement} (leader.north);
-\draw[ar] (leader.south) --
-  node[pathlabel,right]{replikasi log Raft} (follower.north);
-
-\node[phasebox, fit=(client2)(leader)(follower),
+\node[phasebox, fit=(client2)(leader),
   label={[font=\footnotesize\bfseries]above:Fase \textit{Ordering} (Raft)}] (ph2) {};
 
 %--- Fase 3: Validasi & Commit ---
@@ -73,6 +69,6 @@
 
 \end{tikzpicture}%
 }
-\caption{Siklus transaksi Hyperledger Fabric dengan mekanisme konsensus Raft}
+\caption{Siklus transaksi Hyperledger Fabric pada topologi uji dengan satu \textit{consenter} Raft tanpa toleransi kegagalan \textit{orderer}.}
 \label{fig:konsensus-raft}
 \end{figure}

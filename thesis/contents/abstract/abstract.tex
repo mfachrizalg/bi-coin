@@ -1,39 +1,36 @@
 \textit{
-Central Bank Digital Currency (CBDC) is a strategic Bank Indonesia initiative
-under Project Garuda. Publicly documented Project Garuda experiments focus on
-wholesale CBDC, leaving a technical gap for a testable retail prototype that
-combines two-tier distribution, risk-based customer due diligence, deterministic
-wallet limits, and institutional supervision. This study designs and implements
-a retail Digital Rupiah prototype on a permissioned Hyperledger Fabric network.
+Bank Indonesia's public Project Garuda experiments focus on wholesale central
+bank digital currency. This study asks how a testable retail Digital Rupiah
+prototype can represent two-tier distribution, wallet policies, and
+institutional oversight on a permissioned ledger. It uses Hyperledger Fabric
+2.5, Go chaincode and backend services, CouchDB, and PostgreSQL.
 }
 
 \textit{
-The prototyping method covers requirements analysis, architecture design,
-implementation, and functional and performance testing. Go chaincode stores only
-KYC status, risk, due-diligence level, senior-approval status, expiry, and document
-hashes; raw identity data remains in PostgreSQL. Retail wallet tiers are derived
-from the approved KYC profile rather than selected by a user. BASIC, STANDARD,
-and MERCHANT policies enforce per-transaction, daily outgoing, monthly outgoing,
-monthly incoming, and maximum-balance limits using the Fabric transaction
-timestamp. Institutional Bank Indonesia, bank, and payment-service-provider
-wallets remain outside retail tiering and use system-level limits. Hyperledger
-Caliper is configured for a transfer-only workload consisting of 70\% customer-to-
-customer transfers, 25\% customer-to-merchant transfers, and 5\% reads.
+Raw identity data remains in PostgreSQL; the ledger stores KYC status, risk,
+expiry, and document hashes. This separation does not provide transaction
+privacy on the shared channel. Banks or payment service providers supply KYC
+decisions. The chaincode derives BASIC, STANDARD, and MERCHANT wallet tiers and
+validates transaction, daily, monthly, and balance limits. Backend ownership
+and chaincode MSP checks enforce user and organization boundaries. These
+controls do not demonstrate complete AML/CFT compliance or four-eyes approval.
 }
 
 \textit{
-Automated tests verify tier derivation, high-risk enhanced-due-diligence rules,
-incoming and outgoing limit enforcement, privacy separation, and role boundaries.
-The resulting prototype demonstrates a coherent separation of responsibilities:
-customers provide identity data, banks or payment service providers perform KYC,
-and Bank Indonesia supervises institutions and ledger events. Performance claims
-are limited to reproducible measurements produced by the specified Caliper
-protocol. The prototype therefore provides an auditable technical basis for
-studying retail Digital Rupiah policy, without claiming production readiness or
-legal limit equivalence.
+Automated tests and exact-diagnostic negative paths evaluate authorization and
+policy enforcement. Hyperledger Caliper evaluates a fixed retail population
+under 10, 30, and 60 TPS offered loads, with a clean ledger for each profile,
+deterministic seeding, repeated peak rounds, and an aggregate-overspend
+scenario. At a 30 TPS offered load, successful throughput reaches 29.5 TPS
+without failures; at 60 TPS, it ranges from 41.2 to 47.0 TPS. All seven negative
+cases are rejected for the expected reason. In the overspend scenario, 4 of 200
+transfers commit and the final balance remains nonnegative. These results form a
+repeatable local baseline, not evidence of cross-machine reproducibility or
+production capacity. The prototype is an auditable artifact for retail Digital
+Rupiah policy experiments within the stated limitations.
 }
 
 \vspace{0.5cm}
 
-\noindent\textbf{Keywords} : Digital Rupiah, retail CBDC, Hyperledger Fabric,
+\noindent\textbf{Keywords}: Digital Rupiah, retail CBDC, Hyperledger Fabric,
 risk-based KYC, wallet limits

@@ -1,0 +1,603 @@
+<!doctype html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<script>
+    function plotChart(divId, chartData) {
+        // Convert from stringified html, to valid JSON
+        const chartDetails = JSON.parse(chartData.replace(/&quot;/g,'"'));
+        new Chart(document.getElementById(divId), {
+            type: chartDetails.type,
+            data: {
+                labels: chartDetails.labels,
+                datasets: chartDetails.datasets
+            },
+            options: {
+                legend: { display: chartDetails.legend },
+                title: {
+                    display: true,
+                    text: chartDetails.title
+                }
+            }
+        });
+    }
+</script>
+<html>
+<head>
+    <title>Hyperledger Caliper Report</title>
+    <meta charset="UTF-8"/>
+    <style type="text/css">
+        .left-column {
+            position: fixed;
+            width:20%;
+        }
+        .left-column ul {
+            display: block;
+            padding: 0;
+            list-style: none;
+            border-bottom: 1px solid #d9d9d9;
+            font-size: 14px;
+        }
+        .left-column h2{
+            font-size: 24px;
+            font-weight: 400;
+            margin-block-end: 0.5em;
+        }
+        .left-column h3{
+            font-size: 18px;
+            font-weight: 400;
+            margin-block-end: 0.5em;
+        }
+        .left-column li{
+            margin-left: 10px;
+            margin-bottom: 5px;
+            color: #5e6b73;
+        }
+        .right-column {
+            margin-left: 22%;
+            width:60%;
+        }
+        .right-column table {
+            font-size:11px;
+            color:#333333;
+            border-width: 1px;
+            border-color: #666666;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .right-column h2{
+            font-weight: 400;
+        }
+        .right-column h3{
+            font-weight: 400;
+        }
+        .right-column h4 {
+            font-weight: 400;
+            margin-block-end: 0;
+        }
+        .right-column th {
+            border-width: 1px;
+            font-size: small;
+            padding: 8px;
+            border-style: solid;
+            border-color: #666666;
+            background-color: #f2f2f2;
+        }
+        .right-column td {
+            border-width: 1px;
+            font-size: small;
+            padding: 8px;
+            border-style: solid;
+            border-color: #666666;
+            background-color: #ffffff;
+            font-weight: 400;
+        }
+        .tag {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+        }
+        pre {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f2f2f2;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            -khtml-border-radius: 5px;
+            overflow:auto;
+            max-height:300px;
+            font-size:12px;
+        }
+        .charting {
+            display:flex;
+            flex-direction:row;
+            flex-wrap: wrap;
+            page-break-inside: auto;
+        }
+        .chart {
+            display:flex;
+            flex:1;
+            max-width: 50%;
+        }
+    </style>
+</head>
+<body style="font-family: IBM Plex Sans; font-weight: 200;">
+    <main>
+        <div class="left-column">
+            <img src="https://hyperledger.github.io/caliper/assets/img/hyperledger_caliper_logo_color.png" style="width:95%;" alt="">
+            <ul>
+                <h3>&nbspBasic information</h3>
+                <li>DLT: &nbsp<span style="font-weight: 500;">fabric</span></li>
+                <li>Name: &nbsp<span style="font-weight: 500;">Digital Rupiah Retail Transfer - Repetition (mean +&#x2F;- CI)</span></li>
+                <li>Description: &nbsp<span style="font-weight: 500;">Five seeded 60-second peak rounds of the low-contention transfer workload for mean and confidence-interval estimation</span></li>
+                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">5</span></li>
+                <li><a href="#benchmarkInfo">Details</a></li>
+            </ul>
+            <ul>
+                <h3>&nbspBenchmark results</h3>
+                <li><a href="#benchmarksummary">Summary</a></li>
+                    <li><a href="#retail-peak-rep-1">retail-peak-rep-1</a></li>
+                    <li><a href="#retail-peak-rep-2">retail-peak-rep-2</a></li>
+                    <li><a href="#retail-peak-rep-3">retail-peak-rep-3</a></li>
+                    <li><a href="#retail-peak-rep-4">retail-peak-rep-4</a></li>
+                    <li><a href="#retail-peak-rep-5">retail-peak-rep-5</a></li>
+            </ul>
+            <ul>
+                <h3>&nbspSystem under test</h3>
+                <li><a href="#sutdetails">Details</a></li>
+            </ul>
+        </div>
+
+        <div class="right-column">
+            <h1 style="padding-top: 3em; font-weight: 500;">Caliper report</h1>
+            <div style="border-bottom: 1px solid #d9d9d9; margin-bottom: 10px;" id="benchmarksummary">
+                <table style="min-width: 100%;">
+                    <h3>Summary of performance metrics</h3>
+                    <tr>
+                         <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
+                    </tr>
+
+                    <tr>
+                         <td>retail-peak-rep-1</td> <td>2342</td> <td>1256</td> <td>59.9</td> <td>3.69</td> <td>0.01</td> <td>1.07</td> <td>57.7</td>
+                    </tr>
+                    <tr>
+                         <td>retail-peak-rep-2</td> <td>1494</td> <td>2105</td> <td>60.0</td> <td>5.41</td> <td>0.03</td> <td>1.91</td> <td>57.5</td>
+                    </tr>
+                    <tr>
+                         <td>retail-peak-rep-3</td> <td>1885</td> <td>1713</td> <td>60.0</td> <td>3.98</td> <td>0.01</td> <td>1.45</td> <td>59.2</td>
+                    </tr>
+                    <tr>
+                         <td>retail-peak-rep-4</td> <td>1671</td> <td>1931</td> <td>60.0</td> <td>6.08</td> <td>0.01</td> <td>1.62</td> <td>59.5</td>
+                    </tr>
+                    <tr>
+                         <td>retail-peak-rep-5</td> <td>2327</td> <td>1275</td> <td>60.0</td> <td>3.69</td> <td>0.01</td> <td>1.15</td> <td>57.7</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="retail-peak-rep-1">
+                <h2>Benchmark round: retail-peak-rep-1</h2>
+                <p></p>
+                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
+rateControl:
+  type: fixed-rate
+  opts:
+    tps: 60
+</pre>
+                        <h3>Performance metrics for retail-peak-rep-1</h3>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
+                                </tr>
+                                <tr>
+                                     <td>retail-peak-rep-1</td> <td>2342</td> <td>1256</td> <td>59.9</td> <td>3.69</td> <td>0.01</td> <td>1.07</td> <td>57.7</td>
+                                </tr>
+                            </table>
+                        <h3>Resource utilization for retail-peak-rep-1</h3>
+                            <h4>Resource monitor: docker</h4>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                <table>
+                                    <tr>
+                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [MB]</th> <th>Memory(avg) [MB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [MB]</th> <th>Disc Read [KB]</th>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.bi.paynet</td> <td>1.03625</td> <td>0.7475</td> <td>128</td> <td>121</td> <td>83.2</td> <td>68.2</td> <td>69.8</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.pjp.paynet</td> <td>0.6575</td> <td>0.40375</td> <td>122</td> <td>103</td> <td>30.5</td> <td>23.1</td> <td>69.0</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.himbara.paynet</td> <td>0.51375</td> <td>0.385</td> <td>119</td> <td>115</td> <td>30.3</td> <td>22.8</td> <td>65.4</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.ojk.paynet</td> <td>0.49875</td> <td>0.36</td> <td>119</td> <td>115</td> <td>30.2</td> <td>22.8</td> <td>68.3</td> <td>32.0</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.commercial.paynet</td> <td>0.58875</td> <td>0.39625</td> <td>121</td> <td>107</td> <td>30.5</td> <td>23.3</td> <td>68.8</td> <td>16.0</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.bi.paynet</td> <td>2.33125</td> <td>0.9425</td> <td>83.7</td> <td>69.3</td> <td>4.77</td> <td>2.26</td> <td>177</td> <td>280</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.ojk.paynet</td> <td>1.86625</td> <td>0.91375</td> <td>88.1</td> <td>67.1</td> <td>4.82</td> <td>2.39</td> <td>168</td> <td>316</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;orderer.paynet</td> <td>0.20625</td> <td>0.1225</td> <td>78.8</td> <td>60.3</td> <td>17.1</td> <td>80.9</td> <td>69.9</td> <td>16.0</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.pjp.paynet</td> <td>1.87875</td> <td>0.93375</td> <td>74.4</td> <td>64.5</td> <td>4.83</td> <td>2.44</td> <td>170</td> <td>320</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.commercial.paynet</td> <td>1.68</td> <td>0.9425</td> <td>82.0</td> <td>68.3</td> <td>4.82</td> <td>2.38</td> <td>171</td> <td>288</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.himbara.paynet</td> <td>1.80375</td> <td>0.8825</td> <td>72.2</td> <td>61.0</td> <td>4.82</td> <td>2.40</td> <td>171</td> <td>336</td>
+                                    </tr>
+                                </table>
+                                </tr>
+                            </table>
+                            <div class="charting">
+                            </div>
+            </div>
+
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="retail-peak-rep-2">
+                <h2>Benchmark round: retail-peak-rep-2</h2>
+                <p></p>
+                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
+rateControl:
+  type: fixed-rate
+  opts:
+    tps: 60
+</pre>
+                        <h3>Performance metrics for retail-peak-rep-2</h3>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
+                                </tr>
+                                <tr>
+                                     <td>retail-peak-rep-2</td> <td>1494</td> <td>2105</td> <td>60.0</td> <td>5.41</td> <td>0.03</td> <td>1.91</td> <td>57.5</td>
+                                </tr>
+                            </table>
+                        <h3>Resource utilization for retail-peak-rep-2</h3>
+                            <h4>Resource monitor: docker</h4>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                <table>
+                                    <tr>
+                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [MB]</th> <th>Memory(avg) [MB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [MB]</th> <th>Disc Read [MB]</th>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.bi.paynet</td> <td>1.01125</td> <td>0.6875</td> <td>138</td> <td>133</td> <td>78.1</td> <td>61.0</td> <td>57.4</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.pjp.paynet</td> <td>0.73</td> <td>0.39</td> <td>107</td> <td>101</td> <td>27.5</td> <td>22.9</td> <td>158</td> <td>0.0313</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.himbara.paynet</td> <td>0.55</td> <td>0.38</td> <td>121</td> <td>101</td> <td>27.7</td> <td>23.3</td> <td>56.7</td> <td>0.0156</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.ojk.paynet</td> <td>0.47125</td> <td>0.34375</td> <td>121</td> <td>105</td> <td>27.5</td> <td>23.0</td> <td>57.4</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.commercial.paynet</td> <td>0.615</td> <td>0.38875</td> <td>113</td> <td>106</td> <td>27.4</td> <td>22.9</td> <td>57.2</td> <td>0.125</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.bi.paynet</td> <td>1.63125</td> <td>0.7075</td> <td>85.9</td> <td>71.8</td> <td>3.03</td> <td>1.48</td> <td>125</td> <td>4.03</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.ojk.paynet</td> <td>1.32</td> <td>0.65375</td> <td>78.9</td> <td>68.8</td> <td>3.07</td> <td>1.59</td> <td>121</td> <td>5.69</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;orderer.paynet</td> <td>0.20125</td> <td>0.1</td> <td>81.8</td> <td>65.6</td> <td>13.8</td> <td>65.3</td> <td>57.8</td> <td>0.141</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.pjp.paynet</td> <td>1.235</td> <td>0.62625</td> <td>74.4</td> <td>62.8</td> <td>3.08</td> <td>1.62</td> <td>114</td> <td>1.13</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.commercial.paynet</td> <td>1.3075</td> <td>0.64875</td> <td>78.0</td> <td>69.0</td> <td>3.08</td> <td>1.63</td> <td>115</td> <td>4.23</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.himbara.paynet</td> <td>1.39</td> <td>0.71125</td> <td>78.5</td> <td>62.9</td> <td>3.07</td> <td>1.60</td> <td>120</td> <td>0.844</td>
+                                    </tr>
+                                </table>
+                                </tr>
+                            </table>
+                            <div class="charting">
+                            </div>
+            </div>
+
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="retail-peak-rep-3">
+                <h2>Benchmark round: retail-peak-rep-3</h2>
+                <p></p>
+                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
+rateControl:
+  type: fixed-rate
+  opts:
+    tps: 60
+</pre>
+                        <h3>Performance metrics for retail-peak-rep-3</h3>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
+                                </tr>
+                                <tr>
+                                     <td>retail-peak-rep-3</td> <td>1885</td> <td>1713</td> <td>60.0</td> <td>3.98</td> <td>0.01</td> <td>1.45</td> <td>59.2</td>
+                                </tr>
+                            </table>
+                        <h3>Resource utilization for retail-peak-rep-3</h3>
+                            <h4>Resource monitor: docker</h4>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                <table>
+                                    <tr>
+                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [MB]</th> <th>Memory(avg) [MB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [MB]</th> <th>Disc Read [MB]</th>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.bi.paynet</td> <td>1.01875</td> <td>0.685</td> <td>140</td> <td>134</td> <td>78.5</td> <td>62.2</td> <td>59.4</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.pjp.paynet</td> <td>0.57125</td> <td>0.37875</td> <td>111</td> <td>106</td> <td>28.1</td> <td>23.5</td> <td>59.2</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.himbara.paynet</td> <td>0.5525</td> <td>0.365</td> <td>108</td> <td>106</td> <td>27.9</td> <td>23.4</td> <td>57.3</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.ojk.paynet</td> <td>0.4675</td> <td>0.33125</td> <td>108</td> <td>106</td> <td>27.7</td> <td>23.1</td> <td>59.0</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.commercial.paynet</td> <td>0.56625</td> <td>0.36375</td> <td>114</td> <td>108</td> <td>28.2</td> <td>23.8</td> <td>56.9</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.bi.paynet</td> <td>1.555</td> <td>0.7875</td> <td>91.6</td> <td>79.1</td> <td>3.82</td> <td>1.81</td> <td>136</td> <td>4.45</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.ojk.paynet</td> <td>1.4725</td> <td>0.77875</td> <td>89.7</td> <td>76.2</td> <td>3.87</td> <td>1.95</td> <td>142</td> <td>3.27</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;orderer.paynet</td> <td>0.17125</td> <td>0.0975</td> <td>88.4</td> <td>73.1</td> <td>14.1</td> <td>67.0</td> <td>60.4</td> <td>9.85</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.pjp.paynet</td> <td>2.27625</td> <td>0.8</td> <td>80.8</td> <td>69.2</td> <td>3.87</td> <td>1.95</td> <td>143</td> <td>2.01</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.commercial.paynet</td> <td>2.94625</td> <td>0.79125</td> <td>82.8</td> <td>72.7</td> <td>3.87</td> <td>1.93</td> <td>139</td> <td>3.76</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.himbara.paynet</td> <td>1.37</td> <td>0.7</td> <td>87.0</td> <td>71.4</td> <td>3.88</td> <td>1.96</td> <td>135</td> <td>2.66</td>
+                                    </tr>
+                                </table>
+                                </tr>
+                            </table>
+                            <div class="charting">
+                            </div>
+            </div>
+
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="retail-peak-rep-4">
+                <h2>Benchmark round: retail-peak-rep-4</h2>
+                <p></p>
+                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
+rateControl:
+  type: fixed-rate
+  opts:
+    tps: 60
+</pre>
+                        <h3>Performance metrics for retail-peak-rep-4</h3>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
+                                </tr>
+                                <tr>
+                                     <td>retail-peak-rep-4</td> <td>1671</td> <td>1931</td> <td>60.0</td> <td>6.08</td> <td>0.01</td> <td>1.62</td> <td>59.5</td>
+                                </tr>
+                            </table>
+                        <h3>Resource utilization for retail-peak-rep-4</h3>
+                            <h4>Resource monitor: docker</h4>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                <table>
+                                    <tr>
+                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [MB]</th> <th>Memory(avg) [MB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [MB]</th> <th>Disc Read [MB]</th>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.bi.paynet</td> <td>1.03375</td> <td>0.72875</td> <td>152</td> <td>141</td> <td>81.5</td> <td>64.7</td> <td>66.2</td> <td>0.0156</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.pjp.paynet</td> <td>0.6725</td> <td>0.3925</td> <td>114</td> <td>109</td> <td>29.4</td> <td>23.3</td> <td>65.2</td> <td>0.0156</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.himbara.paynet</td> <td>0.53875</td> <td>0.38625</td> <td>112</td> <td>109</td> <td>28.8</td> <td>22.4</td> <td>62.8</td> <td>0.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.ojk.paynet</td> <td>0.50125</td> <td>0.3475</td> <td>114</td> <td>111</td> <td>28.9</td> <td>22.5</td> <td>66.9</td> <td>0.0156</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.commercial.paynet</td> <td>0.62125</td> <td>0.3825</td> <td>120</td> <td>113</td> <td>29.2</td> <td>23.0</td> <td>62.8</td> <td>0.0156</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.bi.paynet</td> <td>1.56125</td> <td>0.7175</td> <td>92.4</td> <td>81.0</td> <td>3.42</td> <td>1.67</td> <td>147</td> <td>7.45</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.ojk.paynet</td> <td>1.5725</td> <td>0.89</td> <td>77.4</td> <td>67.7</td> <td>3.47</td> <td>1.83</td> <td>154</td> <td>0.0547</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;orderer.paynet</td> <td>0.2075</td> <td>0.11125</td> <td>87.0</td> <td>67.1</td> <td>15.6</td> <td>74.2</td> <td>68.2</td> <td>2.23</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.pjp.paynet</td> <td>1.22875</td> <td>0.71</td> <td>79.5</td> <td>64.7</td> <td>3.47</td> <td>1.81</td> <td>138</td> <td>1.79</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.commercial.paynet</td> <td>1.82</td> <td>0.7975</td> <td>77.9</td> <td>64.1</td> <td>3.48</td> <td>1.83</td> <td>148</td> <td>0.117</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.himbara.paynet</td> <td>1.57375</td> <td>0.82875</td> <td>78.3</td> <td>68.0</td> <td>3.47</td> <td>1.80</td> <td>151</td> <td>0.0703</td>
+                                    </tr>
+                                </table>
+                                </tr>
+                            </table>
+                            <div class="charting">
+                            </div>
+            </div>
+
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="retail-peak-rep-5">
+                <h2>Benchmark round: retail-peak-rep-5</h2>
+                <p></p>
+                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
+rateControl:
+  type: fixed-rate
+  opts:
+    tps: 60
+</pre>
+                        <h3>Performance metrics for retail-peak-rep-5</h3>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
+                                </tr>
+                                <tr>
+                                     <td>retail-peak-rep-5</td> <td>2327</td> <td>1275</td> <td>60.0</td> <td>3.69</td> <td>0.01</td> <td>1.15</td> <td>57.7</td>
+                                </tr>
+                            </table>
+                        <h3>Resource utilization for retail-peak-rep-5</h3>
+                            <h4>Resource monitor: docker</h4>
+                            <table style="min-width: 100%;">
+                                <tr>
+                                <table>
+                                    <tr>
+                                         <th>Name</th> <th>CPU%(max)</th> <th>CPU%(avg)</th> <th>Memory(max) [MB]</th> <th>Memory(avg) [MB]</th> <th>Traffic In [MB]</th> <th>Traffic Out [MB]</th> <th>Disc Write [MB]</th> <th>Disc Read [MB]</th>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.bi.paynet</td> <td>0.97375</td> <td>0.69625</td> <td>154</td> <td>140</td> <td>82.4</td> <td>67.2</td> <td>71.6</td> <td>1.70</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.pjp.paynet</td> <td>0.54375</td> <td>0.37875</td> <td>121</td> <td>112</td> <td>30.1</td> <td>23.4</td> <td>68.7</td> <td>0.0313</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.himbara.paynet</td> <td>0.52875</td> <td>0.3725</td> <td>114</td> <td>111</td> <td>29.6</td> <td>22.6</td> <td>66.4</td> <td>0.0391</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.ojk.paynet</td> <td>0.50125</td> <td>0.34375</td> <td>117</td> <td>112</td> <td>29.9</td> <td>23.0</td> <td>67.5</td> <td>2.90</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;peer0.commercial.paynet</td> <td>0.5525</td> <td>0.37875</td> <td>118</td> <td>112</td> <td>30.0</td> <td>23.1</td> <td>68.6</td> <td>8.46</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.bi.paynet</td> <td>1.7425</td> <td>1.0275</td> <td>66.2</td> <td>59.3</td> <td>4.75</td> <td>2.24</td> <td>174</td> <td>13.8</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.ojk.paynet</td> <td>1.8925</td> <td>1.03625</td> <td>71.7</td> <td>62.6</td> <td>4.81</td> <td>2.37</td> <td>173</td> <td>10.7</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;orderer.paynet</td> <td>0.20125</td> <td>0.115</td> <td>82.9</td> <td>67.3</td> <td>16.6</td> <td>78.8</td> <td>71.1</td> <td>1.54</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.pjp.paynet</td> <td>2.02875</td> <td>0.9175</td> <td>70.0</td> <td>60.9</td> <td>4.80</td> <td>2.36</td> <td>166</td> <td>13.1</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.commercial.paynet</td> <td>2.53</td> <td>0.97625</td> <td>71.5</td> <td>59.3</td> <td>4.82</td> <td>2.40</td> <td>173</td> <td>7.00</td>
+                                    </tr>
+                                    <tr>
+                                         <td>&#x2F;couchdb0.himbara.paynet</td> <td>2.22</td> <td>0.9425</td> <td>74.2</td> <td>62.6</td> <td>4.81</td> <td>2.40</td> <td>163</td> <td>12.1</td>
+                                    </tr>
+                                </table>
+                                </tr>
+                            </table>
+                            <div class="charting">
+                            </div>
+            </div>
+
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;">
+                <h2>Test Environment</h2>
+                <h3>benchmark config</h3>
+                <pre id="benchmarkInfo" style="overflow: visible;white-space: pre-wrap;max-height:100%;">name: Digital Rupiah Retail Transfer - Repetition (mean +&#x2F;- CI)
+description: &gt;-
+  Five seeded 60-second peak rounds of the low-contention transfer workload for
+  mean and confidence-interval estimation
+workers:
+  type: local
+  number: 2
+rounds:
+  - label: retail-peak-rep-1
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 60
+    workload:
+      module: benchmark&#x2F;workloads&#x2F;retail-transfer.js
+      arguments:
+        scenario: transfer-repeat
+        customers: 58
+        merchants: 8
+        transactionSlots: 26
+        fundedRatio: 1
+        maxTransferAmount: 50000
+        seed: 20260725
+  - label: retail-peak-rep-2
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 60
+    workload:
+      module: benchmark&#x2F;workloads&#x2F;retail-transfer.js
+      arguments:
+        scenario: transfer-repeat
+        customers: 58
+        merchants: 8
+        transactionSlots: 26
+        fundedRatio: 1
+        maxTransferAmount: 50000
+        seed: 20260725
+  - label: retail-peak-rep-3
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 60
+    workload:
+      module: benchmark&#x2F;workloads&#x2F;retail-transfer.js
+      arguments:
+        scenario: transfer-repeat
+        customers: 58
+        merchants: 8
+        transactionSlots: 26
+        fundedRatio: 1
+        maxTransferAmount: 50000
+        seed: 20260725
+  - label: retail-peak-rep-4
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 60
+    workload:
+      module: benchmark&#x2F;workloads&#x2F;retail-transfer.js
+      arguments:
+        scenario: transfer-repeat
+        customers: 58
+        merchants: 8
+        transactionSlots: 26
+        fundedRatio: 1
+        maxTransferAmount: 50000
+        seed: 20260725
+  - label: retail-peak-rep-5
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 60
+    workload:
+      module: benchmark&#x2F;workloads&#x2F;retail-transfer.js
+      arguments:
+        scenario: transfer-repeat
+        customers: 58
+        merchants: 8
+        transactionSlots: 26
+        fundedRatio: 1
+        maxTransferAmount: 50000
+        seed: 20260725
+</pre>
+                <h3>SUT</h3>
+                <pre id="sutdetails">not provided</pre>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

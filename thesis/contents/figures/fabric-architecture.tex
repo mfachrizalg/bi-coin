@@ -57,11 +57,16 @@
 \node[chan, fit=(peer1)(peer2)(peer3),
   label={[font=\footnotesize\bfseries]below:\textit{Channel} (kebijakan dukungan mayoritas)}] (chan) {};
 
-%--- Arrows ---
-\draw[ar] (app.east) -- node[lab,above]{Proposal} (ord.west);
-\draw[ar] (app.south) to[out=-90,in=180]
-  node[lab,left,pos=0.55]{\textit{endorse}\\\textit{request}}
-  (peer1.west);
+%--- Execute-Order-Validate flow ---
+\draw[ar] ([xshift=-0.45cm]app.south) to[out=-90,in=145]
+  node[lab,left,pos=0.52]{Proposal transaksi}
+  ([xshift=-0.45cm]peer1.north);
+\draw[ar] ([xshift=0.45cm]peer1.north) to[out=35,in=-90]
+  node[lab,right,pos=0.48]{RWSet + tanda tangan}
+  ([xshift=0.45cm]app.south);
+\draw[ar] (app.east) --
+  node[lab,above]{Transaksi\\terendorsement}
+  (ord.west);
 \draw[ar] (ord.south) to[out=-90,in=90]
   node[lab,fill=white,inner sep=1pt,right,pos=0.15]{Blok}
   ([xshift=0.85cm]peer2.north);
@@ -75,6 +80,6 @@
 
 \end{tikzpicture}%
 }
-\caption{Arsitektur komponen Hyperledger Fabric: klien berinteraksi dengan \textit{peer endorser}, transaksi diurutkan oleh \textit{orderer} berbasis Raft, lalu didistribusikan ke semua \textit{peer} dalam \textit{channel}}
+\caption{Arsitektur komponen Hyperledger Fabric: klien mengirim proposal ke \textit{peer endorser}, mengirim transaksi terendorsement ke \textit{orderer}, lalu menerima komitmen blok pada semua \textit{peer} dalam \textit{channel}.}
 \label{fig:fabric-arch}
 \end{figure}

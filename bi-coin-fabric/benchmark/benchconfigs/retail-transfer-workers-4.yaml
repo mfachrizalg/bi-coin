@@ -1,12 +1,12 @@
 test:
   name: Digital Rupiah Retail Transfer Benchmark - 4 Workers
-  description: Contention-free retail transfer baseline with four Caliper workers
+  description: Seeded low-contention retail transfer baseline with four Caliper workers
   workers:
     type: local
     number: 4
   rounds:
     - label: retail-warmup-w4
-      txNumber: 40
+      txDuration: 30
       rateControl:
         type: fixed-rate
         opts:
@@ -15,13 +15,15 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-w4
-          customers: 40
-          merchants: 10
-          transactionSlots: 10
+          customers: 29
+          merchants: 4
+          transactionSlots: 13
           fundedRatio: 1
+          maxTransferAmount: 50000
+          seed: 20260725
 
     - label: retail-sustained-w4
-      txNumber: 40
+      txDuration: 120
       rateControl:
         type: fixed-rate
         opts:
@@ -30,13 +32,15 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-w4
-          customers: 40
-          merchants: 10
-          transactionSlots: 10
+          customers: 29
+          merchants: 4
+          transactionSlots: 13
           fundedRatio: 1
+          maxTransferAmount: 50000
+          seed: 20260725
 
     - label: retail-peak-w4
-      txNumber: 40
+      txDuration: 120
       rateControl:
         type: fixed-rate
         opts:
@@ -45,22 +49,32 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-w4
-          customers: 40
-          merchants: 10
-          transactionSlots: 10
+          customers: 29
+          merchants: 4
+          transactionSlots: 13
           fundedRatio: 1
+          maxTransferAmount: 50000
+          seed: 20260725
 
 observer:
   type: local
   interval: 1
 
-monitor:
-  type: docker
-  docker:
-    name:
-      - peer0.bi.paynet
-      - peer0.himbara.paynet
-      - peer0.commercial.paynet
-      - peer0.pjp.paynet
-      - orderer.paynet
-  interval: 1
+monitors:
+  resource:
+    - module: docker
+      options:
+        interval: 1
+        cpuUsageNormalization: true
+        containers:
+          - /peer0.bi.paynet
+          - /peer0.himbara.paynet
+          - /peer0.commercial.paynet
+          - /peer0.pjp.paynet
+          - /peer0.ojk.paynet
+          - /couchdb0.bi.paynet
+          - /couchdb0.himbara.paynet
+          - /couchdb0.commercial.paynet
+          - /couchdb0.pjp.paynet
+          - /couchdb0.ojk.paynet
+          - /orderer.paynet

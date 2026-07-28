@@ -10,6 +10,7 @@ function captureAdapter() {
         adapter: {
             async sendRequests(request) {
                 calls.push(request);
+                return [{ status: 'success' }];
             },
         },
     };
@@ -91,6 +92,25 @@ test('supervision read workload uses read-only query functions only', async () =
         'GetSupervisionEvents',
     ]);
     assert.ok(calls.every(call => call.readOnly === true));
+});
+
+test('supervision history setup uses distinct STANDARD wallets', () => {
+    const { SupervisionReadsWorkload } = require('./supervision-reads');
+    const workload = new SupervisionReadsWorkload();
+    workload.standardCustomers = [
+        standardCustomer(0),
+        standardCustomer(1),
+        standardCustomer(2),
+    ];
+
+    const pairs = workload.planSeedTransfers(3);
+
+    assert.deepEqual(
+        pairs.map(({ sender, receiver }) => [sender.id, receiver.id]),
+        [['c_0', 'c_1'], ['c_1', 'c_2'], ['c_2', 'c_0']],
+    );
+    assert.ok(pairs.every(({ sender, receiver }) =>
+        sender.tier === 'STANDARD' && receiver.tier === 'STANDARD' && sender.id !== receiver.id));
 });
 
 test('admin policy workload writes unique auto-limit policy keys', async () => {

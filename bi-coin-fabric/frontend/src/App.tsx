@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import WalletList from './pages/WalletList'
 import CreateWallet from './pages/CreateWallet'
 import Transfer from './pages/Transfer'
 import Limits from './pages/Limits'
 import AuditLog from './pages/AuditLog'
-import Supply from './pages/Supply'
 import Participants from './pages/Participants'
-import WorldState from './pages/WorldState'
 import DemoPanel, { type DemoPrefill } from './pages/DemoPanel'
-import { getMe, login, setAccessToken } from './lib/api'
+import Overview from './pages/Overview'
+import Observability from './pages/Observability'
+import QrisPayments from './pages/QrisPayments'
+import { getMe, hasAccessToken, login, setAccessToken } from './lib/api'
 
-type Tab = 'participants' | 'wallets' | 'create' | 'transfer' | 'limits' | 'audit' | 'supply' | 'worldstate'
+type Tab = 'overview' | 'participants' | 'wallets' | 'create' | 'transfer' | 'qris' | 'limits' | 'audit' | 'observability'
 type Role = 'public' | 'authenticated' | 'kyc_verified' | 'bank_pjp' | 'bank_indonesia' | 'merchant' | 'supervisor'
 
 interface RoleConfig {
@@ -23,51 +24,60 @@ interface RoleConfig {
 const ROLES: Record<Role, RoleConfig> = {
   public: {
     label: 'Public',
-    tagLine: 'Masuk untuk mengakses dasbor sesuai peran',
+    tagLine: 'Masuk untuk mengakses cockpit sesuai peran',
     tabs: [],
   },
   authenticated: {
     label: 'Authenticated',
-    tagLine: 'Akses dompet',
-    tabs: ['wallets'],
+    tagLine: 'Akses konteks dompet pribadi',
+    tabs: ['overview', 'wallets'],
   },
   kyc_verified: {
     label: 'KYC Verified',
-    tagLine: 'Transfer Digital Rupiah sebagai pelanggan terverifikasi',
-    tabs: ['wallets', 'transfer'],
+    tagLine: 'Pembayaran retail, dompet, dan QRIS customer pay',
+    tabs: ['overview', 'wallets', 'transfer', 'qris'],
   },
   bank_pjp: {
     label: 'Bank / PJP',
-    tagLine: 'Onboarding nasabah, keputusan KYC, dan operasi peserta',
-    tabs: ['participants', 'wallets', 'create'],
+    tagLine: 'Onboarding peserta, retail KYC, distribusi likuiditas',
+    tabs: ['overview', 'participants', 'wallets', 'create'],
   },
   bank_indonesia: {
     label: 'Bank Indonesia',
-    tagLine: 'Akses penuh — penerbitan, limit, pengawasan',
-    tabs: ['participants', 'wallets', 'limits', 'supply', 'audit', 'worldstate'],
+    tagLine: 'Pengawasan, policy, observability, dan kontrol sistem',
+    tabs: ['overview', 'participants', 'wallets', 'limits', 'audit', 'observability'],
   },
   merchant: {
     label: 'Merchant',
-    tagLine: 'Transfer dan saldo merchant terverifikasi',
-    tabs: ['wallets', 'transfer'],
+    tagLine: 'Merchant collect, transfer, dan QRIS desktop',
+    tabs: ['overview', 'wallets', 'transfer', 'qris'],
   },
   supervisor: {
     label: 'Supervisor',
-    tagLine: 'Pengawasan hanya-baca, laporan',
-    tabs: ['participants', 'limits', 'supply', 'audit', 'worldstate'],
+    tagLine: 'Read-only oversight untuk transaksi, limits, dan topologi',
+    tabs: ['overview', 'participants', 'limits', 'audit', 'observability'],
   },
 }
 
-const TAB_LABELS: Record<Tab, string> = {
-  participants: 'Peserta',
-  wallets: 'Dompet',
-  create: 'Buat Dompet',
-  transfer: 'Transfer',
-  limits: 'Batas Transaksi',
-  audit: 'Log Audit',
-  supply: 'Jumlah Beredar',
-  worldstate: 'World State DB',
+const TAB_META: Record<Tab, { label: string; description: string }> = {
+  overview: { label: 'Overview', description: 'Status sistem dan konteks aktif' },
+  participants: { label: 'Participants & Liquidity', description: 'Onboarding, approval, distribusi, issuance' },
+  wallets: { label: 'Wallets', description: 'Saldo, status, dan pemilihan konteks dompet' },
+  create: { label: 'Retail KYC & Wallets', description: 'Anchor KYC off-chain lalu create wallet' },
+  transfer: { label: 'Transfer', description: 'Transfer retail langsung antar wallet' },
+  qris: { label: 'QRIS', description: 'Merchant collect dan customer pay' },
+  limits: { label: 'Limits', description: 'Live limits dari backend' },
+  audit: { label: 'Audit', description: 'Riwayat transaksi berdasarkan dompet aktif' },
+  observability: { label: 'Observability', description: 'Topologi, metrics, limit, transaksi QRIS' },
 }
+
+const DEMO_ACCOUNTS = [
+  { username: 'bi', password: 'bi-password', label: 'Bank Indonesia' },
+  { username: 'pjp', password: 'pjp-password', label: 'Bank / PJP' },
+  { username: 'customer', password: 'customer-password', label: 'Pelanggan KYC' },
+  { username: 'merchant', password: 'merchant-password', label: 'Merchant' },
+  { username: 'supervisor', password: 'supervisor-password', label: 'Supervisor' },
+]
 
 export default function App() {
   const [role, setRole] = useState<Role>('public')
@@ -75,19 +85,21 @@ export default function App() {
   const [password, setPassword] = useState('')
   const [sessionUser, setSessionUser] = useState('')
   const [authError, setAuthError] = useState('')
-  const [tab, setTab] = useState<Tab>('participants')
+  const [tab, setTab] = useState<Tab>('overview')
   const [selectedWallet, setSelectedWallet] = useState('')
   const [demoMode, setDemoMode] = useState(false)
   const [demoStep, setDemoStep] = useState(1)
   const [demoPrefill, setDemoPrefill] = useState<DemoPrefill | null>(null)
 
   useEffect(() => {
+    if (!hasAccessToken()) return
+
     getMe()
       .then(me => {
-        const r = me.role as Role
+        const nextRole = me.role as Role
         setSessionUser(me.username)
-        setRole(r)
-        setTab(ROLES[r].tabs[0] ?? 'participants')
+        setRole(nextRole)
+        setTab(ROLES[nextRole].tabs[0] ?? 'overview')
       })
       .catch(() => {
         setAccessToken('')
@@ -102,10 +114,10 @@ export default function App() {
       const res = await login({ username, password })
       setAccessToken(res.access_token)
       const me = await getMe()
-      const r = me.role as Role
+      const nextRole = me.role as Role
       setSessionUser(me.username)
-      setRole(r)
-      setTab(ROLES[r].tabs[0] ?? 'participants')
+      setRole(nextRole)
+      setTab(ROLES[nextRole].tabs[0] ?? 'overview')
       setPassword('')
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : 'Login gagal')
@@ -116,253 +128,192 @@ export default function App() {
     setAccessToken('')
     setRole('public')
     setSessionUser('')
-    setTab('participants')
+    setSelectedWallet('')
+    setTab('overview')
   }
 
   function handleDemoStep(stepId: number, _newRole: string, newTab: string) {
     setDemoStep(stepId)
     setDemoPrefill(null)
-    const t = newTab as Tab
-    if (ROLES[role].tabs.includes(t)) setTab(t)
-    else setTab(ROLES[role].tabs[0] ?? 'participants')
+    const nextTab = newTab as Tab
+    if (ROLES[role].tabs.includes(nextTab)) setTab(nextTab)
+    else setTab(ROLES[role].tabs[0] ?? 'overview')
   }
 
   const cfg = ROLES[role]
   const allowedTabs = cfg.tabs
 
-  // Full-screen login card for unauthenticated users
   if (role === 'public') {
     return (
-      <div style={{ minHeight: '100vh', background: '#f0f4f8', display: 'flex', flexDirection: 'column' }}>
-        {/* Minimal header */}
-        <header style={{
-          background: '#1a3c6e', color: '#fff',
-          padding: '1rem 1.5rem',
-          display: 'flex', alignItems: 'center',
-        }}>
-          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Garuda Digital Rupiah</span>
-          <span style={{ marginLeft: 12, opacity: 0.6, fontSize: '0.9rem' }}>Retail CBDC Dashboard</span>
-        </header>
+      <div className="auth-shell">
+        <section className="auth-hero">
+          <div>
+            <div className="role-pill">Garuda Digital Rupiah</div>
+            <h1>Retail CBDC desktop cockpit with QRIS, observability, and live ledger flows.</h1>
+            <p>
+              Dashboard ini menggabungkan role-based operational flow, retail KYC off-chain anchoring,
+              transfer, QRIS prototype, dan observabilitas jaringan tanpa kembali ke iframe CouchDB.
+            </p>
+          </div>
 
-        {/* Centered login card */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div style={{
-            background: '#fff', borderRadius: 12,
-            boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-            padding: '2.5rem 2rem',
-            width: '100%', maxWidth: 420,
-          }}>
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div style={{ fontSize: '2rem', marginBottom: 8 }}>🏦</div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1a3c6e', margin: 0 }}>
-                Garuda Digital Rupiah
-              </h1>
-              <p style={{ fontSize: '1rem', color: '#6b7280', marginTop: 8, marginBottom: 0 }}>
-                Masuk untuk mengakses dasbor
-              </p>
-            </div>
+          <div className="stack-small">
+            <div className="role-pill">What changed</div>
+            <ul className="plain-list">
+              <li>Shell desktop baru dengan workspace per domain kerja.</li>
+              <li>QRIS merchant collect + customer pay terhubung ke backend dan chaincode.</li>
+              <li>Observability live dari `/network/topology`, `/reports/metrics`, `/transactions`, `/limits`.</li>
+            </ul>
+          </div>
+        </section>
 
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <section className="auth-card-panel">
+          <div className="auth-card">
+            <div className="stack-small">
               <div>
-                <label style={{ fontSize: '1rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>
-                  Nama Pengguna
-                </label>
-                <input
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  placeholder="Contoh: bi"
-                  autoComplete="username"
-                  style={{
-                    width: '100%', padding: '12px 14px', borderRadius: 8,
-                    border: '1.5px solid #d1d5db', fontSize: '1rem',
-                    boxSizing: 'border-box', outline: 'none',
-                  }}
-                />
+                <div className="eyebrow">Sign In</div>
+                <h2 style={{ margin: '6px 0 8px' }}>Masuk ke cockpit retail CBDC</h2>
+                <p className="muted">Pilih akun demo atau gunakan kredensial yang sudah dibootstrap di backend.</p>
               </div>
-              <div>
-                <label style={{ fontSize: '1rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>
-                  Kata Sandi
-                </label>
-                <input
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Kata sandi"
-                  type="password"
-                  autoComplete="current-password"
-                  style={{
-                    width: '100%', padding: '12px 14px', borderRadius: 8,
-                    border: '1.5px solid #d1d5db', fontSize: '1rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-              {authError && (
-                <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#dc2626', fontSize: '0.95rem' }}>
-                  {authError}
-                </div>
-              )}
-              <button
-                type="submit"
-                style={{
-                  padding: '14px 0', background: '#1a3c6e', color: '#fff',
-                  border: 'none', borderRadius: 8, fontSize: '1.1rem', fontWeight: 700,
-                  cursor: 'pointer', marginTop: 4,
-                }}
-              >
-                Masuk
-              </button>
-            </form>
 
-            {/* Demo credential hints */}
-            <div style={{ marginTop: '1.5rem', padding: '14px', background: '#f8faff', border: '1px solid #dbeafe', borderRadius: 8 }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1d4ed8', marginBottom: 8 }}>
-                Akun Demo
+              <form className="stack-small" onSubmit={handleLogin}>
+                <label className="app-label">
+                  <span>Nama Pengguna</span>
+                  <input className="app-input" value={username} onChange={e => setUsername(e.target.value)} placeholder="Contoh: merchant" autoComplete="username" />
+                </label>
+                <label className="app-label">
+                  <span>Kata Sandi</span>
+                  <input className="app-input" value={password} onChange={e => setPassword(e.target.value)} placeholder="Kata sandi" type="password" autoComplete="current-password" />
+                </label>
+                {authError && <div className="banner error">{authError}</div>}
+                <button type="submit" className="primary-button">Masuk</button>
+              </form>
+
+              <div className="demo-credentials">
+                {DEMO_ACCOUNTS.map(account => (
+                  <div key={account.username} className="credential-card">
+                    <div>
+                      <div>{account.label}</div>
+                      <strong>{account.username}</strong>
+                    </div>
+                    <code>{account.password}</code>
+                  </div>
+                ))}
               </div>
-              <table style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
-                <tbody>
-                  {[
-                    ['bi', 'bi-password', 'Bank Indonesia'],
-                    ['pjp', 'pjp-password', 'Bank / PJP'],
-                    ['customer', 'customer-password', 'Pelanggan KYC'],
-                    ['merchant', 'merchant-password', 'Merchant'],
-                    ['supervisor', 'supervisor-password', 'Supervisor'],
-                  ].map(([u, p, label]) => (
-                    <tr key={u}>
-                      <td style={{ padding: '3px 0', color: '#374151', width: '30%' }}>{label}</td>
-                      <td style={{ padding: '3px 6px', fontFamily: 'monospace', color: '#1a3c6e', fontWeight: 700 }}>{u}</td>
-                      <td style={{ padding: '3px 0', fontFamily: 'monospace', color: '#6b7280' }}>{p}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7fa', fontSize: '16px' }}>
-      {/* Header */}
-      <header style={{
-        background: '#1a3c6e', color: '#fff',
-        padding: '0.75rem 1.5rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 16,
-      }}>
-        <div>
-          <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Garuda Digital Rupiah</span>
-          <span style={{ marginLeft: 12, opacity: 0.6, fontSize: '0.9rem' }}>Retail CBDC Dashboard</span>
+    <div className="app-shell">
+      <aside className="nav-rail">
+        <div className="nav-brand stack-small">
+          <div className="role-pill">{cfg.label}</div>
+          <div>
+            <h2>Garuda Digital Rupiah</h2>
+            <p>{cfg.tagLine}</p>
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button
-            onClick={() => setDemoMode(d => !d)}
-            style={{
-              padding: '6px 14px', borderRadius: 6, cursor: 'pointer', fontSize: '0.9rem', fontWeight: 700,
-              background: demoMode ? '#3b82f6' : 'rgba(255,255,255,0.15)',
-              color: '#fff', border: demoMode ? '1px solid #60a5fa' : '1px solid rgba(255,255,255,0.2)',
-            }}
-          >
-            {demoMode ? '📋 Demo ON' : '📋 Demo'}
-          </button>
-          <span style={{ fontSize: '0.9rem', opacity: 0.85 }}>{sessionUser}</span>
-          <span style={{
-            fontSize: '0.85rem',
-            background: 'rgba(255,255,255,0.12)', padding: '3px 10px',
-            borderRadius: 4, opacity: 0.9,
-          }}>
-            {cfg.label}
-          </span>
-          <button
-            onClick={handleLogout}
-            style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer', fontSize: '0.9rem' }}
-          >
-            Keluar
-          </button>
+
+        <div className="nav-tabs">
+          {allowedTabs.map(nextTab => (
+            <button
+              key={nextTab}
+              className={`nav-tab${tab === nextTab ? ' active' : ''}`}
+              onClick={() => setTab(nextTab)}
+            >
+              <strong>{TAB_META[nextTab].label}</strong>
+              <span>{TAB_META[nextTab].description}</span>
+            </button>
+          ))}
         </div>
-      </header>
 
-      {/* Role tagline */}
-      <div style={{
-        background: '#e8f0fb', borderBottom: '1px solid #c5d5f0',
-        padding: '8px 1.5rem', fontSize: '0.95rem', color: '#2a4a8e',
-      }}>
-        {cfg.tagLine}
-      </div>
+        <div className="surface-card">
+          <h3 style={{ marginTop: 0 }}>Konteks aktif</h3>
+          <div className="stack-small">
+            <div className="context-row"><span>User</span><strong>{sessionUser}</strong></div>
+            <div className="context-row"><span>Role</span><span className="pill">{cfg.label}</span></div>
+            <div className="context-row"><span>Wallet</span><strong>{selectedWallet || 'belum dipilih'}</strong></div>
+          </div>
+        </div>
+      </aside>
 
-      <div style={{ display: 'flex', alignItems: 'stretch', minHeight: 'calc(100vh - 96px)' }}>
-        <div style={{ flex: 1, maxWidth: demoMode ? 'calc(100% - 320px)' : 1200, margin: '0 auto', padding: '1.5rem', minWidth: 0 }}>
+      <main className="app-main">
+        <header className="topbar">
+          <div>
+            <div className="eyebrow">{TAB_META[tab]?.label ?? cfg.label}</div>
+            <h1 style={{ margin: '4px 0 6px' }}>{TAB_META[tab]?.description ?? cfg.tagLine}</h1>
+            <p className="muted" style={{ margin: 0 }}>
+              Dompet aktif dipakai ulang di transfer, audit, dan QRIS customer-pay.
+            </p>
+          </div>
+          <div className="topbar-actions">
+            <button className="secondary-button" onClick={() => setDemoMode(current => !current)}>
+              {demoMode ? 'Sembunyikan demo' : 'Tampilkan demo'}
+            </button>
+            <button className="secondary-button" onClick={handleLogout}>Keluar</button>
+          </div>
+        </header>
+
+        <section className="workspace-shell">
           {allowedTabs.length === 0 ? (
-            <div style={{ marginTop: 60, textAlign: 'center', color: '#666' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🔒</div>
-              <p style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tidak ada halaman dasbor untuk peran <em>{cfg.label}</em>.</p>
-              <p style={{ fontSize: '0.95rem', marginTop: 6, color: '#999' }}>
-                Gunakan <a href="/docs" style={{ color: '#1a3c6e' }}>dokumentasi API</a> untuk berinteraksi langsung.
+            <div className="surface-card">
+              <h3>Tidak ada workspace untuk peran ini.</h3>
+              <p className="muted">
+                Gunakan <a className="logged-out-link" href="/docs">dokumentasi API</a> untuk eksplorasi langsung.
               </p>
             </div>
           ) : (
-            <>
-              {/* Tab bar */}
-              <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-                {allowedTabs.map(t => (
-                  <button
-                    key={t}
-                    onClick={() => setTab(t)}
-                    style={{
-                      padding: '10px 20px',
-                      fontWeight: tab === t ? 700 : 500,
-                      border: tab === t ? '2px solid #1a3c6e' : '1.5px solid #d1d5db',
-                      borderRadius: 8,
-                      background: tab === t ? '#dbeafe' : '#fff',
-                      color: tab === t ? '#1a3c6e' : '#374151',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                    }}
-                  >
-                    {TAB_LABELS[t]}
-                  </button>
-                ))}
+            <div className={`workspace-layout${demoMode ? ' with-demo' : ''}`}>
+              <div className="workspace-main">
+                {tab === 'overview' && <Overview role={role} selectedWallet={selectedWallet} />}
+                {tab === 'participants' && (
+                  <Participants
+                    role={role}
+                    prefill={demoPrefill?.target === 'submit' || demoPrefill?.target === 'issue' || demoPrefill?.target === 'distribute' ? demoPrefill : undefined}
+                    onPrefillConsumed={() => setDemoPrefill(null)}
+                  />
+                )}
+                {tab === 'wallets' && (
+                  <WalletList
+                    onSelect={setSelectedWallet}
+                    showParticipantBadges={role === 'bank_pjp' || role === 'bank_indonesia'}
+                  />
+                )}
+                {tab === 'create' && (
+                  <CreateWallet
+                    prefill={demoPrefill?.target === 'wallet' || demoPrefill?.target === 'kyc-customer' || demoPrefill?.target === 'kyc-approve' ? demoPrefill : undefined}
+                    onPrefillConsumed={() => setDemoPrefill(null)}
+                  />
+                )}
+                {tab === 'transfer' && (
+                  <Transfer
+                    selectedWallet={selectedWallet}
+                    prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined}
+                    onPrefillConsumed={() => setDemoPrefill(null)}
+                  />
+                )}
+                {tab === 'qris' && <QrisPayments role={role} selectedWallet={selectedWallet} />}
+                {tab === 'limits' && <Limits />}
+                {tab === 'audit' && <AuditLog walletID={selectedWallet} />}
+                {tab === 'observability' && <Observability />}
               </div>
 
-              {/* Tab content */}
-              {tab === 'participants' && (
-                <Participants
-                  role={role}
-                  prefill={demoPrefill?.target === 'submit' || demoPrefill?.target === 'issue' || demoPrefill?.target === 'distribute' ? demoPrefill : undefined}
-                  onPrefillConsumed={() => setDemoPrefill(null)}
-                />
+              {demoMode && (
+                <aside className="workspace-demo">
+                  <DemoPanel
+                    currentStep={demoStep}
+                    onStep={handleDemoStep}
+                    onPrefill={data => setDemoPrefill(data)}
+                  />
+                </aside>
               )}
-              {tab === 'wallets' && <WalletList onSelect={setSelectedWallet} />}
-              {tab === 'create' && (
-                <CreateWallet
-                  prefill={demoPrefill?.target === 'wallet' || demoPrefill?.target === 'kyc-customer' || demoPrefill?.target === 'kyc-approve' ? demoPrefill : undefined}
-                  onPrefillConsumed={() => setDemoPrefill(null)}
-                />
-              )}
-              {tab === 'transfer' && (
-                <Transfer
-                  selectedWallet={selectedWallet}
-                  prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined}
-                  onPrefillConsumed={() => setDemoPrefill(null)}
-                />
-              )}
-              {tab === 'limits' && <Limits />}
-              {tab === 'audit' && <AuditLog walletID={selectedWallet} />}
-              {tab === 'supply' && <Supply />}
-              {tab === 'worldstate' && <WorldState />}
-            </>
+            </div>
           )}
-        </div>
-
-        {demoMode && (
-          <DemoPanel
-            currentStep={demoStep}
-            onStep={handleDemoStep}
-            onPrefill={data => setDemoPrefill(data)}
-          />
-        )}
-      </div>
+        </section>
+      </main>
     </div>
   )
 }

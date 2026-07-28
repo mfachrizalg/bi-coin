@@ -5,12 +5,15 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -44,6 +47,33 @@ type KycStore interface {
 	GetKycProfile(ctx context.Context, profileID string) (*models.KycProfile, error)
 	ListKycProviderChecks(ctx context.Context, profileID string) ([]*models.KycProviderCheck, error)
 	ListKycAuditEvents(ctx context.Context, profileID string) ([]*models.KycAuditEvent, error)
+	CreateQrisIntent(ctx context.Context, intent models.QrisIntent) (*models.QrisIntent, error)
+	GetQrisIntent(ctx context.Context, intentID string) (*models.QrisIntent, error)
+	ListQrisIntents(ctx context.Context, merchantID string) ([]*models.QrisIntent, error)
+	MarkQrisIntentPaid(ctx context.Context, intentID string, txID string, payerWalletID string) error
+	MarkQrisIntentExpired(ctx context.Context, intentID string) error
+	CancelQrisIntent(ctx context.Context, intentID string) error
+}
+
+type qrisPayloadClaims struct {
+	IntentID         string          `json:"intent_id"`
+	Mode             models.QrisMode `json:"mode"`
+	MerchantID       string          `json:"merchant_id"`
+	MerchantWalletID string          `json:"merchant_wallet_id"`
+	Amount           int64           `json:"amount"`
+	ReferenceID      string          `json:"reference_id"`
+	ExpiresAt        string          `json:"expires_at,omitempty"`
+}
+
+type ledgerTransactionRecord struct {
+	TxID            string `json:"tx_id"`
+	TransactionType string `json:"transaction_type"`
+	SenderID        string `json:"sender_id"`
+	ReceiverID      string `json:"receiver_id"`
+	Amount          int64  `json:"amount"`
+	Status          string `json:"status"`
+	RelatedIntentID string `json:"related_intent_id"`
+	Timestamp       string `json:"timestamp"`
 }
 
 func NewLedgerService(cfg *config.Config) (*LedgerService, error) {
@@ -92,6 +122,148 @@ func NewLedgerServiceForTest(contract FabricContract, store KycStore, hashSecret
 
 func (s *LedgerService) SetKycStore(store KycStore) {
 	s.kycStore = store
+}
+
+func (s *LedgerService) CreateQrisIntent(req models.CreateQrisIntentRequest) (*models.QrisIntent, error) {
+	if s.kycStore == nil {
+		return nil, fmt.Errorf("off-chain QRIS store not configured")
+	}
+	if req.MerchantWalletID == "" {
+		return nil, fmt.Errorf("merchant_wallet_id is required")
+	}
+	if req.Mode != models.QrisModeStatic && req.Mode != models.QrisModeDynamic {
+		return nil, fmt.Errorf("invalid qris mode %q", req.Mode)
+	}
+	amount, err := s.parseQrisAmount(req.Mode, req.Amount)
+	if err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC()
+	intent := models.QrisIntent{
+		IntentID:         "qris_" + uuid.NewString(),
+		Mode:             req.Mode,
+		MerchantID:       req.MerchantID,
+		MerchantWalletID: req.MerchantWalletID,
+		Amount:           amount,
+		Status:           models.QrisStatusActive,
+		Label:            req.Label,
+		ReferenceID:      "ref_" + uuid.NewString(),
+		CreatedAt:        now.Format(time.RFC3339),
+		UpdatedAt:        now.Format(time.RFC3339),
+	}
+	if req.Mode == models.QrisModeDynamic {
+		intent.Status = models.QrisStatusPending
+		expiresAt := now.Add(15 * time.Minute).Format(time.RFC3339)
+		if req.ExpiresAt != nil && *req.ExpiresAt != "" {
+			expiresAt = *req.ExpiresAt
+		}
+		intent.ExpiresAt = &expiresAt
+	}
+	payload, err := s.buildQrisPayload(intent)
+	if err != nil {
+		return nil, err
+	}
+	intent.Payload = payload
+	return s.kycStore.CreateQrisIntent(context.Background(), intent)
+}
+
+func (s *LedgerService) ResolveQrisPayload(payload string) (*models.QrisIntent, error) {
+	if s.kycStore == nil {
+		return nil, fmt.Errorf("off-chain QRIS store not configured")
+	}
+	claims, err := s.decodeQrisPayload(payload)
+	if err != nil {
+		return nil, err
+	}
+	intent, err := s.kycStore.GetQrisIntent(context.Background(), claims.IntentID)
+	if err != nil {
+		return nil, err
+	}
+	intent.Payload = payload
+	if intent.ReferenceID == "" {
+		intent.ReferenceID = claims.ReferenceID
+	}
+	if intent.MerchantWalletID == "" {
+		intent.MerchantWalletID = claims.MerchantWalletID
+	}
+	if intent.MerchantID == "" {
+		intent.MerchantID = claims.MerchantID
+	}
+	if intent.Mode == models.QrisModeDynamic && intent.ExpiresAt != nil && *intent.ExpiresAt != "" && intent.Status == models.QrisStatusPending {
+		expiresAt, err := time.Parse(time.RFC3339, *intent.ExpiresAt)
+		if err == nil && time.Now().UTC().After(expiresAt) {
+			_ = s.kycStore.MarkQrisIntentExpired(context.Background(), intent.IntentID)
+			intent.Status = models.QrisStatusExpired
+		}
+	}
+	return intent, nil
+}
+
+func (s *LedgerService) ListQrisIntents(merchantID string) ([]*models.QrisIntent, error) {
+	if s.kycStore == nil {
+		return nil, fmt.Errorf("off-chain QRIS store not configured")
+	}
+	return s.kycStore.ListQrisIntents(context.Background(), merchantID)
+}
+
+func (s *LedgerService) GetQrisIntent(intentID string) (*models.QrisIntent, error) {
+	if s.kycStore == nil {
+		return nil, fmt.Errorf("off-chain QRIS store not configured")
+	}
+	return s.kycStore.GetQrisIntent(context.Background(), intentID)
+}
+
+func (s *LedgerService) CancelQrisIntent(intentID string) error {
+	if s.kycStore == nil {
+		return fmt.Errorf("off-chain QRIS store not configured")
+	}
+	return s.kycStore.CancelQrisIntent(context.Background(), intentID)
+}
+
+func (s *LedgerService) PayQris(req models.PayQrisRequest) (*models.QrisPayResult, error) {
+	if s.kycStore == nil {
+		return nil, fmt.Errorf("off-chain QRIS store not configured")
+	}
+	if req.PayerWalletID == "" {
+		return nil, fmt.Errorf("payer_wallet_id is required")
+	}
+	intent, err := s.ResolveQrisPayload(req.Payload)
+	if err != nil {
+		return nil, err
+	}
+	if intent.Status == models.QrisStatusCancelled || intent.Status == models.QrisStatusExpired {
+		return nil, fmt.Errorf("qris intent %s is %s", intent.IntentID, intent.Status)
+	}
+	if intent.Mode == models.QrisModeDynamic && intent.Status == models.QrisStatusPaid {
+		return nil, fmt.Errorf("qris intent %s is already paid", intent.IntentID)
+	}
+	amount := intent.Amount
+	if intent.Mode == models.QrisModeStatic {
+		amount, err = s.parseQrisAmount(intent.Mode, req.Amount)
+		if err != nil {
+			return nil, err
+		}
+	}
+	result, err := s.contract.SubmitTransaction("PayQris",
+		req.PayerWalletID, intent.MerchantWalletID, fmt.Sprintf("%d", amount), intent.ReferenceID)
+	if err != nil {
+		return nil, fmt.Errorf("chaincode PayQris: %w", err)
+	}
+	var tr models.TransferResult
+	if err := s.unwrap(result, &tr); err != nil {
+		tr = models.TransferResult{Status: "paid"}
+	}
+	if intent.Mode == models.QrisModeDynamic {
+		if err := s.kycStore.MarkQrisIntentPaid(context.Background(), intent.IntentID, tr.TxID, req.PayerWalletID); err != nil {
+			return nil, err
+		}
+	}
+	return &models.QrisPayResult{
+		Status:      tr.Status,
+		TxID:        tr.TxID,
+		IntentID:    intent.IntentID,
+		ReferenceID: intent.ReferenceID,
+	}, nil
 }
 
 func loadIdentity(cfg *config.Config) (*identity.X509Identity, error) {
@@ -552,8 +724,8 @@ func (s *LedgerService) GetBalances() ([]*models.Balance, error) {
 // ─── Supervision ─────────────────────────────────────────────────────────────
 
 func (s *LedgerService) GetTransactions(filters map[string]string) ([]*models.TransactionRecord, error) {
-	args := make([]string, 0, 14)
-	for _, k := range []string{"participant_id", "transaction_type", "status", "from_timestamp", "to_timestamp", "limit", "offset"} {
+	args := make([]string, 0, 10)
+	for _, k := range []string{"participant_id", "transaction_type", "status", "from_timestamp", "to_timestamp"} {
 		v := ""
 		if val, ok := filters[k]; ok {
 			v = val
@@ -561,13 +733,33 @@ func (s *LedgerService) GetTransactions(filters map[string]string) ([]*models.Tr
 		args = append(args, v)
 	}
 	result, err := s.contract.EvaluateTransaction("GetTransactions",
-		args[0], args[1], args[2], args[3], args[4], args[5], args[6])
+		args[0], args[1], args[2], args[3], args[4])
 	if err != nil {
 		return nil, fmt.Errorf("chaincode GetTransactions: %w", err)
 	}
-	var txs []*models.TransactionRecord
-	if err := s.unwrap(result, &txs); err != nil {
+	var raw []*ledgerTransactionRecord
+	if err := s.unwrap(result, &raw); err != nil {
 		return nil, err
+	}
+	participantFilter := filters["participant_id"]
+	txs := make([]*models.TransactionRecord, 0, len(raw))
+	for _, item := range raw {
+		participantID := item.SenderID
+		counterpartyID := item.ReceiverID
+		if participantFilter != "" && participantFilter == item.ReceiverID {
+			participantID = item.ReceiverID
+			counterpartyID = item.SenderID
+		}
+		txs = append(txs, &models.TransactionRecord{
+			TxID:            item.TxID,
+			ParticipantID:   participantID,
+			CounterpartyID:  counterpartyID,
+			Amount:          item.Amount,
+			TransactionType: item.TransactionType,
+			Status:          item.Status,
+			ReferenceID:     item.RelatedIntentID,
+			Timestamp:       item.Timestamp,
+		})
 	}
 	return txs, nil
 }
@@ -620,4 +812,65 @@ func (s *LedgerService) GetTopology() (*models.Topology, error) {
 		return nil, err
 	}
 	return &t, nil
+}
+
+func (s *LedgerService) parseQrisAmount(mode models.QrisMode, raw string) (int64, error) {
+	if mode == models.QrisModeStatic {
+		if raw == "" {
+			return 0, nil
+		}
+	}
+	if raw == "" {
+		return 0, fmt.Errorf("amount is required")
+	}
+	amount, err := parseInt64(raw)
+	if err != nil || amount <= 0 {
+		return 0, fmt.Errorf("invalid amount")
+	}
+	return amount, nil
+}
+
+func (s *LedgerService) buildQrisPayload(intent models.QrisIntent) (string, error) {
+	claims := qrisPayloadClaims{
+		IntentID:         intent.IntentID,
+		Mode:             intent.Mode,
+		MerchantID:       intent.MerchantID,
+		MerchantWalletID: intent.MerchantWalletID,
+		Amount:           intent.Amount,
+		ReferenceID:      intent.ReferenceID,
+	}
+	if intent.ExpiresAt != nil {
+		claims.ExpiresAt = *intent.ExpiresAt
+	}
+	raw, err := json.Marshal(claims)
+	if err != nil {
+		return "", err
+	}
+	sig := s.signQrisPayload(raw)
+	return base64.RawURLEncoding.EncodeToString(raw) + "." + sig, nil
+}
+
+func (s *LedgerService) decodeQrisPayload(payload string) (*qrisPayloadClaims, error) {
+	parts := strings.Split(payload, ".")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid qris payload")
+	}
+	raw, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return nil, fmt.Errorf("decode qris payload: %w", err)
+	}
+	if !hmac.Equal([]byte(parts[1]), []byte(s.signQrisPayload(raw))) {
+		return nil, fmt.Errorf("invalid qris payload signature")
+	}
+	var claims qrisPayloadClaims
+	if err := json.Unmarshal(raw, &claims); err != nil {
+		return nil, fmt.Errorf("unmarshal qris payload: %w", err)
+	}
+	return &claims, nil
+}
+
+func (s *LedgerService) signQrisPayload(raw []byte) string {
+	mac := hmac.New(sha256.New, []byte(s.hashSecret))
+	mac.Write(raw)
+	return hex.EncodeToString(mac.Sum(nil))
 }

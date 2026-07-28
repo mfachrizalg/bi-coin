@@ -12,6 +12,39 @@ type SmartContract struct {
 	contractapi.Contract
 }
 
+const (
+	BankIndonesiaMSP  = "BankIndonesiaOrgMSP"
+	HimbaraBankMSP    = "HimbaraBankOrgMSP"
+	CommercialBankMSP = "CommercialBankOrgMSP"
+	OJKObserverMSP    = "OJKObserverOrgMSP"
+	PJPMSP            = "PJPOrgMSP"
+)
+
+func requireMSP(ctx contractapi.TransactionContextInterface, allowed ...string) error {
+	identity := ctx.GetClientIdentity()
+	if identity == nil {
+		return fmt.Errorf("access denied: client identity is unavailable")
+	}
+	mspID, err := identity.GetMSPID()
+	if err != nil {
+		return fmt.Errorf("access denied: resolve client MSP: %w", err)
+	}
+	for _, allowedMSP := range allowed {
+		if mspID == allowedMSP {
+			return nil
+		}
+	}
+	return fmt.Errorf("access denied: MSP %s is not authorized", mspID)
+}
+
+func requireBankIndonesia(ctx contractapi.TransactionContextInterface) error {
+	return requireMSP(ctx, BankIndonesiaMSP)
+}
+
+func requireInstitution(ctx contractapi.TransactionContextInterface) error {
+	return requireMSP(ctx, BankIndonesiaMSP, HimbaraBankMSP, CommercialBankMSP, PJPMSP)
+}
+
 // ─── Enums ───────────────────────────────────────────────────────────
 
 type WalletTier string
@@ -93,9 +126,10 @@ const (
 type TransactionType string
 
 const (
-	TxMint     TransactionType = "issuance"
-	TxBurn     TransactionType = "redemption"
-	TxTransfer TransactionType = "transfer"
+	TxMint        TransactionType = "issuance"
+	TxBurn        TransactionType = "redemption"
+	TxTransfer    TransactionType = "transfer"
+	TxQrisPayment TransactionType = "qris_payment"
 )
 
 type TransactionStatus string
@@ -268,6 +302,9 @@ func txNow(ctx contractapi.TransactionContextInterface) time.Time {
 }
 
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	limits := []TierLimit{
 		{Tier: TierBasic, MaxBalance: 2_000_000, MinBalance: 0, DailyTxLimit: 500_000, MonthlyTxLimit: 5_000_000, MonthlyIncomingLimit: 20_000_000, PerTxLimit: 250_000},
 		{Tier: TierStandard, MaxBalance: 20_000_000, MinBalance: 100_000, DailyTxLimit: 10_000_000, MonthlyTxLimit: 40_000_000, MonthlyIncomingLimit: 40_000_000, PerTxLimit: 2_500_000},
@@ -313,6 +350,9 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 // ─── Participants ────────────────────────────────────────────────────
 
 func (s *SmartContract) SubmitParticipant(ctx contractapi.TransactionContextInterface, participantID string, name string, domain string, accountID string, participantType string, initialReserveBalance string, complianceStatus string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
 	exists, err := s.participantExists(ctx, participantID)
 	if err != nil {
 		return err
@@ -340,6 +380,9 @@ func (s *SmartContract) SubmitParticipant(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) ApproveParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return err
@@ -374,6 +417,9 @@ func (s *SmartContract) ApproveParticipant(ctx contractapi.TransactionContextInt
 }
 
 func (s *SmartContract) FreezeParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return err
@@ -391,6 +437,9 @@ func (s *SmartContract) FreezeParticipant(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) UnfreezeParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return err
@@ -411,6 +460,9 @@ func (s *SmartContract) UnfreezeParticipant(ctx contractapi.TransactionContextIn
 }
 
 func (s *SmartContract) RejectParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return err
@@ -426,6 +478,9 @@ func (s *SmartContract) RejectParticipant(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) OffboardParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	_, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return err
@@ -448,6 +503,9 @@ func (s *SmartContract) OffboardParticipant(ctx contractapi.TransactionContextIn
 // ─── Wallets (wholesale model) ───────────────────────────────────────
 
 func (s *SmartContract) CreateWholesaleWallet(ctx contractapi.TransactionContextInterface, walletID string, participantID string, walletType string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
 	exists, err := s.walletExists(ctx, walletID)
 	if err != nil {
 		return err
@@ -506,6 +564,9 @@ func (s *SmartContract) ListWalletsByParticipant(ctx contractapi.TransactionCont
 // ─── Legacy CreateWallet (compat with old API) ───────────────────────
 
 func (s *SmartContract) CreateWallet(ctx contractapi.TransactionContextInterface, walletID string, ownerID string, tier string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
 	exists, err := s.walletExists(ctx, walletID)
 	if err != nil {
 		return err
@@ -543,6 +604,9 @@ func (s *SmartContract) CreateWallet(ctx contractapi.TransactionContextInterface
 // ─── Mint / Burn / Transfer ──────────────────────────────────────────
 
 func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, walletID string, amount int64) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	if amount <= 0 {
 		return fmt.Errorf("amount must be positive")
 	}
@@ -581,6 +645,9 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, wallet
 }
 
 func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, walletID string, amount int64) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	if amount <= 0 {
 		return fmt.Errorf("amount must be positive")
 	}
@@ -604,6 +671,23 @@ func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, wallet
 }
 
 func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, senderID string, receiverID string, amount int64) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
+	return s.settleTransfer(ctx, senderID, receiverID, amount, TxTransfer, "", "TRANSFER", "HIGH_RISK_TRANSFER")
+}
+
+func (s *SmartContract) PayQris(ctx contractapi.TransactionContextInterface, senderID string, receiverID string, amount int64, referenceID string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
+	if referenceID == "" {
+		return fmt.Errorf("reference id is required")
+	}
+	return s.settleTransfer(ctx, senderID, receiverID, amount, TxQrisPayment, referenceID, "QRIS_PAYMENT", "HIGH_RISK_QRIS_PAYMENT")
+}
+
+func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterface, senderID string, receiverID string, amount int64, txType TransactionType, relatedIntentID string, auditAction string, riskEvent string) error {
 	if amount <= 0 {
 		return fmt.Errorf("amount must be positive")
 	}
@@ -656,16 +740,16 @@ func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, se
 			}
 		}
 	}
-	_ = s.emitAudit(ctx, "TRANSFER", senderID, receiverID, amount)
+	_ = s.emitAudit(ctx, auditAction, senderID, receiverID, amount)
 	if profile, err := s.getKycProfileBySubject(ctx, sender.OwnerID); err == nil && profile.RiskLevel == RiskHigh {
-		_ = s.emitSupervisionEvent(ctx, "HIGH_RISK_TRANSFER", "wallet", senderID, map[string]interface{}{
+		_ = s.emitSupervisionEvent(ctx, riskEvent, "wallet", senderID, map[string]interface{}{
 			"sender_wallet_id":   senderID,
 			"receiver_wallet_id": receiverID,
 			"amount":             amount,
 			"risk_level":         RiskHigh,
 		})
 	}
-	return s.recordTransaction(ctx, TxTransfer, senderID, receiverID, amount, TxSettled, "")
+	return s.recordTransaction(ctx, txType, senderID, receiverID, amount, TxSettled, relatedIntentID)
 }
 
 // ─── Queries ─────────────────────────────────────────────────────────
@@ -726,6 +810,9 @@ func (s *SmartContract) GetAuditLog(ctx contractapi.TransactionContextInterface,
 // ─── Freeze / Unfreeze ──────────────────────────────────────────────
 
 func (s *SmartContract) FreezeWallet(ctx contractapi.TransactionContextInterface, walletID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	wallet, err := s.getWallet(ctx, walletID)
 	if err != nil {
 		return err
@@ -736,6 +823,9 @@ func (s *SmartContract) FreezeWallet(ctx contractapi.TransactionContextInterface
 }
 
 func (s *SmartContract) UnfreezeWallet(ctx contractapi.TransactionContextInterface, walletID string) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	wallet, err := s.getWallet(ctx, walletID)
 	if err != nil {
 		return err
@@ -748,6 +838,9 @@ func (s *SmartContract) UnfreezeWallet(ctx contractapi.TransactionContextInterfa
 // ─── SetTierLimit ────────────────────────────────────────────────────
 
 func (s *SmartContract) SetTierLimit(ctx contractapi.TransactionContextInterface, tier string, maxBalance int64, minBalance int64, dailyTxLimit int64, monthlyTxLimit int64, monthlyIncomingLimit int64, perTxLimit int64) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	limit := TierLimit{
 		Tier:                 WalletTier(tier),
 		MaxBalance:           maxBalance,
@@ -763,6 +856,9 @@ func (s *SmartContract) SetTierLimit(ctx contractapi.TransactionContextInterface
 // ─── System Policy Limits ────────────────────────────────────────────
 
 func (s *SmartContract) SetSystemLimit(ctx contractapi.TransactionContextInterface, scope string, value int64) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	ls := LimitScope(scope)
 	if ls != ScopeGlobalSupply && ls != ScopePerParticipantBalance && ls != ScopePerTxAmount && ls != ScopeMinParticipantBalance {
 		return fmt.Errorf("invalid limit scope: %s", scope)
@@ -795,6 +891,9 @@ func (s *SmartContract) ListSystemLimits(ctx contractapi.TransactionContextInter
 // ─── Auto-Limit Policy ────────────────────────────────────────────────
 
 func (s *SmartContract) SetAutoLimitPolicy(ctx contractapi.TransactionContextInterface, participantID string, autoRedemption bool, minBalance int64) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	policy := AutoLimitPolicy{
 		ParticipantID:  participantID,
 		AutoRedemption: autoRedemption,
@@ -866,6 +965,9 @@ func (s *SmartContract) putAutoLimitPolicy(ctx contractapi.TransactionContextInt
 // ─── KYC / KYB Profiles ─────────────────────────────────────────────
 
 func (s *SmartContract) SubmitKycProfile(ctx contractapi.TransactionContextInterface, profileID string, subjectType string, subjectID string, documentHashesJSON string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
 	exists, err := s.kycProfileExists(ctx, profileID)
 	if err != nil {
 		return err
@@ -901,6 +1003,9 @@ func (s *SmartContract) SubmitKycProfile(ctx contractapi.TransactionContextInter
 }
 
 func (s *SmartContract) RefreshKycProfile(ctx contractapi.TransactionContextInterface, profileID string, status string, riskLevel string, dueDiligenceLevel string, seniorApproval bool, documentHashesJSON string, expiresAt string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
 	profile, err := s.getKycProfile(ctx, profileID)
 	if err != nil {
 		return err
@@ -982,6 +1087,9 @@ func (s *SmartContract) ListKycAuditEvents(ctx contractapi.TransactionContextInt
 // ─── Retail Customers ────────────────────────────────────────────────
 
 func (s *SmartContract) CreateRetailCustomer(ctx contractapi.TransactionContextInterface, customerID string, identityHash string, walletAccountID string, kycProfileID string) error {
+	if err := requireInstitution(ctx); err != nil {
+		return err
+	}
 	exists, err := s.retailCustomerExists(ctx, customerID)
 	if err != nil {
 		return err
@@ -1589,6 +1697,9 @@ func (s *SmartContract) ListWallets(ctx contractapi.TransactionContextInterface,
 }
 
 func (s *SmartContract) RequestIssuance(ctx contractapi.TransactionContextInterface, participantID string, amount int64) (interface{}, error) {
+	if err := requireInstitution(ctx); err != nil {
+		return nil, err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return nil, err
@@ -1604,6 +1715,9 @@ func (s *SmartContract) RequestIssuance(ctx contractapi.TransactionContextInterf
 }
 
 func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInterface, participantID string, amount int64) (interface{}, error) {
+	if err := requireInstitution(ctx); err != nil {
+		return nil, err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return nil, err
@@ -1616,6 +1730,9 @@ func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextInterface, participantID string, amount int64, reference string) (interface{}, error) {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return nil, err
+	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
 		return nil, err
@@ -1641,6 +1758,9 @@ func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextIn
 // DistributeToParticipant transfers liquidity from a bank validator wallet to a PJP wallet.
 // This is the only way PJPs can receive Digital Rupiah — not via direct BI issuance.
 func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionContextInterface, senderParticipantID string, receiverParticipantID string, amount int64) error {
+	if err := requireBankIndonesia(ctx); err != nil {
+		return err
+	}
 	if amount <= 0 {
 		return fmt.Errorf("amount must be positive")
 	}

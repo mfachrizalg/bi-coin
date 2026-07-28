@@ -8,7 +8,7 @@ const { createWorkloadModule } = require('./retail-transfer');
 function makeWorkload(workerIndex) {
     const workload = createWorkloadModule();
     workload.workerIndex = workerIndex;
-    workload.customers = Array.from({ length: 600 }, (_, i) => ({
+    workload.customers = Array.from({ length: 650 }, (_, i) => ({
         id: `c_w${workerIndex}_${i}`,
         walletId: `wlt_c_w${workerIndex}_${i}`,
         tier: i % 5 === 0 ? 'BASIC' : 'STANDARD',
@@ -62,7 +62,7 @@ test('measured traffic rejects a population too small to avoid contention', () =
 test('measured traffic preserves the operation mix for small worker-scaling rounds', () => {
     const workload = createWorkloadModule();
     workload.workerIndex = 0;
-    workload.customers = Array.from({ length: 80 }, (_, i) => ({
+    workload.customers = Array.from({ length: 85 }, (_, i) => ({
         id: `small_c_${i}`,
         walletId: `wlt_small_c_${i}`,
         tier: i % 5 === 0 ? 'BASIC' : 'STANDARD',

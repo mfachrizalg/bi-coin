@@ -143,6 +143,42 @@ type TransferRequest struct {
 	Amount     string `json:"amount"`
 }
 
+type QrisMode string
+
+const (
+	QrisModeStatic  QrisMode = "static"
+	QrisModeDynamic QrisMode = "dynamic"
+)
+
+type QrisStatus string
+
+const (
+	QrisStatusActive    QrisStatus = "active"
+	QrisStatusPending   QrisStatus = "pending"
+	QrisStatusPaid      QrisStatus = "paid"
+	QrisStatusExpired   QrisStatus = "expired"
+	QrisStatusCancelled QrisStatus = "cancelled"
+)
+
+type CreateQrisIntentRequest struct {
+	Mode             QrisMode `json:"mode"`
+	MerchantID       string   `json:"merchant_id,omitempty"`
+	MerchantWalletID string   `json:"merchant_wallet_id"`
+	Amount           string   `json:"amount,omitempty"`
+	Label            string   `json:"label,omitempty"`
+	ExpiresAt        *string  `json:"expires_at,omitempty"`
+}
+
+type ResolveQrisRequest struct {
+	Payload string `json:"payload"`
+}
+
+type PayQrisRequest struct {
+	Payload       string `json:"payload"`
+	PayerWalletID string `json:"payer_wallet_id"`
+	Amount        string `json:"amount,omitempty"`
+}
+
 type DistributeRequest struct {
 	SenderParticipantID   string `json:"sender_participant_id"`
 	ReceiverParticipantID string `json:"receiver_participant_id"`
@@ -185,6 +221,7 @@ type ValidationError struct {
 
 type Wallet struct {
 	WalletID        string     `json:"wallet_id"`
+	OwnerID         string     `json:"owner_id"`
 	ParticipantID   string     `json:"participant_id"`
 	Tier            string     `json:"tier"`
 	WalletType      WalletType `json:"wallet_type"`
@@ -288,6 +325,30 @@ type TransactionRecord struct {
 	Status          string `json:"status"`
 	ReferenceID     string `json:"reference_id,omitempty"`
 	Timestamp       string `json:"timestamp"`
+}
+
+type QrisIntent struct {
+	IntentID         string     `json:"intent_id"`
+	Mode             QrisMode   `json:"mode"`
+	MerchantID       string     `json:"merchant_id"`
+	MerchantWalletID string     `json:"merchant_wallet_id"`
+	Amount           int64      `json:"amount"`
+	Status           QrisStatus `json:"status"`
+	Label            string     `json:"label,omitempty"`
+	Payload          string     `json:"payload,omitempty"`
+	ReferenceID      string     `json:"reference_id"`
+	ExpiresAt        *string    `json:"expires_at,omitempty"`
+	PaidByWalletID   string     `json:"paid_by_wallet_id,omitempty"`
+	PaidAt           *string    `json:"paid_at,omitempty"`
+	CreatedAt        string     `json:"created_at"`
+	UpdatedAt        string     `json:"updated_at"`
+}
+
+type QrisPayResult struct {
+	Status      string `json:"status"`
+	TxID        string `json:"tx_id,omitempty"`
+	IntentID    string `json:"intent_id"`
+	ReferenceID string `json:"reference_id"`
 }
 
 type SupervisionEvent struct {

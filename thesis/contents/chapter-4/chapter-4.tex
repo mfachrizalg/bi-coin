@@ -126,6 +126,11 @@ MERCHANT & 200.000.000 & 10.000.000 & 50.000.000 & 500.000.000 & 500.000.000 \\
 \end{table}
 \endgroup
 
+Nilai pada Tabel~\ref{tab:tier} adalah parameter kebijakan purwarupa untuk
+menguji penurunan tingkatan dan penegakan limit. Nilai tersebut tidak
+diturunkan dari ketentuan BI, OJK, atau FATF dan tidak membuktikan kepatuhan
+APU/PPT.
+
 Selain limit per tingkatan, sistem menetapkan batas tingkat sistem berupa
 pasokan global maksimum Rp10.000.000.000.000, saldo maksimum per peserta
 Rp1.000.000.000.000, dan nilai maksimum per transaksi Rp100.000.000.000.
@@ -139,6 +144,11 @@ dengan tujuh peran sebagaimana dirangkum pada Tabel~\ref{tab:peran}. Pemisahan
 peran ini memastikan bahwa, misalnya, hanya peran \texttt{bank\_indonesia} yang
 dapat melakukan penerbitan, sedangkan peran
 \texttt{supervisor} hanya memiliki akses baca terhadap laporan pengawasan.
+Untuk pelanggan dan pedagang, backend juga membatasi daftar dompet berdasarkan
+nama pengguna pada JWT dan menolak transfer apabila \texttt{owner\_id} dompet
+pengirim tidak cocok. Pada batas jaringan, chaincode memeriksa MSP: mutasi
+moneter, limit, dan siklus hidup peserta hanya menerima MSP Bank Indonesia,
+sedangkan MSP pengamat tidak dapat melakukan mutasi.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -153,8 +163,8 @@ dapat melakukan penerbitan, sedangkan peran
 \texttt{public} & Pemeriksaan kesehatan dan topologi jaringan \\
 \texttt{authen\allowbreak ticated} & Pembacaan daftar dompet \\
 \texttt{kyc\_verified} & Transfer dan pembacaan saldo pelanggan yang telah disetujui \\
-\texttt{bank\_pjp} & Onboarding pelanggan, keputusan KYC, pembuatan dompet, dan operasi peserta \\
-\texttt{bank\allowbreak\_indonesia} & Penerbitan, kebijakan limit, dan pengawasan; akses baca KYC \\
+\texttt{bank\_pjp} & Onboarding pelanggan, keputusan KYC, pembuatan dompet, dan pengajuan peserta \\
+\texttt{bank\allowbreak\_indonesia} & Penerbitan, distribusi/penebusan likuiditas, siklus hidup peserta, kebijakan limit, dan pengawasan; akses baca KYC \\
 \texttt{merchant} & Transfer dan pembacaan saldo pedagang yang telah disetujui \\
 \texttt{supervisor} & Akses baca KYC, laporan, dan pengawasan \\
 \bottomrule
@@ -169,34 +179,69 @@ dirancang pada BAB III. Hasil pengujian menunjukkan bahwa seluruh alur berjalan
 sesuai rancangan, yaitu:
 \begin{enumerate}
     \item \textbf{Penerbitan dan distribusi berjenjang}. Bank Indonesia
-    menerbitkan Rupiah Digital ke peserta; bank validator mendistribusikan
-    likuiditas ke PJP melalui \texttt{DistributeToParticipant} yang melakukan
-    \texttt{Burn} pada pengirim dan \texttt{Mint} pada penerima; PJP kemudian
-    menyalurkan saldo ke pelanggan ritel. Upaya penerbitan langsung kepada PJP
-    ditolak sesuai aturan, sehingga PJP hanya memperoleh likuiditas melalui
-    bank.
+    menerbitkan Rupiah Digital kepada peserta. Bank validator kemudian
+    mendistribusikan likuiditas ke PJP melalui
+    \texttt{DistributeToParticipant}, yang melakukan \texttt{Burn} pada
+    pengirim dan \texttt{Mint} pada penerima. PJP menyalurkan saldo tersebut
+    kepada pelanggan ritel. Upaya penerbitan langsung kepada PJP ditolak sesuai
+    aturan sehingga PJP hanya memperoleh likuiditas melalui bank.
     \item \textbf{Penegakan limit}. Transaksi yang melampaui batas per
     transaksi, keluar harian, keluar bulanan, atau masuk bulanan ditolak,
     demikian pula transfer yang menyebabkan saldo penerima melampaui batas.
     \item \textbf{KYC dan pembekuan}. Bank/PJP mengajukan dan memperbarui
-    profil KYC. BASIC diturunkan untuk pelanggan risiko rendah dengan uji tuntas
-    sederhana; STANDARD untuk pelanggan dengan uji tuntas standar/lanjutan;
-    MERCHANT untuk pedagang dengan uji tuntas standar/lanjutan. Risiko tinggi
-    memerlukan EDD dan persetujuan senior. Dompet yang dibekukan tidak dapat
-    bertransaksi.
+    profil KYC. BASIC diturunkan untuk pelanggan berisiko rendah dengan uji
+    tuntas sederhana. STANDARD diberikan kepada pelanggan dengan uji tuntas
+    standar atau lanjutan, sedangkan MERCHANT diberikan kepada pedagang dengan
+    uji tuntas standar atau lanjutan. Risiko tinggi memerlukan EDD dan
+    persetujuan senior. Dompet yang dibekukan tidak dapat bertransaksi.
     \item \textbf{Transfer ritel}. Jalur \texttt{Transfer} yang sama berhasil
     digunakan untuk transaksi antarpelanggan dan pelanggan-ke-pedagang.
     \item \textbf{Pengawasan}. Laporan rekonsiliasi, metrik, dan \textit{event}
     pengawasan dapat diambil oleh peran berwenang.
 \end{enumerate}
 
+Selain pengujian berbasis skenario tersebut, verifikasi fungsional juga
+diperkuat dengan \textit{unit test} otomatis pada lapisan \textit{backend} dan
+\textit{chaincode}. Hasil verifikasi menunjukkan bahwa paket uji
+\textit{backend} lulus seluruh pengujian dengan 22 pengujian pada 6 paket,
+sedangkan paket uji \textit{chaincode} lulus seluruh pengujian dengan 30
+pengujian pada 1 paket. Pada lapisan \textit{backend}, pengujian tersebut
+memverifikasi pemilihan metode layanan ke \textit{chaincode} beserta urutan
+argumennya, jalur tulis pengajuan dan pembaruan KYC, validasi persetujuan
+risiko tinggi, pembentukan \textit{anchor hash}, propagasi kegagalan
+penyimpanan \textit{off-chain}, serta penanganan layanan untuk pembuatan
+pelanggan ritel, transfer, penerbitan, penebusan, dan distribusi kepada
+peserta. Pada lapisan \textit{chaincode}, pengujian memverifikasi evaluasi
+kebijakan kepatuhan, penurunan tier dompet, reset penghitung transaksi, aksi
+siklus hidup peserta, validasi siklus hidup KYC, batasan pembuatan dompet,
+jalur berhasil dan jalur penolakan transfer terkait status KYC, status dompet,
+saldo, serta limit transaksi, disertai persistensi dan pembacaan kembali limit
+sistem maupun pembaruan status atau \textit{event} transaksi yang relevan.
+Temuan tersebut mendukung kebenaran logika layanan \textit{backend} dan aturan
+bisnis \textit{chaincode} pada purwarupa, namun tidak ditafsirkan sebagai bukti
+validasi menyeluruh, pembuktian \textit{end-to-end}, atau kesiapan sistem untuk
+lingkungan produksi berskala penuh.
+
+Jika dirujukkan ke SRS pada Tabel~\ref{tab:srs-verifikasi}, hasil pada subbab
+ini memberikan bukti utama untuk FR-01 sampai FR-08 dan NFR-02 sampai NFR-04.
+FR-01 dan FR-02 didukung oleh keberhasilan skenario pendaftaran peserta,
+penerbitan, dan distribusi dua jenjang. FR-03, FR-04, FR-05, dan FR-08
+didukung oleh \textit{unit test} dan skenario fungsional yang menunjukkan bahwa
+profil KYC, penurunan tier dompet, penolakan transaksi yang tidak patuh, serta
+pemisahan data KYC luring berjalan sesuai rancangan. FR-06 dan FR-07 didukung
+oleh skenario pengawasan dan verifikasi hak akses pada lapisan \textit{backend}.
+Dengan demikian, hasil pengujian fungsional pada bab ini berperan sebagai bukti
+bahwa kebutuhan perangkat lunak utama purwarupa telah diimplementasikan dan
+diverifikasi pada tingkat yang sesuai untuk penelitian prototipe.
+
 \section{Hasil Evaluasi Kinerja}
 
 Evaluasi kinerja menggunakan Hyperledger Caliper 0.6 pada jaringan lokal lima
 organisasi dengan sapuan konfigurasi \textit{worker} (1, 2, dan 4
-\textit{worker}) untuk mengidentifikasi batas pemrosesan sisi server. Setiap
-profil transfer menjalankan 40 transaksi pada laju kirim sekitar 10 TPS
-(pemanasan), 30 TPS (stabil), dan 60 TPS (puncak). Dua puluh persen pelanggan
+\textit{worker}). Setiap profil transfer menjalankan pemanasan selama 30 detik
+pada 10 TPS, lalu dua ronde terukur selama 120 detik pada 30 dan 60 TPS.
+Populasi total dijaga tetap pada 116 pelanggan, 16 pedagang, dan 52 slot
+transaksi untuk setiap konfigurasi \textit{worker}. Dua puluh persen pelanggan
 memperoleh BASIC melalui uji tuntas sederhana, sedangkan 80\% memperoleh
 STANDARD melalui uji tuntas standar; pedagang memperoleh MERCHANT.
 
@@ -206,9 +251,11 @@ pembacaan dompet. Setiap subjek diberi jangkar KYC yang disetujui sebelum ronde
 dimulai. Dana awal STANDARD sebesar Rp5.000.000 dan BASIC sebesar Rp500.000
 menyisakan ruang penerimaan di bawah saldo maksimum. Pengukuran melaporkan jumlah
 berhasil dan gagal, \textit{throughput}, serta latensi minimum, rata-rata, dan
-maksimum. Nomor slot global menentukan jenis transaksi secara deterministik dan
-setiap kunci dompet yang dimutasi hanya digunakan satu kali dalam satu ronde
-terukur. Kegagalan kebijakan dan konflik MVCC tetap dihitung jika terjadi.
+maksimum. Nomor slot global menentukan jenis transaksi secara deterministik.
+Ke-52 slot diputar selama ronde berbasis durasi, sehingga kunci dapat digunakan
+kembali setelah satu siklus. Pembagian ini menghindari satu dompet panas sebagai
+garis dasar, tetapi tidak menghapus seluruh kontensi. Kegagalan kebijakan dan
+konflik MVCC tetap dihitung dan dilaporkan jika terjadi.
 
 Hasil diperoleh dari laporan Caliper setelah \textit{chaincode} versi 2.0
 dipasang pada \textit{ledger} bersih dan \texttt{InitLedger} dijalankan. Angka
@@ -234,204 +281,175 @@ digunakan untuk menilai kelayakan desain dan membangun garis dasar pengujian
 lanjutan, tetapi tidak untuk mengekstrapolasi kapasitas nasional tanpa data
 transaksi riil, topologi produksi, dan perangkat keras setara.
 
+Dalam konteks SRS pada Bab~III, evaluasi kinerja ini terutama berfungsi sebagai
+bukti verifikasi untuk NFR-05, yaitu bahwa purwarupa dapat diukur secara
+kuantitatif dengan metrik \textit{throughput}, latensi, dan tingkat keberhasilan
+transaksi. Oleh karena itu, angka Caliper pada subbab ini tidak ditafsirkan
+sebagai pengganti kebutuhan fungsional atau bukti keamanan formal, melainkan
+sebagai ukuran performa purwarupa pada lingkungan uji yang telah didefinisikan.
+
 \begin{table}[H]
 \caption{Konfigurasi evaluasi transfer ritel}
 \label{tab:laju}
 \centering
-\begin{tabular}{l r r r l}
+\scriptsize
+\begin{tabular}{p{2.8cm} p{1cm} p{1.4cm} p{1.4cm} p{4.6cm}}
 \toprule
-\textbf{Profil} & \textbf{\textit{Worker}} & \textbf{Tx} & \textbf{Laju} & \textbf{Komposisi} \\
+\textbf{Profil} & \textbf{\textit{Worker}} & \textbf{Durasi/jumlah} & \textbf{Laju} & \textbf{Komposisi} \\
 \midrule
-Transfer & 1/2/4 & 40 & 10 TPS & 70\% P2P, 25\% pelanggan--pedagang, 5\% baca \\
-Transfer & 1/2/4 & 40 & 30 TPS & 70\% P2P, 25\% pelanggan--pedagang, 5\% baca \\
-Transfer & 1/2/4 & 40 & 60 TPS & 70\% P2P, 25\% pelanggan--pedagang, 5\% baca \\
+Transfer & 1/2/4 & 30 detik & 10 TPS & 70\% P2P, 25\% pelanggan--pedagang, 5\% baca \\
+Transfer & 1/2/4 & 120 detik & 30 TPS & 70\% P2P, 25\% pelanggan--pedagang, 5\% baca \\
+Transfer & 1/2/4 & 120 detik & 60 TPS & 70\% P2P, 25\% pelanggan--pedagang, 5\% baca \\
+Pengulangan puncak & 2 & 5 $\times$ 60 detik & 60 TPS & Transfer ritel identik untuk rerata dan \textit{confidence interval} \\
 Fungsional & 2 & 40--80 & 5--30 TPS & KYC, moneter, pengawasan, administratif \\
+\textit{Negative-path} & 1 & 7 & 5 TPS & Tujuh pelanggaran harus ditolak dengan alasan yang tepat \\
+Agregat \textit{overspend} & 4 & 200 & 80 TPS & Permintaan Rp200.000 dari saldo awal Rp50.000 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pengujian dijalankan pada jaringan Garuda yang diatur ulang, \textit{chaincode}
-\texttt{digital-rupiah} versi 2.0 dideploy ulang dengan
-\texttt{NETWORK\_MODE=garuda}, kemudian \texttt{InitLedger} dijalankan dan
-kontainer \textit{chaincode} dipanaskan sebelum Caliper dieksekusi. Laporan
-pengujian menggunakan cap waktu \texttt{2026-06-30-113543}. Seluruh 616
-permintaan \textit{chaincode} yang dilaporkan Caliper berhasil dengan 0 kegagalan.
-Log \textit{peer} tidak menunjukkan konflik MVCC maupun penolakan kebijakan/limit.
+Seluruh hasil pada subbab ini berasal dari batch
+\texttt{2026-07-27-214918} tanggal 27 Juli 2026. Tujuh profil pada berkas
+status berakhir PASS dan setiap profil memiliki laporan baru. Manifes batch
+mencatat commit dasar \texttt{f4b0910ecc69}, status repositori yang masih
+memuat perubahan, \textit{seed} 20260725, versi alat, dan hash seluruh masukan.
 
 \begin{table}[H]
-\caption{Hasil evaluasi transfer ritel Hyperledger Caliper}
+\caption{Hasil transfer dasar pada ronde terukur}
 \label{tab:hasil-kinerja-caliper}
 \centering
 \scriptsize
-\begin{tabular}{l r r r r r r r r}
+\begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-\textbf{Ronde} & \textbf{\textit{Worker}} & \textbf{Sukses} & \textbf{Gagal} & \textbf{Kirim} &
-\textbf{\textit{Throughput}} & \multicolumn{3}{c}{\textbf{Latensi (detik)}} \\
-\cmidrule(lr){7-9}
- &  &  &  & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{Min.} &
-\textbf{Rerata} & \textbf{Maks.} \\
+\textbf{\textit{Worker}} & \textbf{Beban} & \textbf{Sukses} & \textbf{Gagal} &
+\textbf{Sukses (\%)} & \textbf{Selesai (TPS)} & \textbf{Sukses (TPS)} \\
 \midrule
-Pemanasan & 1 & 40 & 0 & 10,3 & 7,8 & 0,01 & 0,78 & 2,14 \\
-Stabil & 1 & 40 & 0 & 30,8 & 12,7 & 0,00 & 0,62 & 2,15 \\
-Puncak & 1 & 40 & 0 & 57,6 & 14,5 & 0,07 & 0,66 & 2,32 \\
-Pemanasan & 2 & 40 & 0 & 10,5 & 7,8 & 0,01 & 0,80 & 2,14 \\
-Stabil & 2 & 40 & 0 & 31,6 & 12,3 & 0,01 & 0,64 & 2,25 \\
-Puncak & 2 & 40 & 0 & 61,0 & 14,5 & 0,03 & 0,69 & 2,27 \\
-Pemanasan & 4 & 40 & 0 & 11,1 & 8,0 & 0,01 & 0,81 & 2,18 \\
-Stabil & 4 & 40 & 0 & 33,3 & 12,9 & 0,01 & 0,64 & 2,16 \\
-Puncak & 4 & 40 & 0 & 65,9 & 14,5 & 0,01 & 0,70 & 2,30 \\
+1 & 30 TPS & 3.601 & 0     & 100,00 & 29,5 & 29,5 \\
+1 & 60 TPS & 5.037 & 2.164 & 69,95  & 58,9 & 41,2 \\
+2 & 30 TPS & 3.602 & 0     & 100,00 & 29,5 & 29,5 \\
+2 & 60 TPS & 5.748 & 1.454 & 79,81  & 58,9 & 47,0 \\
+4 & 30 TPS & 3.604 & 0     & 100,00 & 29,5 & 29,5 \\
+4 & 60 TPS & 5.603 & 1.601 & 77,78  & 58,9 & 45,8 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pada profil transfer, seluruh kombinasi 1, 2, dan 4 \textit{worker} menghasilkan
-40 permintaan sukses dan 0 kegagalan pada setiap ronde. Peningkatan laju kirim
-dari sekitar 10 TPS ke 60 TPS tidak menaikkan \textit{throughput} secara linear.
-\textit{Throughput} puncak berada pada sekitar 14,5 TPS untuk ketiga jumlah
-\textit{worker}. Hal ini menunjukkan bahwa pada topologi lokal, batas pemrosesan
-lebih dipengaruhi oleh jaringan Fabric dan proses validasi dibanding jumlah
-\textit{worker} Caliper. Keberhasilan 100\% pada pengujian berdurasi terbatas ini
-menunjukkan bahwa transaksi valid dapat diselesaikan tanpa konflik kunci pada
-konfigurasi yang dilaporkan, bukan bahwa sistem siap menangani beban nasional.
+Kolom ``Selesai'' pada Tabel~\ref{tab:hasil-kinerja-caliper} adalah
+\textit{throughput} yang dilaporkan Caliper dan mencakup transaksi sukses serta
+gagal. Kolom ``Sukses (TPS)'' dihitung dengan mengalikan nilai tersebut dengan
+proporsi transaksi sukses. Pada 30 TPS, ketiga konfigurasi mencapai 29,5 TPS
+dengan tingkat sukses 100\%. Pada 60 TPS, \textit{completion throughput} tetap
+58,9 TPS, tetapi \textit{successful throughput} hanya 41,2--47,0 TPS. Kegagalan
+didominasi ketidakcocokan \textit{proposal response payload} saat beberapa
+\textit{peer} membaca versi status yang berbeda. Satu observasi W1 dan W4 tidak
+cukup untuk menyimpulkan pengaruh kausal jumlah \textit{worker}.
 
 \begin{table}[H]
-\caption{Hasil evaluasi fungsi lain Hyperledger Caliper}
-\label{tab:hasil-kinerja-fungsional-caliper}
+\caption{Hasil lima ronde pengulangan beban 60 TPS dengan 2 \textit{worker}}
+\label{tab:hasil-kinerja-repeat}
 \centering
 \scriptsize
-\begin{tabular}{l r r r r r r r}
+\begin{tabular}{@{}lrrrrr@{}}
 \toprule
-\textbf{Profil} & \textbf{Sukses} & \textbf{Gagal} & \textbf{Kirim} &
-\textbf{\textit{Throughput}} & \multicolumn{3}{c}{\textbf{Latensi (detik)}} \\
-\cmidrule(lr){6-8}
- &  &  & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{Min.} &
-\textbf{Rerata} & \textbf{Maks.} \\
+\textbf{Ronde} & \textbf{Sukses} & \textbf{Gagal} & \textbf{Sukses (\%)} &
+\textbf{Selesai (TPS)} & \textbf{Sukses (TPS)} \\
 \midrule
-KYC/\textit{onboarding} & 56 & 0 & 4,4 & 3,7 & 0,13 & 0,88 & 2,29 \\
-Operasi moneter & 80 & 0 & 20,5 & 19,9 & 0,10 & 0,32 & 0,53 \\
-Kueri pengawasan & 80 & 0 & 30,8 & 17,0 & 0,01 & 1,10 & 3,24 \\
-Kebijakan administratif & 40 & 0 & 5,3 & 5,2 & 0,09 & 0,91 & 1,72 \\
+1 & 2.342 & 1.256 & 65,09 & 57,7 & 37,6 \\
+2 & 1.494 & 2.105 & 41,51 & 57,5 & 23,9 \\
+3 & 1.885 & 1.713 & 52,39 & 59,2 & 31,0 \\
+4 & 1.671 & 1.931 & 46,39 & 59,5 & 27,6 \\
+5 & 2.327 & 1.275 & 64,60 & 57,7 & 37,3 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Tabel~\ref{tab:hasil-kinerja-fungsional-caliper} menunjukkan bahwa fungsi
-nontransfer juga dapat dieksekusi tanpa kegagalan pada beban terbatas. Profil
-KYC/\textit{onboarding} berisi beberapa pemanggilan \textit{chaincode} untuk satu
-alur bisnis, sehingga angka sukses pada tabel dibaca sebagai jumlah permintaan
-\textit{chaincode} sukses, bukan jumlah lengkap pelanggan yang di-\textit{onboard}.
-Kueri pengawasan memiliki \textit{throughput} lebih rendah daripada laju kirim
-karena sebagian kueri membaca himpunan data buku besar, sedangkan operasi moneter
-memiliki latensi rata-rata paling rendah pada pengujian ini.
+Rerata \textit{successful throughput} lima ronde adalah 31,46 TPS dengan
+interval kepercayaan 95\% untuk rerata sebesar $\pm 7,44$ TPS. Rerata tingkat
+sukses adalah 54,00\% dengan interval $\pm 13,20$ poin persentase, sedangkan
+rerata latensi adalah 1,44 detik dengan interval $\pm 0,43$ detik. Interval ini
+mengukur ketidakpastian estimasi rerata, bukan pita yang harus memuat seluruh
+observasi. Rentang \textit{successful throughput} 23,87--37,56 TPS menunjukkan
+variasi yang besar pada beban 60 TPS. Lima ronde menggunakan ruang nama berbeda
+pada satu \textit{ledger}, sehingga hasilnya merupakan \textit{repeatability}
+dalam satu lingkungan, bukan reproduksibilitas lintas mesin.
+
+\begin{table}[H]
+\caption{Hasil profil fungsional}
+\label{tab:hasil-kinerja-fungsi}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Profil} & \textbf{Sukses} & \textbf{Gagal} &
+\textbf{\textit{Throughput} (TPS)} & \textbf{Latensi rata-rata (detik)} \\
+\midrule
+KYC/\textit{onboarding} & 56 & 0 & 3,8 & 0,85 \\
+Operasi moneter & 80 & 0 & 19,7 & 0,33 \\
+Kueri pengawasan & 80 & 0 & 30,7 & 0,04 \\
+Kebijakan administratif & 40 & 0 & 5,2 & 0,90 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Keempat profil fungsional selesai tanpa kegagalan. Angka tersebut tidak
+dibandingkan langsung karena setiap profil memiliki fungsi, jumlah transaksi,
+dan pola baca-tulis yang berbeda.
+
+\begin{table}[H]
+\caption{Hasil oracle jalur negatif dan pengeluaran agregat}
+\label{tab:hasil-kinerja-negatif}
+\centering
+\scriptsize
+\begin{tabular}{@{}p{3.4cm}p{9.2cm}@{}}
+\toprule
+\textbf{Profil} & \textbf{Hasil semantik} \\
+\midrule
+\textit{Negative-path} & Tujuh dari tujuh transaksi ditolak dengan alasan
+yang tepat; \textit{enforcement gap}=0 dan \textit{oracle error}=0. \\
+Pengeluaran agregat & Empat dari 200 transfer dikomit dan 196 ditolak.
+Total permintaan Rp200.000 melebihi saldo awal Rp50.000; saldo akhir Rp46.000
+dan tetap nonnegatif pada seluruh \textit{worker}. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Profil \textit{negative-path} memvalidasi alasan penolakan dari detail galat
+\textit{peer} pada log, bukan dari status generik konektor. Profil pengeluaran
+agregat menunjukkan bahwa permintaan bersamaan tidak membuat saldo negatif.
+Konektor Caliper menghapus diagnostik \textit{peer} dari objek status yang
+dikembalikan, sehingga 196 penolakan pada ringkasan \textit{workload} tidak
+diklaim sebagai konflik MVCC tertentu. Bukti ini mendukung invariant saldo pada
+topologi yang diuji, bukan pembuktian formal pencegahan \textit{double-spend}.
+
 
 \section{Perbandingan Hasil Penelitian dengan Hasil Terdahulu}
 
-Perbandingan dengan purwarupa token sederhana berbasis Hyperledger Fabric milik
-Hanif \cite{hanif2024meetcoin} dirangkum pada
-Tabel~\ref{tab:perbandingan-hanif}. Data penelitian terdahulu dipakai untuk
-menjelaskan perkembangan rancangan, bukan sebagai klaim kapasitas yang setara.
-
-Penelitian ini menambahkan distribusi dua jenjang, pemisahan data KYC luring dan
-jangkar kepatuhan pada buku besar, penurunan tingkatan dompet berbasis risiko,
-limit masuk dan keluar, serta peristiwa pengawasan. Perbandingan angka kinerja
-langsung tidak dilakukan karena perangkat keras, topologi, kebijakan dukungan,
-dan semantik beban kerja berbeda.
-
-\begin{table}[H]
-    \caption{Perbandingan purwarupa MeetCoin dan purwarupa Rupiah Digital ritel. Sumber penelitian terdahulu: Hanif \cite{hanif2024meetcoin}.}
-    \label{tab:perbandingan-hanif}
-    \centering
-    \scriptsize
-    \begin{tabular}{@{}p{2.5cm}p{4.6cm}p{5.1cm}@{}}
-        \toprule
-        \textbf{Dimensi} & \textbf{MeetCoin} & \textbf{Penelitian ini} \\
-        \midrule
-        Domain & Token dan dompet digital sederhana & Purwarupa CBDC ritel dua jenjang \\
-        Topologi & Dua \textit{peer}, satu \textit{orderer}, dan satu kanal & Lima organisasi peserta, satu organisasi \textit{orderer}, dan satu kanal \\
-        Basis data status & LevelDB berbasis kunci--nilai & CouchDB berbasis dokumen JSON dan kueri kaya \\
-        Identitas dan kepatuhan & Fabric CA dan autentikasi JWT tanpa tingkatan KYC & KYC luring, jangkar kepatuhan, serta tingkatan BASIC, STANDARD, dan MERCHANT \\
-        Beban kerja & \textit{Mint}, cek saldo, dan transfer; 5/10/15 \textit{worker}; 1.000/2.000/3.000 transaksi; 50/100/150 TPS & 70\% transfer antarpelanggan, 25\% pelanggan--pedagang, dan 5\% baca dompet dengan dua identitas organisasi \\
-        Metrik & Keberhasilan, \textit{throughput}, latensi, CPU, dan memori & Keberhasilan, \textit{throughput}, latensi, serta konflik MVCC \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\paragraph{Perbandingan dengan PoC Proyek Garuda.}
-Laporan PoC Proyek Garuda \cite{bi_garuda_poc} mendokumentasikan uji coba
-\textit{wholesale Rupiah Digital} (wRD) pada tahap \textit{Immediate State}.
-Berbeda dengan penelitian ini, PoC Garuda bersifat grosir dan mengevaluasi dua
-platform non-Fabric: R3 Corda (UTXO, konsensus Notary) dan Kaleido Hyperledger
-Besu (akun, konsensus QBFT/PoA), yang dipilih dari 39 kandidat menjadi dua
-finalis. Pengujian dilakukan dengan 55 skenario bisnis dan teknis menggunakan
-Locust Dashboard serta AWS CloudWatch. Hasil \textit{load test} melaporkan
-\textit{throughput} 37 TPS (Corda) dan 39 TPS (Besu), keduanya memenuhi ambang
-batas lalu lintas grosir sekitar 30 TPS. Arsitektur yang diuji terdiri atas enam
-lapisan (\textit{use case}, aset digital, eksekusi, data, konsensus, jaringan)
-dengan aspek keamanan menyeluruh, serta peran Master Node BI sebagai KDR
-(\textit{Khazanah Digital Rupiah}), Regulator, Observer, Administrator, dan
-Provider. PoC Garuda tidak mengevaluasi dompet ritel berjenjang, KYC bertingkat,
-pembayaran luring, atau kanal pelanggan--pedagang karena lingkupnya terbatas
-pada penerbitan, penebusan, dan transfer dana antarlembaga. Penelitian ini
-mengisi celah ritel tersebut dengan Hyperledger Fabric, dompet BASIC, STANDARD,
-dan MERCHANT, serta pengujian Caliper pada beban transfer ritel. Perbedaan
-platform (Fabric vs Corda/Besu), alat ukur (Caliper vs Locust), dan lingkup
-(ritel vs grosir) membuat angka TPS kedua penelitian tidak dapat dibandingkan
-secara langsung, tetapi saling melengkapi gambaran kelayakan DLT untuk CBDC
-Rupiah Digital pada lapis grosir dan ritel. Distribusi dua jenjang yang
-diarahkan Bank Indonesia \cite{bi_whitepaper2022, bi_consultative} tetap
-dipertahankan dalam purwarupa ini.
-
-\paragraph{Perbandingan dengan tinjauan literatur Aryani (2023).}
-Aryani \cite{aryani2023critlit} melakukan tinjauan literatur kritis komparatif
-terhadap \textit{White Paper Project Garuda} dan implementasi CBDC di empat
-negara (eNaira, Sand Dollar, e-CNY, Project Orchid). Kajian tersebut
-merekomendasikan adopsi dompet berjenjang dan KYC bertingkat untuk r-Digital
-Rupiah, dengan mengutut eNaira (lima tingkat), Sand Dollar (dua tingkat), dan
-e-CNY (berjenjang berdasarkan kekuatan identifikasi). Penelitian ini
-mengimplementasikan rekomendasi tersebut sebagai kebijakan yang dapat diuji:
-tiga tingkatan dompet (BASIC, STANDARD, MERCHANT) diturunkan dari jenis subjek,
-tingkat uji tuntas, tingkat risiko, dan persetujuan senior pada profil KYC.
-Aryani juga mengutip metrik kuantitatif dari literatur global yang menunjukkan
-rata-rata DLT privat hanya mencapai sekitar 20 TPS, jauh di bawah jaringan
-terpusat seperti VISA (hingga 65.000 TPS), serta menyatakan keprihatinan bahwa
-skalabilitas DLT mungkin menghambat \textit{settlement} ritel sehingga
-r-Digital Rupiah mungkin memerlukan infrastruktur terpusat. Penelitian ini
-memberikan bukti empiris pada titik tersebut: pengujian Caliper pada Hyperledger
-Fabric menghasilkan \textit{throughput} transfer 7,8--14,5 TPS dan operasi
-fungsional 3,7--19,9 TPS, yang konsisten dengan rentang rata-rata DLT privat
-yang dikutip Aryani dan menggarisbawahi perlunya evaluasi topologi produksi
-sebelum klaim kapasitas nasional. Seluruh 616 permintaan berhasil tanpa konflik
-MVCC maupun penolakan kebijakan, meskipun dengan keterbatasan satu inah dan
-topologi purwarupa yang belum mewakili produksi nasional. Selain itu, Aryani mencatat bahwa BI Reg.~20/6/PBI/2018
-membatasi uang elektronik tak terdaftar hingga Rp2.000.000 dan terdaftar hingga
-Rp10.000.000, yang dapat berfungsi sebagai proksi limit dompet berjenjang;
-parameter Rupiah pada purwarupa ini dinyatakan sebagai pilihan desain dengan
-ketentuan uang elektronik domestik hanya sebagai proksi dan bukan dasar hukum
-CBDC \cite{bi2022padg247}.
-
-\paragraph{Perbandingan dengan e-CNY dan eNaira.}
-e-CNY dan eNaira menunjukkan bahwa klasifikasi dompet dan limit dapat dikaitkan
-dengan kekuatan identifikasi pengguna \cite{pboc2021ecny, cbn2021enaira}.
-Penelitian ini mengadopsi prinsip tersebut sebagai kebijakan yang dapat diuji,
-tetapi tidak menyalin angka limit negara lain. Parameter Rupiah pada purwarupa
-dinyatakan sebagai pilihan desain, dengan ketentuan uang elektronik domestik
-hanya sebagai proksi dan bukan dasar hukum CBDC \cite{bi2022padg247}.
+Penelitian ini dibandingkan dengan tinjauan literatur Aryani
+\cite{aryani2023critlit} dan PoC Proyek Garuda \cite{bi_garuda_poc} karena
+keduanya membahas kebutuhan CBDC Indonesia dari sisi kebijakan dan pembuktian
+teknologi. Tabel~\ref{tab:perbandingan-cbdc} membandingkan jenis artefak,
+lingkup bukti, dan posisi kontribusi. Jika angka kinerja disebutkan, angka
+tersebut hanya menjelaskan konfigurasi masing-masing artefak dan tidak
+dimaksudkan sebagai peringkat langsung antarsistem. Dalam kerangka itu,
+penelitian ini mengisi ruang purwarupa CBDC ritel berbasis Hyperledger Fabric,
+sedangkan Aryani berfokus pada kajian literatur dan PoC Proyek Garuda pada
+Rupiah Digital grosir.
 
 \begin{table}[H]
     \caption{Perbandingan penelitian ini dengan tinjauan literatur Aryani (2023) dan PoC Proyek Garuda (2024).}
     \label{tab:perbandingan-cbdc}
     \centering
     \scriptsize
-    \begin{tabular}{@{}p{2.8cm}p{3.8cm}p{3.8cm}p{3.8cm}@{}}
+    \begin{tabular}{@{}p{2.5cm}p{3.5cm}p{3.5cm}p{3.5cm}@{}}
         \toprule
         \textbf{Dimensi} & \textbf{Aryani (2023)} & \textbf{PoC Garuda (2024)} & \textbf{Penelitian ini} \\
         \midrule
         Jenis CBDC & Ritel (analisis konseptual) & Grosir (PoC eksperimental) & Ritel (purwarupa) \\
-        Metodologi & Tinjauan literatur kritis komparatif & PoC dengan 55 skenario bisnis dan teknis & Implementasi purwarupa + Caliper \\
+        Metodologi & Tinjauan literatur kritis komparatif & PoC dengan 55 skenario bisnis dan teknis & Purwarupa fungsional + Caliper \\
         Platform DLT & Tidak dievaluasi (kutipan dari kasus negara) & R3 Corda + Hyperledger Besu & Hyperledger Fabric \\
         Dompet berjenjang & Direkomendasikan (eNaira 5 tingkat, Sand Dollar 2, e-CNY berjenjang) & Tidak ada (grosir saja) & BASIC, STANDARD, MERCHANT (3 tingkat) \\
         KYC & Direkomendasikan bertingkat & Tidak dibahas eksplisit & Luring, jangkar kepatuhan, penurunan berbasis risiko \\
-        Metrik kinerja & Dikutip dari literatur (DLT $\sim$20 TPS, VISA $\sim$65.000 TPS) & Diukur: Corda 37 TPS, Besu 39 TPS (Locust) & Diukur: transfer 7,8--14,5 TPS; fungsional 3,7--19,9 TPS (Caliper) \\
+        Metrik kinerja & Kutipan sekunder; tidak diukur langsung & Corda 37 TPS, Besu 39 TPS (Locust) & Transfer sukses 29,5 TPS pada beban 30 TPS; 41,2--47,0 TPS pada beban 60 TPS (Caliper) \\
         Lingkup pengujian & Tidak ada pengujian & Penerbitan, penebusan, transfer antarlembaga & Transfer antarpelanggan, pelanggan--pedagang, baca dompet \\
         Pembayaran luring & Direkomendasikan untuk r-Digital Rupiah & Tidak dibahas & Tidak diuji dalam purwarupa ini \\
         Tokenisasi & Didukung (konseptual) & UTXO (Corda) / ERC-20 + ERC-1400 (Besu) & Transfer berbasis kunci--nilai pada Fabric \\
@@ -439,16 +457,13 @@ hanya sebagai proksi dan bukan dasar hukum CBDC \cite{bi2022padg247}.
     \end{tabular}
 \end{table}
 
-\paragraph{Batas generalisasi.}
-Purwarupa berjalan pada satu inah, memakai satu \textit{peer} per organisasi,
-dan menyimulasikan keputusan penyedia KYC. Oleh karena itu, hasil fungsional
-membuktikan konsistensi implementasi terhadap rancangan, bukan kesiapan produksi.
-Angka Caliper yang diperoleh berlaku untuk konfigurasi yang dilaporkan dan tidak
-dapat langsung digeneralisasi menjadi kapasitas nasional. Keterbatasan ini
-sejalan dengan keprihatinan Aryani \cite{aryani2023critlit} bahwa skalabilitas
-DLT pada volume ritel nasional belum terbukti dan r-Digital Rupiah mungkin
-memerlukan infrastruktur terpusat jika ambang kapasitas DLT terlampaui.
-Sebaliknya, PoC Garuda \cite{bi_garuda_poc} hanya menguji lapis grosir hingga
-ambang 30 TPS dan belum mengeksplorasi kemampuan maksimum, on-premise, atau
-multi-validator; celah ritel yang tertinggal menjadi ruang yang diisi oleh
-penelitian ini, tetapi dengan batas purwarupa yang sama seperti di atas.
+Perbandingan ini terbatas pada posisi kontribusi dan ruang lingkup teknis;
+hasil uji penelitian ini belum dapat digeneralisasi sebagai kapasitas nasional
+karena topologi, jumlah peserta, dan skenario beban masih berada pada skala
+purwarupa. Selisih angka kinerja terhadap PoC Proyek Garuda (Corda 37 TPS dan
+Besu 39 TPS) bersumber pada perbedaan platform, \textit{harness}, tujuan
+pengujian, dan komposisi beban, bukan pada klaim keunggulan langsung
+Hyperledger Fabric. Variasi tingkat sukses pada lima ronde beban 60 TPS
+menunjukkan bahwa hasil ini merupakan garis dasar lokal yang dapat diulang,
+bukan kapasitas maksimum Hyperledger Fabric atau bukti reproduksibilitas lintas
+mesin \cite{fabric_perf2023}.

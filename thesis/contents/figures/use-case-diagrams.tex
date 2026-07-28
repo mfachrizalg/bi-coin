@@ -41,7 +41,7 @@
 
 \node[ucase] (uc1) at (6,9) {Mendaftarkan Peserta};
 \node[ucase] (uc2) at (6,8) {Menerbitkan Digital Rupiah};
-\node[ucase] (uc3) at (6,7) {Mendistribusikan Likuiditas};
+\node[ucase] (uc3) at (6,7) {Mendistribusikan Likuiditas\\ke Peserta};
 \node[ucase] (uc4) at (6,6) {Mengelola KYC Pelanggan};
 \node[ucase] (uc5) at (6,5) {Mentransfer Saldo};
 \node[ucase] (uc6) at (6,4) {Transfer ke Pedagang};
@@ -51,13 +51,13 @@
 \draw[uassoc] (bi) -- (uc1);
 \draw[uassoc] (pjp) to[out=70,in=188] (uc1.west);
 \draw[uassoc] (bi) -- (uc2);
+\draw[uassoc] (bi) -- (uc3);
 \draw[uassoc] (bi) -- (uc7);
 \draw[uassoc] (bv) -- (uc3);
 \draw[uassoc] (m) -- (uc6);
 \draw[uassoc] (pr) -- (uc5);
 \draw[uassoc] (pr) -- (uc6);
 \draw[uassoc] (pjp) -- (uc4);
-\draw[uassoc] (sv) -- (uc7);
 \draw[uassoc] (sv) -- (uc9);
 \draw[uassoc] (bi) to[out=-95,in=172] (uc9.west);
 \draw[uassoc, dashed] (ojk) -- (uc9) node[midway, above, sloped, font=\scriptsize]{$\langle\langle$observasi$\rangle\rangle$};
@@ -76,26 +76,27 @@
 \umlactor{sv}{(10,3.5)}{Supervisor}
 
 \node[ubox, minimum width=6cm, minimum height=6.5cm] (sys) at (5,3.5) {};
-\node[font=\footnotesize\bfseries] at (5,7.2) {Operasi Wholesale};
+\node[font=\footnotesize\bfseries] at (5,7.2) {Operasi Institusional};
 
-\node[ucase] (w1) at (5,6) {Menerbitkan Digital Rupiah};
-\node[ucase] (w2) at (5,5) {Mendistribusikan Likuiditas};
-\node[ucase] (w3) at (5,4) {Mengelola Siklus Hidup Peserta};
+\node[ucase] (w1) at (5,6) {Menerbitkan dan Menebus\\Digital Rupiah};
+\node[ucase] (w2) at (5,5) {Mendistribusikan Likuiditas\\ke Peserta};
+\node[ucase] (w3) at (5,4) {Mengelola Siklus Hidup\\Peserta};
 \node[ucase] (w4) at (5,3) {Mengelola Kebijakan Limit};
-\node[ucase] (w6) at (5,1) {Laporan \& Metrik};
+\node[ucase] (w5) at (5,2) {Mengajukan Pendaftaran\\Peserta};
+\node[ucase] (w6) at (5,1) {Membaca Laporan \& Metrik};
 
 \draw[uassoc] (bi) -- (w1);
+\draw[uassoc] (bi) -- (w2);
 \draw[uassoc] (bi) -- (w3);
 \draw[uassoc] (bi) -- (w4);
+\draw[uassoc] (bi) -- (w5);
+\draw[uassoc] (bi) -- (w6);
 \draw[uassoc] (bv) -- (w2);
-\draw[uassoc] (sv) -- (w1);
-\draw[uassoc] (sv) -- (w3);
-\draw[uassoc] (sv) -- (w4);
+\draw[uassoc] (bv) -- (w5);
 \draw[uassoc] (sv) -- (w6);
-\draw[udep] (w2) -- (w1) node[midway, above, sloped] {$\langle\langle$include$\rangle\rangle$};
 \end{tikzpicture}%
 }
-\caption{Diagram use case operasi wholesale}
+\caption{Diagram use case operasi institusional}
 \label{fig:uc02}
 \end{figure}
 
@@ -110,14 +111,12 @@
 \node[font=\footnotesize\bfseries] at (5,7.2) {Operasi Retail};
 
 \node[ucase] (r1) at (5,6) {Menyediakan Data KYC};
-\node[ucase] (r2) at (5,5) {Mentransfer Saldo};
-\node[ucase] (r3) at (5,4) {Transfer Antarpelanggan};
-\node[ucase] (r4) at (5,3) {Transfer ke Pedagang};
+\node[ucase] (r2) at (5,4.7) {Transfer Antarpelanggan};
+\node[ucase] (r3) at (5,3.4) {Transfer ke Pedagang};
 \draw[uassoc] (pr) -- (r1);
 \draw[uassoc] (pr) -- (r2);
-\draw[uassoc] (pr) -- (r4);
+\draw[uassoc] (pr) -- (r3);
 \draw[uassoc] (m) -- (r3);
-\draw[udep] (r4) -- (r3) node[midway, above, sloped] {$\langle\langle$include$\rangle\rangle$};
 \end{tikzpicture}%
 }
 \caption{Diagram use case operasi retail}
