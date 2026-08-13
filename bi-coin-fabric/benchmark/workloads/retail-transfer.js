@@ -79,7 +79,7 @@ class RetailTransferWorkload extends RetailWorkloadBase {
         const contractFunction = readOnly ? 'GetWallet' : 'Transfer';
         const contractArguments = readOnly
             ? [plan.customer.walletId]
-            : [plan.sender.walletId, plan.receiver.walletId, this.retailAmount(plan.sender.perTxCap)];
+            : [plan.sender.walletId, plan.receiver.walletId, this.retailAmount(plan.sender.perTxCap), `bench_${this.ns()}_${this.txIndex}`];
 
         // Measured failures belong in Caliper's metrics; only setup uses fail-closed submit().
         return this.sutAdapter.sendRequests({

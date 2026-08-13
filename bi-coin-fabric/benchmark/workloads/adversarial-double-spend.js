@@ -109,7 +109,7 @@ class AdversarialDoubleSpendWorkload extends RetailWorkloadBase {
         const request = {
             ...CONTRACT,
             contractFunction: 'Transfer',
-            contractArguments: [this.senderWallet, receiver, String(this.transferAmount)],
+            contractArguments: [this.senderWallet, receiver, String(this.transferAmount), `overspend_${this.ns()}_${this.txIndex}`],
             readOnly: false,
         };
         try {

@@ -2,8 +2,11 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/models"
 )
 
 type contextKey string
@@ -11,6 +14,9 @@ type contextKey string
 const RoleKey contextKey = "role"
 const UsernameKey contextKey = "username"
 const AuthenticatedKey contextKey = "authenticated"
+const SubjectIDKey contextKey = "subject_id"
+const ParticipantIDKey contextKey = "participant_id"
+const CustodianMSPIDKey contextKey = "custodian_msp_id"
 
 type Role string
 
@@ -27,8 +33,11 @@ const (
 type RoleSet map[Role]bool
 
 type TokenClaims struct {
-	Username string
-	Role     Role
+	Username       string
+	Role           Role
+	SubjectID      string
+	ParticipantID  string
+	CustodianMSPID string
 }
 
 type TokenVerifier interface {
@@ -60,16 +69,19 @@ func AuthMiddleware(verifier TokenVerifier) func(http.Handler) http.Handler {
 
 			token, ok := strings.CutPrefix(header, "Bearer ")
 			if !ok || token == "" {
-				http.Error(w, `{"message":"invalid authorization header"}`, http.StatusUnauthorized)
+				writeError(w, http.StatusUnauthorized, "unauthorized", "invalid authorization header")
 				return
 			}
 			claims, err := verifier.Verify(token)
 			if err != nil {
-				http.Error(w, `{"message":"invalid token"}`, http.StatusUnauthorized)
+				writeError(w, http.StatusUnauthorized, "unauthorized", "invalid token")
 				return
 			}
 			ctx = context.WithValue(ctx, RoleKey, claims.Role)
 			ctx = context.WithValue(ctx, UsernameKey, claims.Username)
+			ctx = context.WithValue(ctx, SubjectIDKey, claims.SubjectID)
+			ctx = context.WithValue(ctx, ParticipantIDKey, claims.ParticipantID)
+			ctx = context.WithValue(ctx, CustodianMSPIDKey, claims.CustodianMSPID)
 			ctx = context.WithValue(ctx, AuthenticatedKey, true)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -89,6 +101,21 @@ func GetUsername(r *http.Request) string {
 	return username
 }
 
+func GetSubjectID(r *http.Request) string {
+	subjectID, _ := r.Context().Value(SubjectIDKey).(string)
+	return subjectID
+}
+
+func GetParticipantID(r *http.Request) string {
+	participantID, _ := r.Context().Value(ParticipantIDKey).(string)
+	return participantID
+}
+
+func GetCustodianMSPID(r *http.Request) string {
+	custodianMSPID, _ := r.Context().Value(CustodianMSPIDKey).(string)
+	return custodianMSPID
+}
+
 func RequireRole(allowed ...Role) func(http.Handler) http.Handler {
 	allowedSet := make(map[Role]bool, len(allowed))
 	for _, r := range allowed {
@@ -100,13 +127,22 @@ func RequireRole(allowed ...Role) func(http.Handler) http.Handler {
 			if !allowedSet[role] {
 				authenticated, _ := r.Context().Value(AuthenticatedKey).(bool)
 				if !authenticated {
-					http.Error(w, `{"message":"authentication required"}`, http.StatusUnauthorized)
+					writeError(w, http.StatusUnauthorized, "unauthorized", "authentication required")
 					return
 				}
-				http.Error(w, `{"detail":[{"loc":["header","Authorization"],"msg":"insufficient permissions","type":"auth_error"}]}`, http.StatusForbidden)
+				writeError(w, http.StatusForbidden, "forbidden", "insufficient permissions")
 				return
 			}
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func writeError(w http.ResponseWriter, status int, code string, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(models.ErrorResponse{
+		Code:    code,
+		Message: message,
+	})
 }

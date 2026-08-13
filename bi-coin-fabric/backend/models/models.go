@@ -77,8 +77,7 @@ type OnboardingRequest struct {
 }
 
 type CreateWalletRequest struct {
-	ParticipantID string `json:"participant_id"`
-	Tier          string `json:"tier,omitempty"` // Deprecated policy assertion; chaincode derives the tier from KYC.
+	OwnerID string `json:"owner_id"`
 }
 
 type RetailCustomerRequest struct {
@@ -116,15 +115,21 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int64  `json:"expires_in"`
-	Role        string `json:"role"`
+	AccessToken    string `json:"access_token"`
+	TokenType      string `json:"token_type"`
+	ExpiresIn      int64  `json:"expires_in"`
+	Role           string `json:"role"`
+	SubjectID      string `json:"subject_id,omitempty"`
+	ParticipantID  string `json:"participant_id,omitempty"`
+	CustodianMSPID string `json:"custodian_msp_id,omitempty"`
 }
 
 type MeResponse struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	Username       string `json:"username"`
+	Role           string `json:"role"`
+	SubjectID      string `json:"subject_id,omitempty"`
+	ParticipantID  string `json:"participant_id,omitempty"`
+	CustodianMSPID string `json:"custodian_msp_id,omitempty"`
 }
 
 type SetLimitRequest struct {
@@ -133,14 +138,16 @@ type SetLimitRequest struct {
 }
 
 type AmountRequest struct {
-	ParticipantID string `json:"participant_id"`
-	Amount        string `json:"amount"`
+	ParticipantID  string `json:"participant_id"`
+	Amount         string `json:"amount"`
+	IdempotencyKey string `json:"-"`
 }
 
 type TransferRequest struct {
-	SenderID   string `json:"sender_id"`
-	ReceiverID string `json:"receiver_id"`
-	Amount     string `json:"amount"`
+	SenderID       string `json:"sender_id"`
+	ReceiverID     string `json:"receiver_id"`
+	Amount         string `json:"amount"`
+	IdempotencyKey string `json:"-"`
 }
 
 type QrisMode string
@@ -174,15 +181,17 @@ type ResolveQrisRequest struct {
 }
 
 type PayQrisRequest struct {
-	Payload       string `json:"payload"`
-	PayerWalletID string `json:"payer_wallet_id"`
-	Amount        string `json:"amount,omitempty"`
+	Payload        string `json:"payload"`
+	PayerWalletID  string `json:"payer_wallet_id"`
+	Amount         string `json:"amount,omitempty"`
+	IdempotencyKey string `json:"-"`
 }
 
 type DistributeRequest struct {
 	SenderParticipantID   string `json:"sender_participant_id"`
 	ReceiverParticipantID string `json:"receiver_participant_id"`
 	Amount                int64  `json:"amount"`
+	IdempotencyKey        string `json:"-"`
 }
 
 type RegisterTriggerRequest struct {
@@ -207,6 +216,7 @@ type HealthResponse struct {
 }
 
 type ErrorResponse struct {
+	Code    string            `json:"code,omitempty"`
 	Detail  []ValidationError `json:"detail,omitempty"`
 	Message string            `json:"message,omitempty"`
 }
@@ -251,6 +261,7 @@ type KycProfile struct {
 	ProfileID         string            `json:"profile_id"`
 	SubjectType       KycSubjectType    `json:"subject_type"`
 	SubjectID         string            `json:"subject_id"`
+	CustodianMSPID    string            `json:"custodian_msp_id,omitempty"`
 	ProviderCaseID    string            `json:"provider_case_id,omitempty"`
 	DocumentHashes    []string          `json:"document_hashes"`
 	Status            KycStatus         `json:"status"`
@@ -290,6 +301,7 @@ type RetailCustomer struct {
 	IdentityHash    string `json:"identity_hash,omitempty"`
 	KycProfileID    string `json:"kyc_profile_id,omitempty"`
 	WalletAccountID string `json:"wallet_account_id"`
+	CustodianMSPID  string `json:"custodian_msp_id,omitempty"`
 	CreatedAt       string `json:"created_at"`
 }
 
@@ -307,8 +319,12 @@ type Balance struct {
 }
 
 type TransferResult struct {
-	Status string `json:"status"`
-	TxID   string `json:"tx_id,omitempty"`
+	Status      string `json:"status"`
+	TxID        string `json:"tx_id,omitempty"`
+	ReferenceID string `json:"reference_id,omitempty"`
+	SenderID    string `json:"sender_id,omitempty"`
+	ReceiverID  string `json:"receiver_id,omitempty"`
+	Amount      int64  `json:"amount,omitempty"`
 }
 
 type AmountResult struct {
@@ -340,6 +356,7 @@ type QrisIntent struct {
 	ExpiresAt        *string    `json:"expires_at,omitempty"`
 	PaidByWalletID   string     `json:"paid_by_wallet_id,omitempty"`
 	PaidAt           *string    `json:"paid_at,omitempty"`
+	TxID             string     `json:"tx_id,omitempty"`
 	CreatedAt        string     `json:"created_at"`
 	UpdatedAt        string     `json:"updated_at"`
 }

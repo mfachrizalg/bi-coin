@@ -2,7 +2,19 @@
 
 const { WorkloadModuleBase } = require('@hyperledger/caliper-core');
 
-const CONTRACT = { contractId: 'digital-rupiah', contractVersion: '2.0' };
+const CONTRACT = { contractId: 'digital-rupiah', contractVersion: '3.0' };
+
+const ACTORS = Object.freeze({
+    bi: { invokerMspId: 'BankIndonesiaOrgMSP', invokerIdentity: 'User1' },
+    himbara: { invokerMspId: 'HimbaraBankOrgMSP', invokerIdentity: 'User1' },
+    commercial: { invokerMspId: 'CommercialBankOrgMSP', invokerIdentity: 'User1' },
+});
+
+function actorRequest(request, actor = 'bi') {
+    const identity = ACTORS[actor];
+    if (!identity) throw new Error(`unknown Caliper actor: ${actor}`);
+    return { ...request, ...identity };
+}
 
 // Tier per-transaction caps (must match chaincode InitLedger).
 const PER_TX_BASIC = 250000;
@@ -68,8 +80,8 @@ function assertSuccessfulResponse(fn, response) {
  * that load spreads across many distinct keys instead of a single hot key-pair.
  * Provides realistic Indonesian-retail amount sampling and selection helpers.
  *
- * IDs are namespaced per worker (and per round unless a fixed `scenario` is given) to
- * avoid "already exists" collisions and cross-worker MVCC contention on the same key.
+ * Population IDs are namespaced per run and worker; transaction references remain
+ * round-specific so setup is reusable across Caliper rounds.
  */
 class RetailWorkloadBase extends WorkloadModuleBase {
     constructor() {
@@ -83,6 +95,8 @@ class RetailWorkloadBase extends WorkloadModuleBase {
 
     async initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext) {
         await super.initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext);
+        this.workerIndex = workerIndex;
+        this.roundIndex = roundIndex;
         this.totalWorkers = totalWorkers;
         const configuredSeed = Number(this.arg('seed', 20260725));
         this.randomState = (configuredSeed + (workerIndex + 1) * 1009 + (roundIndex + 1) * 9176) >>> 0;
@@ -98,12 +112,20 @@ class RetailWorkloadBase extends WorkloadModuleBase {
     // collisions while still keeping each round isolated.
     ns() {
         const scenario = this.arg('scenario', null);
+        const run = process.env.BENCHMARK_STAMP || '';
         const prefix = scenario ? `${scenario}_` : '';
-        return `${prefix}w${this.workerIndex}_r${this.roundIndex}`;
+        return `${run ? `${run}_` : ''}${prefix}w${this.workerIndex}_r${this.roundIndex}`;
     }
 
-    customerId(i) { return `c_${this.ns()}_${i}`; }
-    merchantId(i) { return `m_${this.ns()}_${i}`; }
+    populationNs() {
+        const scenario = this.arg('scenario', null);
+        const run = process.env.BENCHMARK_STAMP || '';
+        const prefix = scenario ? `${scenario}_` : '';
+        return `${run ? `${run}_` : ''}${prefix}w${this.workerIndex}`;
+    }
+
+    customerId(i) { return `c_${this.populationNs()}_${i}`; }
+    merchantId(i) { return `m_${this.populationNs()}_${i}`; }
     walletId(ownerId) { return `wlt_${ownerId}`; }
     isBasic(i) { return i % 5 === 0; } // ~20% BASIC, rest STANDARD
 
@@ -128,15 +150,24 @@ class RetailWorkloadBase extends WorkloadModuleBase {
         await Promise.all(workers);
     }
 
-    async submit(fn, args, readOnly = false) {
-        const response = await this.sutAdapter.sendRequests({
-            ...CONTRACT,
-            contractFunction: fn,
-            contractArguments: args.map(String),
-            readOnly,
-        });
-        assertSuccessfulResponse(fn, response);
-        return response;
+    async submit(fn, args, readOnly = false, actor = 'bi', retrySetupConflicts = false) {
+        if (fn === 'Transfer' && args.length === 3) args = [...args, `bench_${this.ns()}_${this.txIndex++}`];
+        const attempts = retrySetupConflicts ? 5 : 1;
+        for (let attempt = 0; attempt < attempts; attempt++) {
+            const response = await this.sutAdapter.sendRequests(actorRequest({
+                ...CONTRACT,
+                contractFunction: fn,
+                contractArguments: args.map(String),
+                readOnly,
+            }, actor));
+            try {
+                assertSuccessfulResponse(fn, response);
+                return response;
+            } catch (error) {
+                if (attempt + 1 === attempts) throw error;
+                await new Promise(resolve => setTimeout(resolve, 250 * (attempt + 1) + this.workerIndex * 113));
+            }
+        }
     }
 
     // Small-value-heavy distribution typical of retail payments, clamped to cap.
@@ -173,24 +204,28 @@ class RetailWorkloadBase extends WorkloadModuleBase {
      * Seed merchants and customers (tier mix + funding).
      * `fundedRatio` of customers are funded normally; the remainder are underfunded.
      */
-    async seedPopulation({ numCustomers, numMerchants, fundedRatio, fundStandard, fundBasic }) {
+    async seedPopulation({ numCustomers, numMerchants, fundedRatio, fundStandard, fundBasic, seed = this.roundIndex === 0 }) {
+        this.customers = [];
+        this.standardCustomers = [];
+        this.merchants = [];
         const seedConcurrency = this.arg('seedConcurrency', Math.max(1, Math.ceil(10 / this.totalWorkers)));
         const merchantTasks = [];
         for (let i = 0; i < numMerchants; i++) {
             const id = this.merchantId(i);
             const walletId = this.walletId(id);
             this.merchants.push({ id, walletId });
-            merchantTasks.push(async () => {
+            if (seed) merchantTasks.push(async () => {
                 const profileId = `kyc_${id}`;
                 const hashes = JSON.stringify([`sha256:${id}`]);
-                await this.submit('SubmitKycProfile', [profileId, 'merchant', id, hashes]);
-                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z']);
-                await this.submit('CreateWallet', [walletId, id, 'MERCHANT']);
+                await this.submit('SubmitKycProfile', [profileId, 'merchant', id, hashes], false, 'bi', true);
+                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z'], false, 'bi', true);
+                await this.submit('CreateWallet', [walletId, id, 'MERCHANT'], false, 'bi', true);
             });
         }
         await this.runPool(merchantTasks, seedConcurrency);
 
         const customerTasks = [];
+        const mintTasks = [];
         for (let i = 0; i < numCustomers; i++) {
             const id = this.customerId(i);
             const walletId = this.walletId(id);
@@ -203,20 +238,23 @@ class RetailWorkloadBase extends WorkloadModuleBase {
             this.customers.push(cust);
             if (!basic) this.standardCustomers.push(cust);
             // Per-customer steps are ordered; different customers run concurrently.
-            customerTasks.push(async () => {
+            if (seed) customerTasks.push(async () => {
                 const profileId = `kyc_${id}`;
                 const hashes = JSON.stringify([`sha256:${id}`]);
                 const diligence = basic ? 'simplified' : 'standard';
-                await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId]);
-                await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes]);
-                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', diligence, false, hashes, '2099-12-31T23:59:59Z']);
-                await this.submit('CreateWallet', [walletId, id, tier]);
-                if (fund > 0) {
-                    await this.submit('Mint', [walletId, fund]);
-                }
+                await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'bi', true);
+                await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'bi', true);
+                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', diligence, false, hashes, '2099-12-31T23:59:59Z'], false, 'bi', true);
+                await this.submit('CreateWallet', [walletId, id, tier], false, 'bi', true);
+            });
+            if (seed && fund > 0) mintTasks.push(async () => {
+                await this.submit('Mint', [walletId, fund], false, 'bi', true);
             });
         }
         await this.runPool(customerTasks, seedConcurrency);
+        // Mint enforces global supply by scanning the wallet range; concurrent setup Mints
+        // create Fabric phantom-read conflicts (validation code 12). Keep only funding serial.
+        await this.runPool(mintTasks, 1);
 
     }
 }
@@ -224,6 +262,8 @@ class RetailWorkloadBase extends WorkloadModuleBase {
 module.exports = {
     RetailWorkloadBase,
     CONTRACT,
+    ACTORS,
+    actorRequest,
     PER_TX_BASIC,
     PER_TX_STANDARD,
     assertSuccessfulResponse,

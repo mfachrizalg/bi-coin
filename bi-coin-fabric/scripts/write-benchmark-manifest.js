@@ -24,13 +24,11 @@ function hashFile(file) {
 
 function evidenceInputs() {
     const roots = ['benchmark/benchconfigs', 'benchmark/workloads'];
-    return roots.flatMap(root => fs.readdirSync(root)
+    const files = roots.flatMap(root => fs.readdirSync(root)
         .filter(file => /\.(ya?ml|js)$/.test(file))
-        .sort()
-        .map(file => {
-            const relativePath = path.join(root, file);
-            return { path: relativePath, sha256: hashFile(relativePath) };
-        }));
+        .map(file => path.join(root, file)));
+    files.push('benchmark/networkconfig.yaml', 'package.json', 'chaincode/digital_rupiah.go');
+    return files.sort().map(relativePath => ({ path: relativePath, sha256: hashFile(relativePath) }));
 }
 
 function parseStatus() {
@@ -42,8 +40,11 @@ function parseStatus() {
 }
 
 const porcelain = command('git', ['status', '--porcelain']) || '';
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const cleanLedger = process.env.BENCHMARK_CLEAN_LEDGER === 'true';
+if (!cleanLedger) throw new Error('manifest requires BENCHMARK_CLEAN_LEDGER=true');
 const manifest = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     startedAt: process.env.BENCHMARK_STARTED_AT || null,
     completedAt: new Date().toISOString(),
     seed: Number(process.env.BENCHMARK_SEED || 20260725),
@@ -56,6 +57,16 @@ const manifest = {
         node: command('node', ['--version']),
         npm: command('npm', ['--version']),
         docker: command('docker', ['--version']),
+        caliper: packageJson.devDependencies?.['@hyperledger/caliper-cli'] || null,
+    },
+    preconditions: {
+        cleanLedger,
+        networkMode: process.env.NETWORK_MODE || 'garuda',
+        chaincode: {
+            name: process.env.CHAINCODE_NAME || 'digital-rupiah',
+            version: process.env.CHAINCODE_VERSION || '3.0',
+            sequence: Number(process.env.CHAINCODE_SEQUENCE || 1),
+        },
     },
     profiles: parseStatus(),
     evidenceInputs: evidenceInputs(),

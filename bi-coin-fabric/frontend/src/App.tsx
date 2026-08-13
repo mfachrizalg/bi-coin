@@ -10,7 +10,7 @@ import DemoPanel, { type DemoPrefill } from './pages/DemoPanel'
 import Overview from './pages/Overview'
 import Observability from './pages/Observability'
 import QrisPayments from './pages/QrisPayments'
-import { getMe, hasAccessToken, login, setAccessToken } from './lib/api'
+import { getMe, hasAccessToken, login, onUnauthorized, setAccessToken } from './lib/api'
 
 type Tab = 'overview' | 'participants' | 'wallets' | 'create' | 'transfer' | 'qris' | 'limits' | 'audit' | 'observability'
 type Role = 'public' | 'authenticated' | 'kyc_verified' | 'bank_pjp' | 'bank_indonesia' | 'merchant' | 'supervisor'
@@ -55,7 +55,7 @@ const ROLES: Record<Role, RoleConfig> = {
   supervisor: {
     label: 'Supervisor',
     tagLine: 'Read-only oversight untuk transaksi, limits, dan topologi',
-    tabs: ['overview', 'participants', 'limits', 'audit', 'observability'],
+    tabs: ['overview', 'participants', 'wallets', 'limits', 'audit', 'observability'],
   },
 }
 
@@ -71,14 +71,6 @@ const TAB_META: Record<Tab, { label: string; description: string }> = {
   observability: { label: 'Observability', description: 'Topologi, metrics, limit, transaksi QRIS' },
 }
 
-const DEMO_ACCOUNTS = [
-  { username: 'bi', password: 'bi-password', label: 'Bank Indonesia' },
-  { username: 'pjp', password: 'pjp-password', label: 'Bank / PJP' },
-  { username: 'customer', password: 'customer-password', label: 'Pelanggan KYC' },
-  { username: 'merchant', password: 'merchant-password', label: 'Merchant' },
-  { username: 'supervisor', password: 'supervisor-password', label: 'Supervisor' },
-]
-
 export default function App() {
   const [role, setRole] = useState<Role>('public')
   const [username, setUsername] = useState('')
@@ -90,6 +82,10 @@ export default function App() {
   const [demoMode, setDemoMode] = useState(false)
   const [demoStep, setDemoStep] = useState(1)
   const [demoPrefill, setDemoPrefill] = useState<DemoPrefill | null>(null)
+
+  useEffect(() => {
+    return onUnauthorized(handleLogout)
+  }, [])
 
   useEffect(() => {
     if (!hasAccessToken()) return
@@ -188,17 +184,7 @@ export default function App() {
                 <button type="submit" className="primary-button">Masuk</button>
               </form>
 
-              <div className="demo-credentials">
-                {DEMO_ACCOUNTS.map(account => (
-                  <div key={account.username} className="credential-card">
-                    <div>
-                      <div>{account.label}</div>
-                      <strong>{account.username}</strong>
-                    </div>
-                    <code>{account.password}</code>
-                  </div>
-                ))}
-              </div>
+              <p className="muted">Akun demo tidak dibundel di frontend. Gunakan kredensial yang diberikan oleh operator environment.</p>
             </div>
           </div>
         </section>
@@ -279,6 +265,7 @@ export default function App() {
                 {tab === 'wallets' && (
                   <WalletList
                     onSelect={setSelectedWallet}
+                    role={role}
                     showParticipantBadges={role === 'bank_pjp' || role === 'bank_indonesia'}
                   />
                 )}

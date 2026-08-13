@@ -24,14 +24,21 @@ import (
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type LedgerService struct {
+	// contract is populated only on a request-scoped copy returned by
+	// ForPrincipal. The shared service never has a default signer.
 	contract   FabricContract
+	contracts  map[string]FabricContract
+	gateways   map[string]config.FabricGateway
+	principal  Principal
 	cfg        *config.Config
 	kycStore   KycStore
+	operations OperationJournalStore
 	hashSecret string
+	closeFn    func() error
+	testOnly   bool
 }
 
 type FabricContract interface {
@@ -40,19 +47,20 @@ type FabricContract interface {
 }
 
 type KycStore interface {
-	CreateRetailCustomer(ctx context.Context, req models.RetailCustomerRequest, identityHash string) (*models.RetailCustomer, error)
-	ListRetailCustomers(ctx context.Context) ([]*models.RetailCustomer, error)
-	SubmitKycProfile(ctx context.Context, req models.KycProfileRequest, anchor models.KycProfile) (*models.KycProfile, error)
+	CreateRetailCustomer(ctx context.Context, req models.RetailCustomerRequest, identityHash string, custodianMSPID string) (*models.RetailCustomer, error)
+	ListRetailCustomers(ctx context.Context, custodianMSPID string) ([]*models.RetailCustomer, error)
+	SubmitKycProfile(ctx context.Context, req models.KycProfileRequest, anchor models.KycProfile, custodianMSPID string) (*models.KycProfile, error)
 	RefreshKycProfile(ctx context.Context, profileID string, req models.KycProviderResultRequest, anchor models.KycProfile) (*models.KycProfile, error)
+	MarkKycAnchored(ctx context.Context, profileID string) error
 	GetKycProfile(ctx context.Context, profileID string) (*models.KycProfile, error)
 	ListKycProviderChecks(ctx context.Context, profileID string) ([]*models.KycProviderCheck, error)
 	ListKycAuditEvents(ctx context.Context, profileID string) ([]*models.KycAuditEvent, error)
 	CreateQrisIntent(ctx context.Context, intent models.QrisIntent) (*models.QrisIntent, error)
 	GetQrisIntent(ctx context.Context, intentID string) (*models.QrisIntent, error)
 	ListQrisIntents(ctx context.Context, merchantID string) ([]*models.QrisIntent, error)
-	MarkQrisIntentPaid(ctx context.Context, intentID string, txID string, payerWalletID string) error
-	MarkQrisIntentExpired(ctx context.Context, intentID string) error
-	CancelQrisIntent(ctx context.Context, intentID string) error
+	MarkQrisIntentPaid(ctx context.Context, intentID string, txID string, payerWalletID string) (bool, error)
+	MarkQrisIntentExpired(ctx context.Context, intentID string) (bool, error)
+	CancelQrisIntent(ctx context.Context, intentID string) (bool, error)
 }
 
 type qrisPayloadClaims struct {
@@ -76,52 +84,217 @@ type ledgerTransactionRecord struct {
 	Timestamp       string `json:"timestamp"`
 }
 
+type rtgsReceipt struct {
+	Status        string `json:"status"`
+	Reference     string `json:"reference"`
+	Amount        int64  `json:"amount"`
+	ParticipantID string `json:"participant_id"`
+	SenderBIC     string `json:"sender_bic"`
+	TxID          string `json:"tx_id"`
+}
+
 func NewLedgerService(cfg *config.Config) (*LedgerService, error) {
-	clientConn, err := grpc.NewClient(cfg.PeerEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	gateways, err := cfg.ParseFabricGateways()
 	if err != nil {
-		return nil, fmt.Errorf("grpc dial: %w", err)
+		return nil, err
 	}
-
-	var conn grpc.ClientConnInterface = clientConn
-	if cfg.TLSCertPath != "" {
-		clientConn.Close()
-		creds, err := credentials.NewClientTLSFromFile(cfg.TLSCertPath, "")
+	service := &LedgerService{
+		contracts:  make(map[string]FabricContract, len(gateways)),
+		gateways:   gateways,
+		cfg:        cfg,
+		hashSecret: cfg.KycHashSecret,
+	}
+	closers := make([]func() error, 0, len(gateways))
+	for mspID, gateway := range gateways {
+		contract, closeFn, err := connectFabricContract(gateway, cfg)
 		if err != nil {
-			return nil, fmt.Errorf("tls creds: %w", err)
+			for _, closeGateway := range closers {
+				_ = closeGateway()
+			}
+			return nil, fmt.Errorf("gateway %s: %w", mspID, err)
 		}
-		clientConn, err = grpc.NewClient(cfg.PeerEndpoint, grpc.WithTransportCredentials(creds))
-		if err != nil {
-			return nil, fmt.Errorf("grpc tls dial: %w", err)
+		service.contracts[mspID] = contract
+		closers = append(closers, closeFn)
+	}
+	service.closeFn = func() error {
+		var first error
+		for _, closeGateway := range closers {
+			if err := closeGateway(); err != nil && first == nil {
+				first = err
+			}
 		}
-		conn = clientConn
+		return first
 	}
-
-	id, err := loadIdentity(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("identity: %w", err)
-	}
-	sign, err := loadSigner(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("signer: %w", err)
-	}
-
-	gw, err := client.Connect(id, client.WithSign(sign), client.WithClientConnection(conn))
-	if err != nil {
-		return nil, fmt.Errorf("gateway connect: %w", err)
-	}
-
-	network := gw.GetNetwork(cfg.ChannelName)
-	contract := network.GetContract(cfg.ChaincodeName)
-
-	return &LedgerService{contract: contract, cfg: cfg, hashSecret: cfg.KycHashSecret}, nil
+	return service, nil
 }
 
 func NewLedgerServiceForTest(contract FabricContract, store KycStore, hashSecret string) *LedgerService {
-	return &LedgerService{contract: contract, kycStore: store, hashSecret: hashSecret}
+	return NewLedgerServiceForTestContracts(map[string]FabricContract{"TEST-MSP": contract}, store, hashSecret)
+}
+
+// NewLedgerServiceForTestContracts exposes the same request-principal routing
+// used in production without requiring live Fabric gateways.
+func NewLedgerServiceForTestContracts(contracts map[string]FabricContract, store KycStore, hashSecret string) *LedgerService {
+	gateways := make(map[string]config.FabricGateway, len(contracts))
+	for mspID := range contracts {
+		gateways[mspID] = config.FabricGateway{MSPID: mspID}
+	}
+	defaultContract := contracts["TEST-MSP"]
+	if defaultContract == nil {
+		for _, contract := range contracts {
+			defaultContract = contract
+			break
+		}
+	}
+	return &LedgerService{
+		contract:   defaultContract,
+		contracts:  contracts,
+		gateways:   gateways,
+		principal:  Principal{Username: "test", CustodianMSPID: "TEST-MSP"},
+		kycStore:   store,
+		operations: newMemoryOperationJournal(),
+		hashSecret: hashSecret,
+		testOnly:   true,
+	}
 }
 
 func (s *LedgerService) SetKycStore(store KycStore) {
 	s.kycStore = store
+	if operations, ok := store.(OperationJournalStore); ok {
+		s.operations = operations
+	}
+}
+
+func (s *LedgerService) beginOperation(ctx context.Context, operation string, key string, request interface{}) (*OperationJournal, bool, error) {
+	if strings.TrimSpace(key) == "" {
+		return nil, false, InvalidInput("Idempotency-Key is required")
+	}
+	if s.operations == nil {
+		return nil, false, Internal("operation journal not configured", nil)
+	}
+	payload, err := json.Marshal(request)
+	if err != nil {
+		return nil, false, Internal("failed to hash operation request", err)
+	}
+	hash := sha256.Sum256(payload)
+	principalID := s.principal.ID()
+	if principalID == "" && s.testOnly {
+		principalID = "test"
+	}
+	if principalID == "" || s.principal.CustodianMSPID == "" {
+		return nil, false, Forbidden("request principal is required")
+	}
+	candidate := OperationJournal{
+		PrincipalScope: s.principal.Scope(),
+		PrincipalID:    principalID,
+		IdempotencyKey: key,
+		Operation:      operation,
+		RequestHash:    hex.EncodeToString(hash[:]),
+		OperationRef:   operationReference(s.principal.Scope(), principalID, key),
+		Status:         OperationPending,
+	}
+	existing, created, err := s.operations.BeginOperation(ctx, candidate)
+	if err != nil {
+		return nil, false, Internal("failed to create operation journal", err)
+	}
+	if !created && (existing.Operation != candidate.Operation || existing.RequestHash != candidate.RequestHash) {
+		return nil, false, Conflict("idempotency key was already used for a different request")
+	}
+	return &existing, !created && existing.Status == OperationCompleted && len(existing.Response) > 0, nil
+}
+
+func (s *LedgerService) recordSubmittedOperation(ctx context.Context, operation *OperationJournal, txID string, response interface{}) error {
+	encoded, err := json.Marshal(response)
+	if err != nil {
+		return Internal("failed to serialize operation receipt", err)
+	}
+	operation.Status = OperationSubmitted
+	operation.TxID = txID
+	operation.Response = encoded
+	if err := s.operations.UpdateOperation(ctx, *operation); err != nil {
+		return Internal("failed to persist operation receipt", err)
+	}
+	return nil
+}
+
+func (s *LedgerService) completeOperation(ctx context.Context, operation *OperationJournal) error {
+	operation.Status = OperationCompleted
+	if err := s.operations.UpdateOperation(ctx, *operation); err != nil {
+		return Internal("failed to complete operation journal", err)
+	}
+	return nil
+}
+
+func connectFabricContract(gateway config.FabricGateway, cfg *config.Config) (FabricContract, func() error, error) {
+	creds, err := credentials.NewClientTLSFromFile(gateway.TLSCertPath, "")
+	if err != nil {
+		return nil, nil, fmt.Errorf("tls creds: %w", err)
+	}
+	clientConn, err := grpc.NewClient(gateway.PeerEndpoint, grpc.WithTransportCredentials(creds))
+	if err != nil {
+		return nil, nil, fmt.Errorf("grpc tls dial: %w", err)
+	}
+	id, err := loadIdentity(gateway)
+	if err != nil {
+		_ = clientConn.Close()
+		return nil, nil, fmt.Errorf("identity: %w", err)
+	}
+	sign, err := loadSigner(gateway)
+	if err != nil {
+		_ = clientConn.Close()
+		return nil, nil, fmt.Errorf("signer: %w", err)
+	}
+	gw, err := client.Connect(id, client.WithSign(sign), client.WithClientConnection(clientConn))
+	if err != nil {
+		_ = clientConn.Close()
+		return nil, nil, fmt.Errorf("gateway connect: %w", err)
+	}
+	return gw.GetNetwork(cfg.ChannelName).GetContract(cfg.ChaincodeName), func() error {
+		gw.Close()
+		return clientConn.Close()
+	}, nil
+}
+
+// ForPrincipal resolves exactly one configured Fabric gateway for a request.
+// It returns a shallow, request-local service copy, preventing a request from
+// inheriting another request's signer.
+func (s *LedgerService) ForPrincipal(principal Principal) (*LedgerService, error) {
+	if strings.TrimSpace(principal.CustodianMSPID) == "" {
+		if !s.testOnly {
+			return nil, Forbidden("custodian_msp_id is required")
+		}
+		principal.CustodianMSPID = "TEST-MSP"
+	}
+	contract, ok := s.contracts[principal.CustodianMSPID]
+	if !ok || contract == nil {
+		return nil, Forbidden("custodian_msp_id is not configured")
+	}
+	gateway := s.gateways[principal.CustodianMSPID]
+	if gateway.MSPID != "" && gateway.MSPID != principal.CustodianMSPID {
+		return nil, Forbidden("custodian_msp_id does not match selected gateway")
+	}
+	if gateway.CustodianMSPID != "" && gateway.CustodianMSPID != principal.CustodianMSPID {
+		return nil, Forbidden("custodian_msp_id does not match gateway custody")
+	}
+	if gateway.ParticipantID != "" && principal.ParticipantID != "" && gateway.ParticipantID != principal.ParticipantID {
+		return nil, Forbidden("participant_id does not match gateway custody")
+	}
+	if len(gateway.AllowedRoles) > 0 {
+		allowed := false
+		for _, role := range gateway.AllowedRoles {
+			if role == string(principal.Role) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return nil, Forbidden("role is not allowed for custodian_msp_id")
+		}
+	}
+	copy := *s
+	copy.contract = contract
+	copy.principal = principal
+	return &copy, nil
 }
 
 func (s *LedgerService) CreateQrisIntent(req models.CreateQrisIntentRequest) (*models.QrisIntent, error) {
@@ -155,6 +328,13 @@ func (s *LedgerService) CreateQrisIntent(req models.CreateQrisIntentRequest) (*m
 		intent.Status = models.QrisStatusPending
 		expiresAt := now.Add(15 * time.Minute).Format(time.RFC3339)
 		if req.ExpiresAt != nil && *req.ExpiresAt != "" {
+			parsed, err := time.Parse(time.RFC3339, *req.ExpiresAt)
+			if err != nil {
+				return nil, InvalidInput("expires_at must be RFC3339")
+			}
+			if !parsed.After(now) {
+				return nil, InvalidInput("expires_at must be in the future")
+			}
 			expiresAt = *req.ExpiresAt
 		}
 		intent.ExpiresAt = &expiresAt
@@ -165,6 +345,21 @@ func (s *LedgerService) CreateQrisIntent(req models.CreateQrisIntentRequest) (*m
 	}
 	intent.Payload = payload
 	return s.kycStore.CreateQrisIntent(context.Background(), intent)
+}
+
+func (s *LedgerService) kycCustodianScope() string {
+	if s.principal.IsOversight() {
+		return ""
+	}
+	return strings.TrimSpace(s.principal.CustodianMSPID)
+}
+
+func (s *LedgerService) requireKycCustodianScope(custodianMSPID string) error {
+	scope := s.kycCustodianScope()
+	if scope == "" || custodianMSPID == "" || custodianMSPID == scope {
+		return nil
+	}
+	return Forbidden("resource is outside custodian scope")
 }
 
 func (s *LedgerService) ResolveQrisPayload(payload string) (*models.QrisIntent, error) {
@@ -192,8 +387,18 @@ func (s *LedgerService) ResolveQrisPayload(payload string) (*models.QrisIntent, 
 	if intent.Mode == models.QrisModeDynamic && intent.ExpiresAt != nil && *intent.ExpiresAt != "" && intent.Status == models.QrisStatusPending {
 		expiresAt, err := time.Parse(time.RFC3339, *intent.ExpiresAt)
 		if err == nil && time.Now().UTC().After(expiresAt) {
-			_ = s.kycStore.MarkQrisIntentExpired(context.Background(), intent.IntentID)
-			intent.Status = models.QrisStatusExpired
+			changed, err := s.kycStore.MarkQrisIntentExpired(context.Background(), intent.IntentID)
+			if err != nil {
+				return nil, Internal("failed to persist QRIS expiry", err)
+			}
+			if changed {
+				intent.Status = models.QrisStatusExpired
+			} else {
+				intent, err = s.kycStore.GetQrisIntent(context.Background(), intent.IntentID)
+				if err != nil {
+					return nil, Internal("failed to reload QRIS intent", err)
+				}
+			}
 		}
 	}
 	return intent, nil
@@ -217,25 +422,32 @@ func (s *LedgerService) CancelQrisIntent(intentID string) error {
 	if s.kycStore == nil {
 		return fmt.Errorf("off-chain QRIS store not configured")
 	}
-	return s.kycStore.CancelQrisIntent(context.Background(), intentID)
+	changed, err := s.kycStore.CancelQrisIntent(context.Background(), intentID)
+	if err != nil {
+		return Internal("failed to cancel QRIS intent", err)
+	}
+	if !changed {
+		return Conflict("QRIS intent is not cancellable")
+	}
+	return nil
 }
 
 func (s *LedgerService) PayQris(req models.PayQrisRequest) (*models.QrisPayResult, error) {
 	if s.kycStore == nil {
-		return nil, fmt.Errorf("off-chain QRIS store not configured")
+		return nil, Internal("off-chain QRIS store not configured", nil)
 	}
 	if req.PayerWalletID == "" {
-		return nil, fmt.Errorf("payer_wallet_id is required")
+		return nil, InvalidInput("payer_wallet_id is required")
 	}
 	intent, err := s.ResolveQrisPayload(req.Payload)
 	if err != nil {
 		return nil, err
 	}
 	if intent.Status == models.QrisStatusCancelled || intent.Status == models.QrisStatusExpired {
-		return nil, fmt.Errorf("qris intent %s is %s", intent.IntentID, intent.Status)
+		return nil, Conflict(fmt.Sprintf("qris intent %s is %s", intent.IntentID, intent.Status))
 	}
 	if intent.Mode == models.QrisModeDynamic && intent.Status == models.QrisStatusPaid {
-		return nil, fmt.Errorf("qris intent %s is already paid", intent.IntentID)
+		return nil, Conflict(fmt.Sprintf("qris intent %s is already paid", intent.IntentID))
 	}
 	amount := intent.Amount
 	if intent.Mode == models.QrisModeStatic {
@@ -244,30 +456,96 @@ func (s *LedgerService) PayQris(req models.PayQrisRequest) (*models.QrisPayResul
 			return nil, err
 		}
 	}
+	operation, replay, err := s.beginOperation(context.Background(), "qris_pay", req.IdempotencyKey, struct {
+		IntentID        string
+		PayerWalletID   string
+		Amount          int64
+		IntentReference string
+	}{intent.IntentID, req.PayerWalletID, amount, intent.ReferenceID})
+	if err != nil {
+		return nil, err
+	}
+	if replay {
+		var result models.QrisPayResult
+		if err := json.Unmarshal(operation.Response, &result); err != nil {
+			return nil, Internal("invalid persisted QRIS receipt", err)
+		}
+		return &result, nil
+	}
+	if operation.Status == OperationSubmitted && len(operation.Response) > 0 {
+		var result models.QrisPayResult
+		if err := json.Unmarshal(operation.Response, &result); err != nil {
+			return nil, Internal("invalid persisted QRIS receipt", err)
+		}
+		if intent.Mode == models.QrisModeDynamic {
+			if err := s.persistQrisPayment(intent, &result, req.PayerWalletID); err != nil {
+				return nil, err
+			}
+		}
+		if err := s.completeOperation(context.Background(), operation); err != nil {
+			return nil, err
+		}
+		return &result, nil
+	}
 	result, err := s.contract.SubmitTransaction("PayQris",
 		req.PayerWalletID, intent.MerchantWalletID, fmt.Sprintf("%d", amount), intent.ReferenceID)
 	if err != nil {
-		return nil, fmt.Errorf("chaincode PayQris: %w", err)
+		return nil, Internal("failed to submit QRIS payment", err)
 	}
 	var tr models.TransferResult
-	if err := s.unwrap(result, &tr); err != nil {
-		tr = models.TransferResult{Status: "paid"}
+	if err := s.unwrapRequired(result, &tr); err != nil {
+		return nil, err
 	}
-	if intent.Mode == models.QrisModeDynamic {
-		if err := s.kycStore.MarkQrisIntentPaid(context.Background(), intent.IntentID, tr.TxID, req.PayerWalletID); err != nil {
-			return nil, err
-		}
+	if tr.Status == "" || tr.TxID == "" {
+		return nil, Internal("invalid QRIS payment receipt", nil)
 	}
-	return &models.QrisPayResult{
+	payResult := &models.QrisPayResult{
 		Status:      tr.Status,
 		TxID:        tr.TxID,
 		IntentID:    intent.IntentID,
 		ReferenceID: intent.ReferenceID,
-	}, nil
+	}
+	if err := s.recordSubmittedOperation(context.Background(), operation, tr.TxID, payResult); err != nil {
+		return nil, err
+	}
+	if intent.Mode == models.QrisModeDynamic {
+		if err := s.persistQrisPayment(intent, payResult, req.PayerWalletID); err != nil {
+			return nil, err
+		}
+	}
+	if err := s.completeOperation(context.Background(), operation); err != nil {
+		return nil, err
+	}
+	return payResult, nil
 }
 
-func loadIdentity(cfg *config.Config) (*identity.X509Identity, error) {
-	certPEM, err := os.ReadFile(cfg.CertPath)
+func (s *LedgerService) persistQrisPayment(intent *models.QrisIntent, result *models.QrisPayResult, payerWalletID string) error {
+	changed, err := s.kycStore.MarkQrisIntentPaid(context.Background(), intent.IntentID, result.TxID, payerWalletID)
+	if err != nil {
+		return Internal("failed to persist QRIS payment", err)
+	}
+	if changed {
+		return nil
+	}
+	current, err := s.kycStore.GetQrisIntent(context.Background(), intent.IntentID)
+	if err != nil {
+		return Internal("failed to reload QRIS payment", err)
+	}
+	if current.Status == models.QrisStatusPaid && current.TxID == result.TxID {
+		return nil
+	}
+	return Conflict("QRIS intent state changed before payment could be persisted")
+}
+
+func (s *LedgerService) Close() error {
+	if s == nil || s.closeFn == nil {
+		return nil
+	}
+	return s.closeFn()
+}
+
+func loadIdentity(gateway config.FabricGateway) (*identity.X509Identity, error) {
+	certPEM, err := os.ReadFile(gateway.CertPath)
 	if err != nil {
 		return nil, fmt.Errorf("read cert: %w", err)
 	}
@@ -279,11 +557,11 @@ func loadIdentity(cfg *config.Config) (*identity.X509Identity, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse cert: %w", err)
 	}
-	return identity.NewX509Identity(cfg.MSPID, cert)
+	return identity.NewX509Identity(gateway.MSPID, cert)
 }
 
-func loadSigner(cfg *config.Config) (identity.Sign, error) {
-	keyPEM, err := os.ReadFile(cfg.KeyPath)
+func loadSigner(gateway config.FabricGateway) (identity.Sign, error) {
+	keyPEM, err := os.ReadFile(gateway.KeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("read key: %w", err)
 	}
@@ -305,7 +583,7 @@ func parseInt64(s string) (int64, error) {
 func (s *LedgerService) hashKycValue(value string) string {
 	secret := s.hashSecret
 	if secret == "" {
-		secret = "dev-kyc-hash-secret-change-me"
+		return ""
 	}
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte(value))
@@ -318,6 +596,16 @@ func (s *LedgerService) unwrap(result []byte, target interface{}) error {
 	}
 	if err := json.Unmarshal(result, target); err != nil {
 		return fmt.Errorf("unmarshal: %w", err)
+	}
+	return nil
+}
+
+func (s *LedgerService) unwrapRequired(result []byte, target interface{}) error {
+	if len(result) == 0 || string(result) == "null" {
+		return Internal("empty ledger receipt", nil)
+	}
+	if err := json.Unmarshal(result, target); err != nil {
+		return Internal("invalid ledger receipt", err)
 	}
 	return nil
 }
@@ -410,16 +698,14 @@ func (s *LedgerService) ListParticipants() ([]*models.Participant, error) {
 // ─── Wallets ─────────────────────────────────────────────────────────────────
 
 func (s *LedgerService) CreateWallet(req models.CreateWalletRequest) (*models.Wallet, error) {
-	walletID := fmt.Sprintf("wlt_%s", req.ParticipantID)
-	result, err := s.contract.SubmitTransaction("CreateWallet", walletID, req.ParticipantID, req.Tier)
-	if err != nil {
-		return nil, fmt.Errorf("chaincode CreateWallet: %w", err)
+	if strings.TrimSpace(req.OwnerID) == "" {
+		return nil, InvalidInput("owner_id is required")
 	}
-	var w models.Wallet
-	if err := s.unwrap(result, &w); err != nil {
-		return nil, err
+	walletID := fmt.Sprintf("wlt_%s", req.OwnerID)
+	if _, err := s.contract.SubmitTransaction("CreateWallet", walletID, req.OwnerID, ""); err != nil {
+		return nil, Internal("failed to create wallet", err)
 	}
-	return &w, nil
+	return s.GetWallet(walletID)
 }
 
 func (s *LedgerService) GetWallet(walletID string) (*models.Wallet, error) {
@@ -446,6 +732,21 @@ func (s *LedgerService) ListWallets(participantID string) ([]*models.Wallet, err
 	return wallets, nil
 }
 
+func (s *LedgerService) ListWalletsByOwner(ownerID string) ([]*models.Wallet, error) {
+	if strings.TrimSpace(ownerID) == "" {
+		return nil, InvalidInput("owner_id is required")
+	}
+	result, err := s.contract.EvaluateTransaction("ListWalletsByOwner", ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("chaincode ListWalletsByOwner: %w", err)
+	}
+	var wallets []*models.Wallet
+	if err := s.unwrap(result, &wallets); err != nil {
+		return nil, err
+	}
+	return wallets, nil
+}
+
 // ─── Retail Customers ────────────────────────────────────────────────────────
 
 func (s *LedgerService) CreateRetailCustomer(req models.RetailCustomerRequest) (*models.RetailCustomer, error) {
@@ -454,16 +755,16 @@ func (s *LedgerService) CreateRetailCustomer(req models.RetailCustomerRequest) (
 	}
 	identityHash := s.hashKycValue(req.CustomerID + ":" + req.LegalName)
 	if s.kycStore != nil {
-		if _, err := s.kycStore.CreateRetailCustomer(context.Background(), req, identityHash); err != nil {
-			return nil, fmt.Errorf("off-chain CreateRetailCustomer: %w", err)
+		if _, err := s.kycStore.CreateRetailCustomer(context.Background(), req, identityHash, s.kycCustodianScope()); err != nil {
+			return nil, Internal("failed to persist retail customer", err)
 		}
 	}
 	result, err := s.contract.SubmitTransaction("CreateRetailCustomer", req.CustomerID, identityHash, req.WalletAccountID, req.KycProfileID)
 	if err != nil {
-		return nil, fmt.Errorf("chaincode CreateRetailCustomer: %w", err)
+		return nil, Internal("failed to anchor retail customer", err)
 	}
 	var c models.RetailCustomer
-	if err := s.unwrap(result, &c); err != nil {
+	if err := s.unwrapRequired(result, &c); err != nil {
 		return nil, err
 	}
 	return &c, nil
@@ -471,7 +772,7 @@ func (s *LedgerService) CreateRetailCustomer(req models.RetailCustomerRequest) (
 
 func (s *LedgerService) ListRetailCustomers() ([]*models.RetailCustomer, error) {
 	if s.kycStore != nil {
-		return s.kycStore.ListRetailCustomers(context.Background())
+		return s.kycStore.ListRetailCustomers(context.Background(), s.kycCustodianScope())
 	}
 	result, err := s.contract.EvaluateTransaction("ListRetailCustomers")
 	if err != nil {
@@ -488,7 +789,7 @@ func (s *LedgerService) ListRetailCustomers() ([]*models.RetailCustomer, error) 
 
 func (s *LedgerService) SubmitKycProfile(req models.KycProfileRequest) (*models.KycProfile, error) {
 	if req.SubjectID == "" {
-		return nil, fmt.Errorf("subject_id is required")
+		return nil, InvalidInput("subject_id is required")
 	}
 	profileID := fmt.Sprintf("kyc_%s", uuid.New().String())
 	hashes := req.DocumentHashes
@@ -499,20 +800,28 @@ func (s *LedgerService) SubmitKycProfile(req models.KycProfileRequest) (*models.
 		ProfileID:         profileID,
 		SubjectType:       req.SubjectType,
 		SubjectID:         req.SubjectID,
+		CustodianMSPID:    s.kycCustodianScope(),
 		DocumentHashes:    hashes,
 		Status:            models.KycPending,
 		RiskLevel:         models.RiskLow,
 		DueDiligenceLevel: models.DueDiligenceSimplified,
 	}
 	hashesJSON, _ := json.Marshal(hashes)
+	var profile *models.KycProfile
+	if s.kycStore != nil {
+		var err error
+		profile, err = s.kycStore.SubmitKycProfile(context.Background(), req, anchor, s.kycCustodianScope())
+		if err != nil {
+			return nil, Internal("failed to persist KYC profile", err)
+		}
+	}
 	if _, err := s.contract.SubmitTransaction("SubmitKycProfile",
 		profileID, string(req.SubjectType), req.SubjectID, string(hashesJSON)); err != nil {
-		return nil, fmt.Errorf("chaincode SubmitKycProfile: %w", err)
+		return nil, Internal("failed to anchor KYC profile; pending off-chain record is retryable", err)
 	}
 	if s.kycStore != nil {
-		profile, err := s.kycStore.SubmitKycProfile(context.Background(), req, anchor)
-		if err != nil {
-			return nil, fmt.Errorf("off-chain SubmitKycProfile: %w", err)
+		if err := s.kycStore.MarkKycAnchored(context.Background(), profileID); err != nil {
+			return nil, Internal("failed to finalize KYC anchor; retry the request", err)
 		}
 		return profile, nil
 	}
@@ -521,21 +830,32 @@ func (s *LedgerService) SubmitKycProfile(req models.KycProfileRequest) (*models.
 
 func (s *LedgerService) RefreshKycProfile(profileID string, req models.KycProviderResultRequest) (*models.KycProfile, error) {
 	if err := validateKycDecision(req); err != nil {
-		return nil, err
+		return nil, InvalidInput(err.Error())
 	}
 	expires := ""
 	if req.ExpiresAt != nil {
 		expires = *req.ExpiresAt
 	}
 	hashes := req.DocumentHashes
-	if len(hashes) == 0 && s.kycStore != nil {
+	custodianMSPID := ""
+	if s.kycStore != nil {
 		current, err := s.kycStore.GetKycProfile(context.Background(), profileID)
-		if err == nil && current != nil {
+		if err != nil {
+			return nil, Internal("failed to load KYC profile", err)
+		}
+		if current != nil {
+			custodianMSPID = current.CustodianMSPID
+		}
+		if err := s.requireKycCustodianScope(custodianMSPID); err != nil {
+			return nil, err
+		}
+		if current != nil && len(hashes) == 0 {
 			hashes = current.DocumentHashes
 		}
 	}
 	anchor := models.KycProfile{
 		ProfileID:         profileID,
+		CustodianMSPID:    custodianMSPID,
 		DocumentHashes:    hashes,
 		Status:            req.Status,
 		RiskLevel:         req.RiskLevel,
@@ -544,14 +864,21 @@ func (s *LedgerService) RefreshKycProfile(profileID string, req models.KycProvid
 		ExpiresAt:         req.ExpiresAt,
 	}
 	hashesJSON, _ := json.Marshal(hashes)
+	var profile *models.KycProfile
+	if s.kycStore != nil {
+		var err error
+		profile, err = s.kycStore.RefreshKycProfile(context.Background(), profileID, req, anchor)
+		if err != nil {
+			return nil, Internal("failed to persist KYC decision", err)
+		}
+	}
 	if _, err := s.contract.SubmitTransaction("RefreshKycProfile",
 		profileID, string(req.Status), string(req.RiskLevel), string(req.DueDiligenceLevel), strconv.FormatBool(req.SeniorApproval), string(hashesJSON), expires); err != nil {
-		return nil, fmt.Errorf("chaincode RefreshKycProfile: %w", err)
+		return nil, Internal("failed to anchor KYC decision; pending off-chain record is retryable", err)
 	}
 	if s.kycStore != nil {
-		profile, err := s.kycStore.RefreshKycProfile(context.Background(), profileID, req, anchor)
-		if err != nil {
-			return nil, fmt.Errorf("off-chain RefreshKycProfile: %w", err)
+		if err := s.kycStore.MarkKycAnchored(context.Background(), profileID); err != nil {
+			return nil, Internal("failed to finalize KYC anchor; retry the request", err)
 		}
 		return profile, nil
 	}
@@ -581,7 +908,14 @@ func validateKycDecision(req models.KycProviderResultRequest) error {
 
 func (s *LedgerService) GetKycProfile(profileID string) (*models.KycProfile, error) {
 	if s.kycStore != nil {
-		return s.kycStore.GetKycProfile(context.Background(), profileID)
+		profile, err := s.kycStore.GetKycProfile(context.Background(), profileID)
+		if err != nil {
+			return nil, err
+		}
+		if err := s.requireKycCustodianScope(profile.CustodianMSPID); err != nil {
+			return nil, err
+		}
+		return profile, nil
 	}
 	result, err := s.contract.EvaluateTransaction("GetKycProfile", profileID)
 	if err != nil {
@@ -596,6 +930,13 @@ func (s *LedgerService) GetKycProfile(profileID string) (*models.KycProfile, err
 
 func (s *LedgerService) ListKycProviderChecks(profileID string) ([]*models.KycProviderCheck, error) {
 	if s.kycStore != nil {
+		profile, err := s.kycStore.GetKycProfile(context.Background(), profileID)
+		if err != nil {
+			return nil, err
+		}
+		if err := s.requireKycCustodianScope(profile.CustodianMSPID); err != nil {
+			return nil, err
+		}
 		return s.kycStore.ListKycProviderChecks(context.Background(), profileID)
 	}
 	result, err := s.contract.EvaluateTransaction("ListKycProviderChecks", profileID)
@@ -611,6 +952,13 @@ func (s *LedgerService) ListKycProviderChecks(profileID string) ([]*models.KycPr
 
 func (s *LedgerService) ListKycAuditEvents(profileID string) ([]*models.KycAuditEvent, error) {
 	if s.kycStore != nil {
+		profile, err := s.kycStore.GetKycProfile(context.Background(), profileID)
+		if err != nil {
+			return nil, err
+		}
+		if err := s.requireKycCustodianScope(profile.CustodianMSPID); err != nil {
+			return nil, err
+		}
 		return s.kycStore.ListKycAuditEvents(context.Background(), profileID)
 	}
 	result, err := s.contract.EvaluateTransaction("ListKycAuditEvents", profileID)
@@ -666,53 +1014,128 @@ func (s *LedgerService) RequestRedemption(participantID string, amount int64) er
 }
 
 func (s *LedgerService) RtgsIssuanceNotification(senderBIC string, amount int64, reference string) (map[string]interface{}, error) {
+	if senderBIC == "" || reference == "" || amount <= 0 {
+		return nil, InvalidInput("sender_bic, positive amount, and reference are required")
+	}
 	amountStr := fmt.Sprintf("%d", amount)
-	participantID := "bank_indonesia"
-	result, err := s.contract.SubmitTransaction("RequestIssuanceRtgs", participantID, amountStr, reference)
+	result, err := s.contract.SubmitTransaction("RequestIssuanceRtgs", senderBIC, amountStr, reference)
 	if err != nil {
-		return nil, fmt.Errorf("chaincode RequestIssuanceRtgs: %w", err)
+		return nil, Internal("failed to submit RTGS issuance", err)
 	}
-	var resp map[string]interface{}
-	if err := s.unwrap(result, &resp); err != nil {
-		return map[string]interface{}{
-			"status":    "issued",
-			"reference": reference,
-			"amount":    amountStr,
-		}, nil
+	var receipt rtgsReceipt
+	if err := s.unwrapRequired(result, &receipt); err != nil {
+		return nil, err
 	}
-	return resp, nil
+	if receipt.Status != "issued" || receipt.Reference != reference || receipt.Amount != amount || receipt.ParticipantID == "" || receipt.SenderBIC != senderBIC || receipt.TxID == "" {
+		return nil, Internal("invalid RTGS issuance receipt", nil)
+	}
+	return map[string]interface{}{
+		"status": receipt.Status, "reference": receipt.Reference, "amount": receipt.Amount,
+		"participant_id": receipt.ParticipantID, "sender_bic": receipt.SenderBIC, "tx_id": receipt.TxID,
+	}, nil
 }
 
-func (s *LedgerService) DistributeToParticipant(senderParticipantID, receiverParticipantID string, amount int64) error {
-	_, err := s.contract.SubmitTransaction("DistributeToParticipant",
-		senderParticipantID, receiverParticipantID, fmt.Sprintf("%d", amount))
-	if err != nil {
-		return fmt.Errorf("chaincode DistributeToParticipant: %w", err)
+func (s *LedgerService) DistributeToParticipant(senderParticipantID, receiverParticipantID string, amount int64, idempotencyKeys ...string) error {
+	if amount <= 0 {
+		return InvalidInput("amount must be positive")
 	}
-	return nil
+	key := ""
+	if len(idempotencyKeys) > 0 {
+		key = idempotencyKeys[0]
+	}
+	operation, replay, err := s.beginOperation(context.Background(), "distribution", key, struct {
+		SenderParticipantID   string
+		ReceiverParticipantID string
+		Amount                int64
+	}{senderParticipantID, receiverParticipantID, amount})
+	if err != nil {
+		return err
+	}
+	if replay {
+		return nil
+	}
+	if operation.Status == OperationSubmitted {
+		return s.completeOperation(context.Background(), operation)
+	}
+	result, err := s.contract.SubmitTransaction("DistributeToParticipant",
+		senderParticipantID, receiverParticipantID, fmt.Sprintf("%d", amount), operation.OperationRef)
+	if err != nil {
+		return Internal("failed to submit distribution", err)
+	}
+	var receipt models.TransferResult
+	if err := s.unwrapRequired(result, &receipt); err != nil {
+		return err
+	}
+	if err := validateMoneyReceipt(receipt, operation.OperationRef, "", "", amount); err != nil {
+		return err
+	}
+	if err := s.recordSubmittedOperation(context.Background(), operation, receipt.TxID, receipt); err != nil {
+		return err
+	}
+	return s.completeOperation(context.Background(), operation)
 }
 
 func (s *LedgerService) Transfer(req models.TransferRequest) (*models.TransferResult, error) {
 	amount, err := parseInt64(req.Amount)
 	if err != nil {
-		return nil, fmt.Errorf("invalid amount: %w", err)
+		return nil, InvalidInput("invalid amount")
+	}
+	operation, replay, err := s.beginOperation(context.Background(), "transfer", req.IdempotencyKey, struct {
+		SenderID   string
+		ReceiverID string
+		Amount     int64
+	}{req.SenderID, req.ReceiverID, amount})
+	if err != nil {
+		return nil, err
+	}
+	if replay || (operation.Status == OperationSubmitted && len(operation.Response) > 0) {
+		var saved models.TransferResult
+		if err := json.Unmarshal(operation.Response, &saved); err != nil {
+			return nil, Internal("invalid persisted transfer receipt", err)
+		}
+		if err := s.completeOperation(context.Background(), operation); err != nil {
+			return nil, err
+		}
+		return &saved, nil
 	}
 	result, err := s.contract.SubmitTransaction("Transfer",
-		req.SenderID, req.ReceiverID, fmt.Sprintf("%d", amount))
+		req.SenderID, req.ReceiverID, fmt.Sprintf("%d", amount), operation.OperationRef)
 	if err != nil {
-		return nil, fmt.Errorf("chaincode Transfer: %w", err)
+		return nil, Internal("failed to submit transfer", err)
 	}
 	var tr models.TransferResult
-	if err := s.unwrap(result, &tr); err != nil {
-		return &models.TransferResult{Status: "transferred"}, nil
+	if err := s.unwrapRequired(result, &tr); err != nil {
+		return nil, err
+	}
+	if err := validateMoneyReceipt(tr, operation.OperationRef, req.SenderID, req.ReceiverID, amount); err != nil {
+		return nil, err
+	}
+	if err := s.recordSubmittedOperation(context.Background(), operation, tr.TxID, tr); err != nil {
+		return nil, err
+	}
+	if err := s.completeOperation(context.Background(), operation); err != nil {
+		return nil, err
 	}
 	return &tr, nil
+}
+
+func validateMoneyReceipt(receipt models.TransferResult, referenceID string, senderID string, receiverID string, amount int64) error {
+	if receipt.Status != "settled" || receipt.TxID == "" || receipt.ReferenceID != referenceID || receipt.Amount != amount {
+		return Internal("invalid money operation receipt", nil)
+	}
+	if senderID != "" && receipt.SenderID != senderID {
+		return Internal("invalid money operation sender receipt", nil)
+	}
+	if receiverID != "" && receipt.ReceiverID != receiverID {
+		return Internal("invalid money operation receiver receipt", nil)
+	}
+	return nil
 }
 
 func (s *LedgerService) GetBalances() ([]*models.Balance, error) {
 	result, err := s.contract.EvaluateTransaction("GetBalances")
 	if err != nil {
-		return nil, fmt.Errorf("chaincode GetBalances: %w", err)
+		return nil, Internal("failed to read balances", err)
 	}
 	var balances []*models.Balance
 	if err := s.unwrap(result, &balances); err != nil {

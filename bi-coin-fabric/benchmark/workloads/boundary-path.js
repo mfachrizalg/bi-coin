@@ -1,6 +1,15 @@
 'use strict';
 
-const { RetailWorkloadBase, CONTRACT, PER_TX_BASIC } = require('./retail-base');
+const {
+    RetailWorkloadBase,
+    CONTRACT,
+    PER_TX_BASIC,
+    transactionResults,
+    transactionStatus,
+    transactionDiagnostic,
+} = require('./retail-base');
+
+const INFRASTRUCTURE_FAILURE = /proposalresponsepayloads do not match|channel has been shut down|failed to connect|deadline exceeded|unavailable|timeout|endorsement policy failure/i;
 
 const DAILY_CAP_BASIC = 500000;   // TierBasic.DailyTxLimit
 const MAX_BALANCE_BASIC = 2000000; // TierBasic.MaxBalance
@@ -42,6 +51,7 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         super();
         this.passed = 0;
         this.mismatches = 0;
+        this.infrastructureErrors = 0;
         this.checks = [];
         this.cases = [];
         this.runNonce = Date.now().toString(36);
@@ -120,34 +130,49 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
             { label: 'per-tx cap, exactly at limit', accept: true,
                 args: () => [this.pertxExact.sender.walletId, this.pertxExact.sink.walletId, PER_TX_BASIC] },
             { label: 'per-tx cap, one past limit', accept: false,
+                expected: /per-transaction limit exceeded/i,
                 args: () => [this.pertxOver.sender.walletId, this.pertxOver.sink.walletId, PER_TX_BASIC + 1] },
 
             { label: 'daily outgoing cap, exactly at limit', accept: true,
                 args: () => [this.dailyExact.sender.walletId, this.dailyExact.sink.walletId, DAILY_CAP_BASIC - 250000] },
             { label: 'daily outgoing cap, one past limit', accept: false,
+                expected: /daily transaction limit exceeded/i,
                 args: () => [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 1] },
 
             { label: 'receiver max balance, exactly at limit', accept: true,
                 args: () => [this.recvExact.sender.walletId, this.recvExact.sink.walletId, 1000] },
             { label: 'receiver max balance, one past limit', accept: false,
+                expected: /exceed receiver max balance/i,
                 args: () => [this.recvOver.sender.walletId, this.recvOver.sink.walletId, 1] },
 
             { label: 'sender balance, exact drain', accept: true,
                 args: () => [this.balExact.sender.walletId, this.balExact.sink.walletId, 200000] },
             { label: 'sender balance, one past available', accept: false,
+                expected: /insufficient balance/i,
                 args: () => [this.balOver.sender.walletId, this.balOver.sink.walletId, 1] },
         ];
     }
 
-    async expect(label, shouldCommit, args) {
-        const request = { ...CONTRACT, contractFunction: 'Transfer', contractArguments: args.map(String), readOnly: false };
+    async expect(label, shouldCommit, args, expected) {
+        const request = { ...CONTRACT, contractFunction: 'Transfer', contractArguments: [...args, `boundary_${this.ns()}_${this.txIndex++}`].map(String), readOnly: false };
         let committed;
         try {
             const res = await this.sutAdapter.sendRequests(request);
-            const tx = Array.isArray(res) ? res[0] : res;
-            const status = tx && typeof tx.GetStatus === 'function' ? tx.GetStatus() : (tx && tx.status);
-            committed = status !== 'failed';
+            const results = transactionResults(res);
+            const diagnostics = results.map(transactionDiagnostic);
+            const diagnosticText = diagnostics.join('\n');
+            if (INFRASTRUCTURE_FAILURE.test(diagnosticText)) {
+                this.infrastructureErrors += 1;
+                committed = false;
+            } else {
+                const failed = results.filter(tx => transactionStatus(tx) === 'failed');
+                committed = failed.length === 0;
+                if (!shouldCommit && !committed && expected && !expected.test(diagnosticText)) {
+                    this.infrastructureErrors += 1;
+                }
+            }
         } catch (err) {
+            this.infrastructureErrors += 1;
             committed = false;
         }
         this.checks.push({ label, expected: shouldCommit ? 'commit' : 'reject', observed: committed ? 'commit' : 'reject' });
@@ -161,11 +186,20 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
 
     async submitTransaction() {
         const c = this.cases[this.txIndex++ % this.cases.length];
-        await this.expect(c.label, c.accept, c.args());
+        await this.expect(c.label, c.accept, c.args(), c.expected);
     }
 
     async cleanupWorkloadModule() {
         const total = this.passed + this.mismatches;
+        console.log(JSON.stringify({
+            event: 'boundary-oracle',
+            worker: this.workerIndex,
+            passed: this.passed,
+            total,
+            mismatches: this.mismatches,
+            infrastructureErrors: this.infrastructureErrors,
+            verdict: this.mismatches === 0 && this.infrastructureErrors === 0 ? 'PASS' : 'FAIL',
+        }));
         const verdict = this.mismatches === 0 ? '(every cap inclusive and correctly placed)' : '(BOUNDARY DEFECT present)';
         console.log(`[boundary] worker ${this.workerIndex}: passed=${this.passed}/${total}, mismatches=${this.mismatches} ${verdict}`);
         for (const c of this.checks) {

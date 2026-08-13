@@ -13,6 +13,21 @@ const expectedReasons = [
 ];
 
 function validateNegativePathLog(log) {
+    const oracleRows = log.split('\n').flatMap((line) => {
+        try {
+            const row = JSON.parse(line);
+            return row.event === 'negative-path-oracle' ? [row] : [];
+        } catch {
+            return [];
+        }
+    });
+    if (oracleRows.length === 0) throw new Error('missing structured negative-path oracle');
+    if (oracleRows.some((row) => !['PASS', 'PENDING'].includes(row.verdict) || row.infrastructureErrors !== 0 || row.reasonGaps !== 0 || row.gaps !== 0 || row.rejected !== row.expected)) {
+        throw new Error(`negative-path structured oracle failed: ${JSON.stringify(oracleRows)}`);
+    }
+    if (oracleRows.some((row) => row.verdict === 'PENDING' && row.deferredReasons !== row.expected)) {
+        throw new Error(`negative-path deferred-reason count failed: ${JSON.stringify(oracleRows)}`);
+    }
     for (const [label, expected] of expectedReasons) {
         if (!expected.test(log)) {
             throw new Error(`missing expected rejection reason for ${label}`);

@@ -21,10 +21,13 @@ import (
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 type AuthUser struct {
-	Username     string
-	PasswordHash string
-	Role         middleware.Role
-	Active       bool
+	Username       string
+	PasswordHash   string
+	Role           middleware.Role
+	SubjectID      string
+	ParticipantID  string
+	CustodianMSPID string
+	Active         bool
 }
 
 type AuthUserStore interface {
@@ -56,10 +59,13 @@ func (s *AuthService) Login(req models.LoginRequest) (*models.LoginResponse, err
 		return nil, err
 	}
 	return &models.LoginResponse{
-		AccessToken: token,
-		TokenType:   "Bearer",
-		ExpiresIn:   int64(s.ttl.Seconds()),
-		Role:        string(user.Role),
+		AccessToken:    token,
+		TokenType:      "Bearer",
+		ExpiresIn:      int64(s.ttl.Seconds()),
+		Role:           string(user.Role),
+		SubjectID:      user.SubjectID,
+		ParticipantID:  user.ParticipantID,
+		CustodianMSPID: user.CustodianMSPID,
 	}, nil
 }
 
@@ -81,9 +87,12 @@ func (s *AuthService) Verify(token string) (*middleware.TokenClaims, error) {
 		return nil, err
 	}
 	var payload struct {
-		Sub  string `json:"sub"`
-		Role string `json:"role"`
-		Exp  int64  `json:"exp"`
+		Sub           string `json:"sub"`
+		Role          string `json:"role"`
+		SubjectID     string `json:"subject_id,omitempty"`
+		ParticipantID string `json:"participant_id,omitempty"`
+		CustodianMSP  string `json:"custodian_msp_id,omitempty"`
+		Exp           int64  `json:"exp"`
 	}
 	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
 		return nil, err
@@ -92,8 +101,11 @@ func (s *AuthService) Verify(token string) (*middleware.TokenClaims, error) {
 		return nil, errors.New("invalid token claims")
 	}
 	return &middleware.TokenClaims{
-		Username: payload.Sub,
-		Role:     middleware.Role(payload.Role),
+		Username:       payload.Sub,
+		Role:           middleware.Role(payload.Role),
+		SubjectID:      payload.SubjectID,
+		ParticipantID:  payload.ParticipantID,
+		CustodianMSPID: payload.CustodianMSP,
 	}, nil
 }
 
@@ -102,11 +114,18 @@ func (s *AuthService) sign(username string, role middleware.Role, expires time.T
 		return "", errors.New("auth secret must be at least 16 bytes")
 	}
 	header := map[string]string{"alg": "HS256", "typ": "JWT"}
+	user, err := s.users.FindAuthUser(username)
+	if err != nil || user == nil {
+		return "", ErrInvalidCredentials
+	}
 	payload := map[string]interface{}{
-		"sub":  username,
-		"role": string(role),
-		"iat":  time.Now().UTC().Unix(),
-		"exp":  expires.Unix(),
+		"sub":              username,
+		"role":             string(role),
+		"subject_id":       user.SubjectID,
+		"participant_id":   user.ParticipantID,
+		"custodian_msp_id": user.CustodianMSPID,
+		"iat":              time.Now().UTC().Unix(),
+		"exp":              expires.Unix(),
 	}
 	headerJSON, err := json.Marshal(header)
 	if err != nil {

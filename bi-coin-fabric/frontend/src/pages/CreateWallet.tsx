@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
-  const [participantId, setParticipantId] = useState('')
+  const [ownerId, setOwnerId] = useState('')
   const [subjectType, setSubjectType] = useState<'retail_customer' | 'merchant'>('retail_customer')
   const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('low')
   const [dueDiligenceLevel, setDueDiligenceLevel] = useState<'simplified' | 'standard' | 'enhanced'>('simplified')
@@ -33,15 +33,16 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
     if (!prefill) return
     if (prefill.customer_id) {
       setCustomerId(prefill.customer_id)
-      setParticipantId(prefill.customer_id)
+      setOwnerId(prefill.customer_id)
       setProviderCaseId(prefill.provider_case_id ?? `case-${prefill.customer_id}`)
-      setKycProfileId(prefill.profile_id ?? sessionStorage.getItem(`kyc_profile_${prefill.customer_id}`) ?? '')
+      setKycProfileId(prefill.profile_id ?? '')
     }
     if (prefill.legal_name) setLegalName(prefill.legal_name)
     if (prefill.document_type) setDocumentType(prefill.document_type)
     if (prefill.document_number) setDocumentNumber(prefill.document_number)
     if (prefill.wallet_account_id) setWalletAccountId(prefill.wallet_account_id)
-    if (prefill.participant_id) setParticipantId(prefill.participant_id)
+    if (prefill.owner_id) setOwnerId(prefill.owner_id)
+    else if (prefill.participant_id) setOwnerId(prefill.participant_id)
     if (prefill.subject_type === 'merchant' || prefill.subject_type === 'retail_customer') setSubjectType(prefill.subject_type)
     if (prefill.risk_level === 'low' || prefill.risk_level === 'medium' || prefill.risk_level === 'high') setRiskLevel(prefill.risk_level)
     if (prefill.due_diligence_level === 'simplified' || prefill.due_diligence_level === 'standard' || prefill.due_diligence_level === 'enhanced') setDueDiligenceLevel(prefill.due_diligence_level)
@@ -70,6 +71,10 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
       })
       const profileID = (profile as any)?.profile_id
       if (!profileID) throw new Error('KYC profile response did not include profile_id')
+      setKycProfileId(profileID)
+      setProviderCaseId(caseID)
+      setWalletAccountId(accountID)
+      setOwnerId(customerId)
       if (subjectType === 'retail_customer') {
         await createRetailCustomer({
           customer_id: customerId,
@@ -78,11 +83,6 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
           kyc_profile_id: profileID,
         })
       }
-      sessionStorage.setItem(`kyc_profile_${customerId}`, profileID)
-      setKycProfileId(profileID)
-      setProviderCaseId(caseID)
-      setWalletAccountId(accountID)
-      setParticipantId(customerId)
       setMessage(`Off-chain KYC stored and anchored: ${profileID}`)
     } catch (e: any) {
       setError(e.message)
@@ -92,7 +92,7 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
   }
 
   const approveKyc = async () => {
-    const profileID = kycProfileId || (customerId ? sessionStorage.getItem(`kyc_profile_${customerId}`) : '')
+    const profileID = kycProfileId
     if (!profileID) {
       setError('Submit KYC first, or paste a KYC profile ID')
       return
@@ -120,13 +120,13 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
   }
 
   const submit = async () => {
-    if (!participantId) { setError('Enter owner / KYC subject ID'); return }
+    if (!ownerId) { setError('Enter owner / KYC subject ID'); return }
     setLoading(true)
     setError('')
     setMessage('')
     try {
-      const w = await createWallet({ participant_id: participantId })
-      setMessage(`Wallet created: ${w?.wallet_id ?? 'wlt_' + participantId}; policy tier: ${w?.tier ?? 'derived on ledger'}`)
+      const w = await createWallet({ owner_id: ownerId })
+      setMessage(`Wallet created: ${w?.wallet_id ?? 'wlt_' + ownerId}; policy tier: ${w?.tier ?? 'derived on ledger'}`)
     } catch (e: any) {
       setError(e.message)
     } finally {
@@ -147,7 +147,7 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
               value={customerId}
               onChange={e => {
                 setCustomerId(e.target.value)
-                setParticipantId(e.target.value)
+                setOwnerId(e.target.value)
               }}
               style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
@@ -249,8 +249,8 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
             Owner / KYC Subject ID
           </label>
           <input
-            value={participantId}
-            onChange={e => setParticipantId(e.target.value)}
+            value={ownerId}
+            onChange={e => setOwnerId(e.target.value)}
             placeholder="budi"
             style={{ width: '100%', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
           />

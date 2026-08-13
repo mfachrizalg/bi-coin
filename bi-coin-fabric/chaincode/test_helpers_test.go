@@ -23,6 +23,7 @@ type mockStub struct {
 	TxTimestamp    *timestamppb.Timestamp
 	signedProposal *peer.SignedProposal
 	ChannelID      string
+	putStateErrors map[string]error
 }
 
 func newMockTransactionContext(txID string, ts time.Time) (*contractapi.TransactionContext, *mockStub) {
@@ -31,10 +32,11 @@ func newMockTransactionContext(txID string, ts time.Time) (*contractapi.Transact
 
 func newMockTransactionContextWithMSP(txID string, ts time.Time, mspID string) (*contractapi.TransactionContext, *mockStub) {
 	stub := &mockStub{
-		State:       make(map[string][]byte),
-		TxID:        txID,
-		TxTimestamp: timestamppb.New(ts.UTC()),
-		ChannelID:   "test-channel",
+		State:          make(map[string][]byte),
+		TxID:           txID,
+		TxTimestamp:    timestamppb.New(ts.UTC()),
+		ChannelID:      "test-channel",
+		putStateErrors: make(map[string]error),
 	}
 	ctx := &contractapi.TransactionContext{}
 	ctx.SetStub(stub)
@@ -98,11 +100,23 @@ func (stub *mockStub) PutState(key string, value []byte) error {
 	if stub.TxID == "" {
 		return errors.New("cannot PutState without a transaction")
 	}
+	for prefix, err := range stub.putStateErrors {
+		if strings.HasPrefix(key, prefix) {
+			return err
+		}
+	}
 	if len(value) == 0 {
 		return stub.DelState(key)
 	}
 	stub.State[key] = value
 	return nil
+}
+
+func (stub *mockStub) failPutStatePrefix(prefix string, err error) {
+	if stub.putStateErrors == nil {
+		stub.putStateErrors = make(map[string]error)
+	}
+	stub.putStateErrors[prefix] = err
 }
 
 func (stub *mockStub) DelState(key string) error {

@@ -207,25 +207,25 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
                 </td>
                 <td style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {can(role, 'bank_indonesia', 'supervisor') && p.status === 'pending' && (
+                    {can(role, 'bank_indonesia') && p.status === 'pending' && (
                       <button onClick={() => handleAction(() => approveParticipant(p.participant_id), 'Approve')}
                         style={{ padding: '7px 16px', fontSize: '0.95rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
                         Approve
                       </button>
                     )}
-                    {can(role, 'bank_indonesia', 'supervisor') && p.status === 'active' && (
+                    {can(role, 'bank_indonesia') && p.status === 'active' && (
                       <button onClick={() => handleAction(() => freezeParticipant(p.participant_id), 'Freeze')}
                         style={{ padding: '7px 16px', fontSize: '0.95rem', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
                         Freeze
                       </button>
                     )}
-                    {can(role, 'bank_indonesia', 'supervisor') && p.status === 'frozen' && (
+                    {can(role, 'bank_indonesia') && p.status === 'frozen' && (
                       <button onClick={() => handleAction(() => unfreezeParticipant(p.participant_id), 'Unfreeze')}
                         style={{ padding: '7px 16px', fontSize: '0.95rem', background: '#d97706', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
                         Unfreeze
                       </button>
                     )}
-                    {!can(role, 'bank_indonesia', 'supervisor') && (
+                    {!can(role, 'bank_indonesia') && (
                       <span style={{ fontSize: 12, color: '#9ca3af' }}>—</span>
                     )}
                   </div>
@@ -238,7 +238,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, alignItems: 'start' }}>
         {/* Submit participant — bank_pjp + bank_indonesia */}
-        {can(role, 'bank_pjp', 'bank_indonesia') && <div>
+        {can(role, 'bank_indonesia') && <div>
           <h3 style={{ marginBottom: 12, fontSize: '1.1rem' }}>Daftarkan Peserta</h3>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -279,7 +279,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
         </div>}
 
         {/* Distribute to PJP — bank_pjp + bank_indonesia */}
-        {can(role, 'bank_pjp', 'bank_indonesia') && <div>
+        {can(role, 'bank_indonesia') && <div>
           <h3 style={{ marginBottom: 12, fontSize: '1.1rem' }}>Distribusi Likuiditas ke PJP</h3>
           <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 10 }}>
             Bank validator transfers Digital Rupiah to PJP wallet.
@@ -319,7 +319,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
           </form>
         </div>}
         {/* Issue Digital Rupiah — bank_indonesia + supervisor only */}
-        {can(role, 'bank_indonesia', 'supervisor') && <div>
+        {can(role, 'bank_indonesia') && <div>
           <h3 style={{ marginBottom: 12, fontSize: '1.1rem' }}>Terbitkan Digital Rupiah (BI)</h3>
           <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 10 }}>
             BI mints and credits Digital Rupiah to bank reserve balance.

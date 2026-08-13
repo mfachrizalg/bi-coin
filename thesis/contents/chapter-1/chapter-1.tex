@@ -31,9 +31,8 @@ pada isu \textit{shadow banking}, melainkan telah merambah pada fenomena
 \textit{shadow currency} dan \textit{shadow central banking} yang mengikis
 efektivitas kebijakan bank sentral \cite{bi_whitepaper2022}.
 \textit{Stablecoin} dan aset kripto tanpa aset dasar memperbesar risiko
-pencucian uang (\textit{money laundering}), pendanaan terorisme, serta
-risiko makrofinansial berupa melemahnya kendali otoritas atas stabilitas
-moneter dan sistem keuangan \cite{bi_whitepaper2022}. Mata uang digital bank
+makrofinansial berupa melemahnya kendali otoritas atas stabilitas moneter dan
+sistem keuangan \cite{bi_whitepaper2022}. Mata uang digital bank
 sentral dirancang untuk menjaga kepercayaan publik terhadap uang dan
 kedaulatan moneter, sekaligus mempertahankan peran bank sentral sebagai
 jangkar stabilitas dalam ekonomi digital
@@ -82,13 +81,12 @@ diuji secara empiris untuk konteks CBDC ritel masih jarang tersedia.
 
 Kajian teknis yang ditinjau masih membahas komponen CBDC secara terpisah.
 Privasi dan auditabilitas dibahas dalam \cite{islam2023, Pocher2022Privacy,
-	Michalopoulos2025Privacy}, keamanan dan pemodelan ancaman dalam
+Michalopoulos2025Privacy}, keamanan dan pemodelan ancaman dalam
 \cite{hans2023}, serta arsitektur jaringan dalam \cite{bhawana2021, sun2017}.
 Kelayakan sistem CBDC ritel, sebaliknya, bergantung pada keterpaduan komponen
 tersebut. Dalam korpus literatur yang digunakan pada penelitian ini, penerbitan
-dan distribusi likuiditas berjenjang, purwarupa KYC-tier dan limit transaksi,
-transfer ritel, serta pengawasan belum dievaluasi sebagai satu artefak Fabric
-yang kinerjanya dapat diukur.
+dan distribusi likuiditas berjenjang, transfer ritel, serta pengawasan belum
+dievaluasi sebagai satu artefak Fabric yang kinerjanya dapat diukur.
 
 Untuk konteks Indonesia, Bank Indonesia telah menetapkan arah desain Rupiah
 Digital berupa model dua jenjang dan interoperabilitas sistem pembayaran
@@ -110,11 +108,11 @@ ritel di atas \textit{permissioned blockchain}, khususnya untuk Rupiah Digital,
 masih langka.
 
 Atas dasar literatur dan artefak publik yang ditinjau, celah penelitian berada
-pada kebutuhan akan purwarupa CBDC
-ritel yang (i) mengintegrasikan penerbitan berjenjang, kepatuhan, transfer ritel,
-serta pengawasan dalam satu sistem, (ii) selaras dengan rancangan dua jenjang
-Bank Indonesia, dan (iii) dievaluasi melalui pengujian Hyperledger Caliper yang
-dapat diulang dengan konfigurasi dan artefak yang dicatat. Penelitian ini
+pada kebutuhan akan purwarupa CBDC ritel yang (i) mengintegrasikan penerbitan
+berjenjang, transfer ritel, serta pengawasan dalam satu sistem, (ii) selaras
+dengan rancangan dua jenjang Bank Indonesia, dan (iii) dievaluasi melalui
+pengujian Hyperledger Caliper yang dapat diulang dengan konfigurasi dan artefak
+yang dicatat. Penelitian ini
 merancang dan
 membangun sistem Rupiah Digital ritel berbasis Hyperledger Fabric yang
 merepresentasikan ekosistem multipihak: Bank Indonesia, bank validator,
@@ -132,11 +130,8 @@ sebagai berikut.
 	\item Bagaimana merancang dan membangun sistem Rupiah Digital ritel berbasis
 	      Hyperledger Fabric yang mendukung model penerbitan dan distribusi likuiditas
 	      berjenjang dari Bank Indonesia menuju bank, penyedia jasa pembayaran, dan
-	      pelanggan ritel?
-	\item Bagaimana menerapkan kontrol kepatuhan pada lapisan \textit{chaincode}
-	      berupa kebijakan KYC-tier yang diinspirasi pendekatan berbasis risiko,
-	      penurunan tingkatan dompet, limit transaksi,
-	      dan pengawasan transaksi?
+	      pelanggan ritel, serta transfer ritel dan pengawasan transaksi dengan batas
+	      wewenang organisasi yang jelas?
 	\item Bagaimana kinerja sistem yang dibangun dari sisi \textit{throughput}
 	      dan latensi pada berbagai skenario beban transaksi yang diukur menggunakan
 	      Hyperledger Caliper?
@@ -148,11 +143,8 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 \begin{enumerate}
 	\item Merancang dan membangun purwarupa sistem Rupiah Digital ritel berbasis
 	      Hyperledger Fabric dengan arsitektur multipihak yang mendukung penerbitan dan
-	      distribusi likuiditas berjenjang.
-	\item Mengimplementasikan kontrol kepatuhan pada \textit{chaincode} berupa
-	      kebijakan KYC-tier yang diinspirasi pendekatan berbasis risiko,
-	      penurunan tingkatan dompet, limit transaksi masuk
-	      dan keluar, serta pengawasan transaksi.
+	      distribusi likuiditas berjenjang, transfer ritel, dan pengawasan transaksi
+	      dengan batas wewenang organisasi yang jelas.
 	\item Mengevaluasi kinerja sistem dari sisi \textit{throughput} dan latensi
 	      pada berbagai skenario beban menggunakan Hyperledger Caliper.
 \end{enumerate}
@@ -202,18 +194,10 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	      kembali \cite{polaris_security, polaris_handbook}. Hasil penelitian ini
 	      hanya merepresentasikan transaksi yang diselesaikan melalui
 	      koneksi ke \textit{ledger}.
-	\item Proses KYC disimulasikan secara terprogram tanpa integrasi penyedia
-	      identitas nyata. Tingkatan BASIC, STANDARD, dan MERCHANT beserta limitnya
-	      merupakan parameter purwarupa yang diinspirasi pendekatan berbasis risiko,
-	      bukan ketentuan BI/OJK/FATF atau bukti kepatuhan APU/PPT. Sistem tidak
-	      mencakup pemeriksaan sanksi/PEP, \textit{beneficial ownership},
-	      \textit{ongoing due diligence}, pelaporan transaksi mencurigakan, atau
-	      integrasi PPATK.
-	\item Sistem memisahkan data identitas mentah di PostgreSQL dari jangkar dan
-	      status KYC pada buku besar, tetapi belum menyediakan privasi transaksi.
+	\item Sistem belum menyediakan privasi transaksi pada kanal bersama.
 	      Topologi memakai satu \textit{application channel} tanpa \textit{private
 	      data collection} atau teknik kriptografi penjaga privasi. Akibatnya,
-	      metadata dompet, KYC, dan graf transaksi terlihat oleh peserta kanal yang
+	      metadata dompet dan graf transaksi terlihat oleh peserta kanal yang
 	      berwenang. Purwarupa ini belum menangani kompromi antara privasi dan keterlacakan
 	      \cite{Pocher2022Privacy, Soana2024Central, Said2026Designing}.
 	\item Topologi hanya memiliki satu \textit{consenter} Raft sehingga tidak
@@ -248,17 +232,17 @@ Penelitian ini diharapkan memberikan manfaat sebagai berikut.
 	      bank sentral.
 	\item Menjelaskan penerapan Hyperledger Fabric untuk memodelkan pemisahan
 	      peran antara BI, peserta distribusi, dan pengguna ritel tanpa
-	      menempatkan data identitas mentah pada buku besar.
+	      menempatkan data portal pada buku besar.
 	\item Menyediakan purwarupa yang dapat digunakan sebagai bahan eksperimen
-	      teknis untuk menguji alur penerbitan, transfer, pembatasan dompet,
-	      kontrol kepatuhan, dan pencatatan peristiwa pengawasan.
+	      teknis untuk menguji alur penerbitan, transfer, otorisasi, dan
+	      pencatatan peristiwa pengawasan.
 	\item Memberikan dasar evaluasi kinerja awal melalui pengujian beban
 	      terbatas sehingga karakteristik \textit{throughput}, latensi, dan
 	      keberhasilan transaksi dapat dibahas secara terukur dalam ruang
 	      lingkup purwarupa.
 	\item Mendukung diskusi teknis pengembangan Rupiah Digital ritel dengan menunjukkan
-	      batas kemampuan purwarupa, termasuk kebutuhan integrasi identitas
-	      nyata, perluasan topologi, dan pengujian keamanan lanjutan, tanpa
+	      batas kemampuan purwarupa, termasuk kebutuhan perluasan topologi,
+	      privasi transaksi, dan pengujian keamanan lanjutan, tanpa
 	      menyimpulkan dampak inklusi atau kesiapan produksi.
 \end{enumerate}
 
@@ -274,7 +258,7 @@ penulisan.
 \noindent BAB II TINJAUAN PUSTAKA DAN DASAR TEORI memaparkan tinjauan
 terhadap penelitian terdahulu yang relevan serta dasar teori yang mendasari
 penelitian, meliputi CBDC, \textit{blockchain} dan DLT, Hyperledger Fabric,
-Hyperledger Caliper, KYC berbasis risiko, dan limit transaksi.
+dan Hyperledger Caliper.
 
 \noindent BAB III METODE PENELITIAN menguraikan alat dan bahan, metode
 perancangan, metode implementasi, metode pengujian, serta alur penelitian yang

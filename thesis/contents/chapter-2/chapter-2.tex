@@ -5,8 +5,7 @@
 Kajian penerapan \textit{blockchain} untuk mata uang digital bank sentral
 mencakup beragam fokus. Bagian ini meninjau penelitian terdahulu yang relevan
 dengan rancang bangun sistem Rupiah Digital ritel berbasis Hyperledger Fabric,
-meliputi arsitektur, kepatuhan, transfer ritel, pengawasan, dan evaluasi
-kinerja.
+meliputi arsitektur, transfer ritel, pengawasan, dan evaluasi kinerja.
 
 \subsection{Penelitian Terdahulu tentang Desain dan Keamanan CBDC}
 
@@ -23,12 +22,9 @@ beban transaksi antarwilayah, sedangkan Islam dan In \cite{islam2023}
 menggunakan \textit{consortium blockchain} dengan model \textit{unspent
 transaction output} (UTXO) untuk menjaga privasi sekaligus auditabilitas.
 
-Pada ranah kepatuhan, Kakebayashi \cite{Kakebayashi2023Policy} menekankan
-pentingnya penanaman aturan \textit{Anti-Money Laundering} dan
-\textit{Combating the Financing of Terrorism} (AML/CFT) langsung pada desain
-CBDC ritel. Kajian lain merumuskan model audit CBDC berbasis
-\textit{blockchain} dari pengalaman \textit{Digital Currency Electronic
-Payment} (DCEP) Tiongkok \cite{unknown2022c}.
+Kajian lain merumuskan model audit CBDC berbasis \textit{blockchain} dari
+pengalaman \textit{Digital Currency Electronic Payment} (DCEP) Tiongkok
+\cite{unknown2022c}.
 Hans dkk. \cite{hans2023} menerapkan pemodelan ancaman STRIDE untuk
 mengidentifikasi risiko keamanan pada sistem CBDC berbasis \textit{blockchain},
 menegaskan perlunya analisis keamanan sejak tahap perancangan. Block-PAD
@@ -60,8 +56,8 @@ tidak dibandingkan langsung karena versi, topologi, dan beban kerja berbeda.
 Penelitian terdahulu dapat dikelompokkan menurut fokusnya. Arsitektur dan tata
 kelola jaringan dibahas dalam \cite{bhawana2021, sun2017}, privasi dan
 auditabilitas dalam \cite{islam2023, Pocher2022Privacy,
-Michalopoulos2025Privacy}, serta keamanan dan kepatuhan dalam
-\cite{hans2023, Kakebayashi2023Policy, unknown2022c}. Kelompok lain membahas
+Michalopoulos2025Privacy}, serta keamanan dan audit dalam
+\cite{hans2023, unknown2022c}. Kelompok lain membahas
 kinerja Hyperledger Fabric \cite{androulaki2018, fabric_perf2023,
 unknown2024f, unknown2021, unknown2025i} dan desain CBDC untuk konteks
 Indonesia \cite{zams2020delphi, Syarifuddin2024OPTIMAL,
@@ -72,8 +68,7 @@ ritel yang memadukan seluruh komponen tersebut.
 \textbf{Celah penelitian.} Sintesis terbatas pada sumber yang dirujuk di bab ini
 menunjukkan empat kebutuhan yang belum dipenuhi secara bersamaan. (1) Satu
 artefak perlu mengintegrasikan
-penerbitan dan distribusi likuiditas berjenjang, kepatuhan KYC dan limit
-berbasis tingkatan dompet, transfer antarpelanggan dan
+penerbitan dan distribusi likuiditas berjenjang, transfer antarpelanggan dan
 pelanggan-ke-pedagang, serta pengawasan. (2) Artefak tersebut perlu selaras
 dengan rancangan dua jenjang Rupiah Digital Bank Indonesia karena dokumentasi
 publik Proyek Garuda baru menjangkau lapisan \textit{wholesale}
@@ -86,8 +81,8 @@ Penelitian ini menempati irisan keempat hal tersebut. Tabel~\ref{tab:tinjauan}
 merangkum posisi penelitian ini terhadap penelitian terdahulu.
 
 \textbf{Kebaruan.} Dalam batas korpus yang ditinjau, kontribusi penelitian ini
-terletak pada integrasi alur distribusi dua jenjang, kebijakan KYC-tier dan
-limit purwarupa, transaksi ritel, pengawasan, serta protokol Caliper dalam satu
+terletak pada integrasi alur distribusi dua jenjang, transaksi ritel,
+pengawasan, serta protokol Caliper dalam satu
 artefak Fabric yang dapat diperiksa dan diulang. Kontribusi ini bukan klaim
 kebaruan arsitektur CBDC secara universal maupun klaim bahwa platform yang
 digunakan Proyek Garuda adalah Fabric \cite{ree2023enaira, bi_garuda_poc}.
@@ -213,8 +208,8 @@ Rupiah Digital \cite{bi_whitepaper2022}.
     \label{fig:bi-whitepaper-design-configuration}
 \end{figure}
 
-Pembedaan ini relevan karena memengaruhi desain KYC, AML/CFT, privasi, limit
-saldo, dan auditabilitas transaksi. Syarifuddin dan Bakhtiar menempatkan
+Pembedaan ini relevan karena memengaruhi desain privasi dan auditabilitas
+transaksi. Syarifuddin dan Bakhtiar menempatkan
 \textit{account-based} dan \textit{token-based payment system} sebagai salah
 satu dimensi desain CBDC yang perlu dipertimbangkan dalam strategi kebijakan
 moneter \cite{SyarifuddinBakhtiar2021Monetary}. Dalam konteks Indonesia,
@@ -225,15 +220,6 @@ dianggap sesuai untuk transaksi pasar keuangan yang lebih kompleks
 ritel sebagai bagian dari tahap integrasi \textit{end-state}; karena itu,
 penelitian ini tidak mengklaim bahwa desain pembayaran Rupiah Digital ritel
 Bank Indonesia telah final sebagai berbasis akun ataupun berbasis token.
-
-Beberapa implementasi CBDC ritel menggunakan pendekatan dompet bertingkat yang
-dekat dengan model akun atau hibrida. eNaira menerapkan dompet pengguna dengan
-tingkat KYC dan batas transaksi \cite{cbn2021enaira,ree2023enaira}, sedangkan
-e-CNY menggunakan kategori dompet bertingkat dengan kekuatan identifikasi dan
-batas saldo/transaksi yang berbeda \cite{pboc2021ecny}. Preseden tersebut
-menunjukkan bahwa model dompet berbasis identitas dan limit merupakan pendekatan
-yang umum digunakan untuk mengendalikan risiko kepatuhan pada CBDC ritel,
-meskipun arsitektur teknis setiap yurisdiksi tidak identik.
 
 \subsubsection{Arsitektur Penerbitan CBDC}
 
@@ -418,52 +404,12 @@ Caliper juga dapat memantau penggunaan sumber daya \textit{container} seperti
 penggunaan CPU dan memori selama pengujian, sehingga sesuai untuk mengevaluasi
 kelayakan kinerja sistem CBDC \cite{fabric_perf2023}.
 
-\subsection{Kepatuhan: KYC, Tingkatan Dompet, dan Limit Transaksi}
-
-\textit{Know Your Customer} (KYC) adalah proses verifikasi identitas nasabah
-yang menjadi syarat kepatuhan pada sistem keuangan untuk mencegah pencucian uang
-dan pendanaan terorisme. FATF menempatkan tingkat keandalan identitas digital
-dan risiko nasabah sebagai dasar penentuan intensitas uji tuntas, sedangkan
-risiko lebih tinggi memerlukan \textit{enhanced due diligence} (EDD)
-\cite{fatf2020digitalidentity}. Pendekatan berbasis risiko juga menjadi prinsip
-dalam ketentuan APU, PPT, dan PPPSPM Bank Indonesia \cite{bi2024pbi10}.
-
-Penerapan tingkatan dompet pada CBDC memiliki preseden pada e-CNY dan eNaira.
-Dokumen desain e-CNY menjelaskan dompet bertingkat dengan kekuatan identifikasi,
-batas saldo, dan batas pembayaran yang berbeda \cite{pboc2021ecny}; rancangan
-eNaira juga membedakan batas berdasarkan tingkat verifikasi pengguna
-\cite{cbn2021enaira}. Literatur ekonomi menunjukkan bahwa batas kepemilikan dan
-penggunaan CBDC merupakan instrumen desain untuk menyeimbangkan kegunaan,
-intermediasi perbankan, dan risiko sistemik \cite{agur2022designing}. Bukti ini
-mendukung klasifikasi berbasis risiko, tetapi tidak menentukan angka limit yang
-universal untuk Rupiah Digital.
-
-Purwarupa memisahkan tiga dimensi yang sering tercampur. \textit{Subject type}
-membedakan pelanggan ritel, pedagang, dan peserta institusional. \textit{Due
-diligence level} mencatat uji tuntas \textit{simplified}, \textit{standard}, atau
-\textit{enhanced}. \textit{Risk level} mencatat risiko rendah, menengah, tinggi,
-atau terlarang. Kombinasi ketiganya menghasilkan tingkatan BASIC, STANDARD, atau
-MERCHANT. Risiko tinggi tidak otomatis ditolak, tetapi hanya dapat disetujui
-setelah EDD dan status persetujuan senior disuplai oleh penyedia KYC; purwarupa
-belum membuktikan alur \textit{four-eyes} atau identitas pemberi persetujuan.
-Transaksi selanjutnya menghasilkan peristiwa pengawasan tanpa data identitas
-mentah.
-
-Angka limit penelitian merupakan parameter kebijakan purwarupa. Ketentuan uang
-elektronik Bank Indonesia digunakan sebagai proksi domestik, bukan sebagai dasar
-hukum limit CBDC \cite{bi2022padg247}. Nilai dipilih konservatif dan eksplisit
-agar aturan dapat diuji: semakin ringan uji tuntas, semakin kecil eksposur saldo
-dan arus dana. Validasi mencakup saldo maksimum, batas per transaksi,
-pengeluaran harian, pengeluaran bulanan, serta penerimaan bulanan.
-Fitur tersebut adalah purwarupa KYC-tier dan limit yang diinspirasi pendekatan
-berbasis risiko, bukan implementasi lengkap program APU/PPT.
-
 \subsection{Transfer Ritel Langsung}
 
 Unit pembayaran pada purwarupa adalah fungsi \texttt{Transfer} yang sama untuk
 transfer antarpelanggan dan pelanggan-ke-pedagang. Penyatuan jalur ini menjaga
-aturan KYC, penghitung limit, pemeriksaan saldo penerima, dan pencatatan audit
-tetap deterministik. Penelitian tidak memodelkan standar instrumen pembayaran
+pemeriksaan otorisasi, saldo, dan pencatatan audit tetap deterministik.
+Penelitian tidak memodelkan standar instrumen pembayaran
 atau proses akseptasi eksternal; fokusnya adalah kebijakan buku besar CBDC ritel.
 
 \subsection{Application Programming Interface}
@@ -537,8 +483,6 @@ Rendah & Sangat tinggi (PoW) & Rendah \\
 Opsional & Ya & Ya \\
 Kapabilitas pemisahan data &
 Ya & Tidak (publik) & Tersedia melalui \textit{channel}/data privat \\
-Kepatuhan regulasi &
-Mudah & Sulit & Mudah \\
 Contoh artefak CBDC yang dilaporkan &
 OpenCBDC \cite{Lovejoy2022A} &
 Tidak direkomen\allowbreak dasikan &
@@ -623,7 +567,7 @@ Tidak \\
 \noindent\textbf{Simpulan:} Hyperledger Fabric dipilih karena identitas
 organisasi berbasis MSP, model eksekusi modular, dukungan kontrak Go, dan
 integrasi langsung dengan alat uji Caliper. MSP mengautentikasi organisasi
-jaringan, bukan menggantikan KYC nasabah. \textit{Channel} dan data privat
+jaringan. \textit{Channel} dan data privat
 merupakan kapabilitas platform, tetapi purwarupa penelitian memakai satu
 \textit{application channel} dan tidak memisahkan buku besar \textit{wholesale}
 dan ritel. PoC Proyek Garuda menggunakan Corda dan Hyperledger Besu; laporan itu
@@ -728,9 +672,7 @@ Fabric, bukan membandingkan implementasi internal beberapa platform.
 
 \subsection{Pemilihan Arsitektur CBDC Dua Jenjang}
 Istilah ``dua jenjang'' pada bagian ini menyatakan pembagian peran distribusi
-antara bank sentral dan perantara. Istilah tersebut berbeda dari ``tingkatan
-dompet KYC'', yang menyatakan klasifikasi kebijakan pengguna ritel. Peserta
-institusional tidak menerima tingkatan BASIC, STANDARD, atau MERCHANT.
+antara bank sentral dan perantara.
 
 Tabel~\ref{tab:arsitektur-tier} membandingkan model arsitektur satu
 jenjang (\textit{one-tier/direct}), di mana bank sentral mendistribusikan
@@ -766,9 +708,6 @@ Rendah \cite{sethaput2025} \\
 Beban infrastruktur bank sentral &
 Sangat tinggi &
 Dibagi ke perantara \\
-KYC dan \textit{onboarding} &
-Dikelola bank sentral &
-Dikelola bank/PJP \\
 Privasi pengguna dari bank sentral &
 Bergantung pada desain implementasi &
 Bergantung pada pemisahan data dan hak akses; bukan sifat otomatis dua jenjang \\
@@ -784,12 +723,11 @@ Ya \cite{bi_garuda_poc, bi_whitepaper2022} \\
 \end{longtable}
 \endgroup
 
-\noindent\textbf{Simpulan:} Model dua jenjang dipilih berdasarkan empat
+\noindent\textbf{Simpulan:} Model dua jenjang dipilih berdasarkan tiga
 pertimbangan. (1) Model ini selaras dengan desain Rupiah Digital Bank Indonesia
 dalam Proyek Garuda \cite{bi_garuda_poc}. (2) Pembagian peran antarlapis
 meminimalkan risiko \textit{disintermediation} perbankan yang menjadi
-kekhawatiran utama bank sentral \cite{sethaput2025}. (3) Bank dan PJP yang
-telah berpengalaman mengelola KYC dan \textit{onboarding} nasabah. (4) Volume
+kekhawatiran utama bank sentral \cite{sethaput2025}. (3) Volume
 transaksi \textit{retail} skala masif tidak membebani \textit{ledger}
 \textit{wholesale} \cite{Auer2020The, Tsareva2024Retail}.
 
@@ -869,36 +807,16 @@ Aryani \cite{aryani2023critlit} mengusulkan arsitektur dua jenjang Digital
 Rupiah dengan lapisan tambahan berupa \textit{Digital Rupiah Depository}
 sebagai entitas perantara antara Bank Indonesia dan peserta jaringan,
 pemisahan \textit{wholesaler} dan \textit{non-wholesaler} di jenjang atas,
-serta basis data KYC bersama (\textit{shared KYC database}) yang terpisah
-dari \textit{ledger} transaksi. Arsitektur tersebut juga mencakup koneksi
-ke BI-RTGS dan jaringan \textit{blockchain} lintas batas untuk
-interoperabilitas. Arsitektur yang diusulkan Aryani ditunjukkan pada
-Gambar~\ref{fig:aryani-cbdc-arch}.
+serta koneksi ke BI-RTGS dan jaringan \textit{blockchain} lintas batas untuk
+interoperabilitas. Perbandingan ini menjadi rujukan konseptual untuk menempatkan
+purwarupa pada spektrum desain CBDC.
 
-\begin{figure}[H]
-    \centering
-    \rotatebox{90}{\includegraphics[width=0.78\textheight]{contents/figures/reference/aryani2023-cbdc-architecture.png}}
-    \caption{Arsitektur Rupiah Digital yang diusulkan Aryani \cite{aryani2023critlit}.}
-    \label{fig:aryani-cbdc-arch}
-\end{figure}
-
-Penelitian ini mengadopsi prinsip inti arsitektur tersebut (distribusi
-berjenjang melalui bank validator dan PJP, serta KYC berbasis risiko) namun
-dengan tiga penyederhanaan yang disengaja sesuai cakupan purwarupa. Pertama,
+Penelitian ini mengadopsi prinsip inti arsitektur tersebut, yaitu distribusi
+berjenjang melalui bank validator dan PJP, namun dengan dua penyederhanaan yang
+disengaja sesuai cakupan purwarupa. Pertama,
 lapisan \textit{Digital Rupiah Depository} dan pemisahan
 \textit{wholesaler}/\textit{non-wholesaler} diciutkan menjadi dua organisasi
 validator (HimbaraBankOrg dan CommercialBankOrg) yang langsung menerima
-penerbitan dari BankIndonesiaOrg. Kedua, data identitas KYC mentah disimpan pada
-PostgreSQL di luar buku besar, sedangkan \textit{world state} hanya menyimpan
-status, risiko, tingkat uji tuntas, persetujuan senior, masa berlaku, dan hash
-dokumen. Pemisahan ini sejalan dengan pola arsitektur hibrid yang dijabarkan
-BIS, yakni bank sentral mempertahankan salinan jangkar kepatuhan sementara
-data sensitif dikelola di luar \textit{ledger} oleh perantara yang menjalankan
-KYC \cite{Auer2020The}. Pendekatan serupa, yakni penyimpanan identitas
-KYC pada basis data terpisah dari buku besar, diadopsi pada proyek CBDC ritel
-Sand Dollar (Bahama) \cite{centralbankbahamas2020sanddollar} dan uji coba
-e-Krona (Swedia) \cite{riksbank2021ekrona}. Bank Indonesia dan pengawas
-memperoleh akses baca terhadap jangkar kepatuhan dan peristiwa pengawasan,
-bukan kewenangan menjalankan KYC nasabah. Ketiga, integrasi BI-RTGS
+penerbitan dari BankIndonesiaOrg. Kedua, integrasi BI-RTGS
 dan jaringan \textit{blockchain} lintas batas tidak diimplementasikan dan
 dinyatakan secara eksplisit sebagai batasan cakupan penelitian (Bab~I).

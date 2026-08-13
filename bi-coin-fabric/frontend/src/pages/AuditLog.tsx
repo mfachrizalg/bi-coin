@@ -1,18 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AuditEntry, getAuditLog } from '../lib/api'
 
 export default function AuditLog({ walletID }: { walletID: string }) {
   const [entries, setEntries] = useState<AuditEntry[]>([])
   const [error, setError] = useState('')
+  const requestVersion = useRef(0)
 
   const load = async () => {
     if (!walletID) return
+    const version = ++requestVersion.current
     try {
-      setEntries(await getAuditLog(walletID))
-    } catch (e: any) { setError(e.message) }
+      const nextEntries = await getAuditLog(walletID)
+      if (version === requestVersion.current) { setEntries(nextEntries); setError('') }
+    } catch (e: any) {
+      if (version === requestVersion.current) setError(e.message)
+    }
   }
 
-  useEffect(() => { load() }, [walletID])
+  useEffect(() => {
+    setEntries([])
+    setError('')
+    void load()
+    return () => { requestVersion.current += 1 }
+  }, [walletID])
 
   if (!walletID) return (
     <div style={{ fontSize: '1rem', color: '#6b7280', marginTop: 24 }}>

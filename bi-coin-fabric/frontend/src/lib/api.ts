@@ -1,18 +1,23 @@
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
-let currentToken = sessionStorage.getItem('access_token') ?? ''
+let currentToken = ''
+let unauthorizedHandler: (() => void) | undefined
 export function hasAccessToken() {
   return Boolean(currentToken)
 }
 
 export function setAccessToken(token: string) {
   currentToken = token
-  if (token) sessionStorage.setItem('access_token', token)
-  else sessionStorage.removeItem('access_token')
+}
+
+export function onUnauthorized(handler: () => void) {
+  unauthorizedHandler = handler
+  return () => { unauthorizedHandler = undefined }
 }
 
 export interface Wallet {
   wallet_id: string
+  owner_id: string
   participant_id: string
   wallet_type: string
   tier: string
@@ -137,9 +142,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (currentToken) headers['Authorization'] = `Bearer ${currentToken}`
   const res = await fetch(`${API_BASE}${path}`, {
-    headers,
     ...options,
+    headers: { ...headers, ...(options?.headers ?? {}) },
   })
+  if (res.status === 401) {
+    setAccessToken('')
+    unauthorizedHandler?.()
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }))
     throw new Error(err.message || err.detail?.[0]?.msg || res.statusText)
@@ -154,7 +163,7 @@ export function login(data: { username: string; password: string }) {
 }
 export function getMe() { return request<MeResponse>('/auth/me') }
 
-export function createWallet(data: { participant_id: string; tier?: string }) {
+export function createWallet(data: { owner_id: string }) {
   return request<Wallet>('/wallets', { method: 'POST', body: JSON.stringify(data) })
 }
 export function getWallets(participantId?: string) {
@@ -206,8 +215,12 @@ export function requestIssuance(data: { participant_id: string; amount: string }
 export function requestRedemption(data: { participant_id: string; amount: string }) {
   return request('/redemption-requests', { method: 'POST', body: JSON.stringify(data) })
 }
-export function submitTransfer(data: { sender_id: string; receiver_id: string; amount: string }) {
-  return request('/transfers', { method: 'POST', body: JSON.stringify(data) })
+export function submitTransfer(data: { sender_id: string; receiver_id: string; amount: string }, idempotencyKey?: string) {
+  return request('/transfers', {
+    method: 'POST',
+    headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    body: JSON.stringify(data),
+  })
 }
 export function createQrisIntent(data: {
   mode: 'static' | 'dynamic'
@@ -326,6 +339,6 @@ export async function getTotalSupply(): Promise<{ totalSupply: number }> {
 }
 
 // Transfer alias matching Transfer.tsx usage
-export function transfer(data: { senderId: string; receiverId: string; amount: number }) {
-  return submitTransfer({ sender_id: data.senderId, receiver_id: data.receiverId, amount: String(data.amount) })
+export function transfer(data: { senderId: string; receiverId: string; amount: number }, idempotencyKey?: string) {
+  return submitTransfer({ sender_id: data.senderId, receiver_id: data.receiverId, amount: String(data.amount) }, idempotencyKey)
 }

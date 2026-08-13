@@ -58,6 +58,7 @@ func TestRetailTransferRejectsForeignSenderWallet(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/transfers",
 		strings.NewReader(`{"sender_id":"wlt_alice","receiver_id":"wlt_bob","amount":"1000"}`))
+	req.Header.Set("Idempotency-Key", "transfer-foreign")
 	req = requestWithIdentity(req, middleware.RoleKycVerified, "mallory")
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, req)
@@ -140,6 +141,7 @@ func TestRetailTransferAllowsOwnedSenderWallet(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/transfers",
 		strings.NewReader(`{"sender_id":"wlt_alice","receiver_id":"wlt_bob","amount":"1000"}`))
+	req.Header.Set("Idempotency-Key", "transfer-owned")
 	req = requestWithIdentity(req, middleware.RoleKycVerified, "alice")
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, req)
@@ -170,8 +172,52 @@ func TestRetailWalletListIgnoresForeignParticipantFilter(t *testing.T) {
 		t.Fatalf("wallet list evaluations = %+v", contract.evaluations)
 	}
 	call := contract.evaluations[0]
-	if call.name != "ListWallets" || len(call.args) != 1 || call.args[0] != "mallory" {
-		t.Fatalf("wallet list call = %+v, want ListWallets(mallory)", call)
+	if call.name != "ListWalletsByOwner" || len(call.args) != 1 || call.args[0] != "mallory" {
+		t.Fatalf("wallet list call = %+v, want ListWalletsByOwner(mallory)", call)
+	}
+}
+
+func TestRetailBalancesAreScopedToOwnedWallets(t *testing.T) {
+	contract := &authorizationContract{
+		walletOwners: map[string]string{"wlt_alice": "alice"},
+	}
+	router := mux.NewRouter()
+	svc := services.NewLedgerServiceForTest(contract, nil, "")
+	New(svc, nil).RegisterRoutes(router)
+
+	req := httptest.NewRequest(http.MethodGet, "/balances", nil)
+	req = requestWithIdentity(req, middleware.RoleKycVerified, "alice")
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, req)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("balances got %d, want 200", response.Code)
+	}
+	body := response.Body.String()
+	if !strings.Contains(body, "wlt_alice") || strings.Contains(body, "wlt_other") {
+		t.Fatalf("scoped balances body = %s", body)
+	}
+}
+
+func TestRetailBalancesDoNotUseSharedCustodianAsOwnership(t *testing.T) {
+	contract := &authorizationContract{
+		walletOwners: map[string]string{"wlt_alice": "alice"},
+	}
+	router := mux.NewRouter()
+	svc := services.NewLedgerServiceForTest(contract, nil, "")
+	New(svc, nil).RegisterRoutes(router)
+
+	req := httptest.NewRequest(http.MethodGet, "/balances", nil)
+	req = requestWithIdentity(req, middleware.RoleKycVerified, "alice")
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, req)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("balances got %d, want 200", response.Code)
+	}
+	body := response.Body.String()
+	if !strings.Contains(body, "wlt_alice") || strings.Contains(body, "wlt_same-custodian") {
+		t.Fatalf("shared-custodian balances body = %s", body)
 	}
 }
 
@@ -195,7 +241,14 @@ type authorizationContract struct {
 
 func (c *authorizationContract) SubmitTransaction(name string, args ...string) ([]byte, error) {
 	c.submissions = append(c.submissions, contractCall{name: name, args: append([]string(nil), args...)})
-	return []byte("{}"), nil
+	switch name {
+	case "Transfer":
+		return []byte(`{"status":"settled","tx_id":"tx-1","reference_id":"` + args[3] + `","sender_id":"` + args[0] + `","receiver_id":"` + args[1] + `","amount":1000}`), nil
+	case "PayQris":
+		return []byte(`{"status":"paid","tx_id":"tx-1"}`), nil
+	default:
+		return []byte("{}"), nil
+	}
 }
 
 func (c *authorizationContract) EvaluateTransaction(name string, args ...string) ([]byte, error) {
@@ -207,8 +260,14 @@ func (c *authorizationContract) EvaluateTransaction(name string, args ...string)
 			"owner_id":  c.walletOwners[args[0]],
 		}
 		return json.Marshal(wallet)
-	case "ListWallets":
-		return []byte("[]"), nil
+	case "ListWallets", "ListWalletsByOwner":
+		return []byte(`[{"wallet_id":"wlt_alice","owner_id":"alice","participant_id":"part-alice"}]`), nil
+	case "GetBalances":
+		return []byte(`[
+			{"participant_id":"part-alice","wallet_id":"wlt_alice","balance":1000,"reserve_balance":0},
+				{"participant_id":"part-alice","wallet_id":"wlt_same-custodian","balance":8888,"reserve_balance":0},
+				{"participant_id":"part-other","wallet_id":"wlt_other","balance":9999,"reserve_balance":0}
+		]`), nil
 	default:
 		return []byte("{}"), nil
 	}

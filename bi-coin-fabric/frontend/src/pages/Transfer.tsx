@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { transfer, getWallets, type Wallet } from '../lib/api'
 import type { DemoPrefill } from './DemoPanel'
 
@@ -17,6 +17,8 @@ export default function Transfer({ selectedWallet, prefill, onPrefillConsumed }:
   const [amount, setAmount] = useState(0)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const idempotencyKey = useRef(crypto.randomUUID())
 
   useEffect(() => {
     getWallets().then(ws => setWallets(ws ?? [])).catch(() => {})
@@ -35,18 +37,22 @@ export default function Transfer({ selectedWallet, prefill, onPrefillConsumed }:
   }, [prefill])
 
   const walletLabel = (w: Wallet) =>
-    `${w.wallet_id} · ${w.participant_id} · ${fmt(w.balance)}`
+    `${w.wallet_id} · ${w.owner_id || w.participant_id} · custodian ${w.participant_id} · ${fmt(w.balance)}`
 
   const submit = async () => {
     if (!senderId || !receiverId) { setError('Pilih dompet pengirim dan penerima'); return }
     try {
       setError('')
       setMessage('')
-      await transfer({ senderId, receiverId, amount })
+      setSubmitting(true)
+      await transfer({ senderId, receiverId, amount }, idempotencyKey.current)
       setMessage(`${fmt(amount)} berhasil ditransfer`)
       setAmount(0)
+      idempotencyKey.current = crypto.randomUUID()
     } catch (e: any) {
       setError(e.message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -99,9 +105,10 @@ export default function Transfer({ selectedWallet, prefill, onPrefillConsumed }:
         </div>
         <button
           onClick={submit}
-          style={{ padding: '14px 0', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, fontSize: '1.05rem', fontWeight: 700, cursor: 'pointer' }}
+          disabled={submitting}
+          style={{ padding: '14px 0', background: submitting ? '#93c5fd' : '#2563eb', color: '#fff', border: 'none', borderRadius: 8, fontSize: '1.05rem', fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer' }}
         >
-          Kirim Transfer
+          {submitting ? 'Mengirim…' : 'Kirim Transfer'}
         </button>
       </div>
       {message && (

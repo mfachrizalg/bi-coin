@@ -2,47 +2,74 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Garuda Digital Rupiah API Gateway — Role: merchant",
-    "description": "Filtered API spec for thesis role: **merchant**.\n\nIncluded OpenAPI tag groups: []\n\nThis embedded role-filtered API spec is maintained with the backend role surface.",
-    "version": "0.1.0"
+    "version": "0.3.0",
+    "description": "Merchant QRIS and payment surface."
   },
   "paths": {
-    "/wallets": {
+    "/health": {
       "get": {
         "tags": [
-          "wallets"
+          "system"
         ],
-        "summary": "List wallets",
-        "description": "Returns wallets, optionally filtered by participant.",
-        "operationId": "list_wallets_wallets_get",
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "participant_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Participant Id"
-            }
-          }
-        ],
+        "summary": "Health check",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Healthy",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login and receive JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           },
@@ -59,41 +86,111 @@
         }
       }
     },
-    "/transfers": {
-      "post": {
+    "/auth/me": {
+      "get": {
         "tags": [
-          "liquidity"
+          "auth"
         ],
-        "summary": "Submit wholesale transfer",
-        "description": "Transfers wholesale Rupiah Digital between active participants. ",
-        "operationId": "transfer_request_transfers_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TransferRequestBody"
-              },
-              "examples": {
-                "successful_transfer": {
-                  "summary": "Bank A pays Bank B",
-                  "description": "Run after both banks are approved and Bank A has issued balance.",
-                  "value": {
-                    "sender_id": "bank-a",
-                    "receiver_id": "bank-b",
-                    "amount": "75"
-                  }
+        "summary": "Current authenticated principal",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated principal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
                 }
               }
             }
           },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/network/topology": {
+      "get": {
+        "tags": [
+          "network"
+        ],
+        "summary": "Network topology",
+        "responses": {
+          "200": {
+            "description": "Topology",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallets": {
+      "get": {
+        "tags": [
+          "wallets"
+        ],
+        "summary": "List wallets",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "participant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional participant filter. Retail actors remain scoped server-side."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           },
@@ -106,74 +203,59 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ]
+        }
       }
     },
     "/balances": {
       "get": {
         "tags": [
-          "liquidity"
+          "wallets"
         ],
-        "summary": "List participant Digital Rupiah balances",
-        "description": "Returns simulated wholesale Rupiah Digital balances by participant id.",
-        "operationId": "balances_balances_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
+        "summary": "List balances visible to the authenticated actor",
         "security": [
           {
-            "APIKeyHeader": []
+            "BearerAuth": []
           }
-        ]
-      }
-    },
-    "/redemption-requests": {
-      "post": {
-        "tags": [
-          "liquidity"
         ],
-        "summary": "Request wholesale Digital Rupiah redemption",
-        "description": "Burns the participant ledger balance first, then credits the mock RTGS reserve account.",
-        "operationId": "redemption_request_redemption_requests_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AmountRequestBody"
-              },
-              "examples": {
-                "redeem_bank_a": {
-                  "summary": "Redeem 50 from Bank A",
-                  "description": "Run after Bank A has issued balance.",
-                  "value": {
-                    "participant_id": "bank-a",
-                    "amount": "50"
-                  }
+        "responses": {
+          "200": {
+            "description": "Visible balances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletList"
                 }
               }
             }
           },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           },
@@ -186,17 +268,652 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
-        },
+        }
+      }
+    },
+    "/transfers": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Transfer retail Digital Rupiah",
+        "description": "Requires wallet ownership and an Idempotency-Key header.",
         "security": [
           {
-            "APIKeyHeader": []
+            "BearerAuth": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Required on replay-safe money mutations. Reuse the same key only when retrying the same logical request."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transfer receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qris/resolve": {
+      "post": {
+        "tags": [
+          "qris"
+        ],
+        "summary": "Resolve QRIS payload",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveQrisRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolved QRIS intent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrisIntent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qris/pay": {
+      "post": {
+        "tags": [
+          "qris"
+        ],
+        "summary": "Pay QRIS intent",
+        "description": "Requires payer wallet ownership and an Idempotency-Key header.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Required on replay-safe money mutations. Reuse the same key only when retrying the same logical request."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayQrisRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QRIS payment receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrisPayResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qris/intents": {
+      "post": {
+        "tags": [
+          "qris"
+        ],
+        "summary": "Create merchant QRIS intent",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQrisIntentRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created intent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrisIntent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "qris"
+        ],
+        "summary": "List merchant QRIS intents",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intent list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrisIntentList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qris/intents/{intent_id}": {
+      "get": {
+        "tags": [
+          "qris"
+        ],
+        "summary": "Get merchant QRIS intent",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Intent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrisIntent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qris/intents/{intent_id}/cancel": {
+      "post": {
+        "tags": [
+          "qris"
+        ],
+        "summary": "Cancel merchant QRIS intent",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancelled intent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrisIntent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Use Authorization: Bearer <JWT> from POST /auth/login."
+      }
+    },
+    "parameters": {
+      "ParticipantFilter": {
+        "name": "participant_id",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Optional participant filter. Retail actors remain scoped server-side."
+      },
+      "ScopeQuery": {
+        "name": "scope",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ProfileID": {
+        "name": "profile_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ParticipantID": {
+        "name": "participant_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IntentID": {
+        "name": "intent_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IdempotencyKeyHeader": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Required on replay-safe money mutations. Reuse the same key only when retrying the same logical request."
+      }
+    },
     "schemas": {
       "AmountRequestBody": {
         "properties": {
@@ -239,33 +956,19 @@
         }
       },
       "CreateWalletRequestBody": {
-        "properties": {
-          "participant_id": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Participant Id",
-            "description": "Participant who owns the wallet.",
-            "examples": [
-              "bank-a"
-            ]
-          },
-          "wallet_type": {
-            "$ref": "#/components/schemas/WalletType",
-            "description": "Hot wallet (online) or cold wallet.",
-            "default": "hot",
-            "examples": [
-              "hot"
-            ]
-          }
-        },
         "type": "object",
         "required": [
-          "participant_id"
+          "owner_id"
         ],
-        "title": "CreateWalletRequestBody",
+        "properties": {
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Retail subject or institutional owner bound to the wallet."
+          }
+        },
         "example": {
-          "participant_id": "bank-a",
-          "wallet_type": "hot"
+          "owner_id": "cust_bank_a_customer_01"
         }
       },
       "HTTPValidationError": {
@@ -703,54 +1406,31 @@
         }
       },
       "TransferRequestBody": {
-        "properties": {
-          "sender_id": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Sender Id",
-            "description": "Participant whose Rupiah Digital balance will be debited.",
-            "examples": [
-              "bank-a"
-            ]
-          },
-          "receiver_id": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Receiver Id",
-            "description": "Participant whose Rupiah Digital balance will be credited.",
-            "examples": [
-              "bank-b"
-            ]
-          },
-          "amount": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              }
-            ],
-            "title": "Amount",
-            "description": "Wholesale transfer amount. ",
-            "examples": [
-              "75"
-            ]
-          }
-        },
         "type": "object",
         "required": [
           "sender_id",
           "receiver_id",
           "amount"
         ],
-        "title": "TransferRequestBody",
+        "properties": {
+          "sender_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receiver_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
+          }
+        },
         "example": {
-          "amount": "75",
-          "receiver_id": "bank-b",
-          "sender_id": "bank-a"
+          "sender_id": "wlt_cust_bank_a_customer_01",
+          "receiver_id": "wlt_cust_bank_b_customer_02",
+          "amount": "25000"
         }
       },
       "ValidationError": {
@@ -808,15 +1488,465 @@
           "standard",
           "enhanced"
         ]
-      }
-    },
-    "securitySchemes": {
-      "APIKeyHeader": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-API-Key"
+      },
+      "LoginRequestBody": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "username": "bi",
+          "password": "bi-password"
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "role"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "example": "Bearer"
+          },
+          "expires_in": {
+            "type": "integer"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "custodian_msp_id": {
+            "type": "string"
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "required": [
+          "username",
+          "role"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "custodian_msp_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "status": "ok"
+        }
+      },
+      "GenericObject": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GenericArray": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "Wallet": {
+        "type": "object",
+        "required": [
+          "wallet_id",
+          "owner_id",
+          "participant_id",
+          "wallet_type",
+          "balance",
+          "frozen"
+        ],
+        "properties": {
+          "wallet_id": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "wallet_type": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "integer"
+          },
+          "frozen": {
+            "type": "boolean"
+          },
+          "daily_spent": {
+            "type": "integer"
+          },
+          "monthly_spent": {
+            "type": "integer"
+          },
+          "monthly_received": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "WalletList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Wallet"
+        }
+      },
+      "TransferResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          },
+          "sender_id": {
+            "type": "string"
+          },
+          "receiver_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AmountResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          }
+        }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "ResolveQrisRequestBody": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "QrisMode": {
+        "type": "string",
+        "enum": [
+          "static",
+          "dynamic"
+        ]
+      },
+      "QrisStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "paid",
+          "cancelled",
+          "expired"
+        ]
+      },
+      "CreateQrisIntentRequestBody": {
+        "type": "object",
+        "required": [
+          "mode",
+          "merchant_wallet_id"
+        ],
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/QrisMode"
+          },
+          "merchant_wallet_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PayQrisRequestBody": {
+        "type": "object",
+        "required": [
+          "payload",
+          "payer_wallet_id"
+        ],
+        "properties": {
+          "payload": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payer_wallet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      },
+      "QrisIntent": {
+        "type": "object",
+        "required": [
+          "intent_id",
+          "mode",
+          "merchant_id",
+          "merchant_wallet_id",
+          "amount",
+          "status",
+          "reference_id",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "intent_id": {
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/QrisMode"
+          },
+          "merchant_id": {
+            "type": "string"
+          },
+          "merchant_wallet_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QrisStatus"
+          },
+          "label": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paid_by_wallet_id": {
+            "type": "string"
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "QrisIntentList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QrisIntent"
+        }
+      },
+      "QrisPayResult": {
+        "type": "object",
+        "required": [
+          "status",
+          "intent_id",
+          "reference_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "intent_id": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          }
+        }
+      },
+      "DistributeRequestBody": {
+        "type": "object",
+        "required": [
+          "sender_participant_id",
+          "receiver_participant_id",
+          "amount"
+        ],
+        "properties": {
+          "sender_participant_id": {
+            "type": "string"
+          },
+          "receiver_participant_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "RtgsIssuanceRequestBody": {
+        "type": "object",
+        "required": [
+          "sender_bic",
+          "amount",
+          "reference"
+        ],
+        "properties": {
+          "sender_bic": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RtgsIssuanceReceipt": {
+        "type": "object",
+        "required": [
+          "status",
+          "reference",
+          "amount",
+          "participant_id",
+          "sender_bic",
+          "tx_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "sender_bic": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          }
+        }
       }
     }
-  },
-  "tags": []
+  }
 }

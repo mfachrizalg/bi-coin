@@ -70,3 +70,38 @@ test('measured transfer returns a failed Caliper result without terminating the 
 
     assert.equal(await workload.submitTransaction(), failedResult);
 });
+
+test('population setup completes wallets before serialized funding', async () => {
+    const calls = [];
+    const active = { setup: 0, mint: 0 };
+    const maximum = { setup: 0, mint: 0 };
+    const workload = new RetailTransferWorkload();
+    workload.workerIndex = 0;
+    workload.totalWorkers = 1;
+    workload.roundIndex = 0;
+    workload.submit = async (fn, args) => {
+        calls.push({ fn, wallet: args[0] });
+        const phase = fn === 'Mint' ? 'mint' : 'setup';
+        active[phase] += 1;
+        maximum[phase] = Math.max(maximum[phase], active[phase]);
+        await new Promise(resolve => setImmediate(resolve));
+        active[phase] -= 1;
+        return [{ status: 'success' }];
+    };
+
+    await workload.seedPopulation({
+        numCustomers: 2,
+        numMerchants: 0,
+        fundedRatio: 1,
+        fundStandard: 5000000,
+        fundBasic: 500000,
+        seed: true,
+    });
+
+    const firstMint = calls.findIndex(call => call.fn === 'Mint');
+    assert.ok(firstMint > 0);
+    assert.ok(calls.slice(0, firstMint).every(call => call.fn !== 'Mint'));
+    assert.ok(maximum.setup > 1);
+    assert.equal(maximum.mint, 1);
+    assert.equal(calls.filter(call => call.fn === 'Mint').length, 2);
+});

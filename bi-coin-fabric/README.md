@@ -87,24 +87,28 @@ Default PoC users are defined in `.env.example`, for example `bi` / `bi-password
 | GET | `/auth/me` | Current authenticated user |
 | POST | `/kyc/profiles` | Store raw KYC off-chain and anchor sanitized status on Fabric |
 | POST | `/kyc/profiles/:profile_id/refresh` | Store provider result off-chain and update Fabric KYC anchor |
-| POST | `/wallets` | Create wallet |
-| POST | `/transfers` | Transfer with KYC and tier-limit enforcement |
+| POST | `/wallets` | Create wallet from `{ "owner_id": ... }` |
+| POST | `/transfers` | Transfer with KYC and tier-limit enforcement; requires `Idempotency-Key` |
+| POST | `/qris/pay` | Settle QRIS payment; requires `Idempotency-Key` |
+| POST | `/distribute` | BI-only wholesale distribution; requires `Idempotency-Key` |
 
 ## Chaincode Functions
 
 | Function | Args | Authority |
 |----------|------|-----------|
 | `InitLedger` | — | Admin |
-| `CreateWallet` | walletID, ownerID, tier | Bank/PJP |
+| `CreateWholesaleWallet` | walletID, participantID, walletType | Institution |
 | `GetWallet` | walletID | Query |
-| `GetAllWallets` | — | Query |
-| `Transfer` | senderID, receiverID, amount | Sender |
-| `FreezeWallet` | walletID | Admin |
-| `UnfreezeWallet` | walletID | Admin |
-| `SetTierLimit` | tier, maxBalance, minBalance, dailyTxLimit, monthlyTxLimit, monthlyIncomingLimit, perTxLimit | Admin |
-| `GetTierLimit` | tier | Query |
+| `ListWalletsByParticipant` | participantID | Query |
+| `Transfer` | senderID, receiverID, amount, referenceID | Sender custodian |
+| `PayQris` | payload, payerWalletID, amount, referenceID | Payer custodian |
+| `DistributeToParticipant` | senderParticipantID, receiverParticipantID, amount, referenceID | Bank Indonesia |
+| `RequestIssuanceRtgs` | senderBIC, amount, reference | Bank Indonesia |
+| `SetSystemLimit` | scope, value | Bank Indonesia |
+| `ListSystemLimits` | — | Query |
 | `GetTotalSupply` | — | Query |
-| `GetAuditLog` | walletID | Query |
+| `GetTransactions` | — | Oversight query |
+| `GetSupervisionEvents` | — | Oversight query |
 
 ## Environment Variables
 

@@ -1,36 +1,30 @@
 \textit{
 Bank Indonesia's public Project Garuda experiments focus on wholesale central
 bank digital currency. This study asks how a testable retail Digital Rupiah
-prototype can represent two-tier distribution, wallet policies, and
-institutional oversight on a permissioned ledger. It uses Hyperledger Fabric
-2.5, Go chaincode and backend services, CouchDB, and PostgreSQL.
+prototype can represent a two-tier distribution model and institutional
+oversight on a permissioned ledger. It uses Hyperledger Fabric 2.5, Go
+chaincode and backend services, CouchDB, and PostgreSQL.
 }
 
 \textit{
-Raw identity data remains in PostgreSQL; the ledger stores KYC status, risk,
-expiry, and document hashes. This separation does not provide transaction
-privacy on the shared channel. Banks or payment service providers supply KYC
-decisions. The chaincode derives BASIC, STANDARD, and MERCHANT wallet tiers and
-validates transaction, daily, monthly, and balance limits. Backend ownership
-and chaincode MSP checks enforce user and organization boundaries. These
-controls do not demonstrate complete AML/CFT compliance or four-eyes approval.
+The prototype separates institutional and retail roles. Backend ownership and
+chaincode MSP checks enforce user and organization boundaries. The shared Fabric
+channel does not provide transaction privacy.
 }
 
 \textit{
-Automated tests and exact-diagnostic negative paths evaluate authorization and
-policy enforcement. Hyperledger Caliper evaluates a fixed retail population
+Automated tests evaluate authorization and transfer safety. Hyperledger Caliper evaluates a fixed retail population
 under 10, 30, and 60 TPS offered loads, with a clean ledger for each profile,
 deterministic seeding, repeated peak rounds, and an aggregate-overspend
 scenario. At a 30 TPS offered load, successful throughput reaches 29.5 TPS
-without failures; at 60 TPS, it ranges from 41.2 to 47.0 TPS. All seven negative
-cases are rejected for the expected reason. In the overspend scenario, 4 of 200
+without failures; at 60 TPS, it ranges from 41.2 to 47.0 TPS. In the overspend scenario, 4 of 200
 transfers commit and the final balance remains nonnegative. These results form a
 repeatable local baseline, not evidence of cross-machine reproducibility or
 production capacity. The prototype is an auditable artifact for retail Digital
-Rupiah policy experiments within the stated limitations.
+Rupiah experiments within the stated limitations.
 }
 
 \vspace{0.5cm}
 
 \noindent\textbf{Keywords}: Digital Rupiah, retail CBDC, Hyperledger Fabric,
-risk-based KYC, wallet limits
+two-tier distribution, performance evaluation

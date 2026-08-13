@@ -66,7 +66,7 @@ func TestCreateRetailCustomerStopsWhenOffChainStoreFails(t *testing.T) {
 		LegalName:       "Alice Customer",
 		WalletAccountID: "acct-1",
 	})
-	if err == nil || err.Error() != "off-chain CreateRetailCustomer: postgres unavailable" {
+	if err == nil || err.Error() != "failed to persist retail customer: postgres unavailable" {
 		t.Fatalf("create retail customer err = %v, want wrapped store error", err)
 	}
 	if contract.submittedName != "" {
@@ -83,25 +83,26 @@ func TestTransferRejectsInvalidAmountBeforeSubmitting(t *testing.T) {
 		ReceiverID: "wlt-b",
 		Amount:     "bad-amount",
 	})
-	if err == nil || err.Error() == "" {
-		t.Fatal("expected invalid amount error")
+	if err == nil || err.Error() != "invalid amount" {
+		t.Fatalf("transfer err = %v, want invalid amount", err)
 	}
 	if contract.submittedName != "" {
 		t.Fatalf("ledger call = %s %v, want no ledger call", contract.submittedName, contract.submittedArgs)
 	}
 }
 
-func TestTransferFallsBackToTransferredWhenChaincodeResultIsNotJSON(t *testing.T) {
+func TestTransferRejectsEmptyReceipt(t *testing.T) {
 	contract := &fakeLedgerContract{submitResult: []byte("not-json")}
 	svc := NewLedgerServiceForTest(contract, nil, "")
 
-	result, err := svc.Transfer(models.TransferRequest{
-		SenderID:   "wlt-a",
-		ReceiverID: "wlt-b",
-		Amount:     "1500",
+	_, err := svc.Transfer(models.TransferRequest{
+		SenderID:       "wlt-a",
+		ReceiverID:     "wlt-b",
+		Amount:         "1500",
+		IdempotencyKey: "transfer-invalid-receipt",
 	})
-	if err != nil {
-		t.Fatalf("transfer: %v", err)
+	if err == nil || err.Error() != "invalid ledger receipt: invalid character 'o' in literal null (expecting 'u')" {
+		t.Fatalf("transfer err = %v, want invalid ledger receipt", err)
 	}
 	if contract.submittedName != "Transfer" {
 		t.Fatalf("submitted %q, want Transfer", contract.submittedName)
@@ -111,9 +112,6 @@ func TestTransferFallsBackToTransferredWhenChaincodeResultIsNotJSON(t *testing.T
 		if contract.submittedArgs[i] != wantArgs[i] {
 			t.Fatalf("arg[%d] = %q, want %q", i, contract.submittedArgs[i], wantArgs[i])
 		}
-	}
-	if result.Status != "transferred" {
-		t.Fatalf("transfer result = %+v, want fallback transferred status", result)
 	}
 }
 
@@ -151,10 +149,10 @@ func TestLedgerServiceLiquidityAndLimitCommands(t *testing.T) {
 		{
 			name: "distribute to participant",
 			run: func(svc *LedgerService) error {
-				return svc.DistributeToParticipant("bank-1", "pjp-1", 900000)
+				return svc.DistributeToParticipant("bank-1", "pjp-1", 900000, "distribution-1")
 			},
 			wantName: "DistributeToParticipant",
-			wantArgs: []string{"bank-1", "pjp-1", "900000"},
+			wantArgs: []string{"bank-1", "pjp-1", "900000", operationReference(":TEST-MSP", "test", "distribution-1")},
 		},
 	}
 
@@ -254,8 +252,9 @@ func TestPayQrisMarksDynamicIntentPaidAndUsesReference(t *testing.T) {
 	contract := &fakeLedgerContract{submitResult: []byte(`{"status":"paid","tx_id":"tx-qris-1"}`)}
 	svc = NewLedgerServiceForTest(contract, store, "qris-secret")
 	result, err := svc.PayQris(models.PayQrisRequest{
-		Payload:       intent.Payload,
-		PayerWalletID: "wlt_customer-1",
+		Payload:        intent.Payload,
+		PayerWalletID:  "wlt_customer-1",
+		IdempotencyKey: "qris-pay-1",
 	})
 	if err != nil {
 		t.Fatalf("pay qris: %v", err)
@@ -274,5 +273,59 @@ func TestPayQrisMarksDynamicIntentPaidAndUsesReference(t *testing.T) {
 	}
 	if result.ReferenceID != intent.ReferenceID {
 		t.Fatalf("pay result = %+v, want reference %q", result, intent.ReferenceID)
+	}
+}
+
+func TestPayQrisReplaysRecordedReceiptAfterPersistFailure(t *testing.T) {
+	store := &memoryKycStore{markPaidErr: errors.New("db write failed")}
+	svc := NewLedgerServiceForTest(&fakeLedgerContract{}, store, "qris-secret")
+
+	intent, err := svc.CreateQrisIntent(models.CreateQrisIntentRequest{
+		Mode:             models.QrisModeDynamic,
+		MerchantID:       "merchant-1",
+		MerchantWalletID: "wlt_merchant-1",
+		Amount:           "20000",
+	})
+	if err != nil {
+		t.Fatalf("create qris intent: %v", err)
+	}
+
+	contract := &fakeLedgerContract{submitResult: []byte(`{"status":"paid","tx_id":"tx-qris-1"}`)}
+	svc = NewLedgerServiceForTest(contract, store, "qris-secret")
+
+	_, err = svc.PayQris(models.PayQrisRequest{Payload: intent.Payload, PayerWalletID: "wlt_customer-1", IdempotencyKey: "qris-pay-retry"})
+	if err == nil || err.Error() != "failed to persist QRIS payment: db write failed" {
+		t.Fatalf("first pay err = %v", err)
+	}
+	store.markPaidErr = nil
+
+	result, err := svc.PayQris(models.PayQrisRequest{Payload: intent.Payload, PayerWalletID: "wlt_customer-1", IdempotencyKey: "qris-pay-retry"})
+	if err != nil {
+		t.Fatalf("replay pay qris: %v", err)
+	}
+	if result.TxID != "tx-qris-1" || contract.submittedName != "PayQris" {
+		t.Fatalf("replay result = %+v, submissions = %s", result, contract.submittedName)
+	}
+}
+
+func TestRtgsIssuanceNotificationUsesSenderBICAndRequiresReceipt(t *testing.T) {
+	contract := &fakeLedgerContract{submitResult: []byte(`{"status":"issued","reference":"ref-1","amount":1000,"participant_id":"bank-1","sender_bic":"BANKIDJA","tx_id":"tx-rtgs-1"}`)}
+	svc := NewLedgerServiceForTest(contract, nil, "")
+
+	result, err := svc.RtgsIssuanceNotification("BANKIDJA", 1000, "ref-1")
+	if err != nil {
+		t.Fatalf("rtgs notification: %v", err)
+	}
+	if contract.submittedName != "RequestIssuanceRtgs" {
+		t.Fatalf("submitted %q", contract.submittedName)
+	}
+	wantArgs := []string{"BANKIDJA", "1000", "ref-1"}
+	for i := range wantArgs {
+		if contract.submittedArgs[i] != wantArgs[i] {
+			t.Fatalf("arg[%d] = %q, want %q", i, contract.submittedArgs[i], wantArgs[i])
+		}
+	}
+	if result["reference"] != "ref-1" {
+		t.Fatalf("result = %+v", result)
 	}
 }

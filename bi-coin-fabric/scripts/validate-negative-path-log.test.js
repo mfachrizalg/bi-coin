@@ -17,6 +17,7 @@ const reasons = [
 function validLog() {
     return [
         ...reasons.map(reason => `Failed to perform submit transaction [Transfer]\nDetails:\n- peer0:${reason}`),
+        JSON.stringify({ event: 'negative-path-oracle', rejected: 7, expected: 7, gaps: 0, reasonGaps: 0, deferredReasons: 7, infrastructureErrors: 0, verdict: 'PENDING' }),
         '[negative-path] worker 0: rejected_status=7/7, gaps=0',
         'Benchmark finished in 10 seconds. Total rounds: 1. Successful rounds: 1. Failed rounds: 0.',
     ].join('\n');

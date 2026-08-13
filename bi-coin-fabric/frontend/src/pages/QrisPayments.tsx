@@ -87,6 +87,12 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
     }
   }, [selectedWallet])
 
+  const handlePayloadChange = (nextPayload: string, nextResolved: QrisIntent | null = null) => {
+    setPayload(nextPayload)
+    setResolved(nextResolved)
+    setPayResult(null)
+  }
+
   const handleCreate = async () => {
     if (!merchantWalletId) {
       setError('Pilih dompet merchant lebih dulu')
@@ -101,8 +107,7 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
         amount: mode === 'dynamic' ? createAmount : undefined,
         label,
       })
-      setPayload(intent.payload ?? '')
-      setResolved(intent)
+      handlePayloadChange(intent.payload ?? '', intent)
       setMessage(`QRIS ${intent.mode} siap dibagikan`)
       await loadIntents()
     } catch (e: any) {
@@ -119,7 +124,7 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
       setError('')
       setMessage('')
       const intent = await resolveQrisPayload(payload)
-      setResolved(intent)
+      handlePayloadChange(payload, intent)
       setPayAmount(intent.amount > 0 ? String(intent.amount) : payAmount)
     } catch (e: any) {
       setError(e.message)
@@ -173,7 +178,7 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
           {payload ? (
             <div className="stack-small">
               <PrototypeQrisCard payload={payload} />
-              <textarea className="app-textarea" rows={5} value={payload} onChange={e => setPayload(e.target.value)} />
+              <textarea className="app-textarea" rows={5} value={payload} onChange={e => handlePayloadChange(e.target.value)} />
             </div>
           ) : (
             <p className="muted">Belum ada payload aktif. Merchant bisa membuat QRIS baru, customer bisa menempel payload dari merchant.</p>
@@ -195,7 +200,7 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
                 <span>Dompet merchant</span>
                 <select className="app-input" value={merchantWalletId} onChange={e => setMerchantWalletId(e.target.value)}>
                   <option value="">Pilih dompet</option>
-                  {wallets.map(wallet => <option key={wallet.wallet_id} value={wallet.wallet_id}>{wallet.wallet_id} · {wallet.participant_id}</option>)}
+                  {wallets.map(wallet => <option key={wallet.wallet_id} value={wallet.wallet_id}>{wallet.wallet_id} · {wallet.owner_id || wallet.participant_id} · custodian {wallet.participant_id}</option>)}
                 </select>
               </label>
               {mode === 'dynamic' && (
@@ -229,7 +234,7 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
                   <span>Dompet payer</span>
                   <select className="app-input" value={payerWalletId} onChange={e => setPayerWalletId(e.target.value)}>
                     <option value="">Pilih dompet</option>
-                    {wallets.map(wallet => <option key={wallet.wallet_id} value={wallet.wallet_id}>{wallet.wallet_id} · {wallet.participant_id}</option>)}
+                    {wallets.map(wallet => <option key={wallet.wallet_id} value={wallet.wallet_id}>{wallet.wallet_id} · {wallet.owner_id || wallet.participant_id} · custodian {wallet.participant_id}</option>)}
                   </select>
                 </label>
                 {resolved.mode === 'static' ? (
@@ -261,7 +266,7 @@ export default function QrisPayments({ role, selectedWallet }: Props) {
                   <div className="muted">{intent.mode} · {intent.amount > 0 ? fmt(intent.amount) : 'nominal diisi payer'}</div>
                   <div className="muted">{intent.reference_id}</div>
                   <div className="intent-actions">
-                    <button className="secondary-button" onClick={() => { setPayload(intent.payload ?? ''); setResolved(intent) }}>Pakai</button>
+                    <button className="secondary-button" onClick={() => handlePayloadChange(intent.payload ?? '', intent)}>Pakai</button>
                     {(intent.status === 'pending' || intent.status === 'active') && (
                       <button className="secondary-button danger" onClick={() => handleCancel(intent.intent_id)}>Cancel</button>
                     )}

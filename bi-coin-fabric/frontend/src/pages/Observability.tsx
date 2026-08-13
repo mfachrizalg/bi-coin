@@ -11,19 +11,24 @@ export default function Observability() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       getMetrics(),
       getTopology(),
       listLimits(),
       getTransactions({ transaction_type: 'qris_payment' }),
     ])
-      .then(([nextMetrics, nextTopology, nextLimits, nextTransactions]) => {
-        setMetrics(nextMetrics)
-        setTopology(nextTopology)
-        setLimits(nextLimits ?? [])
-        setTransactions((nextTransactions ?? []).slice(0, 8))
+      .then(results => {
+        const errors = results.filter(result => result.status === 'rejected').map(result => String(result.reason?.message ?? result.reason))
+        if (errors.length) setError(errors.join('; '))
+        const [metricsResult, topologyResult, limitsResult, transactionsResult] = results
+        if (metricsResult.status === 'fulfilled') setMetrics(metricsResult.value)
+        if (topologyResult.status === 'fulfilled') setTopology(topologyResult.value)
+        if (limitsResult.status === 'fulfilled') setLimits(limitsResult.value ?? [])
+        if (transactionsResult.status === 'fulfilled') {
+          setTransactions((transactionsResult.value ?? []).slice().sort((a, b) =>
+            Date.parse(b.timestamp) - Date.parse(a.timestamp)).slice(0, 8))
+        }
       })
-      .catch(e => setError(e.message))
   }, [])
 
   return (

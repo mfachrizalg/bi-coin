@@ -16,17 +16,8 @@ interface DemoStep {
   title: string
   description: string
   thesis?: string
-  credentials?: { username: string; password: string }
   prefill?: DemoPrefill
   manualAction?: string
-}
-
-const CREDS = {
-  bi:       { username: 'bi',       password: 'bi-password' },
-  pjp:      { username: 'pjp',      password: 'pjp-password' },
-  customer: { username: 'customer', password: 'customer-password' },
-  merchant: { username: 'merchant', password: 'merchant-password' },
-  supervisor: { username: 'supervisor', password: 'supervisor-password' },
 }
 
 const STEPS: DemoStep[] = [
@@ -41,7 +32,6 @@ const STEPS: DemoStep[] = [
     title: 'Register Bank Himbara',
     description: 'BI registers Himbara (BUMN bank) as a validator node on the Digital Rupiah network.',
     thesis: 'Two-tier model: BI is Tier-1 issuer; banks are Tier-2 distributors.',
-    credentials: CREDS.bi,
     prefill: {
       target: 'submit',
       participant_id: 'himbara',
@@ -62,7 +52,6 @@ const STEPS: DemoStep[] = [
     title: 'Approve Himbara (KYC/AML)',
     description: 'BI reviews compliance and approves Himbara to participate in the network.',
     thesis: 'Permissioned network: only BI-approved participants can hold or transfer Digital Rupiah.',
-    credentials: CREDS.bi,
     manualAction: 'Click the Approve button on the himbara row in the table.',
   },
   {
@@ -76,7 +65,6 @@ const STEPS: DemoStep[] = [
     title: 'Issue Rp 100,000,000 to Himbara',
     description: 'BI mints Digital Rupiah and credits Himbara\'s reserve balance (wholesale issuance).',
     thesis: 'Only BI can mint. Supply is recorded on-chain and verifiable by all peers.',
-    credentials: CREDS.bi,
     prefill: {
       target: 'issue',
       participant_id: 'himbara',
@@ -94,7 +82,6 @@ const STEPS: DemoStep[] = [
     title: 'Register GoPay as PJP',
     description: 'Himbara onboards GoPay (Payment Service Provider) to serve retail customers.',
     thesis: 'PJPs extend reach to end users — retail distribution layer.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'submit',
       participant_id: 'gopay',
@@ -115,7 +102,6 @@ const STEPS: DemoStep[] = [
     title: 'BI Approves GoPay PJP',
     description: 'BI approves GoPay, enabling retail wallet custody under GoPay.',
     thesis: 'Approval on-chain: immutable governance audit trail via Fabric ledger.',
-    credentials: CREDS.bi,
     manualAction: 'Click the Approve button on the gopay row in the table.',
   },
   {
@@ -129,7 +115,6 @@ const STEPS: DemoStep[] = [
     title: 'Himbara → GoPay: Distribute Rp 30,000,000',
     description: 'Himbara distributes wholesale liquidity to GoPay for retail customer payments.',
     thesis: 'Wholesale → retail bridge: second tier of the two-tier CBDC model.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'distribute',
       sender: 'himbara',
@@ -148,7 +133,6 @@ const STEPS: DemoStep[] = [
     title: 'Store Budi KYC Off-Chain',
     description: 'GoPay verifies Budi Santoso identity data, stores it in the off-chain KYC database, and anchors only its hash on Fabric.',
     thesis: 'Privacy boundary: raw KYC stays off-chain; Fabric stores KYC status and document hash anchors.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'kyc-customer',
       customer_id: 'budi',
@@ -157,7 +141,6 @@ const STEPS: DemoStep[] = [
       document_number: '3173000101010001',
       wallet_account_id: 'ACC-BUDI-001',
       provider_case_id: 'case-budi',
-      tier: 'BASIC',
     },
   },
   {
@@ -171,7 +154,6 @@ const STEPS: DemoStep[] = [
     title: 'Approve Budi KYC Anchor',
     description: 'Refresh the Fabric KYC anchor to approved after the off-chain provider result passes AML checks.',
     thesis: 'Chaincode enforces spending only when the subject has an approved KYC anchor.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'kyc-approve',
       customer_id: 'budi',
@@ -189,10 +171,9 @@ const STEPS: DemoStep[] = [
     title: 'Create Budi Wallet',
     description: 'Create wallet wlt_budi after Budi has an approved KYC subject anchor. Chaincode derives BASIC.',
     thesis: 'Wallet ownership uses the retail KYC subject ID, not the PJP participant ID.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'wallet',
-      participant_id: 'budi',
+      owner_id: 'budi',
     },
   },
   {
@@ -206,7 +187,6 @@ const STEPS: DemoStep[] = [
     title: 'Store Sari KYC Off-Chain',
     description: 'GoPay verifies Sari Wulandari identity data off-chain and anchors only hash evidence on Fabric.',
     thesis: 'Retail CBDC should separate identity records from ledger balances and payments.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'kyc-customer',
       customer_id: 'sari',
@@ -215,7 +195,6 @@ const STEPS: DemoStep[] = [
       document_number: '3173000202020002',
       wallet_account_id: 'ACC-SARI-001',
       provider_case_id: 'case-sari',
-      tier: 'BASIC',
     },
   },
   {
@@ -229,7 +208,6 @@ const STEPS: DemoStep[] = [
     title: 'Approve Sari KYC Anchor',
     description: 'Refresh the Fabric KYC anchor to approved for Sari.',
     thesis: 'Approved KYC is a spending precondition, while raw KYC details remain in PostgreSQL.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'kyc-approve',
       customer_id: 'sari',
@@ -247,10 +225,9 @@ const STEPS: DemoStep[] = [
     title: 'Create Sari Wallet',
     description: 'Create wallet wlt_sari for Sari after KYC approval. Chaincode derives BASIC.',
     thesis: 'The wallet subject ID links payment enforcement to the approved KYC anchor.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'wallet',
-      participant_id: 'sari',
+      owner_id: 'sari',
     },
   },
   {
@@ -264,7 +241,6 @@ const STEPS: DemoStep[] = [
     title: 'Store Merchant KYC Off-Chain',
     description: 'GoPay verifies Toko Budi merchant identity off-chain before creating its receiving wallet.',
     thesis: 'Merchant onboarding follows the same off-chain KYC privacy boundary as retail users.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'kyc-customer',
       customer_id: 'toko-budi',
@@ -289,7 +265,6 @@ const STEPS: DemoStep[] = [
     title: 'Approve Merchant KYC Anchor',
     description: 'Refresh the Fabric KYC anchor to approved for Toko Budi.',
     thesis: 'The ledger needs only status and hash anchors to enforce eligibility.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'kyc-approve',
       customer_id: 'toko-budi',
@@ -310,10 +285,9 @@ const STEPS: DemoStep[] = [
     title: 'Create Merchant Wallet',
     description: 'Create wallet wlt_toko-budi. Chaincode derives MERCHANT from the approved merchant KYC profile.',
     thesis: 'Merchant wallets can use higher tier limits while still relying on approved KYC.',
-    credentials: CREDS.pjp,
     prefill: {
       target: 'wallet',
-      participant_id: 'toko-budi',
+      owner_id: 'toko-budi',
     },
   },
   {
@@ -327,7 +301,6 @@ const STEPS: DemoStep[] = [
     title: 'Budi Transfers Rp 150,000 to Sari',
     description: 'Peer-to-peer Digital Rupiah transfer from wlt_budi to wlt_sari after both subjects are KYC-approved.',
     thesis: 'Atomic on-chain transfer — no intermediary settlement delay.',
-    credentials: CREDS.customer,
     prefill: {
       target: 'transfer',
       senderId: 'wlt_budi',
@@ -346,7 +319,6 @@ const STEPS: DemoStep[] = [
     title: 'Sari Pays Rp 35,000 to Toko Budi',
     description: 'Customer Sari transfers Digital Rupiah directly to the approved merchant wallet.',
     thesis: 'The same deterministic transfer policy covers peer-to-peer and customer-to-merchant retail payments.',
-    credentials: CREDS.customer,
     prefill: {
       target: 'transfer',
       senderId: 'wlt_sari',
@@ -365,7 +337,6 @@ const STEPS: DemoStep[] = [
     title: 'Monitor Total Supply',
     description: 'BI views total Digital Rupiah in circulation and network metrics.',
     thesis: 'Real-time monetary monitoring — supply verifiable by all 5 peer organizations.',
-    credentials: CREDS.bi,
   },
   {
     id: 20,
@@ -378,7 +349,6 @@ const STEPS: DemoStep[] = [
     title: 'Inspect World State (CouchDB)',
     description: 'View wallets, balances, KYC anchors, and transaction records live in CouchDB Fauxton.',
     thesis: 'Full auditability: every state transition recorded on Hyperledger Fabric ledger.',
-    credentials: CREDS.bi,
   },
 ]
 
@@ -405,8 +375,9 @@ interface Props {
 export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
-  const current = STEPS.find(s => s.id === currentStep)
-  const nextStep = STEPS.find(s => s.id === currentStep + 1)
+  const currentIndex = Math.min(Math.max(currentStep - 1, 0), STEPS.length - 1)
+  const current = STEPS[currentIndex]
+  const nextStep = STEPS[currentIndex + 1]
 
   return (
     <div style={{
@@ -425,13 +396,13 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', color: '#9ca3af' }}>DEMO SCRIPT</div>
         <div style={{ fontSize: 16, fontWeight: 700, marginTop: 2 }}>Retail CBDC Flow</div>
         <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>
-          Step {currentStep} of {STEPS.length}
+          Step {currentIndex + 1} of {STEPS.length}
         </div>
         {/* progress bar */}
         <div style={{ marginTop: 8, background: '#374151', borderRadius: 4, height: 5 }}>
           <div style={{
             height: 5, borderRadius: 4, background: '#3b82f6',
-            width: `${(currentStep / STEPS.length) * 100}%`,
+            width: `${((currentIndex + 1) / STEPS.length) * 100}%`,
             transition: 'width 0.3s ease',
           }} />
         </div>
@@ -450,22 +421,7 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
             {current.roleLabel}
           </div>
 
-          {/* Credentials box */}
-          {current.credentials && (
-            <div style={{
-              marginTop: 8, padding: '8px 10px',
-              background: '#fefce8', border: '1px solid #fde047', borderRadius: 6,
-              fontSize: 14, color: '#713f12', fontFamily: 'monospace',
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <span style={{ fontSize: 16 }}>🔑</span>
-              <span>
-                <strong>{current.credentials.username}</strong>
-                {' / '}
-                <strong>{current.credentials.password}</strong>
-              </span>
-            </div>
-          )}
+          <div className="muted" style={{ marginTop: 8 }}>Login dengan kredensial yang diberikan oleh operator environment.</div>
 
           <div style={{ fontSize: 14, fontWeight: 600, marginTop: 8, color: '#111827' }}>{current.title}</div>
           <div style={{ fontSize: 13, color: '#374151', marginTop: 4, lineHeight: 1.5 }}>{current.description}</div>
@@ -495,10 +451,15 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
 
       {/* Steps list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {phases().map(group => (
+        {phases().map((group, groupIndex) => {
+          const panelId = `demo-phase-panel-${groupIndex + 1}`
+          const expanded = !collapsed[group.phase]
+          return (
           <div key={group.phase}>
             <button
               onClick={() => setCollapsed(c => ({ ...c, [group.phase]: !c[group.phase] }))}
+              aria-controls={panelId}
+              aria-expanded={expanded}
               style={{
                 width: '100%', textAlign: 'left', padding: '7px 14px',
                 background: 'none', border: 'none', cursor: 'pointer',
@@ -517,6 +478,7 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
               </span>
             </button>
 
+            <div id={panelId} hidden={!expanded}>
             {!collapsed[group.phase] && group.steps.map(step => {
               const isActive = step.id === currentStep
               const isDone = step.id < currentStep
@@ -524,6 +486,7 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
                 <button
                   key={step.id}
                   onClick={() => onStep(step.id, step.role, step.tab)}
+                  aria-current={isActive ? 'step' : undefined}
                   style={{
                     width: '100%', textAlign: 'left', padding: '9px 14px 9px 24px',
                     background: isActive ? '#eff6ff' : 'none',
@@ -558,8 +521,9 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
                 </button>
               )
             })}
+            </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Next button */}
@@ -577,7 +541,7 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
           </button>
         </div>
       )}
-      {!nextStep && currentStep === STEPS.length && (
+      {!nextStep && currentIndex === STEPS.length - 1 && (
         <div style={{ padding: 14, borderTop: '1px solid #e5e7eb', textAlign: 'center' }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#059669' }}>Demo Selesai!</div>
           <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>Semua fase telah didemonstrasikan.</div>

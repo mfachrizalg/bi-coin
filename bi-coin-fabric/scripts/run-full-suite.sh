@@ -17,12 +17,6 @@ cd "$PROJECT_DIR"
 mkdir -p "$RESULTS_DIR"
 printf 'profile\tscript\texit_status\treport\tverdict\tnote\n' >"$STATUS_FILE"
 
-if docker compose version >/dev/null 2>&1; then
-  DC=(docker compose)
-else
-  DC=(docker-compose)
-fi
-
 wait_for_fabric_ports() {
   local ports=(7050 7051 9051 11051 12051 13051)
   local attempt port ready
@@ -45,7 +39,7 @@ wait_for_fabric_ports() {
 reset_network() {
   local profile="$1"
   echo "[setup] Resetting network for ${profile}..."
-  "${DC[@]}" -f network/docker-compose.yaml down -v --remove-orphans >/dev/null 2>&1 || true
+  NETWORK_MODE=garuda NETWORK_DOWN_REMOVE_VOLUMES=true ./scripts/network-down.sh >/dev/null 2>&1 || true
 
   if ! NETWORK_MODE=garuda ./scripts/network-up.sh >"$RESULTS_DIR/${STAMP}-${profile}-network-up.log" 2>&1; then
     echo "[setup] FAILED: network-up for ${profile}"
@@ -111,11 +105,28 @@ run_benchmark() {
     else
       case "$oracle" in
       negative)
+        docker logs peer0.bi.paynet >>"$log_file" 2>&1 || true
         if node scripts/validate-negative-path-log.js "$log_file" >>"$log_file" 2>&1; then
           verdict=PASS
           note=expected-rejections-confirmed
         else
           note=negative-path-oracle-failed
+        fi
+        ;;
+      boundary)
+        if node scripts/validate-boundary-log.js "$log_file" >>"$log_file" 2>&1; then
+          verdict=PASS
+          note=boundary-oracle-confirmed
+        else
+          note=boundary-oracle-failed
+        fi
+        ;;
+      custody)
+        if node scripts/validate-authorization-log.js "$log_file" >>"$log_file" 2>&1; then
+          verdict=PASS
+          note=custody-oracle-confirmed
+        else
+          note=custody-oracle-failed
         fi
         ;;
       overspend)
@@ -169,12 +180,16 @@ for entry in "${PERFORMANCE_PROFILES[@]}"; do
   run_benchmark "${entry%%|*}" "${entry##*|}"
 done
 run_benchmark benchmark:functionality functionality
+run_benchmark benchmark:boundary boundary-path boundary
+run_benchmark benchmark:authorization authorization custody
 run_benchmark benchmark:transfer:repeat transfer-repeat
 run_benchmark benchmark:negative negative-path negative
 run_benchmark benchmark:adversarial aggregate-overspend overspend
 
 BENCHMARK_STARTED_AT="$STARTED_AT" \
   BENCHMARK_SEED="$SEED" \
+  BENCHMARK_CLEAN_LEDGER=true \
+  NETWORK_MODE=garuda \
   node scripts/write-benchmark-manifest.js "$STATUS_FILE" "$RESULTS_DIR/${STAMP}-manifest.json"
 
 echo "[done] Suite completed. Stamp: ${STAMP}; status=${OVERALL_STATUS}"

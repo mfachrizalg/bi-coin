@@ -6,7 +6,7 @@ chaincode and print the metric you need, but you must run them and paste the rea
 numbers into the paper. Do not cite any figure that has not been measured.
 
 Prerequisite: the five-organization network is up and the `digital-rupiah`
-chaincode (v2.0) is deployed, exactly as for the existing transfer benchmarks
+chaincode (v3.0, sequence 1) is deployed on a clean ledger, exactly as for the existing transfer benchmarks
 (`npm run benchmark:transfer:w2`). All commands run from `bi-coin-fabric/`.
 
 ## 1. Negative-path conformance — proves rules actually reject
@@ -14,6 +14,30 @@ chaincode (v2.0) is deployed, exactly as for the existing transfer benchmarks
 ```
 npm run benchmark:negative
 ```
+
+## 5. Custody authorization and full-suite execution
+
+```
+npm run benchmark:authorization
+```
+
+`benchmark/workloads/custody-authorization.js` uses explicit Caliper
+`invokerMspId`/`invokerIdentity` fields: BI creates the fixture, then Himbara
+tries to spend the BI-custodied wallet. The JSON `authorization-oracle` line
+must report `verdict=PASS`, a custody error, and zero infrastructure errors.
+Endorsement, timeout, and channel failures are invalid negative evidence.
+
+Run the complete evidence sequence with:
+
+```
+BENCHMARK_CLEAN_LEDGER=true ./scripts/run-full-suite.sh
+```
+
+The suite resets Garuda between profiles, runs boundary and custody
+authorization checks, and writes a schema-v2 manifest containing artifact
+SHA-256 hashes, Caliper/runtime versions, and the clean-ledger/chaincode
+version/sequence precondition. `scripts/network-down.sh` removes Docker
+volumes only when `NETWORK_DOWN_REMOVE_VOLUMES=true` is explicitly set.
 
 Workload: `benchmark/workloads/negative-path.js`. Every submission violates one
 policy rule (per-transaction cap, insufficient balance, receiver max-balance,
@@ -93,3 +117,7 @@ omitting it silently.
 Caliper writes its HTML/JSON report per the workspace config (see existing files
 in `benchmark/results/`). Record raw outputs there and cite the derived numbers in
 `paper/main.tex` (Performance Evaluation + Limitations).
+
+Keep the June 30 and July 27 result files as historical artifacts only. They
+predate the current clean-ledger v3 evidence run and must not be cited as the
+final remediation evidence.

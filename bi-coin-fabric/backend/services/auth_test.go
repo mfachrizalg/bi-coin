@@ -26,7 +26,7 @@ func TestAuthServiceLoginAndVerifyToken(t *testing.T) {
 		t.Fatalf("hash password: %v", err)
 	}
 	auth := NewAuthService(memoryUserStore{users: map[string]AuthUser{
-		"bi": {Username: "bi", PasswordHash: hash, Role: middleware.RoleBankIndonesia, Active: true},
+		"bi": {Username: "bi", PasswordHash: hash, Role: middleware.RoleBankIndonesia, SubjectID: "sub-bi", ParticipantID: "part-bi", CustodianMSPID: "BI-MSP", Active: true},
 	}}, "test-secret-32-bytes-long", time.Hour)
 
 	token, err := auth.Login(models.LoginRequest{Username: "bi", Password: "secret"})
@@ -42,6 +42,12 @@ func TestAuthServiceLoginAndVerifyToken(t *testing.T) {
 	}
 	if claims.Username != "bi" || claims.Role != middleware.RoleBankIndonesia {
 		t.Fatalf("claims = %+v", claims)
+	}
+	if claims.SubjectID != "sub-bi" || claims.ParticipantID != "part-bi" || claims.CustodianMSPID != "BI-MSP" {
+		t.Fatalf("principal claims = %+v", claims)
+	}
+	if token.SubjectID != "sub-bi" || token.ParticipantID != "part-bi" || token.CustodianMSPID != "BI-MSP" {
+		t.Fatalf("login response = %+v", token)
 	}
 }
 

@@ -89,7 +89,8 @@ export default function Overview({ role, selectedWallet }: Props) {
           {currentWallet ? (
             <div className="stack-small">
               <div className="context-row"><span>Wallet ID</span><strong>{currentWallet.wallet_id}</strong></div>
-              <div className="context-row"><span>Owner</span><strong>{currentWallet.participant_id}</strong></div>
+              <div className="context-row"><span>Owner</span><strong>{currentWallet.owner_id || currentWallet.participant_id}</strong></div>
+              <div className="context-row"><span>Custodian</span><strong>{currentWallet.participant_id}</strong></div>
               <div className="context-row"><span>Tipe</span><strong>{currentWallet.wallet_type}</strong></div>
               <div className="context-row"><span>Tier</span><strong>{currentWallet.tier}</strong></div>
             </div>

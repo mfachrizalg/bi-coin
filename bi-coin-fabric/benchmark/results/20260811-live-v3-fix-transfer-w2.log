@@ -1,0 +1,364 @@
+
+> bi-coin-fabric@1.0.0 benchmark:transfer:w2
+> caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-2.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .
+
+2026.08.11-12:47:06.970[32m info [39m [caliper] [cli-launch-manager] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.08.11-12:47:06.971[32m info [39m [caliper] [cli-launch-manager] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml
+2026.08.11-12:47:06.971[32m info [39m [caliper] [cli-launch-manager] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.08.11-12:47:06.971[32m info [39m [caliper] [cli-launch-manager] 	Set SUT type: fabric
+2026.08.11-12:47:06.986[32m info [39m [caliper] [caliper-engine] 	Starting benchmark flow
+2026.08.11-12:47:06.987[32m info [39m [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.start" is not present, skipping start command
+2026.08.11-12:47:07.457[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.08.11-12:47:07.463[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.08.11-12:47:07.465[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.08.11-12:47:07.466[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.08.11-12:47:07.468[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Fabric-Gateway SDK version: 1.5.0 for Peer-Gateway connector; TLS based on BankIndonesiaOrgMSP: server
+2026.08.11-12:47:07.468[32m info [39m [caliper] [caliper-engine] 	Executed "init" step in 0.001 seconds
+2026.08.11-12:47:07.468[33m warn [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Install smart contract not available for the Fabric Peer Gateway connector
+2026.08.11-12:47:07.468[32m info [39m [caliper] [caliper-engine] 	Executed "install" step in 0 seconds
+2026.08.11-12:47:07.470[32m info [39m [caliper] [monitor.js] 	Attempting to create resource monitor of type docker
+2026.08.11-12:47:07.471[32m info [39m [caliper] [default-observer] 	Observer interval set to 5000 milliseconds
+2026.08.11-12:47:07.474[32m info [39m [caliper] [round-orchestrator] 	Preparing worker connections
+2026.08.11-12:47:07.474[32m info [39m [caliper] [worker-orchestrator] 	Launching worker 1 of 2
+2026.08.11-12:47:07.480[32m info [39m [caliper] [worker-orchestrator] 	Launching worker 2 of 2
+2026.08.11-12:47:07.482[32m info [39m [caliper] [worker-orchestrator] 	Messenger not configured, entering configure phase...
+2026.08.11-12:47:07.482[32m info [39m [caliper] [worker-orchestrator] 	No existing workers detected, entering worker launch phase...
+2026.08.11-12:47:07.483[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be connected...
+2026.08.11-12:47:07.767[32m info [39m [caliper] [cli-launch-worker] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.08.11-12:47:07.768[32m info [39m [caliper] [cli-launch-worker] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml
+2026.08.11-12:47:07.768[32m info [39m [caliper] [cli-launch-worker] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.08.11-12:47:07.768[32m info [39m [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.08.11-12:47:07.783[32m info [39m [caliper] [cli-launch-worker] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.08.11-12:47:07.783[32m info [39m [caliper] [cli-launch-worker] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml
+2026.08.11-12:47:07.784[32m info [39m [caliper] [cli-launch-worker] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.08.11-12:47:07.784[32m info [39m [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.08.11-12:47:07.810[32m info [39m [caliper] [worker-orchestrator] 	2 workers connected, progressing to worker assignment phase.
+2026.08.11-12:47:07.810[32m info [39m [caliper] [worker-orchestrator] 	Workers currently unassigned, awaiting index assignment...
+2026.08.11-12:47:07.810[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be assigned...
+2026.08.11-12:47:07.843[32m info [39m [caliper] [worker-orchestrator] 	2 workers assigned, progressing to worker initialization phase.
+2026.08.11-12:47:07.844[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be ready...
+2026.08.11-12:47:07.844[32m info [39m [caliper] [worker-message-handler] 	Initializing Worker#1...
+2026.08.11-12:47:07.844[32m info [39m [caliper] [worker-message-handler] 	Initializing Worker#0...
+2026.08.11-12:47:08.342[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.08.11-12:47:08.345[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.08.11-12:47:08.347[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.08.11-12:47:08.348[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.08.11-12:47:08.349[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.08.11-12:47:08.351[32m info [39m [caliper] [worker-message-handler] 	Worker#1 initialized
+2026.08.11-12:47:08.352[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.08.11-12:47:08.353[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.08.11-12:47:08.353[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.08.11-12:47:08.355[32m info [39m [caliper] [worker-message-handler] 	Worker#0 initialized
+2026.08.11-12:47:08.356[32m info [39m [caliper] [worker-orchestrator] 	2 workers ready, progressing to test preparation phase.
+2026.08.11-12:47:08.356[32m info [39m [caliper] [round-orchestrator] 	Started round 1 (retail-warmup-w2)
+2026.08.11-12:47:08.357[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#0
+2026.08.11-12:47:08.357[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#0
+2026.08.11-12:47:08.370[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.11-12:47:08.371[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.11-12:47:08.374[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:08.374[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:08.376[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:08.376[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is starting...
+2026.08.11-12:47:08.376[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:08.377[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is starting...
+2026.08.11-12:47:16.482[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r0_1,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.482[32m info [39m [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 0: Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:228:21)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 1)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:232:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.483[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.11-12:47:16.483[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:16.483[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:16.483[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.11-12:47:16.483[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.11-12:47:16.484[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.11-12:47:16.484[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is completed
+2026.08.11-12:47:16.485[31m error[39m [caliper] [round-orchestrator] 	Failed round 1 (retail-warmup-w2): Error: Error: setup Mint failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:508:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:508:28)
+    at emit (node:internal/child_process:948:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)
+2026.08.11-12:47:16.485[32m info [39m [caliper] [round-orchestrator] 	Started round 2 (retail-sustained-w2)
+2026.08.11-12:47:16.485[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (669122): Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:228:21)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 1)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:232:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.486[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r0_2,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.487[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r0_3,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.487[32m info [39m [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 0: Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:228:21)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 3)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:232:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.487[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r0_4,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.487[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.11-12:47:16.487[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r0_0,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.487[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:16.487[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:16.488[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w1_r0_3,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.488[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.11-12:47:16.489[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#1
+2026.08.11-12:47:16.489[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.11-12:47:16.490[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.11-12:47:16.491[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is completed
+2026.08.11-12:47:16.491[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (669121): Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:228:21)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 3)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:232:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.492[31m error[39m [caliper] [round-orchestrator] 	Failed round 2 (retail-sustained-w2): Error: Error: setup Mint failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:508:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:508:28)
+    at emit (node:internal/child_process:948:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)
+2026.08.11-12:47:16.492[32m info [39m [caliper] [round-orchestrator] 	Started round 3 (retail-peak-w2)
+2026.08.11-12:47:16.494[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#2
+2026.08.11-12:47:16.494[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 2 is starting...
+2026.08.11-12:47:16.497[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r0_2,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.498[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r0_4,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.498[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_transfer-w2_w0_r0_1,5000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.11-12:47:16.499[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#1
+2026.08.11-12:47:16.500[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#2
+2026.08.11-12:47:16.501[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is starting...
+2026.08.11-12:47:16.512[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w1_r2_0,merchant,m_transfer-w2_w1_r2_0,["sha256:m_transfer-w2_w1_r2_0"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.512[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w1_r2_1,merchant,m_transfer-w2_w1_r2_1,["sha256:m_transfer-w2_w1_r2_1"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.512[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w1_r2_2,merchant,m_transfer-w2_w1_r2_2,["sha256:m_transfer-w2_w1_r2_2"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.512[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w1_r2_3,merchant,m_transfer-w2_w1_r2_3,["sha256:m_transfer-w2_w1_r2_3"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.512[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w1_r2_4,merchant,m_transfer-w2_w1_r2_4,["sha256:m_transfer-w2_w1_r2_4"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.512[32m info [39m [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 2: Error: setup SubmitKycProfile failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:199:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.512[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.11-12:47:16.513[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:16.513[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:16.513[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 2 is completed
+2026.08.11-12:47:16.513[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (669122): Error: setup SubmitKycProfile failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:199:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.514[31m error[39m [caliper] [round-orchestrator] 	Failed round 3 (retail-peak-w2): Error: Error: setup SubmitKycProfile failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:508:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:508:28)
+    at emit (node:internal/child_process:948:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:91:21)
+2026.08.11-12:47:16.514[32m info [39m [caliper] [report-builder] 	### All test results ###
+2026.08.11-12:47:16.514[31m error[39m [caliper] [report-builder] 	No data within test result; implies error within configuration files
+2026.08.11-12:47:16.515[31m error[39m [caliper] [round-orchestrator] 	Error while finalizing the report: Error: unrecognized report table
+    at ReportBuilder.setSummaryTable (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/report/report-builder.js:142:19)
+    at Report.printResultsByRound (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/report/report.js:182:28)
+    at RoundOrchestrator.run (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/round-orchestrator.js:229:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async CaliperEngine.run (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/caliper-engine.js:153:17)
+    at async LaunchManager.handler (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-cli/lib/launch/lib/launchManager.js:81:30)
+2026.08.11-12:47:16.515[32m info [39m [caliper] [monitor.js] 	Stopping all monitors
+2026.08.11-12:47:16.515[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.11-12:47:16.516[32m info [39m [caliper] [worker-orchestrator] 	Sending exit message to connected workers
+2026.08.11-12:47:16.518[32m info [39m [caliper] [round-orchestrator] 	Benchmark finished in 8.161 seconds. Total rounds: 3. Successful rounds: 0. Failed rounds: 3.
+2026.08.11-12:47:16.518[32m info [39m [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.end" is not present, skipping end command
+2026.08.11-12:47:16.518[32m info [39m [caliper] [cli-launch-manager] 	Benchmark successfully finished!
+2026.08.11-12:47:16.518[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:16.519[32m info [39m [caliper] [worker-message-handler] 	Worker#1 is exiting
+2026.08.11-12:47:16.521[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:16.521[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is starting...
+2026.08.11-12:47:16.522[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r2_0,merchant,m_transfer-w2_w0_r2_0,["sha256:m_transfer-w2_w0_r2_0"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.522[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r2_1,merchant,m_transfer-w2_w0_r2_1,["sha256:m_transfer-w2_w0_r2_1"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.522[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r2_2,merchant,m_transfer-w2_w0_r2_2,["sha256:m_transfer-w2_w0_r2_2"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.523[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r2_3,merchant,m_transfer-w2_w0_r2_3,["sha256:m_transfer-w2_w0_r2_3"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.523[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_transfer-w2_w0_r2_4,merchant,m_transfer-w2_w0_r2_4,["sha256:m_transfer-w2_w0_r2_4"]],  with error: Error: Channel has been shut down
+2026.08.11-12:47:16.523[32m info [39m [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 2: Error: setup SubmitKycProfile failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:199:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.523[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.11-12:47:16.523[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:16.523[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:16.523[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is completed
+2026.08.11-12:47:16.523[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (669121): Error: setup SubmitKycProfile failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:199:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:16.524[32m info [39m [caliper] [worker-message-handler] 	Worker#0 is exiting
+2026.08.11-12:47:16.527[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.11-12:47:16.532[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:16.534[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:16.534[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is starting...
+2026.08.11-12:47:16.550[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateRetailCustomer] using arguments [c_transfer-w2_w0_r0_5,sha256:identity:c_transfer-w2_w0_r0_5,wlt_c_transfer-w2_w0_r0_5,kyc_c_transfer-w2_w0_r0_5],  with error: Error: Channel has been shut down
+2026.08.11-12:47:17.430[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_2,m_transfer-w2_w0_r1_2,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_4,m_transfer-w2_w0_r1_4,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_0,m_transfer-w2_w0_r1_0,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w1_r1_0,m_transfer-w2_w1_r1_0,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_1,m_transfer-w2_w0_r1_1,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w0_r1_3,m_transfer-w2_w0_r1_3,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w1_r1_2,m_transfer-w2_w1_r1_2,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.431[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w1_r1_3,m_transfer-w2_w1_r1_3,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.432[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w1_r1_1,m_transfer-w2_w1_r1_1,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.432[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [CreateWallet] using arguments [wlt_m_transfer-w2_w1_r1_4,m_transfer-w2_w1_r1_4,MERCHANT],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.11-12:47:17.432[32m info [39m [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 1: Error: setup CreateWallet failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:201:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 2)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:17.432[32m info [39m [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 1: Error: setup CreateWallet failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:201:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.11-12:47:17.432[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.11-12:47:17.433[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is completed
+2026.08.11-12:47:17.433[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.11-12:47:17.433[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is completed
+2026.08.11-12:47:17.433[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (669121): Error: setup CreateWallet failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:201:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 2)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.11-12:47:17.433[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (669122): Error: setup CreateWallet failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:151:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:201:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:137:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:140:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:204:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at WorkerMessageHandler._handlePrepareMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:217:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v24.14.1
+node:events:486
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at WorkerMessageHandler._handlePrepareMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:217:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v24.14.1

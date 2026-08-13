@@ -1,29 +1,84 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Garuda Digital Rupiah API Gateway — Role: multi",
-    "description": "Filtered API spec for thesis role: **public**.\n\nIncluded OpenAPI tag groups: ['health', 'network']\n\nThis embedded role-filtered API spec is maintained with the backend role surface.",
-    "version": "0.1.0"
+    "title": "Garuda Digital Rupiah API Gateway — Role: public",
+    "version": "0.3.0",
+    "description": "Public entrypoints: health, topology, and JWT login."
   },
   "paths": {
     "/health": {
       "get": {
         "tags": [
-          "health"
+          "system"
         ],
-        "summary": "Check API gateway health",
-        "operationId": "health_health_get",
+        "summary": "Health check",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Healthy",
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "type": "object",
-                  "title": "Response Health Health Get"
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login and receive JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -36,28 +91,84 @@
         "tags": [
           "network"
         ],
-        "summary": "Get logical Indonesia CBDC topology",
-        "description": "Returns the thesis/prototype logical node map. Observer, policy, security, and API nodes are visible here but do not vote in Sumeragi consensus. Retail users and merchants access the ledger through participant APIs, not as ledger nodes.",
-        "operationId": "network_topology_network_topology_get",
+        "summary": "Network topology",
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Topology",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
               }
             }
           }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ]
+        }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Use Authorization: Bearer <JWT> from POST /auth/login."
+      }
+    },
+    "parameters": {
+      "ParticipantFilter": {
+        "name": "participant_id",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Optional participant filter. Retail actors remain scoped server-side."
+      },
+      "ScopeQuery": {
+        "name": "scope",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ProfileID": {
+        "name": "profile_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ParticipantID": {
+        "name": "participant_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IntentID": {
+        "name": "intent_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IdempotencyKeyHeader": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Required on replay-safe money mutations. Reuse the same key only when retrying the same logical request."
+      }
+    },
     "schemas": {
       "AmountRequestBody": {
         "properties": {
@@ -100,33 +211,19 @@
         }
       },
       "CreateWalletRequestBody": {
-        "properties": {
-          "participant_id": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Participant Id",
-            "description": "Participant who owns the wallet.",
-            "examples": [
-              "bank-a"
-            ]
-          },
-          "wallet_type": {
-            "$ref": "#/components/schemas/WalletType",
-            "description": "Hot wallet (online) or cold wallet.",
-            "default": "hot",
-            "examples": [
-              "hot"
-            ]
-          }
-        },
         "type": "object",
         "required": [
-          "participant_id"
+          "owner_id"
         ],
-        "title": "CreateWalletRequestBody",
+        "properties": {
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Retail subject or institutional owner bound to the wallet."
+          }
+        },
         "example": {
-          "participant_id": "bank-a",
-          "wallet_type": "hot"
+          "owner_id": "cust_bank_a_customer_01"
         }
       },
       "HTTPValidationError": {
@@ -564,54 +661,31 @@
         }
       },
       "TransferRequestBody": {
-        "properties": {
-          "sender_id": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Sender Id",
-            "description": "Participant whose Rupiah Digital balance will be debited.",
-            "examples": [
-              "bank-a"
-            ]
-          },
-          "receiver_id": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Receiver Id",
-            "description": "Participant whose Rupiah Digital balance will be credited.",
-            "examples": [
-              "bank-b"
-            ]
-          },
-          "amount": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              }
-            ],
-            "title": "Amount",
-            "description": "Wholesale transfer amount. ",
-            "examples": [
-              "75"
-            ]
-          }
-        },
         "type": "object",
         "required": [
           "sender_id",
           "receiver_id",
           "amount"
         ],
-        "title": "TransferRequestBody",
+        "properties": {
+          "sender_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receiver_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
+          }
+        },
         "example": {
-          "amount": "75",
-          "receiver_id": "bank-b",
-          "sender_id": "bank-a"
+          "sender_id": "wlt_cust_bank_a_customer_01",
+          "receiver_id": "wlt_cust_bank_b_customer_02",
+          "amount": "25000"
         }
       },
       "ValidationError": {
@@ -669,24 +743,465 @@
           "standard",
           "enhanced"
         ]
-      }
-    },
-    "securitySchemes": {
-      "APIKeyHeader": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-API-Key"
+      },
+      "LoginRequestBody": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "username": "bi",
+          "password": "bi-password"
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "role"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "example": "Bearer"
+          },
+          "expires_in": {
+            "type": "integer"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "custodian_msp_id": {
+            "type": "string"
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "required": [
+          "username",
+          "role"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "custodian_msp_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "status": "ok"
+        }
+      },
+      "GenericObject": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GenericArray": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "Wallet": {
+        "type": "object",
+        "required": [
+          "wallet_id",
+          "owner_id",
+          "participant_id",
+          "wallet_type",
+          "balance",
+          "frozen"
+        ],
+        "properties": {
+          "wallet_id": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "wallet_type": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "integer"
+          },
+          "frozen": {
+            "type": "boolean"
+          },
+          "daily_spent": {
+            "type": "integer"
+          },
+          "monthly_spent": {
+            "type": "integer"
+          },
+          "monthly_received": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "WalletList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Wallet"
+        }
+      },
+      "TransferResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          },
+          "sender_id": {
+            "type": "string"
+          },
+          "receiver_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AmountResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          }
+        }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "ResolveQrisRequestBody": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "QrisMode": {
+        "type": "string",
+        "enum": [
+          "static",
+          "dynamic"
+        ]
+      },
+      "QrisStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "paid",
+          "cancelled",
+          "expired"
+        ]
+      },
+      "CreateQrisIntentRequestBody": {
+        "type": "object",
+        "required": [
+          "mode",
+          "merchant_wallet_id"
+        ],
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/QrisMode"
+          },
+          "merchant_wallet_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PayQrisRequestBody": {
+        "type": "object",
+        "required": [
+          "payload",
+          "payer_wallet_id"
+        ],
+        "properties": {
+          "payload": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payer_wallet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      },
+      "QrisIntent": {
+        "type": "object",
+        "required": [
+          "intent_id",
+          "mode",
+          "merchant_id",
+          "merchant_wallet_id",
+          "amount",
+          "status",
+          "reference_id",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "intent_id": {
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/QrisMode"
+          },
+          "merchant_id": {
+            "type": "string"
+          },
+          "merchant_wallet_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QrisStatus"
+          },
+          "label": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paid_by_wallet_id": {
+            "type": "string"
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "QrisIntentList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QrisIntent"
+        }
+      },
+      "QrisPayResult": {
+        "type": "object",
+        "required": [
+          "status",
+          "intent_id",
+          "reference_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "intent_id": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          }
+        }
+      },
+      "DistributeRequestBody": {
+        "type": "object",
+        "required": [
+          "sender_participant_id",
+          "receiver_participant_id",
+          "amount"
+        ],
+        "properties": {
+          "sender_participant_id": {
+            "type": "string"
+          },
+          "receiver_participant_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "RtgsIssuanceRequestBody": {
+        "type": "object",
+        "required": [
+          "sender_bic",
+          "amount",
+          "reference"
+        ],
+        "properties": {
+          "sender_bic": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RtgsIssuanceReceipt": {
+        "type": "object",
+        "required": [
+          "status",
+          "reference",
+          "amount",
+          "participant_id",
+          "sender_bic",
+          "tx_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "sender_bic": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          }
+        }
       }
     }
-  },
-  "tags": [
-    {
-      "name": "health",
-      "description": "Service liveness check."
-    },
-    {
-      "name": "network",
-      "description": "Logical CBDC network topology and consensus profile."
-    }
-  ]
+  }
 }

@@ -39,13 +39,13 @@ type DocsHandler struct {
 func NewDocsHandler(specs DocsSpecs) *DocsHandler {
 	return &DocsHandler{
 		roles: map[string]roleInfo{
-			"public":         {Label: "Public", DevKey: "dev-public-key", Spec: specs.Public, TagLine: "Health & network topology — no API key required"},
-			"authenticated":  {Label: "Authenticated", DevKey: "dev-auth-key", Spec: specs.Authenticated, TagLine: "Wallet management and account access"},
-			"kyc_verified":   {Label: "KYC Verified", DevKey: "dev-kyc-key", Spec: specs.KycVerified, TagLine: "Approved retail-customer transfers"},
-			"bank_pjp":       {Label: "Bank / PJP", DevKey: "dev-bank-pjp-key", Spec: specs.BankPjp, TagLine: "Participant management & liquidity distribution"},
-			"bank_indonesia": {Label: "Bank Indonesia", DevKey: "dev-bi-key", Spec: specs.BankIndonesia, TagLine: "Issuance, limits, supervision, ledger init"},
-			"merchant":       {Label: "Merchant", DevKey: "dev-merchant-key", Spec: specs.Merchant, TagLine: "Approved merchant transfers"},
-			"supervisor":     {Label: "Supervisor", DevKey: "dev-supervisor-key", Spec: specs.Supervisor, TagLine: "Full read access + reports"},
+			"public":         {Label: "Public", DevKey: "dev-public-key", Spec: specs.Public, TagLine: "Health, topology, and JWT login"},
+			"authenticated":  {Label: "Authenticated", DevKey: "dev-auth-key", Spec: specs.Authenticated, TagLine: "Principal profile and wallet listing"},
+			"kyc_verified":   {Label: "KYC Verified", DevKey: "dev-kyc-key", Spec: specs.KycVerified, TagLine: "Retail transfers and QRIS payer flows"},
+			"bank_pjp":       {Label: "Bank / PJP", DevKey: "dev-bank-pjp-key", Spec: specs.BankPjp, TagLine: "Onboarding, KYC, retail customers, and wallet custody"},
+			"bank_indonesia": {Label: "Bank Indonesia", DevKey: "dev-bi-key", Spec: specs.BankIndonesia, TagLine: "Issuance, distribution, limits, RTGS, and oversight"},
+			"merchant":       {Label: "Merchant", DevKey: "dev-merchant-key", Spec: specs.Merchant, TagLine: "Merchant transfers and QRIS intent lifecycle"},
+			"supervisor":     {Label: "Supervisor", DevKey: "dev-supervisor-key", Spec: specs.Supervisor, TagLine: "Read-only oversight and reporting"},
 		},
 	}
 }
@@ -96,7 +96,7 @@ func (d *DocsHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
   <p>Select a role to browse its interactive Swagger UI</p>
 </header>
 <div class="auth-note">
-  Auth: send <code>X-API-Key: &lt;key&gt;</code> header. Dev keys are pre-filled in each role's Swagger UI.
+  Auth: call <code>POST /auth/login</code>, then use <code>Authorization: Bearer &lt;jwt&gt;</code> in Swagger's Authorize dialog.
 </div>
 <div class="grid">%s</div>
 </body>
@@ -137,7 +137,7 @@ func (d *DocsHandler) handleSwaggerUI(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
 <div class="dev-key-notice">
-  Dev key pre-filled: <code>%s</code> &mdash; role: <strong>%s</strong>. Change in Authorize dialog for other keys.
+  Login via <code>POST /auth/login</code>, then paste the returned JWT into Swagger's Authorize dialog as <code>Bearer &lt;jwt&gt;</code>. Role: <strong>%s</strong>.
   <a href="/docs" style="margin-left:1rem; color:#5a4000;">← All roles</a>
 </div>
 <div id="swagger-ui"></div>
@@ -150,23 +150,11 @@ SwaggerUIBundle({
   layout: 'BaseLayout',
   deepLinking: true,
   tryItOutEnabled: true,
-  persistAuthorization: true,
-  requestInterceptor: function(req) {
-    if (!req.headers['X-API-Key']) {
-      req.headers['X-API-Key'] = '%s';
-    }
-    return req;
-  },
-  onComplete: function() {
-    SwaggerUIBundle.presets.apis[0]({
-      name: 'X-API-Key',
-      value: '%s',
-    });
-  }
+  persistAuthorization: true
 });
 </script>
 </body>
-</html>`, info.Label, info.DevKey, roleName, roleName, info.DevKey, info.DevKey)
+</html>`, info.Label, roleName, roleName)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

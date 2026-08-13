@@ -13,25 +13,22 @@ sebagai berikut.
     \textit{backend} Go, CouchDB, dan PostgreSQL, sehingga alur penerbitan dan
     distribusi likuiditas berjenjang dapat direalisasikan sebagai artefak teknis
     yang dapat diuji.
-    \item Berdasarkan rumusan masalah kedua mengenai kontrol kepatuhan pada
-    lapisan \textit{chaincode}, penelitian ini menunjukkan bahwa status dan
-    risiko KYC yang dipasok bank/PJP, penurunan tingkatan dompet, limit
-    transaksi, serta batas peran organisasi dapat divalidasi sesuai aturan
-    purwarupa. Data identitas mentah tetap berada di PostgreSQL, sedangkan
-    \textit{chaincode} menerima jangkar kepatuhan. Cakupan tersebut belum
-    membuktikan kepatuhan APU/PPT menyeluruh, persetujuan empat mata, atau
-    privasi transaksi pada kanal bersama.
-    \item Berdasarkan rumusan masalah ketiga mengenai kinerja sistem, batch
-    Caliper 27 Juli 2026 mencapai 29,5 TPS sukses pada beban 30 TPS tanpa
-    kegagalan. Pada beban 60 TPS, \textit{completion throughput} tetap 58,9 TPS,
-    tetapi \textit{successful throughput} hanya 41,2--47,0 TPS. Lima ronde ulang
-    menghasilkan rerata \textit{successful throughput} 31,46 TPS dengan interval
-    kepercayaan 95\% untuk rerata sebesar $\pm$7,44 TPS. Variasi ini menunjukkan
-    saturasi dan ketidakstabilan \textit{endorsement}, bukan kapasitas produksi.
-    Tujuh kasus negatif ditolak dengan alasan yang tepat. Pada permintaan
-    agregat Rp200.000 dari saldo Rp50.000, empat transfer dikomit, 196 ditolak,
-    dan saldo akhir Rp46.000; hasil ini mendukung invariant saldo nonnegatif pada
-    topologi uji tanpa mengklaim pembuktian formal \textit{double-spend}.
+    \item Sebagai bagian dari rumusan masalah pertama mengenai transfer ritel dan
+    pengawasan, penelitian ini menunjukkan bahwa pemisahan peran organisasi,
+    pemeriksaan MSP kustodian, kepemilikan dompet, status beku, dan kecukupan
+    saldo dapat ditegakkan pada lapisan \textit{backend} dan \textit{chaincode}.
+    Pada pengujian ulang v3.0, transfer dengan MSP pemanggil yang tidak sesuai
+    dengan MSP kustodian ditolak tanpa perubahan saldo. Jalur transfer yang sama
+    melayani pembayaran antarpelanggan dan pelanggan--pedagang, sedangkan laporan
+    serta \textit{event} pengawasan tersedia bagi peran berwenang.
+    \item Berdasarkan rumusan masalah kedua mengenai kinerja sistem, profil
+    transfer Caliper v3.0 dengan satu \textit{worker} menghasilkan
+    \textit{throughput} 29,5 TPS pada laju 30 TPS dan 58,7 TPS pada laju 60 TPS.
+    Tingkat keberhasilannya masing-masing 88,25\% dan 28,77\%. Hasil ini hanya
+    berasal dari satu \textit{ledger} bersih dan satu konfigurasi \textit{worker},
+    sehingga belum menetapkan kapasitas nasional atau reproduktibilitas lintas
+    mesin. Batch historis v2 tetap dicatat pada Bab~IV sebagai \textit{baseline}
+    terpisah dan tidak digunakan untuk menyimpulkan kinerja kontrak v3.
 \end{enumerate}
 
 \section{Saran}
@@ -45,8 +42,8 @@ sebagai berikut.
     \item Menelusuri ketidakcocokan \textit{proposal response payload} pada
     beban 60 TPS dan memisahkan pengaruh propagasi status, kebijakan
     \textit{endorsement}, kontensi kunci, dan jalur submit \textit{gateway}.
-    \item Memperluas \textit{repeatability run} ke profil KYC, operasi moneter,
-    kueri pengawasan, dan kebijakan administratif agar setiap profil tidak
+    \item Memperluas \textit{repeatability run} ke profil penerbitan, distribusi,
+    transfer, operasi moneter, dan kueri pengawasan agar setiap profil tidak
     hanya memiliki satu angka \textit{throughput}, tetapi juga simpangan,
     interval kepercayaan, dan latensi persentil ke-95 serta ke-99.
     \item Mengembangkan skenario \textit{hot-wallet contention} dari jejak
@@ -54,12 +51,6 @@ sebagai berikut.
     dilaporkan eksplisit, lalu mengukur konflik MVCC awal, keberhasilan setelah
     \textit{retry}, \textit{throughput} akhir, dan pengaruh kebijakan
     \textit{backoff} terhadap idempotensi transaksi.
-    \item Memvalidasi angka limit dan distribusi tingkatan bersama Bank
-    Indonesia, bank/PJP, serta ahli APU/PPT. Nilai yang digunakan dalam
-    penelitian ini merupakan parameter purwarupa dan tidak boleh diperlakukan
-    sebagai ketentuan CBDC.
-    \item Mengintegrasikan penyedia eKYC nyata dan menerapkan kontrol retensi,
-    enkripsi, penghapusan, serta audit akses untuk data identitas di PostgreSQL.
     \item Menguji \textit{private data collection} atau teknik kriptografi
     penjaga privasi untuk mengurangi keterlihatan metadata transaksi tanpa
     menghilangkan kemampuan pengawasan \cite{Pocher2022Privacy,

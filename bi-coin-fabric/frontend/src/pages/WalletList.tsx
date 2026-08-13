@@ -6,9 +6,11 @@ const fmt = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
 
 export default function WalletList({
   onSelect,
+  role,
   showParticipantBadges = false,
 }: {
   onSelect: (id: string) => void
+  role?: string
   showParticipantBadges?: boolean
 }) {
   const [wallets, setWallets] = useState<Wallet[]>([])
@@ -92,11 +94,11 @@ export default function WalletList({
           style={{ padding: '9px 16px', borderRadius: 6, border: '1px solid #d1d5db', cursor: 'pointer', fontSize: '1rem' }}>
           Segarkan
         </button>
-        <button
+        {role === 'bank_indonesia' && <button
           onClick={() => initLedger().then(load).catch(e => setError(e.message))}
           style={{ padding: '9px 16px', borderRadius: 6, border: '1px solid #d1d5db', cursor: 'pointer', fontSize: '1rem' }}>
           Init Ledger
-        </button>
+        </button>}
       </div>
 
       {error && <div style={{ color: '#dc2626', fontSize: 14 }}>{error}</div>}
@@ -152,6 +154,10 @@ export default function WalletList({
             {filtered.map(w => (
               <tr key={w.wallet_id}
                 onClick={() => onSelect(w.wallet_id)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(w.wallet_id) } }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Pilih wallet ${w.wallet_id}`}
                 style={{ borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}
                 onMouseEnter={e => (e.currentTarget.style.background = '#f8faff')}
                 onMouseLeave={e => (e.currentTarget.style.background = '')}
@@ -160,7 +166,8 @@ export default function WalletList({
                   {w.wallet_id}
                 </td>
                 <td style={{ padding: '10px 14px' }}>
-                  <span style={{ fontFamily: 'monospace', fontSize: 13 }}>{w.participant_id}</span>
+                  <span style={{ fontFamily: 'monospace', fontSize: 13 }}>{w.owner_id || w.participant_id}</span>
+                  <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 6 }}>(custodian: {w.participant_id})</span>
                   {badge(w.participant_id)}
                 </td>
                 <td style={{ padding: '8px 12px', color: '#6b7280', textTransform: 'capitalize' }}>{w.wallet_type}</td>

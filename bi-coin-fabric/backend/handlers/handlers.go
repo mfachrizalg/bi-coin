@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/middleware"
@@ -18,11 +21,37 @@ type Handler struct {
 	auth *services.AuthService
 }
 
+type ledgerServiceContextKey struct{}
+
+func decodeJSON(w http.ResponseWriter, r *http.Request, target interface{}) bool {
+	if err := json.NewDecoder(r.Body).Decode(target); err != nil {
+		var maxBytesError *http.MaxBytesError
+		if errors.As(err, &maxBytesError) {
+			writeError(w, http.StatusRequestEntityTooLarge, "request body too large")
+			return false
+		}
+		writeValidationError(w, "invalid request body")
+		return false
+	}
+	return true
+}
+
+func writeServiceError(w http.ResponseWriter, err error) {
+	var appError *services.AppError
+	if errors.As(err, &appError) {
+		writeJSON(w, appError.Status, models.ErrorResponse{Code: string(appError.Code), Message: appError.Message})
+		return
+	}
+	log.Printf("service error: %v", err)
+	writeError(w, http.StatusInternalServerError, "internal server error")
+}
+
 func New(svc *services.LedgerService, auth *services.AuthService) *Handler {
 	return &Handler{svc: svc, auth: auth}
 }
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
+	r.Use(h.principalLedger)
 	// Public
 	r.HandleFunc("/health", h.Health).Methods("GET")
 	r.HandleFunc("/auth/login", h.Login).Methods("POST")
@@ -107,6 +136,35 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	oversightRead.HandleFunc("/reports/metrics", h.GetMetrics).Methods("GET")
 }
 
+func (h *Handler) principalLedger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if h.svc == nil || middleware.GetRole(r) == middleware.RolePublic || r.URL.Path == "/health" || r.URL.Path == "/auth/login" || r.URL.Path == "/auth/me" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		service, err := h.svc.ForPrincipal(services.Principal{
+			Username:       middleware.GetUsername(r),
+			Role:           middleware.GetRole(r),
+			SubjectID:      middleware.GetSubjectID(r),
+			ParticipantID:  middleware.GetParticipantID(r),
+			CustodianMSPID: middleware.GetCustodianMSPID(r),
+		})
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		ctx := context.WithValue(r.Context(), ledgerServiceContextKey{}, service)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (h *Handler) ledger(r *http.Request) *services.LedgerService {
+	if scoped, ok := r.Context().Value(ledgerServiceContextKey{}).(*services.LedgerService); ok && scoped != nil {
+		return scoped
+	}
+	return h.svc
+}
+
 func withRole(fn http.HandlerFunc, roles ...middleware.Role) http.HandlerFunc {
 	return middleware.RequireRole(roles...)(fn).ServeHTTP
 }
@@ -115,16 +173,23 @@ func isRetailActor(role middleware.Role) bool {
 	return role == middleware.RoleKycVerified || role == middleware.RoleMerchant
 }
 
+func ownerSubject(r *http.Request) string {
+	if subjectID := middleware.GetSubjectID(r); subjectID != "" {
+		return subjectID
+	}
+	return middleware.GetUsername(r)
+}
+
 func (h *Handler) requireOwnedWallet(w http.ResponseWriter, r *http.Request, walletID string) bool {
 	if !isRetailActor(middleware.GetRole(r)) {
 		return true
 	}
-	wallet, err := h.svc.GetWallet(walletID)
+	wallet, err := h.ledger(r).GetWallet(walletID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return false
 	}
-	if wallet.OwnerID != middleware.GetUsername(r) {
+	if wallet.OwnerID != ownerSubject(r) {
 		writeError(w, http.StatusForbidden, "wallet does not belong to authenticated subject")
 		return false
 	}
@@ -146,11 +211,32 @@ func writeJSON(w http.ResponseWriter, status int, v interface{}) {
 }
 
 func writeError(w http.ResponseWriter, status int, msg string) {
-	writeJSON(w, status, models.ErrorResponse{Message: msg})
+	code := "error"
+	switch status {
+	case http.StatusUnauthorized:
+		code = "unauthorized"
+	case http.StatusForbidden:
+		code = "forbidden"
+	case http.StatusNotFound:
+		code = "not_found"
+	case http.StatusConflict:
+		code = "conflict"
+	case http.StatusUnprocessableEntity:
+		code = "validation_error"
+	case http.StatusRequestEntityTooLarge:
+		code = "payload_too_large"
+	default:
+		if status >= http.StatusInternalServerError {
+			code = "internal_error"
+			msg = "internal server error"
+		}
+	}
+	writeJSON(w, status, models.ErrorResponse{Code: code, Message: msg})
 }
 
 func writeValidationError(w http.ResponseWriter, msg string) {
 	writeJSON(w, http.StatusUnprocessableEntity, models.ErrorResponse{
+		Code: "validation_error",
 		Detail: []models.ValidationError{
 			{Msg: msg, Type: "value_error"},
 		},
@@ -165,8 +251,7 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req models.LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	token, err := h.auth.Login(req)
@@ -184,17 +269,20 @@ func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, models.MeResponse{
-		Username: middleware.GetUsername(r),
-		Role:     string(role),
+		Username:       middleware.GetUsername(r),
+		Role:           string(role),
+		SubjectID:      middleware.GetSubjectID(r),
+		ParticipantID:  middleware.GetParticipantID(r),
+		CustodianMSPID: middleware.GetCustodianMSPID(r),
 	})
 }
 
 // ─── Network ─────────────────────────────────────────────────────────────────
 
 func (h *Handler) GetTopology(w http.ResponseWriter, r *http.Request) {
-	topo, err := h.svc.GetTopology()
+	topo, err := h.ledger(r).GetTopology()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, topo)
@@ -204,13 +292,12 @@ func (h *Handler) GetTopology(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) SubmitParticipant(w http.ResponseWriter, r *http.Request) {
 	var req models.OnboardingRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
-	participant, err := h.svc.SubmitParticipant(req)
+	participant, err := h.ledger(r).SubmitParticipant(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, participant)
@@ -218,8 +305,8 @@ func (h *Handler) SubmitParticipant(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ApproveParticipant(w http.ResponseWriter, r *http.Request) {
 	pid := mux.Vars(r)["participant_id"]
-	if err := h.svc.ApproveParticipant(pid); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).ApproveParticipant(pid); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "approved"})
@@ -227,8 +314,8 @@ func (h *Handler) ApproveParticipant(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) FreezeParticipant(w http.ResponseWriter, r *http.Request) {
 	pid := mux.Vars(r)["participant_id"]
-	if err := h.svc.FreezeParticipant(pid); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).FreezeParticipant(pid); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "frozen"})
@@ -236,8 +323,8 @@ func (h *Handler) FreezeParticipant(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) UnfreezeParticipant(w http.ResponseWriter, r *http.Request) {
 	pid := mux.Vars(r)["participant_id"]
-	if err := h.svc.UnfreezeParticipant(pid); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).UnfreezeParticipant(pid); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "unfrozen"})
@@ -245,8 +332,8 @@ func (h *Handler) UnfreezeParticipant(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) RejectParticipant(w http.ResponseWriter, r *http.Request) {
 	pid := mux.Vars(r)["participant_id"]
-	if err := h.svc.RejectParticipant(pid); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).RejectParticipant(pid); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "rejected"})
@@ -254,8 +341,8 @@ func (h *Handler) RejectParticipant(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) OffboardParticipant(w http.ResponseWriter, r *http.Request) {
 	pid := mux.Vars(r)["participant_id"]
-	if err := h.svc.OffboardParticipant(pid); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).OffboardParticipant(pid); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "offboarded"})
@@ -263,18 +350,18 @@ func (h *Handler) OffboardParticipant(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetParticipant(w http.ResponseWriter, r *http.Request) {
 	pid := mux.Vars(r)["participant_id"]
-	participant, err := h.svc.GetParticipant(pid)
+	participant, err := h.ledger(r).GetParticipant(pid)
 	if err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, participant)
 }
 
 func (h *Handler) ListParticipants(w http.ResponseWriter, r *http.Request) {
-	participants, err := h.svc.ListParticipants()
+	participants, err := h.ledger(r).ListParticipants()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, participants)
@@ -284,13 +371,12 @@ func (h *Handler) ListParticipants(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateWalletRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
-	wallet, err := h.svc.CreateWallet(req)
+	wallet, err := h.ledger(r).CreateWallet(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, wallet)
@@ -298,12 +384,15 @@ func (h *Handler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ListWallets(w http.ResponseWriter, r *http.Request) {
 	participantID := r.URL.Query().Get("participant_id")
+	var wallets []*models.Wallet
+	var err error
 	if isRetailActor(middleware.GetRole(r)) {
-		participantID = middleware.GetUsername(r)
+		wallets, err = h.ledger(r).ListWalletsByOwner(ownerSubject(r))
+	} else {
+		wallets, err = h.ledger(r).ListWallets(participantID)
 	}
-	wallets, err := h.svc.ListWallets(participantID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, wallets)
@@ -313,22 +402,21 @@ func (h *Handler) ListWallets(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CreateRetailCustomer(w http.ResponseWriter, r *http.Request) {
 	var req models.RetailCustomerRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
-	customer, err := h.svc.CreateRetailCustomer(req)
+	customer, err := h.ledger(r).CreateRetailCustomer(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, customer)
 }
 
 func (h *Handler) ListRetailCustomers(w http.ResponseWriter, r *http.Request) {
-	customers, err := h.svc.ListRetailCustomers()
+	customers, err := h.ledger(r).ListRetailCustomers()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, customers)
@@ -338,13 +426,12 @@ func (h *Handler) ListRetailCustomers(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) SubmitKycProfile(w http.ResponseWriter, r *http.Request) {
 	var req models.KycProfileRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
-	profile, err := h.svc.SubmitKycProfile(req)
+	profile, err := h.ledger(r).SubmitKycProfile(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, profile)
@@ -353,13 +440,18 @@ func (h *Handler) SubmitKycProfile(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) RefreshKycProfile(w http.ResponseWriter, r *http.Request) {
 	profileID := mux.Vars(r)["profile_id"]
 	var req models.KycProviderResultRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
-	profile, err := h.svc.RefreshKycProfile(profileID, req)
+	if req.ExpiresAt != nil && *req.ExpiresAt != "" {
+		if _, err := time.Parse(time.RFC3339, *req.ExpiresAt); err != nil {
+			writeValidationError(w, "expires_at must be RFC3339")
+			return
+		}
+	}
+	profile, err := h.ledger(r).RefreshKycProfile(profileID, req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, profile)
@@ -367,9 +459,9 @@ func (h *Handler) RefreshKycProfile(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetKycProfile(w http.ResponseWriter, r *http.Request) {
 	profileID := mux.Vars(r)["profile_id"]
-	profile, err := h.svc.GetKycProfile(profileID)
+	profile, err := h.ledger(r).GetKycProfile(profileID)
 	if err != nil {
-		writeError(w, http.StatusNotFound, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, profile)
@@ -377,9 +469,9 @@ func (h *Handler) GetKycProfile(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ListKycProviderChecks(w http.ResponseWriter, r *http.Request) {
 	profileID := mux.Vars(r)["profile_id"]
-	checks, err := h.svc.ListKycProviderChecks(profileID)
+	checks, err := h.ledger(r).ListKycProviderChecks(profileID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, checks)
@@ -387,9 +479,9 @@ func (h *Handler) ListKycProviderChecks(w http.ResponseWriter, r *http.Request) 
 
 func (h *Handler) ListKycAuditEvents(w http.ResponseWriter, r *http.Request) {
 	profileID := mux.Vars(r)["profile_id"]
-	events, err := h.svc.ListKycAuditEvents(profileID)
+	events, err := h.ledger(r).ListKycAuditEvents(profileID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, events)
@@ -399,12 +491,11 @@ func (h *Handler) ListKycAuditEvents(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) SetSystemLimit(w http.ResponseWriter, r *http.Request) {
 	var req models.SetLimitRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
-	if err := h.svc.SetSystemLimit(req); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).SetSystemLimit(req); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "limit set"})
@@ -412,9 +503,9 @@ func (h *Handler) SetSystemLimit(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ListSystemLimits(w http.ResponseWriter, r *http.Request) {
 	scope := r.URL.Query().Get("scope")
-	limits, err := h.svc.ListSystemLimits(scope)
+	limits, err := h.ledger(r).ListSystemLimits(scope)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, limits)
@@ -424,8 +515,7 @@ func (h *Handler) ListSystemLimits(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) RequestIssuance(w http.ResponseWriter, r *http.Request) {
 	var req models.AmountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	amount, err := strconv.ParseInt(req.Amount, 10, 64)
@@ -433,8 +523,8 @@ func (h *Handler) RequestIssuance(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "invalid amount")
 		return
 	}
-	if err := h.svc.RequestIssuance(req.ParticipantID, amount); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).RequestIssuance(req.ParticipantID, amount); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "issued"})
@@ -442,8 +532,7 @@ func (h *Handler) RequestIssuance(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DistributeToParticipant(w http.ResponseWriter, r *http.Request) {
 	var req models.DistributeRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	if req.SenderParticipantID == "" || req.ReceiverParticipantID == "" {
@@ -454,8 +543,9 @@ func (h *Handler) DistributeToParticipant(w http.ResponseWriter, r *http.Request
 		writeValidationError(w, "amount must be positive")
 		return
 	}
-	if err := h.svc.DistributeToParticipant(req.SenderParticipantID, req.ReceiverParticipantID, req.Amount); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
+	if err := h.ledger(r).DistributeToParticipant(req.SenderParticipantID, req.ReceiverParticipantID, req.Amount, req.IdempotencyKey); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "distributed"})
@@ -463,8 +553,7 @@ func (h *Handler) DistributeToParticipant(w http.ResponseWriter, r *http.Request
 
 func (h *Handler) RequestRedemption(w http.ResponseWriter, r *http.Request) {
 	var req models.AmountRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	amount, err := strconv.ParseInt(req.Amount, 10, 64)
@@ -472,8 +561,8 @@ func (h *Handler) RequestRedemption(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "invalid amount")
 		return
 	}
-	if err := h.svc.RequestRedemption(req.ParticipantID, amount); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).RequestRedemption(req.ParticipantID, amount); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "redeemed"})
@@ -481,16 +570,16 @@ func (h *Handler) RequestRedemption(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Transfer(w http.ResponseWriter, r *http.Request) {
 	var req models.TransferRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	if !h.requireOwnedWallet(w, r, req.SenderID) {
 		return
 	}
-	result, err := h.svc.Transfer(req)
+	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
+	result, err := h.ledger(r).Transfer(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
@@ -498,31 +587,36 @@ func (h *Handler) Transfer(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CreateQrisIntent(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateQrisIntentRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	if req.MerchantWalletID == "" {
 		writeValidationError(w, "merchant_wallet_id is required")
 		return
 	}
+	if req.ExpiresAt != nil && *req.ExpiresAt != "" {
+		if _, err := time.Parse(time.RFC3339, *req.ExpiresAt); err != nil {
+			writeValidationError(w, "expires_at must be RFC3339")
+			return
+		}
+	}
 	if !h.requireOwnedWallet(w, r, req.MerchantWalletID) {
 		return
 	}
-	req.MerchantID = middleware.GetUsername(r)
-	intent, err := h.svc.CreateQrisIntent(req)
+	req.MerchantID = ownerSubject(r)
+	intent, err := h.ledger(r).CreateQrisIntent(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, intent)
 }
 
 func (h *Handler) ListQrisIntents(w http.ResponseWriter, r *http.Request) {
-	merchantID := middleware.GetUsername(r)
-	intents, err := h.svc.ListQrisIntents(merchantID)
+	merchantID := ownerSubject(r)
+	intents, err := h.ledger(r).ListQrisIntents(merchantID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, intents)
@@ -530,12 +624,12 @@ func (h *Handler) ListQrisIntents(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetQrisIntent(w http.ResponseWriter, r *http.Request) {
 	intentID := mux.Vars(r)["intent_id"]
-	intent, err := h.svc.GetQrisIntent(intentID)
+	intent, err := h.ledger(r).GetQrisIntent(intentID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
-	if intent.MerchantID != middleware.GetUsername(r) {
+	if intent.MerchantID != ownerSubject(r) {
 		writeError(w, http.StatusForbidden, "QRIS intent does not belong to authenticated merchant")
 		return
 	}
@@ -548,17 +642,17 @@ func (h *Handler) CancelQrisIntent(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "intent_id is required")
 		return
 	}
-	intent, err := h.svc.GetQrisIntent(intentID)
+	intent, err := h.ledger(r).GetQrisIntent(intentID)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
-	if intent.MerchantID != middleware.GetUsername(r) {
+	if intent.MerchantID != ownerSubject(r) {
 		writeError(w, http.StatusForbidden, "QRIS intent does not belong to authenticated merchant")
 		return
 	}
-	if err := h.svc.CancelQrisIntent(intentID); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).CancelQrisIntent(intentID); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "cancelled"})
@@ -566,17 +660,16 @@ func (h *Handler) CancelQrisIntent(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ResolveQris(w http.ResponseWriter, r *http.Request) {
 	var req models.ResolveQrisRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	if req.Payload == "" {
 		writeValidationError(w, "payload is required")
 		return
 	}
-	intent, err := h.svc.ResolveQrisPayload(req.Payload)
+	intent, err := h.ledger(r).ResolveQrisPayload(req.Payload)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, intent)
@@ -584,8 +677,7 @@ func (h *Handler) ResolveQris(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) PayQris(w http.ResponseWriter, r *http.Request) {
 	var req models.PayQrisRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	if req.Payload == "" || req.PayerWalletID == "" {
@@ -595,27 +687,45 @@ func (h *Handler) PayQris(w http.ResponseWriter, r *http.Request) {
 	if !h.requireOwnedWallet(w, r, req.PayerWalletID) {
 		return
 	}
-	result, err := h.svc.PayQris(req)
+	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
+	result, err := h.ledger(r).PayQris(req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
 }
 
 func (h *Handler) GetBalances(w http.ResponseWriter, r *http.Request) {
-	balances, err := h.svc.GetBalances()
+	balances, err := h.ledger(r).GetBalances()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
+	}
+	if isRetailActor(middleware.GetRole(r)) {
+		wallets, err := h.ledger(r).ListWalletsByOwner(ownerSubject(r))
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		allowedWallets := make(map[string]bool, len(wallets))
+		for _, wallet := range wallets {
+			allowedWallets[wallet.WalletID] = true
+		}
+		filtered := make([]*models.Balance, 0, len(balances))
+		for _, balance := range balances {
+			if allowedWallets[balance.WalletID] {
+				filtered = append(filtered, balance)
+			}
+		}
+		balances = filtered
 	}
 	writeJSON(w, http.StatusOK, balances)
 }
 
 func (h *Handler) RtgsIssuanceNotification(w http.ResponseWriter, r *http.Request) {
 	var req models.RtgsIssuanceRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeValidationError(w, "invalid request body")
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 	if req.SenderBIC == "" || req.Amount == "" || req.Reference == "" {
@@ -627,9 +737,9 @@ func (h *Handler) RtgsIssuanceNotification(w http.ResponseWriter, r *http.Reques
 		writeValidationError(w, "invalid amount")
 		return
 	}
-	result, err := h.svc.RtgsIssuanceNotification(req.SenderBIC, amount, req.Reference)
+	result, err := h.ledger(r).RtgsIssuanceNotification(req.SenderBIC, amount, req.Reference)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
@@ -638,6 +748,15 @@ func (h *Handler) RtgsIssuanceNotification(w http.ResponseWriter, r *http.Reques
 // ─── Supervision ─────────────────────────────────────────────────────────────
 
 func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
+	for _, key := range []string{"limit", "offset"} {
+		if raw := r.URL.Query().Get(key); raw != "" {
+			value, err := strconv.Atoi(raw)
+			if err != nil || value < 0 {
+				writeValidationError(w, key+" must be a non-negative integer")
+				return
+			}
+		}
+	}
 	filters := map[string]string{
 		"participant_id":   r.URL.Query().Get("participant_id"),
 		"transaction_type": r.URL.Query().Get("transaction_type"),
@@ -647,36 +766,36 @@ func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
 		"limit":            r.URL.Query().Get("limit"),
 		"offset":           r.URL.Query().Get("offset"),
 	}
-	txs, err := h.svc.GetTransactions(filters)
+	txs, err := h.ledger(r).GetTransactions(filters)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, txs)
 }
 
 func (h *Handler) GetSupervisionEvents(w http.ResponseWriter, r *http.Request) {
-	events, err := h.svc.GetSupervisionEvents()
+	events, err := h.ledger(r).GetSupervisionEvents()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, events)
 }
 
 func (h *Handler) GetReconciliationReport(w http.ResponseWriter, r *http.Request) {
-	report, err := h.svc.GetReconciliationReport()
+	report, err := h.ledger(r).GetReconciliationReport()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, report)
 }
 
 func (h *Handler) GetMetrics(w http.ResponseWriter, r *http.Request) {
-	metrics, err := h.svc.GetMetrics()
+	metrics, err := h.ledger(r).GetMetrics()
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, metrics)
@@ -708,8 +827,8 @@ func TopologyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) InitLedger(w http.ResponseWriter, r *http.Request) {
-	if err := h.svc.InitLedger(); err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+	if err := h.ledger(r).InitLedger(); err != nil {
+		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ledger initialized"})

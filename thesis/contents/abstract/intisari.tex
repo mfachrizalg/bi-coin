@@ -1,33 +1,26 @@
 Eksperimen publik Proyek Garuda Bank Indonesia berfokus pada mata uang digital
 bank sentral (\textit{Central Bank Digital Currency}, CBDC)
 \textit{wholesale}. Penelitian ini mengkaji cara purwarupa Rupiah Digital ritel
-merepresentasikan distribusi dua jenjang, kebijakan dompet, dan pengawasan
-institusional pada buku besar \textit{permissioned}. Purwarupa menggunakan Hyperledger Fabric 2.5,
-\textit{chaincode} dan layanan \textit{backend} Go, CouchDB, serta PostgreSQL.
+merepresentasikan model distribusi dua jenjang dan pengawasan institusional
+pada buku besar \textit{permissioned}. Purwarupa menggunakan Hyperledger Fabric
+2.5, \textit{chaincode} dan layanan \textit{backend} Go, CouchDB, serta PostgreSQL.
 
-Data identitas mentah disimpan di PostgreSQL, sedangkan buku besar memuat
-status KYC, risiko, masa berlaku, dan hash dokumen. Pemisahan ini tidak memberi
-privasi transaksi pada kanal bersama. Bank atau PJP memasok keputusan KYC.
-\textit{Chaincode} menurunkan tingkatan dompet BASIC, STANDARD, dan MERCHANT
-serta memvalidasi limit transaksi, harian, bulanan, dan saldo. Pemeriksaan
-kepemilikan pada \textit{backend} dan MSP pada \textit{chaincode} membatasi
-pengguna dan organisasi. Kontrol ini tidak membuktikan kepatuhan APU/PPT
-menyeluruh atau persetujuan empat mata.
+Purwarupa memisahkan peran institusional dan ritel. Pemeriksaan kepemilikan pada
+\textit{backend} dan MSP pada \textit{chaincode} membatasi pengguna dan
+organisasi. Kanal Fabric bersama tidak memberikan privasi transaksi.
 
-Pengujian otomatis dan jalur negatif dengan diagnostik yang spesifik
-mengevaluasi otorisasi serta penegakan kebijakan. Hyperledger Caliper
+Pengujian otomatis mengevaluasi otorisasi dan keamanan transfer. Hyperledger Caliper
 mengevaluasi populasi ritel tetap pada beban 10, 30, dan 60 TPS dengan buku
 besar bersih untuk setiap profil, \textit{seed} deterministik, pengulangan beban
 puncak, dan skenario pengeluaran agregat yang melebihi saldo. Pada beban 30 TPS,
 \textit{throughput} sukses mencapai 29,5 TPS tanpa kegagalan; pada 60 TPS,
-nilainya 41,2--47,0 TPS. Ketujuh kasus negatif ditolak dengan alasan yang tepat.
-Pada skenario pengeluaran berlebih, 4 dari 200 transfer dikomit dan saldo akhir
+nilainya 41,2--47,0 TPS. Pada skenario pengeluaran berlebih, 4 dari 200 transfer dikomit dan saldo akhir
 tetap nonnegatif. Hasil ini merupakan garis dasar purwarupa lokal yang dapat
 diulang, bukan bukti reproduksibilitas lintas mesin atau kapasitas produksi.
-Purwarupa ini merupakan artefak yang dapat diaudit untuk eksperimen kebijakan
-Rupiah Digital ritel dalam batas yang dinyatakan.
+Purwarupa ini merupakan artefak yang dapat diaudit untuk eksperimen Rupiah
+Digital ritel dalam batas yang dinyatakan.
 
 \vspace{0.5cm}
 
-\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, Hyperledger Fabric, KYC
-berbasis risiko, limit dompet
+\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, Hyperledger Fabric,
+distribusi dua jenjang, evaluasi kinerja
