@@ -1,12 +1,10 @@
 'use strict';
 
-const { RetailWorkloadBase, CONTRACT } = require('./retail-base');
+const { RetailWorkloadBase, CONTRACT, actorRequest } = require('./retail-base');
 
 /**
  * Transfer-only retail CBDC workload:
- *   70% customer-to-customer transfer
- *   25% customer-to-merchant transfer
- *    5% wallet read
+ *   customer-to-customer transfer only
  *
  * Customer population is 20% BASIC and 80% STANDARD, while the measured
  * senders are STANDARD wallets so duration-based rounds do not fail because a
@@ -22,19 +20,11 @@ class RetailTransferWorkload extends RetailWorkloadBase {
             numCustomers: this.arg('customers', 200),
             numMerchants: this.arg('merchants', 20),
             fundedRatio: this.arg('fundedRatio', 1),
-            fundStandard: this.arg('fundStandard', 5000000),
+            fundStandard: this.arg('fundStandard', 20000000),
             fundBasic: this.arg('fundBasic', 500000),
+            fundReceiverStandard: this.arg('fundReceiverStandard', 1000000),
         });
         this.configureMeasuredTraffic(this.arg('transactionSlots', 0), totalWorkers);
-    }
-
-    operationKind(slot) {
-        const totalSlots = this.transactionSlots * this.totalWorkers;
-        const globalSlot = (slot * this.totalWorkers) + this.workerIndex;
-        const phase = Math.floor((globalSlot * 100) / totalSlots);
-        if (phase < 70) return 'customer';
-        if (phase < 95) return 'merchant';
-        return 'read';
     }
 
     configureMeasuredTraffic(transactionSlots, totalWorkers) {
@@ -42,29 +32,19 @@ class RetailTransferWorkload extends RetailWorkloadBase {
         this.totalWorkers = totalWorkers;
 
         const senders = this.standardCustomers.slice(0, transactionSlots);
-        const receivers = this.standardCustomers.slice(transactionSlots);
-        const required = Array.from({ length: transactionSlots }, (_, slot) => this.operationKind(slot));
-        const requiredReceivers = required.filter(kind => kind === 'customer').length;
-        const requiredMerchants = required.filter(kind => kind === 'merchant').length;
+        const receivers = this.standardCustomers.slice(transactionSlots, transactionSlots * 2);
 
-        if (senders.length < transactionSlots || receivers.length < requiredReceivers || this.merchants.length < requiredMerchants) {
+        if (senders.length < transactionSlots || receivers.length < transactionSlots) {
             throw new Error(
                 `insufficient contention-free population: need ${transactionSlots} senders, ` +
-                `${requiredReceivers} STANDARD receivers, and ${requiredMerchants} merchants`,
+                `${transactionSlots} STANDARD receivers`,
             );
         }
 
-        let receiverIndex = 0;
-        let merchantIndex = 0;
-        this.transactionPlans = required.map((kind, slot) => {
-            if (kind === 'customer') {
-                return { kind, sender: senders[slot], receiver: receivers[receiverIndex++] };
-            }
-            if (kind === 'merchant') {
-                return { kind, sender: senders[slot], receiver: this.merchants[merchantIndex++] };
-            }
-            return { kind, customer: senders[slot] };
-        });
+        this.transactionPlans = Array.from({ length: transactionSlots }, (_, slot) => ({
+            sender: senders[slot],
+            receiver: receivers[slot],
+        }));
     }
 
     planTransaction(slot) {
@@ -75,19 +55,20 @@ class RetailTransferWorkload extends RetailWorkloadBase {
 
     async submitTransaction() {
         const plan = this.planTransaction(this.txIndex++);
-        const readOnly = plan.kind === 'read';
-        const contractFunction = readOnly ? 'GetWallet' : 'Transfer';
-        const contractArguments = readOnly
-            ? [plan.customer.walletId]
-            : [plan.sender.walletId, plan.receiver.walletId, this.retailAmount(plan.sender.perTxCap), `bench_${this.ns()}_${this.txIndex}`];
+        const contractArguments = [
+            plan.sender.walletId,
+            plan.receiver.walletId,
+            this.retailAmount(plan.sender.perTxCap),
+            `bench_${this.ns()}_${this.txIndex}`,
+        ];
 
         // Measured failures belong in Caliper's metrics; only setup uses fail-closed submit().
-        return this.sutAdapter.sendRequests({
+        return this.sutAdapter.sendRequests(actorRequest({
             ...CONTRACT,
-            contractFunction,
+            contractFunction: 'Transfer',
             contractArguments: contractArguments.map(String),
-            readOnly,
-        });
+            readOnly: false,
+        }, 'himbara'));
     }
 }
 

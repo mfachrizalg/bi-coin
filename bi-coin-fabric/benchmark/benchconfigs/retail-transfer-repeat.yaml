@@ -1,6 +1,6 @@
 test:
-  name: Digital Rupiah Retail Transfer - Repetition (mean +/- CI)
-  description: Five seeded 60-second peak rounds of the low-contention transfer workload for mean and confidence-interval estimation
+  name: Digital Rupiah Retail Transfer - Repetition (mean +/- SD)
+  description: Five isolated 60-second peak rounds of the customer-to-customer transfer workload for mean and standard-deviation estimation
   workers:
     type: local
     number: 2
@@ -15,9 +15,9 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-repeat
-          customers: 58
-          merchants: 8
-          transactionSlots: 26
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
           fundedRatio: 1
           maxTransferAmount: 50000
           seed: 20260725
@@ -55,6 +55,9 @@ observer:
   interval: 1
 
 monitors:
+  transaction:
+    - module: ./benchmark/observers/jsonl-transaction-observer.js
+      options: {}
   resource:
     - module: docker
       options:

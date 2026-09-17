@@ -488,13 +488,14 @@ func (s *SmartContract) ApproveParticipant(ctx contractapi.TransactionContextInt
 			ParticipantID:          participantID,
 			CustodianParticipantID: participantID,
 			CustodianMSPID:         p.MSPID,
-			Tier:                   TierMerchant,
-			WalletType:             WalletHot,
-			Balance:                0,
-			LastResetDay:           txNow(ctx).Format("2006-01-02"),
-			LastResetMonth:         txNow(ctx).Format("2006-01"),
-			CreatedAt:              txNow(ctx).Format(time.RFC3339),
-			UpdatedAt:              txNow(ctx).Format(time.RFC3339),
+			// Participant wallets are wholesale reserve accounts, not retail-tier wallets.
+			Tier:           "",
+			WalletType:     WalletHot,
+			Balance:        0,
+			LastResetDay:   txNow(ctx).Format("2006-01-02"),
+			LastResetMonth: txNow(ctx).Format("2006-01"),
+			CreatedAt:      txNow(ctx).Format(time.RFC3339),
+			UpdatedAt:      txNow(ctx).Format(time.RFC3339),
 		}
 		if err := s.putWallet(ctx, walletID, w); err != nil {
 			return err
@@ -751,6 +752,9 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, wallet
 	if err := requireBankIndonesia(ctx); err != nil {
 		return err
 	}
+	if walletID != "bi_treasury" {
+		return fmt.Errorf("issuance must credit bi_treasury")
+	}
 	if amount <= 0 {
 		return fmt.Errorf("amount must be positive")
 	}
@@ -771,11 +775,7 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, wallet
 	if err != nil {
 		return err
 	}
-	if wallet.Tier == "" {
-		if err := s.ensureParticipantAggregateLimit(ctx, s.walletCustodianParticipantID(wallet), walletID, amount); err != nil {
-			return err
-		}
-	} else {
+	if wallet.Tier != "" {
 		limit, err := s.getLimit(ctx, wallet.Tier)
 		if err != nil {
 			return err
@@ -872,9 +872,6 @@ func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterfa
 	if sender.Frozen {
 		return nil, fmt.Errorf("sender wallet %s is frozen", senderID)
 	}
-	if err := s.requireApprovedKyc(ctx, sender); err != nil {
-		return nil, err
-	}
 	receiver, err := s.getWallet(ctx, receiverID)
 	if err != nil {
 		return nil, err
@@ -882,28 +879,52 @@ func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterfa
 	if receiver.Frozen {
 		return nil, fmt.Errorf("receiver wallet %s is frozen", receiverID)
 	}
-	senderLimit, err := s.getLimit(ctx, sender.Tier)
-	if err != nil {
-		return nil, err
-	}
 	receiverLimit, err := s.getLimit(ctx, receiver.Tier)
 	if err != nil {
 		return nil, err
 	}
-	if err := applyRetailTransferPolicy(&sender, &receiver, amount, senderLimit, receiverLimit, txNow(ctx)); err != nil {
-		return nil, err
+	senderLimit := TierLimit{}
+	if sender.Tier == "" {
+		if receiver.Tier == "" {
+			return nil, fmt.Errorf("wholesale transfers must fund a retail wallet")
+		}
+		callerMSP, err := currentMSP(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if receiver.CustodianMSPID != callerMSP {
+			return nil, fmt.Errorf("custodian MSP mismatch: caller %s must equal receiver custodian %s", callerMSP, receiver.CustodianMSPID)
+		}
+		if err := s.requireApprovedKyc(ctx, receiver); err != nil {
+			return nil, err
+		}
+		if err := applyWholesaleFundingPolicy(&sender, &receiver, amount, receiverLimit, txNow(ctx)); err != nil {
+			return nil, err
+		}
+	} else {
+		if receiver.Tier == "" {
+			return nil, fmt.Errorf("retail transfers cannot target a wholesale wallet")
+		}
+		if err := s.requireApprovedKyc(ctx, sender); err != nil {
+			return nil, err
+		}
+		senderLimit, err = s.getLimit(ctx, sender.Tier)
+		if err != nil {
+			return nil, err
+		}
+		if err := applyRetailTransferPolicy(&sender, &receiver, amount, senderLimit, receiverLimit, txNow(ctx)); err != nil {
+			return nil, err
+		}
+		sender.Balance, err = checkedSubInt64(sender.Balance, amount)
+		if err != nil {
+			return nil, err
+		}
+		receiver.Balance, err = checkedAddInt64(receiver.Balance, amount)
+		if err != nil {
+			return nil, err
+		}
 	}
-	newSenderBalance, err := checkedSubInt64(sender.Balance, amount)
-	if err != nil {
-		return nil, err
-	}
-	newReceiverBalance, err := checkedAddInt64(receiver.Balance, amount)
-	if err != nil {
-		return nil, err
-	}
-	sender.Balance = newSenderBalance
 	sender.UpdatedAt = txNow(ctx).Format(time.RFC3339)
-	receiver.Balance = newReceiverBalance
 	receiver.UpdatedAt = txNow(ctx).Format(time.RFC3339)
 	if err := s.putWallet(ctx, senderID, sender); err != nil {
 		return nil, err
@@ -911,7 +932,7 @@ func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterfa
 	if err := s.putWallet(ctx, receiverID, receiver); err != nil {
 		return nil, err
 	}
-	if senderLimit.MinBalance > 0 && sender.Balance < senderLimit.MinBalance {
+	if sender.Tier != "" && senderLimit.MinBalance > 0 && sender.Balance < senderLimit.MinBalance {
 		policy, err := s.getAutoLimitPolicy(ctx, sender.ParticipantID)
 		if err == nil && policy.AutoRedemption && sender.Balance > 0 {
 			if arErr := s.autoRedeem(ctx, senderID, sender.Balance); arErr != nil {
@@ -922,13 +943,15 @@ func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterfa
 	if err := s.emitAudit(ctx, auditAction, senderID, receiverID, amount); err != nil {
 		return nil, err
 	}
-	if profile, err := s.getKycProfileBySubject(ctx, sender.OwnerID); err == nil && profile.RiskLevel == RiskHigh {
-		_ = s.emitSupervisionEvent(ctx, riskEvent, "wallet", senderID, map[string]interface{}{
-			"sender_wallet_id":   senderID,
-			"receiver_wallet_id": receiverID,
-			"amount":             amount,
-			"risk_level":         RiskHigh,
-		})
+	if sender.Tier != "" {
+		if profile, err := s.getKycProfileBySubject(ctx, sender.OwnerID); err == nil && profile.RiskLevel == RiskHigh {
+			_ = s.emitSupervisionEvent(ctx, riskEvent, "wallet", senderID, map[string]interface{}{
+				"sender_wallet_id":   senderID,
+				"receiver_wallet_id": receiverID,
+				"amount":             amount,
+				"risk_level":         RiskHigh,
+			})
+		}
 	}
 	if err := s.recordTransaction(ctx, txType, senderID, receiverID, amount, TxSettled, relatedIntentID); err != nil {
 		return nil, err
@@ -2140,22 +2163,8 @@ func (s *SmartContract) ListWallets(ctx contractapi.TransactionContextInterface,
 	return s.ListWalletsByParticipant(ctx, participantID)
 }
 
-func (s *SmartContract) RequestIssuance(ctx contractapi.TransactionContextInterface, participantID string, amount int64) (interface{}, error) {
-	if err := requireInstitution(ctx); err != nil {
-		return nil, err
-	}
-	p, err := s.getParticipant(ctx, participantID)
-	if err != nil {
-		return nil, err
-	}
-	if p.ParticipantType == ParticipantPJP {
-		return nil, fmt.Errorf("PJP participants cannot request direct issuance; receive liquidity via DistributeToParticipant from a bank validator")
-	}
-	if p.Status != "active" {
-		return nil, fmt.Errorf("participant %s is not active", participantID)
-	}
-	walletID := fmt.Sprintf("wlt_%s", p.ParticipantID)
-	return nil, s.Mint(ctx, walletID, amount)
+func (s *SmartContract) RequestIssuance(ctx contractapi.TransactionContextInterface, amount int64) (interface{}, error) {
+	return nil, s.Mint(ctx, "bi_treasury", amount)
 }
 
 func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInterface, participantID string, amount int64) (interface{}, error) {
@@ -2193,12 +2202,12 @@ func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextIn
 		return nil, err
 	}
 	if p.ParticipantType == ParticipantPJP {
-		return nil, fmt.Errorf("PJP participants cannot request RTGS issuance; receive liquidity via DistributeToParticipant from a bank validator")
+		return nil, fmt.Errorf("PJP participants cannot request RTGS issuance; receive liquidity through Treasury distribution")
 	}
 	if p.Status != "active" {
 		return nil, fmt.Errorf("participant %s is not active", participantID)
 	}
-	walletID := fmt.Sprintf("wlt_%s", p.ParticipantID)
+	walletID := "bi_treasury"
 	wallet, err := s.getWallet(ctx, walletID)
 	if err != nil {
 		return nil, err
@@ -2210,9 +2219,6 @@ func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextIn
 		return nil, err
 	}
 	if err := s.ensureGlobalSupplyRoom(ctx, amount); err != nil {
-		return nil, err
-	}
-	if err := s.ensureParticipantAggregateLimit(ctx, s.walletCustodianParticipantID(wallet), walletID, amount); err != nil {
 		return nil, err
 	}
 	newBalance, err := checkedAddInt64(wallet.Balance, amount)
@@ -2249,9 +2255,8 @@ func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextIn
 	return receipt, nil
 }
 
-// DistributeToParticipant transfers liquidity from a bank validator wallet to a PJP wallet.
-// This is the only way PJPs can receive Digital Rupiah — not via direct BI issuance.
-func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionContextInterface, senderParticipantID string, receiverParticipantID string, amount int64, referenceID string) (map[string]interface{}, error) {
+// DistributeToParticipant transfers liquidity from Treasury to an institutional Custodian.
+func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionContextInterface, receiverParticipantID string, amount int64, referenceID string) (map[string]interface{}, error) {
 	if err := requireBankIndonesia(ctx); err != nil {
 		return nil, err
 	}
@@ -2269,27 +2274,17 @@ func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionConte
 	if err := s.ensurePerTxLimit(ctx, amount); err != nil {
 		return nil, err
 	}
-	sender, err := s.getParticipant(ctx, senderParticipantID)
-	if err != nil {
-		return nil, fmt.Errorf("sender participant: %w", err)
-	}
-	if sender.ParticipantType != ParticipantValidator {
-		return nil, fmt.Errorf("sender %s must be a validator (bank); got %s", senderParticipantID, sender.ParticipantType)
-	}
-	if sender.Status != ParticipantActive {
-		return nil, fmt.Errorf("sender participant %s is not active", senderParticipantID)
-	}
 	receiver, err := s.getParticipant(ctx, receiverParticipantID)
 	if err != nil {
 		return nil, fmt.Errorf("receiver participant: %w", err)
 	}
-	if receiver.ParticipantType != ParticipantPJP {
-		return nil, fmt.Errorf("receiver %s must be a PJP; got %s", receiverParticipantID, receiver.ParticipantType)
+	if receiver.ParticipantType != ParticipantValidator && receiver.ParticipantType != ParticipantPJP {
+		return nil, fmt.Errorf("receiver %s must be a validator or PJP; got %s", receiverParticipantID, receiver.ParticipantType)
 	}
 	if receiver.Status != ParticipantActive {
 		return nil, fmt.Errorf("receiver participant %s is not active", receiverParticipantID)
 	}
-	senderWalletID := fmt.Sprintf("wlt_%s", senderParticipantID)
+	senderWalletID := "bi_treasury"
 	receiverWalletID := fmt.Sprintf("wlt_%s", receiverParticipantID)
 	senderWallet, err := s.getWallet(ctx, senderWalletID)
 	if err != nil {
@@ -2323,22 +2318,24 @@ func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionConte
 	if err := s.putWallet(ctx, receiverWalletID, receiverWallet); err != nil {
 		return nil, err
 	}
-	if err := s.emitAudit(ctx, "PJP_DISTRIBUTION", senderWalletID, receiverWalletID, amount); err != nil {
+	if err := s.emitAudit(ctx, "TREASURY_DISTRIBUTION", senderWalletID, receiverWalletID, amount); err != nil {
 		return nil, err
 	}
 	if err := s.recordTransaction(ctx, TxDistribution, senderWalletID, receiverWalletID, amount, TxSettled, referenceID); err != nil {
 		return nil, err
 	}
 	receipt := map[string]interface{}{
-		"status":                  "distributed",
-		"sender_participant_id":   senderParticipantID,
+		"status":                  string(TxSettled),
+		"sender_id":               senderWalletID,
+		"receiver_id":             receiverWalletID,
+		"sender_participant_id":   "bank_indonesia",
 		"receiver_participant_id": receiverParticipantID,
 		"amount":                  amount,
 		"reference_id":            referenceID,
 		"tx_id":                   ctx.GetStub().GetTxID(),
 		"timestamp":               txNow(ctx).Format(time.RFC3339),
 	}
-	if err := s.emitSupervisionEvent(ctx, "pjp_distribution", "participant", receiverParticipantID, receipt); err != nil {
+	if err := s.emitSupervisionEvent(ctx, "treasury_distribution", "participant", receiverParticipantID, receipt); err != nil {
 		return nil, err
 	}
 	if err := s.putIdempotencyReceipt(ctx, "distribution", referenceID, receipt); err != nil {

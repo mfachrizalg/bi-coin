@@ -3,6 +3,11 @@
 Mermaid flowchart diagrams for AD01–AD04 with monochrome styling.
 Generated for Luthfi thesis format.
 
+**Thesis scope:** KYC is implementation-only, and QRIS is code-only; both are
+excluded from thesis acceptance criteria. Thesis acceptance criteria cover participant lifecycle,
+treasury issuance, two-tier distribution, retail transfer, participant freeze,
+and supervision.
+
 ---
 
 ## AD01 — Pendaftaran Peserta (Participant Registration)
@@ -76,11 +81,10 @@ flowchart TD
   end
 
   subgraph lane_c [Blockchain]
-    B7["RequestIssuance()<br>Validasi participant type"]:::action
-    D3{"[bukan PJP?]"}:::decision
+    B7["RequestIssuance()<br>Validasi BI authority"]:::action
     B8["Tolak penerbitan"]:::action
     E2c((" ")):::startend
-    B9["Mint()<br>balance += amount"]:::action
+    B9["Mint(bi_treasury)<br>supply += amount"]:::action
     B10["Catat transaksi penerbitan<br>(emit audit)"]:::action
   end
 
@@ -92,10 +96,7 @@ flowchart TD
   B4 --> E2a
   D2 -->|"[ya]"| B5
   B5 --> B7
-  B7 --> D3
-  D3 -->|"[tidak]"| B8
-  B8 --> E2c
-  D3 -->|"[ya]"| B9
+  B7 --> B9
   B9 --> B10
   B10 --> B6
   B6 --> E2b
@@ -103,7 +104,7 @@ flowchart TD
 
 ---
 
-## AD03 — Distribusi Likuiditas ke PJP (Liquidity Distribution to PJP)
+## AD03 — Distribusi Likuiditas dari Treasury (Treasury Liquidity Distribution)
 
 ```mermaid
 flowchart TD
@@ -111,15 +112,15 @@ flowchart TD
   classDef action fill:#fff,stroke:#000,color:#000
   classDef decision fill:#fff,stroke:#000,color:#000
 
-  subgraph lane_a [Bank Validator]
+  subgraph lane_a [Bank Indonesia]
     S3((" ")):::startend
-    C1["Inisiasi distribusi<br>likuiditas ke PJP"]:::action
+    C1["Inisiasi distribusi<br>likuiditas ke Custodian"]:::action
   end
 
   subgraph lane_b [Backend API]
     C2["Terima request distribusi<br>(POST /distribute)"]:::action
-    C3["Validasi pengirim<br>= validator"]:::action
-    D4{"[pengirim validator?]"}:::decision
+    C3["Validasi role pengirim<br>= BI"]:::action
+    D4{"[role BI?]"}:::decision
     C4["Kirim error"]:::action
     E3a((" ")):::startend
     C5["Teruskan ke blockchain"]:::action
@@ -128,12 +129,12 @@ flowchart TD
   end
 
   subgraph lane_c [Blockchain]
-    C7["Validasi penerima = PJP"]:::action
-    D5{"[penerima PJP?]"}:::decision
+    C7["Validasi penerima = Validator Bank/PJP"]:::action
+    D5{"[penerima Custodian?]"}:::decision
     C8["Tolak distribusi"]:::action
     E3c((" ")):::startend
-    C9["Burn(sender)<br>kurangi saldo validator"]:::action
-    C10["Mint(receiver)<br>tambah saldo PJP"]:::action
+    C9["Transfer dari bi_treasury<br>kurangi saldo Treasury"]:::action
+    C10["Kredit wallet Custodian<br>tambah saldo penerima"]:::action
     C11["Catat transaksi distribusi"]:::action
   end
 

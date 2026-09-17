@@ -1,0 +1,345 @@
+
+> bi-coin-fabric@1.0.0 benchmark:functionality
+> caliper launch manager --caliper-benchconfig benchmark/benchconfigs/functionality.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .
+
+2026.09.09-06:32:53.929 info  [caliper] [cli-launch-manager] 	Set workspace path: /workspace
+2026.09.09-06:32:53.931 info  [caliper] [cli-launch-manager] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/functionality.yaml
+2026.09.09-06:32:53.931 info  [caliper] [cli-launch-manager] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-06:32:53.932 info  [caliper] [cli-launch-manager] 	Set SUT type: fabric
+2026.09.09-06:32:53.962 info  [caliper] [caliper-engine] 	Starting benchmark flow
+2026.09.09-06:32:53.962 info  [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.start" is not present, skipping start command
+2026.09.09-06:32:54.715 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-06:32:54.723 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-06:32:54.726 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-06:32:54.730 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-06:32:54.734 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Fabric-Gateway SDK version: 1.5.0 for Peer-Gateway connector; TLS based on BankIndonesiaOrgMSP: server
+2026.09.09-06:32:54.734 info  [caliper] [caliper-engine] 	Executed "init" step in 0.002 seconds
+2026.09.09-06:32:54.734 warn  [caliper] [connectors/peer-gateway/PeerGateway] 	Install smart contract not available for the Fabric Peer Gateway connector
+2026.09.09-06:32:54.734 info  [caliper] [caliper-engine] 	Executed "install" step in 0 seconds
+2026.09.09-06:32:54.738 info  [caliper] [monitor.js] 	Attempting to create resource monitor of type docker
+2026.09.09-06:32:54.741 info  [caliper] [default-observer] 	Observer interval set to 5000 milliseconds
+2026.09.09-06:32:54.746 info  [caliper] [round-orchestrator] 	Preparing worker connections
+2026.09.09-06:32:54.747 info  [caliper] [worker-orchestrator] 	Launching worker 1 of 1
+2026.09.09-06:32:54.755 info  [caliper] [worker-orchestrator] 	Messenger not configured, entering configure phase...
+2026.09.09-06:32:54.755 info  [caliper] [worker-orchestrator] 	No existing workers detected, entering worker launch phase...
+2026.09.09-06:32:54.756 info  [caliper] [worker-orchestrator] 	Waiting for 1 workers to be connected...
+2026.09.09-06:32:55.226 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.09-06:32:55.227 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/functionality.yaml
+2026.09.09-06:32:55.227 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-06:32:55.227 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.09-06:32:55.269 info  [caliper] [worker-orchestrator] 	1 workers connected, progressing to worker assignment phase.
+2026.09.09-06:32:55.269 info  [caliper] [worker-orchestrator] 	Workers currently unassigned, awaiting index assignment...
+2026.09.09-06:32:55.269 info  [caliper] [worker-orchestrator] 	Waiting for 1 workers to be assigned...
+2026.09.09-06:32:55.331 info  [caliper] [worker-orchestrator] 	1 workers assigned, progressing to worker initialization phase.
+2026.09.09-06:32:55.331 info  [caliper] [worker-orchestrator] 	Waiting for 1 workers to be ready...
+2026.09.09-06:32:55.332 info  [caliper] [worker-message-handler] 	Initializing Worker#0...
+2026.09.09-06:32:56.054 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-06:32:56.063 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-06:32:56.064 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-06:32:56.065 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-06:32:56.070 info  [caliper] [worker-message-handler] 	Worker#0 initialized
+2026.09.09-06:32:56.071 info  [caliper] [worker-orchestrator] 	1 workers ready, progressing to test preparation phase.
+2026.09.09-06:32:56.071 info  [caliper] [round-orchestrator] 	Started round 1 (kyc-onboarding)
+2026.09.09-06:32:56.072 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#0
+2026.09.09-06:32:56.117 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:32:56.123 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:32:56.126 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:32:56.126 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is starting...
+2026.09.09-06:32:56.128 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:32:56.128 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:32:56.128 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:32:56.128 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:32:56.129 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:32:56.129 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:32:56.129 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is completed
+2026.09.09-06:32:56.129 info  [caliper] [worker-message-handler] 	Worker#0 prepared for Round#0
+2026.09.09-06:32:56.130 info  [caliper] [worker-orchestrator] 	1 workers prepared, progressing to test phase.
+2026.09.09-06:32:58.548 info  [caliper] [round-orchestrator] 	Monitors successfully started
+2026.09.09-06:32:58.573 info  [caliper] [worker-message-handler] 	Worker#0 is starting Round#0
+2026.09.09-06:32:58.611 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:32:58.614 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:32:58.619 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:32:58.626 info  [caliper] [caliper-worker] 	Worker #0 starting workload loop
+2026.09.09-06:33:01.137 info  [caliper] [default-observer] 	[kyc-onboarding Round 0 Transaction Info] - Submitted: 20 Succ: 10 Fail:0 Unfinished:10
+2026.09.09-06:33:06.135 info  [caliper] [default-observer] 	[kyc-onboarding Round 0 Transaction Info] - Submitted: 47 Succ: 46 Fail:0 Unfinished:1
+2026.09.09-06:33:10.857 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:33:10.858 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:33:10.858 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:33:10.858 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:33:10.859 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:33:10.859 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:33:10.859 info  [caliper] [worker-message-handler] 	Worker#0 finished Round#0
+2026.09.09-06:33:15.866 info  [caliper] [default-observer] 	Resetting txCount indicator count
+2026.09.09-06:33:15.892 info  [caliper] [report-builder] 	### Test result ###
+2026.09.09-06:33:15.911 info  [caliper] [report-builder] 	
++----------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name           | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|----------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| kyc-onboarding | 48   | 0    | 5.3             | 2.29            | 0.13            | 0.74            | 4.3              |
++----------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.09-06:33:15.922 info  [caliper] [report-builder] 	### docker resource stats ###'
+2026.09.09-06:33:15.929 info  [caliper] [report-builder] 	
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+| Name                        | CPU%(max) | CPU%(avg) | Memory(max) [MB] | Memory(avg) [MB] | Traffic In [KB] | Traffic Out [MB] | Disc Write [MB] | Disc Read [MB] |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.ojk.paynet           | 0.075     | 0.04      | 220              | 213              | 375             | 0.159            | 1.57            | 15.3           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.pjp.paynet           | 0.05      | 0.03125   | 227              | 227              | 377             | 0.165            | 1.27            | 7.60           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.commercial.paynet    | 0.05625   | 0.0325    | 255              | 254              | 380             | 0.165            | 1.05            | 6.56           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.himbara.paynet       | 0.14      | 0.0575    | 266              | 236              | 879             | 0.765            | 1.75            | 80.7           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.bi.paynet            | 0.04625   | 0.03375   | 264              | 255              | 372             | 0.158            | 1.34            | 12.9           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.commercial.paynet | 0.20625   | 0.08875   | 53.4             | 51.6             | 82.8            | 0.0905           | 1.61            | 1.98           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.ojk.paynet        | 0.49375   | 0.135     | 53.6             | 52.3             | 82.8            | 0.0904           | 1.64            | 2.44           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.pjp.paynet        | 0.54375   | 0.12875   | 52.5             | 51.5             | 83.1            | 0.0906           | 1.88            | 1.89           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.bi.paynet         | 0.17375   | 0.07875   | 51.9             | 51.0             | 82.7            | 0.0905           | 1.88            | 1.88           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.himbara.paynet    | 0.1875    | 0.09875   | 55.1             | 53.9             | 110             | 0.111            | 1.93            | 8.32           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /orderer.paynet             | 0.08      | 0.02375   | 37.3             | 30.0             | 233             | 1.02             | 1.71            | 110            |
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+
+2026.09.09-06:33:15.933 info  [caliper] [round-orchestrator] 	Finished round 1 (kyc-onboarding) in 11.23 seconds
+2026.09.09-06:33:15.939 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.09-06:33:16.039 info  [caliper] [round-orchestrator] 	Waiting 5 seconds for the next round...
+2026.09.09-06:33:21.065 info  [caliper] [round-orchestrator] 	Started round 2 (monetary-ops)
+2026.09.09-06:33:21.113 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#1
+2026.09.09-06:33:21.207 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:33:21.226 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:33:21.231 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:33:21.231 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is starting...
+2026.09.09-06:33:21.367 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetParticipant] using arguments [bench_custodian_20260909-final-08_monetary-ops],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, participant bench_custodian_20260909-final-08_monetary-ops not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, participant bench_custodian_20260909-final-08_monetary-ops not found
+2026.09.09-06:34:57.048 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:34:57.052 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:34:57.052 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:34:57.052 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:34:57.053 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:34:57.053 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:34:57.053 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is completed
+2026.09.09-06:34:57.054 info  [caliper] [worker-message-handler] 	Worker#0 prepared for Round#1
+2026.09.09-06:34:57.055 info  [caliper] [worker-orchestrator] 	1 workers prepared, progressing to test phase.
+2026.09.09-06:34:59.177 info  [caliper] [round-orchestrator] 	Monitors successfully started
+2026.09.09-06:34:59.178 info  [caliper] [worker-message-handler] 	Worker#0 is starting Round#1
+2026.09.09-06:34:59.188 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:34:59.191 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:34:59.193 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:34:59.193 info  [caliper] [caliper-worker] 	Worker #0 starting workload loop
+2026.09.09-06:35:02.056 info  [caliper] [default-observer] 	[monetary-ops Round 1 Transaction Info] - Submitted: 40 Succ: 40 Fail:0 Unfinished:0
+2026.09.09-06:35:02.345 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:35:02.345 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:35:02.345 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:35:02.345 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:35:02.346 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:35:02.346 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:35:02.346 info  [caliper] [worker-message-handler] 	Worker#0 finished Round#1
+2026.09.09-06:35:07.347 info  [caliper] [default-observer] 	Resetting txCount indicator count
+2026.09.09-06:35:07.348 info  [caliper] [report-builder] 	### Test result ###
+2026.09.09-06:35:07.353 info  [caliper] [report-builder] 	
++--------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name         | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|--------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| monetary-ops | 40   | 0    | 20.5            | 0.56            | 0.08            | 0.33            | 19.4             |
++--------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.09-06:35:07.361 info  [caliper] [report-builder] 	### docker resource stats ###'
+2026.09.09-06:35:07.364 info  [caliper] [report-builder] 	
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+| Name                        | CPU%(max) | CPU%(avg) | Memory(max) [MB] | Memory(avg) [MB] | Traffic In [KB] | Traffic Out [KB] | Disc Write [MB] | Disc Read [MB] |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.ojk.paynet           | 0.04125   | 0.02625   | 102              | 102              | 314             | 136              | 0.961           | 1.30           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.pjp.paynet           | 0.02875   | 0.0225    | 103              | 102              | 308             | 132              | 0.875           | 0.676          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.commercial.paynet    | 0.03375   | 0.025     | 96.9             | 94.4             | 304             | 129              | 1.14            | 2.81           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.himbara.paynet       | 0.03375   | 0.02375   | 107              | 104              | 264             | 126              | 1.01            | 4.46           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.bi.paynet            | 0.03125   | 0.025     | 94.6             | 93.8             | 796             | 714              | 0.941           | 5.81           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.commercial.paynet | 0.4025    | 0.1175    | 54.2             | 53.7             | 93.6            | 86.7             | 1.44            | 0.652          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.ojk.paynet        | 0.4375    | 0.12375   | 54.3             | 53.2             | 93.4            | 86.7             | 1.45            | 2.05           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.pjp.paynet        | 0.17      | 0.05625   | 51.7             | 51.3             | 93.3            | 86.7             | 1.26            | 0.816          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.bi.paynet         | 0.1525    | 0.0525    | 52.5             | 51.9             | 101             | 86.0             | 1.39            | 2.62           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.himbara.paynet    | 0.1675    | 0.0575    | 57.9             | 56.5             | 87.5            | 45.8             | 1.62            | 1.09           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /orderer.paynet             | 0         | 0         | 48.9             | 47.1             | 214             | 951              | 1.04            | 18.1           |
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+
+2026.09.09-06:35:07.364 info  [caliper] [round-orchestrator] 	Finished round 2 (monetary-ops) in 2.151 seconds
+2026.09.09-06:35:07.364 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.09-06:35:07.464 info  [caliper] [round-orchestrator] 	Waiting 5 seconds for the next round...
+2026.09.09-06:35:12.465 info  [caliper] [round-orchestrator] 	Started round 3 (supervision-reads)
+2026.09.09-06:35:12.479 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#2
+2026.09.09-06:35:12.511 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:35:12.516 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:35:12.519 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:35:12.519 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is starting...
+2026.09.09-06:35:12.691 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetParticipant] using arguments [bench_custodian_20260909-final-08_supervision-reads],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, participant bench_custodian_20260909-final-08_supervision-reads not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, participant bench_custodian_20260909-final-08_supervision-reads not found
+2026.09.09-06:37:24.749 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:37:24.752 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:24.752 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:24.752 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:37:24.752 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:37:24.752 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:37:24.752 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is completed
+2026.09.09-06:37:24.752 info  [caliper] [worker-message-handler] 	Worker#0 prepared for Round#2
+2026.09.09-06:37:24.754 info  [caliper] [worker-orchestrator] 	1 workers prepared, progressing to test phase.
+2026.09.09-06:37:26.870 info  [caliper] [round-orchestrator] 	Monitors successfully started
+2026.09.09-06:37:26.871 info  [caliper] [worker-message-handler] 	Worker#0 is starting Round#2
+2026.09.09-06:37:26.877 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:37:26.880 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:26.882 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:26.883 info  [caliper] [caliper-worker] 	Worker #0 starting workload loop
+2026.09.09-06:37:29.287 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:37:29.295 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:29.296 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:29.296 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:37:29.296 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:37:29.296 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:37:29.296 info  [caliper] [worker-message-handler] 	Worker#0 finished Round#2
+2026.09.09-06:37:34.299 info  [caliper] [default-observer] 	Resetting txCount indicator count
+2026.09.09-06:37:34.308 info  [caliper] [report-builder] 	### Test result ###
+2026.09.09-06:37:34.311 info  [caliper] [report-builder] 	
++-------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name              | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|-------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| supervision-reads | 40   | 0    | 30.8            | 0.07            | 0.01            | 0.03            | 30.6             |
++-------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.09-06:37:34.320 info  [caliper] [report-builder] 	### docker resource stats ###'
+2026.09.09-06:37:34.321 info  [caliper] [report-builder] 	
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+| Name                        | CPU%(max) | CPU%(avg) | Memory(max) [MB] | Memory(avg) [MB] | Traffic In [MB] | Traffic Out [MB] | Disc Write [KB] | Disc Read [MB] |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.ojk.paynet           | 0.0275    | 0.0225    | 99.3             | 99.0             | 0.0382          | 0.0382           | 0.00            | 1.87           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.pjp.paynet           | 0.04125   | 0.02875   | 101              | 101              | 0.0310          | 0.0311           | 0.00            | 0.0625         |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.commercial.paynet    | 0.0325    | 0.0275    | 107              | 102              | 0.0316          | 0.0317           | 44.0            | 0.598          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.himbara.paynet       | 0.0425    | 0.025     | 111              | 106              | 0.0260          | 0.0269           | 0.00            | 0.00           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.bi.paynet            | 0.06125   | 0.03125   | 107              | 105              | 5.69            | 3.71             | 0.00            | 3.36           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.commercial.paynet | 0.03875   | 0.02125   | 49.3             | 48.9             | 0.00            | 0.00             | 0.00            | 0.00           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.ojk.paynet        | 0.09      | 0.04      | 54.3             | 52.7             | 0.00            | 0.00             | 0.00            | 0.00           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.pjp.paynet        | 0.02125   | 0.01375   | 47.1             | 46.8             | 0.00            | 0.00             | 0.00            | 0.156          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.bi.paynet         | 0.01625   | 0.015     | 51.7             | 51.1             | 0.186           | 4.91             | 0.00            | 2.33           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.himbara.paynet    | 0.01625   | 0.01125   | 48.2             | 47.6             | 0.00            | 0.00             | 0.00            | 0.00           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /orderer.paynet             | 0.005     | 0.00125   | 53.5             | 50.7             | 0.000163        | 0.000163         | 0.00            | 3.16           |
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+
+2026.09.09-06:37:34.322 info  [caliper] [round-orchestrator] 	Finished round 3 (supervision-reads) in 1.402 seconds
+2026.09.09-06:37:34.322 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.09-06:37:34.423 info  [caliper] [round-orchestrator] 	Waiting 5 seconds for the next round...
+2026.09.09-06:37:39.424 info  [caliper] [round-orchestrator] 	Started round 4 (admin-policy)
+2026.09.09-06:37:39.425 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#3
+2026.09.09-06:37:39.445 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:37:39.447 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:39.449 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:39.449 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 3 is starting...
+2026.09.09-06:37:39.451 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:37:39.451 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:39.451 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:39.451 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:37:39.451 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:37:39.451 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:37:39.451 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 3 is completed
+2026.09.09-06:37:39.451 info  [caliper] [worker-message-handler] 	Worker#0 prepared for Round#3
+2026.09.09-06:37:39.452 info  [caliper] [worker-orchestrator] 	1 workers prepared, progressing to test phase.
+2026.09.09-06:37:41.516 info  [caliper] [round-orchestrator] 	Monitors successfully started
+2026.09.09-06:37:41.517 info  [caliper] [worker-message-handler] 	Worker#0 is starting Round#3
+2026.09.09-06:37:41.519 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-06:37:41.522 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:41.524 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:41.524 info  [caliper] [caliper-worker] 	Worker #0 starting workload loop
+2026.09.09-06:37:44.458 info  [caliper] [default-observer] 	[admin-policy Round 3 Transaction Info] - Submitted: 10 Succ: 10 Fail:0 Unfinished:0
+2026.09.09-06:37:49.458 info  [caliper] [default-observer] 	[admin-policy Round 3 Transaction Info] - Submitted: 36 Succ: 30 Fail:0 Unfinished:6
+2026.09.09-06:37:50.528 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-06:37:50.528 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-06:37:50.528 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-06:37:50.528 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-06:37:50.528 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-06:37:50.528 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-06:37:50.529 info  [caliper] [worker-message-handler] 	Worker#0 finished Round#3
+2026.09.09-06:37:55.538 info  [caliper] [default-observer] 	Resetting txCount indicator count
+2026.09.09-06:37:55.548 info  [caliper] [report-builder] 	### Test result ###
+2026.09.09-06:37:55.559 info  [caliper] [report-builder] 	
++--------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name         | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|--------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| admin-policy | 40   | 0    | 5.1             | 1.97            | 0.11            | 1.05            | 5.1              |
++--------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.09-06:37:55.576 info  [caliper] [report-builder] 	### docker resource stats ###'
+2026.09.09-06:37:55.584 info  [caliper] [report-builder] 	
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+| Name                        | CPU%(max) | CPU%(avg) | Memory(max) [MB] | Memory(avg) [MB] | Traffic In [KB] | Traffic Out [KB] | Disc Write [MB] | Disc Read [MB] |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.ojk.paynet           | 0.02375   | 0.01875   | 101              | 98.9             | 268             | 128              | 0.836           | 18.5           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.pjp.paynet           | 0.04875   | 0.0275    | 104              | 101              | 265             | 127              | 1.12            | 9.97           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.commercial.paynet    | 0.025     | 0.02125   | 102              | 101              | 263             | 128              | 0.625           | 4.65           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.himbara.paynet       | 0.0625    | 0.03      | 108              | 105              | 268             | 129              | 17.8            | 8.25           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /peer0.bi.paynet            | 0.09875   | 0.04875   | 110              | 105              | 674             | 607              | 0.543           | 30.7           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.commercial.paynet | 0.05125   | 0.025     | 50.5             | 48.9             | 57.7            | 38.5             | 0.965           | 1.04           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.ojk.paynet        | 0.145     | 0.0425    | 52.2             | 51.9             | 57.6            | 38.5             | 1.30            | 4.91           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.pjp.paynet        | 0.14625   | 0.04375   | 47.6             | 46.8             | 57.6            | 38.5             | 1.21            | 1.11           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.bi.paynet         | 0.135     | 0.0425    | 51.5             | 50.1             | 57.4            | 38.4             | 1.65            | 6.09           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /couchdb0.himbara.paynet    | 0.15875   | 0.04      | 47.4             | 46.8             | 57.7            | 38.5             | 1.18            | 1.55           |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|----------------|
+| /orderer.paynet             | 0.02875   | 0.01      | 56.2             | 52.6             | 189             | 821              | 0.945           | 60.6           |
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+----------------+
+
+2026.09.09-06:37:55.584 info  [caliper] [round-orchestrator] 	Finished round 4 (admin-policy) in 8.004 seconds
+2026.09.09-06:37:55.584 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.09-06:37:55.685 info  [caliper] [report-builder] 	### All test results ###
+2026.09.09-06:37:55.690 info  [caliper] [report-builder] 	
++-------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name              | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|-------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| kyc-onboarding    | 48   | 0    | 5.3             | 2.29            | 0.13            | 0.74            | 4.3              |
+|-------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| monetary-ops      | 40   | 0    | 20.5            | 0.56            | 0.08            | 0.33            | 19.4             |
+|-------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| supervision-reads | 40   | 0    | 30.8            | 0.07            | 0.01            | 0.03            | 30.6             |
+|-------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| admin-policy      | 40   | 0    | 5.1             | 1.97            | 0.11            | 1.05            | 5.1              |
++-------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.09-06:37:55.729 info  [caliper] [report-builder] 	Generated report with path /workspace/report.html
+2026.09.09-06:37:55.729 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.09-06:37:55.729 info  [caliper] [worker-orchestrator] 	Sending exit message to connected workers
+2026.09.09-06:37:55.730 info  [caliper] [round-orchestrator] 	Benchmark finished in 299.659 seconds. Total rounds: 4. Successful rounds: 4. Failed rounds: 0.
+2026.09.09-06:37:55.731 info  [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.end" is not present, skipping end command
+2026.09.09-06:37:55.731 info  [caliper] [cli-launch-manager] 	Benchmark successfully finished!
+2026.09.09-06:37:55.731 info  [caliper] [worker-message-handler] 	Worker#0 is exiting
+[caliper-report] {"rounds":4,"success":168,"failed":0,"rows":[{"name":"kyc-onboarding","success":48,"failed":0},{"name":"monetary-ops","success":40,"failed":0},{"name":"supervision-reads","success":40,"failed":0},{"name":"admin-policy","success":40,"failed":0}],"verdict":"PASS"}

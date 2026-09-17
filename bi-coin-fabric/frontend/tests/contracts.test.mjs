@@ -13,6 +13,14 @@ import {
 
 const apiSource = fs.readFileSync(new URL('../src/lib/api.ts', import.meta.url), 'utf8')
 const transferSource = fs.readFileSync(new URL('../src/pages/Transfer.tsx', import.meta.url), 'utf8')
+const participantsSource = fs.readFileSync(new URL('../src/pages/Participants.tsx', import.meta.url), 'utf8')
+const appSource = fs.readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+const qrisSource = fs.readFileSync(new URL('../src/pages/QrisPayments.tsx', import.meta.url), 'utf8')
+const stylesSource = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
+const contactsSource = fs.readFileSync(new URL('../src/pages/Contacts.tsx', import.meta.url), 'utf8')
+const walletSource = fs.readFileSync(new URL('../src/pages/WalletList.tsx', import.meta.url), 'utf8')
+const overviewSource = fs.readFileSync(new URL('../src/pages/Overview.tsx', import.meta.url), 'utf8')
+const skeletonSource = fs.readFileSync(new URL('../src/components/LoadingSkeleton.tsx', import.meta.url), 'utf8')
 globalThis.__TEST_IMPORT_META_ENV__ = {}
 
 test('access tokens stay in memory and unauthorized responses clear them', () => {
@@ -25,6 +33,23 @@ test('transfer requests carry an idempotency key and suppress duplicate submits'
   assert.match(apiSource, /Idempotency-Key/)
   assert.match(transferSource, /useRef/)
   assert.match(transferSource, /disabled=\{submitting\}/)
+})
+
+test('issuance targets Treasury and distribution selects only a Custodian', () => {
+  assert.match(apiSource, /requestIssuance\(data: \{ amount: string \}\)/)
+  assert.match(apiSource, /receiver_participant_id: string/)
+  assert.match(apiSource, /headers: \{ 'Idempotency-Key': idempotencyKey \}/)
+  assert.doesNotMatch(participantsSource, /sender_participant_id/)
+  assert.match(participantsSource, /Bank Indonesia sends issued Digital Rupiah from Treasury to an active Validator Bank or PJP/)
+  assert.match(participantsSource, /can\(role, 'bank_pjp', 'validator_bank', 'pjp', 'bank_indonesia'\)/)
+  assert.match(appSource, /validator_bank/)
+  assert.match(appSource, /pjp:/)
+})
+
+test('QRIS payments carry a distinct idempotency key', () => {
+  assert.match(apiSource, /payQris\([\s\S]*?idempotencyKey: string/)
+  assert.match(qrisSource, /paymentIdempotencyKey = useRef\(crypto\.randomUUID\(\)\)/)
+  assert.match(qrisSource, /paymentIdempotencyKey\.current = crypto\.randomUUID\(\)/)
 })
 
 test('wallet creation submits owner_id without stale participant or tier fields', async () => {
@@ -148,17 +173,17 @@ test('QRIS switching to a different intent clears stale pay result state', async
     renderer.render()
     await renderer.settle()
 
-    const firstUseButton = findAll(renderer.getTree(), node => node.type === 'button' && textContent(node) === 'Pakai')[0]
+    const firstUseButton = findAll(renderer.getTree(), node => node.type === 'button' && textContent(node) === 'Use')[0]
     firstUseButton.props.onClick()
     renderer.render()
 
-    const payButton = findByText(renderer.getTree(), 'button', 'Bayar QRIS')
+    const payButton = findByText(renderer.getTree(), 'button', 'Pay with QRIS')
     await payButton.props.onClick()
     renderer.render()
 
     assert.match(textContent(renderer.getTree()), /Ref ref-1/)
 
-    const secondUseButton = findAll(renderer.getTree(), node => node.type === 'button' && textContent(node) === 'Pakai')[1]
+    const secondUseButton = findAll(renderer.getTree(), node => node.type === 'button' && textContent(node) === 'Use')[1]
     secondUseButton.props.onClick()
     renderer.render()
 
@@ -188,7 +213,7 @@ test('DemoPanel exposes disclosure and current-step aria state', async () => {
   assert.ok(disclosureButton.props['aria-controls'])
   assert.equal(disclosureButton.props['aria-expanded'], true)
 
-  const currentStepButton = findByText(renderer.getTree(), 'button', 'Issue Rp 100,000,000 to Himbara')
+  const currentStepButton = findByText(renderer.getTree(), 'button', 'Issue Rp 100,000,000 to Treasury')
   assert.equal(currentStepButton.props['aria-current'], 'step')
 
   disclosureButton.props.onClick()
@@ -196,4 +221,74 @@ test('DemoPanel exposes disclosure and current-step aria state', async () => {
 
   const collapsedButton = findByText(renderer.getTree(), 'button', 'Phase 1 — Bank Onboarding')
   assert.equal(collapsedButton.props['aria-expanded'], false)
+})
+
+test('responsive and accessibility foundations are present', () => {
+  assert.doesNotMatch(stylesSource, /min-width:\s*1280px/)
+  assert.match(stylesSource, /@media\s*\(max-width:/)
+  assert.doesNotMatch(stylesSource, /transition\s*:/)
+  assert.doesNotMatch(stylesSource, /animation\s*:/)
+  assert.doesNotMatch(stylesSource, /gradient/)
+  assert.match(stylesSource, /button:focus-visible/)
+  assert.match(appSource, /aria-current=/)
+  assert.match(appSource, /<nav className="nav-tabs"/)
+})
+
+test('login is a form-only surface and the old demo identity contract is gone', () => {
+  assert.match(appSource, /<h1 id="sign-in-title">Sign in<\/h1>/)
+  assert.match(appSource, /className="auth-form"/)
+  assert.match(appSource, /Username/)
+  assert.match(appSource, /Password/)
+  assert.doesNotMatch(appSource, /auth-hero|demo-credentials|credential-card|getDemoIdentities|VITE_DEMO_IDENTITIES/)
+  assert.doesNotMatch(stylesSource, /auth-hero|demo-credentials|credential-card|nav-rail/)
+})
+
+test('data surfaces use static accessible loading placeholders', () => {
+  assert.match(skeletonSource, /role="status"/)
+  assert.match(skeletonSource, /kind: SkeletonKind/)
+  assert.match(overviewSource, /LoadingSkeleton kind="metrics"/)
+  assert.match(walletSource, /LoadingSkeleton kind="table"/)
+  assert.match(participantsSource, /LoadingSkeleton kind="table"/)
+})
+
+test('payment contact API keeps the selected contract', async () => {
+  const { moduleUrl } = compileFrontendModule('lib/api.ts')
+  const api = await import(moduleUrl)
+  const originalFetch = global.fetch
+  const calls = []
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options })
+    return jsonResponse({ id: 'contact-1', label: 'Sari', wallet_id: 'wlt_sari', recipient_type: 'retail_customer' }, 201)
+  }
+  try {
+    const contact = await api.createPaymentContact({ label: 'Sari', wallet_id: 'wlt_sari', recipient_type: 'retail_customer' })
+    assert.equal(contact.wallet_id, 'wlt_sari')
+    assert.equal(calls[0].url, '/api/payment-contacts')
+    assert.equal(calls[0].options.method, 'POST')
+    assert.deepEqual(JSON.parse(calls[0].options.body), { label: 'Sari', wallet_id: 'wlt_sari', recipient_type: 'retail_customer' })
+  } finally {
+    global.fetch = originalFetch
+  }
+  assert.match(contactsSource, /Recipient Wallet ID/)
+  assert.match(contactsSource, /recipient_type/)
+})
+
+test('204 payment contact deletes do not require a JSON body', async () => {
+  const { moduleUrl } = compileFrontendModule('lib/api.ts')
+  const api = await import(moduleUrl)
+  const originalFetch = global.fetch
+  global.fetch = async () => jsonResponse(null, 204)
+  try {
+    assert.equal(await api.deletePaymentContact('contact-1'), undefined)
+  } finally {
+    global.fetch = originalFetch
+  }
+})
+
+test('API errors preserve backend text and use an English fallback', async () => {
+  const { moduleUrl } = compileFrontendModule('lib/api.ts')
+  const api = await import(moduleUrl)
+  assert.equal(api.formatApiError({ message: 'wallet frozen' }, 409, 'Conflict'), 'wallet frozen')
+  assert.equal(api.formatApiError(null, 500, 'Internal Server Error'), 'The service is unavailable. Try again.')
+  assert.equal(api.formatApiError(null, 0, ''), 'The request could not be completed.')
 })

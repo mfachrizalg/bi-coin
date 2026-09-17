@@ -137,17 +137,17 @@ Application: &ApplicationDefaults
       Type: ImplicitMeta
       Rule: "ANY Readers"
     Writers:
-      Type: ImplicitMeta
-      Rule: "ANY Writers"
+      Type: Signature
+      Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.client','HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.client','CommercialBankOrgMSP.admin','CommercialBankOrgMSP.client','PJPOrgMSP.admin','PJPOrgMSP.client')"
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
     LifecycleEndorsement:
-      Type: ImplicitMeta
-      Rule: "MAJORITY Endorsement"
+      Type: Signature
+      Rule: "AND('BankIndonesiaOrgMSP.member',OR('HimbaraBankOrgMSP.member','CommercialBankOrgMSP.member','PJPOrgMSP.member'))"
     Endorsement:
-      Type: ImplicitMeta
-      Rule: "MAJORITY Endorsement"
+      Type: Signature
+      Rule: "OR('BankIndonesiaOrgMSP.member','HimbaraBankOrgMSP.member','CommercialBankOrgMSP.member','PJPOrgMSP.member')"
   Capabilities: *ApplicationCapabilities
 
 Orderer: &OrdererDefaults

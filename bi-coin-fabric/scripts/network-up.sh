@@ -30,22 +30,35 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
   $DC -f "$NETWORK_DIR/docker-compose.yaml" up -d
 
   echo "Waiting for orderer admin endpoint (localhost:7053)..."
+  orderer_ready=false
   for _ in $(seq 1 30); do
     if osnadmin channel list -o localhost:7053 \
         --ca-file "$ORDERER_TLS/ca.crt" \
         --client-cert "$ORDERER_TLS/server.crt" \
         --client-key "$ORDERER_TLS/server.key" >/dev/null 2>&1; then
+      orderer_ready=true
       break
     fi
     sleep 2
   done
+  if [ "$orderer_ready" != true ]; then
+    echo "orderer admin endpoint did not become ready" >&2
+    exit 1
+  fi
 
   echo "Joining orderer to channel $CHANNEL_NAME..."
-  osnadmin channel join --channelID "$CHANNEL_NAME" --config-block "$BLOCK" \
-    -o localhost:7053 \
-    --ca-file "$ORDERER_TLS/ca.crt" \
-    --client-cert "$ORDERER_TLS/server.crt" \
-    --client-key "$ORDERER_TLS/server.key"
+  if osnadmin channel list -o localhost:7053 \
+      --ca-file "$ORDERER_TLS/ca.crt" \
+      --client-cert "$ORDERER_TLS/server.crt" \
+      --client-key "$ORDERER_TLS/server.key" 2>/dev/null | grep -q "$CHANNEL_NAME"; then
+    echo "  orderer already joined"
+  else
+    osnadmin channel join --channelID "$CHANNEL_NAME" --config-block "$BLOCK" \
+      -o localhost:7053 \
+      --ca-file "$ORDERER_TLS/ca.crt" \
+      --client-cert "$ORDERER_TLS/server.crt" \
+      --client-key "$ORDERER_TLS/server.key"
+  fi
 
   echo "Joining peers to channel $CHANNEL_NAME..."
   export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
@@ -62,13 +75,24 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
     export CORE_PEER_TLS_ROOTCERT_FILE="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/peers/peer0.$ORG_DOMAIN/tls/ca.crt"
     export CORE_PEER_MSPCONFIGPATH="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp"
     export CORE_PEER_ADDRESS="localhost:$PORT"
-    for _ in $(seq 1 10); do
-      if peer channel join -b "$BLOCK" 2>/dev/null; then
-        echo "  peer0.$ORG_DOMAIN joined"
-        break
-      fi
-      sleep 3
-    done
+    joined=false
+    if peer channel list 2>/dev/null | grep -Eq "(^|[[:space:]])${CHANNEL_NAME}([[:space:]]|$)"; then
+      echo "  peer0.$ORG_DOMAIN already joined"
+      joined=true
+    else
+      for _ in $(seq 1 10); do
+        if peer channel join -b "$BLOCK" 2>/dev/null; then
+          echo "  peer0.$ORG_DOMAIN joined"
+          joined=true
+          break
+        fi
+        sleep 3
+      done
+    fi
+    if [ "$joined" != true ]; then
+      echo "peer0.$ORG_DOMAIN failed to join channel $CHANNEL_NAME" >&2
+      exit 1
+    fi
   done
 
   echo "Garuda network is up. Channel: $CHANNEL_NAME, 5 orgs joined."

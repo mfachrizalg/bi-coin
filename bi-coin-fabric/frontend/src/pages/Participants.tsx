@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   listParticipants,
   submitParticipant,
@@ -7,32 +7,18 @@ import {
   unfreezeParticipant,
   distributeToParticipant,
   requestIssuance,
+  getErrorMessage,
   type Participant,
 } from '../lib/api'
-import { ParticipantTypeLabel, ParticipantTypeColor } from '../lib/constants'
+import { ParticipantTypeLabel } from '../lib/constants'
 import type { DemoPrefill } from './DemoPanel'
+import LoadingSkeleton from '../components/LoadingSkeleton'
 
 const badge = (type: string) => (
-  <span
-    style={{
-      display: 'inline-block',
-      padding: '2px 8px',
-      borderRadius: 12,
-      fontSize: 12,
-      fontWeight: 600,
-      color: '#fff',
-      background: ParticipantTypeColor[type] ?? '#6b7280',
-    }}
-  >
+  <span className={`participant-badge participant-${type}`}>
     {ParticipantTypeLabel[type] ?? type}
   </span>
 )
-
-const statusColor: Record<string, string> = {
-  active: '#16a34a',
-  pending: '#d97706',
-  frozen: '#dc2626',
-}
 
 interface Props {
   role?: string
@@ -41,12 +27,14 @@ interface Props {
 }
 
 const can = (role: string | undefined, ...allowed: string[]) => allowed.includes(role ?? '')
+const confirmAction = (message: string) => typeof window === 'undefined' || window.confirm(message)
 
 export default function Participants({ role, prefill, onPrefillConsumed }: Props) {
   const [participants, setParticipants] = useState<Participant[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [msg, setMsg] = useState('')
+  const [notice, setNotice] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
+  const [busy, setBusy] = useState('')
 
   const genId = (): string => crypto.randomUUID()
 
@@ -68,23 +56,25 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
     compliance_status: 'pending',
   })
 
-  const [distForm, setDistForm] = useState({
-    sender_participant_id: '',
-    receiver_participant_id: '',
-    amount: '',
-  })
+	const [distForm, setDistForm] = useState({
+		receiver_participant_id: '',
+		amount: '',
+	})
 
-  const [issueForm, setIssueForm] = useState({ participant_id: '', amount: '' })
+	const [issueForm, setIssueForm] = useState({ amount: '' })
+	const distributionIdempotencyKey = useRef(crypto.randomUUID())
 
   const handleIssue = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!issueForm.participant_id || !issueForm.amount) { notify('Fill all issuance fields'); return }
-    try {
-      await requestIssuance({ participant_id: issueForm.participant_id, amount: issueForm.amount })
-      notify('Issuance request submitted')
-      setIssueForm({ participant_id: '', amount: '' })
+	if (!issueForm.amount) { notify('Enter an issuance amount.', 'error'); return }
+	if (!confirmAction(`Issue ${issueForm.amount} Digital Rupiah to Treasury?`)) return
+	try {
+	  setBusy('issue')
+		await requestIssuance({ amount: issueForm.amount })
+			notify('Digital Rupiah issued to Treasury')
+		setIssueForm({ amount: '' })
       load()
-    } catch (e: any) { notify('Error: ' + e.message) }
+	    } catch (e) { notify(getErrorMessage(e), 'error') } finally { setBusy('') }
   }
 
   useEffect(() => {
@@ -99,12 +89,11 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
         participant_type: prefill.participant_type ?? f.participant_type,
       }))
     } else if (prefill.target === 'issue') {
-      setIssueForm({ participant_id: prefill.participant_id ?? '', amount: prefill.amount ?? '' })
+		setIssueForm({ amount: prefill.amount ?? '' })
     } else if (prefill.target === 'distribute') {
       setDistForm(f => ({
         ...f,
-        sender_participant_id: prefill.sender ?? f.sender_participant_id,
-        receiver_participant_id: prefill.receiver ?? f.receiver_participant_id,
+		receiver_participant_id: prefill.receiver ?? f.receiver_participant_id,
         amount: prefill.amount ?? f.amount,
       }))
     }
@@ -117,8 +106,8 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
     try {
       const data = await listParticipants()
       setParticipants(data ?? [])
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -126,107 +115,109 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
 
   useEffect(() => { load() }, [])
 
-  const notify = (m: string) => { setMsg(m); setTimeout(() => setMsg(''), 3000) }
+  const notify = (text: string, kind: 'success' | 'error' = 'success') => setNotice({ text, kind })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+	  setBusy('submit')
       await submitParticipant(form)
-      notify('Participant submitted')
+      notify('Participant registered')
       setForm(f => ({ ...f, participant_id: genId(), name: '', domain: '', account_id: '' }))
       load()
-    } catch (e: any) { notify('Error: ' + e.message) }
+	    } catch (e) { notify(getErrorMessage(e), 'error') } finally { setBusy('') }
   }
 
   const handleAction = async (fn: () => Promise<any>, label: string) => {
-    try { await fn(); notify(label + ' OK'); load() }
-    catch (e: any) { notify('Error: ' + e.message) }
+    if (!confirmAction(`Confirm ${label.toLowerCase()} for this participant?`)) return
+    try { setBusy(label); await fn(); notify(label + ' completed'); load() }
+    catch (e) { notify(getErrorMessage(e), 'error') }
+    finally { setBusy('') }
   }
 
   const handleDistribute = async (e: React.FormEvent) => {
     e.preventDefault()
-    const amount = parseInt(distForm.amount, 10)
-    if (!distForm.sender_participant_id || !distForm.receiver_participant_id || isNaN(amount) || amount <= 0) {
-      notify('Fill all distribute fields correctly')
+    if (!distForm.receiver_participant_id || !/^\d+$/.test(distForm.amount) || BigInt(distForm.amount) <= 0n) {
+      notify('Enter a recipient and a positive amount.', 'error')
       return
     }
+	if (!confirmAction(`Distribute ${distForm.amount} Digital Rupiah to ${distForm.receiver_participant_id}?`)) return
     try {
-      await distributeToParticipant({
-        sender_participant_id: distForm.sender_participant_id,
-        receiver_participant_id: distForm.receiver_participant_id,
-        amount,
-      })
-      notify('Distribution successful')
-      setDistForm({ sender_participant_id: '', receiver_participant_id: '', amount: '' })
-    } catch (e: any) { notify('Error: ' + e.message) }
+	  setBusy('distribute')
+		await distributeToParticipant({
+			receiver_participant_id: distForm.receiver_participant_id,
+          amount: distForm.amount,
+		}, distributionIdempotencyKey.current)
+			notify('Distribution completed')
+		setDistForm({ receiver_participant_id: '', amount: '' })
+		distributionIdempotencyKey.current = crypto.randomUUID()
+	    } catch (e) { notify(getErrorMessage(e), 'error') } finally { setBusy('') }
   }
 
-  const validators = participants.filter(p => p.participant_type === 'validator' && p.status === 'active')
-  const pjps = participants.filter(p => p.participant_type === 'pjp' && p.status === 'active')
+	const validators = participants.filter(p => p.participant_type === 'validator' && p.status === 'active')
+	const pjps = participants.filter(p => p.participant_type === 'pjp' && p.status === 'active')
+	const custodians = [...validators, ...pjps]
 
   return (
-    <div style={{ fontSize: '1rem' }}>
-      <h2 style={{ marginBottom: 16, fontSize: '1.4rem' }}>Peserta Jaringan</h2>
+    <div className="workspace-stack participants-page">
+      <h2>Participants</h2>
 
-      {msg && (
-        <div style={{ padding: '8px 12px', marginBottom: 12, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6 }}>
-          {msg}
+      {notice && (
+        <div className={`banner ${notice.kind}`} role={notice.kind === 'error' ? 'alert' : 'status'}>
+          {notice.text}
         </div>
       )}
       {error && (
-        <div style={{ padding: '8px 12px', marginBottom: 12, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 6 }}>
+        <div className="banner error" role="alert">
           {error}
         </div>
       )}
 
       {/* Participant list */}
-      <div style={{ overflowX: 'auto', marginBottom: 32 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
+      <div className="table-shell">
+        <table className="data-table">
           <thead>
-            <tr style={{ background: '#f9fafb' }}>
-              {['ID', 'Nama', 'Tipe', 'Domain', 'Status', 'Aksi'].map(h => (
-                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap', fontSize: '1rem' }}>{h}</th>
+            <tr>
+              {['ID', 'Name', 'Type', 'Domain', 'Status', 'Actions'].map(h => (
+                <th key={h}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={6} style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>Loading…</td></tr>
+              <tr><td colSpan={6}><LoadingSkeleton kind="table" label="Loading participants" rows={4} /></td></tr>
             )}
             {!loading && participants.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>No participants</td></tr>
+              <tr><td colSpan={6} className="empty-cell">No participants found.</td></tr>
             )}
             {participants.map(p => (
-              <tr key={p.participant_id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: '0.95rem' }}>{p.participant_id}</td>
-                <td style={{ padding: '10px 14px' }}>{p.name}</td>
-                <td style={{ padding: '10px 14px' }}>{badge(p.participant_type)}</td>
-                <td style={{ padding: '8px 12px', color: '#6b7280' }}>{p.domain}</td>
-                <td style={{ padding: '10px 14px' }}>
-                  <span style={{ fontWeight: 600, color: statusColor[p.status] ?? '#374151' }}>{p.status}</span>
+              <tr key={p.participant_id}>
+                <td className="mono">{p.participant_id}</td>
+                <td>{p.name}</td>
+                <td>{badge(p.participant_type)}</td>
+                <td className="muted">{p.domain}</td>
+                <td>
+                  <span className={`status status-${p.status}`}>{p.status}</span>
                 </td>
-                <td style={{ padding: '10px 14px' }}>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <td>
+                  <div className="button-row">
                     {can(role, 'bank_indonesia') && p.status === 'pending' && (
-                      <button onClick={() => handleAction(() => approveParticipant(p.participant_id), 'Approve')}
-                        style={{ padding: '7px 16px', fontSize: '0.95rem', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
+                      <button className="secondary-button" disabled={Boolean(busy)} onClick={() => handleAction(() => approveParticipant(p.participant_id), 'Approve')}>
                         Approve
                       </button>
                     )}
                     {can(role, 'bank_indonesia') && p.status === 'active' && (
-                      <button onClick={() => handleAction(() => freezeParticipant(p.participant_id), 'Freeze')}
-                        style={{ padding: '7px 16px', fontSize: '0.95rem', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
+                      <button className="secondary-button danger" disabled={Boolean(busy)} onClick={() => handleAction(() => freezeParticipant(p.participant_id), 'Freeze')}>
                         Freeze
                       </button>
                     )}
                     {can(role, 'bank_indonesia') && p.status === 'frozen' && (
-                      <button onClick={() => handleAction(() => unfreezeParticipant(p.participant_id), 'Unfreeze')}
-                        style={{ padding: '7px 16px', fontSize: '0.95rem', background: '#d97706', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
+                      <button className="secondary-button warning" disabled={Boolean(busy)} onClick={() => handleAction(() => unfreezeParticipant(p.participant_id), 'Unfreeze')}>
                         Unfreeze
                       </button>
                     )}
                     {!can(role, 'bank_indonesia') && (
-                      <span style={{ fontSize: 12, color: '#9ca3af' }}>—</span>
+                      <span className="muted">—</span>
                     )}
                   </div>
                 </td>
@@ -236,118 +227,99 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
         </table>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, alignItems: 'start' }}>
-        {/* Submit participant — bank_pjp + bank_indonesia */}
-        {can(role, 'bank_indonesia') && <div>
-          <h3 style={{ marginBottom: 12, fontSize: '1.1rem' }}>Daftarkan Peserta</h3>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'flex', gap: 6 }}>
+      <div className="participant-forms-grid">
+        {/* Submit participant — validator bank/PJP + BI */}
+        {can(role, 'bank_pjp', 'validator_bank', 'pjp', 'bank_indonesia') && <section className="surface-card">
+          <h3>Register participant</h3>
+          <form className="stack-small" onSubmit={handleSubmit}>
+            <div className="button-row field-row">
               <input
                 value={form.participant_id}
                 readOnly
-                style={{ flex: 1, padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.9rem', fontFamily: 'monospace', background: '#f9fafb', color: '#6b7280' }}
+                className="app-input mono"
               />
               <button type="button" onClick={() => setForm(f => ({ ...f, participant_id: genId() }))}
                 title="Regenerate ID"
-                style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, cursor: 'pointer', fontSize: '1rem', background: '#fff' }}>
-                ↺
+                aria-label="Regenerate participant ID"
+                className="secondary-button">
+                Regenerate
               </button>
             </div>
             {(['name', 'domain', 'account_id'] as const).map(field => (
               <input
                 key={field}
+                aria-label={field.replace(/_/g, ' ')}
                 placeholder={field.replace(/_/g, ' ')}
                 value={form[field]}
                 onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
-                style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
+                className="app-input"
               />
             ))}
             <select
               value={form.participant_type}
               onChange={e => setForm(f => ({ ...f, participant_type: e.target.value }))}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
+              className="app-input"
             >
               <option value="validator">Bank / Validator</option>
               <option value="pjp">PJP (Payment Service Provider)</option>
               <option value="observer">Observer</option>
             </select>
-            <button type="submit"
-              style={{ padding: '12px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '1rem', fontWeight: 700 }}>
-              Submit
+            <button type="submit" className="primary-button" disabled={Boolean(busy)}>
+              Register participant
             </button>
           </form>
-        </div>}
+        </section>}
 
-        {/* Distribute to PJP — bank_pjp + bank_indonesia */}
-        {can(role, 'bank_indonesia') && <div>
-          <h3 style={{ marginBottom: 12, fontSize: '1.1rem' }}>Distribusi Likuiditas ke PJP</h3>
-          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 10 }}>
-            Bank validator transfers Digital Rupiah to PJP wallet.
-          </p>
-          <form onSubmit={handleDistribute} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <select
-              value={distForm.sender_participant_id}
-              onChange={e => setDistForm(f => ({ ...f, sender_participant_id: e.target.value }))}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
-            >
-              <option value="">— Sender (active bank) —</option>
-              {validators.map(p => (
-                <option key={p.participant_id} value={p.participant_id}>{p.name} ({p.participant_id})</option>
-              ))}
-            </select>
-            <select
+		{/* Treasury distribution to an institutional Custodian */}
+      {can(role, 'bank_indonesia') && <section className="surface-card">
+        <h3>Distribute from Treasury</h3>
+        <p className="field-help">
+              Bank Indonesia sends issued Digital Rupiah from Treasury to an active Validator Bank or PJP.
+            </p>
+				<form className="stack-small" onSubmit={handleDistribute}>
+					<select
               value={distForm.receiver_participant_id}
               onChange={e => setDistForm(f => ({ ...f, receiver_participant_id: e.target.value }))}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
+              className="app-input"
             >
-              <option value="">— Receiver (active PJP) —</option>
-              {pjps.map(p => (
+						<option value="">Select a Validator Bank or PJP</option>
+					{custodians.map(p => (
                 <option key={p.participant_id} value={p.participant_id}>{p.name} ({p.participant_id})</option>
               ))}
             </select>
             <input
               type="number"
-              placeholder="Amount (IDR)"
+              aria-label="Distribution amount in rupiah"
+              placeholder="Amount (rupiah)"
               value={distForm.amount}
               onChange={e => setDistForm(f => ({ ...f, amount: e.target.value }))}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
+              className="app-input"
             />
-            <button type="submit"
-              style={{ padding: '12px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '1rem', fontWeight: 700 }}>
+            <button type="submit" className="primary-button" disabled={Boolean(busy)}>
               Distribute
             </button>
           </form>
-        </div>}
-        {/* Issue Digital Rupiah — bank_indonesia + supervisor only */}
-        {can(role, 'bank_indonesia') && <div>
-          <h3 style={{ marginBottom: 12, fontSize: '1.1rem' }}>Terbitkan Digital Rupiah (BI)</h3>
-          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 10 }}>
-            BI mints and credits Digital Rupiah to bank reserve balance.
+        </section>}
+			{/* Issue Digital Rupiah to Treasury */}
+        {can(role, 'bank_indonesia') && <section className="surface-card">
+          <h3>Issue Digital Rupiah</h3>
+          <p className="field-help">
+					Bank Indonesia issues Digital Rupiah to Treasury. Use Treasury distribution to fund a Custodian.
           </p>
-          <form onSubmit={handleIssue} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <select
-              value={issueForm.participant_id}
-              onChange={e => setIssueForm(f => ({ ...f, participant_id: e.target.value }))}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
-            >
-              <option value="">— Target bank (active validator) —</option>
-              {validators.map(p => (
-                <option key={p.participant_id} value={p.participant_id}>{p.name} ({p.participant_id})</option>
-              ))}
-            </select>
+		  <form className="stack-small" onSubmit={handleIssue}>
             <input
               type="number"
-              placeholder="Amount (IDR)"
+              aria-label="Issuance amount in rupiah"
+              placeholder="Amount (rupiah)"
               value={issueForm.amount}
               onChange={e => setIssueForm(f => ({ ...f, amount: e.target.value }))}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
+              className="app-input"
             />
-            <button type="submit"
-              style={{ padding: '12px 16px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '1rem', fontWeight: 700 }}>
+            <button type="submit" className="primary-button" disabled={Boolean(busy)}>
               Issue
             </button>
           </form>
-        </div>}
+        </section>}
       </div>
     </div>
   )

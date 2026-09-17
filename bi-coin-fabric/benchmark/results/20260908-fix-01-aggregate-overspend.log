@@ -1,0 +1,959 @@
+
+> bi-coin-fabric@1.0.0 benchmark:adversarial
+> caliper launch manager --caliper-benchconfig benchmark/benchconfigs/adversarial.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .
+
+2026.09.08-14:41:14.483 info  [caliper] [cli-launch-manager] 	Set workspace path: /workspace
+2026.09.08-14:41:14.484 info  [caliper] [cli-launch-manager] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/adversarial.yaml
+2026.09.08-14:41:14.484 info  [caliper] [cli-launch-manager] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.08-14:41:14.485 info  [caliper] [cli-launch-manager] 	Set SUT type: fabric
+2026.09.08-14:41:14.513 info  [caliper] [caliper-engine] 	Starting benchmark flow
+2026.09.08-14:41:14.514 info  [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.start" is not present, skipping start command
+2026.09.08-14:41:15.188 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.08-14:41:15.194 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.08-14:41:15.196 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.08-14:41:15.197 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.08-14:41:15.200 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Fabric-Gateway SDK version: 1.5.0 for Peer-Gateway connector; TLS based on BankIndonesiaOrgMSP: server
+2026.09.08-14:41:15.200 info  [caliper] [caliper-engine] 	Executed "init" step in 0.001 seconds
+2026.09.08-14:41:15.200 warn  [caliper] [connectors/peer-gateway/PeerGateway] 	Install smart contract not available for the Fabric Peer Gateway connector
+2026.09.08-14:41:15.201 info  [caliper] [caliper-engine] 	Executed "install" step in 0.001 seconds
+2026.09.08-14:41:15.204 info  [caliper] [monitor.js] 	Attempting to create resource monitor of type docker
+2026.09.08-14:41:15.206 info  [caliper] [default-observer] 	Observer interval set to 5000 milliseconds
+2026.09.08-14:41:15.210 info  [caliper] [round-orchestrator] 	Preparing worker connections
+2026.09.08-14:41:15.210 info  [caliper] [worker-orchestrator] 	Launching worker 1 of 4
+2026.09.08-14:41:15.217 info  [caliper] [worker-orchestrator] 	Launching worker 2 of 4
+2026.09.08-14:41:15.220 info  [caliper] [worker-orchestrator] 	Launching worker 3 of 4
+2026.09.08-14:41:15.222 info  [caliper] [worker-orchestrator] 	Launching worker 4 of 4
+2026.09.08-14:41:15.225 info  [caliper] [worker-orchestrator] 	Messenger not configured, entering configure phase...
+2026.09.08-14:41:15.225 info  [caliper] [worker-orchestrator] 	No existing workers detected, entering worker launch phase...
+2026.09.08-14:41:15.226 info  [caliper] [worker-orchestrator] 	Waiting for 4 workers to be connected...
+2026.09.08-14:41:15.723 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.08-14:41:15.724 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.08-14:41:15.725 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/adversarial.yaml
+2026.09.08-14:41:15.725 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.08-14:41:15.725 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/adversarial.yaml
+2026.09.08-14:41:15.725 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.08-14:41:15.725 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.08-14:41:15.725 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.08-14:41:15.761 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.08-14:41:15.762 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/adversarial.yaml
+2026.09.08-14:41:15.762 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.08-14:41:15.763 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.08-14:41:15.767 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.08-14:41:15.768 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/adversarial.yaml
+2026.09.08-14:41:15.769 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.08-14:41:15.769 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.08-14:41:15.819 info  [caliper] [worker-orchestrator] 	4 workers connected, progressing to worker assignment phase.
+2026.09.08-14:41:15.820 info  [caliper] [worker-orchestrator] 	Workers currently unassigned, awaiting index assignment...
+2026.09.08-14:41:15.824 info  [caliper] [worker-orchestrator] 	Waiting for 4 workers to be assigned...
+2026.09.08-14:41:15.894 info  [caliper] [worker-orchestrator] 	4 workers assigned, progressing to worker initialization phase.
+2026.09.08-14:41:15.894 info  [caliper] [worker-orchestrator] 	Waiting for 4 workers to be ready...
+2026.09.08-14:41:15.895 info  [caliper] [worker-message-handler] 	Initializing Worker#1...
+2026.09.08-14:41:15.895 info  [caliper] [worker-message-handler] 	Initializing Worker#0...
+2026.09.08-14:41:15.895 info  [caliper] [worker-message-handler] 	Initializing Worker#2...
+2026.09.08-14:41:15.895 info  [caliper] [worker-message-handler] 	Initializing Worker#3...
+2026.09.08-14:41:16.804 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.08-14:41:16.811 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.08-14:41:16.812 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.08-14:41:16.813 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.08-14:41:16.815 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.08-14:41:16.817 info  [caliper] [worker-message-handler] 	Worker#1 initialized
+2026.09.08-14:41:16.824 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.08-14:41:16.825 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.08-14:41:16.827 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.08-14:41:16.828 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.08-14:41:16.833 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.08-14:41:16.833 info  [caliper] [worker-message-handler] 	Worker#2 initialized
+2026.09.08-14:41:16.837 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.08-14:41:16.838 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.08-14:41:16.844 info  [caliper] [worker-message-handler] 	Worker#0 initialized
+2026.09.08-14:41:16.861 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.08-14:41:16.870 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.08-14:41:16.871 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.08-14:41:16.872 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.08-14:41:16.877 info  [caliper] [worker-message-handler] 	Worker#3 initialized
+2026.09.08-14:41:16.878 info  [caliper] [worker-orchestrator] 	4 workers ready, progressing to test preparation phase.
+2026.09.08-14:41:16.878 info  [caliper] [round-orchestrator] 	Started round 1 (aggregate-overspend-contention)
+2026.09.08-14:41:16.880 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#0
+2026.09.08-14:41:16.881 info  [caliper] [worker-message-handler] 	Preparing Worker#2 for Round#0
+2026.09.08-14:41:16.882 info  [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#0
+2026.09.08-14:41:16.884 info  [caliper] [worker-message-handler] 	Preparing Worker#3 for Round#0
+2026.09.08-14:41:16.939 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:41:16.942 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:41:16.943 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:41:16.947 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:41:16.950 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:41:16.951 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:41:16.952 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:41:16.952 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:41:16.952 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is starting...
+2026.09.08-14:41:16.953 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:41:16.953 info  [caliper] [caliper-worker] 	Info: worker 2 prepare test phase for round 0 is starting...
+2026.09.08-14:41:16.956 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:41:16.957 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is starting...
+2026.09.08-14:41:16.958 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:41:16.962 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:41:16.962 info  [caliper] [caliper-worker] 	Info: worker 3 prepare test phase for round 0 is starting...
+2026.09.08-14:41:17.040 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:17.045 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:17.053 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetParticipant] using arguments [bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, participant bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, participant bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:17.056 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:17.552 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:17.559 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:17.570 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:18.064 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:18.070 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:18.082 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:18.576 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:18.581 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:18.591 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:19.088 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:19.096 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:19.103 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:19.599 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:19.608 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:19.615 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:20.109 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:20.120 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:20.127 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:20.619 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:20.630 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:20.636 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:21.132 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:21.143 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:21.152 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260908-fix-01_overspend-contention],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_bench_custodian_20260908-fix-01_overspend-contention not found
+2026.09.08-14:41:21.658 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:21.669 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:21.676 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:22.166 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:22.176 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:22.185 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:22.674 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:22.684 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:22.693 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:23.182 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:23.193 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:23.202 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:23.690 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:23.702 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:23.710 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:24.198 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:24.210 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:24.218 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:24.706 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:24.717 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:24.726 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:25.214 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:25.224 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:25.234 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:25.721 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:25.732 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:25.741 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:26.229 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:26.240 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:26.249 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:26.737 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:26.748 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:26.758 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:27.244 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:27.255 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:27.267 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:27.751 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:27.762 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:27.773 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:28.258 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:28.269 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:28.280 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:28.767 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:28.776 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:28.787 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:29.273 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:29.284 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:29.294 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:29.781 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:29.791 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:29.800 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:30.288 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:30.297 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:30.308 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:30.795 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:30.805 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:30.814 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:31.303 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:31.312 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:31.321 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:31.810 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:31.819 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:31.828 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:32.323 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:32.328 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:32.339 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:32.838 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:32.838 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:32.853 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:33.347 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:33.348 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:41:33.362 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_overspend-contention_dblspend_sender_r0],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, wallet wlt_overspend-contention_dblspend_sender_r0 not found
+2026.09.08-14:42:59.827 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:42:59.826 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:42:59.827 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:42:59.827 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:42:59.827 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:42:59.828 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:42:59.828 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:42:59.828 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:42:59.828 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:42:59.828 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:42:59.828 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:42:59.829 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:42:59.829 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:42:59.829 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:42:59.829 info  [caliper] [caliper-worker] 	Info: worker 2 prepare test phase for round 0 is completed
+2026.09.08-14:42:59.829 info  [caliper] [worker-message-handler] 	Worker#2 prepared for Round#0
+2026.09.08-14:42:59.829 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:42:59.830 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:42:59.830 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:42:59.831 info  [caliper] [caliper-worker] 	Info: worker 3 prepare test phase for round 0 is completed
+2026.09.08-14:42:59.832 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:42:59.832 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is completed
+2026.09.08-14:42:59.833 info  [caliper] [worker-message-handler] 	Worker#1 prepared for Round#0
+2026.09.08-14:42:59.832 info  [caliper] [worker-message-handler] 	Worker#3 prepared for Round#0
+2026.09.08-14:43:01.932 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:43:01.933 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:01.933 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:01.933 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:43:01.933 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:43:01.934 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:43:01.934 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is completed
+2026.09.08-14:43:01.934 info  [caliper] [worker-message-handler] 	Worker#0 prepared for Round#0
+2026.09.08-14:43:01.936 info  [caliper] [worker-orchestrator] 	4 workers prepared, progressing to test phase.
+2026.09.08-14:43:04.007 info  [caliper] [round-orchestrator] 	Monitors successfully started
+2026.09.08-14:43:04.008 info  [caliper] [worker-message-handler] 	Worker#0 is starting Round#0
+2026.09.08-14:43:04.009 info  [caliper] [worker-message-handler] 	Worker#2 is starting Round#0
+2026.09.08-14:43:04.009 info  [caliper] [worker-message-handler] 	Worker#1 is starting Round#0
+2026.09.08-14:43:04.009 info  [caliper] [worker-message-handler] 	Worker#3 is starting Round#0
+2026.09.08-14:43:04.012 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:43:04.012 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:43:04.012 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:43:04.013 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.08-14:43:04.015 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:04.015 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:04.015 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:04.015 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:04.018 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:04.018 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:04.018 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:04.018 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:04.020 info  [caliper] [caliper-worker] 	Worker #2 starting workload loop
+2026.09.08-14:43:04.020 info  [caliper] [caliper-worker] 	Worker #3 starting workload loop
+2026.09.08-14:43:04.020 info  [caliper] [caliper-worker] 	Worker #1 starting workload loop
+2026.09.08-14:43:04.020 info  [caliper] [caliper-worker] 	Worker #0 starting workload loop
+2026.09.08-14:43:04.360 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_3],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.362 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_3],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.362 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_1],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.362 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_2],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.364 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_3],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.364 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_2],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.364 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_2],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.365 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_1],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.366 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_2],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.380 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_6],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.381 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_5],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.384 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_6],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.385 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_5],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.385 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_5],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.727 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_8],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.728 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_3],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.728 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_4],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.728 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_4],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.728 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_7],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.729 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_4],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.729 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_7],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.729 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_4],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.731 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_5],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.769 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_13],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.788 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_12],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.789 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_12],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.792 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_11],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.796 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_11],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.797 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_12],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.843 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_10],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.843 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_8],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.843 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_8],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.844 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_8],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.844 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_6],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.844 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_9],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.845 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_7],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.845 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_7],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.846 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_9],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.846 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_9],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:04.847 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_12],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:04.853 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_11],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.293 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_11],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.296 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_13],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.297 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_10],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.298 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_15],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.300 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_13],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.301 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_9],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.301 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_10],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.302 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_10],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.304 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_14],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.438 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_22],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.472 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_23],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.481 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_16],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.482 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_23],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.482 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_14],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.483 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_15],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.483 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_21],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.484 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_18],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.489 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_14],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.491 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_22],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.491 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_15],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.492 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_14],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.493 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_18],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.494 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_16],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.495 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_13],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.496 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_22],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.504 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_24],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.519 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_23],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.526 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_23],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.530 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_21],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.538 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_22],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.542 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_21],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.743 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_17],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.791 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_18],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.791 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_17],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_17],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_19],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_19],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_16],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_17],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_19],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.795 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_18],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:05.967 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_32],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.979 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_31],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.985 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_32],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:05.994 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_30],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.111 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_33],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.113 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_34],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.119 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_36],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.123 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_34],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.126 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_36],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.134 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_27],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.136 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_32],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.137 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_20],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.138 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_35],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.139 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_33],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.139 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_20],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.139 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_21],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.140 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_33],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.141 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_20],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.141 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_16],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.142 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_20],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.143 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_19],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.143 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_26],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.145 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_12,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_33],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.159 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_34],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.160 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_36],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.161 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_35],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.180 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_37],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.180 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_11,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_32],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.187 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_35],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.187 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_15,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_36],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.181 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_14,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_35],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.190 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_37],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.192 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_13,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_34],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.204 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_38],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.211 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_37],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.217 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_16,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_37],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.316 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_29],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.317 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_26],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.317 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_25],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.318 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_25],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.324 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_24],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.325 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_25],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.326 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_26],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.326 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_26],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.327 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_24],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.330 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_25],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.514 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_29],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.516 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_28],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.516 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_30],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.516 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_27],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.518 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_31],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.519 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_29],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.522 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_27],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.525 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_30],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.525 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_28],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.536 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_28],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.713 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_27],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.713 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_31],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.714 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_31],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.714 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_43],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.713 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_42],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.714 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_29],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.715 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_40],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.715 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_28],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.716 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_30],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.728 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_46],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.737 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_48],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.752 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_46],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.756 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_47],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.763 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_49],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.766 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_50],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.767 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_45],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.768 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_10,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_51],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.770 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_47],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.778 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_46],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.779 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_48],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.780 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_49],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.780 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_49],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.commercial.paynet:11051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.781 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_48],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.783 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_8,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_49],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.786 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_50],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.787 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_50],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.788 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_47],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.788 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_7,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_48],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.789 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_6,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_47],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.790 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_44],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.790 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_9,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_50],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.791 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_39],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.791 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_43],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.792 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_43],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_41],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.794 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_40],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.795 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_38],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.796 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_40],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.798 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_19,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_40],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.798 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_44],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.804 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_5,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_46],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.812 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_45],  with error: EndorseError: 10 ABORTED: failed to collect enough transaction endorsements, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:ProposalResponsePayloads do not match
+-  peer0.pjp.paynet:13051:ProposalResponsePayloads do not match
+2026.09.08-14:43:06.826 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_39],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.826 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_2,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_43],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.826 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_44],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.826 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_41],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.827 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_42],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.827 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_39],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.827 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_18,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_39],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.828 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_41],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.828 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_42],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.828 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_0,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_41],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:06.939 info  [caliper] [default-observer] 	[aggregate-overspend-contention Round 0 Transaction Info] - Submitted: 162 Succ: 3 Fail:86 Unfinished:73
+2026.09.08-14:43:08.589 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w1_r0_3,1000,overspend_20260908-fix-01_overspend-contention_w1_r0_44],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:08.589 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w3_r0_1,1000,overspend_20260908-fix-01_overspend-contention_w3_r0_42],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:08.589 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_17,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_38],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:08.589 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w0_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w0_r0_45],  with error: Error: Failed to submit trasaction with status code: 11
+2026.09.08-14:43:08.590 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_overspend-contention_dblspend_sender_r0,wlt_dbl_rcv_20260908-fix-01_overspend-contention_w2_r0_4,1000,overspend_20260908-fix-01_overspend-contention_w2_r0_45],  with error: Error: Failed to submit trasaction with status code: 11
+[overspend-contention] worker 3: committed=3, rejected=47, mvcc=0, insufficient_balance=0, endorsement=0, other=47, final_balance=45000, invariant=PASS
+2026.09.08-14:43:09.687 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:43:09.687 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:09.687 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:09.687 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:43:09.687 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:43:09.687 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:43:09.687 info  [caliper] [worker-message-handler] 	Worker#3 finished Round#0
+[overspend-contention] worker 2: committed=1, rejected=49, mvcc=0, insufficient_balance=0, endorsement=0, other=49, final_balance=45000, invariant=PASS
+2026.09.08-14:43:09.690 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:43:09.690 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:09.690 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:09.691 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:43:09.691 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:43:09.691 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:43:09.691 info  [caliper] [worker-message-handler] 	Worker#2 finished Round#0
+[overspend-contention] worker 1: committed=1, rejected=49, mvcc=0, insufficient_balance=0, endorsement=0, other=49, final_balance=45000, invariant=PASS
+[overspend-contention] worker 0: committed=0, rejected=50, mvcc=0, insufficient_balance=0, endorsement=0, other=50, final_balance=45000, invariant=PASS
+2026.09.08-14:43:09.693 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:43:09.693 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:09.693 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:09.693 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:43:09.693 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.08-14:43:09.693 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.08-14:43:09.694 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:43:09.694 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.08-14:43:09.694 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.08-14:43:09.694 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:43:09.694 info  [caliper] [worker-message-handler] 	Worker#1 finished Round#0
+2026.09.08-14:43:09.694 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.08-14:43:09.694 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.08-14:43:09.694 info  [caliper] [worker-message-handler] 	Worker#0 finished Round#0
+2026.09.08-14:43:14.695 info  [caliper] [default-observer] 	Resetting txCount indicator count
+2026.09.08-14:43:14.696 info  [caliper] [report-builder] 	### Test result ###
+2026.09.08-14:43:14.700 info  [caliper] [report-builder] 	
++--------------------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name                           | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|--------------------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| aggregate-overspend-contention | 5    | 195  | 81.6            | 0.97            | 0.35            | 0.64            | 43.8             |
++--------------------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.08-14:43:14.705 info  [caliper] [report-builder] 	### docker resource stats ###'
+2026.09.08-14:43:14.708 info  [caliper] [report-builder] 	
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+---------------+
+| Name                        | CPU%(max) | CPU%(avg) | Memory(max) [MB] | Memory(avg) [MB] | Traffic In [MB] | Traffic Out [MB] | Disc Write [MB] | Disc Read [B] |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /peer0.pjp.paynet           | 0.6175    | 0.14875   | 110              | 109              | 2.64            | 1.99             | 2.77            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /peer0.bi.paynet            | 0.45625   | 0.115     | 117              | 117              | 2.71            | 2.11             | 3.50            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /peer0.commercial.paynet    | 0.49      | 0.12125   | 116              | 116              | 2.54            | 1.86             | 2.75            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /peer0.himbara.paynet       | 0.78375   | 0.18125   | 119              | 118              | 6.81            | 4.55             | 3.09            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /peer0.ojk.paynet           | 0.235     | 0.0725    | 112              | 110              | 1.37            | 0.129            | 2.97            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /couchdb0.himbara.paynet    | 0.9575    | 0.235     | 53.2             | 52.8             | 0.237           | 0.275            | 2.66            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /couchdb0.pjp.paynet        | 0.9525    | 0.23125   | 54.4             | 53.7             | 0.189           | 0.252            | 2.69            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /couchdb0.commercial.paynet | 0.9025    | 0.23375   | 53.4             | 52.5             | 0.185           | 0.249            | 2.50            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /couchdb0.ojk.paynet        | 0.33625   | 0.10875   | 54.4             | 54.2             | 0.0734          | 0.213            | 2.53            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /couchdb0.bi.paynet         | 0.8325    | 0.215     | 54.6             | 53.8             | 0.195           | 0.253            | 2.88            | 0.00          |
+|-----------------------------|-----------|-----------|------------------|------------------|-----------------|------------------|-----------------|---------------|
+| /orderer.paynet             | 0.11125   | 0.02375   | 48.3             | 46.4             | 1.17            | 5.58             | 3.31            | 0.00          |
++-----------------------------+-----------+-----------+------------------+------------------+-----------------+------------------+-----------------+---------------+
+
+2026.09.08-14:43:14.709 info  [caliper] [round-orchestrator] 	Finished round 1 (aggregate-overspend-contention) in 4.663 seconds
+2026.09.08-14:43:14.709 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.08-14:43:14.810 info  [caliper] [report-builder] 	### All test results ###
+2026.09.08-14:43:14.810 info  [caliper] [report-builder] 	
++--------------------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+| Name                           | Succ | Fail | Send Rate (TPS) | Max Latency (s) | Min Latency (s) | Avg Latency (s) | Throughput (TPS) |
+|--------------------------------|------|------|-----------------|-----------------|-----------------|-----------------|------------------|
+| aggregate-overspend-contention | 5    | 195  | 81.6            | 0.97            | 0.35            | 0.64            | 43.8             |
++--------------------------------+------+------+-----------------+-----------------+-----------------+-----------------+------------------+
+
+2026.09.08-14:43:14.820 info  [caliper] [report-builder] 	Generated report with path /workspace/report.html
+2026.09.08-14:43:14.820 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.08-14:43:14.820 info  [caliper] [worker-orchestrator] 	Sending exit message to connected workers
+2026.09.08-14:43:14.820 info  [caliper] [round-orchestrator] 	Benchmark finished in 117.942 seconds. Total rounds: 1. Successful rounds: 1. Failed rounds: 0.
+2026.09.08-14:43:14.821 info  [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.end" is not present, skipping end command
+2026.09.08-14:43:14.821 info  [caliper] [worker-message-handler] 	Worker#1 is exiting
+2026.09.08-14:43:14.821 info  [caliper] [worker-message-handler] 	Worker#2 is exiting
+2026.09.08-14:43:14.821 info  [caliper] [cli-launch-manager] 	Benchmark successfully finished!
+2026.09.08-14:43:14.821 info  [caliper] [worker-message-handler] 	Worker#3 is exiting
+2026.09.08-14:43:14.821 info  [caliper] [worker-message-handler] 	Worker#0 is exiting

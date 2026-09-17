@@ -1,0 +1,1606 @@
+Packaging chaincode...
+Installing chaincode on all peers (OJK install is query-only)...
+[34m2026-09-17 01:22:59.519 WIB 0001 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:13051"
+[34m2026-09-17 01:22:59.520 WIB 0002 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel created
+[34m2026-09-17 01:22:59.520 WIB 0003 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:13051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:22:59.520 WIB 0004 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel authority set to "localhost:13051"
+[34m2026-09-17 01:22:59.520 WIB 0005 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:22:59.520 WIB 0006 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:22:59.520 WIB 0007 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1940279bc750] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:22:59.520 WIB 0008 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.520 WIB 0009 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel created
+[34m2026-09-17 01:22:59.520 WIB 000a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel exiting idle mode
+[34m2026-09-17 01:22:59.520 WIB 000b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.520 WIB 000c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel picks a new address "localhost:13051" to connect
+[34m2026-09-17 01:22:59.523 WIB 000d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to READY
+[34m2026-09-17 01:22:59.523 WIB 000e INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1940279bc750] SubConn 0x194027c0dea0 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:22:59.523 WIB 000f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to READY
+[34m2026-09-17 01:22:59.523 WIB 0010 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:13051"
+[34m2026-09-17 01:22:59.523 WIB 0011 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel created
+[34m2026-09-17 01:22:59.523 WIB 0012 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:13051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:22:59.523 WIB 0013 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel authority set to "localhost:13051"
+[34m2026-09-17 01:22:59.523 WIB 0014 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:22:59.523 WIB 0015 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:22:59.523 WIB 0016 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x194027bc8090] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:22:59.523 WIB 0017 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.523 WIB 0018 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel created
+[34m2026-09-17 01:22:59.523 WIB 0019 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel exiting idle mode
+[34m2026-09-17 01:22:59.524 WIB 001a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.524 WIB 001b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel picks a new address "localhost:13051" to connect
+[34m2026-09-17 01:22:59.526 WIB 001c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to READY
+[34m2026-09-17 01:22:59.526 WIB 001d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x194027bc8090] SubConn 0x194027800d70 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:22:59.526 WIB 001e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to READY
+Package ID: digital-rupiah_3.0:6577345e5a476eadebff5403f2756125454311a1ea7739a34dbea5999be18074
+Approving chaincode for all validator/PJP orgs...
+[34m2026-09-17 01:22:59.707 WIB 0001 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7051"
+[34m2026-09-17 01:22:59.707 WIB 0002 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel created
+[34m2026-09-17 01:22:59.707 WIB 0003 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:22:59.707 WIB 0004 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel authority set to "localhost:7051"
+[34m2026-09-17 01:22:59.707 WIB 0005 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:22:59.707 WIB 0006 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:22:59.707 WIB 0007 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x37232f7dd8c0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:22:59.707 WIB 0008 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.707 WIB 0009 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel created
+[34m2026-09-17 01:22:59.707 WIB 000a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel exiting idle mode
+[34m2026-09-17 01:22:59.707 WIB 000b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.707 WIB 000c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel picks a new address "localhost:7051" to connect
+[34m2026-09-17 01:22:59.710 WIB 000d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to READY
+[34m2026-09-17 01:22:59.711 WIB 000e INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x37232f7dd8c0] SubConn 0x37232f7b7b80 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:22:59.711 WIB 000f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to READY
+[34m2026-09-17 01:22:59.711 WIB 0010 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7051"
+[34m2026-09-17 01:22:59.711 WIB 0011 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel created
+[34m2026-09-17 01:22:59.711 WIB 0012 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:22:59.711 WIB 0013 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel authority set to "localhost:7051"
+[34m2026-09-17 01:22:59.711 WIB 0014 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:22:59.711 WIB 0015 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:22:59.711 WIB 0016 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x37232f8527e0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:22:59.711 WIB 0017 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.711 WIB 0018 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel created
+[34m2026-09-17 01:22:59.711 WIB 0019 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel exiting idle mode
+[34m2026-09-17 01:22:59.711 WIB 001a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.711 WIB 001b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel picks a new address "localhost:7051" to connect
+[34m2026-09-17 01:22:59.714 WIB 001c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to READY
+[34m2026-09-17 01:22:59.714 WIB 001d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x37232f8527e0] SubConn 0x37232fadb590 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:22:59.714 WIB 001e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to READY
+[33m2026-09-17 01:22:59.714 WIB 001f WARN[0m [grpc] [33;1mWarningf[0m -> [core] Adjusting keepalive ping interval to minimum period of 10s
+[34m2026-09-17 01:22:59.714 WIB 0020 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7050"
+[34m2026-09-17 01:22:59.714 WIB 0021 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel created
+[34m2026-09-17 01:22:59.714 WIB 0022 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7050", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:22:59.714 WIB 0023 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel authority set to "orderer.paynet"
+[34m2026-09-17 01:22:59.714 WIB 0024 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:22:59.714 WIB 0025 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:22:59.714 WIB 0026 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x37232f9b3290] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:22:59.714 WIB 0027 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.714 WIB 0028 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel created
+[34m2026-09-17 01:22:59.714 WIB 0029 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel exiting idle mode
+[34m2026-09-17 01:22:59.714 WIB 002a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:22:59.714 WIB 002b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel picks a new address "localhost:7050" to connect
+[34m2026-09-17 01:22:59.716 WIB 002c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to READY
+[34m2026-09-17 01:22:59.717 WIB 002d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x37232f9b3290] SubConn 0x37232f6fad70 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:22:59.717 WIB 002e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to READY
+[34m2026-09-17 01:23:01.840 WIB 002f INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [c2def6b25cb377df61b844a1a76a79f64f8306086589ffe027ea35fcf0fc30ec] committed with status (VALID) at localhost:7051
+[34m2026-09-17 01:23:02.034 WIB 0001 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:9051"
+[34m2026-09-17 01:23:02.034 WIB 0002 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel created
+[34m2026-09-17 01:23:02.034 WIB 0003 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:9051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:02.034 WIB 0004 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel authority set to "localhost:9051"
+[34m2026-09-17 01:23:02.034 WIB 0005 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:02.034 WIB 0006 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:02.034 WIB 0007 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xccfa33a2360] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:02.034 WIB 0008 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:02.034 WIB 0009 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel created
+[34m2026-09-17 01:23:02.034 WIB 000a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel exiting idle mode
+[34m2026-09-17 01:23:02.034 WIB 000b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:02.034 WIB 000c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel picks a new address "localhost:9051" to connect
+[34m2026-09-17 01:23:02.037 WIB 000d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:02.037 WIB 000e INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xccfa33a2360] SubConn 0xccfa3436410 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:02.037 WIB 000f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to READY
+[34m2026-09-17 01:23:02.037 WIB 0010 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:9051"
+[34m2026-09-17 01:23:02.037 WIB 0011 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel created
+[34m2026-09-17 01:23:02.037 WIB 0012 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:9051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:02.037 WIB 0013 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel authority set to "localhost:9051"
+[34m2026-09-17 01:23:02.037 WIB 0014 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:02.037 WIB 0015 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:02.037 WIB 0016 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xccfa31962d0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:02.037 WIB 0017 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:02.037 WIB 0018 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel created
+[34m2026-09-17 01:23:02.037 WIB 0019 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel exiting idle mode
+[34m2026-09-17 01:23:02.038 WIB 001a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:02.038 WIB 001b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel picks a new address "localhost:9051" to connect
+[34m2026-09-17 01:23:02.040 WIB 001c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:02.040 WIB 001d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xccfa31962d0] SubConn 0xccfa33a0910 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:02.040 WIB 001e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to READY
+[33m2026-09-17 01:23:02.040 WIB 001f WARN[0m [grpc] [33;1mWarningf[0m -> [core] Adjusting keepalive ping interval to minimum period of 10s
+[34m2026-09-17 01:23:02.040 WIB 0020 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7050"
+[34m2026-09-17 01:23:02.040 WIB 0021 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel created
+[34m2026-09-17 01:23:02.040 WIB 0022 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7050", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:02.040 WIB 0023 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel authority set to "orderer.paynet"
+[34m2026-09-17 01:23:02.040 WIB 0024 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:02.041 WIB 0025 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:02.041 WIB 0026 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xccfa3196480] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:02.041 WIB 0027 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:02.041 WIB 0028 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel created
+[34m2026-09-17 01:23:02.041 WIB 0029 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel exiting idle mode
+[34m2026-09-17 01:23:02.041 WIB 002a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:02.041 WIB 002b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel picks a new address "localhost:7050" to connect
+[34m2026-09-17 01:23:02.043 WIB 002c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:02.043 WIB 002d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xccfa3196480] SubConn 0xccfa31f0280 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:02.043 WIB 002e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to READY
+[34m2026-09-17 01:23:04.124 WIB 002f INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [5866311b5d0c2432d16a351a79a0428b634e09135dfdecd4c3eaa24dee78fa60] committed with status (VALID) at localhost:9051
+[34m2026-09-17 01:23:04.344 WIB 0001 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:11051"
+[34m2026-09-17 01:23:04.344 WIB 0002 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel created
+[34m2026-09-17 01:23:04.344 WIB 0003 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:11051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:04.344 WIB 0004 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel authority set to "localhost:11051"
+[34m2026-09-17 01:23:04.344 WIB 0005 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:04.344 WIB 0006 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:04.344 WIB 0007 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x226399ef43f0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:04.344 WIB 0008 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:04.344 WIB 0009 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel created
+[34m2026-09-17 01:23:04.344 WIB 000a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel exiting idle mode
+[34m2026-09-17 01:23:04.344 WIB 000b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:04.344 WIB 000c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel picks a new address "localhost:11051" to connect
+[34m2026-09-17 01:23:04.347 WIB 000d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:04.347 WIB 000e INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x226399ef43f0] SubConn 0x22639a41f900 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:04.347 WIB 000f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to READY
+[34m2026-09-17 01:23:04.347 WIB 0010 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:11051"
+[34m2026-09-17 01:23:04.347 WIB 0011 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel created
+[34m2026-09-17 01:23:04.347 WIB 0012 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:11051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:04.347 WIB 0013 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel authority set to "localhost:11051"
+[34m2026-09-17 01:23:04.347 WIB 0014 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:04.347 WIB 0015 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:04.347 WIB 0016 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x22639a196630] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:04.347 WIB 0017 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:04.347 WIB 0018 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel created
+[34m2026-09-17 01:23:04.347 WIB 0019 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel exiting idle mode
+[34m2026-09-17 01:23:04.347 WIB 001a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:04.347 WIB 001b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel picks a new address "localhost:11051" to connect
+[34m2026-09-17 01:23:04.350 WIB 001c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:04.350 WIB 001d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x22639a196630] SubConn 0x22639a1172c0 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:04.350 WIB 001e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to READY
+[33m2026-09-17 01:23:04.350 WIB 001f WARN[0m [grpc] [33;1mWarningf[0m -> [core] Adjusting keepalive ping interval to minimum period of 10s
+[34m2026-09-17 01:23:04.350 WIB 0020 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7050"
+[34m2026-09-17 01:23:04.350 WIB 0021 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel created
+[34m2026-09-17 01:23:04.350 WIB 0022 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7050", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:04.350 WIB 0023 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel authority set to "orderer.paynet"
+[34m2026-09-17 01:23:04.351 WIB 0024 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:04.351 WIB 0025 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:04.351 WIB 0026 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x226399ef4750] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:04.351 WIB 0027 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:04.351 WIB 0028 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel created
+[34m2026-09-17 01:23:04.351 WIB 0029 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel exiting idle mode
+[34m2026-09-17 01:23:04.351 WIB 002a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:04.351 WIB 002b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel picks a new address "localhost:7050" to connect
+[34m2026-09-17 01:23:04.353 WIB 002c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:04.353 WIB 002d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x226399ef4750] SubConn 0x22639a41fc70 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:04.353 WIB 002e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to READY
+[34m2026-09-17 01:23:06.437 WIB 002f INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [cf71ef254b20347182e5b6719464483905bd84b661009638fb21abadc77487f1] committed with status (VALID) at localhost:11051
+[34m2026-09-17 01:23:06.623 WIB 0001 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:13051"
+[34m2026-09-17 01:23:06.623 WIB 0002 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel created
+[34m2026-09-17 01:23:06.623 WIB 0003 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:13051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:06.623 WIB 0004 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel authority set to "localhost:13051"
+[34m2026-09-17 01:23:06.623 WIB 0005 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:06.623 WIB 0006 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:06.623 WIB 0007 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xfbb5c28a2d0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:06.623 WIB 0008 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:06.623 WIB 0009 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel created
+[34m2026-09-17 01:23:06.623 WIB 000a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel exiting idle mode
+[34m2026-09-17 01:23:06.623 WIB 000b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:06.623 WIB 000c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel picks a new address "localhost:13051" to connect
+[34m2026-09-17 01:23:06.626 WIB 000d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:06.626 WIB 000e INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xfbb5c28a2d0] SubConn 0xfbb5c59ae10 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:06.626 WIB 000f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to READY
+[34m2026-09-17 01:23:06.626 WIB 0010 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:13051"
+[34m2026-09-17 01:23:06.626 WIB 0011 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel created
+[34m2026-09-17 01:23:06.626 WIB 0012 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:13051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:06.626 WIB 0013 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel authority set to "localhost:13051"
+[34m2026-09-17 01:23:06.626 WIB 0014 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:06.627 WIB 0015 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:06.627 WIB 0016 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xfbb5c5c2750] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:06.627 WIB 0017 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:06.627 WIB 0018 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel created
+[34m2026-09-17 01:23:06.627 WIB 0019 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel exiting idle mode
+[34m2026-09-17 01:23:06.627 WIB 001a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:06.627 WIB 001b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel picks a new address "localhost:13051" to connect
+[34m2026-09-17 01:23:06.629 WIB 001c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:06.630 WIB 001d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xfbb5c5c2750] SubConn 0xfbb5c804730 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:06.630 WIB 001e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to READY
+[33m2026-09-17 01:23:06.630 WIB 001f WARN[0m [grpc] [33;1mWarningf[0m -> [core] Adjusting keepalive ping interval to minimum period of 10s
+[34m2026-09-17 01:23:06.630 WIB 0020 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7050"
+[34m2026-09-17 01:23:06.630 WIB 0021 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel created
+[34m2026-09-17 01:23:06.630 WIB 0022 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7050", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:06.630 WIB 0023 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel authority set to "orderer.paynet"
+[34m2026-09-17 01:23:06.630 WIB 0024 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:06.630 WIB 0025 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:06.630 WIB 0026 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xfbb5c3bef30] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:06.630 WIB 0027 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:06.630 WIB 0028 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel created
+[34m2026-09-17 01:23:06.630 WIB 0029 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel exiting idle mode
+[34m2026-09-17 01:23:06.630 WIB 002a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:06.630 WIB 002b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel picks a new address "localhost:7050" to connect
+[34m2026-09-17 01:23:06.632 WIB 002c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:06.632 WIB 002d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0xfbb5c3bef30] SubConn 0xfbb5c377b30 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:06.632 WIB 002e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.904 WIB 002f INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [f57aac5099b3f4fde61910a2165e464b8340774fa73dd261e9cb9f220adc9c40] committed with status (VALID) at localhost:13051
+Committing chaincode...
+[34m2026-09-17 01:23:08.960 WIB 0001 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7051"
+[34m2026-09-17 01:23:08.960 WIB 0002 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel created
+[34m2026-09-17 01:23:08.960 WIB 0003 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.960 WIB 0004 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel authority set to "localhost:7051"
+[34m2026-09-17 01:23:08.960 WIB 0005 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.960 WIB 0006 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.961 WIB 0007 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7e586c0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.961 WIB 0008 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.961 WIB 0009 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel created
+[34m2026-09-17 01:23:08.961 WIB 000a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel exiting idle mode
+[34m2026-09-17 01:23:08.961 WIB 000b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.961 WIB 000c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel picks a new address "localhost:7051" to connect
+[34m2026-09-17 01:23:08.963 WIB 000d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1 SubChannel #2]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.963 WIB 000e INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7e586c0] SubConn 0x1990e7e1af00 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.963 WIB 000f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #1]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.964 WIB 0010 INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7051"
+[34m2026-09-17 01:23:08.964 WIB 0011 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel created
+[34m2026-09-17 01:23:08.964 WIB 0012 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.964 WIB 0013 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel authority set to "localhost:7051"
+[34m2026-09-17 01:23:08.964 WIB 0014 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.964 WIB 0015 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.964 WIB 0016 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b50360] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.964 WIB 0017 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.964 WIB 0018 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel created
+[34m2026-09-17 01:23:08.964 WIB 0019 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel exiting idle mode
+[34m2026-09-17 01:23:08.964 WIB 001a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.964 WIB 001b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel picks a new address "localhost:7051" to connect
+[34m2026-09-17 01:23:08.967 WIB 001c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4 SubChannel #5]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.967 WIB 001d INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b50360] SubConn 0x1990e7c37cc0 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.967 WIB 001e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #4]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.967 WIB 001f INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:9051"
+[34m2026-09-17 01:23:08.967 WIB 0020 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel created
+[34m2026-09-17 01:23:08.967 WIB 0021 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:9051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.967 WIB 0022 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel authority set to "localhost:9051"
+[34m2026-09-17 01:23:08.967 WIB 0023 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.967 WIB 0024 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.967 WIB 0025 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b50120] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.967 WIB 0026 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.967 WIB 0027 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel created
+[34m2026-09-17 01:23:08.967 WIB 0028 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel exiting idle mode
+[34m2026-09-17 01:23:08.967 WIB 0029 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.967 WIB 002a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel picks a new address "localhost:9051" to connect
+[34m2026-09-17 01:23:08.969 WIB 002b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7 SubChannel #8]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.969 WIB 002c INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b50120] SubConn 0x1990e7fbe190 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.969 WIB 002d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #7]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.970 WIB 002e INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:9051"
+[34m2026-09-17 01:23:08.970 WIB 002f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Channel created
+[34m2026-09-17 01:23:08.970 WIB 0030 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:9051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.970 WIB 0031 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Channel authority set to "localhost:9051"
+[34m2026-09-17 01:23:08.970 WIB 0032 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.970 WIB 0033 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.970 WIB 0034 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7c38240] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:9051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:9051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.970 WIB 0035 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.970 WIB 0036 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10 SubChannel #11]Subchannel created
+[34m2026-09-17 01:23:08.970 WIB 0037 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Channel exiting idle mode
+[34m2026-09-17 01:23:08.970 WIB 0038 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10 SubChannel #11]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.970 WIB 0039 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10 SubChannel #11]Subchannel picks a new address "localhost:9051" to connect
+[34m2026-09-17 01:23:08.972 WIB 003a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10 SubChannel #11]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.972 WIB 003b INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7c38240] SubConn 0x1990e7cb50e0 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.972 WIB 003c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #10]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.972 WIB 003d INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:11051"
+[34m2026-09-17 01:23:08.972 WIB 003e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Channel created
+[34m2026-09-17 01:23:08.972 WIB 003f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:11051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.972 WIB 0040 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Channel authority set to "localhost:11051"
+[34m2026-09-17 01:23:08.973 WIB 0041 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.973 WIB 0042 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.973 WIB 0043 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e80222d0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.973 WIB 0044 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.973 WIB 0045 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13 SubChannel #14]Subchannel created
+[34m2026-09-17 01:23:08.973 WIB 0046 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Channel exiting idle mode
+[34m2026-09-17 01:23:08.973 WIB 0047 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13 SubChannel #14]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.973 WIB 0048 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13 SubChannel #14]Subchannel picks a new address "localhost:11051" to connect
+[34m2026-09-17 01:23:08.976 WIB 0049 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13 SubChannel #14]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.976 WIB 004a INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e80222d0] SubConn 0x1990e7e9c230 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.976 WIB 004b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #13]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.976 WIB 004c INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:11051"
+[34m2026-09-17 01:23:08.976 WIB 004d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Channel created
+[34m2026-09-17 01:23:08.976 WIB 004e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:11051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.976 WIB 004f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Channel authority set to "localhost:11051"
+[34m2026-09-17 01:23:08.976 WIB 0050 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.976 WIB 0051 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.977 WIB 0052 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b506c0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:11051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:11051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.977 WIB 0053 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.977 WIB 0054 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16 SubChannel #17]Subchannel created
+[34m2026-09-17 01:23:08.977 WIB 0055 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Channel exiting idle mode
+[34m2026-09-17 01:23:08.977 WIB 0056 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16 SubChannel #17]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.977 WIB 0057 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16 SubChannel #17]Subchannel picks a new address "localhost:11051" to connect
+[34m2026-09-17 01:23:08.980 WIB 0058 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16 SubChannel #17]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.980 WIB 0059 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b506c0] SubConn 0x1990e7fbf310 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.980 WIB 005a INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #16]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.980 WIB 005b INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:13051"
+[34m2026-09-17 01:23:08.980 WIB 005c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Channel created
+[34m2026-09-17 01:23:08.980 WIB 005d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:13051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.980 WIB 005e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Channel authority set to "localhost:13051"
+[34m2026-09-17 01:23:08.980 WIB 005f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.980 WIB 0060 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.980 WIB 0061 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e80226c0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.980 WIB 0062 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.981 WIB 0063 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19 SubChannel #20]Subchannel created
+[34m2026-09-17 01:23:08.981 WIB 0064 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Channel exiting idle mode
+[34m2026-09-17 01:23:08.981 WIB 0065 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19 SubChannel #20]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.981 WIB 0066 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19 SubChannel #20]Subchannel picks a new address "localhost:13051" to connect
+[34m2026-09-17 01:23:08.983 WIB 0067 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19 SubChannel #20]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.983 WIB 0068 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e80226c0] SubConn 0x1990e7e9d900 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.983 WIB 0069 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #19]Channel Connectivity change to READY
+[34m2026-09-17 01:23:08.983 WIB 006a INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:13051"
+[34m2026-09-17 01:23:08.983 WIB 006b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Channel created
+[34m2026-09-17 01:23:08.983 WIB 006c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:13051", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.983 WIB 006d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Channel authority set to "localhost:13051"
+[34m2026-09-17 01:23:08.983 WIB 006e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.984 WIB 006f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.984 WIB 0070 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7c383f0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:13051",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:13051",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.984 WIB 0071 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.984 WIB 0072 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22 SubChannel #23]Subchannel created
+[34m2026-09-17 01:23:08.984 WIB 0073 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Channel exiting idle mode
+[34m2026-09-17 01:23:08.984 WIB 0074 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22 SubChannel #23]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.984 WIB 0075 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22 SubChannel #23]Subchannel picks a new address "localhost:13051" to connect
+[34m2026-09-17 01:23:08.986 WIB 0076 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22 SubChannel #23]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.986 WIB 0077 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7c383f0] SubConn 0x1990e7cb4b40 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.986 WIB 0078 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #22]Channel Connectivity change to READY
+[33m2026-09-17 01:23:08.986 WIB 0079 WARN[0m [grpc] [33;1mWarningf[0m -> [core] Adjusting keepalive ping interval to minimum period of 10s
+[34m2026-09-17 01:23:08.986 WIB 007a INFO[0m [grpc] [34;1mInfof[0m -> [core] original dial target is: "localhost:7050"
+[34m2026-09-17 01:23:08.986 WIB 007b INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Channel created
+[34m2026-09-17 01:23:08.986 WIB 007c INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]parsed dial target is: resolver.Target{URL:url.URL{Scheme:"passthrough", Opaque:"", User:(*url.Userinfo)(nil), Host:"", Path:"/localhost:7050", Fragment:"", RawQuery:"", RawPath:"", RawFragment:"", ForceQuery:false, OmitHost:false}}
+[34m2026-09-17 01:23:08.986 WIB 007d INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Channel authority set to "orderer.paynet"
+[34m2026-09-17 01:23:08.986 WIB 007e INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Resolver state updated: {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+} (resolver returned new addresses)
+[34m2026-09-17 01:23:08.986 WIB 007f INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Channel switches to new LB policy "pick_first"
+[34m2026-09-17 01:23:08.986 WIB 0080 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b507e0] Received new config {
+  "shuffleAddressList": false
+}, resolver state {
+  "Addresses": [
+    {
+      "Addr": "localhost:7050",
+      "ServerName": "",
+      "Attributes": null,
+      "BalancerAttributes": null,
+      "Metadata": null
+    }
+  ],
+  "Endpoints": [
+    {
+      "Addresses": [
+        {
+          "Addr": "localhost:7050",
+          "ServerName": "",
+          "Attributes": null,
+          "BalancerAttributes": null,
+          "Metadata": null
+        }
+      ],
+      "Attributes": null
+    }
+  ],
+  "ServiceConfig": null,
+  "Attributes": null
+}
+[34m2026-09-17 01:23:08.987 WIB 0081 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Channel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.987 WIB 0082 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25 SubChannel #26]Subchannel created
+[34m2026-09-17 01:23:08.987 WIB 0083 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Channel exiting idle mode
+[34m2026-09-17 01:23:08.987 WIB 0084 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25 SubChannel #26]Subchannel Connectivity change to CONNECTING
+[34m2026-09-17 01:23:08.987 WIB 0085 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25 SubChannel #26]Subchannel picks a new address "localhost:7050" to connect
+[34m2026-09-17 01:23:08.989 WIB 0086 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25 SubChannel #26]Subchannel Connectivity change to READY
+[34m2026-09-17 01:23:08.989 WIB 0087 INFO[0m [grpc] [34;1mInfof[0m -> [pick-first-leaf-lb] [pick-first-leaf-lb 0x1990e7b507e0] SubConn 0x1990e7fbec80 reported connectivity state READY and the health listener is disabled. Transitioning SubConn to READY.
+[34m2026-09-17 01:23:08.989 WIB 0088 INFO[0m [grpc] [34;1mAddTraceEvent[0m -> [core] [Channel #25]Channel Connectivity change to READY
+[34m2026-09-17 01:23:11.595 WIB 0089 INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [34ec6988522b60012b00913a03160b232f88f3e591e1bfd4843e628f54941900] committed with status (VALID) at localhost:13051
+[34m2026-09-17 01:23:11.603 WIB 008a INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [34ec6988522b60012b00913a03160b232f88f3e591e1bfd4843e628f54941900] committed with status (VALID) at localhost:11051
+[34m2026-09-17 01:23:11.606 WIB 008b INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [34ec6988522b60012b00913a03160b232f88f3e591e1bfd4843e628f54941900] committed with status (VALID) at localhost:9051
+[34m2026-09-17 01:23:11.618 WIB 008c INFO[0m [chaincodeCmd] [34;1mClientWait[0m -> txid [34ec6988522b60012b00913a03160b232f88f3e591e1bfd4843e628f54941900] committed with status (VALID) at localhost:7051
+Chaincode deployed successfully on Garuda network (BI + 2 validator banks + 1 observer + 1 PJP).

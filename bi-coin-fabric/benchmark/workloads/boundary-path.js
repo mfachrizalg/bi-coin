@@ -7,6 +7,7 @@ const {
     transactionResults,
     transactionStatus,
     transactionDiagnostic,
+    actorRequest,
 } = require('./retail-base');
 
 const INFRASTRUCTURE_FAILURE = /proposalresponsepayloads do not match|channel has been shut down|failed to connect|deadline exceeded|unavailable|timeout|endorsement policy failure/i;
@@ -62,6 +63,7 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         this.workerIndex = workerIndex;
         this.totalWorkers = totalWorkers;
         this.roundIndex = roundIndex;
+        await this.ensureBenchmarkCustodian();
         await this.seedFixtures();
         this.buildCases();
     }
@@ -78,11 +80,11 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         const profileId = `kyc_${id}`;
         const hashes = JSON.stringify([`sha256:${id}`]);
         const dd = tier === 'BASIC' ? 'simplified' : 'standard';
-        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId]);
-        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes]);
-        await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', dd, false, hashes, '2099-12-31T23:59:59Z']);
-        await this.submit('CreateWallet', [walletId, id, tier]);
-        if (fund > 0) await this.submit('Mint', [walletId, fund]);
+        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'himbara');
+        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'himbara');
+        await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', dd, false, hashes, '2099-12-31T23:59:59Z'], false, 'himbara');
+        await this.submit('CreateWallet', [walletId, id, tier], false, 'himbara');
+        if (fund > 0) await this.fundRetailWallet(walletId, fund);
         return { id, walletId, tier };
     }
 
@@ -102,15 +104,15 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         // Daily outgoing cap. The daily counter is advanced during seeding so the
         // round needs only one submission per assertion.
         this.dailyExact = await this.pair('daily_exact', { fund: 1000000 });
-        await this.submit('Transfer', [this.dailyExact.sender.walletId, this.dailyExact.sink.walletId, 250000]);
+        await this.submit('Transfer', [this.dailyExact.sender.walletId, this.dailyExact.sink.walletId, 250000], false, 'himbara');
 
         this.dailyOver = await this.pair('daily_over', { fund: 1000000 });
-        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000]);
-        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000]);
+        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000], false, 'himbara');
+        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000], false, 'himbara');
 
         // Receiver maximum balance. The BASIC receiver sits 1,000 below its
-        // ceiling in the first case and exactly on it in the second. Mint applies
-        // the same inclusive comparison, so funding to exactly the cap is allowed.
+        // ceiling in the first case and exactly on it in the second. Wholesale
+        // funding applies the same inclusive comparison, so exactly-at-cap is allowed.
         this.recvExact = await this.pair('recv_exact', {
             tier: 'STANDARD', fund: 500000, sinkTier: 'BASIC', sinkFund: MAX_BALANCE_BASIC - 1000,
         });
@@ -122,7 +124,7 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         // drained during seeding so the round submission has nothing left.
         this.balExact = await this.pair('bal_exact', { fund: 200000 });
         this.balOver = await this.pair('bal_over', { fund: 200000 });
-        await this.submit('Transfer', [this.balOver.sender.walletId, this.balOver.sink.walletId, 200000]);
+        await this.submit('Transfer', [this.balOver.sender.walletId, this.balOver.sink.walletId, 200000], false, 'himbara');
     }
 
     buildCases() {
@@ -153,19 +155,24 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         ];
     }
 
-    async expect(label, shouldCommit, args, expected) {
-        const request = { ...CONTRACT, contractFunction: 'Transfer', contractArguments: [...args, `boundary_${this.ns()}_${this.txIndex++}`].map(String), readOnly: false };
+    async expect(label, shouldCommit, args, expected, sequence) {
+        const request = { ...CONTRACT, contractFunction: 'Transfer', contractArguments: [...args, `boundary_${this.ns()}_${sequence}`].map(String), readOnly: false };
         let committed;
         try {
-            const res = await this.sutAdapter.sendRequests(request);
+            const res = await this.sutAdapter.sendRequests(actorRequest(request, 'himbara'));
             const results = transactionResults(res);
             const diagnostics = results.map(transactionDiagnostic);
             const diagnosticText = diagnostics.join('\n');
-            if (INFRASTRUCTURE_FAILURE.test(diagnosticText)) {
+            const failed = results.filter(tx => transactionStatus(tx) === 'failed');
+            // Peer-gateway returns failed TxStatus objects with an empty result;
+            // the runner validates the expected chaincode reason from peer logs.
+            const expectedRejection = !shouldCommit && failed.length === results.length;
+            if (expectedRejection) {
+                committed = false;
+            } else if (INFRASTRUCTURE_FAILURE.test(diagnosticText)) {
                 this.infrastructureErrors += 1;
                 committed = false;
             } else {
-                const failed = results.filter(tx => transactionStatus(tx) === 'failed');
                 committed = failed.length === 0;
                 if (!shouldCommit && !committed && expected && !expected.test(diagnosticText)) {
                     this.infrastructureErrors += 1;
@@ -185,8 +192,9 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
     }
 
     async submitTransaction() {
-        const c = this.cases[this.txIndex++ % this.cases.length];
-        await this.expect(c.label, c.accept, c.args(), c.expected);
+        const sequence = this.txIndex++;
+        const c = this.cases[sequence % this.cases.length];
+        await this.expect(c.label, c.accept, c.args(), c.expected, sequence);
     }
 
     async cleanupWorkloadModule() {
@@ -196,6 +204,7 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
             worker: this.workerIndex,
             passed: this.passed,
             total,
+            expected: this.cases.length,
             mismatches: this.mismatches,
             infrastructureErrors: this.infrastructureErrors,
             verdict: this.mismatches === 0 && this.infrastructureErrors === 0 ? 'PASS' : 'FAIL',

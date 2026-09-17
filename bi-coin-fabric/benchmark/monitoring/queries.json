@@ -1,0 +1,82 @@
+[
+  {
+    "name": "container_cpu_percent",
+    "query": "rate(container_cpu_usage_seconds_total{name!=\"\"}[30s]) * 100",
+    "unit": "%"
+  },
+  {
+    "name": "container_memory_working_set_bytes",
+    "query": "container_memory_working_set_bytes{name!=\"\"}",
+    "unit": "bytes"
+  },
+  {
+    "name": "container_network_receive_bytes_per_second",
+    "query": "rate(container_network_receive_bytes_total{name!=\"\"}[30s])",
+    "unit": "bytes_per_second"
+  },
+  {
+    "name": "container_network_transmit_bytes_per_second",
+    "query": "rate(container_network_transmit_bytes_total{name!=\"\"}[30s])",
+    "unit": "bytes_per_second"
+  },
+  {
+    "name": "container_read_iops",
+    "query": "rate(container_fs_reads_total{name!=\"\"}[30s])",
+    "unit": "operations_per_second"
+  },
+  {
+    "name": "container_write_iops",
+    "query": "rate(container_fs_writes_total{name!=\"\"}[30s])",
+    "unit": "operations_per_second"
+  },
+  {
+    "name": "container_read_bytes_per_second",
+    "query": "rate(container_fs_reads_bytes_total{name!=\"\"}[30s])",
+    "unit": "bytes_per_second"
+  },
+  {
+    "name": "container_write_bytes_per_second",
+    "query": "rate(container_fs_writes_bytes_total{name!=\"\"}[30s])",
+    "unit": "bytes_per_second"
+  },
+  {
+    "name": "container_read_service_ms",
+    "query": "1000 * rate(container_fs_read_seconds_total{name!=\"\"}[30s]) / clamp_min(rate(container_fs_reads_total{name!=\"\"}[30s]), 0.000001)",
+    "unit": "milliseconds_per_operation"
+  },
+  {
+    "name": "container_write_service_ms",
+    "query": "1000 * rate(container_fs_write_seconds_total{name!=\"\"}[30s]) / clamp_min(rate(container_fs_writes_total{name!=\"\"}[30s]), 0.000001)",
+    "unit": "milliseconds_per_operation"
+  },
+  {
+    "name": "host_cpu_busy_percent",
+    "query": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[30s])) * 100)",
+    "unit": "%"
+  },
+  {
+    "name": "host_memory_used_bytes",
+    "query": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+    "unit": "bytes"
+  },
+  {
+    "name": "host_read_iops",
+    "query": "rate(node_disk_reads_completed_total[30s])",
+    "unit": "operations_per_second"
+  },
+  {
+    "name": "host_write_iops",
+    "query": "rate(node_disk_writes_completed_total[30s])",
+    "unit": "operations_per_second"
+  },
+  {
+    "name": "host_read_await_ms",
+    "query": "1000 * rate(node_disk_read_time_seconds_total[30s]) / clamp_min(rate(node_disk_reads_completed_total[30s]), 0.000001)",
+    "unit": "milliseconds_per_operation"
+  },
+  {
+    "name": "host_write_await_ms",
+    "query": "1000 * rate(node_disk_write_time_seconds_total[30s]) / clamp_min(rate(node_disk_writes_completed_total[30s]), 0.000001)",
+    "unit": "milliseconds_per_operation"
+  }
+]

@@ -64,6 +64,19 @@ CREATE TABLE IF NOT EXISTS auth_users (
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS payment_contacts (
+	contact_id TEXT PRIMARY KEY,
+	owner_username TEXT NOT NULL REFERENCES auth_users(username) ON DELETE CASCADE,
+	label TEXT NOT NULL,
+	wallet_id TEXT NOT NULL,
+	recipient_type TEXT NOT NULL CHECK (recipient_type IN ('retail_customer', 'merchant')),
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	UNIQUE (owner_username, wallet_id)
+);
+
+CREATE INDEX IF NOT EXISTS payment_contacts_owner_idx ON payment_contacts(owner_username);
+
 CREATE TABLE IF NOT EXISTS retail_customers (
 	customer_id TEXT PRIMARY KEY,
 	legal_name TEXT NOT NULL,

@@ -8,13 +8,21 @@
     "benchmark:transfer:w1": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-1.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:transfer:w2": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-2.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:transfer:w4": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-4.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
+    "benchmark:transfer:w8": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-8.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:functionality": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/functionality.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:negative": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/negative-path.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:adversarial": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/adversarial.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:transfer:repeat": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-repeat.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:boundary": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/boundary-path.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
     "benchmark:authorization": "caliper launch manager --caliper-benchconfig benchmark/benchconfigs/authorization.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .",
-    "test:benchmarks": "node --test benchmark/workloads/*.test.js scripts/*.test.js"
+    "test:benchmarks": "node --test benchmark/workloads/*.test.js scripts/*.test.js",
+    "benchmark:study": "bash scripts/run-benchmark-study.sh",
+    "benchmark:analyze": "node scripts/analyze-benchmark-results.js",
+    "benchmark:compress": "node scripts/compress-study-metrics.js",
+    "benchmark:validate": "node scripts/validate-study-artifacts.js",
+    "benchmark:manifest": "node scripts/write-study-manifest.js",
+    "benchmark:metrics:up": "docker compose -f benchmark/monitoring/docker-compose.yaml up -d --wait",
+    "benchmark:metrics:down": "docker compose -f benchmark/monitoring/docker-compose.yaml down"
   },
   "devDependencies": {
     "@hyperledger/caliper-cli": "^0.6.0",

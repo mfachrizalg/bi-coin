@@ -1,12 +1,17 @@
 # Mermaid Use Case Diagrams — Track C
 
+**Thesis scope:** KYC is implementation-only, and QRIS is code-only; both are
+excluded from thesis acceptance criteria. Thesis acceptance criteria cover participant lifecycle,
+treasury issuance, two-tier distribution, retail transfer, participant freeze,
+and supervision.
+
 ## UC01 — Sistem Keseluruhan (Overall System)
 
 ```mermaid
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     BI[👤 Bank Indonesia]
-    BV[👤 Bank Validator]
+    BV[👤 Validator Bank]
     PJP[👤 PJP]
     M[👤 Merchant]
     PR[👤 Pelanggan Ritel]
@@ -27,13 +32,13 @@ flowchart LR
     BI --> UC1
     BI --> UC2
     BV --> UC1
-    BV --> UC3
+    BI --> UC3
     PJP --> UC1
     PJP --> UC4
     M --> UC6
     PR --> UC5
     PR --> UC6
-    SV --> UC7
+    BI --> UC7
     SV --> UC9
     OJK --> UC9
 
@@ -49,7 +54,7 @@ flowchart LR
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     BI[👤 Bank Indonesia]
-    BV[👤 Bank Validator]
+    BV[👤 Validator Bank]
     PJP[👤 PJP]
     SV[👤 Supervisor]
 
@@ -65,7 +70,7 @@ flowchart LR
     BI --> UC3
     BI --> UC4
     BI --> UC6
-    BV --> UC2
+    BI --> UC2
     PJP --> UC3
     SV --> UC6
 

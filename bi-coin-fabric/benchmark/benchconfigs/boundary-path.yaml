@@ -10,7 +10,7 @@ test:
       rateControl:
         type: fixed-rate
         opts:
-          tps: 2
+          tps: 1
       workload:
         module: benchmark/workloads/boundary-path.js
         arguments:
@@ -21,6 +21,9 @@ observer:
   interval: 1
 
 monitors:
+  transaction:
+    - module: ./benchmark/observers/jsonl-transaction-observer.js
+      options: {}
   resource:
     - module: docker
       options:

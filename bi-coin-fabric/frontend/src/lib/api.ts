@@ -21,11 +21,11 @@ export interface Wallet {
   participant_id: string
   wallet_type: string
   tier: string
-  balance: number
+  balance: string
   frozen: boolean
-  daily_spent: number
-  monthly_spent: number
-  monthly_received: number
+  daily_spent: string
+  monthly_spent: string
+  monthly_received: string
   created_at: string
   updated_at: string
 }
@@ -37,7 +37,7 @@ export interface Participant {
   account_id: string
   participant_type: string
   compliance_status: string
-  reserve_balance: number
+  reserve_balance: string
   status: string
   created_at: string
   updated_at: string
@@ -69,24 +69,41 @@ export interface MeResponse {
   role: string
 }
 
+export type PaymentContactType = 'retail_customer' | 'merchant'
+
+export interface PaymentContact {
+  id: string
+  label: string
+  wallet_id: string
+  recipient_type: PaymentContactType
+  created_at: string
+  updated_at: string
+}
+
+export interface PaymentContactInput {
+  label: string
+  wallet_id: string
+  recipient_type: PaymentContactType
+}
+
 export interface SystemLimit {
   scope: string
-  value: number
+  value: string
   set_at: string
 }
 
 export interface Balance {
   participant_id: string
   wallet_id: string
-  balance: number
-  reserve_balance: number
+  balance: string
+  reserve_balance: string
 }
 
 export interface TransactionRecord {
   tx_id: string
   participant_id: string
   counterparty_id: string
-  amount: number
+  amount: string
   transaction_type: string
   status: string
   reference_id?: string
@@ -98,7 +115,7 @@ export interface QrisIntent {
   mode: 'static' | 'dynamic'
   merchant_id: string
   merchant_wallet_id: string
-  amount: number
+  amount: string
   status: 'active' | 'pending' | 'paid' | 'expired' | 'cancelled'
   label?: string
   payload?: string
@@ -133,7 +150,7 @@ export interface Topology {
 export interface MetricsReport {
   total_participants: number
   active_wallets: number
-  total_supply: number
+  total_supply: string
   total_transfers: number
   generated_at: string
 }
@@ -150,10 +167,31 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     unauthorizedHandler?.()
   }
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }))
-    throw new Error(err.message || err.detail?.[0]?.msg || res.statusText)
+    const err = await res.json().catch(() => null)
+    throw new Error(formatApiError(err, res.status, res.statusText))
   }
+  if (res.status === 204) return undefined as T
   return res.json()
+}
+
+export function formatApiError(body: unknown, status = 0, statusText = '') {
+  if (body && typeof body === 'object') {
+    const record = body as { message?: unknown; detail?: unknown }
+    if (typeof record.message === 'string' && record.message.trim()) return record.message
+    if (Array.isArray(record.detail)) {
+      const first = record.detail[0]
+      if (first && typeof first === 'object' && typeof (first as { msg?: unknown }).msg === 'string') {
+        return (first as { msg: string }).msg
+      }
+      if (typeof first === 'string') return first
+    }
+  }
+  if (status >= 500) return 'The service is unavailable. Try again.'
+  return statusText || 'The request could not be completed.'
+}
+
+export function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'The request could not be completed.'
 }
 
 export function getHealth() { return request<{ status: string }>('/health') }
@@ -169,6 +207,25 @@ export function createWallet(data: { owner_id: string }) {
 export function getWallets(participantId?: string) {
   const qs = participantId ? `?participant_id=${participantId}` : ''
   return request<Wallet[]>(`/wallets${qs}`)
+}
+
+export function listPaymentContacts() {
+  return request<PaymentContact[]>('/payment-contacts')
+}
+
+export function createPaymentContact(data: PaymentContactInput) {
+  return request<PaymentContact>('/payment-contacts', { method: 'POST', body: JSON.stringify(data) })
+}
+
+export function updatePaymentContact(contactId: string, data: PaymentContactInput) {
+  return request<PaymentContact>(`/payment-contacts/${encodeURIComponent(contactId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export function deletePaymentContact(contactId: string) {
+  return request<void>(`/payment-contacts/${encodeURIComponent(contactId)}`, { method: 'DELETE' })
 }
 
 export function submitParticipant(data: any) {
@@ -209,16 +266,16 @@ export function listLimits(scope?: string) {
   return request<SystemLimit[]>(`/limits${qs}`)
 }
 
-export function requestIssuance(data: { participant_id: string; amount: string }) {
+export function requestIssuance(data: { amount: string }) {
   return request('/issuance-requests', { method: 'POST', body: JSON.stringify(data) })
 }
 export function requestRedemption(data: { participant_id: string; amount: string }) {
   return request('/redemption-requests', { method: 'POST', body: JSON.stringify(data) })
 }
-export function submitTransfer(data: { sender_id: string; receiver_id: string; amount: string }, idempotencyKey?: string) {
+export function submitTransfer(data: { sender_id: string; receiver_id: string; amount: string }, idempotencyKey: string) {
   return request('/transfers', {
     method: 'POST',
-    headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    headers: { 'Idempotency-Key': idempotencyKey },
     body: JSON.stringify(data),
   })
 }
@@ -245,8 +302,12 @@ export function cancelQrisIntent(intentId: string) {
 export function resolveQrisPayload(payload: string) {
   return request<QrisIntent>('/qris/resolve', { method: 'POST', body: JSON.stringify({ payload }) })
 }
-export function payQris(data: { payload: string; payer_wallet_id: string; amount?: string }) {
-  return request<QrisPayResult>('/qris/pay', { method: 'POST', body: JSON.stringify(data) })
+export function payQris(data: { payload: string; payer_wallet_id: string; amount?: string }, idempotencyKey: string) {
+	return request<QrisPayResult>('/qris/pay', {
+		method: 'POST',
+		headers: { 'Idempotency-Key': idempotencyKey },
+		body: JSON.stringify(data),
+	})
 }
 export function getBalances() {
   return request<Balance[]>('/balances')
@@ -271,11 +332,14 @@ export function initLedger() {
 }
 
 export function distributeToParticipant(data: {
-  sender_participant_id: string
   receiver_participant_id: string
-  amount: number
-}) {
-  return request<{ status: string }>('/distribute', { method: 'POST', body: JSON.stringify(data) })
+  amount: string
+}, idempotencyKey: string) {
+	return request<{ status: string }>('/distribute', {
+		method: 'POST',
+		headers: { 'Idempotency-Key': idempotencyKey },
+		body: JSON.stringify(data),
+	})
 }
 
 export function listParticipants() {
@@ -290,7 +354,7 @@ export function getParticipant(participantId: string) {
 export interface AuditEntry {
   txId: string
   operation: string
-  amount: number
+  amount: string
   referenceId?: string
   counterpartyId: string
   timestamp: string
@@ -311,17 +375,17 @@ export async function getAuditLog(walletID: string): Promise<AuditEntry[]> {
 // Tier limits support
 export interface TierLimit {
   tier: string
-  maxBalance: number
-  dailyTxLimit: number
-  monthlyTxLimit: number
-  monthlyIncomingLimit: number
-  perTxLimit: number
+  maxBalance: string
+  dailyTxLimit: string
+  monthlyTxLimit: string
+  monthlyIncomingLimit: string
+  perTxLimit: string
 }
 
 const TIER_LIMIT_DEFAULTS: Record<string, TierLimit> = {
-  BASIC:    { tier: 'BASIC',    maxBalance: 2_000_000,   dailyTxLimit: 500_000,    monthlyTxLimit: 5_000_000,   monthlyIncomingLimit: 20_000_000,  perTxLimit: 250_000 },
-  STANDARD: { tier: 'STANDARD', maxBalance: 20_000_000,  dailyTxLimit: 10_000_000, monthlyTxLimit: 40_000_000,  monthlyIncomingLimit: 40_000_000,  perTxLimit: 2_500_000 },
-  MERCHANT: { tier: 'MERCHANT', maxBalance: 200_000_000, dailyTxLimit: 50_000_000, monthlyTxLimit: 500_000_000, monthlyIncomingLimit: 500_000_000, perTxLimit: 10_000_000 },
+  BASIC:    { tier: 'BASIC',    maxBalance: '2000000',   dailyTxLimit: '500000',    monthlyTxLimit: '5000000',   monthlyIncomingLimit: '20000000',  perTxLimit: '250000' },
+  STANDARD: { tier: 'STANDARD', maxBalance: '20000000',  dailyTxLimit: '10000000', monthlyTxLimit: '40000000',  monthlyIncomingLimit: '40000000',  perTxLimit: '2500000' },
+  MERCHANT: { tier: 'MERCHANT', maxBalance: '200000000', dailyTxLimit: '50000000', monthlyTxLimit: '500000000', monthlyIncomingLimit: '500000000', perTxLimit: '10000000' },
 }
 
 export async function getTierLimit(tier: string): Promise<TierLimit> {
@@ -333,12 +397,12 @@ export async function setTierLimit(_limit: TierLimit): Promise<void> {
 }
 
 // Total supply
-export async function getTotalSupply(): Promise<{ totalSupply: number }> {
+export async function getTotalSupply(): Promise<{ totalSupply: string }> {
   const m = await request<MetricsReport>('/reports/metrics')
   return { totalSupply: m.total_supply }
 }
 
 // Transfer alias matching Transfer.tsx usage
-export function transfer(data: { senderId: string; receiverId: string; amount: number }, idempotencyKey?: string) {
-  return submitTransfer({ sender_id: data.senderId, receiver_id: data.receiverId, amount: String(data.amount) }, idempotencyKey)
+export function transfer(data: { senderId: string; receiverId: string; amount: string }, idempotencyKey: string) {
+	return submitTransfer({ sender_id: data.senderId, receiver_id: data.receiverId, amount: data.amount }, idempotencyKey)
 }

@@ -14,6 +14,12 @@ var specKycVerified []byte
 //go:embed docs/api/openapi-bank_pjp.json
 var specBankPjp []byte
 
+//go:embed docs/api/openapi-validator_bank.json
+var specValidatorBank []byte
+
+//go:embed docs/api/openapi-pjp.json
+var specPjp []byte
+
 //go:embed docs/api/openapi-bank_indonesia.json
 var specBankIndonesia []byte
 

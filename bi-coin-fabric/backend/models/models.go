@@ -143,6 +143,10 @@ type AmountRequest struct {
 	IdempotencyKey string `json:"-"`
 }
 
+type IssuanceRequest struct {
+	Amount string `json:"amount"`
+}
+
 type TransferRequest struct {
 	SenderID       string `json:"sender_id"`
 	ReceiverID     string `json:"receiver_id"`
@@ -187,10 +191,22 @@ type PayQrisRequest struct {
 	IdempotencyKey string `json:"-"`
 }
 
+type PaymentContactType string
+
+const (
+	PaymentContactRetailCustomer PaymentContactType = "retail_customer"
+	PaymentContactMerchant       PaymentContactType = "merchant"
+)
+
+type PaymentContactRequest struct {
+	Label         string             `json:"label"`
+	WalletID      string             `json:"wallet_id"`
+	RecipientType PaymentContactType `json:"recipient_type"`
+}
+
 type DistributeRequest struct {
-	SenderParticipantID   string `json:"sender_participant_id"`
 	ReceiverParticipantID string `json:"receiver_participant_id"`
-	Amount                int64  `json:"amount"`
+	Amount                string `json:"amount"`
 	IdempotencyKey        string `json:"-"`
 }
 
@@ -366,6 +382,15 @@ type QrisPayResult struct {
 	TxID        string `json:"tx_id,omitempty"`
 	IntentID    string `json:"intent_id"`
 	ReferenceID string `json:"reference_id"`
+}
+
+type PaymentContact struct {
+	ID            string             `json:"id"`
+	Label         string             `json:"label"`
+	WalletID      string             `json:"wallet_id"`
+	RecipientType PaymentContactType `json:"recipient_type"`
+	CreatedAt     string             `json:"created_at"`
+	UpdatedAt     string             `json:"updated_at"`
 }
 
 type SupervisionEvent struct {

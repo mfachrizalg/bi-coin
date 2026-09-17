@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { getMetrics, getTopology, getTransactions, listLimits, type MetricsReport, type SystemLimit, type Topology, type TransactionRecord } from '../lib/api'
-
-const fmt = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
+import { formatRupiah } from '../lib/money'
+import LoadingSkeleton from '../components/LoadingSkeleton'
 
 export default function Observability() {
   const [metrics, setMetrics] = useState<MetricsReport | null>(null)
   const [topology, setTopology] = useState<Topology | null>(null)
   const [limits, setLimits] = useState<SystemLimit[]>([])
   const [transactions, setTransactions] = useState<TransactionRecord[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function Observability() {
             Date.parse(b.timestamp) - Date.parse(a.timestamp)).slice(0, 8))
         }
       })
+      .finally(() => setLoading(false))
   }, [])
 
   return (
@@ -36,40 +38,40 @@ export default function Observability() {
       <section className="workspace-heading">
         <div>
           <div className="eyebrow">Observability</div>
-          <h2>Topologi, limits, dan pembayaran terbaru berbasis backend.</h2>
+          <h2>Backend system observability</h2>
         </div>
       </section>
 
-      {error && <div className="banner error">{error}</div>}
+      {error && <div className="banner error" role="alert">{error}</div>}
 
-      <section className="metric-grid">
+      {loading ? <LoadingSkeleton kind="metrics" label="Loading observability metrics" /> : <section className="metric-grid">
         <article className="metric-card">
-          <span className="metric-label">Total peserta</span>
+          <span className="metric-label">Total participants</span>
           <strong>{metrics?.total_participants ?? '—'}</strong>
-          <small>Snapshot sistem</small>
+          <small>System snapshot</small>
         </article>
         <article className="metric-card">
-          <span className="metric-label">Dompet aktif</span>
+          <span className="metric-label">Active wallets</span>
           <strong>{metrics?.active_wallets ?? '—'}</strong>
-          <small>Node application view</small>
+          <small>Application view</small>
         </article>
         <article className="metric-card">
           <span className="metric-label">Supply</span>
-          <strong>{metrics ? fmt(metrics.total_supply) : '—'}</strong>
+				<strong>{metrics ? formatRupiah(metrics.total_supply) : '—'}</strong>
           <small>Derived from `/reports/metrics`</small>
         </article>
         <article className="metric-card">
-          <span className="metric-label">Transfer tersettle</span>
+          <span className="metric-label">Settled transfers</span>
           <strong>{metrics?.total_transfers ?? '—'}</strong>
           <small>{metrics?.generated_at ?? '—'}</small>
         </article>
-      </section>
+      </section>}
 
       <section className="panel-grid">
         <article className="surface-card">
           <h3>Logical topology</h3>
           <div className="stack-small">
-            {topology?.nodes.map(node => (
+            {loading ? <LoadingSkeleton kind="list" label="Loading network topology" rows={4} /> : topology?.nodes.map(node => (
               <div key={node.id} className="context-row">
                 <div>
                   <strong>{node.name}</strong>
@@ -77,18 +79,18 @@ export default function Observability() {
                 </div>
                 <span className="pill">{node.role}</span>
               </div>
-            )) ?? <p className="muted">Topology belum tersedia.</p>}
+            )) ?? <p className="muted">Topology is unavailable.</p>}
           </div>
         </article>
 
         <article className="surface-card">
           <h3>Live system limits</h3>
           <div className="stack-small">
-            {limits.length === 0 && <p className="muted">Tidak ada limit live dari backend.</p>}
-            {limits.map(limit => (
+            {loading ? <LoadingSkeleton kind="list" label="Loading live system limits" rows={3} /> : limits.length === 0 && <p className="muted">No live limits found.</p>}
+            {!loading && limits.map(limit => (
               <div key={limit.scope} className="context-row">
                 <span>{limit.scope}</span>
-                <strong>{fmt(limit.value)}</strong>
+				<strong>{formatRupiah(limit.value)}</strong>
               </div>
             ))}
           </div>
@@ -96,9 +98,9 @@ export default function Observability() {
       </section>
 
       <article className="surface-card">
-        <h3>Pembayaran QRIS terbaru</h3>
+        <h3>Recent QRIS payments</h3>
         <div className="table-shell">
-          <table className="data-table">
+          {loading ? <LoadingSkeleton kind="table" label="Loading recent QRIS payments" rows={5} /> : <table className="data-table">
             <thead>
               <tr>
                 <th>Tx ID</th>
@@ -110,19 +112,19 @@ export default function Observability() {
             </thead>
             <tbody>
               {transactions.length === 0 && (
-                <tr><td colSpan={5} className="empty-cell">Belum ada transaksi `qris_payment`.</td></tr>
+                <tr><td colSpan={5} className="empty-cell">No `qris_payment` transactions found.</td></tr>
               )}
               {transactions.map(tx => (
                 <tr key={tx.tx_id}>
                   <td><code>{tx.tx_id}</code></td>
                   <td>{tx.participant_id}</td>
                   <td>{tx.counterparty_id}</td>
-                  <td>{fmt(tx.amount)}</td>
+					<td>{formatRupiah(tx.amount)}</td>
                   <td>{tx.reference_id ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table>}
         </div>
       </article>
     </div>

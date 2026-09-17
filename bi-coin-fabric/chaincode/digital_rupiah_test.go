@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestSubmitAndApproveParticipantCreatesMerchantWallet(t *testing.T) {
+func TestSubmitAndApproveParticipantCreatesWholesaleWallet(t *testing.T) {
 	sc := &SmartContract{}
 	ctx, stub := newMockTransactionContext("tx-submit", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
 
@@ -32,8 +32,8 @@ func TestSubmitAndApproveParticipantCreatesMerchantWallet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get wallet: %v", err)
 	}
-	if wallet.Tier != TierMerchant || wallet.WalletType != WalletHot {
-		t.Fatalf("approved participant wallet = %+v, want merchant hot wallet", wallet)
+	if wallet.Tier != "" || wallet.WalletType != WalletHot {
+		t.Fatalf("approved participant wallet = %+v, want wholesale hot wallet", wallet)
 	}
 
 	events, err := sc.GetSupervisionEvents(ctx)

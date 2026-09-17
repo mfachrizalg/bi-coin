@@ -1,8 +1,10 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/mfachrizalg/bi-coin-retail-cbdc/backend/models"
@@ -133,10 +135,10 @@ func TestLedgerServiceLiquidityAndLimitCommands(t *testing.T) {
 		{
 			name: "request issuance",
 			run: func(svc *LedgerService) error {
-				return svc.RequestIssuance("bank-1", 2500000)
+				return svc.RequestIssuance(2500000)
 			},
 			wantName: "RequestIssuance",
-			wantArgs: []string{"bank-1", "2500000"},
+			wantArgs: []string{"2500000"},
 		},
 		{
 			name: "request redemption",
@@ -149,10 +151,10 @@ func TestLedgerServiceLiquidityAndLimitCommands(t *testing.T) {
 		{
 			name: "distribute to participant",
 			run: func(svc *LedgerService) error {
-				return svc.DistributeToParticipant("bank-1", "pjp-1", 900000, "distribution-1")
+				return svc.DistributeToParticipant("pjp-1", 900000, "distribution-1")
 			},
 			wantName: "DistributeToParticipant",
-			wantArgs: []string{"bank-1", "pjp-1", "900000", operationReference(":TEST-MSP", "test", "distribution-1")},
+			wantArgs: []string{"pjp-1", "900000", operationReference(":TEST-MSP", "test", "distribution-1")},
 		},
 	}
 
@@ -176,6 +178,26 @@ func TestLedgerServiceLiquidityAndLimitCommands(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDistributionPendingKeyDoesNotSubmitFabric(t *testing.T) {
+	contract := &fakeLedgerContract{}
+	svc := NewLedgerServiceForTest(contract, nil, "")
+	_, _, err := svc.beginOperation(context.Background(), "distribution", "pending-distribution", struct {
+		ReceiverParticipantID string
+		Amount                int64
+	}{"pjp-1", 900_000})
+	if err != nil {
+		t.Fatalf("seed pending operation: %v", err)
+	}
+
+	err = svc.DistributeToParticipant("pjp-1", 900_000, "pending-distribution")
+	if err == nil || !strings.Contains(err.Error(), "already in progress") {
+		t.Fatalf("pending distribution err = %v, want in-progress conflict", err)
+	}
+	if contract.submittedName != "" {
+		t.Fatalf("pending distribution submitted Fabric transaction %q", contract.submittedName)
 	}
 }
 
@@ -262,7 +284,7 @@ func TestPayQrisMarksDynamicIntentPaidAndUsesReference(t *testing.T) {
 	if contract.submittedName != "PayQris" {
 		t.Fatalf("submitted %q, want PayQris", contract.submittedName)
 	}
-	wantArgs := []string{"wlt_customer-1", "wlt_merchant-1", "20000", intent.ReferenceID}
+	wantArgs := []string{"wlt_customer-1", "wlt_merchant-1", "20000", operationReference(":TEST-MSP", "test", "qris-pay-1")}
 	for i := range wantArgs {
 		if contract.submittedArgs[i] != wantArgs[i] {
 			t.Fatalf("arg[%d] = %q, want %q", i, contract.submittedArgs[i], wantArgs[i])

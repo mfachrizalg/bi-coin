@@ -144,11 +144,11 @@ const schemas = {
       participant_id: { type: "string" },
       tier: { type: "string" },
       wallet_type: { type: "string" },
-      balance: { type: "integer" },
+      balance: { type: "string", pattern: "^[0-9]+$", description: "Whole-rupiah decimal string." },
       frozen: { type: "boolean" },
-      daily_spent: { type: "integer" },
-      monthly_spent: { type: "integer" },
-      monthly_received: { type: "integer" },
+      daily_spent: { type: "string", pattern: "^[0-9]+$" },
+      monthly_spent: { type: "string", pattern: "^[0-9]+$" },
+      monthly_received: { type: "string", pattern: "^[0-9]+$" },
       created_at: { type: "string" },
       updated_at: { type: "string" },
     },
@@ -156,6 +156,35 @@ const schemas = {
   WalletList: {
     type: "array",
     items: ref("Wallet"),
+  },
+  PaymentContactType: {
+    type: "string",
+    enum: ["retail_customer", "merchant"],
+  },
+  PaymentContactRequestBody: {
+    type: "object",
+    required: ["label", "wallet_id", "recipient_type"],
+    properties: {
+      label: { type: "string", minLength: 1, maxLength: 80 },
+      wallet_id: { type: "string", minLength: 1, maxLength: 160 },
+      recipient_type: ref("PaymentContactType"),
+    },
+  },
+  PaymentContact: {
+    type: "object",
+    required: ["id", "label", "wallet_id", "recipient_type", "created_at", "updated_at"],
+    properties: {
+      id: { type: "string" },
+      label: { type: "string" },
+      wallet_id: { type: "string" },
+      recipient_type: ref("PaymentContactType"),
+      created_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  PaymentContactList: {
+    type: "array",
+    items: ref("PaymentContact"),
   },
   TransferRequestBody: {
     type: "object",
@@ -184,7 +213,7 @@ const schemas = {
       reference_id: { type: "string" },
       sender_id: { type: "string" },
       receiver_id: { type: "string" },
-      amount: { type: "integer" },
+      amount: { type: "string", pattern: "^[0-9]+$", description: "Whole-rupiah decimal string." },
     },
   },
   AmountResult: {
@@ -200,6 +229,13 @@ const schemas = {
     required: ["status"],
     properties: {
       status: { type: "string" },
+    },
+  },
+  IssuanceRequestBody: {
+    type: "object",
+    required: ["amount"],
+    properties: {
+      amount: { type: "string", pattern: "^[0-9]+$", description: "Whole-rupiah decimal string credited to Treasury." },
     },
   },
   ResolveQrisRequestBody: {
@@ -255,7 +291,7 @@ const schemas = {
       mode: ref("QrisMode"),
       merchant_id: { type: "string" },
       merchant_wallet_id: { type: "string" },
-      amount: { type: "integer" },
+      amount: { type: "string", pattern: "^[0-9]+$" },
       status: ref("QrisStatus"),
       label: { type: "string" },
       payload: { type: "string" },
@@ -284,11 +320,10 @@ const schemas = {
   },
   DistributeRequestBody: {
     type: "object",
-    required: ["sender_participant_id", "receiver_participant_id", "amount"],
+    required: ["receiver_participant_id", "amount"],
     properties: {
-      sender_participant_id: { type: "string" },
       receiver_participant_id: { type: "string" },
-      amount: { type: "integer", minimum: 1 },
+      amount: { type: "string", pattern: "^[0-9]+$", minLength: 1 },
     },
   },
   RtgsIssuanceRequestBody: {
@@ -307,7 +342,7 @@ const schemas = {
     properties: {
       status: { type: "string" },
       reference: { type: "string" },
-      amount: { type: "integer" },
+      amount: { type: "string", pattern: "^[0-9]+$" },
       participant_id: { type: "string" },
       sender_bic: { type: "string" },
       tx_id: { type: "string" },
@@ -414,6 +449,49 @@ const paths = {
       summary: "List balances visible to the authenticated actor",
       responses: {
         "200": response("Visible balances", ref("WalletList")),
+        ...authErrors,
+      },
+    }),
+  },
+  "/payment-contacts": {
+    get: op({
+      tags: ["payments"],
+      summary: "List private payment contacts",
+      description: "Returns only contacts owned by the authenticated username; this is not a wallet directory.",
+      responses: {
+        "200": response("Payment contacts", ref("PaymentContactList")),
+        ...authErrors,
+      },
+    }),
+    post: op({
+      tags: ["payments"],
+      summary: "Create a private payment contact",
+      requestBody: ref("PaymentContactRequestBody"),
+      responses: {
+        "201": response("Created payment contact", ref("PaymentContact")),
+        ...authErrors,
+        "409": response("Duplicate wallet contact", ref("ErrorResponse")),
+      },
+    }),
+  },
+  "/payment-contacts/{contact_id}": {
+    put: op({
+      tags: ["payments"],
+      summary: "Update a private payment contact",
+      parameters: [{ name: "contact_id", in: "path", required: true, schema: { type: "string" } }],
+      requestBody: ref("PaymentContactRequestBody"),
+      responses: {
+        "200": response("Updated payment contact", ref("PaymentContact")),
+        ...authErrors,
+        "409": response("Duplicate wallet contact", ref("ErrorResponse")),
+      },
+    }),
+    delete: op({
+      tags: ["payments"],
+      summary: "Delete a private payment contact",
+      parameters: [{ name: "contact_id", in: "path", required: true, schema: { type: "string" } }],
+      responses: {
+        "204": { description: "Deleted payment contact" },
         ...authErrors,
       },
     }),
@@ -683,7 +761,7 @@ const paths = {
     post: op({
       tags: ["liquidity"],
       summary: "Request issuance",
-      requestBody: ref("AmountRequestBody"),
+      requestBody: ref("IssuanceRequestBody"),
       responses: {
         "200": response("Issuance result", ref("StatusResponse")),
         ...authErrors,
@@ -704,7 +782,7 @@ const paths = {
   "/distribute": {
     post: op({
       tags: ["liquidity"],
-      summary: "Distribute wholesale funds to participant",
+      summary: "Distribute Treasury funds to a Validator Bank or PJP Custodian",
       description: "Requires Idempotency-Key header.",
       parameters: [parameters.IdempotencyKeyHeader],
       requestBody: ref("DistributeRequestBody"),
@@ -789,6 +867,8 @@ const rolePaths = {
     "/auth/me": ["get"],
     "/network/topology": ["get"],
     "/wallets": ["get"],
+    "/payment-contacts": ["get", "post"],
+    "/payment-contacts/{contact_id}": ["put", "delete"],
   },
   kyc_verified: {
     "/health": ["get"],
@@ -796,6 +876,8 @@ const rolePaths = {
     "/auth/me": ["get"],
     "/network/topology": ["get"],
     "/wallets": ["get"],
+    "/payment-contacts": ["get", "post"],
+    "/payment-contacts/{contact_id}": ["put", "delete"],
     "/balances": ["get"],
     "/transfers": ["post"],
     "/qris/resolve": ["post"],
@@ -807,6 +889,8 @@ const rolePaths = {
     "/auth/me": ["get"],
     "/network/topology": ["get"],
     "/wallets": ["get"],
+    "/payment-contacts": ["get", "post"],
+    "/payment-contacts/{contact_id}": ["put", "delete"],
     "/balances": ["get"],
     "/transfers": ["post"],
     "/qris/resolve": ["post"],
@@ -829,6 +913,7 @@ const rolePaths = {
     "/kyc/profiles/{profile_id}/provider-checks": ["get"],
     "/kyc/profiles/{profile_id}/audit-events": ["get"],
     "/wallets": ["post", "get"],
+    "/transfers": ["post"],
   },
   bank_indonesia: {
     "/health": ["get"],
@@ -877,12 +962,17 @@ const rolePaths = {
   },
 };
 
+rolePaths.validator_bank = rolePaths.bank_pjp;
+rolePaths.pjp = rolePaths.bank_pjp;
+
 const descriptions = {
   public: "Public entrypoints: health, topology, and JWT login.",
   authenticated: "Authenticated principal surface plus wallet listing.",
   kyc_verified: "Retail transfer and QRIS payer surface after KYC verification.",
   merchant: "Merchant QRIS and payment surface.",
   bank_pjp: "Custodian onboarding, KYC, retail customer, participant read, and wallet issuance surface.",
+  validator_bank: "Validator-bank onboarding, KYC, retail customer, participant read, and wallet issuance surface.",
+  pjp: "PJP onboarding, KYC, retail customer, participant read, and wallet issuance surface.",
   bank_indonesia: "Bank Indonesia mutation and oversight surface.",
   supervisor: "Read-only oversight surface.",
 };

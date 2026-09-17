@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 2,
+  "startedAt": "2026-08-25T07:43:53Z",
+  "completedAt": "2026-08-25T07:43:53.963Z",
+  "seed": 20260725,
+  "revision": {
+    "commit": null,
+    "dirty": false,
+    "changedPaths": []
+  },
+  "runtime": {
+    "node": null,
+    "npm": null,
+    "docker": null,
+    "caliper": "^0.6.0"
+  },
+  "preconditions": {
+    "cleanLedger": true,
+    "networkMode": "garuda",
+    "chaincode": {
+      "name": "digital-rupiah",
+      "version": "3.0",
+      "sequence": 1
+    }
+  },
+  "profiles": [
+    {
+      "profile": "aggregate-overspend",
+      "script": "benchmark:adversarial",
+      "exit_status": "1",
+      "report": "missing",
+      "verdict": "FAIL",
+      "note": "setup-failed"
+    }
+  ],
+  "evidenceInputs": [
+    {
+      "path": "benchmark/benchconfigs/adversarial.yaml",
+      "sha256": "1cdc71aadbe038d59288efcfe52e2279900c52c180c592131004e4955240e3c1"
+    },
+    {
+      "path": "benchmark/benchconfigs/authorization.yaml",
+      "sha256": "f1ae09513f7b4f8159104c81df48da85451a29e84cc346a2c9483e8bc945fe17"
+    },
+    {
+      "path": "benchmark/benchconfigs/boundary-path.yaml",
+      "sha256": "4a41f742a38fc4a7e74c38f65d454f76e4d6de0cb28a727e39da93a38eab9c75"
+    },
+    {
+      "path": "benchmark/benchconfigs/functionality.yaml",
+      "sha256": "ec17750b7b3402e18117889f1c40d1db1c3de845e064f26b64ec1709ca6c4503"
+    },
+    {
+      "path": "benchmark/benchconfigs/negative-path.yaml",
+      "sha256": "582a3c8b035ebe4fad397c8a81e3d4c47f459bf89ac4164b68fcbc0f1abbd0fa"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-repeat.yaml",
+      "sha256": "f139e835d36ff331ed21408abf4683fb3b4c00ef38cea1fc7be94e10528c747b"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-workers-1.yaml",
+      "sha256": "1e83817e11f1fd551900222c088807645c97e04841a1c7ff8bf972c4c95afe36"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-workers-2.yaml",
+      "sha256": "a342b05abe8bc21b61290ed26bc536236ab5c27ccd09b72a4c3ae9d3ae94d647"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-workers-4.yaml",
+      "sha256": "33ab69a401467951ce2921251b3a556b63203872d94c1a3096f15b04a89738d4"
+    },
+    {
+      "path": "benchmark/networkconfig.yaml",
+      "sha256": "b9daef6859a3177e714ec91067089800abcd4db1b13e712bcc696a827e3e8cc3"
+    },
+    {
+      "path": "benchmark/workloads/admin-policy.js",
+      "sha256": "f9ac317568fbb703d7726802a235d14627e06718323ba78ea9fe3222547d3039"
+    },
+    {
+      "path": "benchmark/workloads/adversarial-double-spend.js",
+      "sha256": "b8446fff799321060d17f4010d1237c7cd24c9bcc98239a176b6e627d1a85682"
+    },
+    {
+      "path": "benchmark/workloads/boundary-path.js",
+      "sha256": "46deafd257406bee23d9ce1cf7532d9b17977f9eb84c1d704e6b139f3de864d4"
+    },
+    {
+      "path": "benchmark/workloads/custody-authorization.js",
+      "sha256": "0dd6c00f1ca3899ef324395e4686f44dda7ee6f55ba52850afc5a79068dc0168"
+    },
+    {
+      "path": "benchmark/workloads/functional-workloads.test.js",
+      "sha256": "9e83411752ae716d11833ada7a73be04c8e288b91deb816d83cdd6179fa847dc"
+    },
+    {
+      "path": "benchmark/workloads/monetary-ops.js",
+      "sha256": "f6d512a6e81646dcde9e0537678ddf082a2f2133e50d46fd56e565f02ecafdeb"
+    },
+    {
+      "path": "benchmark/workloads/negative-path.js",
+      "sha256": "19ff404023fdb67d6d1bb304e77b0ee9c2ff2eadfd72f60f37ec36992f691a5f"
+    },
+    {
+      "path": "benchmark/workloads/retail-base.js",
+      "sha256": "41085ab731fa1797cc9e5a7ee8ff6230117da25eed779e9ec80335ee3a8a63fc"
+    },
+    {
+      "path": "benchmark/workloads/retail-base.test.js",
+      "sha256": "6208fc8cd2b40c9491d6ba4233aa1a7465fb52a2e640ac3ede3ce21cc50b2774"
+    },
+    {
+      "path": "benchmark/workloads/retail-onboarding.js",
+      "sha256": "c0d9c273d63acc76325ea8c0502b7056b5c240d627c925092fe493bff926742a"
+    },
+    {
+      "path": "benchmark/workloads/retail-transfer.js",
+      "sha256": "14d3e5c31e4692282478e37a768e6df262b99ec60a51eb9abaff51d4af088150"
+    },
+    {
+      "path": "benchmark/workloads/retail-transfer.test.js",
+      "sha256": "4780c8e78dbc4d369d896a2c5b518eeaad4081057c5ac59c151898a4a360bfd4"
+    },
+    {
+      "path": "benchmark/workloads/supervision-reads.js",
+      "sha256": "f4230094be001df7b8c9af88e36bf63513dae2d0eb951a3aab6217f3067b82d0"
+    },
+    {
+      "path": "chaincode/digital_rupiah.go",
+      "sha256": "a335237d4f26ae6c51a1a3c017f9159f7a773d805f84b11dab4fbfba3e04f76c"
+    },
+    {
+      "path": "package.json",
+      "sha256": "80dc796464e39b3591111a54eb4df04aeaeacd0adc831db78420ae30a814c1b9"
+    }
+  ]
+}

@@ -1,0 +1,650 @@
+
+> bi-coin-fabric@1.0.0 benchmark:transfer:repeat
+> caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-repeat.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .
+
+2026.08.24-17:20:15.982[32m info [39m [caliper] [cli-launch-manager] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.08.24-17:20:15.983[32m info [39m [caliper] [cli-launch-manager] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-repeat.yaml
+2026.08.24-17:20:15.984[32m info [39m [caliper] [cli-launch-manager] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.08.24-17:20:15.984[32m info [39m [caliper] [cli-launch-manager] 	Set SUT type: fabric
+2026.08.24-17:20:16.002[32m info [39m [caliper] [caliper-engine] 	Starting benchmark flow
+2026.08.24-17:20:16.002[32m info [39m [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.start" is not present, skipping start command
+2026.08.24-17:20:16.701[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.08.24-17:20:16.717[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.08.24-17:20:16.719[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.08.24-17:20:16.720[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.08.24-17:20:16.721[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Fabric-Gateway SDK version: 1.5.0 for Peer-Gateway connector; TLS based on BankIndonesiaOrgMSP: server
+2026.08.24-17:20:16.721[32m info [39m [caliper] [caliper-engine] 	Executed "init" step in 0.001 seconds
+2026.08.24-17:20:16.721[33m warn [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Install smart contract not available for the Fabric Peer Gateway connector
+2026.08.24-17:20:16.721[32m info [39m [caliper] [caliper-engine] 	Executed "install" step in 0 seconds
+2026.08.24-17:20:16.723[32m info [39m [caliper] [monitor.js] 	Attempting to create resource monitor of type docker
+2026.08.24-17:20:16.725[32m info [39m [caliper] [default-observer] 	Observer interval set to 5000 milliseconds
+2026.08.24-17:20:16.728[32m info [39m [caliper] [round-orchestrator] 	Preparing worker connections
+2026.08.24-17:20:16.728[32m info [39m [caliper] [worker-orchestrator] 	Launching worker 1 of 2
+2026.08.24-17:20:16.733[32m info [39m [caliper] [worker-orchestrator] 	Launching worker 2 of 2
+2026.08.24-17:20:16.735[32m info [39m [caliper] [worker-orchestrator] 	Messenger not configured, entering configure phase...
+2026.08.24-17:20:16.735[32m info [39m [caliper] [worker-orchestrator] 	No existing workers detected, entering worker launch phase...
+2026.08.24-17:20:16.736[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be connected...
+2026.08.24-17:20:17.099[32m info [39m [caliper] [cli-launch-worker] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.08.24-17:20:17.100[32m info [39m [caliper] [cli-launch-worker] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-repeat.yaml
+2026.08.24-17:20:17.101[32m info [39m [caliper] [cli-launch-worker] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.08.24-17:20:17.101[32m info [39m [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.08.24-17:20:17.118[32m info [39m [caliper] [cli-launch-worker] 	Set workspace path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric
+2026.08.24-17:20:17.119[32m info [39m [caliper] [cli-launch-worker] 	Set benchmark configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-repeat.yaml
+2026.08.24-17:20:17.119[32m info [39m [caliper] [cli-launch-worker] 	Set network configuration path: /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/networkconfig.yaml
+2026.08.24-17:20:17.120[32m info [39m [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.08.24-17:20:17.157[32m info [39m [caliper] [worker-orchestrator] 	2 workers connected, progressing to worker assignment phase.
+2026.08.24-17:20:17.157[32m info [39m [caliper] [worker-orchestrator] 	Workers currently unassigned, awaiting index assignment...
+2026.08.24-17:20:17.158[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be assigned...
+2026.08.24-17:20:17.209[32m info [39m [caliper] [worker-orchestrator] 	2 workers assigned, progressing to worker initialization phase.
+2026.08.24-17:20:17.210[32m info [39m [caliper] [worker-orchestrator] 	Waiting for 2 workers to be ready...
+2026.08.24-17:20:17.210[32m info [39m [caliper] [worker-message-handler] 	Initializing Worker#1...
+2026.08.24-17:20:17.211[32m info [39m [caliper] [worker-message-handler] 	Initializing Worker#0...
+2026.08.24-17:20:17.933[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.08.24-17:20:17.945[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.08.24-17:20:17.945[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.08.24-17:20:17.947[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.08.24-17:20:17.960[32m info [39m [caliper] [worker-message-handler] 	Worker#1 initialized
+2026.08.24-17:20:17.974[32m info [39m [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.08.24-17:20:17.980[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.08.24-17:20:17.981[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.08.24-17:20:17.981[32m info [39m [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.08.24-17:20:17.984[32m info [39m [caliper] [worker-message-handler] 	Worker#0 initialized
+2026.08.24-17:20:17.985[32m info [39m [caliper] [worker-orchestrator] 	2 workers ready, progressing to test preparation phase.
+2026.08.24-17:20:17.985[32m info [39m [caliper] [round-orchestrator] 	Started round 1 (retail-peak-rep-1)
+2026.08.24-17:20:17.987[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#0
+2026.08.24-17:20:17.987[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#0
+2026.08.24-17:20:18.005[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.24-17:20:18.008[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.24-17:20:18.011[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:18.012[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:18.014[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:18.014[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is starting...
+2026.08.24-17:20:18.014[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:18.015[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is starting...
+2026.08.24-17:20:47.929[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_0,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.24-17:20:50.203[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_0,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.24-17:20:52.424[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_0,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.24-17:20:54.640[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_0,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.24-17:20:56.920[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_0,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.24-17:20:56.920[32m info [39m [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 0: Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:164:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:251:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:147:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:150:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:257:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.24-17:20:56.920[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.24-17:20:56.921[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:56.921[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:56.921[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.24-17:20:56.921[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.24-17:20:56.921[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.24-17:20:56.922[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is completed
+2026.08.24-17:20:56.922[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (1587334): Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:164:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:251:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:147:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:150:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:257:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.24-17:20:56.924[31m error[39m [caliper] [round-orchestrator] 	Failed round 1 (retail-peak-rep-1): Error: Error: setup Mint failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:519:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:519:28)
+    at emit (node:internal/child_process:949:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2026.08.24-17:20:56.924[32m info [39m [caliper] [round-orchestrator] 	Started round 2 (retail-peak-rep-2)
+2026.08.24-17:20:56.926[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#1
+2026.08.24-17:20:56.926[32m info [39m [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#1
+2026.08.24-17:20:56.926[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is starting...
+2026.08.24-17:20:56.928[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.24-17:20:56.928[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:56.928[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:56.928[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.24-17:20:56.928[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.24-17:20:56.929[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.24-17:20:56.929[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is completed
+2026.08.24-17:20:56.929[32m info [39m [caliper] [worker-message-handler] 	Worker#0 prepared for Round#1
+2026.08.24-17:20:56.929[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.24-17:20:56.931[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:56.933[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:56.934[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is starting...
+2026.08.24-17:20:56.936[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.24-17:20:56.936[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:56.936[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:56.936[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.24-17:20:56.936[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.24-17:20:56.936[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.24-17:20:56.936[32m info [39m [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is completed
+2026.08.24-17:20:56.936[32m info [39m [caliper] [worker-message-handler] 	Worker#1 prepared for Round#1
+2026.08.24-17:20:56.938[32m info [39m [caliper] [worker-orchestrator] 	2 workers prepared, progressing to test phase.
+2026.08.24-17:20:57.026[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_5,500000],  with error: Error: Channel has been shut down
+2026.08.24-17:20:57.279[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_5,500000],  with error: Error: Channel has been shut down
+2026.08.24-17:20:57.783[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_5,500000],  with error: Error: Channel has been shut down
+2026.08.24-17:20:58.536[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_5,500000],  with error: Error: Channel has been shut down
+2026.08.24-17:20:59.030[32m info [39m [caliper] [round-orchestrator] 	Monitors successfully started
+2026.08.24-17:20:59.031[32m info [39m [caliper] [worker-message-handler] 	Worker#0 is starting Round#1
+2026.08.24-17:20:59.031[32m info [39m [caliper] [worker-message-handler] 	Worker#1 is starting Round#1
+2026.08.24-17:20:59.033[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.24-17:20:59.033[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.08.24-17:20:59.035[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:59.035[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:20:59.037[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:59.037[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.08.24-17:20:59.038[32m info [39m [caliper] [caliper-worker] 	Worker #0 starting workload loop
+2026.08.24-17:20:59.038[32m info [39m [caliper] [caliper-worker] 	Worker #1 starting workload loop
+2026.08.24-17:20:59.057[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_1,wlt_c_20260824-review-full-01_transfer-repeat_w1_33,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_1],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.085[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_2,wlt_c_20260824-review-full-01_transfer-repeat_w1_34,14637,bench_20260824-review-full-01_transfer-repeat_w1_r1_2],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 14637
+2026.08.24-17:20:59.116[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_3,wlt_c_20260824-review-full-01_transfer-repeat_w1_36,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_3],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.151[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_4,wlt_c_20260824-review-full-01_transfer-repeat_w1_37,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_4],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.183[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_6,wlt_c_20260824-review-full-01_transfer-repeat_w1_38,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_5],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.186[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_6,wlt_c_20260824-review-full-01_transfer-repeat_w0_38,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_5],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.215[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_7,wlt_c_20260824-review-full-01_transfer-repeat_w1_39,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_6],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.218[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_7,wlt_c_20260824-review-full-01_transfer-repeat_w0_39,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_6],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.249[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_8,wlt_c_20260824-review-full-01_transfer-repeat_w1_41,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_7],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.251[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_8,wlt_c_20260824-review-full-01_transfer-repeat_w0_41,17216,bench_20260824-review-full-01_transfer-repeat_w0_r1_7],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 17216
+2026.08.24-17:20:59.281[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_9,wlt_c_20260824-review-full-01_transfer-repeat_w0_42,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_8],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.282[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_9,wlt_c_20260824-review-full-01_transfer-repeat_w1_42,8508,bench_20260824-review-full-01_transfer-repeat_w1_r1_8],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 8508
+2026.08.24-17:20:59.314[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_11,wlt_c_20260824-review-full-01_transfer-repeat_w0_43,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_9],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.317[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_11,wlt_c_20260824-review-full-01_transfer-repeat_w1_43,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_9],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.348[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_12,wlt_c_20260824-review-full-01_transfer-repeat_w0_44,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_10],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.348[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_12,wlt_c_20260824-review-full-01_transfer-repeat_w1_44,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_10],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.382[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_13,wlt_c_20260824-review-full-01_transfer-repeat_w1_46,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_11],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.382[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_13,wlt_c_20260824-review-full-01_transfer-repeat_w0_46,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_11],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.415[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_14,wlt_c_20260824-review-full-01_transfer-repeat_w1_47,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_12],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.417[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_14,wlt_c_20260824-review-full-01_transfer-repeat_w0_47,42215,bench_20260824-review-full-01_transfer-repeat_w0_r1_12],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 42215
+2026.08.24-17:20:59.449[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_16,wlt_c_20260824-review-full-01_transfer-repeat_w1_48,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_13],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.452[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_16,wlt_c_20260824-review-full-01_transfer-repeat_w0_48,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_13],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.484[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_17,wlt_c_20260824-review-full-01_transfer-repeat_w1_49,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_14],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.484[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_17,wlt_c_20260824-review-full-01_transfer-repeat_w0_49,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_14],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.515[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_18,wlt_c_20260824-review-full-01_transfer-repeat_w0_51,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_15],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.515[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_18,wlt_c_20260824-review-full-01_transfer-repeat_w1_51,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_15],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.555[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_19,wlt_c_20260824-review-full-01_transfer-repeat_w0_52,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_16],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.555[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_19,wlt_c_20260824-review-full-01_transfer-repeat_w1_52,36449,bench_20260824-review-full-01_transfer-repeat_w1_r1_16],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 36449
+2026.08.24-17:20:59.590[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_21,wlt_c_20260824-review-full-01_transfer-repeat_w1_53,35198,bench_20260824-review-full-01_transfer-repeat_w1_r1_17],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 35198
+2026.08.24-17:20:59.616[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_21,wlt_c_20260824-review-full-01_transfer-repeat_w0_53,49449,bench_20260824-review-full-01_transfer-repeat_w0_r1_17],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 49449
+2026.08.24-17:20:59.617[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_22,wlt_c_20260824-review-full-01_transfer-repeat_w1_54,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_18],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.648[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_22,wlt_c_20260824-review-full-01_transfer-repeat_w0_54,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_18],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.650[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_23,wlt_m_20260824-review-full-01_transfer-repeat_w1_0,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_19],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.682[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_23,wlt_c_20260824-review-full-01_transfer-repeat_w0_56,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_19],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.685[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_24,wlt_m_20260824-review-full-01_transfer-repeat_w1_1,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_20],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.713[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_24,wlt_m_20260824-review-full-01_transfer-repeat_w0_0,33344,bench_20260824-review-full-01_transfer-repeat_w0_r1_20],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 33344
+2026.08.24-17:20:59.716[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_26,wlt_m_20260824-review-full-01_transfer-repeat_w1_2,35131,bench_20260824-review-full-01_transfer-repeat_w1_r1_21],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 35131
+2026.08.24-17:20:59.748[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_26,wlt_m_20260824-review-full-01_transfer-repeat_w0_1,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_21],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.753[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_27,wlt_m_20260824-review-full-01_transfer-repeat_w1_3,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_22],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.781[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_27,wlt_m_20260824-review-full-01_transfer-repeat_w0_2,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_22],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.787[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_28,wlt_m_20260824-review-full-01_transfer-repeat_w1_4,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_23],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.815[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_28,wlt_m_20260824-review-full-01_transfer-repeat_w0_3,41011,bench_20260824-review-full-01_transfer-repeat_w0_r1_23],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 41011
+2026.08.24-17:20:59.817[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_29,wlt_m_20260824-review-full-01_transfer-repeat_w1_5,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_24],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.847[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_29,wlt_m_20260824-review-full-01_transfer-repeat_w0_4,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_24],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.852[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_31,wlt_m_20260824-review-full-01_transfer-repeat_w1_6,9197,bench_20260824-review-full-01_transfer-repeat_w1_r1_25],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 9197
+2026.08.24-17:20:59.880[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_31,wlt_m_20260824-review-full-01_transfer-repeat_w0_5,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_25],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.915[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_1,wlt_c_20260824-review-full-01_transfer-repeat_w1_33,15932,bench_20260824-review-full-01_transfer-repeat_w1_r1_27],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 15932
+2026.08.24-17:20:59.949[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_2,wlt_c_20260824-review-full-01_transfer-repeat_w1_34,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_28],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:20:59.980[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_3,wlt_c_20260824-review-full-01_transfer-repeat_w1_36,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_29],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.012[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_4,wlt_c_20260824-review-full-01_transfer-repeat_w1_37,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_30],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.049[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_6,wlt_c_20260824-review-full-01_transfer-repeat_w1_38,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_31],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.080[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_7,wlt_c_20260824-review-full-01_transfer-repeat_w1_39,37827,bench_20260824-review-full-01_transfer-repeat_w1_r1_32],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 37827
+2026.08.24-17:21:00.080[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_6,wlt_c_20260824-review-full-01_transfer-repeat_w0_38,36793,bench_20260824-review-full-01_transfer-repeat_w0_r1_31],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 36793
+2026.08.24-17:21:00.111[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_7,wlt_c_20260824-review-full-01_transfer-repeat_w0_39,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_32],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.111[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_8,wlt_c_20260824-review-full-01_transfer-repeat_w1_41,29400,bench_20260824-review-full-01_transfer-repeat_w1_r1_33],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 29400
+2026.08.24-17:21:00.145[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_8,wlt_c_20260824-review-full-01_transfer-repeat_w0_41,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_33],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.146[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_9,wlt_c_20260824-review-full-01_transfer-repeat_w1_42,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_34],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.179[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_11,wlt_c_20260824-review-full-01_transfer-repeat_w1_43,25495,bench_20260824-review-full-01_transfer-repeat_w1_r1_35],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 25495
+2026.08.24-17:21:00.179[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_9,wlt_c_20260824-review-full-01_transfer-repeat_w0_42,15026,bench_20260824-review-full-01_transfer-repeat_w0_r1_34],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 15026
+2026.08.24-17:21:00.211[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_12,wlt_c_20260824-review-full-01_transfer-repeat_w1_44,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_36],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.211[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_11,wlt_c_20260824-review-full-01_transfer-repeat_w0_43,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_35],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.245[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_12,wlt_c_20260824-review-full-01_transfer-repeat_w0_44,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_36],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.246[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_13,wlt_c_20260824-review-full-01_transfer-repeat_w1_46,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_37],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.279[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_14,wlt_c_20260824-review-full-01_transfer-repeat_w1_47,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_38],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.279[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_13,wlt_c_20260824-review-full-01_transfer-repeat_w0_46,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_37],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.311[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_14,wlt_c_20260824-review-full-01_transfer-repeat_w0_47,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_38],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.311[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_16,wlt_c_20260824-review-full-01_transfer-repeat_w1_48,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_39],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.346[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_16,wlt_c_20260824-review-full-01_transfer-repeat_w0_48,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_39],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.346[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_17,wlt_c_20260824-review-full-01_transfer-repeat_w1_49,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_40],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.378[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_17,wlt_c_20260824-review-full-01_transfer-repeat_w0_49,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_40],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.381[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_18,wlt_c_20260824-review-full-01_transfer-repeat_w1_51,21594,bench_20260824-review-full-01_transfer-repeat_w1_r1_41],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 21594
+2026.08.24-17:21:00.411[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_18,wlt_c_20260824-review-full-01_transfer-repeat_w0_51,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_41],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.411[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_19,wlt_c_20260824-review-full-01_transfer-repeat_w1_52,31126,bench_20260824-review-full-01_transfer-repeat_w1_r1_42],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 31126
+2026.08.24-17:21:00.446[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_21,wlt_c_20260824-review-full-01_transfer-repeat_w1_53,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_43],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.447[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_19,wlt_c_20260824-review-full-01_transfer-repeat_w0_52,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_42],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.479[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_21,wlt_c_20260824-review-full-01_transfer-repeat_w0_53,33285,bench_20260824-review-full-01_transfer-repeat_w0_r1_43],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 33285
+2026.08.24-17:21:00.479[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_22,wlt_c_20260824-review-full-01_transfer-repeat_w1_54,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_44],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.511[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_22,wlt_c_20260824-review-full-01_transfer-repeat_w0_54,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_44],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.514[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_23,wlt_m_20260824-review-full-01_transfer-repeat_w1_0,39557,bench_20260824-review-full-01_transfer-repeat_w1_r1_45],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 39557
+2026.08.24-17:21:00.545[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_23,wlt_c_20260824-review-full-01_transfer-repeat_w0_56,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_45],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.548[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_24,wlt_m_20260824-review-full-01_transfer-repeat_w1_1,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_46],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.578[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_24,wlt_m_20260824-review-full-01_transfer-repeat_w0_0,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_46],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.580[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_26,wlt_m_20260824-review-full-01_transfer-repeat_w1_2,6937,bench_20260824-review-full-01_transfer-repeat_w1_r1_47],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 6937
+2026.08.24-17:21:00.611[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_26,wlt_m_20260824-review-full-01_transfer-repeat_w0_1,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_47],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.612[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_27,wlt_m_20260824-review-full-01_transfer-repeat_w1_3,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_48],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.645[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_27,wlt_m_20260824-review-full-01_transfer-repeat_w0_2,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_48],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.648[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_28,wlt_m_20260824-review-full-01_transfer-repeat_w1_4,9917,bench_20260824-review-full-01_transfer-repeat_w1_r1_49],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 9917
+2026.08.24-17:21:00.678[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_28,wlt_m_20260824-review-full-01_transfer-repeat_w0_3,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_49],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.679[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_29,wlt_m_20260824-review-full-01_transfer-repeat_w1_5,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_50],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.710[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_29,wlt_m_20260824-review-full-01_transfer-repeat_w0_4,43092,bench_20260824-review-full-01_transfer-repeat_w0_r1_50],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 43092
+2026.08.24-17:21:00.714[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_31,wlt_m_20260824-review-full-01_transfer-repeat_w1_6,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_51],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.745[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_31,wlt_m_20260824-review-full-01_transfer-repeat_w0_5,39813,bench_20260824-review-full-01_transfer-repeat_w0_r1_51],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 39813
+2026.08.24-17:21:00.782[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_1,wlt_c_20260824-review-full-01_transfer-repeat_w1_33,8753,bench_20260824-review-full-01_transfer-repeat_w1_r1_53],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 8753
+2026.08.24-17:21:00.813[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_2,wlt_c_20260824-review-full-01_transfer-repeat_w1_34,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_54],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.896[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_3,wlt_c_20260824-review-full-01_transfer-repeat_w1_36,33469,bench_20260824-review-full-01_transfer-repeat_w1_r1_55],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 33469
+2026.08.24-17:21:00.922[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_4,wlt_c_20260824-review-full-01_transfer-repeat_w1_37,35050,bench_20260824-review-full-01_transfer-repeat_w1_r1_56],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 35050
+2026.08.24-17:21:00.939[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_6,wlt_c_20260824-review-full-01_transfer-repeat_w1_38,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_57],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.967[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_6,wlt_c_20260824-review-full-01_transfer-repeat_w0_38,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_57],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:00.972[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_7,wlt_c_20260824-review-full-01_transfer-repeat_w1_39,35654,bench_20260824-review-full-01_transfer-repeat_w1_r1_58],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 35654
+2026.08.24-17:21:00.992[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_8,wlt_c_20260824-review-full-01_transfer-repeat_w1_41,15303,bench_20260824-review-full-01_transfer-repeat_w1_r1_59],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 15303
+2026.08.24-17:21:01.016[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_7,wlt_c_20260824-review-full-01_transfer-repeat_w0_39,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_58],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.069[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_1,wlt_c_20260824-review-full-01_transfer-repeat_w0_33,17244,bench_20260824-review-full-01_transfer-repeat_w0_r1_53],  with error: Error: Failed to submit trasaction with status code: 11
+2026.08.24-17:21:01.072[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Mint] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_5,500000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.08.24-17:21:01.073[32m info [39m [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 0: Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:164:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:251:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:147:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:150:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:257:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.24-17:21:01.073[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.08.24-17:21:01.073[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.08.24-17:21:01.073[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.08.24-17:21:01.073[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.08.24-17:21:01.073[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.08.24-17:21:01.073[32m info [39m [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.08.24-17:21:01.074[32m info [39m [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is completed
+2026.08.24-17:21:01.074[31m error[39m [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (1587333): Error: setup Mint failed: [object Object]
+    at assertSuccessfulResponse (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:71:19)
+    at RetailTransferWorkload.submit (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:164:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Array.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:251:17)
+    at async /home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:147:17
+    at async Promise.all (index 0)
+    at async RetailTransferWorkload.runPool (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:150:9)
+    at async RetailTransferWorkload.seedPopulation (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-base.js:257:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.08.24-17:21:01.075[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_1,wlt_c_20260824-review-full-01_transfer-repeat_w0_33,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_27],  with error: Error: Failed to submit trasaction with status code: 11
+2026.08.24-17:21:01.075[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_2,wlt_c_20260824-review-full-01_transfer-repeat_w0_34,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_28],  with error: Error: Failed to submit trasaction with status code: 11
+2026.08.24-17:21:01.077[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_3,wlt_c_20260824-review-full-01_transfer-repeat_w0_36,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_29],  with error: Error: Failed to submit trasaction with status code: 11
+2026.08.24-17:21:01.077[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_4,wlt_c_20260824-review-full-01_transfer-repeat_w0_37,21489,bench_20260824-review-full-01_transfer-repeat_w0_r1_30],  with error: Error: Failed to submit trasaction with status code: 11
+2026.08.24-17:21:01.078[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_9,wlt_c_20260824-review-full-01_transfer-repeat_w1_42,10489,bench_20260824-review-full-01_transfer-repeat_w1_r1_60],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 10489
+2026.08.24-17:21:01.077[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_8,wlt_c_20260824-review-full-01_transfer-repeat_w0_41,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_59],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.080[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_11,wlt_c_20260824-review-full-01_transfer-repeat_w1_43,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_61],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306
+                this.workers[workerId].phases[phase].reject(new Error(error));
+                                                     ^
+
+TypeError: this.workers[workerId].phases[phase].reject is not a function
+    at WorkerOrchestrator.updateWorkerPhase (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:54)
+    at ProcessMessenger.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:519:28)
+    at ProcessMessenger.onMessage (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:519:28)
+    at emit (node:internal/child_process:949:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+Node.js v22.23.2
+2026.08.24-17:21:01.087[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_11,wlt_c_20260824-review-full-01_transfer-repeat_w0_43,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_61],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.088[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_9,wlt_c_20260824-review-full-01_transfer-repeat_w0_42,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_60],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.090[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_12,wlt_c_20260824-review-full-01_transfer-repeat_w1_44,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_62],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.106[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_12,wlt_c_20260824-review-full-01_transfer-repeat_w0_44,9874,bench_20260824-review-full-01_transfer-repeat_w0_r1_62],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.114[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_13,wlt_c_20260824-review-full-01_transfer-repeat_w1_46,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_63],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.140[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_13,wlt_c_20260824-review-full-01_transfer-repeat_w0_46,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_63],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.157[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_14,wlt_c_20260824-review-full-01_transfer-repeat_w1_47,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_64],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.173[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_14,wlt_c_20260824-review-full-01_transfer-repeat_w0_47,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_64],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.182[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_16,wlt_c_20260824-review-full-01_transfer-repeat_w1_48,9119,bench_20260824-review-full-01_transfer-repeat_w1_r1_65],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 9119
+2026.08.24-17:21:01.206[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_16,wlt_c_20260824-review-full-01_transfer-repeat_w0_48,20434,bench_20260824-review-full-01_transfer-repeat_w0_r1_65],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.215[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_17,wlt_c_20260824-review-full-01_transfer-repeat_w1_49,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_66],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.240[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_17,wlt_c_20260824-review-full-01_transfer-repeat_w0_49,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_66],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.251[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_18,wlt_c_20260824-review-full-01_transfer-repeat_w1_51,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_67],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.273[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_18,wlt_c_20260824-review-full-01_transfer-repeat_w0_51,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_67],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.285[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_19,wlt_c_20260824-review-full-01_transfer-repeat_w1_52,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_68],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.306[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_19,wlt_c_20260824-review-full-01_transfer-repeat_w0_52,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_68],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.316[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_21,wlt_c_20260824-review-full-01_transfer-repeat_w1_53,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_69],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 50000
+2026.08.24-17:21:01.343[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_21,wlt_c_20260824-review-full-01_transfer-repeat_w0_53,31806,bench_20260824-review-full-01_transfer-repeat_w0_r1_69],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.364[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_22,wlt_c_20260824-review-full-01_transfer-repeat_w1_54,32575,bench_20260824-review-full-01_transfer-repeat_w1_r1_70],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, insufficient balance: have 0, need 32575
+2026.08.24-17:21:01.383[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_22,wlt_c_20260824-review-full-01_transfer-repeat_w0_54,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_70],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.398[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_23,wlt_m_20260824-review-full-01_transfer-repeat_w1_0,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_71],  with error: EndorseError: 10 ABORTED: failed to endorse transaction, see attached details for more info
+Details:
+-  peer0.bi.paynet:7051:error in simulation: failed to execute transaction 28caff61102fb8eb791b19dbeca4a2708d7d04dfb5fe3b7f32b654c587d43b10: error sending: chaincode stream terminated
+2026.08.24-17:21:01.407[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_23,wlt_c_20260824-review-full-01_transfer-repeat_w0_56,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_71],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.442[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_24,wlt_m_20260824-review-full-01_transfer-repeat_w0_0,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_72],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.474[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_26,wlt_m_20260824-review-full-01_transfer-repeat_w0_1,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_73],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.507[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_27,wlt_m_20260824-review-full-01_transfer-repeat_w0_2,11484,bench_20260824-review-full-01_transfer-repeat_w0_r1_74],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.542[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_28,wlt_m_20260824-review-full-01_transfer-repeat_w0_3,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_75],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.580[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_29,wlt_m_20260824-review-full-01_transfer-repeat_w0_4,23087,bench_20260824-review-full-01_transfer-repeat_w0_r1_76],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.610[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_31,wlt_m_20260824-review-full-01_transfer-repeat_w0_5,21004,bench_20260824-review-full-01_transfer-repeat_w0_r1_77],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.642[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_32],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.710[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_1,wlt_c_20260824-review-full-01_transfer-repeat_w0_33,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_79],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.714[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_2,wlt_c_20260824-review-full-01_transfer-repeat_w0_34,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_80],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.742[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_3,wlt_c_20260824-review-full-01_transfer-repeat_w0_36,19493,bench_20260824-review-full-01_transfer-repeat_w0_r1_81],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.777[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_4,wlt_c_20260824-review-full-01_transfer-repeat_w0_37,38475,bench_20260824-review-full-01_transfer-repeat_w0_r1_82],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.808[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_6,wlt_c_20260824-review-full-01_transfer-repeat_w0_38,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_83],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.840[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_7,wlt_c_20260824-review-full-01_transfer-repeat_w0_39,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_84],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.875[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_8,wlt_c_20260824-review-full-01_transfer-repeat_w0_41,5595,bench_20260824-review-full-01_transfer-repeat_w0_r1_85],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.879[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_2,wlt_c_20260824-review-full-01_transfer-repeat_w0_34,25776,bench_20260824-review-full-01_transfer-repeat_w0_r1_54],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.879[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_3,wlt_c_20260824-review-full-01_transfer-repeat_w0_36,30454,bench_20260824-review-full-01_transfer-repeat_w0_r1_55],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.879[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_4,wlt_c_20260824-review-full-01_transfer-repeat_w0_37,5923,bench_20260824-review-full-01_transfer-repeat_w0_r1_56],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.881[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_24,wlt_m_20260824-review-full-01_transfer-repeat_w1_1,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_72],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.881[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_26,wlt_m_20260824-review-full-01_transfer-repeat_w1_2,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_73],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.881[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_27,wlt_m_20260824-review-full-01_transfer-repeat_w1_3,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_74],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.881[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_28,wlt_m_20260824-review-full-01_transfer-repeat_w1_4,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_75],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.881[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_29,wlt_m_20260824-review-full-01_transfer-repeat_w1_5,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_76],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_31,wlt_m_20260824-review-full-01_transfer-repeat_w1_6,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_77],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_32],  with error: GatewayError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_1,wlt_c_20260824-review-full-01_transfer-repeat_w1_33,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_79],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_2,wlt_c_20260824-review-full-01_transfer-repeat_w1_34,26031,bench_20260824-review-full-01_transfer-repeat_w1_r1_80],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_3,wlt_c_20260824-review-full-01_transfer-repeat_w1_36,38514,bench_20260824-review-full-01_transfer-repeat_w1_r1_81],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_4,wlt_c_20260824-review-full-01_transfer-repeat_w1_37,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_82],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_6,wlt_c_20260824-review-full-01_transfer-repeat_w1_38,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_83],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_7,wlt_c_20260824-review-full-01_transfer-repeat_w1_39,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_84],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_8,wlt_c_20260824-review-full-01_transfer-repeat_w1_41,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_85],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.882[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_9,wlt_c_20260824-review-full-01_transfer-repeat_w1_42,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_86],  with error: EndorseError: 1 CANCELLED: Call cancelled
+Details:
+2026.08.24-17:21:01.910[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_9,wlt_c_20260824-review-full-01_transfer-repeat_w0_42,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_86],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.919[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_11,wlt_c_20260824-review-full-01_transfer-repeat_w1_43,39804,bench_20260824-review-full-01_transfer-repeat_w1_r1_87],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: Client network socket disconnected before secure TLS connection was established (2026-08-24T10:21:01.918Z)
+Details:
+2026.08.24-17:21:01.942[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_11,wlt_c_20260824-review-full-01_transfer-repeat_w0_43,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_87],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.947[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_12,wlt_c_20260824-review-full-01_transfer-repeat_w1_44,43842,bench_20260824-review-full-01_transfer-repeat_w1_r1_88],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: Client network socket disconnected before secure TLS connection was established (2026-08-24T10:21:01.918Z)
+Details:
+2026.08.24-17:21:01.973[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_12,wlt_c_20260824-review-full-01_transfer-repeat_w0_44,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_88],  with error: Error: Channel has been shut down
+2026.08.24-17:21:01.975[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_13,wlt_c_20260824-review-full-01_transfer-repeat_w1_46,13503,bench_20260824-review-full-01_transfer-repeat_w1_r1_89],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: Client network socket disconnected before secure TLS connection was established (2026-08-24T10:21:01.918Z)
+Details:
+2026.08.24-17:21:02.007[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w0_13,wlt_c_20260824-review-full-01_transfer-repeat_w0_46,50000,bench_20260824-review-full-01_transfer-repeat_w0_r1_89],  with error: Error: Channel has been shut down
+2026.08.24-17:21:02.008[31m error[39m [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [Transfer] using arguments [wlt_c_20260824-review-full-01_transfer-repeat_w1_14,wlt_c_20260824-review-full-01_transfer-repeat_w1_47,50000,bench_20260824-review-full-01_transfer-repeat_w1_r1_90],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: Client network socket disconnected before secure TLS connection was established (2026-08-24T10:21:01.918Z)
+Details:
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at InternalTxObserver._sendUpdate (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/tx-observers/internal-tx-observer.js:48:30)
+    at Timeout._onTimeout (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/tx-observers/internal-tx-observer.js:58:68)
+    at listOnTimeout (node:internal/timers:585:17)
+    at process.processTimers (node:internal/timers:521:7)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v22.23.2
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at InternalTxObserver._sendUpdate (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/tx-observers/internal-tx-observer.js:48:30)
+    at Timeout._onTimeout (/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-core/lib/worker/tx-observers/internal-tx-observer.js:58:68)
+    at listOnTimeout (node:internal/timers:585:17)
+    at process.processTimers (node:internal/timers:521:7)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v22.23.2

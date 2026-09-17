@@ -71,7 +71,7 @@ func (f *fakeLedgerContract) SubmitTransaction(name string, args ...string) ([]b
 	f.submittedName = name
 	f.submittedArgs = args
 	if f.submitResult == nil && name == "DistributeToParticipant" {
-		return []byte(`{"status":"settled","tx_id":"tx-distribution","reference_id":"` + args[3] + `","amount":900000}`), f.submitErr
+		return []byte(`{"status":"settled","tx_id":"tx-distribution","reference_id":"` + args[2] + `","sender_id":"bi_treasury","receiver_id":"wlt_` + args[0] + `","amount":900000}`), f.submitErr
 	}
 	return f.submitResult, f.submitErr
 }

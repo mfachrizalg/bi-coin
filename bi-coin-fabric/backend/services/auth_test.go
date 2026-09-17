@@ -64,3 +64,42 @@ func TestAuthServiceRejectsWrongPassword(t *testing.T) {
 		t.Fatal("expected invalid credentials")
 	}
 }
+
+func TestAuthServiceRejectsTokenForDeactivatedUser(t *testing.T) {
+	hash, err := HashPassword("secret")
+	if err != nil {
+		t.Fatalf("hash password: %v", err)
+	}
+	users := memoryUserStore{users: map[string]AuthUser{
+		"bi": {Username: "bi", PasswordHash: hash, Role: middleware.RoleBankIndonesia, Active: true},
+	}}
+	auth := NewAuthService(users, "test-secret-32-bytes-long", time.Hour)
+	token, err := auth.Login(models.LoginRequest{Username: "bi", Password: "secret"})
+	if err != nil {
+		t.Fatalf("login: %v", err)
+	}
+	users.users["bi"] = AuthUser{Username: "bi", PasswordHash: hash, Role: middleware.RoleBankIndonesia, Active: false}
+	auth.users = users
+	if _, err := auth.Verify(token.AccessToken); err == nil {
+		t.Fatal("expected deactivated user token to be rejected")
+	}
+}
+
+func TestAuthServiceRejectsTokenAfterRoleChange(t *testing.T) {
+	hash, err := HashPassword("secret")
+	if err != nil {
+		t.Fatalf("hash password: %v", err)
+	}
+	users := memoryUserStore{users: map[string]AuthUser{
+		"operator": {Username: "operator", PasswordHash: hash, Role: middleware.RolePJP, Active: true},
+	}}
+	auth := NewAuthService(users, "test-secret-32-bytes-long", time.Hour)
+	token, err := auth.Login(models.LoginRequest{Username: "operator", Password: "secret"})
+	if err != nil {
+		t.Fatalf("login: %v", err)
+	}
+	users.users["operator"] = AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RoleValidatorBank, Active: true}
+	if _, err := auth.Verify(token.AccessToken); err == nil {
+		t.Fatal("expected role-changed token to be rejected")
+	}
+}

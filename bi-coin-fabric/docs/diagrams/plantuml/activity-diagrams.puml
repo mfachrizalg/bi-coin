@@ -83,14 +83,15 @@ else (ya)
 endif
 
 |Blockchain|
-:RequestIssuance();
-:Validasi peserta tujuan;
-if (Peserta valid?) then (tidak)
+:RequestIssuance(amount);
+:Validasi kewenangan Bank Indonesia;
+if (Kewenangan valid?) then (tidak)
   :Tolak penerbitan;
   end
 else (ya)
 endif
-:Tambah saldo penerbitan;
+:Mint(bi_treasury);
+:Tambah saldo Treasury;
 :Catat transaksi dan audit;
 
 |Backend API|
@@ -112,7 +113,7 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title Distribusi Likuiditas ke PJP
+title Distribusi Likuiditas dari Treasury ke Kustodian
 
 |Bank Indonesia|
 start
@@ -129,13 +130,13 @@ endif
 
 |Blockchain|
 :Validasi peserta penerima;
-if (Penerima aktif?) then (tidak)
+if (Penerima aktif dan bertipe Validator/PJP?) then (tidak)
   :Tolak distribusi;
   end
 else (ya)
 endif
-:Kurangi saldo sumber;
-:Tambah saldo peserta penerima;
+:Kurangi saldo bi_treasury;
+:Tambah saldo dompet kustodian;
 :Catat transaksi distribusi;
 
 |Backend API|

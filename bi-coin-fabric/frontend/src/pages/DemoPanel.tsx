@@ -62,12 +62,11 @@ const STEPS: DemoStep[] = [
     roleLabel: 'Bank Indonesia',
     roleColor: '#1a3c6e',
     tab: 'participants',
-    title: 'Issue Rp 100,000,000 to Himbara',
-    description: 'BI mints Digital Rupiah and credits Himbara\'s reserve balance (wholesale issuance).',
+    title: 'Issue Rp 100,000,000 to Treasury',
+    description: 'BI issues Digital Rupiah into its Treasury before distributing liquidity to Custodians.',
     thesis: 'Only BI can mint. Supply is recorded on-chain and verifiable by all peers.',
     prefill: {
       target: 'issue',
-      participant_id: 'himbara',
       amount: '100000000',
     },
   },
@@ -108,16 +107,15 @@ const STEPS: DemoStep[] = [
     id: 6,
     phase: 'Phase 4 — Retail Liquidity',
     phaseColor: '#d97706',
-    role: 'bank_pjp',
-    roleLabel: 'Bank / PJP',
-    roleColor: '#16a34a',
+    role: 'bank_indonesia',
+    roleLabel: 'Bank Indonesia',
+    roleColor: '#1a3c6e',
     tab: 'participants',
-    title: 'Himbara → GoPay: Distribute Rp 30,000,000',
-    description: 'Himbara distributes wholesale liquidity to GoPay for retail customer payments.',
+    title: 'Treasury → GoPay: Distribute Rp 30,000,000',
+    description: 'BI distributes issued Treasury liquidity directly to GoPay as a PJP Custodian.',
     thesis: 'Wholesale → retail bridge: second tier of the two-tier CBDC model.',
     prefill: {
       target: 'distribute',
-      sender: 'himbara',
       receiver: 'gopay',
       amount: '30000000',
     },
@@ -292,6 +290,42 @@ const STEPS: DemoStep[] = [
   },
   {
     id: 16,
+    phase: 'Phase 6 — Retail Funding',
+    phaseColor: '#d97706',
+    role: 'bank_pjp',
+    roleLabel: 'Bank / PJP Custodian',
+    roleColor: '#16a34a',
+    tab: 'transfer',
+    title: 'GoPay Funds Budi Wallet',
+    description: 'GoPay moves its distributed reserve into Budi\'s KYC-approved retail wallet.',
+    thesis: 'Custodian funding keeps the two-tier path explicit: Treasury → Custodian → Wallet Owner.',
+    prefill: {
+      target: 'transfer',
+      senderId: 'wlt_gopay',
+      receiverId: 'wlt_budi',
+      amount: '500000',
+    },
+  },
+  {
+    id: 17,
+    phase: 'Phase 6 — Retail Funding',
+    phaseColor: '#d97706',
+    role: 'bank_pjp',
+    roleLabel: 'Bank / PJP Custodian',
+    roleColor: '#16a34a',
+    tab: 'transfer',
+    title: 'GoPay Funds Sari Wallet',
+    description: 'GoPay funds Sari\'s KYC-approved retail wallet from its Custodian reserve.',
+    thesis: 'Retail wallets are funded by their Custodian, never by direct issuance.',
+    prefill: {
+      target: 'transfer',
+      senderId: 'wlt_gopay',
+      receiverId: 'wlt_sari',
+      amount: '500000',
+    },
+  },
+  {
+    id: 18,
     phase: 'Phase 6 — P2P Transfer',
     phaseColor: '#2563eb',
     role: 'kyc_verified',
@@ -309,7 +343,7 @@ const STEPS: DemoStep[] = [
     },
   },
   {
-    id: 17,
+    id: 19,
     phase: 'Phase 7 — Customer-to-Merchant Transfer',
     phaseColor: '#dc2626',
     role: 'kyc_verified',
@@ -327,7 +361,7 @@ const STEPS: DemoStep[] = [
     },
   },
   {
-    id: 19,
+    id: 20,
     phase: 'Phase 8 — Supervision',
     phaseColor: '#374151',
     role: 'bank_indonesia',
@@ -339,7 +373,7 @@ const STEPS: DemoStep[] = [
     thesis: 'Real-time monetary monitoring — supply verifiable by all 5 peer organizations.',
   },
   {
-    id: 20,
+    id: 21,
     phase: 'Phase 8 — Supervision',
     phaseColor: '#374151',
     role: 'bank_indonesia',
@@ -380,100 +414,73 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
   const nextStep = STEPS[currentIndex + 1]
 
   return (
-    <div style={{
-      width: 320,
-      flexShrink: 0,
-      background: '#fff',
-      borderLeft: '1px solid #e5e7eb',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      position: 'sticky',
-      top: 0,
-    }}>
+    <div className="demo-panel">
       {/* Header */}
-      <div style={{ background: '#111827', color: '#fff', padding: '14px 16px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', color: '#9ca3af' }}>DEMO SCRIPT</div>
-        <div style={{ fontSize: 16, fontWeight: 700, marginTop: 2 }}>Retail CBDC Flow</div>
-        <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>
+      <div className="demo-header">
+        <div className="demo-kicker">Demo script</div>
+        <div className="demo-title">Retail CBDC flow</div>
+        <div className="demo-step-count">
           Step {currentIndex + 1} of {STEPS.length}
         </div>
         {/* progress bar */}
-        <div style={{ marginTop: 8, background: '#374151', borderRadius: 4, height: 5 }}>
-          <div style={{
-            height: 5, borderRadius: 4, background: '#3b82f6',
-            width: `${((currentIndex + 1) / STEPS.length) * 100}%`,
-            transition: 'width 0.3s ease',
-          }} />
+        <div className="demo-progress">
+          <div className="demo-progress-bar" style={{ width: `${((currentIndex + 1) / STEPS.length) * 100}%` }} />
         </div>
       </div>
 
       {/* Current step callout */}
       {current && (
-        <div style={{ background: '#eff6ff', borderBottom: '1px solid #bfdbfe', padding: '12px 14px' }}>
-          <div style={{ fontSize: 11, color: '#1d4ed8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Required Login
+        <div className="demo-current-step">
+          <div className="demo-kicker">
+            Required sign-in
           </div>
-          <div style={{
-            display: 'inline-block', marginTop: 4, padding: '3px 12px', borderRadius: 10,
-            background: current.roleColor, color: '#fff', fontSize: 13, fontWeight: 700,
-          }}>
+          <div className="demo-role-pill">
             {current.roleLabel}
           </div>
 
-          <div className="muted" style={{ marginTop: 8 }}>Login dengan kredensial yang diberikan oleh operator environment.</div>
+          <div className="muted demo-login-hint">Use credentials provided by the environment operator.</div>
 
-          <div style={{ fontSize: 14, fontWeight: 600, marginTop: 8, color: '#111827' }}>{current.title}</div>
-          <div style={{ fontSize: 13, color: '#374151', marginTop: 4, lineHeight: 1.5 }}>{current.description}</div>
+          <div className="demo-step-title">{current.title}</div>
+          <div className="demo-step-description">{current.description}</div>
           {current.thesis && (
-            <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6, fontStyle: 'italic', lineHeight: 1.4 }}>
+            <div className="demo-thesis">
               Thesis: {current.thesis}
             </div>
           )}
           {current.manualAction && (
-            <div style={{ marginTop: 8, padding: '7px 10px', background: '#fef9c3', border: '1px solid #fde047', borderRadius: 4, fontSize: 13, color: '#713f12', lineHeight: 1.4 }}>
-              ✋ {current.manualAction}
+            <div className="demo-manual-action">
+              {current.manualAction}
             </div>
           )}
           {current.prefill && (
             <button
+              className="primary-button demo-prefill-button"
               onClick={() => onPrefill(current.prefill!)}
-              style={{
-                marginTop: 10, width: '100%', padding: '8px 0', fontSize: 14, fontWeight: 700,
-                background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer',
-              }}
             >
-              Isi Data Demo
+              Prefill demo data
             </button>
           )}
         </div>
       )}
 
       {/* Steps list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+      <div className="demo-steps">
         {phases().map((group, groupIndex) => {
           const panelId = `demo-phase-panel-${groupIndex + 1}`
           const expanded = !collapsed[group.phase]
           return (
           <div key={group.phase}>
             <button
+              className="demo-phase-toggle"
               onClick={() => setCollapsed(c => ({ ...c, [group.phase]: !c[group.phase] }))}
               aria-controls={panelId}
               aria-expanded={expanded}
-              style={{
-                width: '100%', textAlign: 'left', padding: '7px 14px',
-                background: 'none', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 6,
-              }}
             >
-              <span style={{
-                display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
-                background: group.color, flexShrink: 0,
-              }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: group.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span className="demo-phase-dot" />
+              <span className="demo-phase-label">
                 {group.phase}
               </span>
-              <span style={{ marginLeft: 'auto', fontSize: 10, color: '#9ca3af' }}>
+              <span className="demo-phase-indicator">
                 {collapsed[group.phase] ? '▼' : '▲'}
               </span>
             </button>
@@ -485,36 +492,18 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
               return (
                 <button
                   key={step.id}
+                  className={`demo-step${isActive ? ' active' : ''}${isDone ? ' done' : ''}`}
                   onClick={() => onStep(step.id, step.role, step.tab)}
                   aria-current={isActive ? 'step' : undefined}
-                  style={{
-                    width: '100%', textAlign: 'left', padding: '9px 14px 9px 24px',
-                    background: isActive ? '#eff6ff' : 'none',
-                    border: 'none',
-                    borderLeft: isActive ? '3px solid #2563eb' : '3px solid transparent',
-                    cursor: 'pointer',
-                    display: 'flex', gap: 10, alignItems: 'flex-start',
-                  }}
                 >
-                  <span style={{
-                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700,
-                    background: isDone ? '#d1fae5' : isActive ? '#2563eb' : '#f3f4f6',
-                    color: isDone ? '#059669' : isActive ? '#fff' : '#9ca3af',
-                    marginTop: 1,
-                  }}>
+                  <span className="demo-step-number">
                     {isDone ? '✓' : step.id}
                   </span>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? '#1d4ed8' : isDone ? '#6b7280' : '#111827', lineHeight: 1.4 }}>
+                    <div className="demo-step-label">
                       {step.title}
                     </div>
-                    <span style={{
-                      display: 'inline-block', marginTop: 3, padding: '2px 7px', borderRadius: 8,
-                      background: step.roleColor + '22', color: step.roleColor,
-                      fontSize: 11, fontWeight: 600,
-                    }}>
+                    <span className="demo-step-role">
                       {step.roleLabel}
                     </span>
                   </div>
@@ -528,23 +517,19 @@ export default function DemoPanel({ currentStep, onStep, onPrefill }: Props) {
 
       {/* Next button */}
       {nextStep && (
-        <div style={{ padding: 14, borderTop: '1px solid #e5e7eb' }}>
+        <div className="demo-next">
           <button
+            className="primary-button"
             onClick={() => onStep(nextStep.id, nextStep.role, nextStep.tab)}
-            style={{
-              width: '100%', padding: '11px 0', fontSize: 14, fontWeight: 700,
-              background: '#111827', color: '#fff', border: 'none', borderRadius: 6,
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
           >
-            Langkah Berikut: {nextStep.title} →
+            Next step: {nextStep.title} →
           </button>
         </div>
       )}
       {!nextStep && currentIndex === STEPS.length - 1 && (
-        <div style={{ padding: 14, borderTop: '1px solid #e5e7eb', textAlign: 'center' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#059669' }}>Demo Selesai!</div>
-          <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>Semua fase telah didemonstrasikan.</div>
+        <div className="demo-complete">
+          <div>Demo complete</div>
+          <p>All phases are complete.</p>
         </div>
       )}
     </div>

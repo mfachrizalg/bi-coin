@@ -1,0 +1,41 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    container_name: bi-coin-fabric-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - bi_coin_fabric_prometheus:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=2d
+    depends_on:
+      - cadvisor
+      - node-exporter
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:v0.60.5
+    container_name: bi-coin-fabric-cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+
+  node-exporter:
+    image: prom/node-exporter:v1.12.1
+    container_name: bi-coin-fabric-node-exporter
+    pid: host
+    command:
+      - --path.rootfs=/host
+    volumes:
+      - /:/host:ro,rslave
+
+volumes:
+  bi_coin_fabric_prometheus:

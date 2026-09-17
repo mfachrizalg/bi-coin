@@ -1,0 +1,5 @@
+# Frontend experience boundaries
+
+The frontend remains one deployable React bundle with two role-selected experiences: an institutional shell for Bank Indonesia, Participants, and Supervisors, and a retail shell for Retail Customers and Merchants. Native hash routes make screens bookmarkable and preserve browser back/forward behavior without adding a routing dependency. Institutional navigation is organized by operational goal; retail payments share one Pay workspace for Wallet ID transfers, private Payment Contacts, and QRIS. The guided thesis demonstration uses real role handoffs and stores only non-secret progress in the browser session.
+
+This boundary keeps thesis-critical issuance, distribution, participant lifecycle, transfer, and supervision visible as primary work. KYC, QRIS, and world-state inspection remain demonstrable prototype capabilities and do not change backend or chaincode authorization. Payment Contacts are persisted in PostgreSQL and scoped to the authenticated username; they are shortcuts, not a public wallet directory or authorization mechanism.

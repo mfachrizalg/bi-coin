@@ -1,0 +1,268 @@
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/chaincode	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/config	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/handlers	(cached)
+?   	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/middleware	[no test files]
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/models	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/services	(cached)
+
+> bi-coin-fabric@1.0.0 test:benchmarks
+> node --test benchmark/workloads/*.test.js scripts/*.test.js
+
+TAP version 13
+# Subtest: retail onboarding workload benchmarks the full onboarding workflow with unique identities
+ok 1 - retail onboarding workload benchmarks the full onboarding workflow with unique identities
+  ---
+  duration_ms: 274.877616
+  type: 'test'
+  ...
+# Subtest: monetary operations workload burns distinct funded wallets
+ok 2 - monetary operations workload burns distinct funded wallets
+  ---
+  duration_ms: 1.812727
+  type: 'test'
+  ...
+# Subtest: supervision read workload uses read-only query functions only
+ok 3 - supervision read workload uses read-only query functions only
+  ---
+  duration_ms: 1.776147
+  type: 'test'
+  ...
+# Subtest: supervision history setup uses distinct STANDARD wallets
+ok 4 - supervision history setup uses distinct STANDARD wallets
+  ---
+  duration_ms: 0.979035
+  type: 'test'
+  ...
+# Subtest: admin policy workload writes unique auto-limit policy keys
+ok 5 - admin policy workload writes unique auto-limit policy keys
+  ---
+  duration_ms: 1.315036
+  type: 'test'
+  ...
+# Subtest: assertSuccessfulResponse accepts explicit Caliper success
+ok 6 - assertSuccessfulResponse accepts explicit Caliper success
+  ---
+  duration_ms: 1.802227
+  type: 'test'
+  ...
+# Subtest: assertSuccessfulResponse rejects returned setup failure
+ok 7 - assertSuccessfulResponse rejects returned setup failure
+  ---
+  duration_ms: 0.548071
+  type: 'test'
+  ...
+# Subtest: transaction helpers read Caliper method-based results
+ok 8 - transaction helpers read Caliper method-based results
+  ---
+  duration_ms: 0.633816
+  type: 'test'
+  ...
+# Subtest: transactionDiagnostic preserves structured Caliper error details
+ok 9 - transactionDiagnostic preserves structured Caliper error details
+  ---
+  duration_ms: 0.164446
+  type: 'test'
+  ...
+# Subtest: transactionDiagnostic includes Caliper error-message fields
+ok 10 - transactionDiagnostic includes Caliper error-message fields
+  ---
+  duration_ms: 0.189466
+  type: 'test'
+  ...
+# Subtest: transactionPayload decodes typed byte arrays returned by Caliper
+ok 11 - transactionPayload decodes typed byte arrays returned by Caliper
+  ---
+  duration_ms: 0.16947
+  type: 'test'
+  ...
+# Subtest: duration workload rotates a STANDARD-only transaction plan
+ok 12 - duration workload rotates a STANDARD-only transaction plan
+  ---
+  duration_ms: 0.679206
+  type: 'test'
+  ...
+# Subtest: measured transfer returns a failed Caliper result without terminating the round
+ok 13 - measured transfer returns a failed Caliper result without terminating the round
+  ---
+  duration_ms: 0.535818
+  type: 'test'
+  ...
+# Subtest: population setup completes wallets before serialized funding
+ok 14 - population setup completes wallets before serialized funding
+  ---
+  duration_ms: 14.06507
+  type: 'test'
+  ...
+# Subtest: benchmark setup seeds a shared custodian through Treasury distribution
+ok 15 - benchmark setup seeds a shared custodian through Treasury distribution
+  ---
+  duration_ms: 3.734994
+  type: 'test'
+  ...
+# Subtest: setup lock recovers a dead owner
+ok 16 - setup lock recovers a dead owner
+  ---
+  duration_ms: 101.63402
+  type: 'test'
+  ...
+# Subtest: measured traffic contains only customer-to-customer transfers
+ok 17 - measured traffic contains only customer-to-customer transfers
+  ---
+  duration_ms: 7.582636
+  type: 'test'
+  ...
+# Subtest: measured traffic rejects a population too small to avoid contention
+ok 18 - measured traffic rejects a population too small to avoid contention
+  ---
+  duration_ms: 1.160959
+  type: 'test'
+  ...
+# Subtest: measured traffic preserves distinct transfer pairs for small worker-scaling rounds
+ok 19 - measured traffic preserves distinct transfer pairs for small worker-scaling rounds
+  ---
+  duration_ms: 1.003823
+  type: 'test'
+  ...
+# Subtest: isolated workload maps each requested operation to its chaincode call
+ok 20 - isolated workload maps each requested operation to its chaincode call
+  ---
+  duration_ms: 2.972905
+  type: 'test'
+  ...
+# Subtest: retail transfer low contention creates disjoint sender and receiver pairs
+ok 21 - retail transfer low contention creates disjoint sender and receiver pairs
+  ---
+  duration_ms: 1.791329
+  type: 'test'
+  ...
+# Subtest: retail transfer high contention shares one sender and keeps receivers distinct
+ok 22 - retail transfer high contention shares one sender and keeps receivers distinct
+  ---
+  duration_ms: 0.858793
+  type: 'test'
+  ...
+# Subtest: merchant payment is a direct Transfer to a merchant wallet
+ok 23 - merchant payment is a direct Transfer to a merchant wallet
+  ---
+  duration_ms: 0.817332
+  type: 'test'
+  ...
+# Subtest: percentiles use Type-7 interpolation and standard deviations are explicit
+ok 24 - percentiles use Type-7 interpolation and standard deviations are explicit
+  ---
+  duration_ms: 4.052076
+  type: 'test'
+  ...
+# Subtest: failure classification prefers a specific KYC reason over EndorseError
+ok 25 - failure classification prefers a specific KYC reason over EndorseError
+  ---
+  duration_ms: 2.155822
+  type: 'test'
+  ...
+# Subtest: run summary splits failed and timed-out completions
+ok 26 - run summary splits failed and timed-out completions
+  ---
+  duration_ms: 3.414581
+  type: 'test'
+  ...
+# Subtest: run summary uses measured Caliper log status codes when trace diagnostics are empty
+ok 27 - run summary uses measured Caliper log status codes when trace diagnostics are empty
+  ---
+  duration_ms: 2.567013
+  type: 'test'
+  ...
+# Subtest: aggregate statistics keep pilot and calibration phases separate
+ok 28 - aggregate statistics keep pilot and calibration phases separate
+  ---
+  duration_ms: 1.27017
+  type: 'test'
+  ...
+# Subtest: Garuda lifecycle approval is sent only to the approving organization peer
+ok 29 - Garuda lifecycle approval is sent only to the approving organization peer
+  ---
+  duration_ms: 2.126993
+  type: 'test'
+  ...
+# Subtest: Garuda lifecycle commit collects endorsements from the validator peers
+ok 30 - Garuda lifecycle commit collects endorsements from the validator peers
+  ---
+  duration_ms: 0.33113
+  type: 'test'
+  ...
+# Subtest: accepts a custody rejection with no infrastructure failure
+ok 31 - accepts a custody rejection with no infrastructure failure
+  ---
+  duration_ms: 3.228041
+  type: 'test'
+  ...
+# Subtest: rejects endorsement failure as an invalid negative result
+ok 32 - rejects endorsement failure as an invalid negative result
+  ---
+  duration_ms: 1.093833
+  type: 'test'
+  ...
+# Subtest: accepts a passing boundary oracle
+ok 33 - accepts a passing boundary oracle
+  ---
+  duration_ms: 3.398724
+  type: 'test'
+  ...
+# Subtest: rejects infrastructure failures as boundary evidence
+    # Subtest: rejects an incomplete boundary oracle
+    ok 1 - rejects an incomplete boundary oracle
+      ---
+      duration_ms: 0.405335
+      type: 'test'
+      ...
+    1..1
+ok 34 - rejects infrastructure failures as boundary evidence
+  ---
+  duration_ms: 1.52637
+  type: 'test'
+  ...
+# Subtest: accepts a report with zero failed transactions
+ok 35 - accepts a report with zero failed transactions
+  ---
+  duration_ms: 3.554272
+  type: 'test'
+  ...
+# Subtest: rejects a failure-heavy report even when Caliper exited normally
+ok 36 - rejects a failure-heavy report even when Caliper exited normally
+  ---
+  duration_ms: 0.888018
+  type: 'test'
+  ...
+# Subtest: accepts one exact rejection for every negative-path rule
+ok 37 - accepts one exact rejection for every negative-path rule
+  ---
+  duration_ms: 4.030538
+  type: 'test'
+  ...
+# Subtest: rejects a generic endorsement failure without the expected reason
+ok 38 - rejects a generic endorsement failure without the expected reason
+  ---
+  duration_ms: 1.049004
+  type: 'test'
+  ...
+# Subtest: study artifact validation rejects unreconciled completion counts
+ok 39 - study artifact validation rejects unreconciled completion counts
+  ---
+  duration_ms: 3.487615
+  type: 'test'
+  ...
+# Subtest: study artifact validation accepts a compressed Prometheus trace
+ok 40 - study artifact validation accepts a compressed Prometheus trace
+  ---
+  duration_ms: 5.948973
+  type: 'test'
+  ...
+1..40
+# tests 41
+# suites 0
+# pass 41
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 546.766375

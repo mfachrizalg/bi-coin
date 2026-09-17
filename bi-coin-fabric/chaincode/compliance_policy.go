@@ -93,6 +93,44 @@ func applyRetailTransferPolicy(sender *Wallet, receiver *Wallet, amount int64, s
 	return nil
 }
 
+// applyWholesaleFundingPolicy settles a custodian reserve transfer into one of
+// its retail wallets. Wholesale wallets have no retail tier or KYC profile, so
+// only the receiver's retail limits apply after the system-wide amount check.
+func applyWholesaleFundingPolicy(sender *Wallet, receiver *Wallet, amount int64, receiverLimit TierLimit, now time.Time) error {
+	if amount <= 0 {
+		return fmt.Errorf("amount must be positive")
+	}
+	senderCopy := *sender
+	receiverCopy := *receiver
+	resetRetailCounters(&receiverCopy, now)
+	if senderCopy.Balance < amount {
+		return fmt.Errorf("insufficient wholesale balance: have %d, need %d", senderCopy.Balance, amount)
+	}
+	newReceiverBalance, err := checkedAddInt64(receiverCopy.Balance, amount)
+	if err != nil {
+		return err
+	}
+	if newReceiverBalance > receiverLimit.MaxBalance {
+		return fmt.Errorf("transfer would exceed receiver max balance %d for tier %s", receiverLimit.MaxBalance, receiver.Tier)
+	}
+	newMonthlyReceived, err := checkedAddInt64(receiverCopy.MonthlyReceived, amount)
+	if err != nil {
+		return err
+	}
+	if newMonthlyReceived > receiverLimit.MonthlyIncomingLimit {
+		return fmt.Errorf("monthly incoming limit exceeded: %d for tier %s", receiverLimit.MonthlyIncomingLimit, receiver.Tier)
+	}
+	senderCopy.Balance, err = checkedSubInt64(senderCopy.Balance, amount)
+	if err != nil {
+		return err
+	}
+	receiverCopy.Balance = newReceiverBalance
+	receiverCopy.MonthlyReceived = newMonthlyReceived
+	*sender = senderCopy
+	*receiver = receiverCopy
+	return nil
+}
+
 func resetRetailCounters(wallet *Wallet, now time.Time) {
 	day := now.Format("2006-01-02")
 	month := now.Format("2006-01")

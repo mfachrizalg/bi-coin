@@ -36,7 +36,8 @@ class CustodyAuthorizationWorkload extends RetailWorkloadBase {
         await this.submit('SubmitKycProfile', [`kyc_${this.receiver}`, 'retail_customer', this.receiver, hashes], false, 'bi');
         await this.submit('RefreshKycProfile', [`kyc_${this.receiver}`, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z'], false, 'bi');
         await this.submit('CreateWallet', [this.receiverWallet, this.receiver, 'STANDARD'], false, 'bi');
-        await this.submit('Mint', [this.senderWallet, '100000'], false, 'bi');
+        await this.submit('RequestIssuance', ['100000'], false, 'bi');
+        await this.submit('Transfer', ['bi_treasury', this.senderWallet, '100000'], false, 'bi');
     }
 
     async submitTransaction() {

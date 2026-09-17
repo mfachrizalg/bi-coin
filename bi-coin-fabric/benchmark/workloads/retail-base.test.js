@@ -1,9 +1,13 @@
 'use strict';
 
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
     assertSuccessfulResponse,
+    RetailWorkloadBase,
     transactionDiagnostic,
     transactionPayload,
     transactionStatus,
@@ -29,6 +33,16 @@ test('transaction helpers read Caliper method-based results', () => {
     assert.equal(transactionStatus(tx), 'failed');
     assert.match(transactionDiagnostic(tx), /MVCC_READ_CONFLICT/);
     assert.equal(transactionPayload(tx), 'MVCC_READ_CONFLICT');
+});
+
+test('transactionDiagnostic preserves structured Caliper error details', () => {
+    const tx = { GetStatus: () => 'failed', GetResult: () => ({ message: 'insufficient balance' }) };
+    assert.match(transactionDiagnostic(tx), /insufficient balance/);
+});
+
+test('transactionDiagnostic includes Caliper error-message fields', () => {
+    const tx = { GetStatus: () => 'failed', GetErrMsg: () => ['per-transaction limit exceeded'] };
+    assert.match(transactionDiagnostic(tx), /per-transaction limit exceeded/);
 });
 
 test('transactionPayload decodes typed byte arrays returned by Caliper', () => {
@@ -73,15 +87,16 @@ test('measured transfer returns a failed Caliper result without terminating the 
 
 test('population setup completes wallets before serialized funding', async () => {
     const calls = [];
-    const active = { setup: 0, mint: 0 };
-    const maximum = { setup: 0, mint: 0 };
+    const active = { setup: 0, funding: 0 };
+    const maximum = { setup: 0, funding: 0 };
     const workload = new RetailTransferWorkload();
     workload.workerIndex = 0;
     workload.totalWorkers = 1;
     workload.roundIndex = 0;
+    workload.custodianWalletId = 'wlt_test_custodian';
     workload.submit = async (fn, args) => {
         calls.push({ fn, wallet: args[0] });
-        const phase = fn === 'Mint' ? 'mint' : 'setup';
+        const phase = fn === 'Transfer' ? 'funding' : 'setup';
         active[phase] += 1;
         maximum[phase] = Math.max(maximum[phase], active[phase]);
         await new Promise(resolve => setImmediate(resolve));
@@ -96,12 +111,69 @@ test('population setup completes wallets before serialized funding', async () =>
         fundStandard: 5000000,
         fundBasic: 500000,
         seed: true,
+        custodianSetup: false,
     });
 
-    const firstMint = calls.findIndex(call => call.fn === 'Mint');
-    assert.ok(firstMint > 0);
-    assert.ok(calls.slice(0, firstMint).every(call => call.fn !== 'Mint'));
+    const firstFunding = calls.findIndex(call => call.fn === 'Transfer');
+    assert.ok(firstFunding > 0);
+    assert.ok(calls.slice(0, firstFunding).every(call => call.fn !== 'Transfer'));
     assert.ok(maximum.setup > 1);
-    assert.equal(maximum.mint, 1);
-    assert.equal(calls.filter(call => call.fn === 'Mint').length, 2);
+    assert.equal(maximum.funding, 1);
+    assert.equal(calls.filter(call => call.fn === 'Transfer').length, 2);
+    assert.ok(calls.filter(call => call.fn === 'Transfer').every(call => call.wallet === 'wlt_test_custodian'));
+});
+
+test('benchmark setup seeds a shared custodian through Treasury distribution', async () => {
+    const calls = [];
+    const workload = new RetailTransferWorkload();
+    workload.workerIndex = 0;
+    workload.totalWorkers = 1;
+    workload.roundIndex = 0;
+    workload.roundArguments = { scenario: 'custodian-test', custodianFunding: 1000 };
+    workload.sutAdapter = {
+        sendRequests: async request => {
+            calls.push(request);
+            if (request.contractFunction === 'GetParticipant') return [{ status: 'failed', error: 'not found' }];
+            if (request.contractFunction === 'GetWallet') return [{ status: 'success', result: JSON.stringify({ balance: 0 }) }];
+            return [{ status: 'success' }];
+        },
+    };
+
+    await workload.ensureBenchmarkCustodian();
+
+    assert.deepEqual(calls.map(call => call.contractFunction), [
+        'GetParticipant',
+        'SubmitParticipant',
+        'ApproveParticipant',
+        'GetWallet',
+        'GetWallet',
+        'RequestIssuance',
+        'DistributeToParticipant',
+    ]);
+    assert.equal(calls[1].invokerMspId, 'HimbaraBankOrgMSP');
+    assert.equal(calls[5].invokerMspId, 'BankIndonesiaOrgMSP');
+    assert.equal(calls[6].contractArguments[1], '1000');
+});
+
+test('setup lock recovers a dead owner', async () => {
+    const stamp = `lock-recovery-${process.pid}`;
+    const lockPath = path.join(os.tmpdir(), `bi-coin-${stamp}-retail-funding.lock`);
+    const ownerPath = path.join(lockPath, 'owner');
+    const previousStamp = process.env.BENCHMARK_STAMP;
+    process.env.BENCHMARK_STAMP = stamp;
+    fs.mkdirSync(lockPath);
+    fs.writeFileSync(ownerPath, '99999999');
+
+    try {
+        let executed = false;
+        await new RetailWorkloadBase().withSetupLock('retail-funding', async () => {
+            executed = true;
+        });
+        assert.equal(executed, true);
+        assert.equal(fs.existsSync(lockPath), false);
+    } finally {
+        fs.rmSync(lockPath, { recursive: true, force: true });
+        if (previousStamp === undefined) delete process.env.BENCHMARK_STAMP;
+        else process.env.BENCHMARK_STAMP = previousStamp;
+    }
 });

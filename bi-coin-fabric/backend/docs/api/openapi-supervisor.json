@@ -1682,19 +1682,24 @@
             "type": "string"
           },
           "balance": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
           },
           "frozen": {
             "type": "boolean"
           },
           "daily_spent": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "monthly_spent": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "monthly_received": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "created_at": {
             "type": "string"
@@ -1732,7 +1737,9 @@
             "type": "string"
           },
           "amount": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
           }
         }
       },
@@ -1863,7 +1870,8 @@
             "type": "string"
           },
           "amount": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "status": {
             "$ref": "#/components/schemas/QrisStatus"
@@ -1930,20 +1938,17 @@
       "DistributeRequestBody": {
         "type": "object",
         "required": [
-          "sender_participant_id",
           "receiver_participant_id",
           "amount"
         ],
         "properties": {
-          "sender_participant_id": {
-            "type": "string"
-          },
           "receiver_participant_id": {
             "type": "string"
           },
           "amount": {
-            "type": "integer",
-            "minimum": 1
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "minLength": 1
           }
         }
       },
@@ -1989,7 +1994,8 @@
             "type": "string"
           },
           "amount": {
-            "type": "integer"
+            "type": "string",
+            "pattern": "^[0-9]+$"
           },
           "participant_id": {
             "type": "string"
@@ -2000,6 +2006,88 @@
           "tx_id": {
             "type": "string"
           }
+        }
+      },
+      "IssuanceRequestBody": {
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string credited to Treasury."
+          }
+        }
+      },
+      "PaymentContactType": {
+        "type": "string",
+        "enum": [
+          "retail_customer",
+          "merchant"
+        ]
+      },
+      "PaymentContactRequestBody": {
+        "type": "object",
+        "required": [
+          "label",
+          "wallet_id",
+          "recipient_type"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "wallet_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "recipient_type": {
+            "$ref": "#/components/schemas/PaymentContactType"
+          }
+        }
+      },
+      "PaymentContact": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "wallet_id",
+          "recipient_type",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "wallet_id": {
+            "type": "string"
+          },
+          "recipient_type": {
+            "$ref": "#/components/schemas/PaymentContactType"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PaymentContactList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PaymentContact"
         }
       }
     }

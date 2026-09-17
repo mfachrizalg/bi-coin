@@ -21,12 +21,23 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
   NETWORK_DIR="$PROJECT_DIR/network"
   export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
 
+  if CORE_PEER_TLS_ENABLED=true \
+      CORE_PEER_LOCALMSPID=BankIndonesiaOrgMSP \
+      CORE_PEER_ADDRESS=localhost:7051 \
+      CORE_PEER_TLS_ROOTCERT_FILE="$NETWORK_DIR/organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls/ca.crt" \
+      CORE_PEER_MSPCONFIGPATH="$NETWORK_DIR/organizations/peerOrganizations/bi.paynet/users/Admin@bi.paynet/msp" \
+      peer lifecycle chaincode querycommitted -C "$CHANNEL_NAME" -n "$CHAINCODE_NAME" 2>/dev/null \
+      | grep -q "Version: $CHAINCODE_VERSION, Sequence: $CHAINCODE_SEQUENCE,"; then
+    echo "Chaincode already committed: $CHAINCODE_NAME version $CHAINCODE_VERSION sequence $CHAINCODE_SEQUENCE"
+    exit 0
+  fi
+
   peer lifecycle chaincode package "${CHAINCODE_NAME}.tar.gz" \
     --path "$CHAINCODE_DIR" \
     --lang golang \
     --label "${CHAINCODE_NAME}_${CHAINCODE_VERSION}"
 
-  echo "Installing chaincode on all 5 org peers..."
+  echo "Installing chaincode on all peers (OJK install is query-only)..."
 
   for org in bi himbara commercial ojk pjp; do
     case "$org" in
@@ -43,17 +54,22 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
     export CORE_PEER_MSPCONFIGPATH="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp"
     export CORE_PEER_ADDRESS="localhost:$PORT"
 
-    # Idempotent: a re-run on an already-installed peer must not abort the script.
-    peer lifecycle chaincode install "${CHAINCODE_NAME}.tar.gz" 2>&1 | grep -v "already successfully installed" || true
+    # Idempotent: only the exact already-installed response is tolerated.
+    install_output="$(peer lifecycle chaincode install "${CHAINCODE_NAME}.tar.gz" 2>&1)" || {
+      if ! grep -q "already successfully installed" <<<"$install_output"; then
+        printf '%s\n' "$install_output" >&2
+        exit 1
+      fi
+    }
   done
 
   PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "${CHAINCODE_NAME}_${CHAINCODE_VERSION}" | awk '{print $3}' | sed 's/,//')
   echo "Package ID: $PACKAGE_ID"
 
-  echo "Approving chaincode for all 5 orgs..."
+  echo "Approving chaincode for all validator/PJP orgs..."
   TLS_CA="$NETWORK_DIR/organizations/ordererOrganizations/paynet/orderers/orderer.paynet/msp/tlscacerts/tlsca.paynet-cert.pem"
 
-  for org in bi himbara commercial ojk pjp; do
+  for org in bi himbara commercial pjp; do
     case "$org" in
       bi)         MSPID=BankIndonesiaOrgMSP; PORT=7051;  ORG_DOMAIN=bi.paynet ;;
       himbara)    MSPID=HimbaraBankOrgMSP;   PORT=9051;  ORG_DOMAIN=himbara.paynet ;;
@@ -67,15 +83,32 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
     export CORE_PEER_MSPCONFIGPATH="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp"
     export CORE_PEER_ADDRESS="localhost:$PORT"
 
-    peer lifecycle chaincode approveformyorg \
-      -o localhost:7050 \
-      --ordererTLSHostnameOverride orderer.paynet \
-      --channelID "$CHANNEL_NAME" \
-      --name "$CHAINCODE_NAME" \
-      --version "$CHAINCODE_VERSION" \
-      --package-id "$PACKAGE_ID" \
-      --sequence "$CHAINCODE_SEQUENCE" \
-      --tls --cafile "$TLS_CA"
+    approval_state="$(peer lifecycle chaincode queryapproved \
+      -C "$CHANNEL_NAME" \
+      -n "$CHAINCODE_NAME" \
+      --output json 2>/dev/null || true)"
+    if [[ "$approval_state" =~ \"sequence\"[[:space:]]*:[[:space:]]*$CHAINCODE_SEQUENCE ]] \
+      && [[ "$approval_state" =~ \"version\"[[:space:]]*:[[:space:]]*\"$CHAINCODE_VERSION\" ]] \
+      && grep -Fq "\"package_id\": \"$PACKAGE_ID\"" <<<"$approval_state"; then
+      echo "  $org approval already matches $CHAINCODE_NAME $CHAINCODE_VERSION sequence $CHAINCODE_SEQUENCE"
+    else
+      if [ -n "$approval_state" ]; then
+        echo "  $org has a mismatched uncommitted approval" >&2
+        printf '%s\n' "$approval_state" >&2
+        exit 1
+      fi
+      peer lifecycle chaincode approveformyorg \
+        -o localhost:7050 \
+        --ordererTLSHostnameOverride orderer.paynet \
+        --channelID "$CHANNEL_NAME" \
+        --name "$CHAINCODE_NAME" \
+        --version "$CHAINCODE_VERSION" \
+        --package-id "$PACKAGE_ID" \
+        --sequence "$CHAINCODE_SEQUENCE" \
+        --tls --cafile "$TLS_CA" \
+        --peerAddresses "localhost:$PORT" \
+        --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/peers/peer0.$ORG_DOMAIN/tls/ca.crt"
+    fi
   done
 
   echo "Committing chaincode..."
@@ -87,12 +120,16 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
     --version "$CHAINCODE_VERSION" \
     --sequence "$CHAINCODE_SEQUENCE" \
     --tls --cafile "$TLS_CA" \
-    --peerAddresses localhost:7051  --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls/ca.crt" \
-    --peerAddresses localhost:9051  --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls/ca.crt" \
-    --peerAddresses localhost:11051 --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls/ca.crt" \
-    --peerAddresses localhost:13051 --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/tls/ca.crt"
+    --peerAddresses localhost:7051 \
+    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls/ca.crt" \
+    --peerAddresses localhost:9051 \
+    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls/ca.crt" \
+    --peerAddresses localhost:11051 \
+    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls/ca.crt" \
+    --peerAddresses localhost:13051 \
+    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/tls/ca.crt"
 
-  echo "Chaincode deployed successfully on Garuda network (4 validators + 1 observer + 1 PJP)."
+  echo "Chaincode deployed successfully on Garuda network (BI + 2 validator banks + 1 observer + 1 PJP)."
 else
   cd "$TEST_NETWORK"
   export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"

@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react'
-import { getTotalSupply } from '../lib/api'
+import { getErrorMessage, getTotalSupply } from '../lib/api'
+import { formatRupiah } from '../lib/money'
+import LoadingSkeleton from '../components/LoadingSkeleton'
 
 export default function Supply() {
-  const [supply, setSupply] = useState(0)
+  const [supply, setSupply] = useState('0')
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    getTotalSupply().then(s => setSupply(s.totalSupply)).catch(e => setError(e.message))
+    getTotalSupply().then(s => setSupply(s.totalSupply)).catch(e => setError(getErrorMessage(e))).finally(() => setLoading(false))
   }, [])
 
   return (
-    <div>
-      <h2 style={{ marginBottom: 20, fontSize: '1.4rem' }}>Total Digital Rupiah Beredar</h2>
+    <div className="workspace-stack supply-page">
+      <h2>Circulating Digital Rupiah</h2>
       {error && (
-        <div style={{ padding: '10px 14px', marginBottom: 16, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#dc2626', fontSize: '1rem' }}>
+        <div className="banner error" role="alert">
           {error}
         </div>
       )}
-      <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#2563eb', fontVariantNumeric: 'tabular-nums' }}>
-        Rp {supply.toLocaleString('id-ID')}
-      </div>
-      <div style={{ marginTop: 8, fontSize: '1rem', color: '#6b7280' }}>
-        Saldo total di seluruh jaringan (5 peer orgs)
-      </div>
+      {loading ? <LoadingSkeleton kind="form" label="Loading circulating supply" rows={1} /> : <>
+        <div className="supply-value">{formatRupiah(supply)}</div>
+        <div className="field-help">Total balance across five peer organizations.</div>
+      </>}
     </div>
   )
 }

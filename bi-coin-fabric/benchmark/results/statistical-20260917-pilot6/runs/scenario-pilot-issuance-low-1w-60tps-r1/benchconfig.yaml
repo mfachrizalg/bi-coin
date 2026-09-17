@@ -1,0 +1,76 @@
+test:
+  name: Digital Rupiah Statistical Study - issuance - low
+  description: Isolated fixed-rate workload with explicit transaction and contention semantics
+  workers:
+    type: local
+    number: 1
+  rounds:
+    - label: warmup-issuance-low-60tps
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 5
+      workload:
+        module: benchmark/workloads/transaction-types.js
+        arguments:
+          operation: issuance
+          contention: low
+          scenario: issuance-low
+          transactionSlots: 50
+          operationAmount: 1000
+          fundStandard: 20000000
+          fundReceiverStandard: 1000000
+          maxTransferAmount: 50000
+          seed: 20260725
+    - label: issuance-low-60tps
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/transaction-types.js
+        arguments:
+          operation: issuance
+          contention: low
+          scenario: issuance-low
+          transactionSlots: 50
+          operationAmount: 1000
+          fundStandard: 20000000
+          fundReceiverStandard: 1000000
+          maxTransferAmount: 50000
+          seed: 20260725
+
+observer:
+  type: local
+  interval: 1
+
+monitors:
+  transaction:
+    - module: ./benchmark/observers/jsonl-transaction-observer.js
+      options: {}
+  resource:
+    - module: docker
+      options:
+        interval: 1
+        cpuUsageNormalization: true
+        containers:
+          - /peer0.bi.paynet
+          - /peer0.himbara.paynet
+          - /peer0.commercial.paynet
+          - /peer0.pjp.paynet
+          - /peer0.ojk.paynet
+          - /couchdb0.bi.paynet
+          - /couchdb0.himbara.paynet
+          - /couchdb0.commercial.paynet
+          - /couchdb0.pjp.paynet
+          - /couchdb0.ojk.paynet
+          - /orderer.paynet
+    - module: process
+      options:
+        interval: 1
+        processes:
+          - command: node
+            arguments: caliper
+            multiOutput: sum

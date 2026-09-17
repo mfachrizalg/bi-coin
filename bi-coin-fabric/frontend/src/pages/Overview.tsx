@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getMetrics, getWallets, type MetricsReport, type Wallet } from '../lib/api'
-
-const fmt = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
+import { getErrorMessage, getMetrics, getWallets, type MetricsReport, type Wallet } from '../lib/api'
+import { formatRupiah, sumRupiah } from '../lib/money'
+import LoadingSkeleton from '../components/LoadingSkeleton'
 
 interface Props {
   role: string
@@ -13,89 +13,84 @@ const METRIC_ROLES = new Set(['bank_indonesia', 'supervisor'])
 export default function Overview({ role, selectedWallet }: Props) {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [metrics, setMetrics] = useState<MetricsReport | null>(null)
+  const [walletsLoading, setWalletsLoading] = useState(true)
+  const [metricsLoading, setMetricsLoading] = useState(METRIC_ROLES.has(role))
   const [error, setError] = useState('')
 
   useEffect(() => {
-    getWallets().then(data => setWallets(data ?? [])).catch(e => setError(e.message))
-    if (METRIC_ROLES.has(role)) {
-      getMetrics().then(setMetrics).catch(e => setError(prev => prev || e.message))
+    setWalletsLoading(true)
+    getWallets()
+      .then(data => setWallets(data ?? []))
+      .catch(e => setError(getErrorMessage(e)))
+      .finally(() => setWalletsLoading(false))
+
+    const needsMetrics = METRIC_ROLES.has(role)
+    setMetricsLoading(needsMetrics)
+    if (needsMetrics) {
+      getMetrics()
+        .then(setMetrics)
+        .catch(e => setError(prev => prev || getErrorMessage(e)))
+        .finally(() => setMetricsLoading(false))
+    } else {
+      setMetrics(null)
     }
   }, [role])
 
-  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0)
+  const totalBalance = sumRupiah(wallets.map(wallet => wallet.balance))
   const frozenWallets = wallets.filter(wallet => wallet.frozen).length
   const currentWallet = wallets.find(wallet => wallet.wallet_id === selectedWallet)
 
   return (
     <div className="workspace-stack">
-      <section className="hero-panel">
-        <div>
-          <div className="eyebrow">Desktop Cockpit</div>
-          <h1>Operasi retail CBDC, QRIS, dan observabilitas dalam satu workspace.</h1>
-          <p>
-            Gunakan panel kiri untuk berpindah alur kerja. Pilih dompet dari workspace dompet untuk
-            mengisi konteks transfer, audit, dan QRIS customer-pay.
-          </p>
-        </div>
-        <div className="hero-meta">
-          <div className="hero-chip">{role.replace(/_/g, ' ')}</div>
-          {currentWallet && (
-            <div className="hero-context">
-              <span>Dompet aktif</span>
-              <strong>{currentWallet.wallet_id}</strong>
-              <span>{fmt(currentWallet.balance)}</span>
-            </div>
-          )}
-        </div>
-      </section>
+      {(walletsLoading || metricsLoading) ? <LoadingSkeleton kind="metrics" label="Loading overview" /> : (
+        <section className="metric-grid">
+          <article className="metric-card">
+            <span className="metric-label">Visible wallets</span>
+            <strong>{wallets.length}</strong>
+            <small>Total balance {formatRupiah(totalBalance)}</small>
+          </article>
+          <article className="metric-card">
+            <span className="metric-label">Frozen wallets</span>
+            <strong>{frozenWallets}</strong>
+            <small>Requires operator attention</small>
+          </article>
+          <article className="metric-card">
+            <span className="metric-label">Settled transfers</span>
+            <strong>{metrics?.total_transfers ?? '—'}</strong>
+            <small>{metrics ? `Snapshot ${metrics.generated_at}` : 'Restricted to Bank Indonesia and Supervisor'}</small>
+          </article>
+          <article className="metric-card">
+            <span className="metric-label">Circulating supply</span>
+            <strong>{metrics ? formatRupiah(metrics.total_supply) : '—'}</strong>
+            <small>{metrics ? `${metrics.active_wallets} active wallets` : 'Restricted to Bank Indonesia and Supervisor'}</small>
+          </article>
+        </section>
+      )}
 
-      <section className="metric-grid">
-        <article className="metric-card">
-          <span className="metric-label">Dompet terlihat</span>
-          <strong>{wallets.length}</strong>
-          <small>Total saldo {fmt(totalBalance)}</small>
-        </article>
-        <article className="metric-card">
-          <span className="metric-label">Dompet beku</span>
-          <strong>{frozenWallets}</strong>
-          <small>Perlu perhatian operator</small>
-        </article>
-        <article className="metric-card">
-          <span className="metric-label">Transfer tersettle</span>
-          <strong>{metrics?.total_transfers ?? '—'}</strong>
-          <small>{metrics ? `Snapshot ${metrics.generated_at}` : 'Butuh peran pengawasan'}</small>
-        </article>
-        <article className="metric-card">
-          <span className="metric-label">Supply beredar</span>
-          <strong>{metrics ? fmt(metrics.total_supply) : '—'}</strong>
-          <small>{metrics ? `${metrics.active_wallets} dompet aktif` : 'Tersedia untuk BI/Supervisor'}</small>
-        </article>
-      </section>
-
-      {error && <div className="banner error">{error}</div>}
+      {error && <div className="banner error" role="alert">{error}</div>}
 
       <section className="panel-grid">
         <article className="surface-card">
-          <h3>Alur kerja utama</h3>
-          <ul className="plain-list">
-            <li>`Participants & Liquidity`: onboarding, approval, freeze/unfreeze, distribusi, issuance.</li>
-            <li>`Retail KYC & Wallets`: anchor KYC off-chain, approval, lalu create wallet.</li>
-            <li>`Payments & QRIS`: transfer biasa atau merchant collect / customer pay QRIS.</li>
-            <li>`Observability`: topologi, limits, dan transaksi terbaru berbasis backend.</li>
-          </ul>
+          <h3>Selected wallet</h3>
+          {currentWallet ? (
+            <div className="stack-small">
+              <div className="context-row"><span>Wallet ID</span><strong className="mono">{currentWallet.wallet_id}</strong></div>
+              <div className="context-row"><span>Balance</span><strong>{formatRupiah(currentWallet.balance)}</strong></div>
+            </div>
+          ) : <p className="muted">Select a wallet to use it in payment and audit workflows.</p>}
         </article>
         <article className="surface-card">
-          <h3>Konteks aktif</h3>
+          <h3>Wallet details</h3>
           {currentWallet ? (
             <div className="stack-small">
               <div className="context-row"><span>Wallet ID</span><strong>{currentWallet.wallet_id}</strong></div>
               <div className="context-row"><span>Owner</span><strong>{currentWallet.owner_id || currentWallet.participant_id}</strong></div>
               <div className="context-row"><span>Custodian</span><strong>{currentWallet.participant_id}</strong></div>
-              <div className="context-row"><span>Tipe</span><strong>{currentWallet.wallet_type}</strong></div>
+              <div className="context-row"><span>Type</span><strong>{currentWallet.wallet_type}</strong></div>
               <div className="context-row"><span>Tier</span><strong>{currentWallet.tier}</strong></div>
             </div>
           ) : (
-            <p className="muted">Belum ada dompet dipilih. Klik baris pada workspace Dompet untuk mengikat konteks ke transfer, audit, dan QRIS.</p>
+            <p className="muted">Wallet details appear after you select a wallet.</p>
           )}
         </article>
       </section>

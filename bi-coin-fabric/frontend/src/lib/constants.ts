@@ -7,13 +7,7 @@ export const ParticipantType = {
 export type ParticipantTypeValue = (typeof ParticipantType)[keyof typeof ParticipantType]
 
 export const ParticipantTypeLabel: Record<string, string> = {
-  validator: 'Bank / Validator',
+  validator: 'Validator Bank',
   observer: 'Observer',
-  pjp: 'PJP (Payment Service Provider)',
-}
-
-export const ParticipantTypeColor: Record<string, string> = {
-  validator: '#16a34a',
-  observer: '#6b7280',
-  pjp: '#2563eb',
+  pjp: 'PJP',
 }

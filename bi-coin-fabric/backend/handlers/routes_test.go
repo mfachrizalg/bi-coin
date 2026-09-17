@@ -50,6 +50,8 @@ func TestCurrentRetailRoutesAreRegistered(t *testing.T) {
 		{http.MethodPost, "/kyc/profiles/kyc_budi/refresh", middleware.RoleBankPjp},
 		{http.MethodPost, "/transfers", middleware.RoleKycVerified},
 		{http.MethodPost, "/transfers", middleware.RoleMerchant},
+		{http.MethodPost, "/transfers", middleware.RoleValidatorBank},
+		{http.MethodPost, "/transfers", middleware.RolePJP},
 		{http.MethodPost, "/qris/resolve", middleware.RoleKycVerified},
 		{http.MethodPost, "/qris/pay", middleware.RoleKycVerified},
 		{http.MethodPost, "/qris/intents", middleware.RoleMerchant},
@@ -89,7 +91,7 @@ func TestDocsRoleTaglinesUseCurrentScope(t *testing.T) {
 	}
 }
 
-func TestRetailKycMutationIsRestrictedToBankPjp(t *testing.T) {
+func TestRetailKycMutationIsRestrictedToCustodianRoles(t *testing.T) {
 	router := mux.NewRouter()
 	New(nil, nil).RegisterRoutes(router)
 
@@ -100,6 +102,20 @@ func TestRetailKycMutationIsRestrictedToBankPjp(t *testing.T) {
 		router.ServeHTTP(response, req)
 		if response.Code != http.StatusForbidden {
 			t.Fatalf("role %s got %d, want 403", role, response.Code)
+		}
+	}
+}
+
+func TestExplicitCustodianRolesCanReachKycValidation(t *testing.T) {
+	router := mux.NewRouter()
+	New(nil, nil).RegisterRoutes(router)
+	for _, role := range []middleware.Role{middleware.RoleValidatorBank, middleware.RolePJP} {
+		req := httptest.NewRequest(http.MethodPost, "/kyc/profiles", strings.NewReader("not-json"))
+		req = requestWithRole(req, role)
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, req)
+		if response.Code != http.StatusUnprocessableEntity {
+			t.Fatalf("role %s got %d, want request validation 422", role, response.Code)
 		}
 	}
 }

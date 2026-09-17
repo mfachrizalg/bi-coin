@@ -1,0 +1,428 @@
+{
+  "schemaVersion": 2,
+  "startedAt": "2026-09-08T13:48:13Z",
+  "completedAt": "2026-09-08T14:43:14.933Z",
+  "seed": 20260725,
+  "revision": {
+    "commit": null,
+    "dirty": false,
+    "changedPaths": []
+  },
+  "runtime": {
+    "node": "v22.23.2",
+    "npm": "10.9.1",
+    "docker": "Docker version 27.5.1, build 9f9e405",
+    "caliper": "0.6.0",
+    "caliperRequested": "^0.6.0"
+  },
+  "preconditions": {
+    "cleanLedger": true,
+    "networkMode": "garuda",
+    "chaincode": {
+      "name": "digital-rupiah",
+      "version": "3.0",
+      "sequence": 1
+    }
+  },
+  "profiles": [
+    {
+      "profile": "transfer-w2",
+      "script": "benchmark:transfer:w2",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "MEASURED_WITH_FAILURES",
+      "note": "caliper-report-failures"
+    },
+    {
+      "profile": "transfer-w4",
+      "script": "benchmark:transfer:w4",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "FAIL",
+      "note": "caliper-failed-round"
+    },
+    {
+      "profile": "transfer-w1",
+      "script": "benchmark:transfer:w1",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "MEASURED_WITH_FAILURES",
+      "note": "caliper-report-failures"
+    },
+    {
+      "profile": "functionality",
+      "script": "benchmark:functionality",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "FAIL",
+      "note": "caliper-failed-round"
+    },
+    {
+      "profile": "boundary-path",
+      "script": "benchmark:boundary",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "FAIL",
+      "note": "boundary-oracle-failed"
+    },
+    {
+      "profile": "authorization",
+      "script": "benchmark:authorization",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "PASS",
+      "note": "custody-oracle-confirmed"
+    },
+    {
+      "profile": "transfer-repeat",
+      "script": "benchmark:transfer:repeat",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "MEASURED_WITH_FAILURES",
+      "note": "caliper-report-failures"
+    },
+    {
+      "profile": "negative-path",
+      "script": "benchmark:negative",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "PASS",
+      "note": "expected-rejections-confirmed"
+    },
+    {
+      "profile": "aggregate-overspend",
+      "script": "benchmark:adversarial",
+      "exit_status": "0",
+      "report": "present",
+      "verdict": "PASS",
+      "note": "nonnegative-balance-and-rejection-confirmed"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "benchmark/results/20260908-fix-01-aggregate-overspend-deploy-chaincode.log",
+      "sha256": "3db611e3da9acb67656e4cd6c4d73b3c07d5964e0c73801ddfd651a875226a14"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-aggregate-overspend-init-ledger.log",
+      "sha256": "3a61a7596352ece18b30b8feaaf3bf322b7ca314f73b7ac32ea5666ae12ccd62"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-aggregate-overspend-network-up.log",
+      "sha256": "dc11e435386b02238e454ae2135a2108a7a70f52ff99d9b865c280ecdb1901f9"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-aggregate-overspend.html",
+      "sha256": "86fac1cb3e1e81ca16ad419716bd7a64e3dd0dc2612d2d9d3d52ebe2c0a0c465"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-aggregate-overspend.log",
+      "sha256": "ff6b6c8aa683fbc92813d2b03cb07b9eec16fe7a0af6aa7f0eeda14cc7152361"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-authorization-deploy-chaincode.log",
+      "sha256": "8dbce5702f064fd360a5bb84f423f4b0a1a3aaeedd866265a11817c8f37c00d9"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-authorization-init-ledger.log",
+      "sha256": "ed68611cdc833be848bfcbbfab1afc10afdce08d8930f54eeb66fe2db78a66fb"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-authorization-network-up.log",
+      "sha256": "ced73f052406ea1feabe665048137d84049eaf1419d3a5220620dea75223cd43"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-authorization.html",
+      "sha256": "3f61f55218221e2253ae837928be97fdda6eaab1a5f2d41d0ea2faa4236d2034"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-authorization.log",
+      "sha256": "0f5e71b6fb997047d7ada03544c57b86a1e085fa8a927a4b06d90ee66d14e7f4"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-boundary-path-deploy-chaincode.log",
+      "sha256": "daba99aeaa9b6228b974703976c2281aa5035a77608df7320a00d0f36ff4c390"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-boundary-path-init-ledger.log",
+      "sha256": "2185c89fd631bb3b7b28465fe7f2c3e25c27b4f55c0dd72012ad68b84214799e"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-boundary-path-network-up.log",
+      "sha256": "ec4cc9ca7fe3fd9767cebfe11f6fc168cdaa394d41ea915a5f28f2ac9c994ecc"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-boundary-path.html",
+      "sha256": "31074d2e998c6411b76e596d955ab620adbc5b0cfd7f21b8d6f9e13390e22aa8"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-boundary-path.log",
+      "sha256": "f405362105fa2f9f9e068ab78eaf5b8a48db47f1cd6f58b1d4869306a974cb20"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-functionality-deploy-chaincode.log",
+      "sha256": "80aebc504f7f3363a8a70da00f0397cc59f6746a64452479829e25380ae95f98"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-functionality-init-ledger.log",
+      "sha256": "d64892072a2be017bf6c2537215f1e695e9c53bfb8d6917734ae4c13f4e317f2"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-functionality-network-up.log",
+      "sha256": "1aadfcfc94f7e2ffb13e17ea488c312d005af76de6cbe5811553541c6eb692e3"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-functionality.html",
+      "sha256": "45f75290e0085deca4916ad8a5e2b3eb908268e252f5604442ba2b659ce5a9d8"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-functionality.log",
+      "sha256": "851450a6b911d992d639dc024aa7f7c06d7c63871f16f32cd7b485fbe5a8c883"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-negative-path-deploy-chaincode.log",
+      "sha256": "f5c863db3e354b55f4b62c3f6cba9a76d564d017b98028b3363c5ba6c43f0f91"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-negative-path-init-ledger.log",
+      "sha256": "157803d03a9a4bf70fbb90236ba66accec6eef3b9af4cc5775411a6c54441f29"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-negative-path-network-up.log",
+      "sha256": "a91304544b211e595e2f625c9fdad04f0ae8e64b20acb0a9ca3fd8479d226c69"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-negative-path.html",
+      "sha256": "c8ec0f69c69c3847b42435c89c98ac0eda566a98eaee3291b9e87ebf3345a603"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-negative-path.log",
+      "sha256": "f469a46b1beb52874f96ef98762451372273cb479d3066f57bf7edda705e147b"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-status.tsv",
+      "sha256": "c816145520198e5072e9a1624253258512ac9892977c73590b420fa33592c8fa"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-repeat-deploy-chaincode.log",
+      "sha256": "06d93fd0370f0674b5034d2dcdc5c7d90fdbe872787632db63263cadc2e53615"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-repeat-init-ledger.log",
+      "sha256": "adfcbfefefc9ecee15d68eb421fc902d18480b0faa420cf521582009abe97e42"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-repeat-network-up.log",
+      "sha256": "fa059a8ea0740ca5cf95ec6abd23899abebd0c7afbb91a0955d2e46d371c9496"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-repeat.html",
+      "sha256": "8e3098401ccebea7cb581c423f5487fac695dacd0f8ae2da813dceb2faba70c5"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-repeat.log",
+      "sha256": "11391db42005169ea0812d6ccbb3d4c220f7629083fd06ddc90942172e50fc05"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w1-deploy-chaincode.log",
+      "sha256": "64498c2a1b6b6725701dd8cb7fbbe3f03fdcb1932234f28ddd692a07c0506bcd"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w1-init-ledger.log",
+      "sha256": "ea7fac1640288863d6ea30c617271c1e58a9da5dd1d5ecfc906d57bd37ad04a4"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w1-network-up.log",
+      "sha256": "e08a9506e734b3abb2b3f2fd3c469f68ccaf56a4a4e62b52da94cd6481f3751e"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w1.html",
+      "sha256": "b7953f19541affcfeea4d8ffad2c2826a0783e8a6a35e0e09ed5e9e7f92bba1f"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w1.log",
+      "sha256": "2ec173bdbb516dd47d9d47e94b43433225970b737900ac782fc131497262b7f2"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w2-deploy-chaincode.log",
+      "sha256": "f13207de812031fa20beeb349240435d597c52143bc19a84b2c76b243e79991a"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w2-init-ledger.log",
+      "sha256": "b9c80fccedae8812b6fe5507452083169c89ea97f2231f8557b8f41c6770cdf5"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w2-network-up.log",
+      "sha256": "a9df883911f57535181014a2b447b64f82e113ca328c083f8427e7e0dfaf1091"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w2.html",
+      "sha256": "dc77243deb8ddb314372483bb24f98b5240dda7658ef16bcaf5ba0f14a6a5d35"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w2.log",
+      "sha256": "27518edbda5c7367ff778121204ef5062f51f5cf42db502f54bb15a2f4a90ee7"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w4-deploy-chaincode.log",
+      "sha256": "46be29d8e32ddd2a9e4d77814918bc1f7c7fe0542a9c3f69075e7ccc3065f6eb"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w4-init-ledger.log",
+      "sha256": "686bc40f2849fc4527e624636cb256dd7446321b10da7375792e5d42735639a2"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w4-network-up.log",
+      "sha256": "6cb9751b1982507e7aede70c36149ffac18af85db45b7cb6fcf8f08fa1b832e7"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w4.html",
+      "sha256": "dbcf91008224db2a7b37a6a598bcb1d7727a7035e5e20b2457c508687944be0e"
+    },
+    {
+      "path": "benchmark/results/20260908-fix-01-transfer-w4.log",
+      "sha256": "5c19e088119cf7a0ef05a70fa03f207b77e1b0badeac16c623c45c51dfe3f893"
+    }
+  ],
+  "evidenceInputs": [
+    {
+      "path": "benchmark/benchconfigs/adversarial.yaml",
+      "sha256": "1cdc71aadbe038d59288efcfe52e2279900c52c180c592131004e4955240e3c1"
+    },
+    {
+      "path": "benchmark/benchconfigs/authorization.yaml",
+      "sha256": "f1ae09513f7b4f8159104c81df48da85451a29e84cc346a2c9483e8bc945fe17"
+    },
+    {
+      "path": "benchmark/benchconfigs/boundary-path.yaml",
+      "sha256": "105e1eba3ca10403cc55a56a5b996f04c43c8e09e99871aeedabb57cdb9ac46b"
+    },
+    {
+      "path": "benchmark/benchconfigs/functionality.yaml",
+      "sha256": "877a3a4fdd9dd7a3375ad138f5fd1832e4e0c07cf4f75383b07b543ec027cbb3"
+    },
+    {
+      "path": "benchmark/benchconfigs/negative-path.yaml",
+      "sha256": "582a3c8b035ebe4fad397c8a81e3d4c47f459bf89ac4164b68fcbc0f1abbd0fa"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-repeat.yaml",
+      "sha256": "f139e835d36ff331ed21408abf4683fb3b4c00ef38cea1fc7be94e10528c747b"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-workers-1.yaml",
+      "sha256": "1e83817e11f1fd551900222c088807645c97e04841a1c7ff8bf972c4c95afe36"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-workers-2.yaml",
+      "sha256": "a342b05abe8bc21b61290ed26bc536236ab5c27ccd09b72a4c3ae9d3ae94d647"
+    },
+    {
+      "path": "benchmark/benchconfigs/retail-transfer-workers-4.yaml",
+      "sha256": "33ab69a401467951ce2921251b3a556b63203872d94c1a3096f15b04a89738d4"
+    },
+    {
+      "path": "benchmark/gen-network-assets.sh",
+      "sha256": "9ddc7ab6450cc43939ccbe1e848c25c36fa2bfc9d2ae623cc9d2f018d8d5879d"
+    },
+    {
+      "path": "benchmark/networkconfig.yaml",
+      "sha256": "b9daef6859a3177e714ec91067089800abcd4db1b13e712bcc696a827e3e8cc3"
+    },
+    {
+      "path": "benchmark/workloads/admin-policy.js",
+      "sha256": "f9ac317568fbb703d7726802a235d14627e06718323ba78ea9fe3222547d3039"
+    },
+    {
+      "path": "benchmark/workloads/adversarial-double-spend.js",
+      "sha256": "8513ab3c048f35b7955ed54ebf57ef4e9b0e0dcf09ed0ccd80b3397104a0f2a2"
+    },
+    {
+      "path": "benchmark/workloads/boundary-path.js",
+      "sha256": "4dd8d02ee4730a2f59d28f09acd2912bb0d77aaaf056aebee056a11f6aad2fe3"
+    },
+    {
+      "path": "benchmark/workloads/custody-authorization.js",
+      "sha256": "9d318618573f72843a96f88ff04701fef95c9eca70213e4af55da1ea5b1903d3"
+    },
+    {
+      "path": "benchmark/workloads/functional-workloads.test.js",
+      "sha256": "9ecbe685b3cce08ce74eb7c203b3cf41bf776555d17447dfd88ab077bd803c23"
+    },
+    {
+      "path": "benchmark/workloads/monetary-ops.js",
+      "sha256": "ca76b1b47b6932ee6ea5313676436e2da7e1562947c392aff3f9cc3e48def83b"
+    },
+    {
+      "path": "benchmark/workloads/negative-path.js",
+      "sha256": "90581a6b0c40a14915515ea19a60be3d1a7d36d8e9635ef956b9ec4a127806fc"
+    },
+    {
+      "path": "benchmark/workloads/retail-base.js",
+      "sha256": "960c6e3e62f258d800335c963e3463cd72a94e3b774c7608d1e6f0ef74240fe2"
+    },
+    {
+      "path": "benchmark/workloads/retail-base.test.js",
+      "sha256": "e3d7deab932d58f90b7cdcd84128508b8674d774632a175f30e846e98af1b504"
+    },
+    {
+      "path": "benchmark/workloads/retail-onboarding.js",
+      "sha256": "5d22ba606dac1700d404240119a169a66b6c09416095d46b68cd9d764b4275fe"
+    },
+    {
+      "path": "benchmark/workloads/retail-transfer.js",
+      "sha256": "cfad2987a00cfdba92b9fce006f574ac74c4c9e973bac2618e977cc84d9232a1"
+    },
+    {
+      "path": "benchmark/workloads/retail-transfer.test.js",
+      "sha256": "4780c8e78dbc4d369d896a2c5b518eeaad4081057c5ac59c151898a4a360bfd4"
+    },
+    {
+      "path": "benchmark/workloads/supervision-reads.js",
+      "sha256": "755f94aec9eb82af960cdc0e5abebf974f0ce4c1190a2025651402e8ff7c4a0d"
+    },
+    {
+      "path": "chaincode/digital_rupiah.go",
+      "sha256": "bb3ef0280518b192c43819898c1e56e23f661ed3a9cbe91bd4f6a49889625817"
+    },
+    {
+      "path": "network/configtx.yaml",
+      "sha256": "ce7ecf8580abbdad415b6220c58800b3295a9d443f0b79d803d77601672ed434"
+    },
+    {
+      "path": "network/docker-compose.yaml",
+      "sha256": "4a357e6da768ba15ac82a4ef1bd8bdc0659b4011ea3e2eda662a20230cfdfafc"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "755082ebf048ed8da0a3974168d337d06eaa2058099f7098d2a8a333287c32a0"
+    },
+    {
+      "path": "package.json",
+      "sha256": "80dc796464e39b3591111a54eb4df04aeaeacd0adc831db78420ae30a814c1b9"
+    },
+    {
+      "path": "scripts/run-full-suite.sh",
+      "sha256": "4c6e71cef88b6bf0d8123a9c7cbb79a51cb7153cd8d0e8e1804d330c72029000"
+    }
+  ],
+  "imageDigests": [
+    {
+      "image": "hyperledger/fabric-orderer:2.5",
+      "digest": "hyperledger/fabric-orderer@sha256:e322c57331d37e0a35ffae3cb3d3265a0e852211c0f801f2514cc15b964ffc93"
+    },
+    {
+      "image": "hyperledger/fabric-peer:2.5",
+      "digest": "hyperledger/fabric-peer@sha256:09ee75042de9983bfde31ca88a5bf033386351f10a990e4c48264ee50172dee0"
+    },
+    {
+      "image": "couchdb:3.2",
+      "digest": "couchdb@sha256:d32613dffcfb62cce58f65a9709fd46d66715db1a9dba3bb1033bc52df516d19"
+    }
+  ],
+  "topology": {
+    "orderers": 1,
+    "peersPerOrganization": 1,
+    "faultTolerance": "prototype-single-node-per-role; no orderer or peer failure tolerance"
+  }
+}

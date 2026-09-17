@@ -30,6 +30,10 @@ export function useEffect(effect, deps) {
 export function useMemo(factory, deps) {
   return requireRuntime().useMemo(factory, deps)
 }
+
+export function useRef(initialValue) {
+  return requireRuntime().useRef(initialValue)
+}
 `
 
 const JSX_RUNTIME_MODULE = `
@@ -120,6 +124,7 @@ export function createRenderer(hooksModule, Component, initialProps) {
   let props = initialProps
   let hookIndex = 0
   const hookState = []
+  const refState = []
   const memoState = []
   const effectState = []
   let pendingEffects = []
@@ -157,6 +162,12 @@ export function createRenderer(hooksModule, Component, initialProps) {
         return value
       }
       return memo.value
+    },
+    useRef(initialValue) {
+      const index = hookIndex
+      hookIndex += 1
+      if (!(index in refState)) refState[index] = { current: initialValue }
+      return refState[index]
     },
   }
 

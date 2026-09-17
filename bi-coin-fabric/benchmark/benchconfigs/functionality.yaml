@@ -3,7 +3,7 @@ test:
   description: Separate benchmark profiles for onboarding, monetary operations, supervision reads, and administrative policy writes
   workers:
     type: local
-    number: 2
+    number: 1
   rounds:
     - label: kyc-onboarding
       txNumber: 40
@@ -18,7 +18,7 @@ test:
           tier: STANDARD
 
     - label: monetary-ops
-      txNumber: 80
+      txNumber: 40
       rateControl:
         type: fixed-rate
         opts:
@@ -33,7 +33,7 @@ test:
           initialBasicBalance: 100000
 
     - label: supervision-reads
-      txNumber: 80
+      txNumber: 40
       rateControl:
         type: fixed-rate
         opts:
@@ -63,6 +63,9 @@ observer:
   interval: 1
 
 monitors:
+  transaction:
+    - module: ./benchmark/observers/jsonl-transaction-observer.js
+      options: {}
   resource:
     - module: docker
       options:

@@ -17,8 +17,9 @@ import (
 )
 
 type Handler struct {
-	svc  *services.LedgerService
-	auth *services.AuthService
+	svc      *services.LedgerService
+	auth     *services.AuthService
+	contacts services.PaymentContactStore
 }
 
 type ledgerServiceContextKey struct{}
@@ -50,6 +51,10 @@ func New(svc *services.LedgerService, auth *services.AuthService) *Handler {
 	return &Handler{svc: svc, auth: auth}
 }
 
+func (h *Handler) SetPaymentContactStore(store services.PaymentContactStore) {
+	h.contacts = store
+}
+
 func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.Use(h.principalLedger)
 	// Public
@@ -60,12 +65,21 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	// Wallet reads for authenticated actors.
 	auth := r.NewRoute().Subrouter()
 	auth.Use(middleware.RequireRole(middleware.RoleAuthenticated, middleware.RoleKycVerified,
-		middleware.RoleBankPjp, middleware.RoleBankIndonesia, middleware.RoleSupervisor, middleware.RoleMerchant))
+		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP,
+		middleware.RoleBankIndonesia, middleware.RoleSupervisor, middleware.RoleMerchant))
 	auth.HandleFunc("/wallets", h.ListWallets).Methods("GET")
+
+	// Retail actors keep private recipient shortcuts; this is not a wallet directory.
+	paymentContacts := r.NewRoute().Subrouter()
+	paymentContacts.Use(middleware.RequireRole(middleware.RoleAuthenticated, middleware.RoleKycVerified, middleware.RoleMerchant))
+	paymentContacts.HandleFunc("/payment-contacts", h.ListPaymentContacts).Methods("GET")
+	paymentContacts.HandleFunc("/payment-contacts", h.CreatePaymentContact).Methods("POST")
+	paymentContacts.HandleFunc("/payment-contacts/{contact_id}", h.UpdatePaymentContact).Methods("PUT")
+	paymentContacts.HandleFunc("/payment-contacts/{contact_id}", h.DeletePaymentContact).Methods("DELETE")
 
 	// Bank/PJP performs retail onboarding and KYC decisions.
 	kycMutation := r.NewRoute().Subrouter()
-	kycMutation.Use(middleware.RequireRole(middleware.RoleBankPjp))
+	kycMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP))
 	kycMutation.HandleFunc("/wallets", h.CreateWallet).Methods("POST")
 	kycMutation.HandleFunc("/retail/customers", h.CreateRetailCustomer).Methods("POST")
 	kycMutation.HandleFunc("/kyc/profiles", h.SubmitKycProfile).Methods("POST")
@@ -73,19 +87,25 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Bank/PJP operates KYC; BI and supervisors have read-only oversight.
 	kycRead := r.NewRoute().Subrouter()
-	kycRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	kycRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
 	kycRead.HandleFunc("/retail/customers", h.ListRetailCustomers).Methods("GET")
 	kycRead.HandleFunc("/kyc/profiles/{profile_id}", h.GetKycProfile).Methods("GET")
 	kycRead.HandleFunc("/kyc/profiles/{profile_id}/provider-checks", h.ListKycProviderChecks).Methods("GET")
 	kycRead.HandleFunc("/kyc/profiles/{profile_id}/audit-events", h.ListKycAuditEvents).Methods("GET")
 
-	// Approved customers and merchants initiate retail transfers.
-	payments := r.NewRoute().Subrouter()
-	payments.Use(middleware.RequireRole(middleware.RoleKycVerified, middleware.RoleMerchant))
-	payments.HandleFunc("/transfers", h.Transfer).Methods("POST")
-	payments.HandleFunc("/qris/resolve", h.ResolveQris).Methods("POST")
-	payments.HandleFunc("/qris/pay", h.PayQris).Methods("POST")
-	payments.HandleFunc("/balances", h.GetBalances).Methods("GET")
+	// Custodians fund retail wallets; customers and merchants also transfer.
+	transferPayments := r.NewRoute().Subrouter()
+	transferPayments.Use(middleware.RequireRole(
+		middleware.RoleKycVerified, middleware.RoleMerchant,
+		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP))
+	transferPayments.HandleFunc("/transfers", h.Transfer).Methods("POST")
+
+	// Approved customers and merchants initiate QRIS payments and read balances.
+	retailPayments := r.NewRoute().Subrouter()
+	retailPayments.Use(middleware.RequireRole(middleware.RoleKycVerified, middleware.RoleMerchant))
+	retailPayments.HandleFunc("/qris/resolve", h.ResolveQris).Methods("POST")
+	retailPayments.HandleFunc("/qris/pay", h.PayQris).Methods("POST")
+	retailPayments.HandleFunc("/balances", h.GetBalances).Methods("GET")
 
 	merchantQris := r.NewRoute().Subrouter()
 	merchantQris.Use(middleware.RequireRole(middleware.RoleMerchant))
@@ -104,12 +124,12 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Bank/PJP and Bank Indonesia may submit participant applications.
 	bankMutation := r.NewRoute().Subrouter()
-	bankMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleBankIndonesia))
+	bankMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankIndonesia))
 	bankMutation.HandleFunc("/participants", h.SubmitParticipant).Methods("POST")
 
 	// Bank PJP, Bank Indonesia, and supervisors can read participant state.
 	participantRead := r.NewRoute().Subrouter()
-	participantRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	participantRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
 	participantRead.HandleFunc("/participants", h.ListParticipants).Methods("GET")
 	participantRead.HandleFunc("/participants/{participant_id}", h.GetParticipant).Methods("GET")
 
@@ -398,6 +418,67 @@ func (h *Handler) ListWallets(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, wallets)
 }
 
+// ─── Payment contacts ───────────────────────────────────────────────────────
+
+func (h *Handler) ListPaymentContacts(w http.ResponseWriter, r *http.Request) {
+	if h.contacts == nil {
+		writeError(w, http.StatusNotImplemented, "payment contacts are unavailable")
+		return
+	}
+	contacts, err := h.contacts.ListPaymentContacts(r.Context(), middleware.GetUsername(r))
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, contacts)
+}
+
+func (h *Handler) CreatePaymentContact(w http.ResponseWriter, r *http.Request) {
+	if h.contacts == nil {
+		writeError(w, http.StatusNotImplemented, "payment contacts are unavailable")
+		return
+	}
+	var req models.PaymentContactRequest
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	contact, err := h.contacts.CreatePaymentContact(r.Context(), middleware.GetUsername(r), req)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, contact)
+}
+
+func (h *Handler) UpdatePaymentContact(w http.ResponseWriter, r *http.Request) {
+	if h.contacts == nil {
+		writeError(w, http.StatusNotImplemented, "payment contacts are unavailable")
+		return
+	}
+	var req models.PaymentContactRequest
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	contact, err := h.contacts.UpdatePaymentContact(r.Context(), middleware.GetUsername(r), mux.Vars(r)["contact_id"], req)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, contact)
+}
+
+func (h *Handler) DeletePaymentContact(w http.ResponseWriter, r *http.Request) {
+	if h.contacts == nil {
+		writeError(w, http.StatusNotImplemented, "payment contacts are unavailable")
+		return
+	}
+	if err := h.contacts.DeletePaymentContact(r.Context(), middleware.GetUsername(r), mux.Vars(r)["contact_id"]); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // ─── Retail Customers ────────────────────────────────────────────────────────
 
 func (h *Handler) CreateRetailCustomer(w http.ResponseWriter, r *http.Request) {
@@ -514,7 +595,7 @@ func (h *Handler) ListSystemLimits(w http.ResponseWriter, r *http.Request) {
 // ─── Liquidity ───────────────────────────────────────────────────────────────
 
 func (h *Handler) RequestIssuance(w http.ResponseWriter, r *http.Request) {
-	var req models.AmountRequest
+	var req models.IssuanceRequest
 	if !decodeJSON(w, r, &req) {
 		return
 	}
@@ -523,7 +604,7 @@ func (h *Handler) RequestIssuance(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "invalid amount")
 		return
 	}
-	if err := h.ledger(r).RequestIssuance(req.ParticipantID, amount); err != nil {
+	if err := h.ledger(r).RequestIssuance(amount); err != nil {
 		writeServiceError(w, err)
 		return
 	}
@@ -535,16 +616,17 @@ func (h *Handler) DistributeToParticipant(w http.ResponseWriter, r *http.Request
 	if !decodeJSON(w, r, &req) {
 		return
 	}
-	if req.SenderParticipantID == "" || req.ReceiverParticipantID == "" {
-		writeValidationError(w, "sender_participant_id and receiver_participant_id are required")
+	if req.ReceiverParticipantID == "" {
+		writeValidationError(w, "receiver_participant_id is required")
 		return
 	}
-	if req.Amount <= 0 {
-		writeValidationError(w, "amount must be positive")
+	amount, err := strconv.ParseInt(req.Amount, 10, 64)
+	if err != nil || amount <= 0 {
+		writeValidationError(w, "amount must be a positive whole-rupiah integer")
 		return
 	}
 	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
-	if err := h.ledger(r).DistributeToParticipant(req.SenderParticipantID, req.ReceiverParticipantID, req.Amount, req.IdempotencyKey); err != nil {
+	if err := h.ledger(r).DistributeToParticipant(req.ReceiverParticipantID, amount, req.IdempotencyKey); err != nil {
 		writeServiceError(w, err)
 		return
 	}

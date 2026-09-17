@@ -35,13 +35,13 @@ class RetailOnboardingWorkload extends RetailWorkloadBase {
             `sha256:identity:${subject.id}`,
             subject.walletId,
             subject.profileId,
-        ]);
+        ], false, 'himbara');
         await this.submit('SubmitKycProfile', [
             subject.profileId,
             'retail_customer',
             subject.id,
             hashes,
-        ]);
+        ], false, 'himbara');
         await this.submit('RefreshKycProfile', [
             subject.profileId,
             'approved',
@@ -50,12 +50,12 @@ class RetailOnboardingWorkload extends RetailWorkloadBase {
             false,
             hashes,
             '2099-12-31T23:59:59Z',
-        ]);
+        ], false, 'himbara');
         await this.submit('CreateWallet', [
             subject.walletId,
             subject.id,
             subject.tier,
-        ]);
+        ], false, 'himbara');
     }
 }
 

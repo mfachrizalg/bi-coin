@@ -52,19 +52,20 @@ test('retail onboarding workload benchmarks the full onboarding workflow with un
     assert.notEqual(calls[3].contractArguments[0], calls[7].contractArguments[0]);
 });
 
-test('monetary operations workload alternates Mint and Burn on preplanned wallets', async () => {
+test('monetary operations workload burns distinct funded wallets', async () => {
     const { createWorkloadModule } = require('./monetary-ops');
     const workload = createWorkloadModule();
     const { calls, adapter } = captureAdapter();
     workload.sutAdapter = adapter;
+    workload.roundArguments = { operationAmount: 1000 };
     workload.customers = [standardCustomer(0), standardCustomer(1), standardCustomer(2)];
     workload.configureMeasuredTraffic(3);
-
+    calls.length = 0;
     await workload.submitTransaction();
     await workload.submitTransaction();
     await workload.submitTransaction();
 
-    assert.deepEqual(calls.map(call => call.contractFunction), ['Mint', 'Burn', 'Mint']);
+    assert.deepEqual(calls.map(call => call.contractFunction), ['Burn', 'Burn', 'Burn']);
     assert.deepEqual(calls.map(call => call.contractArguments[0]), [
         'wlt_c_0',
         'wlt_c_1',

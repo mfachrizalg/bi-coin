@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"sync"
@@ -36,6 +37,7 @@ type OperationJournal struct {
 
 type OperationJournalStore interface {
 	BeginOperation(ctx context.Context, operation OperationJournal) (existing OperationJournal, created bool, err error)
+	GetOperation(ctx context.Context, scope string, principalID string, key string) (*OperationJournal, error)
 	UpdateOperation(ctx context.Context, operation OperationJournal) error
 }
 
@@ -67,6 +69,16 @@ func (s *memoryOperationJournal) BeginOperation(_ context.Context, operation Ope
 	operation.UpdatedAt = now
 	s.entries[key] = operation
 	return operation, true, nil
+}
+
+func (s *memoryOperationJournal) GetOperation(_ context.Context, scope string, principalID string, key string) (*OperationJournal, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	operation, ok := s.entries[scope+"\x00"+principalID+"\x00"+key]
+	if !ok {
+		return nil, sql.ErrNoRows
+	}
+	return &operation, nil
 }
 
 func (s *memoryOperationJournal) UpdateOperation(_ context.Context, operation OperationJournal) error {

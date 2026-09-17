@@ -1,6 +1,6 @@
 test:
   name: Digital Rupiah Retail Transfer Benchmark - 2 Workers
-  description: Seeded low-contention retail transfer baseline with two Caliper workers
+  description: Isolated customer-to-customer retail transfer baseline with two Caliper workers
   workers:
     type: local
     number: 2
@@ -15,10 +15,12 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-w2
-          customers: 58
-          merchants: 8
-          transactionSlots: 26
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
           fundedRatio: 1
+          fundStandard: 20000000
+          fundReceiverStandard: 1000000
           maxTransferAmount: 50000
           seed: 20260725
 
@@ -32,9 +34,9 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-w2
-          customers: 58
-          merchants: 8
-          transactionSlots: 26
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
           fundedRatio: 1
           maxTransferAmount: 50000
           seed: 20260725
@@ -49,9 +51,9 @@ test:
         module: benchmark/workloads/retail-transfer.js
         arguments:
           scenario: transfer-w2
-          customers: 58
-          merchants: 8
-          transactionSlots: 26
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
           fundedRatio: 1
           maxTransferAmount: 50000
           seed: 20260725
@@ -61,6 +63,9 @@ observer:
   interval: 1
 
 monitors:
+  transaction:
+    - module: ./benchmark/observers/jsonl-transaction-observer.js
+      options: {}
   resource:
     - module: docker
       options:

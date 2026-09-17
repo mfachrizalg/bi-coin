@@ -7,6 +7,7 @@ const {
     transactionResults,
     transactionStatus,
     transactionDiagnostic,
+    actorRequest,
 } = require('./retail-base');
 
 const INFRASTRUCTURE_FAILURE = /proposalresponsepayloads do not match|channel has been shut down|failed to connect|deadline exceeded|unavailable|timeout|endorsement policy failure/i;
@@ -49,6 +50,7 @@ class NegativePathWorkload extends RetailWorkloadBase {
         this.workerIndex = workerIndex;
         this.totalWorkers = totalWorkers;
         this.roundIndex = roundIndex;
+        await this.ensureBenchmarkCustodian();
         await this.seedFixtures();
         this.buildCases();
     }
@@ -63,11 +65,11 @@ class NegativePathWorkload extends RetailWorkloadBase {
         const profileId = `kyc_${id}`;
         const hashes = JSON.stringify([`sha256:${id}`]);
         const dd = diligence || (tier === 'BASIC' ? 'simplified' : 'standard');
-        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId]);
-        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes]);
-        await this.submit('RefreshKycProfile', [profileId, 'approved', risk, dd, senior, hashes, expiresAt]);
-        await this.submit('CreateWallet', [walletId, id, tier]);
-        if (fund > 0) await this.submit('Mint', [walletId, fund]);
+        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'himbara');
+        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'himbara');
+        await this.submit('RefreshKycProfile', [profileId, 'approved', risk, dd, senior, hashes, expiresAt], false, 'himbara');
+        await this.submit('CreateWallet', [walletId, id, tier], false, 'himbara');
+        if (fund > 0) await this.fundRetailWallet(walletId, fund);
         return { id, walletId, tier };
     }
 
@@ -134,7 +136,7 @@ class NegativePathWorkload extends RetailWorkloadBase {
         console.log(`[negative-path] CASE worker=${this.workerIndex} label=${label}`);
         let response;
         try {
-            response = await this.sutAdapter.sendRequests(request);
+            response = await this.sutAdapter.sendRequests(actorRequest(request, 'himbara'));
         } catch (err) {
             this.infrastructureErrors += 1;
             throw new Error(`[negative-path] ORACLE ERROR: connector threw before returning a status for "${label}": ${err}`);

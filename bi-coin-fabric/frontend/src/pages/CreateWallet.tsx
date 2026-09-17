@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   createRetailCustomer,
   createWallet,
+  getErrorMessage,
   refreshKycProfile,
   submitKycProfile,
 } from '../lib/api'
@@ -84,8 +85,8 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
         })
       }
       setMessage(`Off-chain KYC stored and anchored: ${profileID}`)
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -112,8 +113,8 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
       })
       setKycProfileId(profileID)
       setMessage(`KYC approved on-chain anchor: ${profileID}`)
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -127,161 +128,153 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
     try {
       const w = await createWallet({ owner_id: ownerId })
       setMessage(`Wallet created: ${w?.wallet_id ?? 'wlt_' + ownerId}; policy tier: ${w?.tier ?? 'derived on ledger'}`)
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ maxWidth: 640, fontSize: '1rem' }}>
-      <h2 style={{ marginBottom: 20, fontSize: '1.4rem' }}>KYC Retail &amp; Buat Dompet</h2>
+    <div className="workspace-stack create-wallet-page">
+      <h2>KYC and wallet</h2>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ padding: 14, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8 }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>KYC Off-Chain (PoC)</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div className="workspace-stack">
+        <section className="surface-card">
+          <h3>Off-chain KYC</h3>
+          <div className="field-grid">
             <input
+              className="app-input"
               placeholder="Customer / merchant ID"
               value={customerId}
               onChange={e => {
                 setCustomerId(e.target.value)
                 setOwnerId(e.target.value)
               }}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <select
+              className="app-input"
               value={subjectType}
               onChange={e => setSubjectType(e.target.value as 'retail_customer' | 'merchant')}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             >
               <option value="retail_customer">Retail customer</option>
               <option value="merchant">Merchant</option>
             </select>
             <input
+              className="app-input"
               placeholder="Legal name"
               value={legalName}
               onChange={e => setLegalName(e.target.value)}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <input
+              className="app-input"
               placeholder="Document type"
               value={documentType}
               onChange={e => setDocumentType(e.target.value)}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <input
+              className="app-input"
               placeholder="Document number"
               value={documentNumber}
               onChange={e => setDocumentNumber(e.target.value)}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <input
+              className="app-input"
               placeholder="Wallet account ID"
               value={walletAccountId}
               onChange={e => setWalletAccountId(e.target.value)}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <input
+              className="app-input"
               placeholder="Provider case ID"
               value={providerCaseId}
               onChange={e => setProviderCaseId(e.target.value)}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <input
+              className="app-input field-grid-wide"
               placeholder="KYC profile ID"
               value={kycProfileId}
               onChange={e => setKycProfileId(e.target.value)}
-              style={{ gridColumn: 'span 2', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             />
             <select
+              className="app-input"
               value={riskLevel}
               onChange={e => setRiskLevel(e.target.value as 'low' | 'medium' | 'high')}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             >
               <option value="low">Low risk</option>
               <option value="medium">Medium risk</option>
               <option value="high">High risk</option>
             </select>
             <select
+              className="app-input"
               value={dueDiligenceLevel}
               onChange={e => setDueDiligenceLevel(e.target.value as 'simplified' | 'standard' | 'enhanced')}
-              style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
             >
               <option value="simplified">Simplified due diligence</option>
               <option value="standard">Standard due diligence</option>
               <option value="enhanced">Enhanced due diligence</option>
             </select>
-            <label style={{ gridColumn: 'span 2', display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
+            <label className="checkbox-label field-grid-wide">
               <input type="checkbox" checked={seniorApproval} onChange={e => setSeniorApproval(e.target.checked)} />
               Senior approval (required for high risk)
             </label>
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          <div className="button-row form-actions">
             <button
+              className="primary-button"
               onClick={submitKyc}
               disabled={loading}
-              style={{
-                flex: 1, padding: '12px 0', background: loading ? '#93c5fd' : '#2563eb', color: '#fff',
-                border: 'none', borderRadius: 6, fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-              }}
             >
               Store Off-Chain KYC
             </button>
             <button
+              className="secondary-button"
               onClick={approveKyc}
               disabled={loading}
-              style={{
-                flex: 1, padding: '12px 0', background: loading ? '#86efac' : '#16a34a', color: '#fff',
-                border: 'none', borderRadius: 6, fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-              }}
             >
               Approve KYC Anchor
             </button>
           </div>
-        </div>
+        </section>
 
-        <div style={{ padding: 14, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8 }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Buat Dompet</h3>
-        <div>
-          <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+        <section className="surface-card">
+          <h3>Create wallet</h3>
+        <div className="stack-small">
+          <label className="app-label" htmlFor="owner-id">
             Owner / KYC Subject ID
           </label>
           <input
+            id="owner-id"
+            className="app-input"
             value={ownerId}
             onChange={e => setOwnerId(e.target.value)}
             placeholder="budi"
-            style={{ width: '100%', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '1rem' }}
           />
         </div>
 
         <div>
-          <div style={{ fontSize: 12, color: '#4b5563', padding: '8px 10px', background: '#f9fafb', borderRadius: 4 }}>
+          <div className="field-help callout">
             Tier is derived by chaincode from subject type, risk, due diligence, and senior approval. It cannot be selected by the operator.
           </div>
         </div>
 
         <button
+          className="primary-button"
           onClick={submit}
           disabled={loading}
-          style={{
-            padding: '14px 0', background: loading ? '#93c5fd' : '#2563eb', color: '#fff',
-            border: 'none', borderRadius: 8, fontSize: '1rem', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-          }}
         >
           {loading ? 'Creating…' : 'Create Wallet'}
         </button>
-        </div>
+        </section>
       </div>
 
       {message && (
-        <div style={{ marginTop: 16, padding: '12px 14px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, fontSize: '1rem', color: '#15803d', fontWeight: 600 }}>
+        <div className="banner success" role="status">
           {message}
         </div>
       )}
       {error && (
-        <div style={{ marginTop: 12, padding: '8px 12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 6, fontSize: 14, color: '#dc2626' }}>
+        <div className="banner error" role="alert">
           {error}
         </div>
       )}

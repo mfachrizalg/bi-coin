@@ -3,72 +3,110 @@ import type { FormEvent } from 'react'
 import WalletList from './pages/WalletList'
 import CreateWallet from './pages/CreateWallet'
 import Transfer from './pages/Transfer'
-import Limits from './pages/Limits'
-import AuditLog from './pages/AuditLog'
+import Pay from './pages/Pay'
 import Participants from './pages/Participants'
 import DemoPanel, { type DemoPrefill } from './pages/DemoPanel'
 import Overview from './pages/Overview'
-import Observability from './pages/Observability'
-import QrisPayments from './pages/QrisPayments'
-import { getMe, hasAccessToken, login, onUnauthorized, setAccessToken } from './lib/api'
+import Contacts from './pages/Contacts'
+import Activity from './pages/Activity'
+import Supervision from './pages/Supervision'
+import PrototypeLab from './pages/PrototypeLab'
+import { getErrorMessage, getMe, hasAccessToken, login, onUnauthorized, setAccessToken } from './lib/api'
+import LoadingSkeleton from './components/LoadingSkeleton'
 
-type Tab = 'overview' | 'participants' | 'wallets' | 'create' | 'transfer' | 'qris' | 'limits' | 'audit' | 'observability'
-type Role = 'public' | 'authenticated' | 'kyc_verified' | 'bank_pjp' | 'bank_indonesia' | 'merchant' | 'supervisor'
+export type Tab = 'overview' | 'participants' | 'wallets' | 'create' | 'transfer' | 'contacts' | 'activity' | 'supervision' | 'prototype'
+export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'bank_pjp' | 'validator_bank' | 'pjp' | 'bank_indonesia' | 'merchant' | 'supervisor'
+type Shell = 'institutional' | 'retail'
 
 interface RoleConfig {
   label: string
-  tagLine: string
+  shell: Shell | 'public'
   tabs: Tab[]
 }
 
-const ROLES: Record<Role, RoleConfig> = {
-  public: {
-    label: 'Public',
-    tagLine: 'Masuk untuk mengakses cockpit sesuai peran',
-    tabs: [],
-  },
-  authenticated: {
-    label: 'Authenticated',
-    tagLine: 'Akses konteks dompet pribadi',
-    tabs: ['overview', 'wallets'],
-  },
-  kyc_verified: {
-    label: 'KYC Verified',
-    tagLine: 'Pembayaran retail, dompet, dan QRIS customer pay',
-    tabs: ['overview', 'wallets', 'transfer', 'qris'],
-  },
-  bank_pjp: {
-    label: 'Bank / PJP',
-    tagLine: 'Onboarding peserta, retail KYC, distribusi likuiditas',
-    tabs: ['overview', 'participants', 'wallets', 'create'],
-  },
-  bank_indonesia: {
-    label: 'Bank Indonesia',
-    tagLine: 'Pengawasan, policy, observability, dan kontrol sistem',
-    tabs: ['overview', 'participants', 'wallets', 'limits', 'audit', 'observability'],
-  },
-  merchant: {
-    label: 'Merchant',
-    tagLine: 'Merchant collect, transfer, dan QRIS desktop',
-    tabs: ['overview', 'wallets', 'transfer', 'qris'],
-  },
-  supervisor: {
-    label: 'Supervisor',
-    tagLine: 'Read-only oversight untuk transaksi, limits, dan topologi',
-    tabs: ['overview', 'participants', 'wallets', 'limits', 'audit', 'observability'],
-  },
+export const ROLES: Record<Role, RoleConfig> = {
+  public: { label: 'Public', shell: 'public', tabs: [] },
+  authenticated: { label: 'Retail Customer', shell: 'retail', tabs: ['overview', 'wallets', 'contacts'] },
+  kyc_verified: { label: 'Retail Customer', shell: 'retail', tabs: ['overview', 'wallets', 'transfer', 'contacts', 'activity'] },
+  bank_pjp: { label: 'Participant', shell: 'institutional', tabs: ['overview', 'participants', 'wallets', 'create', 'transfer'] },
+  validator_bank: { label: 'Validator Bank', shell: 'institutional', tabs: ['overview', 'participants', 'wallets', 'create', 'transfer'] },
+  pjp: { label: 'PJP', shell: 'institutional', tabs: ['overview', 'participants', 'wallets', 'create', 'transfer'] },
+  bank_indonesia: { label: 'Bank Indonesia', shell: 'institutional', tabs: ['overview', 'participants', 'wallets', 'supervision', 'prototype'] },
+  merchant: { label: 'Merchant', shell: 'retail', tabs: ['overview', 'wallets', 'transfer', 'contacts', 'activity'] },
+  supervisor: { label: 'Supervisor', shell: 'institutional', tabs: ['overview', 'participants', 'wallets', 'supervision'] },
 }
 
-const TAB_META: Record<Tab, { label: string; description: string }> = {
-  overview: { label: 'Overview', description: 'Status sistem dan konteks aktif' },
-  participants: { label: 'Participants & Liquidity', description: 'Onboarding, approval, distribusi, issuance' },
-  wallets: { label: 'Wallets', description: 'Saldo, status, dan pemilihan konteks dompet' },
-  create: { label: 'Retail KYC & Wallets', description: 'Anchor KYC off-chain lalu create wallet' },
-  transfer: { label: 'Transfer', description: 'Transfer retail langsung antar wallet' },
-  qris: { label: 'QRIS', description: 'Merchant collect dan customer pay' },
-  limits: { label: 'Limits', description: 'Live limits dari backend' },
-  audit: { label: 'Audit', description: 'Riwayat transaksi berdasarkan dompet aktif' },
-  observability: { label: 'Observability', description: 'Topologi, metrics, limit, transaksi QRIS' },
+export const TAB_META: Record<Tab, { label: string }> = {
+  overview: { label: 'Overview' },
+  participants: { label: 'Participants' },
+  wallets: { label: 'Wallets' },
+  create: { label: 'KYC and wallet' },
+  transfer: { label: 'Pay' },
+  contacts: { label: 'Contacts' },
+  activity: { label: 'Activity' },
+  supervision: { label: 'Supervision' },
+  prototype: { label: 'Prototype lab' },
+}
+
+interface DemoHandoff {
+  stepId: number
+  role: Role
+  tab: Tab
+}
+
+const DEMO_STATE_KEY = 'garuda-demo-progress'
+const UI_STATE_KEY = 'garuda-ui-context'
+
+function readSession<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback
+  try {
+    const value = window.sessionStorage.getItem(key)
+    return value ? JSON.parse(value) as T : fallback
+  } catch {
+    return fallback
+  }
+}
+
+function writeSession(key: string, value: unknown) {
+  try { window.sessionStorage.setItem(key, JSON.stringify(value)) } catch { /* private browsing */ }
+}
+
+function clearSession(key: string) {
+  try { window.sessionStorage.removeItem(key) } catch { /* private browsing */ }
+}
+
+function routeFor(shell: Shell, tab: Tab) {
+  if (shell === 'retail') {
+    return ({ overview: 'home', wallets: 'wallets', transfer: 'pay', contacts: 'contacts', activity: 'activity' } as Partial<Record<Tab, string>>)[tab] ?? 'home'
+  }
+  return ({ overview: 'overview', participants: 'participants', wallets: 'wallets', create: 'kyc', transfer: 'transfer', supervision: 'supervision', prototype: 'prototype-lab' } as Partial<Record<Tab, string>>)[tab] ?? 'overview'
+}
+
+function navigate(shell: Shell, tab: Tab) {
+  if (typeof window !== 'undefined') window.location.hash = `#/${shell}/${routeFor(shell, tab)}`
+}
+
+function tabFromHash(hash: string): Tab | undefined {
+  const path = hash.replace(/^#\/?/, '').split('/').filter(Boolean)
+  if (path[0] === 'retail') {
+    return ({ home: 'overview', wallets: 'wallets', pay: 'transfer', contacts: 'contacts', activity: 'activity' } as Record<string, Tab>)[path[1] ?? '']
+  }
+  if (path[0] === 'institutional') {
+    return ({ overview: 'overview', participants: 'participants', wallets: 'wallets', kyc: 'create', transfer: 'transfer', supervision: 'supervision', limits: 'supervision', audit: 'supervision', observability: 'supervision', 'prototype-lab': 'prototype', supply: 'prototype', worldstate: 'prototype' } as Record<string, Tab>)[path[1] ?? '']
+  }
+  return undefined
+}
+
+function roleFrom(value: string): Role | undefined {
+  return value in ROLES && value !== 'public' ? value as Role : undefined
+}
+
+function demoTab(value: string): Tab {
+  if (value === 'supply' || value === 'worldstate') return 'prototype'
+  if (value === 'create') return 'create'
+  if (value === 'transfer') return 'transfer'
+  if (value === 'participants') return 'participants'
+  return 'overview'
 }
 
 export default function App() {
@@ -77,30 +115,55 @@ export default function App() {
   const [password, setPassword] = useState('')
   const [sessionUser, setSessionUser] = useState('')
   const [authError, setAuthError] = useState('')
-  const [tab, setTab] = useState<Tab>('overview')
-  const [selectedWallet, setSelectedWallet] = useState('')
+  const [sessionLoading, setSessionLoading] = useState(() => hasAccessToken())
+  const [tab, setTab] = useState<Tab>(() => tabFromHash(typeof window === 'undefined' ? '' : window.location.hash) ?? 'overview')
+  const [selectedWallet, setSelectedWallet] = useState(() => readSession(UI_STATE_KEY, { wallet: '' }).wallet)
   const [demoMode, setDemoMode] = useState(false)
-  const [demoStep, setDemoStep] = useState(1)
+  const [demoStep, setDemoStep] = useState(() => readSession<DemoHandoff | null>(DEMO_STATE_KEY, null)?.stepId ?? 1)
   const [demoPrefill, setDemoPrefill] = useState<DemoPrefill | null>(null)
+  const [demoHandoff, setDemoHandoff] = useState<DemoHandoff | null>(() => readSession(DEMO_STATE_KEY, null))
+
+  function handleLogout() {
+    setAccessToken('')
+    setRole('public')
+    setSessionUser('')
+    setSelectedWallet('')
+    setTab('overview')
+    setDemoPrefill(null)
+    setSessionLoading(false)
+    if (typeof window !== 'undefined') window.location.hash = '#/login'
+  }
+
+  useEffect(() => onUnauthorized(handleLogout), [])
 
   useEffect(() => {
-    return onUnauthorized(handleLogout)
+    const onHashChange = () => {
+      const next = tabFromHash(window.location.hash)
+      if (next) setTab(next)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  useEffect(() => {
-    if (!hasAccessToken()) return
+  useEffect(() => { writeSession(UI_STATE_KEY, { wallet: selectedWallet }) }, [selectedWallet])
 
+  useEffect(() => {
+    if (demoMode && role !== 'public') writeSession(DEMO_STATE_KEY, { stepId: demoStep, role, tab })
+  }, [demoMode, demoStep, role, tab])
+
+  useEffect(() => {
+    if (!hasAccessToken()) { setSessionLoading(false); return }
     getMe()
       .then(me => {
-        const nextRole = me.role as Role
+        const nextRole = roleFrom(me.role)
+        if (!nextRole) throw new Error('Account role is not recognized.')
         setSessionUser(me.username)
         setRole(nextRole)
-        setTab(ROLES[nextRole].tabs[0] ?? 'overview')
+        const nextTab = tabFromHash(window.location.hash) ?? ROLES[nextRole].tabs[0] ?? 'overview'
+        setTab(ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0] ?? 'overview')
       })
-      .catch(() => {
-        setAccessToken('')
-        setRole('public')
-      })
+      .catch(() => handleLogout())
+      .finally(() => setSessionLoading(false))
   }, [])
 
   async function handleLogin(event: FormEvent) {
@@ -110,195 +173,122 @@ export default function App() {
       const res = await login({ username, password })
       setAccessToken(res.access_token)
       const me = await getMe()
-      const nextRole = me.role as Role
+      const nextRole = roleFrom(me.role)
+      if (!nextRole) throw new Error('Account role is not recognized.')
+      if (demoHandoff && demoHandoff.role !== nextRole) {
+        setAccessToken('')
+        setAuthError(`This demo step requires sign-in as ${ROLES[demoHandoff.role].label}.`)
+        return
+      }
       setSessionUser(me.username)
       setRole(nextRole)
-      setTab(ROLES[nextRole].tabs[0] ?? 'overview')
       setPassword('')
+      const nextTab = demoHandoff ? demoTab(demoHandoff.tab) : tabFromHash(window.location.hash) ?? ROLES[nextRole].tabs[0] ?? 'overview'
+      setTab(ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0] ?? 'overview')
+      if (demoHandoff) {
+        setDemoStep(demoHandoff.stepId)
+        setDemoMode(true)
+        clearSession(DEMO_STATE_KEY)
+        setDemoHandoff(null)
+      }
+      const nextShell = ROLES[nextRole].shell === 'public' ? 'retail' : ROLES[nextRole].shell
+      navigate(nextShell, ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0] ?? 'overview')
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Login gagal')
+      setAuthError(getErrorMessage(err))
     }
   }
 
-  function handleLogout() {
-    setAccessToken('')
-    setRole('public')
-    setSessionUser('')
-    setSelectedWallet('')
-    setTab('overview')
-  }
-
-  function handleDemoStep(stepId: number, _newRole: string, newTab: string) {
+  function handleDemoStep(stepId: number, requestedRole: string, requestedTab: string) {
+    const nextRole = roleFrom(requestedRole)
+    if (!nextRole) {
+      setAuthError('Demo step role is not recognized.')
+      return
+    }
+    const nextTab = demoTab(requestedTab)
     setDemoStep(stepId)
     setDemoPrefill(null)
-    const nextTab = newTab as Tab
-    if (ROLES[role].tabs.includes(nextTab)) setTab(nextTab)
-    else setTab(ROLES[role].tabs[0] ?? 'overview')
+    setDemoMode(true)
+    if (nextRole !== role) {
+      const handoff = { stepId, role: nextRole, tab: nextTab }
+      writeSession(DEMO_STATE_KEY, handoff)
+      setDemoHandoff(handoff)
+      handleLogout()
+      setAuthError(`Sign in as ${ROLES[nextRole].label} to continue the demo.`)
+      return
+    }
+    setTab(nextTab)
+    navigate(ROLES[role].shell === 'public' ? 'retail' : ROLES[role].shell, nextTab)
   }
 
   const cfg = ROLES[role]
   const allowedTabs = cfg.tabs
 
+  if (sessionLoading) {
+    return <div className="auth-shell"><LoadingSkeleton kind="form" label="Loading session" rows={3} /></div>
+  }
+
   if (role === 'public') {
     return (
       <div className="auth-shell">
-        <section className="auth-hero">
-          <div>
-            <div className="role-pill">Garuda Digital Rupiah</div>
-            <h1>Retail CBDC desktop cockpit with QRIS, observability, and live ledger flows.</h1>
-            <p>
-              Dashboard ini menggabungkan role-based operational flow, retail KYC off-chain anchoring,
-              transfer, QRIS prototype, dan observabilitas jaringan tanpa kembali ke iframe CouchDB.
-            </p>
-          </div>
-
-          <div className="stack-small">
-            <div className="role-pill">What changed</div>
-            <ul className="plain-list">
-              <li>Shell desktop baru dengan workspace per domain kerja.</li>
-              <li>QRIS merchant collect + customer pay terhubung ke backend dan chaincode.</li>
-              <li>Observability live dari `/network/topology`, `/reports/metrics`, `/transactions`, `/limits`.</li>
-            </ul>
-          </div>
-        </section>
-
-        <section className="auth-card-panel">
-          <div className="auth-card">
-            <div className="stack-small">
-              <div>
-                <div className="eyebrow">Sign In</div>
-                <h2 style={{ margin: '6px 0 8px' }}>Masuk ke cockpit retail CBDC</h2>
-                <p className="muted">Pilih akun demo atau gunakan kredensial yang sudah dibootstrap di backend.</p>
-              </div>
-
-              <form className="stack-small" onSubmit={handleLogin}>
-                <label className="app-label">
-                  <span>Nama Pengguna</span>
-                  <input className="app-input" value={username} onChange={e => setUsername(e.target.value)} placeholder="Contoh: merchant" autoComplete="username" />
-                </label>
-                <label className="app-label">
-                  <span>Kata Sandi</span>
-                  <input className="app-input" value={password} onChange={e => setPassword(e.target.value)} placeholder="Kata sandi" type="password" autoComplete="current-password" />
-                </label>
-                {authError && <div className="banner error">{authError}</div>}
-                <button type="submit" className="primary-button">Masuk</button>
-              </form>
-
-              <p className="muted">Akun demo tidak dibundel di frontend. Gunakan kredensial yang diberikan oleh operator environment.</p>
-            </div>
-          </div>
-        </section>
+        <main className="auth-card" aria-labelledby="sign-in-title">
+          <h1 id="sign-in-title">Sign in</h1>
+          <form className="auth-form" onSubmit={handleLogin}>
+            <label className="app-label" htmlFor="login-username"><span>Username</span><input id="login-username" className="app-input" value={username} onChange={event => setUsername(event.target.value)} autoComplete="username" required /></label>
+            <label className="app-label" htmlFor="login-password"><span>Password</span><input id="login-password" className="app-input" value={password} onChange={event => setPassword(event.target.value)} type="password" autoComplete="current-password" required /></label>
+            {authError && <div className="banner error" role="alert">{authError}</div>}
+            <button type="submit" className="primary-button">Sign in</button>
+          </form>
+        </main>
       </div>
     )
   }
 
+  const shell: Shell = cfg.shell === 'public' ? 'retail' : cfg.shell
+
   return (
-    <div className="app-shell">
-      <aside className="nav-rail">
-        <div className="nav-brand stack-small">
-          <div className="role-pill">{cfg.label}</div>
-          <div>
-            <h2>Garuda Digital Rupiah</h2>
-            <p>{cfg.tagLine}</p>
+    <div className={`app-shell ${shell}-shell`}>
+      <header className="app-header">
+        <div className="topbar">
+          <div className="brand-block">
+            <span className="brand-mark" aria-hidden="true">G</span>
+            <div><strong>Garuda Digital Rupiah</strong><span>{cfg.label}</span></div>
           </div>
-        </div>
-
-        <div className="nav-tabs">
-          {allowedTabs.map(nextTab => (
-            <button
-              key={nextTab}
-              className={`nav-tab${tab === nextTab ? ' active' : ''}`}
-              onClick={() => setTab(nextTab)}
-            >
-              <strong>{TAB_META[nextTab].label}</strong>
-              <span>{TAB_META[nextTab].description}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="surface-card">
-          <h3 style={{ marginTop: 0 }}>Konteks aktif</h3>
-          <div className="stack-small">
-            <div className="context-row"><span>User</span><strong>{sessionUser}</strong></div>
-            <div className="context-row"><span>Role</span><span className="pill">{cfg.label}</span></div>
-            <div className="context-row"><span>Wallet</span><strong>{selectedWallet || 'belum dipilih'}</strong></div>
-          </div>
-        </div>
-      </aside>
-
-      <main className="app-main">
-        <header className="topbar">
-          <div>
-            <div className="eyebrow">{TAB_META[tab]?.label ?? cfg.label}</div>
-            <h1 style={{ margin: '4px 0 6px' }}>{TAB_META[tab]?.description ?? cfg.tagLine}</h1>
-            <p className="muted" style={{ margin: 0 }}>
-              Dompet aktif dipakai ulang di transfer, audit, dan QRIS customer-pay.
-            </p>
+          <div className="header-context" aria-label="Session context">
+            <div><span>Signed in</span><strong>{sessionUser}</strong></div>
+            <div><span>Role</span><strong>{cfg.label}</strong></div>
+            <div><span>Wallet</span><strong>{selectedWallet || 'Not selected'}</strong></div>
           </div>
           <div className="topbar-actions">
-            <button className="secondary-button" onClick={() => setDemoMode(current => !current)}>
-              {demoMode ? 'Sembunyikan demo' : 'Tampilkan demo'}
-            </button>
-            <button className="secondary-button" onClick={handleLogout}>Keluar</button>
+            <button className="secondary-button" onClick={() => setDemoMode(current => !current)} aria-expanded={demoMode}>{demoMode ? 'Hide demo' : 'Show demo'}</button>
+            <button className="secondary-button" onClick={handleLogout}>Sign out</button>
           </div>
-        </header>
+        </div>
+        <nav className="nav-tabs" aria-label={`${shell === 'retail' ? 'Retail payments' : 'Institutional operations'} navigation`}>
+          {allowedTabs.map(nextTab => (
+            <button key={nextTab} className={`nav-tab${tab === nextTab ? ' active' : ''}`} aria-current={tab === nextTab ? 'page' : undefined} onClick={() => { setTab(nextTab); navigate(shell, nextTab) }}>
+              {TAB_META[nextTab].label}
+            </button>
+          ))}
+        </nav>
+      </header>
 
-        <section className="workspace-shell">
-          {allowedTabs.length === 0 ? (
-            <div className="surface-card">
-              <h3>Tidak ada workspace untuk peran ini.</h3>
-              <p className="muted">
-                Gunakan <a className="logged-out-link" href="/docs">dokumentasi API</a> untuk eksplorasi langsung.
-              </p>
-            </div>
-          ) : (
-            <div className={`workspace-layout${demoMode ? ' with-demo' : ''}`}>
-              <div className="workspace-main">
-                {tab === 'overview' && <Overview role={role} selectedWallet={selectedWallet} />}
-                {tab === 'participants' && (
-                  <Participants
-                    role={role}
-                    prefill={demoPrefill?.target === 'submit' || demoPrefill?.target === 'issue' || demoPrefill?.target === 'distribute' ? demoPrefill : undefined}
-                    onPrefillConsumed={() => setDemoPrefill(null)}
-                  />
-                )}
-                {tab === 'wallets' && (
-                  <WalletList
-                    onSelect={setSelectedWallet}
-                    role={role}
-                    showParticipantBadges={role === 'bank_pjp' || role === 'bank_indonesia'}
-                  />
-                )}
-                {tab === 'create' && (
-                  <CreateWallet
-                    prefill={demoPrefill?.target === 'wallet' || demoPrefill?.target === 'kyc-customer' || demoPrefill?.target === 'kyc-approve' ? demoPrefill : undefined}
-                    onPrefillConsumed={() => setDemoPrefill(null)}
-                  />
-                )}
-                {tab === 'transfer' && (
-                  <Transfer
-                    selectedWallet={selectedWallet}
-                    prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined}
-                    onPrefillConsumed={() => setDemoPrefill(null)}
-                  />
-                )}
-                {tab === 'qris' && <QrisPayments role={role} selectedWallet={selectedWallet} />}
-                {tab === 'limits' && <Limits />}
-                {tab === 'audit' && <AuditLog walletID={selectedWallet} />}
-                {tab === 'observability' && <Observability />}
-              </div>
+      <main className="app-main" id="main-content">
 
-              {demoMode && (
-                <aside className="workspace-demo">
-                  <DemoPanel
-                    currentStep={demoStep}
-                    onStep={handleDemoStep}
-                    onPrefill={data => setDemoPrefill(data)}
-                  />
-                </aside>
-              )}
+        <section className="workspace-shell" aria-live="polite">
+          <div className={`workspace-layout${demoMode ? ' with-demo' : ''}`}>
+            <div className="workspace-main">
+              {tab === 'overview' && <Overview role={role} selectedWallet={selectedWallet} />}
+              {tab === 'participants' && <Participants role={role} prefill={demoPrefill?.target === 'submit' || demoPrefill?.target === 'issue' || demoPrefill?.target === 'distribute' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} />}
+              {tab === 'wallets' && <WalletList onSelect={setSelectedWallet} role={role} showParticipantBadges={cfg.shell === 'institutional'} />}
+              {tab === 'create' && <CreateWallet prefill={demoPrefill?.target === 'wallet' || demoPrefill?.target === 'kyc-customer' || demoPrefill?.target === 'kyc-approve' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} />}
+              {tab === 'transfer' && (shell === 'retail' ? <Pay role={role} selectedWallet={selectedWallet} prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} /> : <Transfer role={role} selectedWallet={selectedWallet} prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} />)}
+              {tab === 'contacts' && <Contacts />}
+              {tab === 'activity' && <Activity />}
+              {tab === 'supervision' && <Supervision walletID={selectedWallet} />}
+              {tab === 'prototype' && <PrototypeLab />}
             </div>
-          )}
+            {demoMode && <aside className="workspace-demo"><DemoPanel currentStep={demoStep} onStep={handleDemoStep} onPrefill={data => setDemoPrefill(data)} /></aside>}
+          </div>
         </section>
       </main>
     </div>

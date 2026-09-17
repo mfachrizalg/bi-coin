@@ -5,8 +5,8 @@ const { RetailWorkloadBase } = require('./retail-base');
 /**
  * Monetary wallet-operation benchmark.
  *
- * Setup seeds funded wallets. Measured invocations alternate Mint and Burn on
- * unique wallet keys so MVCC contention does not dominate this functional profile.
+ * Setup establishes funded retail wallets through the Custodian path. Measured
+ * redemptions burn one distinct wallet per slot, avoiding shared-key contention.
  */
 class MonetaryOpsWorkload extends RetailWorkloadBase {
     async initializeWorkloadModule(workerIndex, totalWorkers, roundIndex, roundArguments, sutAdapter, sutContext) {
@@ -17,12 +17,14 @@ class MonetaryOpsWorkload extends RetailWorkloadBase {
 
         const slots = this.arg('transactionSlots', 100);
         await this.seedPopulation({
-            numCustomers: this.arg('wallets', slots),
+            numCustomers: slots,
             numMerchants: 0,
             fundedRatio: 1,
             fundStandard: this.arg('initialStandardBalance', 1000000),
             fundBasic: this.arg('initialBasicBalance', 100000),
+            seed: true,
         });
+        this.txIndex = 0;
         this.configureMeasuredTraffic(slots);
     }
 
@@ -30,10 +32,7 @@ class MonetaryOpsWorkload extends RetailWorkloadBase {
         if (this.customers.length < transactionSlots) {
             throw new Error(`insufficient monetary-operation wallets: need ${transactionSlots}, have ${this.customers.length}`);
         }
-        this.transactionPlans = Array.from({ length: transactionSlots }, (_, slot) => ({
-            kind: slot % 2 === 0 ? 'mint' : 'burn',
-            wallet: this.customers[slot],
-        }));
+        this.transactionPlans = Array.from({ length: transactionSlots }, (_, slot) => ({ wallet: this.customers[slot] }));
     }
 
     planTransaction(slot) {
@@ -44,8 +43,8 @@ class MonetaryOpsWorkload extends RetailWorkloadBase {
 
     async submitTransaction() {
         const plan = this.planTransaction(this.txIndex++);
-        const amount = Math.max(1000, Math.floor(plan.wallet.perTxCap / 100));
-        return this.submit(plan.kind === 'mint' ? 'Mint' : 'Burn', [plan.wallet.walletId, amount]);
+        const amount = this.arg('operationAmount', 100000);
+        return this.submit('Burn', [plan.wallet.walletId, amount], false, 'bi');
     }
 }
 

@@ -7,6 +7,7 @@ const {
     transactionPayload,
     transactionResults,
     transactionStatus,
+    actorRequest,
 } = require('./retail-base');
 
 /**
@@ -44,6 +45,7 @@ class AdversarialDoubleSpendWorkload extends RetailWorkloadBase {
         this.roundIndex = roundIndex;
         this.transferAmount = this.arg('transferAmount', 1000);
         this.senderFunding = this.arg('senderFunding', 50000);
+        await this.ensureBenchmarkCustodian();
         await this.seedSharedSender();
         await this.seedReceivers(this.arg('receivers', 20));
     }
@@ -60,11 +62,11 @@ class AdversarialDoubleSpendWorkload extends RetailWorkloadBase {
         const profileId = `kyc_${id}`;
         const hashes = JSON.stringify([`sha256:${id}`]);
         if (this.workerIndex === 0) {
-            await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId]);
-            await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes]);
-            await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z']);
-            await this.submit('CreateWallet', [walletId, id, 'STANDARD']);
-            await this.submit('Mint', [walletId, this.senderFunding]);
+            await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'himbara');
+            await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'himbara');
+            await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z'], false, 'himbara');
+            await this.submit('CreateWallet', [walletId, id, 'STANDARD'], false, 'himbara');
+            await this.fundRetailWallet(walletId, this.senderFunding);
         } else {
             await this.waitForWallet(walletId);
         }
@@ -95,10 +97,10 @@ class AdversarialDoubleSpendWorkload extends RetailWorkloadBase {
             const profileId = `kyc_${rid}`;
             const hashes = JSON.stringify([`sha256:${rid}`]);
             tasks.push(async () => {
-                await this.submit('CreateRetailCustomer', [rid, `sha256:identity:${rid}`, walletId, profileId]);
-                await this.submit('SubmitKycProfile', [profileId, 'retail_customer', rid, hashes]);
-                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z']);
-                await this.submit('CreateWallet', [walletId, rid, 'STANDARD']);
+                await this.submit('CreateRetailCustomer', [rid, `sha256:identity:${rid}`, walletId, profileId], false, 'himbara');
+                await this.submit('SubmitKycProfile', [profileId, 'retail_customer', rid, hashes], false, 'himbara');
+                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z'], false, 'himbara');
+                await this.submit('CreateWallet', [walletId, rid, 'STANDARD'], false, 'himbara');
             });
         }
         await this.runPool(tasks, this.arg('seedConcurrency', 2));
@@ -113,7 +115,7 @@ class AdversarialDoubleSpendWorkload extends RetailWorkloadBase {
             readOnly: false,
         };
         try {
-            const response = await this.sutAdapter.sendRequests(request);
+        const response = await this.sutAdapter.sendRequests(actorRequest(request, 'himbara'));
             for (const tx of transactionResults(response)) {
                 if (transactionStatus(tx) === 'success') {
                     this.committed += 1;

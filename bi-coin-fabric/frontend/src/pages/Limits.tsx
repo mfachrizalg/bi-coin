@@ -1,68 +1,69 @@
 import { useEffect, useState } from 'react'
-import { listLimits, type SystemLimit } from '../lib/api'
+import { getErrorMessage, listLimits, type SystemLimit } from '../lib/api'
+import { formatRupiah } from '../lib/money'
+import LoadingSkeleton from '../components/LoadingSkeleton'
 
 const SCOPE_LABELS: Record<string, string> = {
-  global_supply:           'Batas Supply Global',
-  per_participant_balance: 'Batas Saldo per Peserta',
-  per_tx_amount:           'Batas Jumlah per Transaksi',
+  global_supply:           'Global supply cap',
+  per_participant_balance: 'Participant balance cap',
+  per_tx_amount:           'Transaction amount cap',
 }
 
-const fmt = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
 
 export default function Limits() {
   const [systemLimits, setSystemLimits] = useState<SystemLimit[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     listLimits()
       .then(data => setSystemLimits(data ?? []))
-      .catch(e => setError(e.message))
+      .catch(e => setError(getErrorMessage(e)))
+      .finally(() => setLoading(false))
   }, [])
 
   return (
-    <div style={{ fontSize: '1rem' }}>
-      <h2 style={{ marginBottom: 24, fontSize: '1.4rem' }}>Batas Transaksi</h2>
-      <div style={{ padding: '12px 14px', marginBottom: 18, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, color: '#1d4ed8' }}>
-        Halaman ini hanya menampilkan limit live dari backend. Policy tier retail tetap ditegakkan chaincode dan tidak lagi dipresentasikan sebagai tabel pseudo-live terpisah.
-      </div>
+    <div className="workspace-stack limits-page">
+      <h2>Transaction limits</h2>
+      <div className="callout">Live limits from the backend. Retail tier policy remains enforced by chaincode.</div>
 
       {/* System limits from backend */}
-      <div style={{ marginBottom: 32 }}>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: 12, color: '#374151' }}>Batas Sistem (Bank Indonesia)</h3>
+      <section>
+        <h3>Bank Indonesia system limits</h3>
         {error && (
-          <div style={{ padding: '10px 14px', marginBottom: 12, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#dc2626', fontSize: '0.95rem' }}>
+          <div className="banner error" role="alert">
             {error}
           </div>
         )}
-        {systemLimits.length === 0 ? (
-          <div style={{ padding: '12px 14px', background: '#fefce8', border: '1px solid #fde047', borderRadius: 8, color: '#713f12', fontSize: '0.95rem' }}>
-            Tidak ada batas sistem yang dikonfigurasi (atau chaincode belum diinisialisasi).
-          </div>
+        {loading ? <LoadingSkeleton kind="table" label="Loading system limits" rows={3} /> : systemLimits.length === 0 ? (
+          <div className="callout warning">No system limits found. The chaincode may not be initialized.</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
+          <div className="table-shell">
+          <table className="data-table">
             <thead>
-              <tr style={{ background: '#f9fafb' }}>
-                <th style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>Scope</th>
-                <th style={{ padding: '10px 14px', textAlign: 'right', borderBottom: '2px solid #e5e7eb' }}>Nilai</th>
-                <th style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '2px solid #e5e7eb' }}>Diatur pada</th>
+              <tr>
+                <th>Scope</th>
+                <th>Value</th>
+                <th>Set at</th>
               </tr>
             </thead>
             <tbody>
               {systemLimits.map(l => (
-                <tr key={l.scope} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 600 }}>
+                <tr key={l.scope}>
+                  <td>
                     {SCOPE_LABELS[l.scope] ?? l.scope}
                   </td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                    {fmt(l.value)}
+                  <td className="numeric-cell">
+                    {formatRupiah(l.value)}
                   </td>
-                  <td style={{ padding: '10px 14px', color: '#6b7280', fontSize: '0.9rem' }}>{l.set_at}</td>
+                  <td className="muted">{l.set_at}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }

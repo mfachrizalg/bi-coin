@@ -4,6 +4,11 @@ Retail Central Bank Digital Currency (CBDC) prototype on Hyperledger Fabric.
 Digital Rupiah with PostgreSQL-backed off-chain KYC, JWT-authenticated role access,
 KYC-tiered wallets, on-chain limits, and audit trail.
 
+**Thesis scope:** KYC is implementation-only, and QRIS is code-only; both are
+excluded from thesis acceptance criteria. Thesis acceptance criteria cover participant lifecycle,
+treasury issuance, two-tier distribution, retail transfer, participant freeze,
+and supervision.
+
 ## Architecture
 
 ```
@@ -12,9 +17,12 @@ KYC-tiered wallets, on-chain limits, and audit trail.
 │  React/TS   │     │  Go REST API  │     │  (chaincode)     │
 └─────────────┘     └──────┬───────┘     └──────────────────┘
                            │
-                           ▼
-                    PostgreSQL KYC/Auth
+                   ▼
+            PostgreSQL KYC/Auth
 ```
+
+Monetary flow: `Bank Indonesia Treasury -> Validator Bank/PJP Custodian reserve -> Retail Customer/Merchant wallet`.
+Issuance credits only `bi_treasury`; Custodian funding uses the ordinary transfer policy.
 
 ## Components
 
@@ -41,35 +49,13 @@ KYC-tiered wallets, on-chain limits, and audit trail.
 - Node.js 18+
 - Docker & Docker Compose
 
-### 1. Start Fabric Network
+### 1. Start everything
 ```bash
-./scripts/network-up.sh
+./start.sh
 ```
 
-### 2. Deploy Chaincode
-```bash
-./scripts/deploy-chaincode.sh
-```
-
-### 3. Start PostgreSQL
-
-```bash
-docker compose -f docker-compose.postgres.yaml up -d
-```
-
-### 4. Start Backend
-```bash
-cd backend
-cp ../.env.example .env
-go run .
-```
-
-### 5. Start Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+`start.sh` starts the Garuda Fabric network, deploys and initializes chaincode,
+starts PostgreSQL, then runs the backend gateway and frontend.
 
 Default PoC users are defined in `.env.example`, for example `bi` / `bi-password`.
 
@@ -90,7 +76,8 @@ Default PoC users are defined in `.env.example`, for example `bi` / `bi-password
 | POST | `/wallets` | Create wallet from `{ "owner_id": ... }` |
 | POST | `/transfers` | Transfer with KYC and tier-limit enforcement; requires `Idempotency-Key` |
 | POST | `/qris/pay` | Settle QRIS payment; requires `Idempotency-Key` |
-| POST | `/distribute` | BI-only wholesale distribution; requires `Idempotency-Key` |
+| POST | `/issuance-requests` | BI-only issuance into Treasury |
+| POST | `/distribute` | BI-only Treasury distribution to a Validator Bank or PJP Custodian; requires `Idempotency-Key` |
 
 ## Chaincode Functions
 
@@ -102,7 +89,8 @@ Default PoC users are defined in `.env.example`, for example `bi` / `bi-password
 | `ListWalletsByParticipant` | participantID | Query |
 | `Transfer` | senderID, receiverID, amount, referenceID | Sender custodian |
 | `PayQris` | payload, payerWalletID, amount, referenceID | Payer custodian |
-| `DistributeToParticipant` | senderParticipantID, receiverParticipantID, amount, referenceID | Bank Indonesia |
+| `RequestIssuance` | amount | Bank Indonesia |
+| `DistributeToParticipant` | receiverParticipantID, amount, referenceID | Bank Indonesia |
 | `RequestIssuanceRtgs` | senderBIC, amount, reference | Bank Indonesia |
 | `SetSystemLimit` | scope, value | Bank Indonesia |
 | `ListSystemLimits` | — | Query |

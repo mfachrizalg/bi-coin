@@ -100,6 +100,10 @@ func (s *AuthService) Verify(token string) (*middleware.TokenClaims, error) {
 	if payload.Sub == "" || payload.Role == "" || payload.Exp <= time.Now().Unix() {
 		return nil, errors.New("invalid token claims")
 	}
+	user, err := s.users.FindAuthUser(payload.Sub)
+	if err != nil || user == nil || !user.Active || user.Role != middleware.Role(payload.Role) {
+		return nil, errors.New("inactive auth user")
+	}
 	return &middleware.TokenClaims{
 		Username:       payload.Sub,
 		Role:           middleware.Role(payload.Role),

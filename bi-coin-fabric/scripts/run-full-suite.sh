@@ -15,7 +15,7 @@ OVERALL_STATUS=0
 
 cd "$PROJECT_DIR"
 mkdir -p "$RESULTS_DIR"
-printf 'profile\tscript\texit_status\treport\tverdict\tnote\n' >"$STATUS_FILE"
+printf 'profile\tscript\texit_status\treport\tverdict\tnote\tsuccess\tfailed\n' >"$STATUS_FILE"
 
 wait_for_fabric_ports() {
   local ports=(7050 7051 9051 11051 12051 13051)
@@ -36,6 +36,25 @@ wait_for_fabric_ports() {
   return 1
 }
 
+prepare_benchmark_assets() {
+  echo "[setup] Generating Caliper identities and connection profiles..."
+  if ! bash benchmark/gen-network-assets.sh; then
+    echo "[setup] FAILED: benchmark network assets" >&2
+    return 1
+  fi
+
+  local missing=0 rel
+  while IFS= read -r rel; do
+    rel="${rel%\"}"
+    rel="${rel#\"}"
+    if [ ! -f "$rel" ]; then
+      echo "[setup] missing benchmark asset: $rel" >&2
+      missing=1
+    fi
+  done < <(sed -n 's/^[[:space:]]*path:[[:space:]]*//p' benchmark/networkconfig.yaml)
+  [ "$missing" -eq 0 ]
+}
+
 reset_network() {
   local profile="$1"
   echo "[setup] Resetting network for ${profile}..."
@@ -47,6 +66,10 @@ reset_network() {
   fi
   if ! wait_for_fabric_ports; then
     echo "[setup] FAILED: Fabric ports not ready for ${profile}"
+    return 1
+  fi
+  if ! prepare_benchmark_assets; then
+    echo "[setup] FAILED: benchmark assets for ${profile}"
     return 1
   fi
   if ! NETWORK_MODE=garuda ./scripts/deploy-chaincode.sh >"$RESULTS_DIR/${STAMP}-${profile}-deploy-chaincode.log" 2>&1; then
@@ -63,7 +86,7 @@ reset_network() {
 }
 
 record_status() {
-  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$@" >>"$STATUS_FILE"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$@" >>"$STATUS_FILE"
 }
 
 run_benchmark() {
@@ -72,19 +95,23 @@ run_benchmark() {
   local oracle="${3:-standard}"
   local log_file="$RESULTS_DIR/${STAMP}-${profile}.log"
   local report_file="$RESULTS_DIR/${STAMP}-${profile}.html"
+  local trace_dir="$RESULTS_DIR/${STAMP}-${profile}-trace"
   local status=0
   local verdict=FAIL
   local note=
+  local success_count=0
+  local failed_count=0
 
   if ! reset_network "$profile"; then
-    record_status "$profile" "$script_name" 1 missing FAIL setup-failed
+    record_status "$profile" "$script_name" 1 missing FAIL setup-failed 0 0
     OVERALL_STATUS=1
     return
   fi
 
   echo "[run] ${profile} ..."
+  mkdir -p "$trace_dir"
   rm -f report.html
-  if npm run "$script_name" >"$log_file" 2>&1; then
+  if BENCHMARK_STAMP="${STAMP}_${profile}" BENCHMARK_TRACE_DIR="$trace_dir" npm run "$script_name" >"$log_file" 2>&1; then
     status=0
   else
     status=$?
@@ -98,8 +125,26 @@ run_benchmark() {
     note=missing-fresh-report
   fi
 
+  local report_summary=
+  local report_ok=false
+  if [ "$report_state" = present ]; then
+    report_summary="$(node scripts/validate-caliper-report.js "$log_file" 2>&1 || true)"
+    printf '%s\n' "$report_summary" >>"$log_file"
+    if [[ "$report_summary" =~ \"success\":([0-9]+) ]]; then success_count="${BASH_REMATCH[1]}"; fi
+    if [[ "$report_summary" =~ \"failed\":([0-9]+) ]]; then failed_count="${BASH_REMATCH[1]}"; fi
+    if [[ "$report_summary" == *'"verdict":"PASS"'* ]]; then report_ok=true; fi
+  fi
+
   if [ "$status" -eq 0 ] && [ "$report_state" = present ]; then
-    if grep -Eq 'Failed round [0-9]+|Failed rounds: [1-9][0-9]*' "$log_file"; then
+    if [ "$oracle" = standard ]; then
+      if [ "$report_ok" = true ] && ! grep -Eq 'Failed round [0-9]+|Failed rounds: [1-9][0-9]*' "$log_file"; then
+        verdict=PASS
+        note=caliper-success-zero-failures
+      else
+        verdict=MEASURED_WITH_FAILURES
+        note=caliper-report-failures
+      fi
+    elif grep -Eq 'Failed round [0-9]+|Failed rounds: [1-9][0-9]*' "$log_file"; then
       verdict=FAIL
       note=caliper-failed-round
     else
@@ -114,6 +159,7 @@ run_benchmark() {
         fi
         ;;
       boundary)
+        docker logs peer0.bi.paynet >>"$log_file" 2>&1 || true
         if node scripts/validate-boundary-log.js "$log_file" >>"$log_file" 2>&1; then
           verdict=PASS
           note=boundary-oracle-confirmed
@@ -139,17 +185,13 @@ run_benchmark() {
           note=overspend-oracle-failed
         fi
         ;;
-      standard)
-        verdict=PASS
-        note=caliper-success
-        ;;
       esac
     fi
   elif [ -z "$note" ]; then
     note=caliper-exit-${status}
   fi
 
-  record_status "$profile" "$script_name" "$status" "$report_state" "$verdict" "$note"
+  record_status "$profile" "$script_name" "$status" "$report_state" "$verdict" "$note" "$success_count" "$failed_count"
   echo "[run] ${profile}: exit=${status}, report=${report_state}, verdict=${verdict}"
   if [ "$verdict" != PASS ]; then
     OVERALL_STATUS=1
@@ -162,6 +204,7 @@ const profiles = [
   'benchmark:transfer:w1|transfer-w1',
   'benchmark:transfer:w2|transfer-w2',
   'benchmark:transfer:w4|transfer-w4',
+  'benchmark:transfer:w8|transfer-w8',
 ];
 let state = Number(process.env.BENCHMARK_SEED) >>> 0;
 function random() {

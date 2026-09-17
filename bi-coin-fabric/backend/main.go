@@ -41,15 +41,19 @@ func main() {
 	defer svc.Close()
 	svc.SetKycStore(store)
 
-	server := newHTTPServer(cfg, authSvc, svc)
+	server := newHTTPServer(cfg, authSvc, svc, store)
 	log.Printf("Garuda Digital Rupiah API Gateway starting on :%s", cfg.Port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("server: %v", err)
 	}
 }
 
-func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *services.LedgerService) *http.Server {
+func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *services.LedgerService, stores ...*services.PostgresStore) *http.Server {
 	h := handlers.New(svc, authSvc)
+	// Contact shortcuts are private Postgres data owned by the authenticated user.
+	if len(stores) > 0 {
+		h.SetPaymentContactStore(stores[0])
+	}
 
 	r := mux.NewRouter()
 	r.Use(middleware.AuthMiddleware(authSvc))
@@ -62,6 +66,8 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 		Authenticated: specAuthenticated,
 		KycVerified:   specKycVerified,
 		BankPjp:       specBankPjp,
+		ValidatorBank: specValidatorBank,
+		Pjp:           specPjp,
 		BankIndonesia: specBankIndonesia,
 		Merchant:      specMerchant,
 		Supervisor:    specSupervisor,
@@ -71,7 +77,8 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 	topologyRoute := r.NewRoute().Subrouter()
 	topologyRoute.Use(middleware.RequireRole(
 		middleware.RolePublic, middleware.RoleAuthenticated, middleware.RoleKycVerified,
-		middleware.RoleBankPjp, middleware.RoleBankIndonesia, middleware.RoleMerchant, middleware.RoleSupervisor,
+		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP,
+		middleware.RoleBankIndonesia, middleware.RoleMerchant, middleware.RoleSupervisor,
 	))
 	topologyRoute.HandleFunc("/network/topology", handlers.TopologyHandler).Methods("GET")
 

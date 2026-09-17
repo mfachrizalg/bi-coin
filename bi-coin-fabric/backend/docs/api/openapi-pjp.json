@@ -1,0 +1,2314 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Garuda Digital Rupiah API Gateway — Role: pjp",
+    "version": "0.3.0",
+    "description": "PJP onboarding, KYC, retail customer, participant read, and wallet issuance surface."
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login and receive JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Current authenticated principal",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated principal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/network/topology": {
+      "get": {
+        "tags": [
+          "network"
+        ],
+        "summary": "Network topology",
+        "responses": {
+          "200": {
+            "description": "Topology",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/participants": {
+      "post": {
+        "tags": [
+          "participants"
+        ],
+        "summary": "Submit participant onboarding request",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Participant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "participants"
+        ],
+        "summary": "List participants",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Participants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericArray"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/participants/{participant_id}": {
+      "get": {
+        "tags": [
+          "participants"
+        ],
+        "summary": "Get participant",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "participant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Participant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/retail/customers": {
+      "post": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "Create retail customer anchor",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetailCustomerRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Retail customer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "List retail customers",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retail customers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericArray"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles": {
+      "post": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "Submit KYC profile",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KycProfileRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "KYC profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles/{profile_id}": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "Get KYC profile",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KYC profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles/{profile_id}/refresh": {
+      "post": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "Refresh KYC profile from provider result",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KycProviderResultRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated KYC profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles/{profile_id}/provider-checks": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "List provider checks",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider checks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericArray"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kyc/profiles/{profile_id}/audit-events": {
+      "get": {
+        "tags": [
+          "kyc"
+        ],
+        "summary": "List KYC audit events",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericArray"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallets": {
+      "post": {
+        "tags": [
+          "wallets"
+        ],
+        "summary": "Create wallet",
+        "description": "Create a wallet bound to owner_id. Custodian and participant bindings come from the authenticated principal and ledger state.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWalletRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created wallet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wallet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "wallets"
+        ],
+        "summary": "List wallets",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "participant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional participant filter. Retail actors remain scoped server-side."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transfers": {
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Transfer retail Digital Rupiah",
+        "description": "Requires wallet ownership and an Idempotency-Key header.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Required on replay-safe money mutations. Reuse the same key only when retrying the same logical request."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transfer receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Use Authorization: Bearer <JWT> from POST /auth/login."
+      }
+    },
+    "parameters": {
+      "ParticipantFilter": {
+        "name": "participant_id",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Optional participant filter. Retail actors remain scoped server-side."
+      },
+      "ScopeQuery": {
+        "name": "scope",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ProfileID": {
+        "name": "profile_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ParticipantID": {
+        "name": "participant_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IntentID": {
+        "name": "intent_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IdempotencyKeyHeader": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Required on replay-safe money mutations. Reuse the same key only when retrying the same logical request."
+      }
+    },
+    "schemas": {
+      "AmountRequestBody": {
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Participant Id",
+            "description": "Participant requesting issuance or redemption.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Amount",
+            "description": "Wholesale Rupiah Digital amount represented as a decimal string.",
+            "examples": [
+              "100"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant_id",
+          "amount"
+        ],
+        "title": "AmountRequestBody",
+        "example": {
+          "amount": "100",
+          "participant_id": "bank-a"
+        }
+      },
+      "CreateWalletRequestBody": {
+        "type": "object",
+        "required": [
+          "owner_id"
+        ],
+        "properties": {
+          "owner_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Retail subject or institutional owner bound to the wallet."
+          }
+        },
+        "example": {
+          "owner_id": "cust_bank_a_customer_01"
+        }
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "KycProfileRequestBody": {
+        "properties": {
+          "subject_type": {
+            "$ref": "#/components/schemas/KycSubjectType",
+            "description": "Entity being verified: participant institution, retail customer, or merchant.",
+            "examples": [
+              "retail_customer",
+              "merchant"
+            ]
+          },
+          "subject_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Subject Id",
+            "description": "Subject identifier.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "provider_case_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Provider Case Id",
+            "description": "External KYC/KYB provider case reference.",
+            "examples": [
+              "sumsub-case-bank-a"
+            ]
+          },
+          "document_hashes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Document Hashes",
+            "description": "Opaque document hashes only. Raw identity documents are not stored.",
+            "examples": [
+              [
+                "sha256:document-hash"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "subject_type",
+          "subject_id",
+          "provider_case_id",
+          "document_hashes"
+        ],
+        "title": "KycProfileRequestBody",
+        "example": {
+          "document_hashes": [
+            "sha256:document-hash"
+          ],
+          "provider_case_id": "sumsub-case-bank-a",
+          "subject_id": "bank-a",
+          "subject_type": "participant"
+        }
+      },
+      "KycProviderResultRequestBody": {
+        "properties": {
+          "provider_case_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Provider Case Id",
+            "description": "Provider case reference."
+          },
+          "status": {
+            "$ref": "#/components/schemas/KycStatus",
+            "description": "Provider decision status."
+          },
+          "risk_level": {
+            "$ref": "#/components/schemas/KycRiskLevel",
+            "description": "Provider risk classification."
+          },
+          "checks": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Checks",
+            "description": "Provider check names and normalized outcomes."
+          },
+          "document_hashes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Document Hashes",
+            "description": "Opaque hashes for documents used by the provider."
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason",
+            "description": "Reason for rejection."
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "KYC expiry timestamp."
+          },
+          "due_diligence_level": {
+            "$ref": "#/components/schemas/DueDiligenceLevel"
+          },
+          "senior_approval": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider_case_id",
+          "status",
+          "risk_level",
+          "document_hashes",
+          "due_diligence_level",
+          "senior_approval"
+        ],
+        "title": "KycProviderResultRequestBody",
+        "example": {
+          "checks": {
+            "adverse_media": "clear",
+            "identity_or_business_verification": "pass",
+            "pep": "clear",
+            "sanctions": "clear"
+          },
+          "document_hashes": [
+            "sha256:document-hash"
+          ],
+          "provider_case_id": "sumsub-case-bank-a",
+          "risk_level": "low",
+          "status": "approved"
+        }
+      },
+      "KycRiskLevel": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "prohibited"
+        ],
+        "title": "KycRiskLevel"
+      },
+      "KycStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "in_review",
+          "approved",
+          "rejected",
+          "expired",
+          "suspended"
+        ],
+        "title": "KycStatus"
+      },
+      "KycSubjectType": {
+        "type": "string",
+        "enum": [
+          "participant",
+          "retail_customer",
+          "merchant"
+        ],
+        "title": "KycSubjectType"
+      },
+      "LimitScope": {
+        "type": "string",
+        "enum": [
+          "global_supply",
+          "per_participant_balance",
+          "per_tx_amount"
+        ],
+        "title": "LimitScope"
+      },
+      "OnboardingRequestBody": {
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Participant Id",
+            "description": "Unique participant code used by BI supervision and payment workflows.",
+            "examples": [
+              "bank-a"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Legal or demo display name for the participating institution.",
+            "examples": [
+              "Bank A Demo"
+            ]
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Domain",
+            "description": "Iroha domain namespace assigned to the participant.",
+            "examples": [
+              "bank-a.paynet"
+            ]
+          },
+          "account_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Account Id",
+            "description": "Iroha account that will hold wholesale Rupiah Digital balances.",
+            "examples": [
+              "bank-a-account"
+            ]
+          },
+          "participant_type": {
+            "$ref": "#/components/schemas/ParticipantType",
+            "description": "Participant category in the wholesale Digital Rupiah network.",
+            "examples": [
+              "validator"
+            ]
+          },
+          "initial_reserve_balance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Initial Reserve Balance",
+            "description": "Mock BI-RTGS reserve balance available for future issuance requests.",
+            "default": "0",
+            "examples": [
+              "1000"
+            ]
+          },
+          "compliance_status": {
+            "type": "string",
+            "title": "Compliance Status",
+            "description": "Legacy demo field. KYC approval is enforced through KYC profile endpoints.",
+            "default": "active",
+            "examples": [
+              "active"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "participant_id",
+          "name",
+          "domain",
+          "account_id",
+          "participant_type"
+        ],
+        "title": "OnboardingRequestBody",
+        "example": {
+          "account_id": "bank-a-account",
+          "compliance_status": "active",
+          "domain": "bank-a.paynet",
+          "initial_reserve_balance": "1000",
+          "name": "Bank A Demo",
+          "participant_id": "bank-a",
+          "participant_type": "validator"
+        }
+      },
+      "ParticipantType": {
+        "type": "string",
+        "enum": [
+          "validator",
+          "non_validator",
+          "no_node"
+        ],
+        "title": "ParticipantType"
+      },
+      "RegisterTriggerRequestBody": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name",
+            "description": "Trigger name.",
+            "examples": [
+              "tax_withholding"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Human-readable description.",
+            "default": "",
+            "examples": [
+              "Auto tax withholding"
+            ]
+          },
+          "action_type": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Action Type",
+            "description": "Trigger event: on_transfer, on_issuance, on_redemption, periodic.",
+            "examples": [
+              "on_transfer"
+            ]
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "description": "Arbitrary key-value parameters for the trigger logic."
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "action_type"
+        ],
+        "title": "RegisterTriggerRequestBody",
+        "example": {
+          "action_type": "on_transfer",
+          "description": "Automatically withhold tax on transfers above threshold",
+          "name": "tax_withholding",
+          "params": {
+            "rate": "0.10",
+            "threshold": "10000"
+          }
+        }
+      },
+      "RetailCustomerRequestBody": {
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Customer Id",
+            "description": "Internal retail customer identifier.",
+            "examples": [
+              "cust-001"
+            ]
+          },
+          "legal_name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Legal Name",
+            "description": "Legal name kept in the participant provider system.",
+            "examples": [
+              "Retail Customer 001"
+            ]
+          },
+          "wallet_account_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Wallet Account Id",
+            "description": "Ledger wallet account bound to this retail customer.",
+            "examples": [
+              "cust-001-wallet"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "customer_id",
+          "legal_name",
+          "wallet_account_id"
+        ],
+        "title": "RetailCustomerRequestBody",
+        "example": {
+          "customer_id": "cust-001",
+          "legal_name": "Retail Customer 001",
+          "wallet_account_id": "cust-001-wallet"
+        }
+      },
+      "SetLimitRequestBody": {
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/LimitScope",
+            "description": "Limit scope: global_supply, per_participant_balance, or per_tx_amount."
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Value",
+            "description": "Maximum value for the given scope.",
+            "examples": [
+              "1000000"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "scope",
+          "value"
+        ],
+        "title": "SetLimitRequestBody",
+        "example": {
+          "scope": "global_supply",
+          "value": "1000000"
+        }
+      },
+      "TransferRequestBody": {
+        "type": "object",
+        "required": [
+          "sender_id",
+          "receiver_id",
+          "amount"
+        ],
+        "properties": {
+          "sender_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "receiver_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
+          }
+        },
+        "example": {
+          "sender_id": "wlt_cust_bank_a_customer_01",
+          "receiver_id": "wlt_cust_bank_b_customer_02",
+          "amount": "25000"
+        }
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WalletType": {
+        "type": "string",
+        "enum": [
+          "hot",
+          "cold"
+        ],
+        "title": "WalletType"
+      },
+      "DueDiligenceLevel": {
+        "type": "string",
+        "enum": [
+          "simplified",
+          "standard",
+          "enhanced"
+        ]
+      },
+      "LoginRequestBody": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "username": "bi",
+          "password": "bi-password"
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "role"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "example": "Bearer"
+          },
+          "expires_in": {
+            "type": "integer"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "custodian_msp_id": {
+            "type": "string"
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "required": [
+          "username",
+          "role"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "subject_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "custodian_msp_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "status": "ok"
+        }
+      },
+      "GenericObject": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GenericArray": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "Wallet": {
+        "type": "object",
+        "required": [
+          "wallet_id",
+          "owner_id",
+          "participant_id",
+          "wallet_type",
+          "balance",
+          "frozen"
+        ],
+        "properties": {
+          "wallet_id": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "wallet_type": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
+          },
+          "frozen": {
+            "type": "boolean"
+          },
+          "daily_spent": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "monthly_spent": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "monthly_received": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "WalletList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Wallet"
+        }
+      },
+      "TransferResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          },
+          "sender_id": {
+            "type": "string"
+          },
+          "receiver_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string."
+          }
+        }
+      },
+      "AmountResult": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          }
+        }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "ResolveQrisRequestBody": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "QrisMode": {
+        "type": "string",
+        "enum": [
+          "static",
+          "dynamic"
+        ]
+      },
+      "QrisStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "paid",
+          "cancelled",
+          "expired"
+        ]
+      },
+      "CreateQrisIntentRequestBody": {
+        "type": "object",
+        "required": [
+          "mode",
+          "merchant_wallet_id"
+        ],
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/QrisMode"
+          },
+          "merchant_wallet_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PayQrisRequestBody": {
+        "type": "object",
+        "required": [
+          "payload",
+          "payer_wallet_id"
+        ],
+        "properties": {
+          "payload": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payer_wallet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      },
+      "QrisIntent": {
+        "type": "object",
+        "required": [
+          "intent_id",
+          "mode",
+          "merchant_id",
+          "merchant_wallet_id",
+          "amount",
+          "status",
+          "reference_id",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "intent_id": {
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/QrisMode"
+          },
+          "merchant_id": {
+            "type": "string"
+          },
+          "merchant_wallet_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QrisStatus"
+          },
+          "label": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paid_by_wallet_id": {
+            "type": "string"
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "QrisIntentList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QrisIntent"
+        }
+      },
+      "QrisPayResult": {
+        "type": "object",
+        "required": [
+          "status",
+          "intent_id",
+          "reference_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          },
+          "intent_id": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "string"
+          }
+        }
+      },
+      "DistributeRequestBody": {
+        "type": "object",
+        "required": [
+          "receiver_participant_id",
+          "amount"
+        ],
+        "properties": {
+          "receiver_participant_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "minLength": 1
+          }
+        }
+      },
+      "RtgsIssuanceRequestBody": {
+        "type": "object",
+        "required": [
+          "sender_bic",
+          "amount",
+          "reference"
+        ],
+        "properties": {
+          "sender_bic": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RtgsIssuanceReceipt": {
+        "type": "object",
+        "required": [
+          "status",
+          "reference",
+          "amount",
+          "participant_id",
+          "sender_bic",
+          "tx_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "participant_id": {
+            "type": "string"
+          },
+          "sender_bic": {
+            "type": "string"
+          },
+          "tx_id": {
+            "type": "string"
+          }
+        }
+      },
+      "IssuanceRequestBody": {
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Whole-rupiah decimal string credited to Treasury."
+          }
+        }
+      },
+      "PaymentContactType": {
+        "type": "string",
+        "enum": [
+          "retail_customer",
+          "merchant"
+        ]
+      },
+      "PaymentContactRequestBody": {
+        "type": "object",
+        "required": [
+          "label",
+          "wallet_id",
+          "recipient_type"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "wallet_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "recipient_type": {
+            "$ref": "#/components/schemas/PaymentContactType"
+          }
+        }
+      },
+      "PaymentContact": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "wallet_id",
+          "recipient_type",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "wallet_id": {
+            "type": "string"
+          },
+          "recipient_type": {
+            "$ref": "#/components/schemas/PaymentContactType"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PaymentContactList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PaymentContact"
+        }
+      }
+    }
+  }
+}

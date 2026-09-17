@@ -1,0 +1,915 @@
+
+> bi-coin-fabric@1.0.0 benchmark:transfer:w4
+> caliper launch manager --caliper-benchconfig benchmark/benchconfigs/retail-transfer-workers-4.yaml --caliper-networkconfig benchmark/networkconfig.yaml --caliper-workspace .
+
+2026.09.09-04:11:12.577 info  [caliper] [cli-launch-manager] 	Set workspace path: /workspace
+2026.09.09-04:11:12.580 info  [caliper] [cli-launch-manager] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/retail-transfer-workers-4.yaml
+2026.09.09-04:11:12.582 info  [caliper] [cli-launch-manager] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-04:11:12.583 info  [caliper] [cli-launch-manager] 	Set SUT type: fabric
+2026.09.09-04:11:12.616 info  [caliper] [caliper-engine] 	Starting benchmark flow
+2026.09.09-04:11:12.617 info  [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.start" is not present, skipping start command
+2026.09.09-04:11:13.396 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-04:11:13.406 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-04:11:13.408 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-04:11:13.410 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-04:11:13.413 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Fabric-Gateway SDK version: 1.5.0 for Peer-Gateway connector; TLS based on BankIndonesiaOrgMSP: server
+2026.09.09-04:11:13.413 info  [caliper] [caliper-engine] 	Executed "init" step in 0.002 seconds
+2026.09.09-04:11:13.413 warn  [caliper] [connectors/peer-gateway/PeerGateway] 	Install smart contract not available for the Fabric Peer Gateway connector
+2026.09.09-04:11:13.413 info  [caliper] [caliper-engine] 	Executed "install" step in 0 seconds
+2026.09.09-04:11:13.416 info  [caliper] [monitor.js] 	Attempting to create resource monitor of type docker
+2026.09.09-04:11:13.419 info  [caliper] [default-observer] 	Observer interval set to 5000 milliseconds
+2026.09.09-04:11:13.423 info  [caliper] [round-orchestrator] 	Preparing worker connections
+2026.09.09-04:11:13.424 info  [caliper] [worker-orchestrator] 	Launching worker 1 of 4
+2026.09.09-04:11:13.430 info  [caliper] [worker-orchestrator] 	Launching worker 2 of 4
+2026.09.09-04:11:13.433 info  [caliper] [worker-orchestrator] 	Launching worker 3 of 4
+2026.09.09-04:11:13.435 info  [caliper] [worker-orchestrator] 	Launching worker 4 of 4
+2026.09.09-04:11:13.437 info  [caliper] [worker-orchestrator] 	Messenger not configured, entering configure phase...
+2026.09.09-04:11:13.438 info  [caliper] [worker-orchestrator] 	No existing workers detected, entering worker launch phase...
+2026.09.09-04:11:13.439 info  [caliper] [worker-orchestrator] 	Waiting for 4 workers to be connected...
+2026.09.09-04:11:13.924 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.09-04:11:13.925 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/retail-transfer-workers-4.yaml
+2026.09.09-04:11:13.926 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-04:11:13.926 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.09-04:11:13.927 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.09-04:11:13.929 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/retail-transfer-workers-4.yaml
+2026.09.09-04:11:13.929 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-04:11:13.930 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.09-04:11:13.935 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.09-04:11:13.936 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/retail-transfer-workers-4.yaml
+2026.09.09-04:11:13.936 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-04:11:13.936 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.09-04:11:13.957 info  [caliper] [cli-launch-worker] 	Set workspace path: /workspace
+2026.09.09-04:11:13.959 info  [caliper] [cli-launch-worker] 	Set benchmark configuration path: /workspace/benchmark/benchconfigs/retail-transfer-workers-4.yaml
+2026.09.09-04:11:13.959 info  [caliper] [cli-launch-worker] 	Set network configuration path: /workspace/benchmark/networkconfig.yaml
+2026.09.09-04:11:13.959 info  [caliper] [cli-launch-worker] 	Set SUT type: fabric
+2026.09.09-04:11:14.017 info  [caliper] [worker-orchestrator] 	4 workers connected, progressing to worker assignment phase.
+2026.09.09-04:11:14.017 info  [caliper] [worker-orchestrator] 	Workers currently unassigned, awaiting index assignment...
+2026.09.09-04:11:14.019 info  [caliper] [worker-orchestrator] 	Waiting for 4 workers to be assigned...
+2026.09.09-04:11:14.086 info  [caliper] [worker-orchestrator] 	4 workers assigned, progressing to worker initialization phase.
+2026.09.09-04:11:14.087 info  [caliper] [worker-orchestrator] 	Waiting for 4 workers to be ready...
+2026.09.09-04:11:14.087 info  [caliper] [worker-message-handler] 	Initializing Worker#0...
+2026.09.09-04:11:14.087 info  [caliper] [worker-message-handler] 	Initializing Worker#2...
+2026.09.09-04:11:14.087 info  [caliper] [worker-message-handler] 	Initializing Worker#1...
+2026.09.09-04:11:14.087 info  [caliper] [worker-message-handler] 	Initializing Worker#3...
+2026.09.09-04:11:14.933 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-04:11:14.940 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-04:11:14.941 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-04:11:14.942 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-04:11:14.946 info  [caliper] [worker-message-handler] 	Worker#0 initialized
+2026.09.09-04:11:14.976 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-04:11:14.982 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-04:11:14.983 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-04:11:14.984 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-04:11:14.990 info  [caliper] [worker-message-handler] 	Worker#3 initialized
+2026.09.09-04:11:15.007 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-04:11:15.015 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-04:11:15.016 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-04:11:15.017 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-04:11:15.020 info  [caliper] [FabricConnectorFactory] 	Initializing peer gateway connector compatible with installed fabric-gateway SDK: 1.5.0
+2026.09.09-04:11:15.022 info  [caliper] [worker-message-handler] 	Worker#1 initialized
+2026.09.09-04:11:15.028 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as User1 for organization BankIndonesiaOrgMSP
+2026.09.09-04:11:15.029 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _HimbaraBankOrgMSP_User1 for organization HimbaraBankOrgMSP
+2026.09.09-04:11:15.030 info  [caliper] [IdentityManager] 	Adding User1 (admin=false) as _CommercialBankOrgMSP_User1 for organization CommercialBankOrgMSP
+2026.09.09-04:11:15.033 info  [caliper] [worker-message-handler] 	Worker#2 initialized
+2026.09.09-04:11:15.034 info  [caliper] [worker-orchestrator] 	4 workers ready, progressing to test preparation phase.
+2026.09.09-04:11:15.034 info  [caliper] [round-orchestrator] 	Started round 1 (retail-warmup-w4)
+2026.09.09-04:11:15.036 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#0
+2026.09.09-04:11:15.037 info  [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#0
+2026.09.09-04:11:15.037 info  [caliper] [worker-message-handler] 	Preparing Worker#3 for Round#0
+2026.09.09-04:11:15.037 info  [caliper] [worker-message-handler] 	Preparing Worker#2 for Round#0
+2026.09.09-04:11:15.096 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-04:11:15.097 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-04:11:15.097 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-04:11:15.098 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-04:11:15.103 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:11:15.106 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:11:15.106 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:11:15.107 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:11:15.110 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-04:11:15.110 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-04:11:15.110 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is starting...
+2026.09.09-04:11:15.110 info  [caliper] [caliper-worker] 	Info: worker 3 prepare test phase for round 0 is starting...
+2026.09.09-04:11:15.111 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-04:11:15.111 info  [caliper] [caliper-worker] 	Info: worker 2 prepare test phase for round 0 is starting...
+2026.09.09-04:11:15.113 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-04:11:15.113 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is starting...
+2026.09.09-04:11:15.195 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, participant bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, participant bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:20.807 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RequestIssuance] using arguments [20000000000],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.09.09-04:11:21.077 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RequestIssuance] using arguments [20000000000],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:7051 (2026-09-09T04:11:21.074Z)
+Details:
+2026.09.09-04:11:21.583 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RequestIssuance] using arguments [20000000000],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:7051 (2026-09-09T04:11:21.074Z)
+Details:
+2026.09.09-04:11:22.339 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RequestIssuance] using arguments [20000000000],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:7051 (2026-09-09T04:11:21.074Z)
+Details:
+2026.09.09-04:11:23.358 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [RequestIssuance] using arguments [20000000000],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:7051 (2026-09-09T04:11:21.074Z)
+Details:
+2026.09.09-04:11:23.363 info  [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 0: Error: setup RequestIssuance failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /workspace/benchmark/workloads/retail-base.js:252:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:11:23.364 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:11:23.367 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:11:23.369 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:11:23.371 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-04:11:23.376 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-04:11:23.376 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-04:11:23.377 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 0 is completed
+2026.09.09-04:11:23.379 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (385086): Error: setup RequestIssuance failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /workspace/benchmark/workloads/retail-base.js:252:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:11:23.381 error [caliper] [round-orchestrator] 	Failed round 1 (retail-warmup-w4): Error: Error: setup RequestIssuance failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:519:28)
+    at ProcessMessenger.onMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:519:28)
+    at emit (node:internal/child_process:949:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2026.09.09-04:11:23.381 info  [caliper] [round-orchestrator] 	Started round 2 (retail-sustained-w4)
+2026.09.09-04:11:23.383 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#1
+2026.09.09-04:11:23.388 info  [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#1
+2026.09.09-04:11:23.388 info  [caliper] [worker-message-handler] 	Preparing Worker#2 for Round#1
+2026.09.09-04:11:23.388 info  [caliper] [worker-message-handler] 	Preparing Worker#3 for Round#1
+2026.09.09-04:11:23.389 info  [caliper] [caliper-worker] 	Info: worker 2 prepare test phase for round 1 is starting...
+2026.09.09-04:11:23.389 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is starting...
+2026.09.09-04:11:23.389 info  [caliper] [caliper-worker] 	Info: worker 3 prepare test phase for round 1 is starting...
+2026.09.09-04:11:23.401 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-04:11:23.410 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:11:23.418 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-04:11:23.418 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is starting...
+2026.09.09-04:11:23.474 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:24.032 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:24.551 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:25.061 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:25.569 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:26.074 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:26.578 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:27.083 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:11:23.470Z)
+Details:
+2026.09.09-04:11:27.607 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: failed to get config for channel [mychannel]: could not get last config for channel mychannel
+Details:
+2026.09.09-04:11:28.117 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:28.625 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:29.131 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:29.637 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:30.142 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:30.648 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:31.154 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:31.664 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:32.172 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:32.679 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:33.184 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:33.689 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:34.194 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:34.700 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:35.204 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:35.710 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:36.214 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:36.719 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:37.225 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:37.732 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:38.237 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:38.742 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:39.247 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:39.753 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:40.257 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:40.763 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:41.269 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:41.773 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:42.279 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:42.783 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:43.290 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:43.795 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:44.344 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:44.851 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:45.355 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:45.860 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:46.365 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:46.877 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:11:47.592 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:48.100 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:48.609 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:49.115 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:49.634 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:50.142 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:50.648 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:51.157 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:51.664 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:52.172 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:52.683 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:53.191 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:53.701 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:54.217 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:54.724 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:55.233 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:55.740 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:56.248 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:56.758 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:57.265 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:57.774 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:58.282 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:58.790 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:59.299 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:11:59.808 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:00.319 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:00.827 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:01.338 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:01.850 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:02.361 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:02.873 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:03.381 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:03.888 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:04.395 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:04.903 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:05.410 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:05.920 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:06.430 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:06.939 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:07.450 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:07.958 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:08.465 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:08.972 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:09.480 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:09.988 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:10.495 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:11.003 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:11.509 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:12.019 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:12.527 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:13.035 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:13.542 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:14.051 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:14.559 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:15.066 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:15.574 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:16.083 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:16.591 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:17.099 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:17.606 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:18.112 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:18.644 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:19.200 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:19.722 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:20.263 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:20.858 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:21.435 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:22.013 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:22.526 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:23.073 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:23.590 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:24.107 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:24.640 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:25.141 info  [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 1: Error: benchmark custodian wallet was not seeded: Error: setup GetWallet failed: [object Object]
+    at RetailTransferWorkload.waitForWallet (/workspace/benchmark/workloads/retail-base.js:206:15)
+    at async /workspace/benchmark/workloads/retail-base.js:216:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:12:25.142 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:12:25.142 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:12:25.142 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:12:25.142 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-04:12:25.142 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-04:12:25.143 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-04:12:25.143 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 1 is completed
+2026.09.09-04:12:25.143 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (385087): Error: benchmark custodian wallet was not seeded: Error: setup GetWallet failed: [object Object]
+    at RetailTransferWorkload.waitForWallet (/workspace/benchmark/workloads/retail-base.js:206:15)
+    at async /workspace/benchmark/workloads/retail-base.js:216:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:12:25.147 error [caliper] [round-orchestrator] 	Failed round 2 (retail-sustained-w4): Error: Error: benchmark custodian wallet was not seeded: Error: setup GetWallet failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:519:28)
+    at ProcessMessenger.onMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:519:28)
+    at emit (node:internal/child_process:949:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2026.09.09-04:12:25.147 info  [caliper] [round-orchestrator] 	Started round 3 (retail-peak-w4)
+2026.09.09-04:12:25.150 info  [caliper] [worker-message-handler] 	Preparing Worker#1 for Round#2
+2026.09.09-04:12:25.151 info  [caliper] [worker-message-handler] 	Preparing Worker#0 for Round#2
+2026.09.09-04:12:25.152 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is starting...
+2026.09.09-04:12:25.154 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user User1
+2026.09.09-04:12:25.156 info  [caliper] [worker-message-handler] 	Preparing Worker#2 for Round#2
+2026.09.09-04:12:25.157 info  [caliper] [caliper-worker] 	Info: worker 2 prepare test phase for round 2 is starting...
+2026.09.09-04:12:25.155 info  [caliper] [worker-message-handler] 	Preparing Worker#3 for Round#2
+2026.09.09-04:12:25.158 info  [caliper] [caliper-worker] 	Info: worker 3 prepare test phase for round 2 is starting...
+2026.09.09-04:12:25.158 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:12:25.162 info  [caliper] [connectors/peer-gateway/PeerGateway] 	Generating contract map for user _CommercialBankOrgMSP_User1
+2026.09.09-04:12:25.163 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 2 is starting...
+2026.09.09-04:12:25.239 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, participant bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.bi.paynet:7051:chaincode response 500, participant bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:12:33.779 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [DistributeToParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,20000000000,bench-liquidity-bench_custodian_20260909-final-03_transfer-w4-20000000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.09.09-04:12:35.956 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [DistributeToParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,20000000000,bench-liquidity-bench_custodian_20260909-final-03_transfer-w4-20000000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.09.09-04:12:38.068 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [DistributeToParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,20000000000,bench-liquidity-bench_custodian_20260909-final-03_transfer-w4-20000000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.09.09-04:12:40.210 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [DistributeToParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,20000000000,bench-liquidity-bench_custodian_20260909-final-03_transfer-w4-20000000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.09.09-04:12:42.353 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [DistributeToParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,20000000000,bench-liquidity-bench_custodian_20260909-final-03_transfer-w4-20000000000],  with error: Error: Failed to submit trasaction with status code: 12
+2026.09.09-04:12:42.353 info  [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 2: Error: setup DistributeToParticipant failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /workspace/benchmark/workloads/retail-base.js:253:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:12:42.353 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:12:42.353 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:12:42.353 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:12:42.353 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-04:12:42.354 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-04:12:42.354 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-04:12:42.354 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 2 is completed
+2026.09.09-04:12:42.354 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (385086): Error: setup DistributeToParticipant failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async /workspace/benchmark/workloads/retail-base.js:253:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:12:42.355 error [caliper] [round-orchestrator] 	Failed round 3 (retail-peak-w4): Error: Error: setup DistributeToParticipant failed: [object Object]
+    at WorkerOrchestrator.updateWorkerPhase (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:306:61)
+    at ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/worker-orchestrator.js:109:18)
+    at ProcessMessenger.emit (node:events:519:28)
+    at ProcessMessenger.onMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/messenger-interface.js:40:14)
+    at ChildProcess.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:59:26)
+    at ChildProcess.emit (node:events:519:28)
+    at emit (node:internal/child_process:949:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2026.09.09-04:12:42.355 info  [caliper] [report-builder] 	### All test results ###
+2026.09.09-04:12:42.355 error [caliper] [report-builder] 	No data within test result; implies error within configuration files
+2026.09.09-04:12:42.356 error [caliper] [round-orchestrator] 	Error while finalizing the report: Error: unrecognized report table
+    at ReportBuilder.setSummaryTable (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/report/report-builder.js:142:19)
+    at Report.printResultsByRound (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/report/report.js:182:28)
+    at RoundOrchestrator.run (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/orchestrators/round-orchestrator.js:229:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async CaliperEngine.run (/workspace/node_modules/@hyperledger/caliper-core/lib/manager/caliper-engine.js:153:17)
+    at async LaunchManager.handler (/workspace/node_modules/@hyperledger/caliper-cli/lib/launch/lib/launchManager.js:81:30)
+2026.09.09-04:12:42.357 info  [caliper] [monitor.js] 	Stopping all monitors
+2026.09.09-04:12:42.357 info  [caliper] [worker-orchestrator] 	Sending exit message to connected workers
+2026.09.09-04:12:42.358 info  [caliper] [worker-message-handler] 	Worker#2 is exiting
+2026.09.09-04:12:42.359 info  [caliper] [worker-message-handler] 	Worker#1 is exiting
+2026.09.09-04:12:42.360 info  [caliper] [worker-message-handler] 	Worker#0 is exiting
+2026.09.09-04:12:42.361 info  [caliper] [worker-message-handler] 	Worker#3 is exiting
+2026.09.09-04:12:42.362 info  [caliper] [round-orchestrator] 	Benchmark finished in 87.327 seconds. Total rounds: 3. Successful rounds: 0. Failed rounds: 3.
+2026.09.09-04:12:42.362 info  [caliper] [caliper-engine] 	Network configuration attribute "caliper.command.end" is not present, skipping end command
+2026.09.09-04:12:42.362 info  [caliper] [cli-launch-manager] 	Benchmark successfully finished!
+2026.09.09-04:12:42.490 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4],  with error: Error: Channel has been shut down
+2026.09.09-04:12:42.494 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,Benchmark Himbara Custodian,himbara.paynet,bench_custodian_20260909-final-03_transfer-w4-account,validator,0,pending],  with error: Error: Channel has been shut down
+2026.09.09-04:12:42.751 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,Benchmark Himbara Custodian,himbara.paynet,bench_custodian_20260909-final-03_transfer-w4-account,validator,0,pending],  with error: Error: Channel has been shut down
+2026.09.09-04:12:43.100 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_1,merchant,m_20260909-final-03_transfer-w4_w2_1,["sha256:m_20260909-final-03_transfer-w4_w2_1"]],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.09.09-04:12:43.100 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_2,merchant,m_20260909-final-03_transfer-w4_w2_2,["sha256:m_20260909-final-03_transfer-w4_w2_2"]],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.09.09-04:12:43.100 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_0,merchant,m_20260909-final-03_transfer-w4_w2_0,["sha256:m_20260909-final-03_transfer-w4_w2_0"]],  with error: CommitStatusError: 1 CANCELLED: Call cancelled
+Details:
+2026.09.09-04:12:43.254 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,Benchmark Himbara Custodian,himbara.paynet,bench_custodian_20260909-final-03_transfer-w4-account,validator,0,pending],  with error: Error: Channel has been shut down
+2026.09.09-04:12:43.593 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_1,merchant,m_20260909-final-03_transfer-w4_w2_1,["sha256:m_20260909-final-03_transfer-w4_w2_1"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:43.595 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_2,merchant,m_20260909-final-03_transfer-w4_w2_2,["sha256:m_20260909-final-03_transfer-w4_w2_2"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:43.595 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_0,merchant,m_20260909-final-03_transfer-w4_w2_0,["sha256:m_20260909-final-03_transfer-w4_w2_0"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:44.007 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,Benchmark Himbara Custodian,himbara.paynet,bench_custodian_20260909-final-03_transfer-w4-account,validator,0,pending],  with error: Error: Channel has been shut down
+2026.09.09-04:12:44.333 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_1,merchant,m_20260909-final-03_transfer-w4_w2_1,["sha256:m_20260909-final-03_transfer-w4_w2_1"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:44.333 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_2,merchant,m_20260909-final-03_transfer-w4_w2_2,["sha256:m_20260909-final-03_transfer-w4_w2_2"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:44.334 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_0,merchant,m_20260909-final-03_transfer-w4_w2_0,["sha256:m_20260909-final-03_transfer-w4_w2_0"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:45.011 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitParticipant] using arguments [bench_custodian_20260909-final-03_transfer-w4,Benchmark Himbara Custodian,himbara.paynet,bench_custodian_20260909-final-03_transfer-w4-account,validator,0,pending],  with error: Error: Channel has been shut down
+2026.09.09-04:12:45.012 info  [caliper] [caliper-worker] 	Worker [0] encountered an error during prepare test phase for round 1: Error: setup SubmitParticipant failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at async /workspace/benchmark/workloads/retail-base.js:228:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:12:45.013 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:12:45.013 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:12:45.013 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:12:45.013 info  [caliper] [caliper-worker] 	Info: worker 0 prepare test phase for round 1 is completed
+2026.09.09-04:12:45.014 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker (385086): Error: setup SubmitParticipant failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at async /workspace/benchmark/workloads/retail-base.js:228:17
+    at async RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:189:20)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:217:24)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v22.23.2
+2026.09.09-04:12:45.076 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:45.323 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_1,merchant,m_20260909-final-03_transfer-w4_w2_1,["sha256:m_20260909-final-03_transfer-w4_w2_1"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:45.324 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_2,merchant,m_20260909-final-03_transfer-w4_w2_2,["sha256:m_20260909-final-03_transfer-w4_w2_2"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:45.324 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_0,merchant,m_20260909-final-03_transfer-w4_w2_0,["sha256:m_20260909-final-03_transfer-w4_w2_0"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:45.585 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:46.122 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:46.556 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform submit transaction [SubmitKycProfile] using arguments [kyc_m_20260909-final-03_transfer-w4_w2_1,merchant,m_20260909-final-03_transfer-w4_w2_1,["sha256:m_20260909-final-03_transfer-w4_w2_1"]],  with error: EndorseError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:43.591Z)
+Details:
+2026.09.09-04:12:46.556 info  [caliper] [caliper-worker] 	Worker [2] encountered an error during prepare test phase for round 0: Error: setup SubmitKycProfile failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Array.<anonymous> (/workspace/benchmark/workloads/retail-base.js:340:17)
+    at async /workspace/benchmark/workloads/retail-base.js:157:17
+    at async Promise.all (index 1)
+    at async RetailTransferWorkload.runPool (/workspace/benchmark/workloads/retail-base.js:160:9)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:345:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+2026.09.09-04:12:46.557 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:12:46.557 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:12:46.557 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:12:46.557 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-04:12:46.557 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-04:12:46.558 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-04:12:46.558 info  [caliper] [caliper-worker] 	Info: worker 2 prepare test phase for round 0 is completed
+2026.09.09-04:12:46.558 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#2 (385088): Error: setup SubmitKycProfile failed: [object Object]
+    at assertSuccessfulResponse (/workspace/benchmark/workloads/retail-base.js:81:19)
+    at execute (/workspace/benchmark/workloads/retail-base.js:279:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Array.<anonymous> (/workspace/benchmark/workloads/retail-base.js:340:17)
+    at async /workspace/benchmark/workloads/retail-base.js:157:17
+    at async Promise.all (index 1)
+    at async RetailTransferWorkload.runPool (/workspace/benchmark/workloads/retail-base.js:160:9)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:345:9)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:217:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v22.23.2
+2026.09.09-04:12:46.671 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:47.184 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:47.691 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:48.198 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:48.704 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:45.073Z)
+Details:
+2026.09.09-04:12:49.222 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:49.727 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:50.231 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:50.734 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:51.238 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:51.743 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:52.254 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:52.760 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:53.269 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:53.775 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:54.280 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:54.784 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:55.288 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:55.793 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:56.297 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:56.801 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:57.304 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:57.807 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:58.312 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:58.817 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 14 UNAVAILABLE: No connection established. Last error: connect ECONNREFUSED 127.0.0.1:9051 (2026-09-09T04:12:49.221Z)
+Details:
+2026.09.09-04:12:59.331 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:12:59.835 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:00.340 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:00.847 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:01.352 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:01.860 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:02.366 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:02.873 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:03.380 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:03.908 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:04.413 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:04.917 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:05.421 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:05.927 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:06.431 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:06.935 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:07.439 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:07.944 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:08.448 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:08.952 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:09.459 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:09.964 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:10.472 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:10.980 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:11.485 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:11.990 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:12.496 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:13.000 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 9 FAILED_PRECONDITION: no peers available to evaluate chaincode digital-rupiah in channel mychannel
+Details:
+2026.09.09-04:13:14.606 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:13:15.116 error [caliper] [connectors/peer-gateway/PeerGateway] 	Failed to perform query transaction [GetWallet] using arguments [wlt_bench_custodian_20260909-final-03_transfer-w4],  with error: GatewayError: 2 UNKNOWN: evaluate call to endorser returned error: chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+Details:
+-  peer0.himbara.paynet:9051:chaincode response 500, wallet wlt_bench_custodian_20260909-final-03_transfer-w4 not found
+2026.09.09-04:13:15.117 info  [caliper] [caliper-worker] 	Worker [3] encountered an error during prepare test phase for round 0: Error: timed out waiting for setup lock custodian-setup
+    at RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:179:58)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:13:15.117 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:13:15.117 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:13:15.117 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:13:15.117 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-04:13:15.118 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-04:13:15.118 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-04:13:15.118 info  [caliper] [caliper-worker] 	Info: worker 3 prepare test phase for round 0 is completed
+2026.09.09-04:13:15.119 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#3 (385089): Error: timed out waiting for setup lock custodian-setup
+    at RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:179:58)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:217:24)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at processTicksAndRejections (node:internal/process/task_queues:84:11)
+    at runNextTicks (node:internal/process/task_queues:68:3)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v22.23.2
+2026.09.09-04:13:15.140 info  [caliper] [caliper-worker] 	Worker [1] encountered an error during prepare test phase for round 0: Error: timed out waiting for setup lock custodian-setup
+    at RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:179:58)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+2026.09.09-04:13:15.140 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user User1
+2026.09.09-04:13:15.140 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _HimbaraBankOrgMSP_User1
+2026.09.09-04:13:15.140 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gateway for user _CommercialBankOrgMSP_User1
+2026.09.09-04:13:15.140 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.bi.paynet
+2026.09.09-04:13:15.140 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.himbara.paynet
+2026.09.09-04:13:15.140 info  [caliper] [connectors/peer-gateway/PeerGateway] 	disconnecting gRpc client at peer peer0.commercial.paynet
+2026.09.09-04:13:15.140 info  [caliper] [caliper-worker] 	Info: worker 1 prepare test phase for round 0 is completed
+2026.09.09-04:13:15.141 error [caliper] [worker-message-handler] 	Error while handling "prepare" message for Worker#1 (385087): Error: timed out waiting for setup lock custodian-setup
+    at RetailTransferWorkload.withSetupLock (/workspace/benchmark/workloads/retail-base.js:179:58)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7)
+    at async RetailTransferWorkload.seedPopulation (/workspace/benchmark/workloads/retail-base.js:330:29)
+    at async RetailTransferWorkload.initializeWorkloadModule (/workspace/benchmark/workloads/retail-transfer.js:21:9)
+    at async CaliperWorker.prepareTest (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/caliper-worker.js:161:13)
+    at async WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:210:13)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error [ERR_IPC_CHANNEL_CLOSED]: Channel closed
+    at target.send (node:internal/child_process:753:16)
+    at ProcessMessenger.send (/workspace/node_modules/@hyperledger/caliper-core/lib/common/messengers/process/process-messenger.js:90:18)
+    at WorkerMessageHandler._handlePrepareMessage (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:217:24)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7)
+    at async ProcessMessenger.<anonymous> (/workspace/node_modules/@hyperledger/caliper-core/lib/worker/worker-message-handler.js:89:13)
+Emitted 'error' event on process instance at:
+    at node:internal/child_process:757:35
+    at processTicksAndRejections (node:internal/process/task_queues:84:11)
+    at runNextTicks (node:internal/process/task_queues:68:3)
+    at listOnTimeout (node:internal/timers:547:9)
+    at process.processTimers (node:internal/timers:521:7) {
+  code: 'ERR_IPC_CHANNEL_CLOSED'
+}
+
+Node.js v22.23.2

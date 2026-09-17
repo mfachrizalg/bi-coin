@@ -1,0 +1,82 @@
+test:
+  name: Digital Rupiah Retail Transfer Benchmark - 8 Workers
+  description: Isolated customer-to-customer retail transfer calibration with eight Caliper workers
+  workers:
+    type: local
+    number: 8
+  rounds:
+    - label: retail-warmup-w8
+      txDuration: 30
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 10
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w8
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
+          fundedRatio: 1
+          fundStandard: 20000000
+          fundReceiverStandard: 1000000
+          maxTransferAmount: 50000
+          seed: 20260725
+    - label: retail-sustained-w8
+      txDuration: 120
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 30
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w8
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
+          fundedRatio: 1
+          maxTransferAmount: 50000
+          seed: 20260725
+    - label: retail-peak-w8
+      txDuration: 120
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 60
+      workload:
+        module: benchmark/workloads/retail-transfer.js
+        arguments:
+          scenario: transfer-w8
+          customers: 280
+          merchants: 0
+          transactionSlots: 100
+          fundedRatio: 1
+          maxTransferAmount: 50000
+          seed: 20260725
+observer:
+  type: local
+  interval: 1
+
+monitors:
+  transaction:
+    - module: ./benchmark/observers/jsonl-transaction-observer.js
+      options: {}
+  resource:
+    - module: docker
+      options:
+        interval: 1
+        cpuUsageNormalization: true
+        containers:
+          - /peer0.bi.paynet
+          - /peer0.himbara.paynet
+          - /peer0.commercial.paynet
+          - /peer0.pjp.paynet
+          - /peer0.ojk.paynet
+          - /couchdb0.bi.paynet
+          - /couchdb0.himbara.paynet
+          - /couchdb0.commercial.paynet
+          - /couchdb0.pjp.paynet
+          - /couchdb0.ojk.paynet
+          - /orderer.paynet

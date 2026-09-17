@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { getWallets, listParticipants, initLedger, type Wallet, type Participant } from '../lib/api'
-import { ParticipantTypeColor, ParticipantTypeLabel } from '../lib/constants'
-
-const fmt = (n: number) => 'Rp ' + n.toLocaleString('id-ID')
+import { getErrorMessage, getWallets, listParticipants, initLedger, type Wallet, type Participant } from '../lib/api'
+import { ParticipantTypeLabel } from '../lib/constants'
+import { formatRupiah, sumRupiah } from '../lib/money'
+import LoadingSkeleton from '../components/LoadingSkeleton'
 
 export default function WalletList({
   onSelect,
@@ -16,7 +16,7 @@ export default function WalletList({
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [participantMap, setParticipantMap] = useState<Record<string, Participant>>({})
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
   const load = async () => {
@@ -25,8 +25,8 @@ export default function WalletList({
     try {
       const ws = await getWallets()
       setWallets(ws ?? [])
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError(getErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -53,7 +53,7 @@ export default function WalletList({
     w.wallet_type.toLowerCase().includes(q)
   )
 
-  const totalBalance = filtered.reduce((sum, w) => sum + w.balance, 0)
+  const totalBalance = sumRupiah(filtered.map(w => w.balance))
   const frozenCount = filtered.filter(w => w.frozen).length
 
   const badge = (participantId: string) => {
@@ -61,74 +61,57 @@ export default function WalletList({
     if (!p) return null
     const type = p.participant_type
     return (
-      <span style={{
-        display: 'inline-block', padding: '1px 7px', borderRadius: 10,
-        fontSize: 11, fontWeight: 600, color: '#fff',
-        background: ParticipantTypeColor[type] ?? '#6b7280', marginLeft: 6,
-      }}>
+      <span className={`participant-badge participant-${type}`}>
         {ParticipantTypeLabel[type] ?? type}
       </span>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="workspace-stack wallet-page">
       {/* Toolbar */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div className="button-row wallet-toolbar">
         <input
-          placeholder="Cari wallet ID, peserta, tipe…"
+          className="app-input wallet-search"
+          placeholder="Search Wallet ID, participant, or type"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{
-            flex: 1, minWidth: 200, padding: '10px 14px',
-            border: '1.5px solid #d1d5db', borderRadius: 8, fontSize: '1rem',
-          }}
         />
         {search && (
-          <button onClick={() => setSearch('')}
-            style={{ padding: '9px 14px', borderRadius: 6, border: '1px solid #d1d5db', cursor: 'pointer', fontSize: '1rem' }}>
-            Hapus
+          <button className="secondary-button" onClick={() => setSearch('')}>
+            Clear
           </button>
         )}
-        <button onClick={load}
-          style={{ padding: '9px 16px', borderRadius: 6, border: '1px solid #d1d5db', cursor: 'pointer', fontSize: '1rem' }}>
-          Segarkan
+        <button className="secondary-button" onClick={load}>
+          Refresh
         </button>
         {role === 'bank_indonesia' && <button
-          onClick={() => initLedger().then(load).catch(e => setError(e.message))}
-          style={{ padding: '9px 16px', borderRadius: 6, border: '1px solid #d1d5db', cursor: 'pointer', fontSize: '1rem' }}>
-          Init Ledger
+          className="secondary-button"
+          onClick={() => initLedger().then(load).catch(e => setError(getErrorMessage(e)))}
+        >
+          Initialize ledger
         </button>}
       </div>
 
-      {error && <div style={{ color: '#dc2626', fontSize: 14 }}>{error}</div>}
-      {loading && <div style={{ color: '#6b7280', fontSize: 14 }}>Loading…</div>}
+      {error && <div className="banner error" role="alert">{error}</div>}
 
       {/* Balance summary */}
       {!loading && wallets.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '12px 16px' }}>
-            <div style={{ fontSize: 11, color: '#1d4ed8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Total Balance{search ? ' (filtered)' : ''}
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#1e3a8a', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
-              {fmt(totalBalance)}
-            </div>
+        <div className="metric-grid wallet-summary-grid">
+          <div className="metric-card">
+            <div className="metric-label">Total balance{search ? ' (filtered)' : ''}</div>
+            <div className="summary-value">{formatRupiah(totalBalance)}</div>
           </div>
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 16px' }}>
-            <div style={{ fontSize: 11, color: '#15803d', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Active Wallets
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#14532d', marginTop: 4 }}>
+          <div className="metric-card">
+            <div className="metric-label">Active wallets</div>
+            <div className="summary-value">
               {filtered.length - frozenCount}
-              <span style={{ fontSize: 13, fontWeight: 400, color: '#6b7280', marginLeft: 6 }}>of {filtered.length}</span>
+              <span>of {filtered.length}</span>
             </div>
           </div>
-          <div style={{ background: frozenCount > 0 ? '#fef2f2' : '#f9fafb', border: `1px solid ${frozenCount > 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 8, padding: '12px 16px' }}>
-            <div style={{ fontSize: 11, color: frozenCount > 0 ? '#dc2626' : '#6b7280', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Frozen
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: frozenCount > 0 ? '#991b1b' : '#9ca3af', marginTop: 4 }}>
+          <div className={`metric-card${frozenCount > 0 ? ' warning-card' : ''}`}>
+            <div className="metric-label">Frozen</div>
+            <div className="summary-value">
               {frozenCount}
             </div>
           </div>
@@ -136,51 +119,47 @@ export default function WalletList({
       )}
 
       {/* Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1rem' }}>
+      <div className="table-shell">
+        <table className="data-table">
           <thead>
-            <tr style={{ background: '#f9fafb' }}>
-              {['Wallet ID', 'Peserta / Tipe', 'Tipe Dompet', 'Saldo (IDR)', 'Status'].map(h => (
-                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', borderBottom: '2px solid #e5e7eb', whiteSpace: 'nowrap', fontSize: '1rem' }}>{h}</th>
+            <tr>
+              {['Wallet ID', 'Participant / type', 'Wallet type', 'Balance (IDR)', 'Status'].map(h => (
+                <th key={h}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr><td colSpan={5}><LoadingSkeleton kind="table" label="Loading wallets" rows={5} /></td></tr>
+            )}
             {filtered.length === 0 && !loading && (
-              <tr><td colSpan={5} style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>
+              <tr><td colSpan={5} className="empty-cell">
                 {search ? `No wallets matching "${search}"` : 'No wallets'}
               </td></tr>
             )}
             {filtered.map(w => (
-              <tr key={w.wallet_id}
+              <tr key={w.wallet_id} className="selectable-row"
                 onClick={() => onSelect(w.wallet_id)}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(w.wallet_id) } }}
                 tabIndex={0}
                 role="button"
-                aria-label={`Pilih wallet ${w.wallet_id}`}
-                style={{ borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#f8faff')}
-                onMouseLeave={e => (e.currentTarget.style.background = '')}
+                aria-label={`Select wallet ${w.wallet_id}`}
               >
-                <td style={{ padding: '10px 14px', color: '#2563eb', fontFamily: 'monospace', fontSize: '0.95rem' }}>
+                <td className="mono wallet-id">
                   {w.wallet_id}
                 </td>
-                <td style={{ padding: '10px 14px' }}>
-                  <span style={{ fontFamily: 'monospace', fontSize: 13 }}>{w.owner_id || w.participant_id}</span>
-                  <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 6 }}>(custodian: {w.participant_id})</span>
+                <td>
+                  <span className="mono">{w.owner_id || w.participant_id}</span>
+                  <span className="wallet-custodian">(custodian: {w.participant_id})</span>
                   {badge(w.participant_id)}
                 </td>
-                <td style={{ padding: '8px 12px', color: '#6b7280', textTransform: 'capitalize' }}>{w.wallet_type}</td>
-                <td style={{ padding: '8px 12px', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                  {fmt(w.balance)}
+                <td className="muted wallet-type">{w.wallet_type}</td>
+                <td className="wallet-balance">
+                  {formatRupiah(w.balance)}
                 </td>
-                <td style={{ padding: '10px 14px' }}>
-                  <span style={{
-                    display: 'inline-block', padding: '2px 8px', borderRadius: 10, fontSize: 12, fontWeight: 700,
-                    background: w.frozen ? '#fee2e2' : '#dcfce7',
-                    color: w.frozen ? '#dc2626' : '#16a34a',
-                  }}>
-                    {w.frozen ? 'FROZEN' : 'Active'}
+                <td>
+                  <span className={`status ${w.frozen ? 'status-frozen' : 'status-active'}`}>
+                    {w.frozen ? 'Frozen' : 'Active'}
                   </span>
                 </td>
               </tr>
@@ -188,7 +167,7 @@ export default function WalletList({
           </tbody>
         </table>
         {search && filtered.length > 0 && (
-          <div style={{ padding: '6px 12px', fontSize: 12, color: '#6b7280', borderTop: '1px solid #f3f4f6' }}>
+          <div className="table-note">
             {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "{search}"
           </div>
         )}

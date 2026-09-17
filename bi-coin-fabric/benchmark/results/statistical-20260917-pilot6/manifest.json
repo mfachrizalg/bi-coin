@@ -1,0 +1,1486 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-09-17T02:52:16.485Z",
+  "study": "Digital Rupiah statistical benchmark",
+  "runtime": {
+    "node": "v22.23.2",
+    "npm": "10.9.8",
+    "docker": "Docker version 29.8.1, build 4a63305",
+    "caliper": "/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/node_modules/@hyperledger/caliper-cli"
+  },
+  "revision": {
+    "commit": "0207584077575bc859f16f8be9811211890b3e0c",
+    "dirty": true,
+    "changedPaths": [
+      "i-coin-fabric/.env.example",
+      "bi-coin-fabric/README.md",
+      "bi-coin-fabric/backend/docs/api/generate_specs.mjs",
+      "bi-coin-fabric/backend/docs/api/openapi-authenticated.json",
+      "bi-coin-fabric/backend/docs/api/openapi-bank_indonesia.json",
+      "bi-coin-fabric/backend/docs/api/openapi-bank_pjp.json",
+      "bi-coin-fabric/backend/docs/api/openapi-kyc_verified.json",
+      "bi-coin-fabric/backend/docs/api/openapi-merchant.json",
+      "bi-coin-fabric/backend/docs/api/openapi-public.json",
+      "bi-coin-fabric/backend/docs/api/openapi-supervisor.json",
+      "bi-coin-fabric/backend/docsembed.go",
+      "bi-coin-fabric/backend/docsembed_test.go",
+      "bi-coin-fabric/backend/handlers/docs.go",
+      "bi-coin-fabric/backend/handlers/handlers.go",
+      "bi-coin-fabric/backend/handlers/routes_test.go",
+      "bi-coin-fabric/backend/main.go",
+      "bi-coin-fabric/backend/middleware/auth.go",
+      "bi-coin-fabric/backend/models/models.go",
+      "bi-coin-fabric/backend/services/auth.go",
+      "bi-coin-fabric/backend/services/auth_test.go",
+      "bi-coin-fabric/backend/services/kyc_service_test.go",
+      "bi-coin-fabric/backend/services/ledger.go",
+      "bi-coin-fabric/backend/services/ledger_test.go",
+      "bi-coin-fabric/backend/services/operation_journal.go",
+      "bi-coin-fabric/backend/services/postgres_store.go",
+      "bi-coin-fabric/benchmark/README-P1-benchmarks.md",
+      "bi-coin-fabric/benchmark/benchconfigs/adversarial.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/authorization.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/boundary-path.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/functionality.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/negative-path.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/retail-transfer-repeat.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-1.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml",
+      "bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-4.yaml",
+      "bi-coin-fabric/benchmark/workloads/adversarial-double-spend.js",
+      "bi-coin-fabric/benchmark/workloads/boundary-path.js",
+      "bi-coin-fabric/benchmark/workloads/custody-authorization.js",
+      "bi-coin-fabric/benchmark/workloads/functional-workloads.test.js",
+      "bi-coin-fabric/benchmark/workloads/monetary-ops.js",
+      "bi-coin-fabric/benchmark/workloads/negative-path.js",
+      "bi-coin-fabric/benchmark/workloads/retail-base.js",
+      "bi-coin-fabric/benchmark/workloads/retail-base.test.js",
+      "bi-coin-fabric/benchmark/workloads/retail-onboarding.js",
+      "bi-coin-fabric/benchmark/workloads/retail-transfer.js",
+      "bi-coin-fabric/benchmark/workloads/retail-transfer.test.js",
+      "bi-coin-fabric/benchmark/workloads/supervision-reads.js",
+      "bi-coin-fabric/chaincode/compliance_policy.go",
+      "bi-coin-fabric/chaincode/digital_rupiah.go",
+      "bi-coin-fabric/chaincode/digital_rupiah_test.go",
+      "bi-coin-fabric/chaincode/digital_rupiah_v3_test.go",
+      "bi-coin-fabric/docs/diagrams/mermaid/activity-diagrams.md",
+      "bi-coin-fabric/docs/diagrams/mermaid/use-case-diagrams.md",
+      "bi-coin-fabric/docs/diagrams/plantuml/activity-diagrams.puml",
+      "bi-coin-fabric/docs/diagrams/plantuml/use-case-diagrams.puml",
+      "bi-coin-fabric/frontend/src/App.tsx",
+      "bi-coin-fabric/frontend/src/lib/api.ts",
+      "bi-coin-fabric/frontend/src/lib/constants.ts",
+      "bi-coin-fabric/frontend/src/pages/AuditLog.tsx",
+      "bi-coin-fabric/frontend/src/pages/CreateWallet.tsx",
+      "bi-coin-fabric/frontend/src/pages/DemoPanel.tsx",
+      "bi-coin-fabric/frontend/src/pages/Limits.tsx",
+      "bi-coin-fabric/frontend/src/pages/Observability.tsx",
+      "bi-coin-fabric/frontend/src/pages/Overview.tsx",
+      "bi-coin-fabric/frontend/src/pages/Participants.tsx",
+      "bi-coin-fabric/frontend/src/pages/QrisPayments.tsx",
+      "bi-coin-fabric/frontend/src/pages/Supply.tsx",
+      "bi-coin-fabric/frontend/src/pages/Transfer.tsx",
+      "bi-coin-fabric/frontend/src/pages/WalletList.tsx",
+      "bi-coin-fabric/frontend/src/pages/WorldState.tsx",
+      "bi-coin-fabric/frontend/src/styles.css",
+      "bi-coin-fabric/frontend/tests/contracts.test.mjs",
+      "bi-coin-fabric/frontend/tests/runtime.mjs",
+      "bi-coin-fabric/network/channel-artifacts/mychannel.block",
+      "bi-coin-fabric/network/configtx.yaml",
+      "bi-coin-fabric/package.json",
+      "bi-coin-fabric/scripts/deploy-chaincode.sh",
+      "bi-coin-fabric/scripts/network-up.sh",
+      "bi-coin-fabric/scripts/run-full-suite.sh",
+      "bi-coin-fabric/scripts/smoke-test.sh",
+      "bi-coin-fabric/scripts/validate-boundary-log.js",
+      "bi-coin-fabric/scripts/validate-boundary-log.test.js",
+      "bi-coin-fabric/scripts/write-benchmark-manifest.js",
+      "paper/CLAUDE.md",
+      "paper/main.bbl",
+      "paper/main.pdf",
+      "paper/main.tex",
+      "render-activity-diagrams.py",
+      "thesis/CLAUDE.md",
+      "thesis/contents/abstract/abstract.tex",
+      "thesis/contents/abstract/intisari.tex",
+      "thesis/contents/chapter-1/chapter-1.tex",
+      "thesis/contents/chapter-3/chapter-3.tex",
+      "thesis/contents/chapter-4/chapter-4.tex",
+      "thesis/contents/chapter-5/chapter-5.tex",
+      "thesis/contents/figures/activity/AD01-Pendaftaran-Peserta.png",
+      "thesis/contents/figures/activity/AD02-Penerbitan-Digital-Rupiah.png",
+      "thesis/contents/figures/activity/AD03-Distribusi-Likuiditas-PJP.png",
+      "thesis/contents/figures/activity/AD05-Transfer-Saldo-Ritel.png",
+      "thesis/contents/figures/activity/AD08-Pembekuan-Peserta.png",
+      "thesis/contents/figures/activity/AD10-Laporan-Supervisi.png",
+      "thesis/contents/figures/two-tier-cbdc.tex",
+      "thesis/contents/figures/use-case-diagrams.tex",
+      "thesis/main.pdf",
+      "thesis/tmp/deck-brief/slide-prompts.md",
+      "thesis/tmp/deck-brief/slide_figures/blockchain-structure-1.png",
+      "thesis/tmp/deck-brief/slide_figures/blockchain-structure/blockchain-structure.pdf",
+      "thesis/tmp/deck-brief/slide_figures/blockchain-structure/blockchain-structure.tex",
+      "thesis/tmp/deck-brief/slide_figures/fabric-architecture-1.png",
+      "thesis/tmp/deck-brief/slide_figures/fabric-architecture/fabric-architecture.pdf",
+      "thesis/tmp/deck-brief/slide_figures/fabric-architecture/fabric-architecture.tex",
+      "thesis/tmp/deck-brief/slide_figures/network-architecture-1.png",
+      "thesis/tmp/deck-brief/slide_figures/network-architecture/network-architecture.pdf",
+      "thesis/tmp/deck-brief/slide_figures/network-architecture/network-architecture.tex",
+      "thesis/tmp/deck-brief/slide_figures/system-architecture-1.png",
+      "thesis/tmp/deck-brief/slide_figures/system-architecture/system-architecture.pdf",
+      "thesis/tmp/deck-brief/slide_figures/system-architecture/system-architecture.tex",
+      "thesis/tmp/deck-brief/slide_figures/two-tier-cbdc-1.png",
+      "thesis/tmp/deck-brief/slide_figures/two-tier-cbdc/two-tier-cbdc.pdf",
+      "thesis/tmp/deck-brief/slide_figures/two-tier-cbdc/two-tier-cbdc.tex",
+      "thesis/tmp/deck-brief/thesis-defense-deck-brief.md",
+      ".bi-coin-iroha/",
+      ".codegraph/",
+      ".graphify_detect.json",
+      ".superpowers/",
+      "2026-08-14-113720-changes-at-thesis-bi-coin-fabric.md",
+      "\"Presentasi Skripsi_Muhammad Fachrizal Giffari.pptx\"",
+      "bi-coin-fabric/.playwright-cli/",
+      "bi-coin-fabric/.rtk/",
+      "bi-coin-fabric/CLAUDE.md",
+      "bi-coin-fabric/CONTEXT.md",
+      "bi-coin-fabric/backend/.codegraph/",
+      "bi-coin-fabric/backend/.rtk/",
+      "bi-coin-fabric/backend/CLAUDE.md",
+      "bi-coin-fabric/backend/docs/api/openapi-pjp.json",
+      "bi-coin-fabric/backend/docs/api/openapi-validator_bank.json",
+      "bi-coin-fabric/backend/graphify-out/",
+      "bi-coin-fabric/backend/handlers/payment_contacts_test.go",
+      "bi-coin-fabric/backend/integration_test.go",
+      "bi-coin-fabric/backend/models/money_json.go",
+      "bi-coin-fabric/backend/models/money_json_test.go",
+      "bi-coin-fabric/backend/services/payment_contacts.go",
+      "bi-coin-fabric/backend/services/payment_contacts_test.go",
+      "bi-coin-fabric/backend/services/qris_replay_test.go",
+      "bi-coin-fabric/backend/services/retail_customer_receipt_test.go",
+      "bi-coin-fabric/benchmark/.codegraph/",
+      "bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-8.yaml",
+      "bi-coin-fabric/benchmark/monitoring/",
+      "bi-coin-fabric/benchmark/observers/",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-aggregate-overspend-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-aggregate-overspend-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-aggregate-overspend.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-authorization-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-authorization-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-authorization-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-authorization.html",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-authorization.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-boundary-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-boundary-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-boundary-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-boundary-path.html",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-boundary-path.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-functionality-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-functionality-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-functionality-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-functionality.html",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-functionality.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-negative-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-negative-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-negative-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-negative-path.html",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-negative-path.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-recovery-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-recovery-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-recovery-runner.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-recovery-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-recovery2-aggregate-overspend.html",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-recovery2-aggregate-overspend.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-repeat-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-repeat-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-repeat-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-repeat.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w1.html",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w2-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w2-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w2.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260824-review-full-01-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-aggregate-overspend-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-aggregate-overspend-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-aggregate-overspend.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-aggregate-overspend.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-authorization-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-authorization-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-authorization-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-authorization.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-authorization.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-boundary-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-boundary-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-boundary-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-boundary-path.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-boundary-path.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-functionality-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-functionality-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-functionality-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-functionality.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-functionality.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-negative-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-negative-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-negative-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-negative-path.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-negative-path.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-repeat-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-repeat-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-repeat-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-repeat.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-repeat.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w1.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w2-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w2-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w2.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w2.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w4.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-01-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-boundary-corrected.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-boundary-corrected.log",
+      "bi-coin-fabric/benchmark/results/20260908-fix-functionality-corrected.html",
+      "bi-coin-fabric/benchmark/results/20260908-fix-functionality-corrected.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-authorization-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-boundary-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-functionality-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-negative-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-transfer-repeat-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-01-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-authorization-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-authorization-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-boundary-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-boundary-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-boundary-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-boundary-path.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-boundary-path.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-functionality-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-negative-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-repeat-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w1.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w2-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w2-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w2.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-02-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-authorization-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-authorization-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-authorization-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-authorization.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-authorization.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-boundary-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-boundary-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-boundary-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-boundary-path.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-boundary-path.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-functionality-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-negative-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-negative-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-negative-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-negative-path.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-repeat-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-repeat-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-repeat-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-repeat.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w1.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-03-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-04-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-05-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w1.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w2-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w2-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w2.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w4.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-06-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-07-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-07-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-07-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-07-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-07-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-aggregate-overspend-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-aggregate-overspend-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-aggregate-overspend-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-aggregate-overspend.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-aggregate-overspend.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-authorization-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-authorization-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-authorization-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-authorization.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-authorization.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-boundary-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-boundary-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-boundary-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-functionality-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-functionality-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-functionality-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-functionality.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-functionality.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-negative-path-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-negative-path-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-negative-path-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-negative-path.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-negative-path.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-repeat-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-repeat-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-repeat-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-repeat.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-repeat.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w1-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w1-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w1-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w1.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w1.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w2-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w2-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w2-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w2.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w2.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w4-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w4-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w4-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w4.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-08-transfer-w4.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-boundary-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-boundary-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-boundary-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-boundary.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-boundary.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-evidence-manifest.json",
+      "bi-coin-fabric/benchmark/results/20260909-final-evidence-status.tsv",
+      "bi-coin-fabric/benchmark/results/20260909-final-w4d-deploy-chaincode.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-w4d-init-ledger.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-w4d-network-up.log",
+      "bi-coin-fabric/benchmark/results/20260909-final-w4d.html",
+      "bi-coin-fabric/benchmark/results/20260909-final-w4d.log",
+      "bi-coin-fabric/benchmark/results/e2e-20260917-kyc2/",
+      "bi-coin-fabric/benchmark/results/e2e-20260917-kyc3/",
+      "bi-coin-fabric/benchmark/results/e2e-20260917-kyc4/",
+      "bi-coin-fabric/benchmark/results/e2e-20260917T022949Z/",
+      "bi-coin-fabric/benchmark/results/statistical-20260916T181059Z/",
+      "bi-coin-fabric/benchmark/results/statistical-20260916T182239Z/",
+      "bi-coin-fabric/benchmark/results/statistical-20260917-pilot1/",
+      "bi-coin-fabric/benchmark/results/statistical-20260917-pilot2/",
+      "bi-coin-fabric/benchmark/results/statistical-20260917-pilot3/",
+      "bi-coin-fabric/benchmark/results/statistical-20260917-pilot4/",
+      "bi-coin-fabric/benchmark/results/statistical-20260917-pilot5/",
+      "bi-coin-fabric/benchmark/results/statistical-20260917-pilot6/",
+      "bi-coin-fabric/benchmark/workloads/transaction-types.js",
+      "bi-coin-fabric/benchmark/workloads/transaction-types.test.js",
+      "bi-coin-fabric/chaincode/.codegraph/",
+      "bi-coin-fabric/chaincode/.rtk/",
+      "bi-coin-fabric/chaincode/CLAUDE.md",
+      "bi-coin-fabric/chaincode/graphify-out/",
+      "bi-coin-fabric/docs/adr/",
+      "bi-coin-fabric/docs/reviews/",
+      "bi-coin-fabric/frontend/.codegraph/",
+      "bi-coin-fabric/frontend/.env.example",
+      "bi-coin-fabric/frontend/.rtk/",
+      "bi-coin-fabric/frontend/CLAUDE.md",
+      "bi-coin-fabric/frontend/graphify-out/",
+      "bi-coin-fabric/frontend/src/components/",
+      "bi-coin-fabric/frontend/src/lib/money.ts",
+      "bi-coin-fabric/frontend/src/pages/Activity.tsx",
+      "bi-coin-fabric/frontend/src/pages/Contacts.tsx",
+      "bi-coin-fabric/frontend/src/pages/Pay.tsx",
+      "bi-coin-fabric/frontend/src/pages/PrototypeLab.tsx",
+      "bi-coin-fabric/frontend/src/pages/Supervision.tsx",
+      "bi-coin-fabric/graphify-out/",
+      "bi-coin-fabric/scripts/analyze-benchmark-results.js",
+      "bi-coin-fabric/scripts/analyze-benchmark-results.test.js",
+      "bi-coin-fabric/scripts/compress-study-metrics.js",
+      "bi-coin-fabric/scripts/deploy-chaincode.test.js",
+      "bi-coin-fabric/scripts/generate-study-config.js",
+      "bi-coin-fabric/scripts/record-study-run.js",
+      "bi-coin-fabric/scripts/run-benchmark-study.sh",
+      "bi-coin-fabric/scripts/run-kyc-e2e.sh",
+      "bi-coin-fabric/scripts/sample-prometheus.js",
+      "bi-coin-fabric/scripts/study-control.js",
+      "bi-coin-fabric/scripts/validate-caliper-report.js",
+      "bi-coin-fabric/scripts/validate-caliper-report.test.js",
+      "bi-coin-fabric/scripts/validate-study-artifacts.js",
+      "bi-coin-fabric/scripts/validate-study-artifacts.test.js",
+      "bi-coin-fabric/scripts/write-study-manifest.js",
+      "bi-coin-fabric/start.sh",
+      "digital-rupiah.tar.gz",
+      "overflow-public/",
+      "paper/.rtk/",
+      "per-tx-probe/",
+      "probe/",
+      "probe2/",
+      "thesis/.rtk/",
+      "thesis/tmp/deck-brief/slide_figures/README.md"
+    ]
+  },
+  "monitoringImages": [
+    {
+      "image": "prom/prometheus:v3.14.0",
+      "digest": "prom/prometheus@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0"
+    },
+    {
+      "image": "ghcr.io/google/cadvisor:v0.60.5",
+      "digest": "ghcr.io/google/cadvisor@sha256:763aecf1c32c2be8a1a75f9abfc2fc461005c9dbbaa39cb356b354aac1296dbe"
+    },
+    {
+      "image": "prom/node-exporter:v1.12.1",
+      "digest": "prom/node-exporter@sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "REPORT.md",
+      "sha256": "4881297f9a7fdc10b2b47653eba93f4b811aa25e9e1b273a1f13c7b5991fa8ad"
+    },
+    {
+      "path": "analysis.log",
+      "sha256": "568762d43dcfb622950a083581a7c2099d2768a9afa4e2fdecf7b27973d4c3f1"
+    },
+    {
+      "path": "failure-reasons.csv",
+      "sha256": "cd80a21f2297165415288dcdd34cecc1bf8284bcc06aadbbd3ae8c409d3d19ce"
+    },
+    {
+      "path": "metadata.json",
+      "sha256": "115eb1119f8fcb5902239800fd1705b7737404bf5a3fcc69d8e43dafd52bef51"
+    },
+    {
+      "path": "resources.csv",
+      "sha256": "1f8c54de5a7efd01053c10d63841121782d223f857d1f83e7d2f37edc74f4dec"
+    },
+    {
+      "path": "runs.csv",
+      "sha256": "9e408660119a886435d44d28cb93ef0b2524b2ec70e27f0a42338d64410ec937"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/benchconfig.yaml",
+      "sha256": "753f3c5bde2694b266ee48d3ed6e87075d15f257ca9bd2d8ee815fc99c37cc33"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/caliper.log",
+      "sha256": "18099b75de7a9cafcda2b03bde838438e796c9aa6abc897171c0aec254b8880e"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/config-generation.json",
+      "sha256": "5de5b73d56fa937d503127e42c350f3e14be650fb1fc6183038f3f05904f3721"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/deploy-chaincode.log",
+      "sha256": "b58429d3288393f309de7080613ef3adefa66eb31af2f74ef1e8e37d9395de19"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/init-ledger.log",
+      "sha256": "9c9d86ce261e3295ab5711161757747fe83f0ca25abc50569dbbba65c3b378bc"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/network-down.log",
+      "sha256": "fbbfe91356f1c2f6e5308b65ffa37aef0eabe8c1b03c3aaf77ac404eda9bd787"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/network-up.log",
+      "sha256": "995708fbeb931f20455b7acd69d54763032a2583503b43b1d36d1884dc00cb15"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/prometheus.jsonl.gz",
+      "sha256": "bf50f801e40dc48f3b5dd5832ce068c039557153e3ea5ac8bda7a078a61a1970"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/report.html",
+      "sha256": "d69631da042d6042cec6faa6155650a9a7ac82c7ff1505b7d18ee4912333935e"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r1/transactions-worker-0.jsonl",
+      "sha256": "879e4ad825cd75ec05593a55d410af6610e907a15c1a96a82baf14026cf309ca"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/benchconfig.yaml",
+      "sha256": "753f3c5bde2694b266ee48d3ed6e87075d15f257ca9bd2d8ee815fc99c37cc33"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/caliper.log",
+      "sha256": "71f9f83020a54d7f76317c7a1c27dddbc5bef0ad3c09239864e29d490ba92e88"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/config-generation.json",
+      "sha256": "658e40516af4f62fce9e509dcc1122805293abcbab06ccddd05eb70a177913d1"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/deploy-chaincode.log",
+      "sha256": "e8357a66b22f038a0a1586b2964de0787bedcb0f46a178e62d07603a827268a6"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/init-ledger.log",
+      "sha256": "c014908cdcc2c6f6a3e6740e523ab4cce6b653cdaa12ab0407c7193e0df9357a"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/network-down.log",
+      "sha256": "06988ca3c1f4c0ff9fbc07b79066a1b4071b97911a2fa10884764c314a778200"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/network-up.log",
+      "sha256": "c45f86eab1c3910a889466a6b032b86ac77685f4e234d9d0a7ce27374d5327cf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/prometheus.jsonl.gz",
+      "sha256": "26380854bc2160e653e1369b414db34477c72fa734e92edf64c2bfbdb33ec160"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/report.html",
+      "sha256": "afd86889b98d086c827829a708c41e1f24ae50937bbab17ede9e8e74831487a6"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r2/transactions-worker-0.jsonl",
+      "sha256": "d4a8886ce113286506b85848d9e4be865f85b03350d2121fb1d837a69a8cd66c"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/benchconfig.yaml",
+      "sha256": "753f3c5bde2694b266ee48d3ed6e87075d15f257ca9bd2d8ee815fc99c37cc33"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/caliper.log",
+      "sha256": "80e9ab78e637f68b51a5684cd391889c1fba1a7f8d4629c2eade9037626ad18a"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/config-generation.json",
+      "sha256": "140c03b2333711edd6e9142bde3ecfc4c5280b19cd265c4b200bb11ccfd03950"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/deploy-chaincode.log",
+      "sha256": "ff3f03ac575bf83fca9ab42077e78b66b4fbbac326fbda29e6eb0167143bcdfa"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/init-ledger.log",
+      "sha256": "558ddf7ffa53d265bd65055e4b2193ad9b34d3d285131a0567bbf04861ca4d29"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/network-down.log",
+      "sha256": "ef4ba3894cb6e2f9cf73f393fe0dc24bac92fbca8fa8c2eb8a79481362f031c1"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/network-up.log",
+      "sha256": "58b7ac49502805ff97de8a156ee1bd05d34b6dd3aab8674d2a46429a35bd9d67"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/prometheus.jsonl.gz",
+      "sha256": "7dcac89bbbe2467177da51e3c59f07374dba9e8241b744f7a5231e1306d4b672"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/report.html",
+      "sha256": "2488f6b8d1ce3f5ec67694096def65fbc187244af9c961de87e14369c8ef8de3"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r3/transactions-worker-0.jsonl",
+      "sha256": "2f4910ef8ad0256fcfa63a3613c8b4edbfbefac49338e47c53e9e36a642bfa33"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/benchconfig.yaml",
+      "sha256": "36562c73dc1942f5c4fe2ce372804c36d2dadaf3198d17fa3d1d07fd2f3afd29"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/caliper.log",
+      "sha256": "cd69b53223e5e23de0267746c7ab4493607e560fc7d2b5b5aeb8e5289876fa12"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/config-generation.json",
+      "sha256": "b078a6306b1ef8178fd144a1d4aaa259cdf090422aee416cc64123e491585f66"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/deploy-chaincode.log",
+      "sha256": "94311f317fdc045f2baf3f3b6da7d934fb3d8c7bcc2877b82ea23b07f357f180"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/init-ledger.log",
+      "sha256": "11ae69a05b67b909462747e4dd94c7f7625da2ab992714082a285f15e3748590"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/network-down.log",
+      "sha256": "0e2f5eeca23ca15fea6febf0e87a48392b55548469e79d1cf38b038b1d1f5ecd"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/network-up.log",
+      "sha256": "3b8c7d745b4f87f70b672e96ecf0a1f65cf92deb4077cc811f72f02a3ac86de7"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/prometheus.jsonl.gz",
+      "sha256": "43062cb0c576dd639163b175ba3bd7675e9791e9adf2db13cbe060c6aa6a76aa"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/report.html",
+      "sha256": "6e483e55393faf23d9783839e0bcc7c18a965988ae5b12208bafbee7de450420"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r4/transactions-worker-0.jsonl",
+      "sha256": "224a43b429173db3ad514bce5b05d8b9557ab47e0c0f1c1f2e54c8373a359bc7"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/benchconfig.yaml",
+      "sha256": "36562c73dc1942f5c4fe2ce372804c36d2dadaf3198d17fa3d1d07fd2f3afd29"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/caliper.log",
+      "sha256": "dd7a8dbd8b0240d161729cc706439bfb0e2da9ccc07d3c798ba97ef26922870b"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/config-generation.json",
+      "sha256": "5882a0585624ff0295fad4ebdc9af1858f967ffc2eb43f58a9b7931d4c6c9d0e"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/deploy-chaincode.log",
+      "sha256": "d1cd045e556fe526b3fc8478f9282c80d5f32edb9ccf1d15c329fe43dbd9d45f"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/init-ledger.log",
+      "sha256": "47b2f1d80de96c7d53527edbf79ec0cc58d5654128f74cdb0e108191d0ce8984"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/network-down.log",
+      "sha256": "a207a460046a879691eee99f1bfee1ab29ebebf36dcd0483d0b826b523b7fbcb"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/network-up.log",
+      "sha256": "3ee18850602f12dcfc05c034b24de0950d189a316bf72a6f9a33198a6fa18925"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/prometheus.jsonl.gz",
+      "sha256": "12bca7d018568001e0d09e8374362541b2deafe203ab9ae4c128e118c28a02d4"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/report.html",
+      "sha256": "8792755f283441836b4763b2187a4eb48b7e3c0da7f29dac339727a966a68a2b"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-30tps-r5/transactions-worker-0.jsonl",
+      "sha256": "f95aca5d1d94b0550f346e96f4ad2935ec922acb9076f8e907aa31bbcccccd0f"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/benchconfig.yaml",
+      "sha256": "ccc3f4f397f6faf33233fcfc7f7d3eaac610f7375218b8b09b7084919cfc0632"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/caliper.log",
+      "sha256": "58c665779817900335fcc3d092430feef5339eb6e8b10585fa5aba69004754dd"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/config-generation.json",
+      "sha256": "ef6a6d3d2f538240edc432fa3e3fbb3798bec55ba72d545a79d72a4a4c464c0d"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/deploy-chaincode.log",
+      "sha256": "ac6fca0f3e8d2c802e82f3d556cad89051bdb43fd4703b818cf4378bb2e19c92"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/init-ledger.log",
+      "sha256": "3eee6496dbc595032a672a6743f27b6186d47ee867db477002b4db6ea88a8d8b"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/network-down.log",
+      "sha256": "db7f5fbee4858b27d3f02947644953d23ce4d5d5ba96787f79a03d045cb11199"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/network-up.log",
+      "sha256": "e8319dfc20b1d720217d391a658469774dbc8f0a04934ffdfe2f870e021f54df"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/prometheus.jsonl.gz",
+      "sha256": "4ad1ce51640398caaa6e436a49262eccdee493f85f95ae00d19723962fdd01ff"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/report.html",
+      "sha256": "7bbdf2963d22a1d5ccf45bd2be9d70168d66b93b3dff3f62a697897d2edf334a"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r1/transactions-worker-0.jsonl",
+      "sha256": "6c2c9b423c1202eff117682b3e056fb17bea897be06c2c3f8ee9d1bc108459a5"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/benchconfig.yaml",
+      "sha256": "ccc3f4f397f6faf33233fcfc7f7d3eaac610f7375218b8b09b7084919cfc0632"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/caliper.log",
+      "sha256": "2b7c199240d8880a705d0737214a7e7cc7b17e4178c23193265ef22091e24ebe"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/config-generation.json",
+      "sha256": "8eee80503ec6b8ff1ef59259a1391a8d3f6e8756ed8a2eb7a71fa2e0be1bb5e6"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/deploy-chaincode.log",
+      "sha256": "6cbe0bcf045fa10b1a0359aeae1a43ce9ff659fb24ef92fb448e00d477caa830"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/init-ledger.log",
+      "sha256": "7d7ab2c0a1172d09183587ab8b65a0cc87d84ed068f99aa3426c54a4be6e4c8d"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/network-down.log",
+      "sha256": "a8058c36e090836517b2062c1b6b1c52c42d0b3b56b33ad1761d72509c359a0e"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/network-up.log",
+      "sha256": "866561e49e45586e05e82efb252357d633622dff432509f0eb3df0c315e9de5d"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/prometheus.jsonl.gz",
+      "sha256": "0d7ad026730c8178bb0012eb8e2bc067ffa98ea2083ff90d3b9fc1abddfd0beb"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/report.html",
+      "sha256": "e2ca5531b122fd2a3db1432c199c85a254bfc674101302ebcc8ba9fbb2768092"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r2/transactions-worker-0.jsonl",
+      "sha256": "b3f533438a7eecb6309103ca439a52460f7930345dbcfc7ea99ede8c0c091423"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/benchconfig.yaml",
+      "sha256": "ccc3f4f397f6faf33233fcfc7f7d3eaac610f7375218b8b09b7084919cfc0632"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/caliper.log",
+      "sha256": "dac5cf1e75c6a8d79c4fcf4afcde2ddc840e3a5fa9bea7e8551f48a06c6b811c"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/config-generation.json",
+      "sha256": "80dfd8a812302c7d652d112bcd284eb0aba1f3938b6027874f8e6aacadc5ab05"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/deploy-chaincode.log",
+      "sha256": "92733cbaf118ba54082e8818c43e6a98bdbbabb7e758dbd03c51b502abf1b4c7"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/init-ledger.log",
+      "sha256": "cb5bc747a22dbb91bf2ce0092ffa07aeee6b082719d2c5f7e6ccc4debbcc3bb1"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/network-down.log",
+      "sha256": "4678b57895e79a016fa4ef21d945c051666dddfe1a776ee84e0cdb787bb2c83f"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/network-up.log",
+      "sha256": "88fedd32edc35f26c6f981ae3a37e18e63f8499ecd5096cd1eff08cdbcedd2a7"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/prometheus.jsonl.gz",
+      "sha256": "f4f2b03db2019978670ad630288056a9eb4309c8de29b8d2d82b70929c71e2e0"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/report.html",
+      "sha256": "43935e197ddd9515e9eec408ff5b7da8bede4b5b947557af7df4867e2fb392b6"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r3/transactions-worker-0.jsonl",
+      "sha256": "9238122e1dd8cd598ceac3e16f4a1fea12eace7883fcaa2a916f3d79166dc451"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/benchconfig.yaml",
+      "sha256": "ccc3f4f397f6faf33233fcfc7f7d3eaac610f7375218b8b09b7084919cfc0632"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/caliper.log",
+      "sha256": "4e3c47c0ffc46087a7c67aa784ca95fe764715c902c2d1123576c20fd4f9259e"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/config-generation.json",
+      "sha256": "ea9e2fc00b6bcd162682a10f0444d0e6e5ffb26cde0abbdd23a22a9ed97e4c6a"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/deploy-chaincode.log",
+      "sha256": "80d6ee118ccd0b29b161e9a7839d2a66834289ee963fd1f9960067fe0c58b5ce"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/init-ledger.log",
+      "sha256": "e1e4f665167047e843d02f5e310f549ed201db8ca417c89552786a10c7d80a36"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/network-down.log",
+      "sha256": "6bc4310290599ddc60be6eedd9aa81e00d77ff400626a68f99146ab1d04ee82e"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/network-up.log",
+      "sha256": "160a332d9077c5c2ce6469971b8a1575e9f664e2f7d01c44087b59ea926bf672"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/prometheus.jsonl.gz",
+      "sha256": "a96cc7b8b393ba05d9b70c6ca542f0442755b115a0d690e26ad21d5cb09b2670"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/report.html",
+      "sha256": "b59bfe26f9f7aea926f5ffd2fd1ca24c714767e0233069304cd158c2b534ae2a"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r4/transactions-worker-0.jsonl",
+      "sha256": "374d7682f6b6a6c7eb6c30e632c6198afa92500b0880183e3f300499f0803a2a"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/benchconfig.yaml",
+      "sha256": "ccc3f4f397f6faf33233fcfc7f7d3eaac610f7375218b8b09b7084919cfc0632"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/caliper.log",
+      "sha256": "81a996ff2bdab225b230a1fa4e5ae409bfd0cb3ed2a3dc1a53e2bc30e34994df"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/config-generation.json",
+      "sha256": "09cd861a80b888ff04f98fb9e2e092cd568717cd144b31312f440c5310ee9ac8"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/deploy-chaincode.log",
+      "sha256": "d645a4a5804d7b04a35c5229edc5ba96744c26b0bb499281011d7fcd866b3e35"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/init-ledger.log",
+      "sha256": "fa7cd5d6b2a38f3f3abb52ba630896cc5bc5842a2bb3aa9eb9817adacaae38ce"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/network-down.log",
+      "sha256": "b325e492c7518255484ba5c199b99c3a11bc61d2dc3913de7a2f3e9c9d6c7f03"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/network-up.log",
+      "sha256": "177b810746746a39e5c4efa9c37c4939e53a1c67e6701ef602be5bbe3cbdbda2"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/prometheus.jsonl.gz",
+      "sha256": "3f42f89aa8965a30f85ecfdaaf1c7c43ab1ecc9a50214192382fc603c6c76af0"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/report.html",
+      "sha256": "71a14ebab1acfccc993ca9cbc585f0ff843c8f849964c04a84b0b9abc7f7b647"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-40tps-r5/transactions-worker-0.jsonl",
+      "sha256": "efb576cc0537bccf60b1abb0377dab67e361d88e7ae3735ae98b97067bedc3cc"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/benchconfig.yaml",
+      "sha256": "96b1a2b8652fa2bb9d7d208d66632a12f3d0ae7ff1376a5aeda8f4d66c1ee153"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/caliper.log",
+      "sha256": "f6ccd1e777ffc03c56db82d581f53b8333c44294e7b529d285b2b941a37d38f8"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/config-generation.json",
+      "sha256": "9ee597f01fb8e33534af59c489e83591645f1a525de6789d7863ef7b57a89f6d"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/deploy-chaincode.log",
+      "sha256": "66151d53d3f2ad0e92f57a93126f626c0754e06102c90876c376f9f50b702748"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/init-ledger.log",
+      "sha256": "2a570c264cf1e61bde5c727732befae91c88ab363e6f6924334d3485fffd53e6"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/network-down.log",
+      "sha256": "9642ece25b36fdc196fa2c137d822dcdec7a31be397344d353028d6aaff09632"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/network-up.log",
+      "sha256": "c5a62eefcb5d59d5467dd8a8fd8042862670ccd900b3b39cb75e13f6bc7b6063"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/prometheus.jsonl.gz",
+      "sha256": "7e7503d4e38b12c204eebb23e4762aeba1547fd7a738bdfe5f2d6f290c59c1e3"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/report.html",
+      "sha256": "127d6d9058e7f337fdc6db02ee6a0a33a2e6bd39a0c46d4de4a6c84c354aa1a5"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r1/transactions-worker-0.jsonl",
+      "sha256": "f7310bb161e18b8167f1965678e33fbc7fdf21233f777ed25b80ac5ff59612ea"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/benchconfig.yaml",
+      "sha256": "96b1a2b8652fa2bb9d7d208d66632a12f3d0ae7ff1376a5aeda8f4d66c1ee153"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/caliper.log",
+      "sha256": "323f87e2a122e0a8c7ff9ee2eba0eba2562b665f526e26da7f5d22bd7c77fd3b"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/config-generation.json",
+      "sha256": "2f3e9f7d9702557f22db9f79d6433c9bbc93f43aa46d58374f5607d2cab66a11"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/deploy-chaincode.log",
+      "sha256": "a37c8f564e6e16160f138e472a8190e1b5493814c5f0955c343cb9e15a681446"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/init-ledger.log",
+      "sha256": "1ed163b99938e2664b1400aca047a327938014b9b210a039c241ee37ed8f115c"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/network-down.log",
+      "sha256": "5681d9ff70cc0273a1cc7ef7c28b8f754a096a1b3929c1bb22908901b54e9b97"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/network-up.log",
+      "sha256": "7fbd286a5c63ced676b3564b07975af27d3bb9b802d92810608f59027790130d"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/calibration-retail-transfer-low-1w-50tps-r2/prometheus.jsonl",
+      "sha256": "b47ae0245ac3e2a5e78434c3cc149729eaeb7b26a9f19a04334ca6457f22a097"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/benchconfig.yaml",
+      "sha256": "bb57f96206786503cc125562b7d4bf2dc571d050cd99867e19ac46da19699559"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/caliper.log",
+      "sha256": "1418071c3f2de2cbe77135eadb8db010e4a784033fbf3786be53401ff39daed0"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/config-generation.json",
+      "sha256": "4e8d7529d68bcacfca9ccd36e9685350eabbfeb64301123ab07e8bc991c0ab84"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/deploy-chaincode.log",
+      "sha256": "2333179fdf03ecaa70bb9a9f3e3a1d4853dbfac9f3df55c56e22cbb8604f718d"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/init-ledger.log",
+      "sha256": "730535104d62b2137ea7da427984c86bc7b76fce0641ee934ef877a3d7a86956"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/network-down.log",
+      "sha256": "98da2ca9c3829bddfe357da8e06a6a09ea4d9005817875afd91ec000654a1092"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/network-up.log",
+      "sha256": "47ee073dc7946659704304f7d6d41d8554899fa846fe05a510d6831a25acd9ce"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/prometheus.jsonl.gz",
+      "sha256": "a418762fa6152317bd30d47f67d06766595bc8da81a655bf16d51ca20535049a"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/report.html",
+      "sha256": "41f4e5ef0dce5994ceaae75a30861fdc4ea26d90831b692aa26b517741fe3818"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-100tps-r1/transactions-worker-0.jsonl",
+      "sha256": "f10077a3b329872a70a70cc20f88dbd6d0e93a5697a98ee86a0ce6053ff1f15e"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/benchconfig.yaml",
+      "sha256": "0481af0f93b564b5f42630df5f2b289849c29803474033b7d7bd12fe1b6bd046"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/caliper.log",
+      "sha256": "f5cf0a0573c6396fafd58c25986796e39d8f033ed01a31cbaa2d48b76b658b5d"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/config-generation.json",
+      "sha256": "1d5e8ac73ae028443627d6c63350282ba5e30af3d907bebdd558354c66a78f3f"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/deploy-chaincode.log",
+      "sha256": "0594451ee762250d421e96142e45ceb93eba4cfd298840f4db5da6d038694326"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/init-ledger.log",
+      "sha256": "5a28ee01d1147fb4589d07a5945cae70c2c139a33b2811b33a82bbda0b42c616"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/network-down.log",
+      "sha256": "32015f3efb2cfb1434a691dfc39247b9b615bad64e9287e63acac258f3b79673"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/network-up.log",
+      "sha256": "09994868792ca005aa4f96f48da305d91714128fe957f3c5c501be0c34a2f70a"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/prometheus.jsonl.gz",
+      "sha256": "1c3bb2ac49a9192d943cb56472508accea09ce59686f18f288e8ff9bdb2c0073"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/report.html",
+      "sha256": "d171a23a722ff15ead47ced854a1699273d3418673110ee6479a8e3ff13ebb8e"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-10tps-r1/transactions-worker-0.jsonl",
+      "sha256": "fd67fe45ec941ab876bb67324dcdbba39de67a401e00c4e4b3fd4339aed0a53f"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/benchconfig.yaml",
+      "sha256": "0d67a87a19bc6df1ec1fded0a0c8fdff63f3243001e40e9999ce52e0ce8c477e"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/caliper.log",
+      "sha256": "30b4389489bb8996d6d4c9bfe45e800ba514ea39b750e552467bfe40b4da0a4d"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/config-generation.json",
+      "sha256": "dcd59bff860af79c1bc31a67873ca4c40ed2db6323d1bab4818896a5f1863b2f"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/deploy-chaincode.log",
+      "sha256": "7658389d703f1f05f93515db7c9112ef2ba1a20962169eead310eed4afe10798"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/init-ledger.log",
+      "sha256": "558e19dfd74a1ed01049277980e715a6994ffd4ee4dee13d3b7919223df9de10"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/network-down.log",
+      "sha256": "a564ad7eb0ab2a7ddb07241de8fcaa2f576b510d78b403ff90d82cebc3523304"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/network-up.log",
+      "sha256": "90a6d8a7e16f7a04be05804cef8c3995d55ce940868903bc2288603588fa20d4"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/prometheus.jsonl.gz",
+      "sha256": "e32875d3e18d96aaa13c23ca036bf6012aef0a456a37419eb0d13667433906b4"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/report.html",
+      "sha256": "d803cb036e57b5e39cd41a60aa6e518b6027f822c8eeab2124104092a577cb75"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-150tps-r1/transactions-worker-0.jsonl",
+      "sha256": "0832db06b46a467067b8db0cb47eb0d7f542f6f3c355507cbfa2dd5d2b8790f8"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/benchconfig.yaml",
+      "sha256": "12a20090f517cdec338ea692248aa1833747fc71f18b146a0e43d913413dc217"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/caliper.log",
+      "sha256": "a4d79f840451f797fd1f635b95eaced16004d5469465d2a4765adbc9c01a45ab"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/config-generation.json",
+      "sha256": "2d40600b3d9e8eb63fa47414282481edf13db7de62287c99223d7f6457a240ce"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/deploy-chaincode.log",
+      "sha256": "c213b4d6226dfe2e7cd5adbdcf766403825f437736fe7db31f01b73b7b7086c5"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/init-ledger.log",
+      "sha256": "7b0010d1030bb9ab041f47087673e9d8f520b386a9de4a516e8bf50ba2740dd2"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/network-down.log",
+      "sha256": "8284551d04780e9d13d87b18ecb154339bf70f0504b2481a4a653be7796ff9f9"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/network-up.log",
+      "sha256": "c6f0edee7a7fce81fbde82f47ea96ef1ef32168b1b9d3cc0536f0195648c0cc0"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/prometheus.jsonl.gz",
+      "sha256": "fdf83a1f69e6a762c6a1ccc6d148b8d874aab6e21adbabb7b4c89ce6ea54d433"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/report.html",
+      "sha256": "b14f9bf19a42c337fde3fb7a4f7e7f1dd4192afcbe58b2a97a6a0f5365dda3f0"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-20tps-r1/transactions-worker-0.jsonl",
+      "sha256": "0630dd4252886c1d2917c887d1303762685644d4da3b120b4c6edffcbdb4c746"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/benchconfig.yaml",
+      "sha256": "ad2eeefe6d9bcd6e65f39cf5df0c47e2b00bc0a9cd6eb8472293238becdf2a6d"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/caliper.log",
+      "sha256": "563e5f41d1cef43b5a8ffa6da570c081fd3dd376edf767c4f6e89e853083edc2"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/config-generation.json",
+      "sha256": "71269534e026ea79df3fea9029042ee0222eeee7af08ac3f064ff6fa3973b016"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/deploy-chaincode.log",
+      "sha256": "51018c193f67705cd428b8232f107609b70d161e9d7a6897ebe0ee80186673ba"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/init-ledger.log",
+      "sha256": "c20fd960e703e49ed2f3cb771ee41a6c3587dea79cef01df231e0c0ab428b2db"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/network-down.log",
+      "sha256": "4cb6ccacf7c2514ec504fb33c964e5d8169ce231eefc6930fe7a980ea72d9124"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/network-up.log",
+      "sha256": "573d9ca4e876af158a0c1251138e3aefb55481493c3ec8d5c4fc0bb3654f2bfb"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/prometheus.jsonl.gz",
+      "sha256": "66b48faeb032daccbbc83303fdaf86b830205d01cb6087c9a087104696967f02"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/report.html",
+      "sha256": "48782ce34d68ca554e7d7622e6498c207b9410bb38e6ebb77cc2e43687b2310e"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-40tps-r1/transactions-worker-0.jsonl",
+      "sha256": "a5e811dd834a86827f347c270e6a386e00686f9a347f5997ab67c577b626052c"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/benchconfig.yaml",
+      "sha256": "ad63dd520a1abbaf47fd39d257877a1d37171bc7ca8e41a85fa4a10790284be3"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/caliper.log",
+      "sha256": "6bbe03ac87df8ffb0b56cbe8af4ad347fd3d61987f48e5aa210819b5fa66ee14"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/config-generation.json",
+      "sha256": "aac9ab503126e2da9c76c7c7d720f4b3faca78eb8460e8cfc20d2cbc404a6fd8"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/deploy-chaincode.log",
+      "sha256": "a4f2a5bbf91d9abed51b0d7f0a591fab040588d4392f5348f62bdc9e204dd475"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/init-ledger.log",
+      "sha256": "0e7629ed2ec817646c1756859688968f016d8eb5dccecc84054c58b634f87493"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/network-down.log",
+      "sha256": "fe8ae2acc705b3cf5038dd6bdce644b8bfeac9b1940338de3b436a282b439f0c"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/network-up.log",
+      "sha256": "e150e43fba05d25d4f99eca7bae1338cce345aeae3b1d80685dcc7af383a38ea"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/prometheus.jsonl.gz",
+      "sha256": "68dc9c1d3de5b97117928ca2dfdfac63a619f5df923b447653eb5bc243373696"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/report.html",
+      "sha256": "07512f70bc81ba55b12ce0911f80f6209d0edccd62b293094c01b7fa4ff05e04"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-5tps-r1/transactions-worker-0.jsonl",
+      "sha256": "ca43702c70bcf67947d49bcc7dfdc7378b28eedbb0210fa4a70b084cf4521859"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/benchconfig.yaml",
+      "sha256": "57530b03930d12b5372a795d8bc3c6eee755858de22491978224122c3876446f"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/caliper.log",
+      "sha256": "6ad414509cad2eb5ee38833c73a8646b3abc259b054019b666446d8f38334685"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/config-generation.json",
+      "sha256": "7f20e1a6feb0c0941b70984b3ebebcf3bc0ceccae01d0397579c4046f3ae3b58"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/deploy-chaincode.log",
+      "sha256": "4b37cb033969133bc2fdbd6a0f86e296290970bdf5f18e90f7c4768a57d3640b"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/init-ledger.log",
+      "sha256": "2419dc335a366d55149b40932dd4720dcd265c04c15758b75d37bbf856d4bc3b"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/network-down.log",
+      "sha256": "dc42230c2bfde80a5da6d61c65e635a9405b59e7c35964e967c64d4a08858766"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/network-up.log",
+      "sha256": "6effe86c6dc5b678a627bf48e64dfc0cf85a48ca8f2c5f5be212b7af64349622"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/prometheus.jsonl.gz",
+      "sha256": "a1128885b3e835664ef3f79bb3e651bfbda3116332f9f4641b958f070a10bb69"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/report.html",
+      "sha256": "71b828c8b41e046bc600577f3ae91e0c6b17f710ea882b20f1d41e814fcb392f"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-60tps-r1/transactions-worker-0.jsonl",
+      "sha256": "9cbc3d0b18cf5a16a055884b5b4ccc6de93564b510e2f96881afbe2c945cf5d7"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/assets.log",
+      "sha256": "0e59ae06780a7f55ee644878cff9728fcce0776c7c4ecaf91b42ec63aea516bf"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/benchconfig.yaml",
+      "sha256": "62a7e2798ccb64d115e31b6c460f144c8307985c9003f2278f1153f5f84f4b16"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/caliper.log",
+      "sha256": "a786518eeea694489db205b8c27f017af799abff2f6d713cf6ab411655e8c9a7"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/config-generation.json",
+      "sha256": "28fdf033841aed471048df5c71d3a3c8ecadbaf8655b4fb06c0ee3cf0974ef97"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/deploy-chaincode.log",
+      "sha256": "75cb01af586f44715f9a8f8fb280e707fe09612e4fd6a96a4c1a7b4c9db4684d"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/init-ledger.log",
+      "sha256": "a45b20ce4cf398eb441af2a0a244e3faf3d0eae15a7b05c1e3da3634c28400be"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/network-down.log",
+      "sha256": "eab0557f1df7a01a1b99aa7fb7bd64bfb7a7c041ab2fc7463e70d249335332b1"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/network-up.log",
+      "sha256": "937dbfadbf1b9e3c5cb132280c62de4dcc68986025960068e655e90421833a23"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/prometheus-sampler.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/prometheus.jsonl.gz",
+      "sha256": "7bc5b49ab183f8f8fd6405879faa2142478e88eff2009d672e8915994694455b"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/report.html",
+      "sha256": "9f9c56e5630095f390907e1ac03a5303ddb099244c496f36767d0cb402887741"
+    },
+    {
+      "path": "runs/pilot-retail-transfer-low-1w-80tps-r1/transactions-worker-0.jsonl",
+      "sha256": "8f9928b1ce6939bba253ff01f0a840995a7104c023e96e3ae0fb2e91f8bb0d73"
+    },
+    {
+      "path": "source-validation.log",
+      "sha256": "a96eda8f5d362cc6b8c3bb844027e9cc0b87b93bc1be3f64f527922eaaefa4e1"
+    },
+    {
+      "path": "summary.json",
+      "sha256": "fcec05a87d54ea8db3edbcea550caa1013b4d1df3a6de5213ad20c52a72359d3"
+    }
+  ]
+}

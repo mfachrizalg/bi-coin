@@ -21,14 +21,16 @@ class SupervisionReadsWorkload extends RetailWorkloadBase {
             fundedRatio: 1,
             fundStandard: this.arg('fundStandard', 1000000),
             fundBasic: this.arg('fundBasic', 100000),
+            seed: true,
         });
 
         const seedTransfers = this.arg('seedTransfers', 10);
         const seedTransferAmount = this.arg('seedTransferAmount', 50000);
         for (const { sender, receiver } of this.planSeedTransfers(seedTransfers)) {
-            await this.submit('Transfer', [sender.walletId, receiver.walletId, seedTransferAmount]);
+            await this.submit('Transfer', [sender.walletId, receiver.walletId, seedTransferAmount], false, 'himbara');
         }
 
+        this.txIndex = 0;
         this.configureMeasuredTraffic(this.arg('transactionSlots', 100));
     }
 

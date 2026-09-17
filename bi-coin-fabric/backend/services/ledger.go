@@ -5,10 +5,12 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/x509"
+	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -200,7 +202,36 @@ func (s *LedgerService) beginOperation(ctx context.Context, operation string, ke
 	if !created && (existing.Operation != candidate.Operation || existing.RequestHash != candidate.RequestHash) {
 		return nil, false, Conflict("idempotency key was already used for a different request")
 	}
+	if !created && existing.Status == OperationPending {
+		return nil, false, Conflict("operation is already in progress")
+	}
 	return &existing, !created && existing.Status == OperationCompleted && len(existing.Response) > 0, nil
+}
+
+func (s *LedgerService) existingOperation(ctx context.Context, operation string, key string, request interface{}) (*OperationJournal, error) {
+	if strings.TrimSpace(key) == "" {
+		return nil, nil
+	}
+	principalID := s.principal.ID()
+	if principalID == "" {
+		return nil, nil
+	}
+	payload, err := json.Marshal(request)
+	if err != nil {
+		return nil, Internal("failed to hash operation request", err)
+	}
+	hash := sha256.Sum256(payload)
+	existing, err := s.operations.GetOperation(ctx, s.principal.Scope(), principalID, key)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, Internal("failed to load operation journal", err)
+	}
+	if existing.Operation != operation || existing.RequestHash != hex.EncodeToString(hash[:]) {
+		return nil, Conflict("idempotency key was already used for a different request")
+	}
+	return existing, nil
 }
 
 func (s *LedgerService) recordSubmittedOperation(ctx context.Context, operation *OperationJournal, txID string, response interface{}) error {
@@ -443,12 +474,6 @@ func (s *LedgerService) PayQris(req models.PayQrisRequest) (*models.QrisPayResul
 	if err != nil {
 		return nil, err
 	}
-	if intent.Status == models.QrisStatusCancelled || intent.Status == models.QrisStatusExpired {
-		return nil, Conflict(fmt.Sprintf("qris intent %s is %s", intent.IntentID, intent.Status))
-	}
-	if intent.Mode == models.QrisModeDynamic && intent.Status == models.QrisStatusPaid {
-		return nil, Conflict(fmt.Sprintf("qris intent %s is already paid", intent.IntentID))
-	}
 	amount := intent.Amount
 	if intent.Mode == models.QrisModeStatic {
 		amount, err = s.parseQrisAmount(intent.Mode, req.Amount)
@@ -456,12 +481,46 @@ func (s *LedgerService) PayQris(req models.PayQrisRequest) (*models.QrisPayResul
 			return nil, err
 		}
 	}
-	operation, replay, err := s.beginOperation(context.Background(), "qris_pay", req.IdempotencyKey, struct {
+	operationRequest := struct {
 		IntentID        string
 		PayerWalletID   string
 		Amount          int64
 		IntentReference string
-	}{intent.IntentID, req.PayerWalletID, amount, intent.ReferenceID})
+	}{intent.IntentID, req.PayerWalletID, amount, intent.ReferenceID}
+	existing, err := s.existingOperation(context.Background(), "qris_pay", req.IdempotencyKey, operationRequest)
+	if err != nil {
+		return nil, err
+	}
+	if existing != nil {
+		if existing.Status == OperationPending {
+			return nil, Conflict("operation is already in progress")
+		}
+		if len(existing.Response) == 0 {
+			return nil, Internal("invalid persisted QRIS receipt", nil)
+		}
+		var result models.QrisPayResult
+		if err := json.Unmarshal(existing.Response, &result); err != nil {
+			return nil, Internal("invalid persisted QRIS receipt", err)
+		}
+		if existing.Status == OperationSubmitted {
+			if intent.Mode == models.QrisModeDynamic {
+				if err := s.persistQrisPayment(intent, &result, req.PayerWalletID); err != nil {
+					return nil, err
+				}
+			}
+			if err := s.completeOperation(context.Background(), existing); err != nil {
+				return nil, err
+			}
+		}
+		return &result, nil
+	}
+	if intent.Status == models.QrisStatusCancelled || intent.Status == models.QrisStatusExpired {
+		return nil, Conflict(fmt.Sprintf("qris intent %s is %s", intent.IntentID, intent.Status))
+	}
+	if intent.Mode == models.QrisModeDynamic && intent.Status == models.QrisStatusPaid {
+		return nil, Conflict(fmt.Sprintf("qris intent %s is already paid", intent.IntentID))
+	}
+	operation, replay, err := s.beginOperation(context.Background(), "qris_pay", req.IdempotencyKey, operationRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -488,7 +547,7 @@ func (s *LedgerService) PayQris(req models.PayQrisRequest) (*models.QrisPayResul
 		return &result, nil
 	}
 	result, err := s.contract.SubmitTransaction("PayQris",
-		req.PayerWalletID, intent.MerchantWalletID, fmt.Sprintf("%d", amount), intent.ReferenceID)
+		req.PayerWalletID, intent.MerchantWalletID, fmt.Sprintf("%d", amount), operation.OperationRef)
 	if err != nil {
 		return nil, Internal("failed to submit QRIS payment", err)
 	}
@@ -754,14 +813,29 @@ func (s *LedgerService) CreateRetailCustomer(req models.RetailCustomerRequest) (
 		req.CustomerID = uuid.New().String()
 	}
 	identityHash := s.hashKycValue(req.CustomerID + ":" + req.LegalName)
+	var persisted *models.RetailCustomer
 	if s.kycStore != nil {
-		if _, err := s.kycStore.CreateRetailCustomer(context.Background(), req, identityHash, s.kycCustodianScope()); err != nil {
+		var err error
+		persisted, err = s.kycStore.CreateRetailCustomer(context.Background(), req, identityHash, s.kycCustodianScope())
+		if err != nil {
 			return nil, Internal("failed to persist retail customer", err)
 		}
 	}
 	result, err := s.contract.SubmitTransaction("CreateRetailCustomer", req.CustomerID, identityHash, req.WalletAccountID, req.KycProfileID)
 	if err != nil {
 		return nil, Internal("failed to anchor retail customer", err)
+	}
+	if len(result) == 0 || string(result) == "null" {
+		if persisted != nil {
+			return persisted, nil
+		}
+		return &models.RetailCustomer{
+			CustomerID:      req.CustomerID,
+			LegalName:       req.LegalName,
+			IdentityHash:    identityHash,
+			WalletAccountID: req.WalletAccountID,
+			KycProfileID:    req.KycProfileID,
+		}, nil
 	}
 	var c models.RetailCustomer
 	if err := s.unwrapRequired(result, &c); err != nil {
@@ -993,9 +1067,9 @@ func (s *LedgerService) ListSystemLimits(scope string) ([]*models.SystemLimit, e
 
 // ─── Liquidity ───────────────────────────────────────────────────────────────
 
-func (s *LedgerService) RequestIssuance(participantID string, amount int64) error {
+func (s *LedgerService) RequestIssuance(amount int64) error {
 	amountStr := fmt.Sprintf("%d", amount)
-	result, err := s.contract.SubmitTransaction("RequestIssuance", participantID, amountStr)
+	result, err := s.contract.SubmitTransaction("RequestIssuance", amountStr)
 	if err != nil {
 		return fmt.Errorf("chaincode RequestIssuance: %w", err)
 	}
@@ -1035,7 +1109,7 @@ func (s *LedgerService) RtgsIssuanceNotification(senderBIC string, amount int64,
 	}, nil
 }
 
-func (s *LedgerService) DistributeToParticipant(senderParticipantID, receiverParticipantID string, amount int64, idempotencyKeys ...string) error {
+func (s *LedgerService) DistributeToParticipant(receiverParticipantID string, amount int64, idempotencyKeys ...string) error {
 	if amount <= 0 {
 		return InvalidInput("amount must be positive")
 	}
@@ -1044,10 +1118,9 @@ func (s *LedgerService) DistributeToParticipant(senderParticipantID, receiverPar
 		key = idempotencyKeys[0]
 	}
 	operation, replay, err := s.beginOperation(context.Background(), "distribution", key, struct {
-		SenderParticipantID   string
 		ReceiverParticipantID string
 		Amount                int64
-	}{senderParticipantID, receiverParticipantID, amount})
+	}{receiverParticipantID, amount})
 	if err != nil {
 		return err
 	}
@@ -1058,7 +1131,7 @@ func (s *LedgerService) DistributeToParticipant(senderParticipantID, receiverPar
 		return s.completeOperation(context.Background(), operation)
 	}
 	result, err := s.contract.SubmitTransaction("DistributeToParticipant",
-		senderParticipantID, receiverParticipantID, fmt.Sprintf("%d", amount), operation.OperationRef)
+		receiverParticipantID, fmt.Sprintf("%d", amount), operation.OperationRef)
 	if err != nil {
 		return Internal("failed to submit distribution", err)
 	}
@@ -1066,7 +1139,7 @@ func (s *LedgerService) DistributeToParticipant(senderParticipantID, receiverPar
 	if err := s.unwrapRequired(result, &receipt); err != nil {
 		return err
 	}
-	if err := validateMoneyReceipt(receipt, operation.OperationRef, "", "", amount); err != nil {
+	if err := validateMoneyReceipt(receipt, operation.OperationRef, "bi_treasury", fmt.Sprintf("wlt_%s", receiverParticipantID), amount); err != nil {
 		return err
 	}
 	if err := s.recordSubmittedOperation(context.Background(), operation, receipt.TxID, receipt); err != nil {
