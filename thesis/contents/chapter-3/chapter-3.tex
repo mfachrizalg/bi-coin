@@ -40,10 +40,10 @@ klien, \textit{backend API}, basis data luring PostgreSQL, dan jaringan
 \textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya.
 
 Pemangku kepentingan utama terdiri atas Bank Indonesia sebagai penerbit dan
-pengawas, bank validator sebagai distributor likuiditas ke PJP, PJP sebagai
-penyalur layanan ritel, pedagang dan pelanggan ritel sebagai pengguna transaksi,
-serta supervisor dan pengamat OJK sebagai pihak yang membutuhkan fungsi baca dan
-pelaporan. Setiap pemangku kepentingan tersebut kemudian diterjemahkan menjadi
+pengawas, bank validator dan PJP sebagai kustodian institusional, pedagang dan
+pelanggan ritel sebagai pengguna transaksi, serta supervisor dan pengamat OJK
+sebagai pihak yang membutuhkan fungsi baca dan pelaporan. Setiap pemangku
+kepentingan tersebut kemudian diterjemahkan menjadi
 peran akses pada \textit{backend API} dan aturan bisnis pada \textit{chaincode}
 agar kebutuhan operasional dapat ditelusuri secara konsisten.
 
@@ -57,7 +57,7 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
         \midrule
         FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembekuan, pencairan, dan penghentian peserta sesuai peran Bank Indonesia, bank validator, dan PJP. \\
-        FR-02 & Sistem harus mendukung penerbitan Digital Rupiah oleh Bank Indonesia dan distribusi likuiditas dua jenjang dari bank validator ke PJP. \\
+        FR-02 & Sistem harus mendukung penerbitan Digital Rupiah oleh Bank Indonesia ke dalam Treasury dan distribusi langsung kepada bank validator atau PJP sebagai kustodian institusional. \\
         FR-03 & Sistem harus menolak transfer yang tidak diotorisasi, melibatkan dompet beku, bernilai tidak valid, atau melebihi saldo pengirim, lalu memperbarui saldo secara atomik. \\
         FR-04 & Sistem harus menyediakan laporan rekonsiliasi, metrik, riwayat transaksi, dan \textit{event} pengawasan bagi peran yang berwenang. \\
         FR-05 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, PJP/bank, merchant, dan supervisor. \\
@@ -74,7 +74,7 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         \toprule
         \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
         \midrule
-        NFR-01 & Sistem harus berjalan pada jaringan \textit{permissioned} Hyperledger Fabric yang mendukung partisipasi multipihak dan \textit{endorsement} mayoritas. \\
+        NFR-01 & Sistem harus berjalan pada jaringan \textit{permissioned} Hyperledger Fabric yang mendukung partisipasi multipihak dan kebijakan \textit{endorsement} organisasi yang ditetapkan pada kanal. \\
         NFR-02 & Sistem harus menyediakan keterlacakan melalui catatan audit, \textit{event} pengawasan, dan riwayat transaksi yang dapat ditelusuri kembali ke peserta terkait. \\
         NFR-03 & Sistem harus memisahkan antarmuka klien, \textit{backend API}, basis data luring, dan \textit{chaincode} agar kontrol akses dan integrasi dapat dikelola secara modular. \\
         NFR-04 & Sistem harus dapat dievaluasi kinerjanya secara kuantitatif melalui metrik \textit{throughput}, latensi, dan tingkat keberhasilan transaksi menggunakan Hyperledger Caliper. \\
@@ -108,7 +108,7 @@ Setiap proses utama dimodelkan dengan activity diagram bergaya
 \textit{swimlane} tiga jalur, yaitu jalur aktor, jalur \textit{backend API}, dan
 jalur \textit{blockchain} (\textit{chaincode}). Diagram tersebut mencakup
 pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
-(Gambar~\ref{fig:ad02}), distribusi likuiditas ke PJP
+(Gambar~\ref{fig:ad02}), distribusi likuiditas dari Treasury Bank Indonesia kepada kustodian
 (Gambar~\ref{fig:ad03}). Proses lainnya meliputi transfer saldo ritel
 (Gambar~\ref{fig:ad05}), pembekuan dan pencairan peserta
 (Gambar~\ref{fig:ad08}), serta laporan dan pengawasan
@@ -120,12 +120,13 @@ pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
 
 Secara konseptual, sistem menggunakan model distribusi Rupiah Digital dua
 jenjang sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
-Jenjang distribusi institusional menghubungkan Bank Indonesia selaku penerbit
-dengan bank validator (HimbaraBank dan CommercialBank) serta PJP melalui
-jaringan Hyperledger Fabric. Jenjang layanan ritel menyediakan pembayaran
-melalui PJP, termasuk transfer antarpelanggan, transfer pelanggan-ke-pedagang,
-dan kontrol akses berbasis peran. Jenjang institusional tersebut menjelaskan
-jalur distribusi menuju layanan ritel, bukan implementasi instrumen w-Digital
+Jenjang distribusi institusional menghubungkan Treasury Bank Indonesia selaku
+penerbit dengan bank validator (HimbaraBank dan CommercialBank) atau PJP sebagai
+kustodian melalui jaringan Hyperledger Fabric. Jenjang layanan ritel menyediakan
+pembayaran melalui kustodian, termasuk transfer antarpelanggan,
+transfer pelanggan-ke-pedagang, dan kontrol akses berbasis peran. Jenjang
+institusional tersebut menjelaskan jalur distribusi menuju layanan ritel, bukan
+implementasi instrumen w-Digital
 Rupiah yang terpisah.
 
 \input{contents/figures/two-tier-cbdc}
@@ -211,8 +212,10 @@ Tabel~\ref{tab:jaringan}.
 \endgroup
 
 Seluruh peserta tergabung dalam satu kanal (\textit{channel}) dengan kebijakan
-dukungan \textit{majority}, sehingga pemutakhiran \textit{ledger} memerlukan
-dukungan dari mayoritas organisasi. Komunikasi antarsimpul diamankan dengan TLS.
+\textit{endorsement} yang menerima salah satu MSP institusional yang ditetapkan
+pada konfigurasi kanal. Kebijakan siklus hidup \textit{chaincode} tetap
+memerlukan persetujuan Bank Indonesia dan salah satu peserta institusional.
+Komunikasi antarsimpul diamankan dengan TLS.
 Topologi jaringan secara lengkap ditunjukkan pada
 Gambar~\ref{fig:arsitektur-jaringan}, yang memperlihatkan hubungan antara
 \textit{orderer}, kelima \textit{peer}, basis data CouchDB masing-masing
@@ -537,7 +540,7 @@ rekayasa sistem.
 \noindent\textit{Berdasarkan literatur.}
 Variasi 1, 2, dan 4 \textit{worker} digunakan untuk memisahkan pengaruh
 pembangkit beban Caliper dari kapasitas jaringan Fabric. Dengan kebijakan
-\textit{endorsement majority} (3 dari 5 organisasi), penambahan \textit{worker}
+\textit{endorsement} organisasi pada kanal, penambahan \textit{worker}
 tidak otomatis meningkatkan kapasitas jaringan karena bottleneck dapat berpindah
 ke eksekusi \textit{peer}, validasi blok, atau pemrosesan \textit{orderer}
 \cite{androulaki2018, fabric_perf2023, hlf_caliper}. Kontrol laju
@@ -555,19 +558,20 @@ dilaporkan apa adanya.
 
 \noindent\textit{Berdasarkan pertimbangan teknis sistem.}
 Ronde pemanasan berlangsung 30 detik, sedangkan ronde stabil dan puncak
-masing-masing berlangsung 120 detik. Ketiga konfigurasi mempertahankan total
-116 pelanggan, 16 pedagang, dan 52 slot transaksi: 116/16/52 pada
-1 \textit{worker}, 58/8/26 per \textit{worker} pada 2 \textit{worker},
-serta 29/4/13 per \textit{worker} pada 4 \textit{worker}. Nilai transfer
-ditetapkan Rp50.000 agar penggunaan berulang tetap berada dalam saldo awal
-purwarupa. Populasi menyediakan pengirim, penerima, dan pedagang untuk rencana
+masing-masing berlangsung 120 detik. Konfigurasi tersebut menetapkan 116
+pelanggan, 16 pedagang, dan 52 slot untuk 1 \textit{worker}; 58 pelanggan,
+8 pedagang, dan 26 slot untuk 2 \textit{worker}; serta 29 pelanggan, 4
+pedagang, dan 13 slot untuk 4 \textit{worker}. Pengirim
+menerima saldo awal lebih besar daripada penerima agar pengukuran tidak berhenti
+karena batas saldo penerima. Populasi menyediakan pengirim, penerima, dan
+pedagang untuk rencana
 transaksi
 berputar dengan perebutan kunci rendah. Jenis transaksi ditentukan secara
 deterministik berdasarkan slot global sehingga komposisi gabungan tetap 70\%
 transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
 pembacaan dompet. Profil pengulangan puncak menggunakan 2 \textit{worker} dan
-lima ronde berdurasi 60 detik agar rerata serta interval kepercayaan reratanya
-dihitung tanpa mengubah komposisi beban. Setiap ronde memakai ruang nama kunci
+lima ronde berdurasi 60 detik agar rerata dan variasinya diamati tanpa mengubah
+komposisi beban. Setiap ronde memakai ruang nama kunci
 yang berbeda, tetapi kelimanya berjalan pada satu \textit{ledger} profil yang
 sama. Interval tersebut karena itu mengukur \textit{repeatability} dalam satu
 lingkungan, bukan lima replikasi infrastruktur yang independen.
@@ -582,7 +586,8 @@ penolakan. Skenario ini tidak diklaim sebagai simulasi serangan
 
 Setiap profil dijalankan pada jaringan dan buku besar baru. Urutan konfigurasi
 1, 2, dan 4 \textit{worker} diacak secara deterministik dengan \textit{seed}
-20260725. Generator bilangan acak beban kerja juga memakai \textit{seed} yang
+suite 20260909. Berkas konfigurasi transfer mempertahankan \textit{seed}
+workload 20260725; generator bilangan acak beban kerja juga memakai \textit{seed} yang
 dicampur dengan indeks ronde dan \textit{worker}. Runner menghapus laporan lama
 sebelum eksekusi, membatalkan validitas ronde jika setup gagal, dan mencatat
 status, versi runtime, hash konfigurasi/beban kerja, revisi Git, keadaan
@@ -688,7 +693,9 @@ menambah saldo dompet setelah memverifikasi otorisasi dan status beku.
 \begin{lstlisting}[language=Go]
 func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface,
     walletID string, amount int64) error {
-    // ... validasi MSP Bank Indonesia dan pasokan global ...
+    if walletID != "bi_treasury" {
+        return fmt.Errorf("issuance must credit bi_treasury")
+    }
     if amount <= 0 {
         return fmt.Errorf("amount must be positive")
     }
@@ -697,7 +704,9 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface,
     if wallet.Frozen {
         return fmt.Errorf("wallet %s is frozen", walletID)
     }
-    newBalance := wallet.Balance + amount
+    // ... validasi batas transaksi dan pasokan global ...
+    newBalance, err := checkedAddInt64(wallet.Balance, amount)
+    if err != nil { return err }
     wallet.Balance = newBalance
     wallet.UpdatedAt = txNow(ctx).Format(time.RFC3339)
     if err := s.emitAudit(ctx, "MINT", walletID, "", amount); err != nil {
@@ -711,17 +720,21 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface,
 \end{figure}
 
 Gambar~\ref{lst:transfer} menunjukkan pemanggilan fungsi transfer bersama.
-Fungsi tersebut memeriksa otorisasi, status dompet, nilai positif, dan saldo
-pengirim sebelum memperbarui kedua dompet secara atomik.
+Fungsi tersebut memeriksa otorisasi, status dompet, nilai positif, batas
+masuk, dan saldo pengirim sebelum memperbarui kedua dompet secara atomik.
 
 \begin{figure}[H]
 \begin{lstlisting}[language=Go]
 func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface,
     senderID string, receiverID string, amount int64, referenceID string) (map[string]interface{}, error) {
-    // ... periksa MSP pemanggil, sender & receiver tidak beku,
-    // serta kecukupan saldo ...
-    sender.Balance -= amount
-    receiver.Balance += amount
+    // ... periksa MSP kustodian, KYC penerima, status dompet, batas, dan saldo ...
+    if sender.Tier == "" {
+        // Pendanaan kustodian ke dompet ritel hanya mengkredit penerima.
+        // ... applyWholesaleFundingPolicy, putWallet, dan receipt idempotensi ...
+    } else {
+        // Transfer ritel mengurangi pengirim dan menambah penerima.
+        // ... applyRetailTransferPolicy, putWallet, dan receipt idempotensi ...
+    }
     // ... putWallet, recordTransaction, audit, dan receipt idempotensi ...
 }
 \end{lstlisting}
@@ -757,12 +770,15 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
     auth := r.NewRoute().Subrouter()
     auth.Use(middleware.RequireRole(
         middleware.RoleAuthenticated, middleware.RoleBankPjp,
+        middleware.RoleValidatorBank, middleware.RolePJP,
         middleware.RoleBankIndonesia))
     auth.HandleFunc("/wallets", h.ListWallets).Methods("GET")
 
     // Bank/PJP mengelola dompet dan distribusi ritel
     walletMutation := r.NewRoute().Subrouter()
-    walletMutation.Use(middleware.RequireRole(middleware.RoleBankPjp))
+    walletMutation.Use(middleware.RequireRole(
+        middleware.RoleBankPjp, middleware.RoleValidatorBank,
+        middleware.RolePJP))
     walletMutation.HandleFunc("/wallets", h.CreateWallet).Methods("POST")
 
     // Pelanggan/pedagang yang disetujui melakukan transfer

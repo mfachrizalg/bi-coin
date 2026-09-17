@@ -7,21 +7,24 @@ chaincode and backend services, CouchDB, and PostgreSQL.
 }
 
 \textit{
-The prototype separates institutional and retail roles. Backend ownership and
-chaincode MSP checks enforce user and organization boundaries. The shared Fabric
-channel does not provide transaction privacy.
+The prototype separates institutional and retail roles. Bank Indonesia issues
+Digital Rupiah into Treasury and distributes it directly to a validator bank or
+payment service provider acting as custodian. Backend ownership and chaincode MSP
+checks enforce user and organization boundaries. The shared Fabric channel does
+not provide transaction privacy.
 }
 
 \textit{
-Automated tests evaluate authorization and transfer safety. Hyperledger Caliper evaluates a fixed retail population
-under 10, 30, and 60 TPS offered loads, with a clean ledger for each profile,
-deterministic seeding, repeated peak rounds, and an aggregate-overspend
-scenario. At a 30 TPS offered load, successful throughput reaches 29.5 TPS
-without failures; at 60 TPS, it ranges from 41.2 to 47.0 TPS. In the overspend scenario, 4 of 200
-transfers commit and the final balance remains nonnegative. These results form a
-repeatable local baseline, not evidence of cross-machine reproducibility or
-production capacity. The prototype is an auditable artifact for retail Digital
-Rupiah experiments within the stated limitations.
+Automated tests evaluate authorization and transfer safety. Hyperledger Caliper
+evaluates clean-ledger profiles with deterministic seeding, one, two, and four
+workers, functional workloads, repeated peak rounds, and an aggregate-overspend
+scenario. The final transfer profiles report 29.1--29.5 TPS at a 30 TPS offered
+load with an 86.23--100.00\% success rate, and 56.3--57.3 TPS at 60 TPS with a
+12.05--12.48\% success rate. Five peak repetitions average 54.8 TPS completion
+throughput and 16.33\% success. Functional workloads complete 168 of 168
+transactions, while the boundary and negative-path oracles pass their expected
+rejections. These measurements describe a single-host prototype and do not
+establish production capacity or cross-machine reproducibility.
 }
 
 \vspace{0.5cm}

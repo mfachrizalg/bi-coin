@@ -22,11 +22,11 @@
 \node[actor] (commercial) at (6.0, -1.5)  {Commercial Bank\\(Validator)};
 \node[actor] (ojk)        at (11.5, 0)    {OJK\\(Observer)};
 
-% BI → Banks (penerbitan dan distribusi)
+% BI Treasury → bank/PJP custodian (penerbitan dan distribusi)
 \draw[ar] (bi.east) to[out=15,in=175]
-  node[pl, above, sloped, pos=0.3]{Distribusi} (himbara.west);
+  node[pl, above, sloped, pos=0.55]{Distribusi dari Treasury} (himbara.west);
 \draw[ar] (bi.east) to[out=-15,in=-175]
-  node[pl, below, sloped, pos=0.3]{Distribusi} (commercial.west);
+  node[pl, below, sloped, pos=0.55]{Distribusi dari Treasury} (commercial.west);
 
 % Pelaporan dan akses baca pengawasan
 \draw[dar] (bi.north east) to[out=60,in=180] (6.0,2.2)
@@ -55,12 +55,12 @@
 
 %── Distribusi lintas jenjang ─────────────────────────────────────────────────
 
-\node[actor] (pjp) at (6.0, -4.5) {PJP\\(Penyedia Jasa Pembayaran)};
+\node[actor] (pjp) at (6.0, -4.5) {PJP\\(Kustodian)};
 
 \draw[ar] (bi.south) to[out=-90,in=180] (2.5,-3.7)
   to[out=0,in=155] (pjp.north west);
 \node[font=\scriptsize, align=center, anchor=west, fill=white, inner sep=1pt]
-  at (2.5,-3.7) {Distribusi\\Likuiditas};
+  at (3.0,-3.7) {Distribusi langsung\\ke kustodian};
 
 %── Jenjang 2: Retail ────────────────────────────────────────────────────────
 

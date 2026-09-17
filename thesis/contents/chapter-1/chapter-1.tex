@@ -128,9 +128,10 @@ Berdasarkan latar belakang di atas, rumusan masalah pada penelitian ini adalah
 sebagai berikut.
 \begin{enumerate}
 	\item Bagaimana merancang dan membangun sistem Rupiah Digital ritel berbasis
-	      Hyperledger Fabric yang mendukung model penerbitan dan distribusi likuiditas
-	      berjenjang dari Bank Indonesia menuju bank, penyedia jasa pembayaran, dan
-	      pelanggan ritel, serta transfer ritel dan pengawasan transaksi dengan batas
+	      Hyperledger Fabric yang mendukung penerbitan oleh Bank Indonesia ke dalam
+	      Treasury, distribusi langsung kepada bank validator atau PJP sebagai
+	      kustodian, serta layanan kepada pelanggan ritel, transfer ritel, dan
+	      pengawasan transaksi dengan batas
 	      wewenang organisasi yang jelas?
 	\item Bagaimana kinerja sistem yang dibangun dari sisi \textit{throughput}
 	      dan latensi pada berbagai skenario beban transaksi yang diukur menggunakan
@@ -142,9 +143,10 @@ sebagai berikut.
 Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 \begin{enumerate}
 	\item Merancang dan membangun purwarupa sistem Rupiah Digital ritel berbasis
-	      Hyperledger Fabric dengan arsitektur multipihak yang mendukung penerbitan dan
-	      distribusi likuiditas berjenjang, transfer ritel, dan pengawasan transaksi
-	      dengan batas wewenang organisasi yang jelas.
+	      Hyperledger Fabric dengan arsitektur multipihak yang mendukung penerbitan
+	      ke Treasury Bank Indonesia, distribusi langsung kepada bank validator atau
+	      PJP sebagai kustodian, transfer ritel, dan pengawasan transaksi dengan batas
+	      wewenang organisasi yang jelas.
 	\item Mengevaluasi kinerja sistem dari sisi \textit{throughput} dan latensi
 	      pada berbagai skenario beban menggunakan Hyperledger Caliper.
 \end{enumerate}
@@ -174,12 +176,13 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	      produksi \cite{Lovejoy2022A, fabric_perf2023}.
 	\item Komposisi beban transaksi dan distribusi
 	      nilai yang digunakan merupakan asumsi desain yang menyerupai pola pembayaran
-	      ritel di Indonesia, bukan jejak transaksi empiris. Pada setiap \textit{worker},
-	      konfigurasi transfer mempertahankan 116 pelanggan, 16 pedagang, dan
-	      52 slot transaksi pada seluruh konfigurasi
-	      \textit{worker}. Ronde
-	      pemanasan berlangsung 30 detik, sedangkan ronde terukur berlangsung
-	      120 detik.
+	      ritel di Indonesia, bukan jejak transaksi empiris. Profil transfer menggunakan
+	      konfigurasi terpisah untuk satu, dua, dan empat \textit{worker}; setiap profil
+	      menetapkan populasi, slot transaksi, saldo awal, dan durasi pada berkas
+	      konfigurasi yang ikut dihash dalam manifes. Ronde pemanasan berlangsung
+	      30 detik, sedangkan ronde terukur berlangsung 120 detik.
+	\item KYC dan QRIS tersedia sebagai fitur implementasi pendukung, tetapi tidak
+	      menjadi kriteria penerimaan utama penelitian.
 	\item Evaluasi transfer dasar menggunakan skenario perebutan kunci rendah
 	      (\textit{low-contention}) dengan rencana transaksi berputar dan populasi
 	      tetap. Skenario terpisah menguji perebutan satu dompet melalui permintaan
@@ -228,7 +231,7 @@ Penelitian ini diharapkan memberikan manfaat sebagai berikut.
 \begin{enumerate}
 	\item Memberikan rujukan teoretis tentang perancangan CBDC ritel berbasis
 	      \textit{permissioned blockchain} yang mencakup penerbitan berjenjang,
-	      distribusi melalui PJP, transaksi antarpengguna, dan pengawasan oleh
+	      distribusi kepada kustodian bank atau PJP, transaksi antarpengguna, dan pengawasan oleh
 	      bank sentral.
 	\item Menjelaskan penerapan Hyperledger Fabric untuk memodelkan pemisahan
 	      peran antara BI, peserta distribusi, dan pengguna ritel tanpa

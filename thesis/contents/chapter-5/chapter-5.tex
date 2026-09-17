@@ -9,26 +9,31 @@ sebagai berikut.
     Rupiah Digital ritel berbasis Hyperledger Fabric, penelitian ini berhasil
     merancang dan membangun purwarupa dengan arsitektur dua jenjang yang
     memisahkan peran Bank Indonesia, bank validator, PJP, dan pengguna ritel.
-    Implementasi dijalankan pada Hyperledger Fabric 2.5 dengan lima organisasi,
-    \textit{backend} Go, CouchDB, dan PostgreSQL, sehingga alur penerbitan dan
-    distribusi likuiditas berjenjang dapat direalisasikan sebagai artefak teknis
-    yang dapat diuji.
+    Bank Indonesia menerbitkan Rupiah Digital ke Treasury, kemudian
+    mendistribusikannya secara langsung kepada bank validator atau PJP sebagai
+    kustodian. Implementasi dijalankan pada Hyperledger Fabric 2.5 dengan lima
+    organisasi, \textit{backend} Go, CouchDB, dan PostgreSQL, sehingga alur
+    tersebut dapat direalisasikan sebagai artefak teknis yang dapat diuji.
     \item Sebagai bagian dari rumusan masalah pertama mengenai transfer ritel dan
     pengawasan, penelitian ini menunjukkan bahwa pemisahan peran organisasi,
     pemeriksaan MSP kustodian, kepemilikan dompet, status beku, dan kecukupan
     saldo dapat ditegakkan pada lapisan \textit{backend} dan \textit{chaincode}.
-    Pada pengujian ulang v3.0, transfer dengan MSP pemanggil yang tidak sesuai
-    dengan MSP kustodian ditolak tanpa perubahan saldo. Jalur transfer yang sama
-    melayani pembayaran antarpelanggan dan pelanggan--pedagang, sedangkan laporan
-    serta \textit{event} pengawasan tersedia bagi peran berwenang.
+    Pada pengujian fungsional final, 168 transaksi pada empat profil selesai
+    tanpa kegagalan. Profil otorisasi, batas transaksi, jalur negatif, dan
+    \textit{overspend} juga memenuhi oracle semantik. Jalur transfer yang sama
+    melayani pembayaran antarpelanggan dan pelanggan--pedagang, sedangkan
+    laporan serta \textit{event} pengawasan tersedia bagi peran berwenang.
     \item Berdasarkan rumusan masalah kedua mengenai kinerja sistem, profil
-    transfer Caliper v3.0 dengan satu \textit{worker} menghasilkan
-    \textit{throughput} 29,5 TPS pada laju 30 TPS dan 58,7 TPS pada laju 60 TPS.
-    Tingkat keberhasilannya masing-masing 88,25\% dan 28,77\%. Hasil ini hanya
-    berasal dari satu \textit{ledger} bersih dan satu konfigurasi \textit{worker},
+    transfer Caliper final dengan satu, dua, dan empat \textit{worker}
+    menghasilkan \textit{throughput} penyelesaian 29,1--29,5 TPS pada laju
+    30 TPS dengan tingkat keberhasilan 86,23--100,00\%. Pada laju 60 TPS,
+    \textit{throughput} penyelesaian berada pada 56,3--57,3 TPS dengan tingkat
+    keberhasilan 12,05--12,48\%. Lima pengulangan beban puncak menghasilkan
+    rerata throughput 54,8 TPS dan tingkat keberhasilan 16,33\%. Status 11 dan
+    batas konkurensi gateway menjelaskan kegagalan pada log transfer. Hasil ini
+    berlaku untuk satu \textit{ledger} bersih per profil dan topologi lokal,
     sehingga belum menetapkan kapasitas nasional atau reproduktibilitas lintas
-    mesin. Batch historis v2 tetap dicatat pada Bab~IV sebagai \textit{baseline}
-    terpisah dan tidak digunakan untuk menyimpulkan kinerja kontrak v3.
+    mesin.
 \end{enumerate}
 
 \section{Saran}
@@ -39,9 +44,9 @@ sebagai berikut.
     konfigurasi, versi \textit{chaincode}, jumlah sukses/gagal, latensi,
     \textit{throughput}, konflik MVCC, dan pengulangan setiap skenario bersama
     hasilnya.
-    \item Menelusuri ketidakcocokan \textit{proposal response payload} pada
-    beban 60 TPS dan memisahkan pengaruh propagasi status, kebijakan
-    \textit{endorsement}, kontensi kunci, dan jalur submit \textit{gateway}.
+    \item Menelusuri status 11 dan batas konkurensi \textit{gateway} pada
+    beban 60 TPS dengan instrumentasi tahap \textit{endorsement}, validasi, dan
+    pengiriman agar pengaruh kontensi state dan jalur klien dapat dipisahkan.
     \item Memperluas \textit{repeatability run} ke profil penerbitan, distribusi,
     transfer, operasi moneter, dan kueri pengawasan agar setiap profil tidak
     hanya memiliki satu angka \textit{throughput}, tetapi juga simpangan,

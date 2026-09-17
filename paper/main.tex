@@ -19,7 +19,7 @@
 \begin{document}
 
 \title{A Retail Digital Rupiah Prototype on Hyperledger Fabric: Two-Tier
-Business Processes, Risk-Based KYC Tiers, and a Reproducible Benchmark}
+Business Processes and a Reproducible Benchmark}
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Muhammad Fachrizal Giffari}
 	\IEEEauthorblockA{\textit{Department of Electrical and} \\ \textit{Information Engineering} \\
@@ -43,41 +43,31 @@ Business Processes, Risk-Based KYC Tiers, and a Reproducible Benchmark}
 \maketitle
 
 \begin{abstract}
-Bank Indonesia pursues Central Bank Digital Currency (CBDC) through Project
-Garuda, but the project's publicly documented experiments cover only the
-wholesale tier. To our knowledge, no publicly available system provides a
-testable implementation of Bank Indonesia's retail money business processes
-(issuance, two-tier distribution, risk-based customer onboarding, payment,
-redemption, and supervision) on a single auditable blockchain ledger. This paper
-presents a retail Digital Rupiah prototype deployed on a permissioned,
-five-organization Hyperledger Fabric network. Its Go chaincode anchors KYC
-status, risk level, due-diligence level, senior approval, expiry, and document
-hashes on the ledger, while raw identity data remains in an off-chain PostgreSQL
-store. The chaincode derives the BASIC, STANDARD, or MERCHANT wallet tier from
-an approved KYC profile and applies five per-tier transfer and balance limits,
-using the Fabric transaction timestamp so that every endorser obtains the same
-result. We formalize the tier-derivation function, transfer-validity predicate,
-and double-spend-safety argument, then evaluate the prototype with a
-reproducible Hyperledger Caliper protocol that varies client concurrency and
-exercises the business processes directly. Across transfer rounds at three
-concurrency levels and four business-process workloads, the prototype committed
-814 of 816 transactions, and transfer throughput saturates at
-14.50$\pm$0.32~TPS regardless of client concurrency, with bounded latency (mean
-$\le$0.99~s, maximum $\le$2.63~s). Three dedicated workloads test the compliance
-and safety claims rather than inferring them: all 34 negative-path submissions
-across seven rule classes were rejected with no enforcement gap, every numeric
-cap held on both sides of its boundary, and concurrent transfers from a single
-wallet were serialized, with every losing transaction rejected at multi-version
-concurrency control validation. Container-level
-measurements place no component near saturation, so the ceiling is not explained
-by endorsement or database capacity. The prototype provides an auditable testbed
-for studying blockchain-based implementation of Bank Indonesia's business
-processes, not a production-ready system.
+Bank Indonesia's public Project Garuda experiments focus on wholesale central
+bank digital currency. This paper asks how a testable retail Digital Rupiah
+prototype can represent a two-tier distribution model and institutional
+oversight on a permissioned ledger. We implement the prototype with Hyperledger
+Fabric 2.5, Go chaincode and backend services, CouchDB, and PostgreSQL. The
+prototype separates institutional and retail roles. Bank Indonesia issues
+Digital Rupiah into Treasury and distributes it directly to a validator bank or
+payment service provider acting as custodian. Backend ownership checks and
+chaincode MSP checks enforce user and organization boundaries, while the shared
+Fabric channel does not provide transaction privacy. Automated tests evaluate
+authorization and transfer safety. Hyperledger Caliper evaluates clean-ledger
+profiles with deterministic seeding, one, two, and four workers, functional
+workloads, repeated peak rounds, and an aggregate-overspend scenario. The final
+transfer profiles report 29.1--29.5 TPS at a 30 TPS offered load with an
+86.23--100.00\% success rate, and 56.3--57.3 TPS at 60 TPS with a
+12.05--12.48\% success rate. Five peak repetitions average 54.8 TPS completion
+throughput and 16.33\% success. Functional workloads complete 168 of 168
+transactions, while boundary and negative-path oracles pass their expected
+rejections. These measurements describe a single-host prototype and do not
+establish production capacity or cross-machine reproducibility.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Digital Rupiah, retail CBDC, Hyperledger Fabric, risk-based KYC, wallet limits,
-business process, blockchain benchmarking
+Digital Rupiah, retail CBDC, Hyperledger Fabric, two-tier distribution,
+performance evaluation
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -95,11 +85,10 @@ that implements Bank Indonesia's retail money business processes end to end on a
 blockchain ledger.
 
 Central-bank digital money involves a sequence of business processes, not a
-single ledger operation. The central bank \emph{issues} money against reserves,
-banks \emph{distribute} liquidity to PJP, and PJP \emph{onboard} customers and
-merchants through risk-based Know-Your-Customer (KYC) checks. Holders then
-\emph{transact} within category-specific limits, intermediaries \emph{redeem}
-money to the central bank, and the supervisor \emph{reconciles} and audits its
+single ledger operation. The central bank \emph{issues} money into its Treasury
+and \emph{distributes} liquidity directly to a validator bank or PJP custodian.
+Custodians serve customers and merchants in the retail tier. Holders
+\emph{transact}, custodians \emph{redeem} money to the central bank, and the supervisor \emph{reconciles} and audits its
 circulation. A blockchain implementation must express these processes as
 deterministic transactions that each organization can validate independently.
 It must also preserve two-tier intermediation to reduce bank
@@ -119,33 +108,29 @@ To address this gap, we implement a Digital Rupiah prototype on a permissioned
 Hyperledger Fabric network~\cite{androulaki2018}. The prototype maps Bank
 Indonesia's business processes to chaincode transactions. This paper contributes:
 \begin{enumerate}
-	\item A two-tier Digital Rupiah chaincode that integrates
-	      hierarchical issuance and distribution, risk-based KYC with
-	      deterministic wallet-tier derivation, tiered transfer limits, and
-	      supervisor-facing reconciliation. This extends the wholesale-only
-	      Garuda proof of concept with a testable retail implementation.
-	\item A formal, deterministic, double-spend-safe transfer protocol that
-	      combines a tier-limit validity predicate, Fabric multi-version
-	      concurrency control (MVCC), and a transaction-timestamp clock, so that
-	      limit counters and validation are identical across endorsing
-	      organizations.
+	\item A two-tier Digital Rupiah chaincode that integrates hierarchical
+	      issuance and distribution, retail transfers, and supervisor-facing
+	      reconciliation. This extends the wholesale-only Garuda proof of concept
+	      with a testable retail implementation.
+	\item A deterministic transfer protocol with explicit authorization and
+	      balance checks, Fabric multi-version concurrency control (MVCC), and
+	      atomic wallet updates. The protocol lets endorsing organizations apply
+	      the same state-transition rules independently.
 	\item An open, reproducible retail-CBDC benchmark with Hyperledger
 	      Caliper~\cite{hlf_caliper} that documents the testbed, workload,
-	      population seeding, a client-concurrency sweep, and business-process
-	      profiles. The benchmark identifies the throughput saturation point,
-	      bounds the resource envelope at that point with container-level
-	      metrics, and pairs the contention-free load with negative-path,
-	      boundary-value, and single-key adversarial workloads that test policy
-	      enforcement, cap placement, and MVCC double-spend rejection as
-	      measured outcomes.
+	      deterministic population seeding, offered-load profiles, and
+	      authorization and aggregate-overspend checks. The benchmark reports
+	      throughput, latency, success rate, and container-level resource
+	      measurements while keeping the local testbed and one-worker scope
+	      explicit.
 \end{enumerate}
 
 \section{Background and Related Work}
 
 \subsection{Two-Tier Retail CBDC}
 In the two-tier (intermediated) model the central bank issues CBDC and remains
-the ultimate liability holder, while regulated intermediaries onboard end users,
-perform KYC, and operate customer-facing rails~\cite{Auer2020The,Kiff2020A}.
+the ultimate liability holder, while regulated intermediaries serve end users and
+operate customer-facing rails~\cite{Auer2020The,Kiff2020A}.
 This preserves the existing division of labor and limits the central bank's
 exposure to retail operations. Bank Indonesia adopts this structure for Digital
 Rupiah, with banks and PJP acting as distributors between the central bank and
@@ -162,18 +147,14 @@ prototypes~\cite{bhawana2021,hanif2024meetcoin}. Hyperledger
 Caliper~\cite{hlf_caliper,hlf_metrics} measures throughput and latency under
 different workloads.
 
-\subsection{Compliance, Limits, and Supervision}
-Retail CBDC policy calls for AML/CFT controls and holding limits to be part of
-the system design. In Indonesia, these controls are subject to
-anti-money-laundering regulation~\cite{bi2024pbi10}. Token-based retail designs
-also face denial-of-service and double-spend risks~\cite{ahuja2024limbocoin}, so
-policy enforcement must be deterministic. Our chaincode combines tiered limits,
-KYC gating, and supervision events, complementing studies that address
-privacy~\cite{islam2023} or security~\cite{hans2023} separately. Deployed retail
-CBDCs already document tiered, KYC-linked limits: e-CNY defines wallet
-categories with graduated balance and transaction ceilings~\cite{pboc2021ecny},
-and eNaira applies tiered daily transaction and balance
-limits~\cite{ree2023enaira}. The closest published prototype is Project Aurum,
+\subsection{Authorization and Supervision}
+Retail CBDC systems require explicit authorization boundaries, safe balance
+updates, and supervisory visibility. Token-based retail designs also face
+denial-of-service and double-spend risks~\cite{ahuja2024limbocoin}, so transfer
+validation must be deterministic. Our chaincode combines organization-aware
+authorization, wallet-state checks, and supervision events, complementing
+studies that address privacy~\cite{islam2023} or security~\cite{hans2023}
+separately. The closest published prototype is Project Aurum,
 a full-stack two-tier retail CBDC built for the Hong Kong Monetary
 Authority~\cite{bis2022aurum}, which pairs a wholesale interbank system with a
 retail e-wallet system and, like this work, keeps the two tiers
@@ -181,9 +162,9 @@ architecturally distinct. Aurum reports no reproducible throughput benchmark,
 and its source code and technical manuals are released only to BIS member
 central banks rather than publicly. What distinguishes this prototype among the
 representative systems in Table~\ref{tab:compare} is that its two-tier
-intermediation and KYC-and-limit policy are realized in a publicly available
-implementation with a reproducible benchmark, rather than described in design
-documentation alone.
+intermediation and authorization and supervision controls are realized in a
+publicly available implementation with a reproducible benchmark, rather than
+described in design documentation alone.
 
 \begin{table}[!t]
 	\caption{Comparison with Representative Retail CBDC Systems}
@@ -191,22 +172,21 @@ documentation alone.
 	\centering
 	\footnotesize
 	\setlength{\tabcolsep}{3pt}
-	\begin{tabular}{llcccc}
+	\begin{tabular}{llccc}
 		\toprule
-		\textbf{System} & \textbf{Platform} & \textbf{2-tier} & \textbf{Limits} & \textbf{Open} & \textbf{Bench.} \\
+		\textbf{System} & \textbf{Platform} & \textbf{2-tier} & \textbf{Open} & \textbf{Bench.} \\
 		\midrule
-		e-CNY~\cite{pboc2021ecny}                           & Permissioned & $\checkmark$ & $\checkmark$ & $\times$     & $\times$     \\
-		eNaira~\cite{ree2023enaira}                         & Fabric       & $\checkmark$ & $\checkmark$ & $\times$     & $\times$     \\
-		Sand Dollar~\cite{centralbankbahamas2020sanddollar} & Permissioned & $\checkmark$ & $\checkmark$ & $\times$     & $\times$     \\
-		OpenCBDC~\cite{Lovejoy2022A}                        & Account      & $\times$     & $\times$     & $\checkmark$ & $\checkmark$ \\
-		\textbf{This work}                                  & Fabric 2.5   & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+		e-CNY~\cite{pboc2021ecny}                           & Permissioned & $\checkmark$ & $\times$     & $\times$     \\
+		eNaira~\cite{ree2023enaira}                         & Fabric       & $\checkmark$ & $\times$     & $\times$     \\
+		Sand Dollar~\cite{centralbankbahamas2020sanddollar} & Permissioned & $\checkmark$ & $\times$     & $\times$     \\
+		OpenCBDC~\cite{Lovejoy2022A}                        & Account      & $\times$     & $\checkmark$ & $\checkmark$ \\
+		\textbf{This work}                                  & Fabric 2.5   & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
 		\bottomrule
 	\end{tabular}
 
 	\vspace{2pt}
-	{\scriptsize Limits: tiered, KYC-linked holding or transaction limits
-		described in public documentation. Open: implementation publicly
-		available. Bench.: open, reproducible throughput/latency benchmark.
+	{\scriptsize Open: implementation publicly available. Bench.: open,
+		reproducible throughput/latency benchmark.
 		OpenCBDC is account-based and not distributed-ledger-based. Rows span
 		deployed national CBDCs and a research platform, and summarize public
 		information rather than a controlled comparison.}
@@ -220,65 +200,29 @@ Table~\ref{tab:processes} identifies the initiator, chaincode transaction, and
 endorsement requirement for each process.
 
 \begin{figure}[!t]
-	\centering
-	\resizebox{\columnwidth}{!}{%
-		\begin{tikzpicture}[
-				actor/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
-						minimum width=3.2cm, minimum height=1.0cm, align=center, font=\footnotesize\bfseries},
-				wbox/.style={draw=black, fill=gray!10, rectangle, rounded corners=2pt,
-						minimum width=3.0cm, minimum height=0.9cm, align=center, font=\scriptsize},
-				zonebox/.style={draw=black, dashed, rounded corners=6pt, fill=none, inner sep=14pt},
-				pl/.style={font=\scriptsize, midway, align=center},
-				ar/.style={-{Stealth}, thick},
-				dar/.style={-{Stealth}, thick, dashed},
-			]
-			\node[actor] (bi)         at (0,    0)    {Bank Indonesia\\(Issuer)};
-			\node[actor] (himbara)    at (6.0,  1.5)  {HIMBARA Bank\\(Validator)};
-			\node[actor] (commercial) at (6.0, -1.5)  {Commercial Bank\\(Validator)};
-			\node[actor] (ojk)        at (11.5, 0)    {OJK\\(Observer)};
-			\draw[ar] (bi.east) to[out=15,in=175]
-			node[pl, above, sloped, pos=0.3]{Issuance} (himbara.west);
-			\draw[ar] (bi.east) to[out=-15,in=-175]
-			node[pl, below, sloped, pos=0.3]{Distribution} (commercial.west);
-			\draw[dar] (bi.north east) to[out=60,in=180] (6.0,2.2)
-			to[out=0,in=120] (ojk.north west);
-			\node[font=\scriptsize, align=center, fill=white, inner sep=1pt]
-			at (6.0,2.2) {Report};
-			\draw[dar] (ojk.south west) to[out=180,in=0] (6.0,-2.3)
-			to[out=180,in=-60] (bi.south east);
-			\node[font=\scriptsize, align=center, fill=white, inner sep=1pt]
-			at (6.0,-2.3) {Supervision};
-			\draw[dar] (himbara.east)    -- (ojk.north west);
-			\draw[dar] (commercial.east) -- (ojk.south west);
-			\node[zonebox, fit=(bi)(himbara)(commercial)(ojk),
-				label={[font=\footnotesize\bfseries, anchor=south west]north west:%
-						Tier 1: \textit{Wholesale}}] (j1) {};
-			\draw[dashed, thick, gray!70] (-1.0, -2.8) -- (13.5, -2.8);
-			\node[font=\scriptsize, gray!70, anchor=east] at (13.5, -2.55) {Tier boundary};
-			\node[actor] (pjp) at (6.0, -4.5) {PJP\\(Payment Service Provider)};
-			\draw[ar] (himbara.south) to[out=-90,in=90] (8.3,-1.5)
-			to[out=-90,in=20] (pjp.north east);
-			\node[font=\scriptsize, align=center, anchor=west, fill=white,
-				inner sep=1pt] at (8.3,-1.5) {Liquidity\\distribution};
-			\draw[ar] (commercial.south) to[out=-90, in=105] (pjp.north west);
-			\node[wbox] (tbasic)    at (3.0, -6.8) {BASIC wallet};
-			\node[wbox] (tstandard) at (6.0, -6.8) {STANDARD wallet};
-			\node[wbox] (tmerchant) at (9.0, -6.8) {MERCHANT wallet};
-			\draw[ar] (pjp) -- (tbasic);
-			\draw[ar] (pjp) -- (tstandard);
-			\draw[ar] (pjp) -- (tmerchant);
-			\node[zonebox, fit=(pjp)(tbasic)(tstandard)(tmerchant),
-				label={[font=\footnotesize\bfseries, anchor=south west]north west:%
-						Tier 2: \textit{Retail}}] (j2) {};
-			\node[font=\scriptsize, gray] at (6.0, -8.3)
-			{P2P / merchant transfer $\cdot$ KYC-gated};
-		\end{tikzpicture}%
-	}
-	\caption{Two-tier actor structure of the Digital Rupiah system. Bank
-		Indonesia issues and distributes to validator banks (Tier~1); banks
-		distribute liquidity to the PJP, which serves tiered retail wallets
-		(Tier~2). The OJK observer receives reports and supervises.}
-	\label{fig:twotier}
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw=black, rounded corners=3pt, align=center,
+    minimum width=3.4cm, minimum height=0.9cm, font=\footnotesize},
+  ar/.style={-{Stealth}, thick}
+]
+\node[box] (bi) {Bank Indonesia\\ (Tier 1)};
+\node[box, right=1.7cm of bi] (bank) {Validator banks\\ (Tier 1)};
+\node[box, below=1.2cm of bank] (pjp) {PJP custodian\\ (Tier 1)};
+\node[box, right=1.7cm of pjp] (retail) {Retail users\\ (Tier 2)};
+\draw[ar] (bi) -- node[above, font=\scriptsize]{issuance to Treasury} (bank);
+\draw[ar] (bi) to[out=-25,in=155] node[below, font=\scriptsize]{direct distribution} (pjp);
+\draw[ar] (pjp) -- node[below, font=\scriptsize]{retail funding and transfer} (retail);
+\draw[ar, dashed] (retail.north) to[out=120,in=-30]
+  node[font=\scriptsize, right]{supervision} (bi.east);
+\end{tikzpicture}%
+}
+\caption{Two-tier actor structure of the Digital Rupiah prototype. Bank
+Indonesia issues Digital Rupiah into Treasury and distributes it directly to a
+validator bank or PJP custodian, which serves retail users. Dashed flow denotes
+supervisory visibility.}
+\label{fig:twotier}
 \end{figure}
 
 \begin{table}[!t]
@@ -289,12 +233,11 @@ endorsement requirement for each process.
 	\setlength{\tabcolsep}{3.5pt}
 	\begin{tabular}{ll>{\raggedright\arraybackslash}p{3.8cm}}
 		\toprule
-		\textbf{Process} & \textbf{Initiator} & \textbf{Chaincode transaction} \\
+	\textbf{Process} & \textbf{Initiator} & \textbf{Chaincode transaction} \\
 		\midrule
 		Issuance       & Bank Indonesia & \texttt{Mint}, \texttt{RequestIssuance} \\
-		Distribution   & Validator bank & \texttt{DistributeToParticipant}        \\
-		Onboarding/KYC & Bank / PJP     & \texttt{SubmitKycProfile},
-		\texttt{RefreshKycProfile}, \texttt{CreateWallet}                          \\
+	Distribution   & Bank Indonesia & \texttt{DistributeToParticipant}        \\
+		Wallet creation & Bank / PJP   & \texttt{CreateWallet}                  \\
 		Payment        & Customer       & \texttt{Transfer}                        \\
 		Redemption     & Participant    & \texttt{Burn}, \texttt{RequestRedemption} \\
 		Supervision    & OJK / BI       & \texttt{GetReconciliationReport},
@@ -303,24 +246,25 @@ endorsement requirement for each process.
 	\end{tabular}
 
 	\vspace{2pt}
-	{\scriptsize All state-changing transactions commit under a MAJORITY
-		endorsement policy (3 of 5 organizations).}
+	{\scriptsize The channel endorsement policy accepts an institutional MSP from
+	Bank Indonesia, HimbaraBank, CommercialBank, or PJP; OJK is observer-only.}
 \end{table}
 
-The wholesale tier contains Bank Indonesia, banks, and PJP. These institutional
-participants follow a lifecycle of submission, approval, freezing, unfreezing,
-rejection, and offboarding. Bank Indonesia mints Digital Rupiah to a treasury
-wallet. Banks request issuance and distribute liquidity to PJP; a chaincode
-guard permits this validator-to-PJP flow but prevents a PJP from requesting
-issuance directly. The PJP serves customers and merchants in the retail tier.
-Institutional wallets have system-level limits but no retail tier.
+The institutional tier contains Bank Indonesia, validator banks, and PJP
+Custodians. These participants follow a lifecycle of submission, approval,
+freezing, unfreezing, rejection, and offboarding. Bank Indonesia mints Digital
+Rupiah only to the Treasury wallet, then distributes liquidity directly to an
+active validator bank or PJP through \texttt{DistributeToParticipant}. Each
+Custodian serves customers and merchants in the retail tier, where the shared
+transfer path applies ownership, wallet-status, authorization, and balance
+checks.
 
 \section{System Architecture}
 Fig.~\ref{fig:sysarch} shows the four-layer architecture: client, backend API,
 off-chain store, and Fabric network. The web client calls a Go REST backend
 built with Gorilla Mux. The backend authenticates requests with JWT and
-role-based access control, stores KYC and authentication data in PostgreSQL, and
-submits ledger transactions through the Fabric Gateway SDK.
+role-based access control, stores account and authentication data in PostgreSQL,
+and submits ledger transactions through the Fabric Gateway SDK.
 Fig.~\ref{fig:netarch} details the permissioned network.
 
 \begin{figure*}[!t]
@@ -349,7 +293,7 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 			]
 			\node[appbox] (fe) at (6.0, 16.5) {\textbf{Client}\\Web UI / Client App};
 			\node[appbox] (be) at (6.0, 14.5) {\textbf{Backend API}\\Go REST + Gorilla Mux + JWT/RBAC};
-			\node[pgbox]  (pg) at (0.0, 14.5) {\textbf{PostgreSQL}\\KYC \textit{off-chain}};
+			\node[pgbox]  (pg) at (0.0, 14.5) {\textbf{PostgreSQL}\\Account data \textit{off-chain}};
 			\node[gwbox]  (gw) at (6.0, 12.5) {\textbf{Fabric Gateway SDK v1.8}\\gRPC / TLS};
 			\draw[ar]  (fe.south) -- (be.north)  node[lbl, right]{HTTP/REST};
 			\draw[bar] (be.west)  -- (pg.east)   node[lbl, above]{SQL};
@@ -358,7 +302,7 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 			\draw[rounded corners=8pt, black]   (-2.8, 2.2) rectangle (14.8, 11.0);
 			\node[font=\footnotesize\bfseries, anchor=south] at (6.0, 11.0)
 			{\textbf{Hyperledger Fabric 2.5}\quad
-				(digital-rupiah channel, MAJORITY endorsement, TLS)};
+			(digital-rupiah channel, institutional endorsement, TLS)};
 			\draw[ar] (gw.south) -- (6.0, 11.0)
 			node[lbl, right]{\textit{endorse} + submit (gRPC)};
 			\node[ordnode] (ord) at (6.0, 9.5) {orderer.paynet:7050\\Raft (1 node)};
@@ -413,15 +357,13 @@ Indonesia's association of state-owned banks) and \emph{CommercialBankOrg} are
 validator and distributor banks; \emph{PJPOrg} represents the payment service
 provider; and \emph{OJKObserverOrg} is the supervisor (OJK, \emph{Otoritas Jasa
 Keuangan}, the financial-services authority), which initiates no business
-transactions but whose peer still participates in endorsement under the majority
-policy. Each organization operates one
+transactions and is excluded from chaincode approval. Each organization operates one
 peer with a CouchDB world state and maintains its own certificate authority and
 MSP for identity management. A single Raft orderer orders transactions; this
 configuration provides ordering but not crash fault tolerance, which requires at
 least three consenters. The
-MAJORITY
-endorsement policy requires at least three of the five organizations to validate
-a transaction before it can commit.
+channel endorsement policy accepts one of the four institutional MSPs, while the
+chaincode lifecycle policy requires Bank Indonesia and one institutional participant.
 
 \begin{figure*}[!t]
 	\centering
@@ -469,7 +411,7 @@ a transaction before it can commit.
 			\draw[ar] (pojk) -- (cojk);
 			\node[chanbox, fit=(pbi)(phim)(pcom)(ppjp)(pojk)(cbi)(chim)(ccom)(cpjp)(cojk),
 				label={[font=\footnotesize\bfseries]below:%
-						\textit{digital-rupiah channel} (MAJORITY endorsement, TLS)}] {};
+		\textit{digital-rupiah channel} (institutional endorsement, TLS)}] {};
 		\end{tikzpicture}%
 	}
 	\caption{Hyperledger Fabric network topology: five peer organizations, each
@@ -502,13 +444,10 @@ a transaction before it can commit.
 
 \subsection{On-Chain and Off-Chain Data}
 The Go chaincode in \texttt{digital\_rupiah.go} groups functions for
-participants, wallets, issuance and redemption, retail transfers, KYC and
-compliance, limits, and supervision (Table~\ref{tab:funcs}). Its on-chain KYC
-anchor contains status, subject type, risk level, due-diligence level,
-senior-approval flag, expiry, and document hashes. Personally identifiable data
-remains in PostgreSQL. In the off-chain schema (Fig.~\ref{fig:erd}),
-\texttt{kyc\_profiles} links the provider-check and audit-event tables, while
-the separate \texttt{auth\_users} table supports portal authentication.
+participants, wallets, issuance and redemption, retail transfers, and
+supervision (Table~\ref{tab:funcs}). Account and authentication data remain in
+the off-chain PostgreSQL store, while the ledger contains the wallet and
+transaction state needed for settlement and oversight.
 
 \begin{table}[!t]
 	\caption{Chaincode Function Groups}
@@ -529,105 +468,14 @@ the separate \texttt{auth\_users} table supports portal authentication.
 		Redemption   & \texttt{Burn}, \texttt{RequestRedemption}                 \\
 		Distribution & \texttt{DistributeToParticipant}                          \\
 		Transfer     & \texttt{Transfer}                                         \\
-		KYC          & \texttt{SubmitKycProfile}, \texttt{RefreshKycProfile},
-		\texttt{GetKycProfile}                                                   \\
-		Limits       & \texttt{SetTierLimit}, \texttt{SetSystemLimit}            \\
 		Supervision  & \texttt{GetReconciliationReport}, \texttt{GetMetrics},
 		\texttt{GetSupervisionEvents}                                            \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\begin{figure*}[!t]
-	\centering
-	\resizebox{\textwidth}{!}{%
-		\begin{tikzpicture}[
-				ehdr/.style={draw=black, fill=gray!25, rectangle, minimum width=4.6cm,
-						minimum height=0.52cm, align=center, font=\scriptsize\bfseries, inner sep=2pt},
-				erow/.style={draw=black, fill=white, rectangle, minimum width=4.6cm,
-						minimum height=0.44cm, align=left, text width=4.1cm, font=\scriptsize, inner sep=3pt},
-				ebox/.style={draw=black, very thick, rounded corners=2pt, inner sep=1pt},
-				rel/.style={-{Stealth}, thick},
-				soft/.style={-{Stealth}, thick, dashed},
-				card/.style={font=\scriptsize, fill=white, inner sep=1pt},
-			]
-			\node[ehdr] (ph) at (6.2,0) {kyc\_profiles};
-			\node[erow, below=0pt of ph]  (p1)  {\underline{\texttt{profile\_id}} \hfill TEXT};
-			\node[erow, below=0pt of p1]  (p2)  {\texttt{subject\_type} \hfill TEXT};
-			\node[erow, below=0pt of p2]  (p3)  {\texttt{subject\_id} \hfill TEXT};
-			\node[erow, below=0pt of p3]  (p4)  {\texttt{provider\_case\_id} \hfill TEXT};
-			\node[erow, below=0pt of p4]  (p5)  {\texttt{legal\_name} \hfill TEXT};
-			\node[erow, below=0pt of p5]  (p6)  {\texttt{document\_type} \hfill TEXT};
-			\node[erow, below=0pt of p6]  (p7)  {\texttt{document\_number} \hfill TEXT};
-			\node[erow, below=0pt of p7]  (p8)  {\texttt{document\_hashes} \hfill JSONB};
-			\node[erow, below=0pt of p8]  (p9)  {\texttt{status} \hfill TEXT};
-			\node[erow, below=0pt of p9]  (p10) {\texttt{risk\_level} \hfill TEXT};
-			\node[erow, below=0pt of p10] (p11) {\texttt{due\_diligence\_level} \hfill TEXT};
-			\node[erow, below=0pt of p11] (p12) {\texttt{senior\_approval} \hfill BOOLEAN};
-			\node[erow, below=0pt of p12] (p13) {\texttt{rejection\_reason} \hfill TEXT};
-			\node[erow, below=0pt of p13] (p14) {\texttt{expires\_at} \hfill TEXT};
-			\node[erow, below=0pt of p14] (p15) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-			\node[erow, below=0pt of p15] (p16) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
-			\node[ebox, fit=(ph)(p16)] (PROF) {};
-			\node[ehdr] (rh) at (0,0) {retail\_customers};
-			\node[erow, below=0pt of rh] (r1) {\underline{\texttt{customer\_id}} \hfill TEXT};
-			\node[erow, below=0pt of r1] (r2) {\texttt{legal\_name} \hfill TEXT};
-			\node[erow, below=0pt of r2] (r3) {\texttt{identity\_hash} \hfill TEXT};
-			\node[erow, below=0pt of r3] (r4) {\texttt{wallet\_account\_id} \hfill TEXT};
-			\node[erow, below=0pt of r4] (r5) {\texttt{kyc\_profile\_id} \textit{(ref)} \hfill TEXT};
-			\node[erow, below=0pt of r5] (r6) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-			\node[erow, below=0pt of r6] (r7) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
-			\node[ebox, fit=(rh)(r7)] (RETAIL) {};
-			\node[ehdr] (uh) at (0,-4.6) {auth\_users};
-			\node[erow, below=0pt of uh] (u1) {\underline{\texttt{username}} \hfill TEXT};
-			\node[erow, below=0pt of u1] (u2) {\texttt{password\_hash} \hfill TEXT};
-			\node[erow, below=0pt of u2] (u3) {\texttt{role} \hfill TEXT};
-			\node[erow, below=0pt of u3] (u4) {\texttt{active} \hfill BOOLEAN};
-			\node[erow, below=0pt of u4] (u5) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-			\node[erow, below=0pt of u5] (u6) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
-			\node[ebox, fit=(uh)(u6)] (AUTH) {};
-			\node[ehdr] (ch) at (12.4,0) {kyc\_provider\_checks};
-			\node[erow, below=0pt of ch]  (c1)  {\underline{\texttt{check\_id}} \hfill TEXT};
-			\node[erow, below=0pt of c1]  (c2)  {\texttt{profile\_id} \textit{(FK)} \hfill TEXT};
-			\node[erow, below=0pt of c2]  (c3)  {\texttt{provider\_case\_id} \hfill TEXT};
-			\node[erow, below=0pt of c3]  (c4)  {\texttt{status} \hfill TEXT};
-			\node[erow, below=0pt of c4]  (c5)  {\texttt{risk\_level} \hfill TEXT};
-			\node[erow, below=0pt of c5]  (c6)  {\texttt{due\_diligence\_level} \hfill TEXT};
-			\node[erow, below=0pt of c6]  (c7)  {\texttt{senior\_approval} \hfill BOOLEAN};
-			\node[erow, below=0pt of c7]  (c8)  {\texttt{checks} \hfill JSONB};
-			\node[erow, below=0pt of c8]  (c9)  {\texttt{document\_hashes} \hfill JSONB};
-			\node[erow, below=0pt of c9]  (c10) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-			\node[ebox, fit=(ch)(c10)] (CHECK) {};
-			\node[ehdr] (ah) at (12.4,-5.4) {kyc\_audit\_events};
-			\node[erow, below=0pt of ah] (a1) {\underline{\texttt{event\_id}} \hfill TEXT};
-			\node[erow, below=0pt of a1] (a2) {\texttt{profile\_id} \textit{(ref)} \hfill TEXT};
-			\node[erow, below=0pt of a2] (a3) {\texttt{action} \hfill TEXT};
-			\node[erow, below=0pt of a3] (a4) {\texttt{details} \hfill TEXT};
-			\node[erow, below=0pt of a4] (a5) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-			\node[ebox, fit=(ah)(a5)] (AUDIT) {};
-			\draw[rel] (PROF.east |- c2) -- (CHECK.west)
-			node[card, pos=0.08] {1} node[card, pos=0.92] {N};
-			\draw[soft] (PROF.east |- p15) -- (AUDIT.west)
-			node[card, pos=0.06] {1} node[card, pos=0.94] {N};
-			\draw[soft] (RETAIL.east |- r5) -- (PROF.west |- r5)
-			node[card, pos=0.06] {N} node[card, pos=0.94] {0..1};
-			\node[align=left, font=\scriptsize, draw=black, rounded corners=2pt,
-				fill=gray!5, inner sep=4pt] at (6.2,-9.3)
-			{\textbf{Legend:} \underline{text} = primary key (PK);
-				\textit{(FK)} = foreign key with a database constraint;
-				\textit{(ref)} = soft reference (no constraint).\\
-				Solid line = constrained relation (\textit{ON DELETE CASCADE});
-				dashed line = soft reference.};
-		\end{tikzpicture}%
-	}
-	\caption{Off-chain PostgreSQL entity-relationship schema. The
-		\texttt{auth\_users} table stands alone for portal authentication, while
-		\texttt{kyc\_profiles} is the hub linking the provider-check history and
-		the audit trail. No raw identity data is written to the ledger.}
-	\label{fig:erd}
-\end{figure*}
 
-A Go backend enforces role-based access control over seven roles, summarized in
+A Go backend enforces role-based access control over six roles, summarized in
 Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 
 \begin{table}[!t]
@@ -642,9 +490,8 @@ Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 		\midrule
 		Public          & Health check, login                         \\
 		Authenticated   & View own profile, list wallets              \\
-		KYC-verified    & Initiate transfer, view balance, redeem     \\
-		Bank/PJP        & Onboard customer, submit KYC, create wallet, distribute \\
-		Bank Indonesia  & Issue, set system limits, approve participant \\
+	Bank/PJP        & Create wallet, fund retail wallets         \\
+		Bank Indonesia  & Issue, redeem liquidity, approve participant \\
 		Merchant        & Initiate transfer, view balance             \\
 		Supervisor      & Reconciliation, metrics, supervision events \\
 		\bottomrule
@@ -652,714 +499,310 @@ Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 \end{table}
 
 The two layers enforce different things, and the split matters for how the
-prototype's guarantees should be read. The chaincode enforces the monetary and
-compliance invariants of Section~\ref{sec:proto}: tier derivation, transfer
-limits, KYC validity, wallet freezing, system-level caps, and the
-validator-to-PJP issuance guard. Every endorsing peer re-evaluates them
-independently, so no single organization can commit a state change that violates
-them. Caller authorization is different: the mapping from roles to permitted
-functions in Table~\ref{tab:roles} is enforced only in the backend, and the
-chaincode does not additionally check the submitting client's MSP identity
-against the requested function. A five-organization endorsement policy therefore
-protects the integrity of the rules but not the attribution of the request, and
-the single backend and PostgreSQL instance are a trust and availability
-concentration point. A production design would bind each organization to its own
-backend and re-check the submitter's certificate attributes inside the
-chaincode; Section~\ref{sec:limits} returns to this.
+prototype's guarantees should be read. The backend maps JWT roles to permitted
+operations and restricts customers to their own wallets. The chaincode checks
+the caller's organization, wallet status, transfer amount, and available
+balance before it writes the state transition. Every endorsing peer re-evaluates
+these rules independently, while the channel endorsement policy restricts
+validation to institutional MSPs. The
+single backend and PostgreSQL instance remain trust and availability
+concentration points for this prototype.
 
 \section{Protocol and Determinism}
 \label{sec:proto}
-The chaincode applies the following compliance rules during endorsement. We
-formalize these rules and examine their behavior under concurrent transactions.
-
-\subsection{Wallet-Tier Derivation}
-Let $s$ be the subject type, $d$ the due-diligence level, and $r$ the risk
-level of an approved KYC profile. The wallet tier $\tau$ is a deterministic
-function
-\begin{equation}
-	\tau(s,d,r)=
-	\begin{cases}
-		\textsc{basic}    & d{=}0,\ s{=}\mathrm{C},\ r{=}0 \\
-		\textsc{standard} & d{\ge}1,\ s{=}\mathrm{C},\ r{\le}2 \\
-		\textsc{merchant} & d{\ge}1,\ s{=}\mathrm{Mr},\ r{\le}2 \\
-		\bot              & \text{otherwise,}
-	\end{cases}
-	\label{eq:tier}
-\end{equation}
-where $s\in\{\mathrm{C}\text{ (customer)},\mathrm{Mr}\text{ (merchant)}\}$ is
-the subject type. The due-diligence level $d\in\{0,1,2\}$ denotes
-simplified, standard, or enhanced due diligence, and the risk level
-$r\in\{0,1,2\}$ denotes low, medium, or high risk. Under standard or enhanced
-due diligence ($d{\ge}1$), a customer maps to \textsc{standard} and a merchant
-to \textsc{merchant} at any of these three risk levels; simplified due diligence
-($d{=}0$) is confined to a low-risk customer, who maps to \textsc{basic}. A
-high-risk subject ($r{=}2$) therefore remains tier-eligible, but only with
-enhanced due diligence and senior approval, both enforced when the KYC profile
-is approved. A fourth, prohibited risk classification is rejected at approval and
-never reaches $\tau$; the value $\bot$ identifies any other profile that cannot
-support a retail wallet. Because $\tau$ uses only the approved profile, users
-cannot select their own tier.
+The transfer path applies explicit authorization and balance checks during
+endorsement. We formalize these checks and examine their behavior under
+concurrent transactions.
 
 \subsection{Transfer-Validity Rules}
-Each wallet tier has five limits, listed in Table~\ref{tab:limits}: a
-per-transaction cap, a daily outgoing cap, a monthly outgoing cap, a monthly
-incoming cap, and a maximum balance. For a transfer of amount $a$ from a sender
-to a receiver, the chaincode admits the transfer only if every one of the
-following checks passes:
+For a transfer of amount $a$ from sender $s$ to receiver $r$, the chaincode
+admits the transfer only if every one of the following checks passes:
 \begin{itemize}
-	\item neither the sender's nor the receiver's wallet is frozen;
-	\item the sender's KYC profile is approved and not expired;
-	\item the amount does not exceed the sender's per-transaction cap;
-	\item the sender's running daily and monthly outgoing totals, plus this
-	      transfer, stay within the sender's daily and monthly outgoing caps;
-	\item the receiver's running monthly incoming total, plus this transfer,
-	      stays within the receiver's monthly incoming cap;
-	\item the sender has enough balance to cover the transfer; and
-	\item the resulting receiver balance does not exceed the receiver's
-	      maximum-balance cap.
+\item the caller's organization and wallet ownership satisfy the authorization
+      rules;
+\item neither the sender's nor the receiver's wallet is frozen;
+\item $a>0$ and the required business reference is present;
+\item the sender has enough balance to cover $a$; and
+\item the sender and receiver wallet records can be updated atomically.
 \end{itemize}
-If any check fails, the transfer is rejected. Institutional wallets (Bank
-Indonesia, banks, and PJP) skip these tier limits but are still bounded by the
-system-level caps in Table~\ref{tab:syslimits}: a total supply cap on the sum of
-all balances, a per-participant balance cap, and a per-transaction cap.
-
-\begin{table}[!t]
-	\caption{Retail Wallet Tier Limits (Indonesian Rupiah)}
-	\label{tab:limits}
-	\centering
-	\footnotesize
-	\begin{tabular}{lrrr}
-		\toprule
-		\textbf{Limit} & \textbf{BASIC} & \textbf{STANDARD} & \textbf{MERCHANT} \\
-		\midrule
-		Max.\ balance     & 2{,}000{,}000  & 20{,}000{,}000 & 200{,}000{,}000 \\
-		Per transaction   & 250{,}000      & 2{,}500{,}000  & 10{,}000{,}000  \\
-		Daily outgoing    & 500{,}000      & 10{,}000{,}000 & 50{,}000{,}000  \\
-		Monthly outgoing  & 5{,}000{,}000  & 40{,}000{,}000 & 500{,}000{,}000 \\
-		Monthly incoming  & 20{,}000{,}000 & 40{,}000{,}000 & 500{,}000{,}000 \\
-		\bottomrule
-	\end{tabular}
-\end{table}
-
-\begin{table}[!t]
-	\caption{System-Level Limits (Institutional Wallets)}
-	\label{tab:syslimits}
-	\centering
-	\footnotesize
-	\begin{tabular}{llr}
-		\toprule
-		\textbf{Limit} & \textbf{Meaning} & \textbf{Value (Rp)} \\
-		\midrule
-		Total supply cap        & Sum of all balances     & 10{,}000{,}000{,}000{,}000 \\
-		Per-participant cap     & Per-participant balance & 1{,}000{,}000{,}000{,}000  \\
-		Per-transaction cap     & Per-transaction amount  & 100{,}000{,}000{,}000      \\
-		\bottomrule
-	\end{tabular}
-\end{table}
-
-The values in Table~\ref{tab:limits} are chaincode parameters, seeded at ledger
-initialization and revisable through \texttt{SetTierLimit}, so limit policy is
-itself an auditable on-chain transaction rather than a compiled-in constant. The
-BASIC tier is anchored to existing Indonesian electronic-money regulation, which
-caps unregistered electronic money at Rp2{,}000{,}000 and caps monthly incoming
-transaction value at Rp20{,}000{,}000~\cite{bi2018pbi206}; both figures are
-reproduced exactly in the BASIC row, which lets the lowest tier stand in for the
-regulated no-KYC instrument. The STANDARD and MERCHANT tiers are not regulatory
-values. They are scaled above the electronic-money ceilings to represent
-bank-intermediated retail accounts, for which the same regulation sets no
-directly comparable limit, and they are test parameters rather than a
-calibration proposal: the merchant ceilings in particular sit well below the
-turnover of a mid-size Indonesian retailer. Setting defensible national values
-is a policy exercise outside the scope of this paper.
+If any check fails, the transfer is rejected. A successful transfer decreases
+the sender balance, increases the receiver balance, records the transaction,
+and emits the supervision event used by the read-only observer path. Treasury
+distribution accepts only active validator-bank or PJP custodians, and a PJP
+cannot call issuance directly.
 
 \subsection{Determinism and Double-Spend Safety}
-Every endorsing peer evaluates the transfer rules independently. The
-daily/monthly counters and KYC-expiry check therefore cannot use a peer's local
-clock, because clock differences could produce different decisions. Instead,
-the chaincode uses Fabric's transaction timestamp, which is identical for all
-endorsers of a transaction, to select the applicable day and month windows. The
-running totals are not recomputed from transaction history. Each wallet record
-carries its own spent-today, spent-this-month, and received-this-month counters
-together with the day and month stamps at which they were last reset; a transfer
-derives the current day and month from the transaction timestamp, zeroes any
-counter whose window has rolled over, and then tests the limits against the
-updated values. Because every input to this evaluation is either the transaction
-timestamp or the two wallet records read during endorsement, each endorser
-computes the same totals and reaches the same decision.
+Every endorsing peer evaluates the authorization and transfer rules against the
+same transaction arguments and wallet records. The state transition does not
+depend on a peer-local clock or on a peer-local cache. Each successful transfer
+updates the sender and receiver records in one transaction, so every endorser
+evaluates the same balance transition before validation.
 
-Double-spend safety combines this deterministic check with Fabric's built-in
-multi-version concurrency control (MVCC). An endorsement reads the current
-version of a wallet record, and Fabric commits the transaction only if that
-version remains unchanged through ordering and validation. Two concurrent
-transfers from the same wallet may endorse against the same record and version.
-Only the first ordered transaction commits. The second fails MVCC validation
-even if it passed the balance check during endorsement. Keeping the limit
-counters on the wallet record rather than in a separate index is what extends
-this protection to them: balance and counters share one key, so a single version
-check covers both, and no range or rich query enters the read set where a
-phantom read could arise. Fig.~\ref{alg:transfer} summarizes the transfer
-routine.
+Double-spend safety follows from Fabric's multi-version concurrency control
+(MVCC). An endorsement reads the current version of each wallet record, and
+Fabric commits the transaction only if those versions remain unchanged through
+ordering and validation. Two concurrent transfers from the same wallet may
+endorse against the same record and version, but only the first ordered
+transaction commits. The second fails MVCC validation after the first update.
+Because the balance records are the keys in the read set, one version check
+covers the state used by the transfer and prevents a stale balance update.
 
 \begin{figure}[!t]
-	\centering
-	\begin{algorithmic}[1]
-		\STATE \textbf{function} \textsc{Transfer}(sender, receiver, amount)
-		\STATE timestamp $\leftarrow$ \textsc{GetTxTimestamp}() \COMMENT{same value on every endorser}
-		\IF{sender frozen \textbf{or} receiver frozen \textbf{or} sender's KYC not valid at timestamp}
-		\RETURN \textsc{reject}
-		\ENDIF
-		\STATE derive day and month from timestamp; zero any sender or receiver
-		counter whose window has rolled over
-		\STATE dailyOut, monthlyOut $\leftarrow$ sender's stored outgoing counters
-		\STATE monthlyIn $\leftarrow$ receiver's stored incoming counter
-		\IF{any transfer-validity rule fails (Sec.~\ref{sec:proto})}
-		\RETURN \textsc{reject}
-		\ENDIF
-		\STATE sender.balance $\leftarrow$ sender.balance $-$ amount; increment
-		sender's daily and monthly outgoing counters
-		\STATE receiver.balance $\leftarrow$ receiver.balance $+$ amount;
-		increment receiver's monthly incoming counter
-		\STATE append record to sender's and receiver's history; emit supervision
-		event if high-risk
-		\STATE \textbf{PutState} (validated by Fabric MVCC)
-		\RETURN \textsc{commit}
-	\end{algorithmic}
-	\caption{Deterministic, double-spend-safe transfer executed on every
-		endorsing peer. ``Sender's KYC not valid'' means not approved or expired;
-		``transfer-validity rule'' refers to the checklist in
-		Sec.~\ref{sec:proto}.}
-	\label{alg:transfer}
+\centering
+\begin{algorithmic}[1]
+\STATE \textbf{function} \textsc{Transfer}(sender, receiver, amount)
+\IF{caller unauthorized \textbf{or} either wallet is frozen}
+\RETURN \textsc{reject}
+\ENDIF
+\IF{amount $\le 0$ \textbf{or} reference is missing}
+\RETURN \textsc{reject}
+\ENDIF
+\IF{sender.balance $<$ amount}
+\RETURN \textsc{reject}
+\ENDIF
+\STATE sender.balance $\leftarrow$ sender.balance $-$ amount
+\STATE receiver.balance $\leftarrow$ receiver.balance $+$ amount
+\STATE append transaction history and emit supervision event
+\STATE \textbf{PutState} (validated by Fabric MVCC)
+\RETURN \textsc{commit}
+\end{algorithmic}
+\caption{Authorized, atomic, and double-spend-safe transfer executed by the
+chaincode. Fabric MVCC validates the wallet versions before commit.}
+\label{alg:transfer}
 \end{figure}
+
 
 \section{Performance Evaluation}
+\label{sec:eval}
 
 \subsection{Methodology}
-We measure performance with Hyperledger Caliper on Fabric~2.5.16, following
-blockchain performance-metric guidance~\cite{hlf_metrics}.
-Table~\ref{tab:testbed} states the testbed. All eleven containers, the Caliper
-workers, and the backend share one host, so the figures below describe that
-configuration and are not portable to a distributed deployment. The ordering
-parameters are listed because they bound the results directly: with a two-second
-batch timeout and a ten-message maximum, a block is cut whenever either
-condition is met first. Before measurement, the ledger is seeded with the
-population in Table~\ref{tab:population}: 200 retail customers (20\% BASIC, 80\%
-STANDARD) and 50 merchants. Every account holds an approved KYC anchor and
-receives funding within its tier limits.
+We evaluate the final prototype with Hyperledger Caliper 0.6.0 on a clean
+ledger for each profile. The combined manifest
+\texttt{20260909-final-evidence-manifest.json} records suite seed 20260909
+(profile ordering); the transfer configurations retain workload seed 20260725.
+It also records chaincode \texttt{digital-rupiah} version 3.0 sequence 1, runtime versions,
+input hashes, result hashes, and the single-host topology. The testbed has five
+peer organizations, one peer per organization, one Raft orderer, and one
+CouchDB instance per peer.
 
 \begin{table}[!t]
-	\caption{Testbed Configuration}
-	\label{tab:testbed}
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{3.5pt}
-	\begin{tabular}{l>{\raggedright\arraybackslash}p{5.6cm}}
-		\toprule
-		\textbf{Component} & \textbf{Specification} \\
-		\midrule
-		Processor    & Intel Core i7-7700HQ @ 2.80~GHz (4 cores, 8 threads) \\
-		Memory       & 16~GB                                                \\
-		Host OS      & Fedora Linux 44, kernel 7.1.3                        \\
-		Runtime      & Docker 29.6.2                                        \\
-		Fabric       & 2.5.16 (peer, orderer); CouchDB 3.2                  \\
-		Chaincode    & Go, \texttt{fabric-contract-api-go} v2.0.0           \\
-		Backend      & Go 1.23, \texttt{fabric-gateway} v1.8.0              \\
-		Benchmark    & Hyperledger Caliper 0.6.0                            \\
-		Ordering     & Single-node Raft; \texttt{BatchTimeout} 2~s;
-		\texttt{MaxMessageCount} 10; \texttt{PreferredMaxBytes} 2~MB;
-		\texttt{AbsoluteMaxBytes} 10~MB                                     \\
-		Endorsement  & MAJORITY (3 of 5 organizations)                      \\
-		\bottomrule
-	\end{tabular}
+\caption{Final testbed configuration}
+\label{tab:testbed-final}
+\centering
+\scriptsize
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.2cm}}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+Processor & Intel Core i7-7700HQ, 4 cores, 8 threads, 2.80 GHz \\
+Memory & 15.52 GiB \\
+Runtime & Node.js 22.23.2, npm 10.9.1, Docker 27.5.1 \\
+Fabric / CouchDB & 2.5 / 3.2 \\
+Caliper & 0.6.0 \\
+Chaincode & \texttt{digital-rupiah} v3.0, sequence 1 \\
+Ordering & Single-node Raft; batch timeout 2 s; maximum 10 messages \\
+Endorsement & One institutional MSP: BI, HimbaraBank, CommercialBank, or PJP \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-The experiment uses four workload families. The transfer workload comprises
-70\% customer-to-customer transfers, 25\% customer-to-merchant transfers, and
-5\% reads (Table~\ref{tab:workload}). It runs at three client-concurrency levels
-(1, 2, and 4 Caliper workers), with warmup, sustained, and peak rounds at each
-level, and is then repeated for five identical peak rounds so that throughput
-can be reported with a confidence interval. Every round submits 40 transactions,
-which at the achieved rates lasts roughly three to six seconds; rounds this short
-capture the saturated steady state only briefly, which is why the peak round is
-the one repeated. Intervals reported as $\pm$ are two-sided 95\% Student's
-$t$ intervals over those five rounds ($n{=}5$, four degrees of freedom).
-Four functionality profiles exercise
-the business processes in Section~\ref{sec:bp}: KYC onboarding, monetary
-operations (issuance, distribution, redemption), supervision reads, and
-admin/policy.
-
-Three further workloads test the compliance and safety claims directly. The
-conformance workload submits only transactions that each violate one policy
-rule, so enforcement is observed as an outcome rather than inferred from an
-absence of rejections. The boundary workload then probes each numeric cap from
-both sides, pairing a submission exactly at the limit with one a single rupiah
-past it, which distinguishes a correctly placed cap from an off-by-one
-comparison. The adversarial workload directs four concurrent workers at a single
-sender wallet, forcing repeated MVCC version conflicts on one balance key. The
-transfer and adversarial designs are deliberately separate: the contention-free
-transfer workload measures the throughput ceiling without abort noise, while the
-single-key workload measures conflict handling without confounding it with
-saturation.
-
-The conformance workload needs a metric of its own, because for it a rejection
-is the desired result and Caliper scores every rejected submission as a failed
-transaction. The workload therefore keeps its own counters: a submission that the
-chaincode rejects is recorded as \emph{enforced}, and one that commits is
-recorded as an enforcement \emph{gap} and re-raised so that it cannot pass
-silently. The conformance verdict is the gap count, not Caliper's success ratio.
-The round is configured for 42 transactions, of which 34 are policy-violating
-submissions and the remainder are fixture-seeding calls that are expected to
-succeed; we report the 34 assertions and their verdict.
-
-During every round, Caliper's Docker resource monitor samples processor, memory,
-network, and disk use once per second for all eleven containers, comprising five
-peers, five CouchDB instances, and the orderer. Processor figures are reported
-with Caliper's CPU normalization enabled, which divides each container's share of
-system-wide CPU time by the number of logical cores. A reported value is
-therefore a percentage of the whole host's eight-thread capacity, not of a single
-core: 100\% would mean the container saturated the entire machine.
-
-For each round, we report throughput and efficiency $\eta$. Throughput is the
-number of successful transactions divided by wall-clock duration, while
-efficiency divides throughput by the offered (requested) transaction rate. A
-value near 1 indicates that the system keeps pace with the offered load. A value
-well below 1 indicates saturation. All reported figures come from the Caliper
-report generated against the deployed chaincode on a clean ledger.
+The transfer profiles use 70\% customer-to-customer transfers, 25\%
+customer-to-merchant transfers, and 5\% wallet reads. Each profile warms the
+network for 30 seconds at 10 TPS, then measures 120-second rounds at 30 and
+60 TPS. The one-, two-, and four-worker profiles use the populations and
+transaction slots specified in their individual configuration files. Sender
+wallets receive a larger initial balance than receiver wallets, so valid
+traffic does not begin with a receiver at its maximum balance. Caliper records
+successful and failed submissions, completion throughput, and latency.
 
 \begin{table}[!t]
-	\caption{Caliper Transfer Workload Composition}
-	\label{tab:workload}
-	\centering
-	\footnotesize
-	\begin{tabular}{lll}
-		\toprule
-		\textbf{Share} & \textbf{Operation} & \textbf{Transaction} \\
-		\midrule
-		70\% & Customer-to-customer transfer & \texttt{Transfer}  \\
-		25\% & Customer-to-merchant transfer & \texttt{Transfer}  \\
-		5\%  & Wallet read                   & \texttt{GetWallet} \\
-		\bottomrule
-	\end{tabular}
+\caption{Final transfer-profile results}
+\label{tab:results-final}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.8pt}
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+\textbf{Workers} & \textbf{Load} & \textbf{Succ.} & \textbf{Fail} &
+\textbf{Success} & \textbf{Send} & \textbf{Throughput} & \textbf{Avg.} \\
+& & & & \textbf{(\%)} & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{lat. (s)} \\
+\midrule
+1 & 30 TPS & 3,105 & 496 & 86.23 & 30.0 & 29.1 & 0.71 \\
+1 & 60 TPS & 898 & 6,300 & 12.48 & 60.0 & 56.3 & 6.36 \\
+2 & 30 TPS & 3,602 & 0 & 100.00 & 30.0 & 29.5 & 0.40 \\
+2 & 60 TPS & 874 & 6,327 & 12.14 & 60.0 & 57.2 & 6.48 \\
+4 & 30 TPS & 3,486 & 118 & 96.73 & 30.0 & 29.5 & 0.76 \\
+4 & 60 TPS & 868 & 6,336 & 12.05 & 60.0 & 57.3 & 6.47 \\
+\bottomrule
+\end{tabular}
 \end{table}
+
+All warmup rounds completed without failure. At 30 TPS, completion throughput
+was 29.1--29.5 TPS and success rate was 86.23--100.00\%. At 60 TPS, completion
+throughput was 56.3--57.3 TPS while success rate was 12.05--12.48\%. Completion
+throughput includes failed submissions, so it is not successful throughput.
 
 \begin{table}[!t]
-	\caption{Seeded Test Population and Workloads}
-	\label{tab:population}
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{4pt}
-	\begin{tabular}{ll}
-		\toprule
-		\textbf{Parameter} & \textbf{Value} \\
-		\midrule
-		Retail customers      & 200 (20\% BASIC, 80\% STANDARD) \\
-		Merchants             & 50 (MERCHANT tier)              \\
-		Client concurrency    & 1, 2, 4 Caliper workers         \\
-		Transfer rounds       & warmup / sustained / peak       \\
-		Repetition rounds     & 5 identical peak rounds         \\
-		Functionality profiles & KYC, monetary, supervision, admin \\
-		Performance transactions & 816                          \\
-		Conformance / boundary & 34 / 8                          \\
-		Adversarial            & 200                             \\
-		\bottomrule
-	\end{tabular}
-
-	\vspace{2pt}
-	{\scriptsize Conformance counts the policy-violating submissions asserted, not
-		the Caliper round size (42), which also contains fixture-seeding calls.
-		Boundary counts the at-limit and one-past-limit assertion pairs.}
+\caption{Failure diagnostics in final transfer profiles}
+\label{tab:failure-diagnostics-final}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Profile} & \textbf{Status 11} & \textbf{Gateway limit} & \textbf{Total} \\
+\midrule
+1 worker & 5,332 & 1,464 & 6,796 \\
+2 workers & 4,919 & 1,408 & 6,327 \\
+4 workers & 5,121 & 1,333 & 6,454 \\
+Five repetitions & 11,878 & 3,191 & 15,069 \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-\subsection{Results}
-The performance workloads committed 814 of 816 transactions. The two failures
-occurred in the four-worker peak round, where a seeded sender exhausted its
-balance; this is an artifact of workload seeding rather than a system fault. The
-predicate in Section~\ref{sec:proto} produced consistent endorsement decisions
-throughout the run.
-
-Table~\ref{tab:results} reports transfer scaling. Peak throughput saturates near
-14.5~TPS and does not increase when client concurrency rises from one to four
-workers, which excludes a client-side limit. Efficiency falls from
-$\eta\!\approx\!0.75$ during warmup to $\eta\!\approx\!0.21$ at peak, placing
-the saturation point below the sustained offered load. Latency remains bounded:
-the mean is at most 0.99~s and the maximum is at most 2.63~s. Across five
-identical peak rounds, throughput is 14.50~TPS with a 95\% confidence interval
-of $\pm$0.32~TPS (standard deviation 0.26~TPS), mean latency 0.68$\pm$0.04~s,
-and maximum latency 2.31$\pm$0.09~s, so the saturation point is stable across
-repetitions. Efficiency is already below one in the warmup rounds, at an offered
-rate near 10~TPS: these rounds start against a cold chaincode container and
-empty peer caches, and at 40 transactions they are too short for that startup
-cost to amortize. Fig.~\ref{fig:saturation}(a) shows the resulting curve: the
-three concurrency levels trace the same trajectory, which departs from the ideal
-$\eta{=}1$ line as offered load grows and then flattens.
+The final transfer logs classify every failed submission as Fabric status 11 or
+the gateway message \texttt{too many requests for /gateway.Gateway}. Status 11
+is the Fabric validation code for an MVCC read conflict: a transaction read a
+wallet version that changed before commit. The gateway message identifies
+client-path concurrency pressure. The logs contain no insufficient-balance or
+transport failure in these final transfer profiles.
 
 \begin{table}[!t]
-	\caption{Transfer Throughput Scaling by Client Concurrency}
-	\label{tab:results}
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{4pt}
-	\begin{tabular}{llrrrrr}
-		\toprule
-		\textbf{Wk.} & \textbf{Round} & \textbf{Send} & \textbf{Thr.} & \textbf{$\eta$} & \textbf{Avg} & \textbf{Max} \\
-		& & \textbf{(TPS)} & \textbf{(TPS)} & & \textbf{(s)} & \textbf{(s)} \\
-		\midrule
-		1 & Warmup    & 10.3 & 7.7  & 0.75 & 0.81 & 2.19 \\
-		1 & Sustained & 30.8 & 12.7 & 0.41 & 0.64 & 2.15 \\
-		1 & Peak      & 58.7 & 14.7 & 0.25 & 0.64 & 2.22 \\
-		\midrule
-		2 & Warmup    & 10.5 & 7.8  & 0.74 & 0.77 & 2.12 \\
-		2 & Sustained & 31.6 & 12.5 & 0.40 & 0.63 & 2.21 \\
-		2 & Peak      & 62.9 & 14.8 & 0.24 & 0.66 & 2.27 \\
-		\midrule
-		4 & Warmup    & 11.1 & 8.1  & 0.73 & 0.82 & 2.13 \\
-		4 & Sustained & 31.9 & 11.1 & 0.35 & 0.99 & 2.63 \\
-		4 & Peak      & 66.6 & 14.3 & 0.21 & 0.62 & 2.32 \\
-		\bottomrule
-	\end{tabular}
-
-	\vspace{2pt}
-	{\scriptsize All rounds: 40 transactions. Failures: 0 in every round except
-		the four-worker peak round (2, insufficient balance). Wk.: Caliper
-		workers.}
+\caption{Five repetitions at an offered load of 60 TPS}
+\label{tab:repeat-final}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+\textbf{Round} & \textbf{Succ.} & \textbf{Fail} & \textbf{Success (\%)} &
+\textbf{Throughput (TPS)} & \textbf{Avg. lat. (s)} \\
+\midrule
+1 & 895 & 2,707 & 24.85 & 57.7 & 3.23 \\
+2 & 403 & 3,199 & 11.19 & 54.9 & 6.93 \\
+3 & 598 & 3,004 & 16.60 & 54.8 & 4.93 \\
+4 & 448 & 3,154 & 12.44 & 52.7 & 6.39 \\
+5 & 597 & 3,005 & 16.57 & 54.1 & 4.50 \\
+\midrule
+Mean & 588.2 & 3,013.8 & 16.33 & 54.8 & 5.20 \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-\begin{figure}[!t]
-	\centering
-	\begin{tikzpicture}
-		\pgfplotsset{
-			every axis/.append style={
-					width=\dimexpr\columnwidth-36pt\relax, height=4.3cm,
-					scale only axis, font=\footnotesize,
-					xmin=0, xmax=72,
-					grid=major,
-					grid style={gray!30, dashed, line width=0.3pt},
-					axis line style={gray!60, line width=0.4pt},
-					tick style={gray!60},
-					line width=0.7pt,
-					mark size=2.0pt,
-				},
-			w1/.style={black, solid,   mark=*,         mark options={fill=white}},
-			w2/.style={black, dashed,  mark=square*,   mark options={fill=white, solid}},
-			w4/.style={black, densely dotted, mark=triangle*, mark options={fill=white, solid}},
-		}
-		% ---- Panel (a): achieved throughput ----
-		\begin{axis}[
-				name=plota,
-				ylabel={Throughput (TPS)},
-				ymin=0, ymax=18,
-				xticklabels={},
-				legend style={
-						at={(0.98,0.03)}, anchor=south east,
-						font=\scriptsize, draw=gray!60, fill=white,
-						row sep=-1pt, inner sep=2pt,
-					},
-				legend cell align={left},
-			]
-			% ideal reference: throughput == offered load
-			\addplot[gray!70, dash dot, line width=0.6pt, forget plot]
-			coordinates {(0,0) (18,18)};
-			\node[font=\scriptsize, gray!70, anchor=west]
-			at (axis cs:17.5,16.4) {ideal ($\eta{=}1$)};
-			% measured plateau from the repetition rounds
-			\addplot[black, dotted, line width=0.5pt, forget plot]
-			coordinates {(0,14.50) (72,14.50)};
-			\node[font=\scriptsize, anchor=south east]
-			at (axis cs:71,14.8) {plateau $14.50\pm0.32$};
-			\addplot[w1] coordinates {(10.3,7.7) (30.8,12.7) (58.7,14.7)};
-			\addplot[w2] coordinates {(10.5,7.8) (31.6,12.5) (62.9,14.8)};
-			\addplot[w4] coordinates {(11.1,8.1) (31.9,11.1) (66.6,14.3)};
-			\legend{1 worker, 2 workers, 4 workers}
-			% 95\% CI on the repeated peak round (n=5)
-			\addplot[black, only marks, mark=o, mark size=2.6pt, forget plot,
-				error bars/.cd, y dir=both, y explicit]
-			coordinates {(62.9,14.50) +- (0,0.32)};
-		\end{axis}
-		% ---- Panel (b): maximum latency ----
-		\begin{axis}[
-				name=plotb,
-				at={(plota.below south west)}, anchor=north west, yshift=-0.75cm,
-				xlabel={Offered load (send rate, TPS)},
-				ylabel={Max.\ latency (s)},
-				ymin=1.8, ymax=2.9,
-				ytick={1.8,2.0,2.2,2.4,2.6,2.8},
-			]
-			\addplot[black, dash dot, line width=0.6pt, forget plot]
-			coordinates {(0,2.0) (72,2.0)};
-			\node[font=\scriptsize, anchor=south west]
-			at (axis cs:1.5,1.83) {batch timeout (2\,s, reference)};
-			\addplot[w1] coordinates {(10.3,2.19) (30.8,2.15) (58.7,2.22)};
-			\addplot[w2] coordinates {(10.5,2.12) (31.6,2.21) (62.9,2.27)};
-			\addplot[w4] coordinates {(11.1,2.13) (31.9,2.63) (66.6,2.32)};
-		\end{axis}
-	\end{tikzpicture}
-	\caption{Transfer performance against offered load at three client-concurrency
-		levels. (a) Achieved throughput departs from the ideal $\eta{=}1$ line and
-		flattens at $14.50\pm0.32$~TPS (95\% confidence interval over five repeated
-		peak rounds), and the three concurrency levels coincide, so additional
-		client workers do not raise the ceiling. (b) Maximum latency stays
-		between 2.12 and 2.63~s in every round. The two-second batch timeout is
-		drawn for reference, but at 14.5~TPS a ten-message block fills before
-		that timeout expires; the tail is consistent with queueing while the
-		fixed-rate round drains, not with timeout-driven block cutting.}
-	\label{fig:saturation}
-\end{figure}
-
-Table~\ref{tab:funcresults} reports the four business-process profiles. The
-short, single-key writes used by monetary operations produce the highest
-throughput (19.9~TPS) and lowest mean latency (0.32~s). Supervision reads sustain
-16.3~TPS, with 1.17~s mean and 3.43~s maximum latency; reconciliation and metrics
-scan the whole transaction index through composite-key range queries rather than
-reading a maintained aggregate, so their cost grows with ledger size. The
-multi-step KYC onboarding and admin/policy profiles reach 3.8~TPS and 5.2~TPS,
-respectively. Both complete without failure, and the corresponding business
-processes execute on the ledger.
+Five repetitions on one clean ledger produced a mean completion throughput of
+54.8 TPS and a mean success rate of 16.33\%. The success-rate range was
+11.19--24.85\%, and mean latency ranged from 3.23 to 6.93 s. These values
+describe variation in the reported local configuration.
 
 \begin{table}[!t]
-	\caption{Business-Process Functionality Profiles}
-	\label{tab:funcresults}
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{4pt}
-	\begin{tabular}{lrrrrr}
-		\toprule
-		\textbf{Profile} & \textbf{Tx} & \textbf{Send} & \textbf{Thr.} & \textbf{Avg} & \textbf{Max} \\
-		& & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{(s)} & \textbf{(s)} \\
-		\midrule
-		KYC onboarding     & 56 & 4.4  & 3.8  & 0.88 & 2.26 \\
-		Monetary ops       & 80 & 20.5 & 19.9 & 0.32 & 0.56 \\
-		Supervision reads  & 80 & 30.7 & 16.3 & 1.17 & 3.43 \\
-		Admin / policy     & 40 & 5.3  & 5.2  & 0.92 & 1.72 \\
-		\bottomrule
-	\end{tabular}
+\caption{Functional Caliper profiles}
+\label{tab:functionality-final}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Profile} & \textbf{Succ.} & \textbf{Fail} & \textbf{Throughput (TPS)} &
+\textbf{Avg. lat. (s)} \\
+\midrule
+KYC onboarding & 48 & 0 & 4.3 & 0.74 \\
+Monetary operations & 40 & 0 & 19.4 & 0.33 \\
+Supervision reads & 40 & 0 & 30.6 & 0.03 \\
+Administrative policy & 40 & 0 & 5.1 & 1.05 \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-\subsection{Policy Enforcement and Contention}
-Throughput results alone cannot show that the compliance rules reject anything,
-because a workload built from valid transactions can never trigger them. The
-conformance workload therefore submits only violations. Across 34 assertions
-spanning the seven rule classes in Table~\ref{tab:negpath}, split evenly between
-two workers, every submission was rejected and the run recorded no enforcement
-gap.
-
-Rejecting an input that sits well inside the violating region does not show that
-a cap is placed correctly, so a second workload probes each numeric limit from
-both sides: one transfer whose value lands exactly on the limit, which must
-commit, and one a single rupiah past it, which must be rejected. A rule with an
-off-by-one comparison passes the first workload and fails this one. Caliper
-issues submissions concurrently, so each of the eight assertions uses its own
-sender and receiver, and every accumulated state, whether a partial daily spend,
-a receiver pre-filled to its ceiling, or a drained sender, is established during
-seeding; no assertion can therefore be rejected by an MVCC conflict rather than
-by the rule under test. All eight outcomes matched
-(Table~\ref{tab:boundary}). The per-transaction, daily-outgoing, and
-receiver-balance caps and the sender-balance check are inclusive and placed
-exactly where Section~\ref{sec:proto} specifies.
-
-The adversarial workload then tests double-spend safety directly. Four workers
-issued 200 concurrent transfers from one sender wallet, so every transaction read
-the same balance version. Twelve committed and 188 were rejected at validation,
-and the twelve that committed were serialized rather than applied against a
-stale balance. This is the behavior argued in Section~\ref{sec:proto}:
-transactions that pass the balance check during endorsement still fail MVCC
-validation once an earlier transaction has advanced the version of that key. The
-argument predicts the serialization, not the split between the two outcomes; how
-many of the 200 commit depends on the offered rate and on endorsement latency,
-so the 94\% rejection share characterizes this run rather than the protocol. The
-zero conflicts recorded by the contention-free transfer workload and the 188
-recorded here are consistent, because the two workloads differ only in whether
-they share a sender key.
+The four functional profiles completed all 168 transactions without failure.
+They verify onboarding, monetary operations, read-only supervision, and policy
+updates at their configured rates. Their throughputs are not combined with the
+transfer sweep because the functions and read-write patterns differ.
 
 \begin{table}[!t]
-	\caption{Negative-Path Conformance Results}
-	\label{tab:negpath}
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{4pt}
-	\begin{tabular}{lcc}
-		\toprule
-		\textbf{Rule violated by the submission} & \textbf{Expected} & \textbf{Observed} \\
-		\midrule
-		Per-transaction cap             & reject & reject \\
-		Sender balance insufficient     & reject & reject \\
-		Receiver maximum balance        & reject & reject \\
-		Sender wallet frozen            & reject & reject \\
-		Sender KYC anchor expired       & reject & reject \\
-		Prohibited-risk approval        & reject & reject \\
-		High risk without senior approval & reject & reject \\
-		\bottomrule
-	\end{tabular}
-
-	\vspace{2pt}
-	{\scriptsize 34 policy-violating submissions across the seven classes;
-		0 committed, 0 enforcement gaps.}
+\caption{Semantic conformance profiles}
+\label{tab:conformance-final}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrp{4.6cm}@{}}
+\toprule
+\textbf{Profile} & \textbf{Succ.} & \textbf{Fail} & \textbf{Oracle result} \\
+\midrule
+Authorization & 2 & 1 & PASS; one expected custodian-mismatch rejection. \\
+Boundary & 4 & 4 & PASS; 8/8 cases, zero mismatches, zero infrastructure errors. \\
+Negative path & 0 & 7 & PASS; 7/7 expected rejection rules enforced. \\
+Aggregate overspend & 10 & 190 & PASS; final sender balance Rp40,000. \\
+\bottomrule
+\end{tabular}
 \end{table}
+
+The failed counts in these semantic profiles represent expected policy
+rejections. The aggregate-overspend workload requested Rp200,000 from an
+initial Rp50,000 sender balance. Ten transfers committed and 190 were rejected;
+the final balance remained Rp40,000. These observations support the tested
+authorization and balance invariants, but do not constitute a formal security
+proof.
 
 \begin{table}[!t]
-	\caption{Boundary-Value Conformance Results}
-	\label{tab:boundary}
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{4pt}
-	\begin{tabular}{lcc}
-		\toprule
-		\textbf{Limit probed} & \textbf{Exactly at limit} & \textbf{One past limit} \\
-		\midrule
-		Per-transaction cap (Rp250{,}000)     & commit & reject \\
-		Daily outgoing cap (Rp500{,}000)      & commit & reject \\
-		Receiver max.\ balance (Rp2{,}000{,}000) & commit & reject \\
-		Sender balance (exact drain)          & commit & reject \\
-		\bottomrule
-	\end{tabular}
-
-	\vspace{2pt}
-	{\scriptsize BASIC-tier limits. Observed outcome matched the expected outcome
-		in all eight assertions, so every cap is inclusive. Each assertion used a
-		dedicated sender and receiver.}
+\caption{Maximum monitored resource usage}
+\label{tab:resources-final}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Profile} & \textbf{CPU max. (\%)} & \textbf{Memory max. (MB)} \\
+\midrule
+Transfer, 1 worker & 2.35 & 163 \\
+Transfer, 2 workers & 2.74 & 166 \\
+Transfer, 4 workers & 2.69 & 163 \\
+Five peak repetitions & 2.53 & 170 \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-\subsection{Discussion}
-These measurements characterize a single-host functional prototype, not
-national capacity. Transfer throughput plateaus near 14.5~TPS and monetary
-operations near 20~TPS. Both are modest for permissioned DLT and, like other
-private-DLT retail prototypes, remain far below the throughput of centralized
-card networks.
-
-Throughput remains almost unchanged from one to four client workers, which
-already excludes a client-side limit, and the resource measurements narrow the
-alternatives further. At the highest offered load no monitored container comes
-close to saturation. Expressed as a share of the whole host, mean processor use
-stays at or below 0.08\% on the peers, 0.13\% on the CouchDB instances, and
-0.01\% on the orderer, with per-sample peaks of 0.20\%, 0.34\%, and 0.03\%
-respectively; peer memory remains flat between 123 and 127~MB, and peer disk
-writes stay near one megabyte per round. No component is close to exhausting
-processor, memory, or write bandwidth, so the ceiling is not a capacity limit in
-any single container.
-
-Locating it more precisely is harder than the aggregate figures suggest, and two
-candidate mechanisms remain. Sustained throughput of 14.5~TPS against a
-ten-message block maximum corresponds to a block cycle of roughly 0.7~s. That
-cycle is consistent both with the ordering service cutting and delivering blocks
-at that interval and with the serialized per-channel validation and commit path
-taking that long to apply a ten-transaction block to five peers and their CouchDB
-instances. Low aggregate processor use does not discriminate between them,
-because a commit path bounded by write latency and by sequential validation can
-throttle throughput while leaving every container mostly idle, which is the
-regime other Fabric performance studies also
-report~\cite{fabric_perf2023,dinh2017blockbench}.
-
-The latency data does not settle the question either, and one apparent clue
-should be discounted. Maximum latency sits between 2.12 and 2.63~s in every
-round, close enough to the two-second batch timeout to invite the reading that
-block cutting is timeout-driven. That reading does not survive the arithmetic:
-at 14.5~TPS a ten-message block fills in about 0.7~s, so the timeout is not the
-binding condition at peak load. The latency tail is better explained by queueing
-in the fixed-rate round. A peak round offers its 40 transactions in roughly
-0.6~s and the system drains them at 14.5~TPS over about 2.8~s, which places the
-last transaction's latency near 2.2~s, as observed. Distinguishing block
-formation from commit serialization therefore requires an experiment this study
-did not run: a sweep of \texttt{MaxMessageCount} and \texttt{BatchTimeout}, with
-block-interval timestamps read back from the ledger. We report the plateau and
-its resource envelope as measured, and leave the attribution open.
-
-Enforcement and safety rest on direct observation rather than on the absence of
-counterexamples. All 34 conformance submissions were rejected with no
-enforcement gap, every numeric cap held on both sides of its boundary, and the
-concurrent single-key transfers were serialized, every losing transaction
-failing at MVCC validation. These outcomes are what the determinism and
-double-spend arguments in Section~\ref{sec:proto} require. The boundary result
-is the sharper of the two enforcement checks, since an off-by-one cap would
-leave the negative-path run looking identical.
-
-Absolute TPS values should not be compared directly across platforms because
-the platform, measurement tool, network size, and workload differ among
-studies. Instead, the documented protocol fixes the workload mix, seeded
-population, concurrency sweep, and business-process profiles so that the
-saturation point can be measured again under another configuration.
+No monitored container approached the host CPU or memory capacity. The
+observed drop in success at 60 TPS therefore cannot be attributed to simple
+resource exhaustion alone; the logs show state conflicts and gateway
+concurrency pressure. The evidence supports the architecture and policy
+controls, then bounds their observed behavior under the tested local loads.
 
 \section{Limitations and Future Work}
 \label{sec:limits}
 The evaluation uses a single host with one peer per organization and no
 geographic distribution or network latency. Its Caliper results therefore apply
 only to the reported configuration and do not estimate national-scale
-performance. The workload pair also brackets rather than samples realistic
-traffic: the transfer workload holds every sender key disjoint, while the
-adversarial workload drives all writers onto one key. Retail payment traffic
-lies between these extremes, since popular merchants attract skewed but not
-exclusive concurrency. A graded-skew workload would be needed to measure
-throughput under partial contention, and the throughput figures reported here
-should be read as the contention-free ceiling.
+performance. Each transfer profile uses a clean ledger and a fixed seeded
+population, while the final sweep varies one, two, and four workers. A
+distributed deployment and a graded-skew contention workload would be needed to
+characterize other operating conditions.
 
-Two caveats bound what the measurements support. The conformance and boundary
-workloads cover the numeric caps and the seven rule classes, but not the
-temporal edges: expiry exactly at the transaction timestamp and the rollover of
-a daily or monthly window are untested, and both depend on timestamp handling
-rather than on an integer comparison. And while the resource envelope rules out
-capacity exhaustion as the cause of the throughput plateau, it does not separate
-block formation from validation and commit serialization; that attribution
-awaits the parameter sweep described below.
+The shared Fabric channel does not provide transaction privacy, and the
+prototype does not use private data collections or privacy-preserving
+cryptography. The single orderer provides ordering but does not tolerate its
+own failure. The prototype also omits offline payment and leaves connections to
+domestic infrastructure such as BI-RTGS and BI-FAST as stubs.
 
-Authorization is the prototype's clearest architectural limitation. As
-Section~\ref{sec:proto} describes, the chaincode enforces the monetary and
-compliance invariants at every endorser, but the mapping from caller roles to
-permitted functions lives only in the backend, which does not re-present the
-submitter's identity for chaincode-side checking. The five-organization
-endorsement policy consequently secures what may be written, not who asked for
-it, and a single backend and database concentrate trust that the network
-topology otherwise distributes. Binding each organization to its own backend and
-enforcing role checks from client certificate attributes inside the chaincode is
-the natural next step, and it would let a supervisor verify request provenance
-from the ledger alone. Related is the position of the OJK peer, which endorses
-every transaction it will later audit; excluding the supervisor from the
-endorsement policy while retaining full ledger visibility is the alternative
-worth evaluating. The single orderer is likewise a functional convenience rather
-than a design: it provides ordering without crash fault tolerance, so its loss
-halts settlement until it is restarted.
+The authorization and aggregate-overspend profiles cover the tested paths only.
+They do not establish formal security, production readiness, or
+cross-machine reproducibility. Future work should repeat the protocol on
+distributed hosts, instrument endorsement and commit phases, expand the
+contention workload, and evaluate privacy, offline payment, and
+interoperability.
 
-The KYC process is programmatic and has no connection to a real eKYC provider.
-Authorized peers can see transaction data because the ledger uses neither
-private data collections nor privacy-preserving cryptography, which leaves the
-tension between supervisory visibility and holder privacy unaddressed rather
-than resolved. The prototype also
-omits payment-queue gridlock resolution and offline, network-disconnected
-payment. Offline payment would require secure devices and post-reconnection
-settlement of the kind studied in Project Polaris~\cite{polaris_handbook}.
-Connections to domestic infrastructure, including BI-RTGS and BI-FAST, remain
-stubs. The prototype thus demonstrates internal integration but not the full
-interoperability and interconnection required for Digital Rupiah.
-
-Future evaluation should use distributed multi-host deployments, a graded-skew
-contention workload, and a sweep of the block-cutting parameters combined with
-block-interval and commit-phase instrumentation, which is what would separate
-the two candidate explanations for the current ceiling. Further implementation
-work should integrate real eKYC and identity controls, move caller authorization
-into the chaincode, test privacy-preserving supervision, and add gridlock
-resolution and offline payment.
 
 \section{Conclusion}
 This paper implements Bank Indonesia's digital money business processes in a
 two-tier Digital Rupiah prototype on a five-organization Hyperledger Fabric
-network. One chaincode integrates hierarchical issuance and distribution,
-risk-based KYC with deterministic wallet-tier derivation, tiered transfer limits
-based on the transaction timestamp, and supervisor-facing reconciliation.
+network. The chaincode integrates hierarchical issuance and distribution,
+retail transfers, organization-aware authorization, and supervisor-facing
+reconciliation.
 
-The formal model specifies the tier-derivation function, transfer-validity
-predicate, and double-spend-safety argument. Under the reproducible Hyperledger
-Caliper protocol, the prototype committed 814 of 816 transactions across a
-client-concurrency sweep and four business-process workloads, and transfer
-throughput saturated at 14.50$\pm$0.32~TPS with bounded latency. Three further
-workloads test the claims directly: all 34 negative-path submissions across
-seven rule classes were rejected with no enforcement gap, every numeric cap held
-on both sides of its boundary, and concurrent transfers from a single wallet
-were serialized, every losing transaction failing at MVCC validation, as the
-double-spend argument requires. Resource measurements
-show no container near saturation at the plateau, so the ceiling is not a
-capacity limit; separating block formation from commit serialization as its
-cause requires a block-parameter sweep that we leave to future work.
+The transfer protocol combines explicit wallet-state checks with Fabric MVCC.
+The final Caliper sweep reports 29.1--29.5 TPS completion throughput at a
+30 TPS offered load with an 86.23--100.00\% success rate. At 60 TPS, completion
+throughput is 56.3--57.3 TPS and success rate is 12.05--12.48\%. Five peak
+repetitions average 54.8 TPS completion throughput and 16.33\% success. The
+functional profiles complete 168 of 168 transactions, and the authorization,
+boundary, negative-path, and aggregate-overspend oracles pass their expected
+checks. These results provide a local, auditable baseline for retail Digital
+Rupiah experiments, not a production-capacity claim.
 
-The prototype extends the public, wholesale-only Project Garuda experiments
-with an auditable and measurable retail reference. It provides a testbed for
-studying blockchain-based central-bank business processes but does not establish
-production readiness.
 
 \section*{Artifact Availability}
 The chaincode, the five-organization network definition, the Go backend, and the

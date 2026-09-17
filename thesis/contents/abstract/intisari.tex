@@ -1,24 +1,28 @@
 Eksperimen publik Proyek Garuda Bank Indonesia berfokus pada mata uang digital
-bank sentral (\textit{Central Bank Digital Currency}, CBDC)
-\textit{wholesale}. Penelitian ini mengkaji cara purwarupa Rupiah Digital ritel
-merepresentasikan model distribusi dua jenjang dan pengawasan institusional
-pada buku besar \textit{permissioned}. Purwarupa menggunakan Hyperledger Fabric
-2.5, \textit{chaincode} dan layanan \textit{backend} Go, CouchDB, serta PostgreSQL.
+bank sentral (\textit{Central Bank Digital Currency}, CBDC) \textit{wholesale}.
+Penelitian ini mengkaji purwarupa Rupiah Digital ritel yang merepresentasikan
+model distribusi dua jenjang dan pengawasan institusional pada buku besar
+\textit{permissioned}. Purwarupa menggunakan Hyperledger Fabric 2.5,
+\textit{chaincode} dan layanan \textit{backend} Go, CouchDB, serta PostgreSQL.
 
-Purwarupa memisahkan peran institusional dan ritel. Pemeriksaan kepemilikan pada
+Purwarupa memisahkan peran institusional dan ritel. Bank Indonesia menerbitkan
+Rupiah Digital ke Treasury, lalu mendistribusikannya secara langsung kepada bank
+validator atau PJP sebagai kustodian. Pemeriksaan kepemilikan pada
 \textit{backend} dan MSP pada \textit{chaincode} membatasi pengguna dan
 organisasi. Kanal Fabric bersama tidak memberikan privasi transaksi.
 
 Pengujian otomatis mengevaluasi otorisasi dan keamanan transfer. Hyperledger Caliper
-mengevaluasi populasi ritel tetap pada beban 10, 30, dan 60 TPS dengan buku
-besar bersih untuk setiap profil, \textit{seed} deterministik, pengulangan beban
-puncak, dan skenario pengeluaran agregat yang melebihi saldo. Pada beban 30 TPS,
-\textit{throughput} sukses mencapai 29,5 TPS tanpa kegagalan; pada 60 TPS,
-nilainya 41,2--47,0 TPS. Pada skenario pengeluaran berlebih, 4 dari 200 transfer dikomit dan saldo akhir
-tetap nonnegatif. Hasil ini merupakan garis dasar purwarupa lokal yang dapat
-diulang, bukan bukti reproduksibilitas lintas mesin atau kapasitas produksi.
-Purwarupa ini merupakan artefak yang dapat diaudit untuk eksperimen Rupiah
-Digital ritel dalam batas yang dinyatakan.
+mengevaluasi profil dengan buku besar bersih, \textit{seed} deterministik, satu,
+dua, dan empat \textit{worker}, beban fungsional, pengulangan beban puncak, dan
+skenario pengeluaran agregat yang melebihi saldo. Profil transfer final
+menghasilkan \textit{throughput} penyelesaian 29,1--29,5 TPS pada laju 30 TPS
+dengan tingkat keberhasilan 86,23--100,00\%, dan 56,3--57,3 TPS pada laju 60 TPS
+dengan tingkat keberhasilan 12,05--12,48\%. Lima pengulangan beban puncak
+menghasilkan rerata throughput 54,8 TPS dan tingkat keberhasilan 16,33\%.
+Profil fungsional menyelesaikan 168 dari 168 transaksi, sedangkan oracle batas
+dan jalur negatif lulus dengan penolakan yang diharapkan. Hasil ini berlaku pada
+purwarupa satu inang dan tidak menetapkan kapasitas produksi atau
+reproduktibilitas lintas mesin.
 
 \vspace{0.5cm}
 
