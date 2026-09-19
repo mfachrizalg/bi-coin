@@ -445,18 +445,16 @@ Caliper dibagi menjadi tiga kelompok, yaitu garis dasar transfer ritel, profil
 \textit{repeatability} untuk beban puncak, serta profil khusus yang menekankan
 konformansi kebijakan dan konservasi saldo pada permintaan agregat berlebih.
 
-Skenario pengujian kinerja dirancang untuk mengamati pengaruh laju pengiriman
-transaksi (\textit{send rate}), jumlah \textit{worker} Caliper, dan jenis fungsi
-rantai blok terhadap \textit{throughput} dan latensi. Pengujian transfer ritel
-dijalankan dengan 1, 2, dan 4 \textit{worker}. Pengujian fungsi lain dijalankan
-terpisah agar hasil transfer, operasi moneter, pembacaan pengawasan, dan
-distribusi tidak dicampur menjadi satu angka TPS umum. Selain itu,
-lima ronde identik pada beban puncak dipakai untuk melaporkan rerata dan
-\textit{confidence interval} rerata, sedangkan dua profil khusus dipakai untuk
-memisahkan bukti keselamatan transfer dan bukti konservasi saldo
-dari pembacaan \textit{throughput} garis dasar. Konfigurasi ronde pengujian
-dirangkum pada Tabel~\ref{tab:skenario}, sedangkan rincian profil khusus beserta
-hasil yang diharapkan dipaparkan pada Tabel~\ref{tab:uji-fungsional}.
+Skenario pengujian kinerja dibagi menjadi pilot saturasi, kalibrasi jumlah
+\textit{worker}, dan pengujian primer. Setiap jenis transaksi diukur secara
+terpisah sehingga penerbitan, distribusi, transfer, pembayaran pedagang,
+penebusan, kueri saldo, serta perubahan status dompet tidak dicampur menjadi
+satu angka TPS. Transfer ritel juga memiliki profil kontensi rendah dan
+kontensi tinggi dengan pengirim bersama. Pilot digunakan untuk menemukan
+wilayah saturasi, sedangkan pengujian primer memakai jumlah \textit{worker}
+terkecil yang dipilih dari kalibrasi dan mengulang setiap beban lima kali.
+Konfigurasi pengujian dirangkum pada Tabel~\ref{tab:skenario}, sedangkan
+jenis transaksi dan kontensi dipisahkan pada Tabel~\ref{tab:uji-fungsional}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -464,16 +462,15 @@ hasil yang diharapkan dipaparkan pada Tabel~\ref{tab:uji-fungsional}.
 	\caption{Skenario beban pengujian kinerja}
 	\label{tab:skenario}
 	\centering
-	\begin{tabular}{p{3.2cm} p{2cm} p{2cm} p{4.6cm}}
+	\begin{tabular}{p{3.2cm} p{2cm} p{2.5cm} p{4.1cm}}
 	\toprule
 	\textbf{Ronde} & \textbf{Durasi/jumlah} & \textbf{Laju (TPS)} & \textbf{Beban kerja} \\
 	\midrule
-	Pemanasan         & 30 detik            & 10                  & Transfer ritel, 1/2/4 \textit{worker}  \\
-	Beban stabil      & 120 detik           & 30                  & Transfer ritel, 1/2/4 \textit{worker}  \\
-	Beban puncak      & 120 detik           & 60                  & Transfer ritel, 1/2/4 \textit{worker}  \\
-	Pengulangan puncak & 5 $\times$ 60 detik & 60                  & Transfer ritel, 2 \textit{worker}, lima ronde identik \\
-    Fungsional terpisah & 40--80           & 5--30               & Penerbitan, distribusi, transfer, dan pengawasan \\
-	Agregat \textit{overspend} & 200 & 80 & Pengirim bersama, 4 \textit{worker}, permintaan melebihi saldo \\
+	Pilot saturasi & 30 detik & 5, 10, 20, 40, 60, 80, 100, 150 & Transfer ritel, kontensi rendah, satu \textit{worker} \\
+	Kalibrasi \textit{worker} & 60 detik & 30, 40, 50 & Transfer ritel, 1/2/4/8 \textit{worker}, lima pengulangan \\
+	Pengujian primer & 120 detik & Per jenis transaksi & Satu \textit{worker} terpilih, lima pengulangan per laju \\
+	Kontensi tinggi & 120 detik & Per laju primer & Transfer ritel dengan satu pengirim bersama, lima pengulangan \\
+	Demonstrasi KYC & Lima pengulangan & -- & Go/PostgreSQL/KYC secara \textit{end-to-end}, terpisah dari Fabric \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -482,99 +479,95 @@ hasil yang diharapkan dipaparkan pada Tabel~\ref{tab:uji-fungsional}.
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Profil dan kasus uji khusus beserta hasil yang diharapkan}
+	\caption{Jenis transaksi dan kontensi yang diukur secara terpisah}
 	\label{tab:uji-fungsional}
 	\centering
 	\begin{tabular}{p{3.4cm} p{1.1cm} p{1.6cm} p{5.2cm}}
 	\toprule
 	\textbf{Profil} & \textbf{Tx} & \textbf{Laju (TPS)} & \textbf{Hasil yang diharapkan} \\
 	\midrule
-    Penerbitan dan distribusi & 80 & 20 & \textit{Mint}, \textit{Burn}, dan distribusi berpasangan berhasil \\
-    Transfer dan status dompet & 80 & 20 & Otorisasi, status beku, dan pembaruan saldo ditegakkan \\
-	Kueri pengawasan & 80 & 30 & Fungsi baca-saja mengembalikan data tanpa mengubah status \\
-	Agregat \textit{overspend} & 200 & 80 & Saldo akhir tidak negatif, jumlah komit dan penolakan tercatat, serta sedikitnya satu transfer ditolak \\
+	Penerbitan & -- & Primer & Fungsi \textit{Mint} pada Treasury \\
+	Distribusi & -- & Primer & Distribusi ke kustodian \\
+	Transfer ritel & -- & Primer & Transfer antarpelanggan pada kontensi rendah dan tinggi \\
+	Pembayaran pedagang & -- & Primer & Transfer pelanggan--pedagang \\
+	Penebusan & -- & Primer & Fungsi \textit{Burn} dari dompet \\
+	Kueri dan status dompet & -- & Primer & Kueri saldo, pembekuan, dan pembukaan pembekuan \\
 	\bottomrule
 	\end{tabular}
 \end{table}
 \endgroup
 
-Metrik yang diukur meliputi \textit{throughput} (TPS), latensi rata-rata,
-latensi maksimum dan minimum, serta tingkat keberhasilan transaksi
-\cite{hlf_metrics}. Mengikuti definisi metrik kinerja blockchain, tingkat keberhasilan transaksi
-dihitung dengan Persamaan~\ref{eq:benchmark-success-rate}.
+Metrik yang diukur meliputi laju yang ditawarkan, laju yang berhasil dicapai,
+tingkat keberhasilan, latensi rata-rata, median (p50), p95, p99, simpangan
+baku, minimum, maksimum, serta penggunaan sumber daya \cite{hlf_metrics}.
+Laju yang ditawarkan dihitung dari seluruh transaksi yang dikirim, sedangkan
+laju yang berhasil dicapai hanya menghitung penyelesaian berhasil.
+Tingkat keberhasilan dihitung dengan Persamaan~\ref{eq:benchmark-success-rate}.
 
 \begin{equation}
-    R_s = \frac{N_{\mathrm{valid}}}{N_{\mathrm{submitted}}} \times 100\%
+    R_s = \frac{N_{\mathrm{success}}}{N_{\mathrm{submitted}}} \times 100\%
     \label{eq:benchmark-success-rate}
 \end{equation}
 
-\textit{Throughput} valid dihitung dengan Persamaan~\ref{eq:benchmark-throughput}.
+Laju yang ditawarkan dihitung dengan Persamaan~\ref{eq:benchmark-offered}.
 
 \begin{equation}
-    T = \frac{N_{\mathrm{valid}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
+    T_{\mathrm{offered}} = \frac{N_{\mathrm{submitted}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
+    \label{eq:benchmark-offered}
+\end{equation}
+
+Laju yang berhasil dicapai dihitung dengan Persamaan~\ref{eq:benchmark-throughput}.
+
+\begin{equation}
+    T_{\mathrm{achieved}} = \frac{N_{\mathrm{success}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
     \label{eq:benchmark-throughput}
 \end{equation}
 
-Latensi transaksi ke-$i$ dihitung dengan Persamaan~\ref{eq:benchmark-latency}.
+Latensi transaksi berhasil ke-$i$ dihitung dengan Persamaan~\ref{eq:benchmark-latency}.
 
 \begin{equation}
-    L_i = t_{\mathrm{confirm},i} - t_{\mathrm{submit},i}
+    L_i = t_{\mathrm{final},i} - t_{\mathrm{create},i}
     \label{eq:benchmark-latency}
 \end{equation}
 
-Pada persamaan tersebut, $N_{\mathrm{valid}}$ adalah jumlah transaksi valid,
-$N_{\mathrm{submitted}}$ adalah jumlah transaksi yang dikirim, dan selang
-$t_{\mathrm{end}}-t_{\mathrm{start}}$ dinyatakan dalam detik. Kegagalan
-transaksi akibat konflik MVCC dicatat dan dianalisis sebagai bagian dari
-karakterisasi sistem, bukan dihilangkan dari hasil pengukuran. Untuk profil
-garis dasar transfer dan fungsi lain, rasio sukses/gagal Caliper dibaca
-langsung sebagai hasil benchmark. Pada profil agregat \textit{overspend},
-bukti utamanya adalah saldo akhir tidak negatif,
-adanya penolakan karena total permintaan melebihi saldo, dan klasifikasi alasan
-penolakan aktual. Penolakan tidak diasumsikan sebagai konflik MVCC.
+Pada persamaan tersebut, $N_{\mathrm{submitted}}$ adalah jumlah transaksi yang
+dikirim, $N_{\mathrm{success}}$ adalah jumlah penyelesaian berhasil, dan selang
+$t_{\mathrm{end}}-t_{\mathrm{start}}$ dinyatakan dalam detik pengukuran. Latensi
+memakai batas observasi Caliper, yaitu waktu \texttt{time\_final} dikurangi
+\texttt{time\_create} untuk transaksi yang selesai berhasil. Nilai ini
+menggambarkan jalur Fabric dari pembuatan permintaan hingga finalisasi; latensi
+API, PostgreSQL, dan KYC tidak termasuk dalam angka tersebut. Kegagalan akibat
+konflik MVCC, batas konkurensi gateway, serta kategori lain tetap dicatat dan
+diklasifikasikan, bukan dihilangkan dari hasil.
 
 \paragraph{Justifikasi pemilihan parameter.}
 Parameter pengujian dipilih berdasarkan dua pertimbangan: literatur dan
 rekayasa sistem.
 
 \noindent\textit{Berdasarkan literatur.}
-Variasi 1, 2, dan 4 \textit{worker} digunakan untuk memisahkan pengaruh
-pembangkit beban Caliper dari kapasitas jaringan Fabric. Dengan kebijakan
-\textit{endorsement} organisasi pada kanal, penambahan \textit{worker}
-tidak otomatis meningkatkan kapasitas jaringan karena bottleneck dapat berpindah
-ke eksekusi \textit{peer}, validasi blok, atau pemrosesan \textit{orderer}
-\cite{androulaki2018, fabric_perf2023, hlf_caliper}. Kontrol laju
-\textit{fixed-rate} dipilih karena menahan laju pengiriman sebagai variabel
-independen sehingga penurunan \textit{throughput} dan peningkatan latensi dapat
-diamati sebagai fungsi dari laju tersebut; kontrol \textit{fixed-load}
-menyesuaikan TPS secara otomatis berdasarkan latensi sehingga menyembunyikan
-perilaku saturasi \cite{hlf_caliper}. Laju 10 TPS digunakan sebagai garis dasar,
-30 TPS sebagai beban stabil, dan 60 TPS sebagai beban puncak pada purwarupa
-lokal. Nilai tersebut dipilih agar profil transfer dasar dapat diamati pada
-topologi Garuda lokal tanpa mengubah semantik bisnis, bukan untuk mengklaim
-kapasitas produksi nasional. Hasil aktual, termasuk kegagalan
-\textit{endorsement} atau konflik versi yang muncul pada ronde tertentu, tetap
-dilaporkan apa adanya.
+Kalibrasi satu, dua, empat, dan delapan \textit{worker} digunakan untuk
+memisahkan pengaruh pembangkit beban Caliper dari kapasitas jaringan Fabric.
+Penambahan \textit{worker} tidak otomatis meningkatkan kapasitas jaringan
+karena hambatan dapat berpindah ke eksekusi \textit{peer}, validasi blok, atau
+pemrosesan \textit{orderer} \cite{androulaki2018, fabric_perf2023,
+hlf_caliper}. Kontrol laju \textit{fixed-rate} dipilih karena mempertahankan
+laju pengiriman sebagai variabel independen, sehingga penurunan throughput dan
+peningkatan latensi dapat diamati sebagai fungsi laju tersebut
+\cite{hlf_caliper}. Beban berkelanjutan ditetapkan sebelum interpretasi hasil,
+yaitu sedikitnya 99\% penyelesaian berhasil dan p95 latensi transaksi berhasil
+paling tinggi 2,5 detik pada seluruh lima pengulangan.
 
 \noindent\textit{Berdasarkan pertimbangan teknis sistem.}
-Ronde pemanasan berlangsung 30 detik, sedangkan ronde stabil dan puncak
-masing-masing berlangsung 120 detik. Konfigurasi tersebut menetapkan 116
-pelanggan, 16 pedagang, dan 52 slot untuk 1 \textit{worker}; 58 pelanggan,
-8 pedagang, dan 26 slot untuk 2 \textit{worker}; serta 29 pelanggan, 4
-pedagang, dan 13 slot untuk 4 \textit{worker}. Pengirim
-menerima saldo awal lebih besar daripada penerima agar pengukuran tidak berhenti
-karena batas saldo penerima. Populasi menyediakan pengirim, penerima, dan
-pedagang untuk rencana
-transaksi
-berputar dengan perebutan kunci rendah. Jenis transaksi ditentukan secara
-deterministik berdasarkan slot global sehingga komposisi gabungan tetap 70\%
-transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
-pembacaan dompet. Profil pengulangan puncak menggunakan 2 \textit{worker} dan
-lima ronde berdurasi 60 detik agar rerata dan variasinya diamati tanpa mengubah
-komposisi beban. Setiap ronde memakai ruang nama kunci
-yang berbeda, tetapi kelimanya berjalan pada satu \textit{ledger} profil yang
-sama. Interval tersebut karena itu mengukur \textit{repeatability} dalam satu
-lingkungan, bukan lima replikasi infrastruktur yang independen.
+Ronde pemanasan berlangsung 30 detik dan ronde pengukuran 120 detik. Pilot
+transfer ritel menggunakan laju 5--150 TPS. Kalibrasi menggunakan 30, 40,
+dan 50 TPS dengan satu, dua, empat, dan delapan \textit{worker}; setiap
+kombinasi diulang lima kali. Setelah kalibrasi, pengujian primer menggunakan
+satu \textit{worker} dan lima pengulangan untuk setiap laju yang dipilih dari
+pilot per jenis transaksi. Penerbitan, distribusi, transfer, pembayaran
+pedagang, penebusan, kueri saldo, pembekuan, dan pembukaan pembekuan dijalankan
+sebagai profil terpisah. Transfer ritel juga diuji pada kontensi rendah dan
+kontensi tinggi dengan satu pengirim bersama. Tidak ada komposisi 70/25/5;
+setiap baris primer mewakili satu fungsi dan satu pola kontensi.
 
 Profil agregat \textit{overspend} mengirim 200 transfer masing-masing Rp1.000 pada
 80 TPS dengan 4 \textit{worker} dari satu dompet bersaldo awal Rp50.000 menuju
@@ -585,7 +578,7 @@ penolakan. Skenario ini tidak diklaim sebagai simulasi serangan
 \textit{double-spend} protokol.
 
 Setiap profil dijalankan pada jaringan dan buku besar baru. Urutan konfigurasi
-1, 2, dan 4 \textit{worker} diacak secara deterministik dengan \textit{seed}
+1, 2, 4, dan 8 \textit{worker} diacak secara deterministik dengan \textit{seed}
 suite 20260909. Berkas konfigurasi transfer mempertahankan \textit{seed}
 workload 20260725; generator bilangan acak beban kerja juga memakai \textit{seed} yang
 dicampur dengan indeks ronde dan \textit{worker}. Runner menghapus laporan lama
@@ -599,10 +592,13 @@ pengguna nasional.
 
 \paragraph{Kesesuaian dengan skenario CBDC ritel.}
 Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
-Digital ritel secara struktural. Campuran transaksi garis dasar terdiri atas
-70\% transfer antarpelanggan, 25\% transfer pelanggan-ke-pedagang, dan 5\%
-pembacaan dompet. Komposisi ini dipilih karena CBDC ritel adalah instrumen
-pedagang, bukan hanya setelmen antarlembaga. Literatur teknologi CBDC ritel
+Digital ritel secara struktural. Setiap fungsi diuji secara terisolasi agar
+throughput, latensi, dan alasan kegagalan dapat diatribusikan pada fungsi yang
+diukur. Transfer antarpelanggan, pembayaran pelanggan--pedagang, penerbitan,
+distribusi, penebusan, kueri saldo, serta perubahan status dompet dipisahkan;
+transfer ritel juga memiliki profil kontensi rendah dan kontensi tinggi. Pola
+ini dipilih karena CBDC ritel mencakup transaksi pengguna, distribusi, dan
+pengawasan, bukan hanya setelmen antarlembaga. Literatur teknologi CBDC ritel
 menempatkan desain dompet, privasi, dan arsitektur distribusi sebagai elemen
 inti sistem pembayaran publik \cite{Auer2020The}. Oleh karena itu, beban kerja
 yang hanya menguji transfer institusional tidak memadai untuk menjawab rumusan
@@ -621,8 +617,8 @@ fabric_perf2023}. Profil agregat \textit{overspend} menambah bukti konservasi
 saldo, sedangkan konflik versi pada dompet pengirim bersama dianalisis sebagai
 karakteristik implementasi.
 
-Perbedaan utama dengan sistem CBDC ritel produksi adalah skala (80 pelanggan
-per \textit{worker} berbanding jutaan pengguna nyata), topologi jaringan (satu
+Perbedaan utama dengan sistem CBDC ritel produksi adalah skala (populasi
+pengujian sintetis berbanding jutaan pengguna nyata), topologi jaringan (satu
 \textit{peer} per organisasi dalam satu mesin lokal berbanding jaringan
 terdistribusi geografis), dan integrasi identitas produksi (disimulasikan
 secara terprogram). Keterbatasan ini berlaku umum pada studi prototipe CBDC berbasis
@@ -872,8 +868,11 @@ Hyperledger Caliper & 0.6.0 \\
 
 \subsubsection{Menjalankan Pengujian Hyperledger Caliper}
 
-Pengujian dijalankan dengan kontrol laju \textit{fixed-rate}. Profil transfer
-ritel dijalankan untuk 1, 2, dan 4 \textit{worker}, sedangkan profil fungsi lain
-dijalankan secara terpisah. Caliper mengumpulkan metrik \textit{throughput}
-(TPS), latensi rata-rata, latensi maksimum, dan tingkat keberhasilan transaksi,
-yang kemudian dianalisis pada BAB IV.
+Pengujian dijalankan dengan kontrol laju \textit{fixed-rate}. Caliper terlebih
+dahulu menguji 1, 2, 4, dan 8 \textit{worker}; pengujian primer kemudian
+menetapkan satu \textit{worker} berdasarkan hasil kalibrasi. Setiap jenis
+transaksi dan pola kontensi dijalankan secara terpisah. Caliper mengumpulkan
+laju yang ditawarkan, laju yang berhasil dicapai, jumlah sukses/gagal/
+\textit{timeout}, latensi p50, p95, p99, simpangan baku, minimum, maksimum,
+alasan kegagalan, serta metrik sumber daya yang kemudian dianalisis pada
+Bab~IV. Demonstrasi Go/PostgreSQL/KYC dilaporkan terpisah dari batas Fabric.

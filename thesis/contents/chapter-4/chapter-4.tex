@@ -222,122 +222,123 @@ Jaringan / kontrak & Garuda / \texttt{digital-rupiah} v3.0, sequence 1 \\
 \end{tabular}
 \end{table}
 
-Profil transfer menggunakan komposisi 70\% transfer antarpelanggan, 25\%
-transfer pelanggan--pedagang, dan 5\% pembacaan dompet. Ronde pemanasan
-berlangsung 30 detik pada 10 TPS, sedangkan ronde terukur berlangsung 120 detik
-pada 30 dan 60 TPS. Populasi dan slot transaksi ditetapkan per berkas konfigurasi
-untuk satu, dua, dan empat \textit{worker}. Dana awal pengirim dan penerima
-ditetapkan berbeda untuk menjaga pengirim tetap dapat diuji tanpa memenuhi batas
-saldo maksimum penerima. Semua kegagalan transaksi tetap dihitung.
+Pengujian primer menggunakan satu \textit{worker} yang dipilih setelah kalibrasi
+1, 2, 4, dan 8 \textit{worker}. Setiap jenis transaksi diuji secara terpisah
+dengan lima pengulangan pada laju tetap. Transfer ritel memiliki profil
+kontensi rendah dan kontensi tinggi; tidak ada komposisi 70/25/5. Laju yang
+ditawarkan adalah jumlah transaksi yang dikirim dibagi durasi pengukuran,
+sedangkan laju yang berhasil dicapai adalah jumlah penyelesaian berhasil dibagi
+durasi yang sama. Latensi yang dilaporkan menggunakan batas Fabric Caliper,
+\texttt{time\_final - time\_create}, untuk penyelesaian berhasil.
 
 \begin{table}[H]
-\caption{Hasil profil transfer Caliper pada beban terukur}
+\caption{Beban berkelanjutan pada pengujian primer}
 \label{tab:hasil-kinerja-caliper-final}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{@{}llrrrrrr@{}}
 \toprule
-\textbf{Worker} & \textbf{Beban} & \textbf{Sukses} & \textbf{Gagal} &
-\textbf{Sukses (\%)} & \textbf{Laju (TPS)} & \textbf{Throughput (TPS)} &
-\textbf{Lat. avg. (s)} \\
+\textbf{Fungsi} & \textbf{Kontensi} & \textbf{Beban} & \textbf{Offered} &
+\textbf{Achieved} & \textbf{Sukses (\%)} & \textbf{p95 (s)} & \textbf{p99 (s)} \\
 \midrule
-1 & 30 TPS & 3.105 & 496 & 86,23 & 30,0 & 29,1 & 0,71 \\
-1 & 60 TPS & 898 & 6.300 & 12,48 & 60,0 & 56,3 & 6,36 \\
-2 & 30 TPS & 3.602 & 0 & 100,00 & 30,0 & 29,5 & 0,40 \\
-2 & 60 TPS & 874 & 6.327 & 12,14 & 60,0 & 57,2 & 6,48 \\
-4 & 30 TPS & 3.486 & 118 & 96,73 & 30,0 & 29,5 & 0,76 \\
-4 & 60 TPS & 868 & 6.336 & 12,05 & 60,0 & 57,3 & 6,47 \\
+Kueri saldo & rendah & 190 & 190,0 & 190,0 & 100,00 & 0,01 & 0,01 \\
+Pembekuan dompet & rendah & 50 & 50,0 & 50,0 & 100,00 & 0,28 & 0,37 \\
+Pembukaan pembekuan & rendah & 65 & 65,0 & 65,0 & 100,00 & 0,27 & 0,35 \\
+Penebusan & rendah & 25 & 25,0 & 25,0 & 100,00 & 0,53 & 0,60 \\
+Transfer ritel & rendah & 20 & 20,0 & 20,0 & 100,00 & 0,72 & 0,89 \\
+Pembayaran pedagang & rendah & 20 & 20,0 & 20,0 & 100,00 & 0,66 & 0,75 \\
+Penerbitan & rendah & -- & -- & -- & $<$99,00 & -- & -- \\
+Distribusi & rendah & -- & -- & -- & $<$99,00 & -- & -- \\
+Transfer ritel & tinggi & -- & -- & -- & $<$99,00 & -- & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Ketiga ronde pemanasan selesai tanpa kegagalan. Pada beban 30 TPS, throughput
-berada pada 29,1--29,5 TPS dengan tingkat keberhasilan 86,23--100,00\%.
-Pada beban 60 TPS, throughput tetap 56,3--57,3 TPS, tetapi tingkat keberhasilan
-turun menjadi 12,05--12,48\%. Karena throughput Caliper menghitung transaksi
-yang selesai termasuk transaksi gagal, angka throughput tersebut tidak sama
-dengan throughput transaksi berhasil.
+Beban berkelanjutan ditetapkan sebelum interpretasi hasil sebagai laju tertinggi
+yang mencapai sedikitnya 99\% penyelesaian berhasil dan p95 latensi transaksi
+berhasil paling tinggi 2,5 detik pada seluruh lima pengulangan. Tabel ini
+menunjukkan batas tersebut untuk enam profil. Penerbitan, distribusi, dan
+transfer ritel dengan kontensi tinggi tidak memiliki laju berkelanjutan pada
+rentang yang diuji; tanda ``--'' bukan nilai nol, melainkan ketiadaan titik
+yang memenuhi kriteria. Laju uji dan statistik lengkap per pengulangan tersedia
+pada artefak \textit{summary} benchmark.
 
 \begin{table}[H]
-\caption{Diagnostik kegagalan pada profil transfer final}
+\caption{Kategori kegagalan pada seluruh pengujian primer}
 \label{tab:diagnostik-kegagalan-transfer}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lr@{}}
 \toprule
-\textbf{Profil} & \textbf{Status 11} & \textbf{Batas gateway} & \textbf{Total gagal} \\
+\textbf{Kategori} & \textbf{Jumlah} \\
 \midrule
-1 \textit{worker} & 5.332 & 1.464 & 6.796 \\
-2 \textit{worker} & 4.919 & 1.408 & 6.327 \\
-4 \textit{worker} & 5.121 & 1.333 & 6.454 \\
-Pengulangan & 11.878 & 3.191 & 15.069 \\
+MVCC read conflict & 358.413 \\
+Unknown failure & 1.013.243 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Diagnostik pada log memisahkan seluruh kegagalan profil transfer menjadi status
-11 dan batas konkurensi \textit{gateway}; tidak ditemukan kegagalan karena saldo
-tidak mencukupi atau gangguan transportasi pada profil final. Status 11 adalah
-kode validasi Fabric untuk \textit{MVCC read conflict}, yang terjadi ketika
-transaksi memakai versi dompet yang telah berubah. Pesan ``too many requests for
-/gateway.Gateway'' berasal dari batas konkurensi jalur gateway. Kedua kategori
-tersebut harus dipisahkan ketika hasil dibahas, karena kategori pertama
-menunjukkan kontensi state, sedangkan kategori kedua menunjukkan batas jalur
-klien atau gateway.
+Pada pengujian primer, analyzer mengklasifikasikan 358.413 kegagalan sebagai
+\textit{MVCC read conflict} dan 1.013.243 sebagai \textit{Unknown failure}.
+Status 11 menunjukkan transaksi membaca versi state yang berubah sebelum
+validasi. Kategori \textit{Unknown failure} dipertahankan sebagai kategori
+konservatif ketika log tidak menyediakan alasan yang cukup untuk klasifikasi
+lebih spesifik; kategori ini tidak ditafsirkan sebagai bukti tunggal dari
+kontensi atau kapasitas gateway.
 
 \begin{table}[H]
-\caption{Hasil pengulangan beban puncak 60 TPS}
+\caption{Statistik pengulangan pada beban berkelanjutan}
 \label{tab:hasil-kinerja-repeat-final}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
-\textbf{Ronde} & \textbf{Sukses} & \textbf{Gagal} & \textbf{Sukses (\%)} &
-\textbf{Throughput (TPS)} & \textbf{Lat. avg. (s)} \\
+\textbf{Fungsi} & \textbf{Beban} & \textbf{Offered} & \textbf{Achieved} &
+\textbf{Sukses (\%)} & \textbf{p95 (s)} \\
 \midrule
-1 & 895 & 2.707 & 24,85 & 57,7 & 3,23 \\
-2 & 403 & 3.199 & 11,19 & 54,9 & 6,93 \\
-3 & 598 & 3.004 & 16,60 & 54,8 & 4,93 \\
-4 & 448 & 3.154 & 12,44 & 52,7 & 6,39 \\
-5 & 597 & 3.005 & 16,57 & 54,1 & 4,50 \\
-\midrule
-Rerata & 588,2 & 3.013,8 & 16,33 & 54,8 & 5,20 \\
+Kueri saldo & 190 & 190,0 & 190,0 & 100,00 & 0,01 \\
+Pembekuan dompet & 50 & 50,0 & 50,0 & 100,00 & 0,28 \\
+Pembukaan pembekuan & 65 & 65,0 & 65,0 & 100,00 & 0,27 \\
+Penebusan & 25 & 25,0 & 25,0 & 100,00 & 0,53 \\
+Transfer ritel & 20 & 20,0 & 20,0 & 100,00 & 0,72 \\
+Pembayaran pedagang & 20 & 20,0 & 20,0 & 100,00 & 0,66 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pengulangan beban puncak menggunakan satu \textit{ledger} bersih dan lima
-ronde pada 60 TPS. Rerata throughput penyelesaian adalah 54,8 TPS, sedangkan
-rerata tingkat keberhasilan hanya 16,33\%. Variasi keberhasilan 11,19--24,85\%
-dan latensi rata-rata 3,23--6,93 detik menunjukkan bahwa beban puncak tidak
-memberikan tingkat keberhasilan yang stabil pada konfigurasi ini. Hasil ini
-menjadi pengukuran variasi lokal, bukan interval kapasitas nasional.
+Nilai pada tabel merupakan rerata lima pengulangan untuk setiap fungsi pada
+beban berkelanjutan tertinggi yang memenuhi kriteria. Simpangan baku antar-
+pengulangan dilaporkan pada berkas \textit{summary} dan digunakan untuk
+menilai variasi, sedangkan nilai p95 dipakai sebagai batas latensi untuk
+menentukan keberlanjutan beban. Penerbitan, distribusi, dan kontensi tinggi
+tidak dimasukkan karena tidak memiliki beban primer yang memenuhi kriteria.
 
 \begin{table}[H]
-\caption{Hasil profil fungsional Caliper final}
+\caption{Demonstrasi terpisah PostgreSQL/KYC}
 \label{tab:hasil-kinerja-fungsi-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}p{5cm}rrr@{}}
 \toprule
-\textbf{Profil} & \textbf{Sukses} & \textbf{Gagal} & \textbf{Throughput (TPS)} &
-\textbf{Lat. avg. (s)} \\
+\textbf{Tahap} & \textbf{Pengulangan} & \textbf{Rerata (ms)} & \textbf{SD (ms)} \\
 \midrule
-KYC onboarding & 48 & 0 & 4,3 & 0,74 \\
-Operasi moneter & 40 & 0 & 19,4 & 0,33 \\
-Kueri pengawasan & 40 & 0 & 30,6 & 0,03 \\
-Kebijakan administratif & 40 & 0 & 5,1 & 1,05 \\
+Login & 5 & 186,85 & 34,77 \\
+Pembuatan pelanggan & 5 & 2.069,02 & 8,60 \\
+Pengajuan KYC & 5 & 2.071,99 & 7,02 \\
+Penyegaran KYC & 5 & 2.064,70 & 8,31 \\
+Pembuatan dompet & 5 & 2.075,16 & 6,05 \\
+Pembacaan profil KYC & 5 & 1,14 & 0,41 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Keempat profil fungsional menyelesaikan seluruh 168 transaksi tanpa kegagalan.
-Profil tersebut memverifikasi alur onboarding, operasi moneter, pembacaan
-pengawasan, dan perubahan kebijakan pada laju yang ditetapkan. Profil ini tidak
-digabungkan dengan throughput transfer karena fungsi, jumlah transaksi, dan pola
-baca-tulisnya berbeda.
+Demonstrasi ini mengukur alur Go/PostgreSQL/KYC secara \textit{end-to-end} dan
+tidak digabungkan dengan pengujian Fabric. Lima pengulangan menyelesaikan alur
+login, pembuatan pelanggan, pengajuan dan penyegaran KYC, pembuatan dompet,
+serta pembacaan profil. Waktu KYC dan pembuatan dompet berada pada kisaran
+dua detik karena melibatkan layanan backend, PostgreSQL, dan koneksi ledger.
 
 \begin{table}[H]
 \caption{Hasil konformitas semantik Caliper final}
@@ -365,28 +366,28 @@ nonnegatif. Bukti ini mendukung aturan saldo pada topologi yang diuji, tetapi
 tidak merupakan pembuktian formal keamanan.
 
 \begin{table}[H]
-\caption{Pemakaian sumber daya maksimum pada profil final}
+\caption{Metrik sumber daya yang dikumpulkan pada pengujian primer}
 \label{tab:sumber-daya-caliper-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}p{6cm}p{5cm}@{}}
 \toprule
-\textbf{Profil} & \textbf{CPU maksimum (\%)} & \textbf{Memori maksimum (MB)} \\
+\textbf{Lapisan} & \textbf{Metrik} \\
 \midrule
-Transfer, 1 \textit{worker} & 2,35 & 163 \\
-Transfer, 2 \textit{worker} & 2,74 & 166 \\
-Transfer, 4 \textit{worker} & 2,69 & 163 \\
-Pengulangan puncak & 2,53 & 170 \\
+Host & CPU, memori, IOPS, dan latensi disk \\
+Container Fabric & CPU, memori, jaringan, IOPS, dan latensi layanan disk \\
+Klien Caliper & CPU proses klien \\
+Prometheus & CPU dan memori pemantauan \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pemantauan Docker tidak menunjukkan penggunaan CPU atau memori yang mendekati
-kapasitas host. Karena itu, penurunan tingkat keberhasilan pada beban 60 TPS
-tidak dapat dijelaskan hanya dengan saturasi sumber daya; kontensi versi state
-dan batas konkurensi gateway terlihat langsung pada log. Semua angka berlaku
-hanya untuk satu host, satu orderer, satu peer per organisasi, dan konfigurasi
-yang dicatat dalam manifes.
+Pemantauan mencakup I/O jaringan, I/O disk, IOPS, latensi layanan disk,
+penggunaan sumber daya setiap container Fabric, dan CPU klien Caliper. Nilai
+mentah serta ringkasan rerata, p95, dan maksimum tersedia pada artefak sumber
+daya benchmark. Karena penerbitan, distribusi, dan kontensi tinggi tidak
+memenuhi kriteria keberlanjutan, interpretasi bottleneck dibatasi pada
+konfigurasi dan beban yang benar-benar diuji.
 
 Dalam konteks SRS pada Bab~III, hasil ini memberikan bukti untuk NFR-04 dan
 NFR-05 serta melengkapi bukti fungsional sebelumnya. Hasil fungsional dan
@@ -423,7 +424,7 @@ Rupiah Digital grosir.
         Platform DLT & Tidak dievaluasi (kutipan dari kasus negara) & R3 Corda + Hyperledger Besu & Hyperledger Fabric \\
         Distribusi & Dua jenjang secara konseptual & Grosir pada PoC & BI Treasury--bank/PJP kustodian--ritel \\
         Transfer ritel & Direkomendasikan secara konseptual & Tidak diuji & Antarpelanggan dan pelanggan--pedagang \\
-        Metrik kinerja & Kutipan sekunder; tidak diukur langsung & Corda 37 TPS, Besu 39 TPS (Locust) & Caliper final: throughput penyelesaian 29,1--29,5 TPS pada 30 TPS dan 56,3--57,3 TPS pada 60 TPS; tingkat keberhasilan dilaporkan terpisah \\
+        Metrik kinerja & Kutipan sekunder; tidak diukur langsung & Corda 37 TPS, Besu 39 TPS (Locust) & Caliper primer lima pengulangan per laju; batas berkelanjutan 190 TPS untuk kueri saldo, 50 TPS untuk pembekuan, 65 TPS untuk pembukaan pembekuan, 25 TPS untuk penebusan, dan 20 TPS untuk transfer ritel/pembayaran pedagang pada kontensi rendah \\
         Lingkup pengujian & Tidak ada pengujian & Penerbitan, penebusan, transfer antarlembaga & Transfer antarpelanggan, pelanggan--pedagang, baca dompet \\
         Pembayaran luring & Direkomendasikan untuk r-Digital Rupiah & Tidak dibahas & Tidak diuji dalam purwarupa ini \\
         Tokenisasi & Didukung (konseptual) & UTXO (Corda) / ERC-20 + ERC-1400 (Besu) & Transfer berbasis kunci--nilai pada Fabric \\
@@ -432,12 +433,14 @@ Rupiah Digital grosir.
 \end{table}
 
 Perbandingan ini terbatas pada posisi kontribusi dan ruang lingkup teknis.
-Profil final menggunakan satu, dua, dan empat \textit{worker}; hasilnya tetap
-berlaku hanya untuk topologi, jumlah peserta, dan skenario beban purwarupa.
-Selisih angka kinerja terhadap PoC Proyek Garuda (Corda 37 TPS dan
+Kalibrasi menggunakan satu, dua, empat, dan delapan \textit{worker}, sedangkan
+pengujian primer menggunakan satu \textit{worker} yang dipilih berdasarkan
+beban berkelanjutan tertinggi. Hasilnya tetap berlaku hanya untuk topologi,
+jumlah peserta, dan skenario beban purwarupa. Selisih angka kinerja terhadap
+PoC Proyek Garuda (Corda 37 TPS dan
 Besu 39 TPS) bersumber pada perbedaan platform, \textit{harness}, tujuan
 pengujian, dan komposisi beban, bukan pada klaim keunggulan langsung
-Hyperledger Fabric. Variasi tingkat sukses pada lima ronde beban 60 TPS
+Hyperledger Fabric. Variasi tingkat sukses pada lima pengulangan setiap beban
 menunjukkan bahwa hasil ini merupakan garis dasar lokal yang dapat diulang,
 bukan kapasitas maksimum Hyperledger Fabric atau bukti reproduksibilitas lintas
 mesin \cite{fabric_perf2023}.

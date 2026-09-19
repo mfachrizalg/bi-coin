@@ -18,20 +18,23 @@ sebagai berikut.
     pengawasan, penelitian ini menunjukkan bahwa pemisahan peran organisasi,
     pemeriksaan MSP kustodian, kepemilikan dompet, status beku, dan kecukupan
     saldo dapat ditegakkan pada lapisan \textit{backend} dan \textit{chaincode}.
-    Pada pengujian fungsional final, 168 transaksi pada empat profil selesai
-    tanpa kegagalan. Profil otorisasi, batas transaksi, jalur negatif, dan
-    \textit{overspend} juga memenuhi oracle semantik. Jalur transfer yang sama
-    melayani pembayaran antarpelanggan dan pelanggan--pedagang, sedangkan
+    Pada pengujian konformitas, oracle otorisasi, batas transaksi, jalur negatif,
+    dan \textit{overspend} memenuhi hasil yang diharapkan. Jalur transfer yang
+    sama melayani pembayaran antarpelanggan dan pelanggan--pedagang, sedangkan
     laporan serta \textit{event} pengawasan tersedia bagi peran berwenang.
-    \item Berdasarkan rumusan masalah kedua mengenai kinerja sistem, profil
-    transfer Caliper final dengan satu, dua, dan empat \textit{worker}
-    menghasilkan \textit{throughput} penyelesaian 29,1--29,5 TPS pada laju
-    30 TPS dengan tingkat keberhasilan 86,23--100,00\%. Pada laju 60 TPS,
-    \textit{throughput} penyelesaian berada pada 56,3--57,3 TPS dengan tingkat
-    keberhasilan 12,05--12,48\%. Lima pengulangan beban puncak menghasilkan
-    rerata throughput 54,8 TPS dan tingkat keberhasilan 16,33\%. Status 11 dan
-    batas konkurensi gateway menjelaskan kegagalan pada log transfer. Hasil ini
-    berlaku untuk satu \textit{ledger} bersih per profil dan topologi lokal,
+    Demonstrasi Go/PostgreSQL/KYC terpisah menyelesaikan lima pengulangan alur
+    layanan tanpa digabungkan ke batas latensi Fabric.
+    \item Berdasarkan rumusan masalah kedua mengenai kinerja sistem, pengujian
+    primer menggunakan satu \textit{worker} yang dipilih setelah kalibrasi
+    satu, dua, empat, dan delapan \textit{worker}. Setiap beban diulang lima
+    kali dengan kontrol laju tetap. Dengan kriteria sedikitnya 99\%
+    penyelesaian berhasil dan p95 latensi transaksi berhasil paling tinggi
+    2,5 detik pada semua pengulangan, beban berkelanjutan tertinggi mencapai
+    190 TPS untuk kueri saldo, 50 TPS untuk pembekuan dompet, 65 TPS untuk
+    pembukaan pembekuan, 25 TPS untuk penebusan, serta 20 TPS untuk transfer
+    ritel dan pembayaran pedagang pada kontensi rendah. Penerbitan, distribusi,
+    dan transfer ritel dengan kontensi tinggi tidak memenuhi kriteria tersebut
+    pada laju yang diuji. Hasil ini berlaku pada satu inang dan topologi lokal,
     sehingga belum menetapkan kapasitas nasional atau reproduktibilitas lintas
     mesin.
 \end{enumerate}
@@ -39,23 +42,16 @@ sebagai berikut.
 \section{Saran}
 
 \begin{enumerate}
-    \item Mengulang protokol Caliper pada beberapa perangkat keras, topologi
-    jaringan, dan jumlah \textit{worker} yang lebih luas, lalu melaporkan
-    konfigurasi, versi \textit{chaincode}, jumlah sukses/gagal, latensi,
-    \textit{throughput}, konflik MVCC, dan pengulangan setiap skenario bersama
-    hasilnya.
-    \item Menelusuri status 11 dan batas konkurensi \textit{gateway} pada
-    beban 60 TPS dengan instrumentasi tahap \textit{endorsement}, validasi, dan
-    pengiriman agar pengaruh kontensi state dan jalur klien dapat dipisahkan.
-    \item Memperluas \textit{repeatability run} ke profil penerbitan, distribusi,
-    transfer, operasi moneter, dan kueri pengawasan agar setiap profil tidak
-    hanya memiliki satu angka \textit{throughput}, tetapi juga simpangan,
-    interval kepercayaan, dan latensi persentil ke-95 serta ke-99.
-    \item Mengembangkan skenario \textit{hot-wallet contention} dari jejak
-    transaksi yang dianonimkan atau distribusi sintetis yang parameternya
-    dilaporkan eksplisit, lalu mengukur konflik MVCC awal, keberhasilan setelah
-    \textit{retry}, \textit{throughput} akhir, dan pengaruh kebijakan
-    \textit{backoff} terhadap idempotensi transaksi.
+    \item Mengulang protokol Caliper pada beberapa perangkat keras dan topologi
+    jaringan, kemudian menjalankan \textit{soak test} berdurasi panjang untuk
+    menguji kestabilan hasil di luar satu inang.
+    \item Menelusuri kegagalan penerbitan dan distribusi serta kategori
+    \textit{Unknown failure} dengan instrumentasi tahap \textit{endorsement},
+    validasi, dan pengiriman agar penyebab bisnis dan infrastruktur dapat
+    dipisahkan.
+    \item Memperluas skenario kontensi dompet bersama dan menguji kebijakan
+    \textit{retry} serta \textit{backoff} secara eksplisit terhadap konflik MVCC
+    tanpa mengubah makna idempotensi transaksi.
     \item Menguji \textit{private data collection} atau teknik kriptografi
     penjaga privasi untuk mengurangi keterlihatan metadata transaksi tanpa
     menghilangkan kemampuan pengawasan \cite{Pocher2022Privacy,

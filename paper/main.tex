@@ -53,16 +53,19 @@ Digital Rupiah into Treasury and distributes it directly to a validator bank or
 payment service provider acting as custodian. Backend ownership checks and
 chaincode MSP checks enforce user and organization boundaries, while the shared
 Fabric channel does not provide transaction privacy. Automated tests evaluate
-authorization and transfer safety. Hyperledger Caliper evaluates clean-ledger
-profiles with deterministic seeding, one, two, and four workers, functional
-workloads, repeated peak rounds, and an aggregate-overspend scenario. The final
-transfer profiles report 29.1--29.5 TPS at a 30 TPS offered load with an
-86.23--100.00\% success rate, and 56.3--57.3 TPS at 60 TPS with a
-12.05--12.48\% success rate. Five peak repetitions average 54.8 TPS completion
-throughput and 16.33\% success. Functional workloads complete 168 of 168
-transactions, while boundary and negative-path oracles pass their expected
-rejections. These measurements describe a single-host prototype and do not
-establish production capacity or cross-machine reproducibility.
+authorization and transfer safety. Hyperledger Caliper uses isolated
+transaction types, a fixed-rate pilot, calibration at one, two, four, and
+eight workers, and five primary repetitions per load. Calibration selects one
+worker for the primary study. Under the declared sustainability gate of at
+least 99\% successful completions and successful-transaction p95 latency at or
+below 2.5 seconds in every repetition, sustainable loads reach 190 TPS for
+balance queries, 50 TPS for wallet freeze, 65 TPS for wallet unfreeze, 25 TPS
+for redemption, and 20 TPS for low-contention retail transfer and merchant
+payment. Issuance, distribution, and deliberate high-contention retail
+transfer do not meet the gate at the tested rates. A separate five-repetition
+Go/PostgreSQL/KYC demonstration evaluates the service path. These measurements
+describe a single-host prototype and do not establish production capacity or
+cross-machine reproducibility.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -606,114 +609,118 @@ Endorsement & One institutional MSP: BI, HimbaraBank, CommercialBank, or PJP \\
 \end{tabular}
 \end{table}
 
-The transfer profiles use 70\% customer-to-customer transfers, 25\%
-customer-to-merchant transfers, and 5\% wallet reads. Each profile warms the
-network for 30 seconds at 10 TPS, then measures 120-second rounds at 30 and
-60 TPS. The one-, two-, and four-worker profiles use the populations and
-transaction slots specified in their individual configuration files. Sender
-wallets receive a larger initial balance than receiver wallets, so valid
-traffic does not begin with a receiver at its maximum balance. Caliper records
-successful and failed submissions, completion throughput, and latency.
+The primary study isolates each transaction type and contention mode. A pilot
+uses fixed-rate retail transfers, calibration compares one, two, four, and
+eight workers, and the primary study fixes the smallest worker count sustaining
+the highest passing load. Each primary cell has five repetitions. Offered TPS
+is submitted transactions divided by the measured window; achieved TPS is
+successful completions divided by that window. Latency is the Caliper Fabric
+boundary, \texttt{time\_final - time\_create}, for successful completions. The
+study also records failed and timed-out completions, failure categories, and
+host, container, disk, network, and Caliper-client resource metrics.
 
 \begin{table}[!t]
-\caption{Final transfer-profile results}
+\caption{Sustainable primary loads by transaction type}
 \label{tab:results-final}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{1.8pt}
 \begin{tabular}{@{}llrrrrrr@{}}
 \toprule
-\textbf{Workers} & \textbf{Load} & \textbf{Succ.} & \textbf{Fail} &
-\textbf{Success} & \textbf{Send} & \textbf{Throughput} & \textbf{Avg.} \\
-& & & & \textbf{(\%)} & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{lat. (s)} \\
+\textbf{Function} & \textbf{Contention} & \textbf{Load} & \textbf{Offered} &
+\textbf{Achieved} & \textbf{Success} & \textbf{p95} & \textbf{p99} \\
+& & & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{(\%)} & \textbf{(s)} & \textbf{(s)} \\
 \midrule
-1 & 30 TPS & 3,105 & 496 & 86.23 & 30.0 & 29.1 & 0.71 \\
-1 & 60 TPS & 898 & 6,300 & 12.48 & 60.0 & 56.3 & 6.36 \\
-2 & 30 TPS & 3,602 & 0 & 100.00 & 30.0 & 29.5 & 0.40 \\
-2 & 60 TPS & 874 & 6,327 & 12.14 & 60.0 & 57.2 & 6.48 \\
-4 & 30 TPS & 3,486 & 118 & 96.73 & 30.0 & 29.5 & 0.76 \\
-4 & 60 TPS & 868 & 6,336 & 12.05 & 60.0 & 57.3 & 6.47 \\
+Balance query & Low & 190 & 190.0 & 190.0 & 100.00 & 0.01 & 0.01 \\
+Wallet freeze & Low & 50 & 50.0 & 50.0 & 100.00 & 0.28 & 0.37 \\
+Wallet unfreeze & Low & 65 & 65.0 & 65.0 & 100.00 & 0.27 & 0.35 \\
+Redemption & Low & 25 & 25.0 & 25.0 & 100.00 & 0.53 & 0.60 \\
+Retail transfer & Low & 20 & 20.0 & 20.0 & 100.00 & 0.72 & 0.89 \\
+Merchant payment & Low & 20 & 20.0 & 20.0 & 100.00 & 0.66 & 0.75 \\
+Issuance & Low & -- & -- & -- & $<$99 & -- & -- \\
+Distribution & Low & -- & -- & -- & $<$99 & -- & -- \\
+Retail transfer & High & -- & -- & -- & $<$99 & -- & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-All warmup rounds completed without failure. At 30 TPS, completion throughput
-was 29.1--29.5 TPS and success rate was 86.23--100.00\%. At 60 TPS, completion
-throughput was 56.3--57.3 TPS while success rate was 12.05--12.48\%. Completion
-throughput includes failed submissions, so it is not successful throughput.
+The sustainability rule was fixed before interpretation: every one of five
+repetitions had to reach at least 99\% successful completions and successful-
+transaction p95 latency at or below 2.5 seconds. The table reports the highest
+passing load for each operation. Issuance, distribution, and high-contention
+retail transfer have no passing load in the tested range; their failed
+submissions are retained in the failure analysis rather than converted into a
+throughput claim.
 
 \begin{table}[!t]
-\caption{Failure diagnostics in final transfer profiles}
+\caption{Failure categories in primary workloads}
 \label{tab:failure-diagnostics-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lr@{}}
 \toprule
-\textbf{Profile} & \textbf{Status 11} & \textbf{Gateway limit} & \textbf{Total} \\
+\textbf{Category} & \textbf{Count} \\
 \midrule
-1 worker & 5,332 & 1,464 & 6,796 \\
-2 workers & 4,919 & 1,408 & 6,327 \\
-4 workers & 5,121 & 1,333 & 6,454 \\
-Five repetitions & 11,878 & 3,191 & 15,069 \\
+MVCC read conflict & 358,413 \\
+Unknown failure & 1,013,243 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The final transfer logs classify every failed submission as Fabric status 11 or
-the gateway message \texttt{too many requests for /gateway.Gateway}. Status 11
-is the Fabric validation code for an MVCC read conflict: a transaction read a
-wallet version that changed before commit. The gateway message identifies
-client-path concurrency pressure. The logs contain no insufficient-balance or
-transport failure in these final transfer profiles.
+The primary logs classify 358,413 failures as MVCC read conflicts and 1,013,243
+as Unknown failure. Status 11 indicates that a transaction read a state version
+that changed before validation. Unknown failure is retained when the available
+log does not support a more specific category; it is not interpreted as proof
+of a single bottleneck.
 
 \begin{table}[!t]
-\caption{Five repetitions at an offered load of 60 TPS}
+\caption{Five-repetition summary at the highest passing loads}
 \label{tab:repeat-final}
 \centering
 \scriptsize
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
-\textbf{Round} & \textbf{Succ.} & \textbf{Fail} & \textbf{Success (\%)} &
-\textbf{Throughput (TPS)} & \textbf{Avg. lat. (s)} \\
+\textbf{Function} & \textbf{Load} & \textbf{Offered} & \textbf{Achieved} &
+\textbf{Success (\%)} & \textbf{p95 (s)} \\
 \midrule
-1 & 895 & 2,707 & 24.85 & 57.7 & 3.23 \\
-2 & 403 & 3,199 & 11.19 & 54.9 & 6.93 \\
-3 & 598 & 3,004 & 16.60 & 54.8 & 4.93 \\
-4 & 448 & 3,154 & 12.44 & 52.7 & 6.39 \\
-5 & 597 & 3,005 & 16.57 & 54.1 & 4.50 \\
-\midrule
-Mean & 588.2 & 3,013.8 & 16.33 & 54.8 & 5.20 \\
+Balance query & 190 & 190.0 & 190.0 & 100.00 & 0.01 \\
+Wallet freeze & 50 & 50.0 & 50.0 & 100.00 & 0.28 \\
+Wallet unfreeze & 65 & 65.0 & 65.0 & 100.00 & 0.27 \\
+Redemption & 25 & 25.0 & 25.0 & 100.00 & 0.53 \\
+Retail transfer & 20 & 20.0 & 20.0 & 100.00 & 0.72 \\
+Merchant payment & 20 & 20.0 & 20.0 & 100.00 & 0.66 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Five repetitions on one clean ledger produced a mean completion throughput of
-54.8 TPS and a mean success rate of 16.33\%. The success-rate range was
-11.19--24.85\%, and mean latency ranged from 3.23 to 6.93 s. These values
-describe variation in the reported local configuration.
+Each row is the mean of five repetitions. The complete per-run standard
+deviations, p50, p95, p99, minimum, and maximum values remain available in the
+machine-readable benchmark summary. The table excludes operations without a
+passing load under the declared sustainability rule.
 
 \begin{table}[!t]
-\caption{Functional Caliper profiles}
+\caption{Separate PostgreSQL/KYC demonstration}
 \label{tab:functionality-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
-\textbf{Profile} & \textbf{Succ.} & \textbf{Fail} & \textbf{Throughput (TPS)} &
-\textbf{Avg. lat. (s)} \\
+\textbf{Stage} & \textbf{Runs} & \textbf{Mean (ms)} & \textbf{SD (ms)} \\
 \midrule
-KYC onboarding & 48 & 0 & 4.3 & 0.74 \\
-Monetary operations & 40 & 0 & 19.4 & 0.33 \\
-Supervision reads & 40 & 0 & 30.6 & 0.03 \\
-Administrative policy & 40 & 0 & 5.1 & 1.05 \\
+Login & 5 & 186.85 & 34.77 \\
+Customer creation & 5 & 2,069.02 & 8.60 \\
+KYC submission & 5 & 2,071.99 & 7.02 \\
+KYC refresh & 5 & 2,064.70 & 8.31 \\
+Wallet creation & 5 & 2,075.16 & 6.05 \\
+KYC read & 5 & 1.14 & 0.41 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The four functional profiles completed all 168 transactions without failure.
-They verify onboarding, monetary operations, read-only supervision, and policy
-updates at their configured rates. Their throughputs are not combined with the
-transfer sweep because the functions and read-write patterns differ.
+This five-repetition demonstration measures the Go/PostgreSQL/KYC service path
+separately from the direct Fabric benchmark. It covers login, customer
+creation, KYC submission and refresh, wallet creation, and KYC reads. Its
+latencies must not be combined with the Fabric transaction latency boundary.
 
 \begin{table}[!t]
 \caption{Semantic conformance profiles}
@@ -740,36 +747,35 @@ authorization and balance invariants, but do not constitute a formal security
 proof.
 
 \begin{table}[!t]
-\caption{Maximum monitored resource usage}
+\caption{Resource metrics collected in the primary study}
 \label{tab:resources-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}ll@{}}
 \toprule
-\textbf{Profile} & \textbf{CPU max. (\%)} & \textbf{Memory max. (MB)} \\
+\textbf{Layer} & \textbf{Metrics} \\
 \midrule
-Transfer, 1 worker & 2.35 & 163 \\
-Transfer, 2 workers & 2.74 & 166 \\
-Transfer, 4 workers & 2.69 & 163 \\
-Five peak repetitions & 2.53 & 170 \\
+Host & CPU, memory, I/O, IOPS, and disk latency \\
+Fabric containers & CPU, memory, network, IOPS, and disk service latency \\
+Caliper client & Process CPU \\
+Prometheus & Monitoring CPU and memory \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-No monitored container approached the host CPU or memory capacity. The
-observed drop in success at 60 TPS therefore cannot be attributed to simple
-resource exhaustion alone; the logs show state conflicts and gateway
-concurrency pressure. The evidence supports the architecture and policy
-controls, then bounds their observed behavior under the tested local loads.
+The resource sampler records host, container, disk, network, Prometheus, and
+Caliper-client measurements. The primary results are interpreted together with
+these measurements and the categorized failures; they remain bounded to the
+single-host testbed and do not establish production capacity.
 
 \section{Limitations and Future Work}
 \label{sec:limits}
 The evaluation uses a single host with one peer per organization and no
 geographic distribution or network latency. Its Caliper results therefore apply
 only to the reported configuration and do not estimate national-scale
-performance. Each transfer profile uses a clean ledger and a fixed seeded
-population, while the final sweep varies one, two, and four workers. A
-distributed deployment and a graded-skew contention workload would be needed to
+performance. Each primary profile uses a clean ledger, a fixed seeded
+population, one calibrated worker, and five repetitions. A distributed
+deployment and a graded-skew contention workload would be needed to
 characterize other operating conditions.
 
 The shared Fabric channel does not provide transaction privacy, and the
@@ -794,14 +800,15 @@ retail transfers, organization-aware authorization, and supervisor-facing
 reconciliation.
 
 The transfer protocol combines explicit wallet-state checks with Fabric MVCC.
-The final Caliper sweep reports 29.1--29.5 TPS completion throughput at a
-30 TPS offered load with an 86.23--100.00\% success rate. At 60 TPS, completion
-throughput is 56.3--57.3 TPS and success rate is 12.05--12.48\%. Five peak
-repetitions average 54.8 TPS completion throughput and 16.33\% success. The
-functional profiles complete 168 of 168 transactions, and the authorization,
-boundary, negative-path, and aggregate-overspend oracles pass their expected
-checks. These results provide a local, auditable baseline for retail Digital
-Rupiah experiments, not a production-capacity claim.
+Under the declared sustainability gate, the primary study reaches 190 TPS for
+balance queries, 50 TPS for wallet freeze, 65 TPS for wallet unfreeze, 25 TPS
+for redemption, and 20 TPS for low-contention retail transfer and merchant
+payment. Issuance, distribution, and deliberate high-contention retail
+transfer do not meet the gate at the tested rates. All primary cells use five
+repetitions, and the final report separates offered TPS, achieved TPS, failure
+categories, latency percentiles, resource measurements, and variability. These
+results provide a local, auditable baseline for retail Digital Rupiah
+experiments, not a production-capacity claim.
 
 
 \section*{Artifact Availability}

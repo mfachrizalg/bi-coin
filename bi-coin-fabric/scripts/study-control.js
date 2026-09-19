@@ -30,8 +30,12 @@ function scenarioKnee(operation, contention) {
     const rows = summary.runs.filter(row => row.phase === 'scenario-pilot'
         && row.operation === operation && (row.contention || 'low') === contention);
     const passingRates = rows.filter(passing).map(row => Number(row.targetTps));
-    if (!passingRates.length) throw new Error(`scenario pilot found no sustainable load: ${operation}/${contention}`);
-    return Math.max(...passingRates);
+    if (passingRates.length) return Math.max(...passingRates);
+    const testedRates = rows.map(row => Number(row.targetTps)).filter(Number.isFinite);
+    if (!testedRates.length) throw new Error(`scenario pilot found no tested load: ${operation}/${contention}`);
+    const fallback = Math.max(...testedRates);
+    console.error(`[study-control] no sustainable pilot load for ${operation}/${contention}; using highest tested pilot rate ${fallback} TPS for primary rates`);
+    return fallback;
 }
 
 function primaryRates() {

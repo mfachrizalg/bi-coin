@@ -11,18 +11,20 @@ validator atau PJP sebagai kustodian. Pemeriksaan kepemilikan pada
 \textit{backend} dan MSP pada \textit{chaincode} membatasi pengguna dan
 organisasi. Kanal Fabric bersama tidak memberikan privasi transaksi.
 
-Pengujian otomatis mengevaluasi otorisasi dan keamanan transfer. Hyperledger Caliper
-mengevaluasi profil dengan buku besar bersih, \textit{seed} deterministik, satu,
-dua, dan empat \textit{worker}, beban fungsional, pengulangan beban puncak, dan
-skenario pengeluaran agregat yang melebihi saldo. Profil transfer final
-menghasilkan \textit{throughput} penyelesaian 29,1--29,5 TPS pada laju 30 TPS
-dengan tingkat keberhasilan 86,23--100,00\%, dan 56,3--57,3 TPS pada laju 60 TPS
-dengan tingkat keberhasilan 12,05--12,48\%. Lima pengulangan beban puncak
-menghasilkan rerata throughput 54,8 TPS dan tingkat keberhasilan 16,33\%.
-Profil fungsional menyelesaikan 168 dari 168 transaksi, sedangkan oracle batas
-dan jalur negatif lulus dengan penolakan yang diharapkan. Hasil ini berlaku pada
-purwarupa satu inang dan tidak menetapkan kapasitas produksi atau
-reproduktibilitas lintas mesin.
+Pengujian otomatis mengevaluasi otorisasi dan keamanan transfer. Studi
+Hyperledger Caliper menggunakan jenis transaksi terisolasi, pilot dengan
+kontrol laju tetap, kalibrasi pada satu, dua, empat, dan delapan \textit{worker},
+serta lima pengulangan primer untuk setiap beban. Kalibrasi memilih satu
+\textit{worker}. Dengan kriteria sedikitnya 99\% penyelesaian berhasil dan
+latensi p95 transaksi berhasil paling tinggi 2,5 detik pada seluruh pengulangan,
+beban berkelanjutan mencapai 190 TPS untuk kueri saldo, 50 TPS untuk pembekuan
+dompet, 65 TPS untuk pembukaan pembekuan, 25 TPS untuk penebusan, serta 20 TPS
+untuk transfer ritel dan pembayaran pedagang pada kontensi rendah. Penerbitan,
+distribusi, dan transfer ritel dengan kontensi tinggi tidak memenuhi kriteria
+tersebut pada laju yang diuji. Demonstrasi terpisah sebanyak lima pengulangan
+mengevaluasi alur layanan Go/PostgreSQL/KYC. Hasil ini berlaku pada purwarupa
+satu inang dan tidak menetapkan kapasitas produksi atau reproduktibilitas lintas
+mesin.
 
 \vspace{0.5cm}
 
