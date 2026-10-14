@@ -504,11 +504,11 @@ Hasil ini menunjukkan perilaku fungsional pada skenario sintetis yang diuji,
 bukan kepatuhan hukum menyeluruh, efektivitas deteksi AML/CFT pada populasi
 nyata, atau keberhasilan pengiriman laporan kepada PPATK.
 
-Pengujian kinerja untuk ketiga \textit{chaincode} studi dijalankan dengan satu \textit{worker} Caliper pada satu host lokal menggunakan \textit{stamp} \texttt{run-20261014-01}. Seluruh 31 beban kerja diukur dan dikonfirmasi, dengan pemeriksaan kesiapan 31 dari 31 lulus. Run ini sempat terhenti karena restart host dan dilanjutkan dengan \textit{stamp} yang sama dari titik pemeriksaan terakhir. Setelah pelanjutan, konfirmasi \texttt{fund-reserve} gagal dengan HTTP 500 sehingga pencariannya diulang seluruhnya. Pemeriksaan kebenaran lulus, yaitu 20 dari 20 skenario, 207 dari 207 sel otorisasi, 27 dari 27 kasus validasi, dan 15 dari 15 hasil aksi, tanpa pemeriksaan yang tidak terselesaikan. Kapasitas terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
+Pengujian kinerja untuk ketiga \textit{chaincode} studi dijalankan dengan satu \textit{worker} Caliper pada satu host lokal. Dari 31 beban kerja, seluruhnya telah diukur dan dikonfirmasi pada \textit{stamp} \texttt{run-20261014-01}. Run ini sempat terhenti oleh gangguan daya dan dilanjutkan dengan \textit{stamp} yang sama dari titik pemeriksaan terakhir. Konfirmasi \texttt{fund-reserve} pada percobaan sebelumnya gagal dengan HTTP 500 dan tidak dihitung, sehingga pencariannya diulang. Seluruh pemeriksaan kebenaran lulus, yaitu 20 dari 20 skenario, 207 dari 207 sel otorisasi, 27 dari 27 kasus validasi, dan 15 dari 15 hasil aksi, tanpa pemeriksaan yang tidak terselesaikan. Kapasitas terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
 
 \begin{table}[H]
 \centering
-\caption{Kapasitas terkonfirmasi tiga \textit{chaincode} studi pada satu \textit{worker} (\textit{stamp} \texttt{run-20261014-01})}
+\caption{Kapasitas terkonfirmasi tiga \textit{chaincode} studi pada satu \textit{worker}}
 \label{tab:ch4-kapasitas-kontrol}
 \begin{tabular}{llllrr}
 \toprule
@@ -539,17 +539,17 @@ Beban kerja & \textit{Chaincode} & Jenis & Terkonfirmasi (ops/s) & Gagal pertama
 \texttt{read-treasury} & \texttt{rupiah-monetary} & baca & 296 & 320 \\
 \texttt{read-total-supply} & \texttt{rupiah-monetary} & baca & 296 & 320 \\
 \texttt{read-reserve} & \texttt{rupiah-monetary} & baca & 296 & 320 \\
-\texttt{open-wallet} & \texttt{rupiah-payments} & tulis & 4,625 & 5 \\
 \texttt{transfer-retail} & \texttt{rupiah-payments} & tulis & 0,78125 & 0,828125 \\
 \texttt{transfer-merchant} & \texttt{rupiah-payments} & tulis & 0,195313 & 0,207031 \\
+\texttt{fund-reserve} & \texttt{rupiah-payments} & tulis & 0,183594 & 0,195313 \\
 \texttt{read-balance} & \texttt{rupiah-payments} & baca & 272 & 296 \\
 \texttt{read-receipt} & \texttt{rupiah-payments} & baca & 272 & 296 \\
-\texttt{fund-reserve} & \texttt{rupiah-payments} & tulis & 0,183594 & 0,195313 \\
+\texttt{open-wallet} & \texttt{rupiah-payments} & tulis & 4,625 & 5 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Operasi baca mencapai 272 hingga 296 ops/s pada sepuluh beban baca. Operasi tulis terverifikasi berada pada rentang 0,184 hingga 4,75 TPS pada 21 beban tulis, dengan \texttt{create-pending} (4,75 TPS) dan \texttt{open-wallet} (4,625 TPS) sebagai nilai tertinggi. Sebagian besar beban tulis terkonfirmasi pada 0,78 TPS atau lebih rendah. Pola ini sesuai dengan batas komit yang teramati: konfigurasi orderer studi memakai \texttt{BatchTimeout} 2 detik, dan blok yang teramati hanya memuat satu transaksi. Hubungan sebab-akibat ini belum diuji secara terpisah. Angka tersebut berlaku untuk satu \textit{worker}, satu host, dan durasi konfirmasi 30 detik, sehingga tidak dimaksudkan sebagai kapasitas produksi.
+Operasi baca mencapai 272 hingga 296 ops/s. Operasi tulis terverifikasi berada pada rentang 0,184 hingga 4,75 TPS, dengan \texttt{create-pending} (4,75 TPS) dan \texttt{open-wallet} (4,625 TPS) sebagai nilai tertinggi. Nilai tulis yang rendah ini sesuai dengan batas komit yang teramati: konfigurasi orderer studi memakai \texttt{BatchTimeout} 2 detik, dan blok yang teramati hanya memuat satu transaksi. Hubungan sebab-akibat ini belum diuji secara terpisah, tetapi temuan ini konsisten dengan penelitian yang menunjukkan bahwa tahap pemesanan dan validasi transaksi membatasi throughput Hyperledger Fabric \cite{thakkar2018,gorenflo2019fastfabric}. Angka tersebut berlaku untuk satu \textit{worker}, satu host, dan durasi konfirmasi 30 detik, sehingga tidak dimaksudkan sebagai kapasitas produksi.
 
 Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk 31 beban kerja yang terkonfirmasi. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai per kelompok komponen, dengan rata-rata median CPU dan puncak maksimum antar jendela.
 
