@@ -1,0 +1,42 @@
+sequenceDiagram
+    autonumber
+    actor CO as Petugas kepatuhan
+    actor R as Reviewer
+    actor S as Approver senior
+    participant API as Backend API
+    participant GW as Fabric Gateway
+    participant CC as rupiah-controls
+
+    CO->>API: POST /subjects/{subject_id}/restrictions
+    API->>GW: Submit FreezeSubject(subject_id, reason_code)
+    GW->>CC: FreezeSubject(subject_id, reason_code)
+    CC->>CC: Set status terbatas dan alasan
+    CC->>CC: Hapus reviewer dan referensi bukti lama
+    CC-->>GW: Pembatasan tercatat
+    GW-->>API: Commit
+    API-->>CO: Hasil transaksi
+    Note over GW,CC: Kebijakan endorsement berbasis state wajib dipenuhi.
+
+    R->>API: POST /subjects/{subject_id}/restriction-release-requests<br/>authority_evidence_ref
+    API->>GW: Submit RequestUnfreeze(subject_id, referensi SHA-256)
+    GW->>CC: RequestUnfreeze(subject_id, referensi SHA-256)
+    CC->>CC: Validasi peran reviewer dan status terbatas
+    CC->>CC: Simpan identitas reviewer dan referensi baru
+    CC-->>GW: Permintaan pelepasan tercatat
+    GW-->>API: Commit
+    API-->>R: Hasil transaksi
+
+    S->>API: POST /subjects/{subject_id}/restriction-release-decisions
+    API->>GW: Submit ApproveUnfreeze(subject_id)
+    GW->>CC: ApproveUnfreeze(subject_id)
+    CC->>CC: Validasi bukti dan identitas approver senior
+    alt Bukti tersedia dan reviewer berbeda dari approver
+        CC->>CC: Hapus status terbatas dan data pelepasan
+        CC-->>GW: Pelepasan disetujui
+        GW-->>API: Commit
+        API-->>S: Pelepasan disetujui
+    else Bukti tidak ada atau identitas sama
+        CC-->>GW: Tolak, subjek tetap terbatas
+        GW-->>API: Tidak ada state yang di-commit
+        API-->>S: Pelepasan ditolak
+    end

@@ -1,0 +1,41 @@
+sequenceDiagram
+    autonumber
+    actor D as Petugas distributor
+    participant API as Backend API
+    participant GW as Fabric Gateway
+    participant Pay as rupiah-payments
+    participant Ctrl as rupiah-controls
+    participant Mon as rupiah-monetary
+
+    D->>API: POST /conversions<br/>subject_id, distributor_id, amount, Idempotency-Key
+    API->>GW: Submit FundFromReserve sebagai DistributorMSP
+    GW->>Pay: FundFromReserve(subject, distributor, amount, reference)
+    Pay->>Pay: Periksa receipt untuk reference
+    alt Reference dan payload sama dengan receipt tersimpan
+        Pay-->>GW: Kembalikan receipt lama
+        GW-->>API: Hasil replay
+        API-->>D: Konversi sudah tercatat
+    else Reference dipakai untuk payload lain
+        Pay-->>GW: Tolak konflik reference
+        GW-->>API: Transaksi gagal
+        API-->>D: Konversi ditolak
+    else Reference baru
+        Pay->>Ctrl: Periksa kelayakan subjek dan batas
+        Ctrl-->>Pay: Status subjek dan batas saldo
+        Pay->>Pay: Periksa wallet dan batas kepemilikan
+        alt Subjek layak dan cadangan mencukupi
+            Pay->>Mon: DebitReserveForFunding(distributor, subject, amount)
+            Mon->>Mon: Debit cadangan wholesale distributor
+            Mon-->>Pay: Debit berhasil
+            Pay->>Pay: Kredit wallet ritel dan simpan receipt
+            Note over Pay,Mon: Debit, kredit, receipt: satu transaksi kanal
+            Pay-->>GW: Receipt konversi
+            GW-->>API: Hasil commit
+            API-->>D: Konversi berhasil
+        else Subjek tidak layak, batas terlampaui, atau cadangan kurang
+            Pay-->>GW: Tolak konversi
+            GW-->>API: Tidak ada state yang di-commit
+            API-->>D: Konversi ditolak
+        end
+    end
+    Note over API,Mon: Endorsement gagal: tidak ada state yang di-commit

@@ -1,0 +1,42 @@
+sequenceDiagram
+    autonumber
+    actor U as Pengguna EndUserMSP
+    participant API as Backend API
+    participant GW as Fabric Gateway
+    participant Pay as rupiah-payments
+    participant Ctrl as rupiah-controls
+
+    U->>API: POST /retail-transfers<br/>from, to, amount, Idempotency-Key
+    API->>GW: Submit Transfer sebagai EndUserMSP
+    GW->>Pay: Transfer(sender, recipient, amount, reference)
+    Pay->>Pay: Periksa receipt untuk reference
+    alt Reference dan payload sama dengan receipt tersimpan
+        Pay-->>GW: Kembalikan receipt lama
+        GW-->>API: Hasil replay
+        API-->>U: Transfer sudah tercatat
+    else Reference dipakai untuk payload lain
+        Pay-->>GW: Tolak konflik reference
+        GW-->>API: Transaksi gagal
+        API-->>U: Transfer ditolak
+    else Reference baru
+        Pay->>Ctrl: Periksa CanActFor(sender)
+        Pay->>Ctrl: Periksa CanPay(sender dan recipient)
+        Pay->>Ctrl: Baca batas sender dan recipient
+        Ctrl-->>Pay: Status dan batas kedua subjek
+        Pay->>Pay: Periksa batas transaksi, saldo, dan holdings recipient
+        alt Kewenangan, kelayakan, saldo, dan batas valid
+            Pay->>Ctrl: Tambahkan penggunaan limit sender
+            Ctrl-->>Pay: Penggunaan limit diperbarui
+            Pay->>Pay: Perbarui saldo sender dan recipient
+            Pay->>Pay: Simpan receipt transfer
+            Note over API,Ctrl: Saldo, limit, receipt: satu transaksi kanal
+            Pay-->>GW: Receipt transfer
+            GW-->>API: Hasil commit
+            API-->>U: Transfer berhasil
+        else Kewenangan, kelayakan, saldo, atau batas gagal
+            Pay-->>GW: Tolak transfer
+            GW-->>API: Tidak ada state yang di-commit
+            API-->>U: Transfer ditolak
+        end
+    end
+    Note over API,Ctrl: Endorsement gagal: saldo dan limit tidak di-commit
