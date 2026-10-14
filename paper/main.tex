@@ -495,7 +495,7 @@ same-channel transaction, so all three policies apply to that funding flow.
 These policies and distinct-staff approvals are experimental design choices;
 they are not presented as statutory endorsement rules.
 
-The compliance benchmark measures the three controls-study chaincodes with one Caliper worker on one host. All 31 workloads are confirmed with three 30-second rounds each, with 31 of 31 preflight checks passing. Thirty of 31 workloads are bracketed by measured probes; the \texttt{fund-reserve} upper bound is unresolved because its probe failed on a fetch error before measurement. All functional checks pass: 20 of 20 scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. Read operations reach 272 to 296 operations per second. Confirmed passing write rates range from 0.184 to 4.75 TPS across 21 write workloads, with verified throughput at those rates between 0.200 and 4.613 TPS; 19 of 21 confirm at 0.78 TPS or below. The write ceiling's cause is not isolated: the study orderer's batch timeout is two seconds, and the run records no block contents, so the link to the write ceiling is not established.
+The compliance benchmark measures the three controls-study chaincodes with one Caliper worker on one host. All 31 workloads are confirmed with three 30-second rounds each, with 31 of 31 preflight checks passing. Thirty of 31 workloads are bracketed by measured probes; the \texttt{fund-reserve} upper bound is unresolved because two upper-bound probes failed on fetch errors before measurement. The nearest measured failure is 0.21875 ops/s, about 19\% above the confirmed 0.183594 ops/s. All functional checks pass: 20 of 20 scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. Read operations sustain 272 to 296 operations per second offered, with all verifications passing; delivered load fell to 0.50 to 0.93 of target in the failing probes, so these are lower bounds on read capacity. Confirmed passing write rates range from 0.184 to 4.75 TPS across 21 write workloads, with verified throughput at those rates of 0.200 to 4.613 TPS, the mean of three confirmation rounds per workload; 19 of 21 confirm at 0.78125 ops/s or below. In 20 of the 21 write workloads (fund-reserve excluded, since its failing probe was a fetch error), the first failing probe exceeded the drain limit: verified throughput over duration plus drain must reach 90 percent of the delivered rate, which is equivalent to a drain of at most one-ninth of the probe duration (1.1 s for 10 s probes). The median drain was 1.73 s for failing 10 s probes and 0.06 s for passing ones. The configured two-second batch timeout is a plausible source of this drain latency, but the run records no block contents, so the link is not isolated.
 
 \subsection{Baseline On-Chain and Off-Chain Data}
 The Go chaincode in \texttt{digital\_rupiah.go} groups functions for
@@ -641,7 +641,7 @@ CouchDB instance per peer.
 
 The Caliper measurements in this section apply only to this five-organization
 baseline and \texttt{digital-rupiah} v3.0. The four-MSP controls-study
-extension is functionally smoke-tested but has its own one-worker Caliper run, reported in the Controls-Study Extension subsection; the baseline figures must not be attributed to its three chaincodes.
+extension is functionally tested but has its own one-worker Caliper run, reported in the Controls-Study Extension subsection; the baseline figures must not be attributed to its three chaincodes.
 
 \begin{table}[!t]
 \caption{Final testbed configuration}
@@ -873,7 +873,7 @@ scenarios. It does not use live identity verification or screening feeds, submit
 reports to PPATK, or establish the effectiveness of a risk model or institutional
 compliance. Its backend HTTP path is exercised by functional tests but has not been load-measured. Performance
 results for the three new chaincodes are limited to one Caliper worker on one
-host with 30-second confirmation windows. The run was interrupted by a host or power interruption and resumed under the same stamp from its last checkpoint.
+host with 30-second confirmation windows. The run was interrupted by a host or power interruption and resumed under the same stamp from its last checkpoint. After the restart, the network was brought up again with existing identity material. The two payments reads measured after the restart (272 and 296 ops/s) are lower than the eight controls and monetary reads measured before it (296 and 320 ops/s); because chaincode and restart effects are confounded, the difference cannot be attributed to either.
 
 
 \section{Conclusion}
@@ -897,10 +897,10 @@ also shows that shared-key contention, independent of the wallet-cap funding
 limit, sharply reduces transfer completion at the same offered load.
 
 A separate four-MSP controls-study extension implements three domain chaincodes
-and passes synthetic integration smoke scenarios for distinct senior approval,
+and passes synthetic integration scenarios for distinct senior approval,
 restriction evidence, reserve funding, retail payment, read-only ValidatorMSP
 access, and expected endorsement failures. This functional evidence is
-independent of the baseline Caliper results above.
+does not depend on the baseline Caliper results above.
 
 
 \section*{Artifact Availability}
