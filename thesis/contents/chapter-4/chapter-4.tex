@@ -551,7 +551,7 @@ Beban kerja & \textit{Chaincode} & Jenis & Terkonfirmasi (ops/s) & Gagal pertama
 
 Operasi baca mencapai 272 hingga 296 ops/s. Operasi tulis terverifikasi berada pada rentang 0,184 hingga 4,75 TPS, dengan \texttt{create-pending} (4,75 TPS) dan \texttt{open-wallet} (4,625 TPS) sebagai nilai tertinggi. Nilai tulis yang rendah ini sesuai dengan batas komit yang teramati: konfigurasi orderer studi memakai \texttt{BatchTimeout} 2 detik, dan blok yang teramati hanya memuat satu transaksi. Hubungan sebab-akibat ini belum diuji secara terpisah, tetapi temuan ini konsisten dengan penelitian yang menunjukkan bahwa tahap pemesanan dan validasi transaksi membatasi throughput Hyperledger Fabric \cite{thakkar2018,gorenflo2019fastfabric}. Angka tersebut berlaku untuk satu \textit{worker}, satu host, dan durasi konfirmasi 30 detik, sehingga tidak dimaksudkan sebagai kapasitas produksi.
 
-Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk 31 beban kerja yang terkonfirmasi. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai per kelompok komponen, dengan rata-rata median CPU dan puncak maksimum antar jendela.
+Konsumsi sumber daya dicatat selama jendela konfirmasi 30 detik untuk 31 beban kerja yang terkonfirmasi, dengan sepuluh sampel per jendela dan tiga jendela per beban kerja. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai per kelompok komponen: median CPU rata-rata dan median delta RX per jendela, serta puncak maksimum CPU dan memori antar jendela. Kelompok dengan beberapa instans, yaitu CouchDB, kontainer chaincode, dan Caliper, digabung seluruh instansnya.
 
 \begin{table}[H]
 \centering
@@ -561,18 +561,18 @@ Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik unt
 \toprule
 Komponen & CPU rata-rata median (\%) & CPU puncak maks (\%) & Memori puncak maks (MiB) & Delta RX median (MB) \\
 \midrule
-Peer Fabric \texttt{centralbank} & 1,50 & 68,83 & 154,2 & 1,00 \\
-Peer Fabric \texttt{distributor} & 1,37 & 6,99 & 154,1 & 1,00 \\
-Peer Fabric \texttt{enduser} & 1,39 & 91,23 & 160,8 & 1,00 \\
-Peer Fabric \texttt{validator} & 1,31 & 70,99 & 153,9 & 1,00 \\
-Orderer Fabric & 0,10 & 1,52 & 80,8 & 0,10 \\
-CouchDB & 0,96 & 70,76 & 66,8 & 0,00 \\
+Peer Fabric \texttt{centralbank} & 1,59 & 68,83 & 154,2 & 0,10 \\
+Peer Fabric \texttt{distributor} & 1,44 & 6,99 & 154,1 & 0,00 \\
+Peer Fabric \texttt{enduser} & 1,44 & 91,23 & 160,8 & 0,00 \\
+Peer Fabric \texttt{validator} & 1,36 & 70,99 & 153,4 & 0,09 \\
+Orderer Fabric & 0,12 & 1,52 & 80,8 & 0,00 \\
+CouchDB & 1,04 & 70,76 & 66,8 & 0,00 \\
 Fabric CA & 0,00 & 1,03 & 28,9 & 0,00 \\
 PostgreSQL & 0,03 & 0,79 & 37,8 & 0,00 \\
-Kontainer \textit{chaincode} & 0,02 & 30,58 & 25,3 & 0,21 \\
-Klien Caliper & 0,40 & 17,98 & 313,5 & 7,69 \\
+Kontainer \textit{chaincode} & 0,00 & 30,58 & 25,3 & 0,00 \\
+Klien Caliper & 0,00 & 17,98 & 313,5 & 1,62 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Peer Fabric memakai CPU rata-rata median 1,31\% hingga 1,50\% dengan puncak 6,99\% hingga 91,23\%, sedangkan CouchDB mencapai puncak 70,76\%. Puncak memori peer berada pada 153,9 hingga 160,8 MiB. Nilai rata-rata yang rendah menunjukkan bahwa sebagian besar jendela ukur tidak sepenuhnya sibuk; penyebabnya belum diuji secara terpisah. Kolom delta menunjukkan selisih kumulatif jaringan RX per jendela; delta I/O disk belum dirangkum pada tabel ini. Nilai ini hanya mewakili pengukuran pada satu host dan tidak dibandingkan dengan pengujian primer.
+Peer Fabric memakai CPU rata-rata median 1,36\% hingga 1,59\% dengan puncak 6,99\% hingga 91,23\%, sedangkan CouchDB mencapai puncak 70,76\%. Puncak memori peer berada pada 153,4 hingga 160,8 MiB. Nilai rata-rata yang rendah menunjukkan bahwa sebagian besar jendela ukur tidak sepenuhnya sibuk; penyebabnya belum diuji secara terpisah. Kolom delta menunjukkan selisih kumulatif jaringan RX per jendela; delta I/O disk belum dirangkum pada tabel ini. Nilai ini hanya mewakili pengukuran pada satu host dan tidak dibandingkan dengan pengujian primer.
