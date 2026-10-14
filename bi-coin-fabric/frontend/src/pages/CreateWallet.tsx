@@ -7,6 +7,7 @@ import {
   submitKycProfile,
 } from '../lib/api'
 import type { DemoPrefill } from '../App'
+import { useToast } from '../components/Toaster'
 
 interface Props {
   prefill?: DemoPrefill
@@ -30,6 +31,7 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   useEffect(() => {
     if (!prefill) return
@@ -91,6 +93,7 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
         })
       }
       setMessage(`Off-chain KYC stored and anchored: ${profileID}`)
+      toast.success(`Off-chain KYC stored and anchored: ${profileID}`)
     } catch (e) {
       setError(getErrorMessage(e))
     } finally {
@@ -118,6 +121,7 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
       })
       setKycProfileId(profileID)
       setMessage(`KYC approved on-chain anchor: ${profileID}`)
+      toast.success(`KYC approved on-chain anchor: ${profileID}`)
     } catch (e) {
       setError(getErrorMessage(e))
     } finally {
@@ -133,6 +137,7 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
     try {
       const w = await createWallet({ owner_id: ownerId })
       setMessage(`Wallet created: ${w?.wallet_id ?? 'wlt_' + ownerId}; policy tier: ${w?.tier ?? 'derived on ledger'}`)
+      toast.success(`Wallet created: ${w?.wallet_id ?? 'wlt_' + ownerId}; policy tier: ${w?.tier ?? 'derived on ledger'}`)
     } catch (e) {
       setError(getErrorMessage(e))
     } finally {

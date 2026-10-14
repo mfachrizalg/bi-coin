@@ -10,6 +10,7 @@ import {
   type Wallet,
 } from '../lib/api'
 import { recordPaymentReceipt } from './Activity'
+import { useToast } from '../components/Toaster'
 import type { DemoPrefill } from '../App'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 
@@ -36,6 +37,7 @@ export default function Transfer({ role, selectedWallet, prefill, onPrefillConsu
   const [submitting, setSubmitting] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const idempotencyKey = useRef(crypto.randomUUID())
+  const toast = useToast()
 
   useEffect(() => {
     Promise.all([getWallets(), retail ? listPaymentContacts() : Promise.resolve([] as PaymentContact[])])
@@ -80,6 +82,7 @@ export default function Transfer({ role, selectedWallet, prefill, onPrefillConsu
       const result = await transfer({ senderId, receiverId, amount }, idempotencyKey.current) as { tx_id?: string; reference_id?: string }
       const reference = result.reference_id
       setMessage(`${formatRupiah(amount)} transferred successfully.`)
+      toast.success(`${formatRupiah(amount)} transferred successfully.`)
       recordPaymentReceipt({ id: crypto.randomUUID(), operation: 'Digital Rupiah transfer', amount, recipient: receiverId, txId: result.tx_id, reference, createdAt: new Date().toISOString() })
       setAmount('')
       setContactId('')
