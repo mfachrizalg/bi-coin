@@ -155,6 +155,38 @@ export interface MetricsReport {
   generated_at: string
 }
 
+export const studyRestrictionReasonOptions = [
+  { value: 'dttot', label: 'DTTOT' },
+  { value: 'authority_order', label: 'Authority order' },
+  { value: 'internal_review', label: 'Internal review' },
+] as const
+
+export type StudyRestrictionReason = typeof studyRestrictionReasonOptions[number]['value']
+
+export interface StudySubjectView {
+  subject_id: string
+  category: 'retail' | 'merchant' | 'business'
+  status: string
+  risk_level: string
+  pep: boolean
+  protected: boolean
+  restricted: boolean
+  restriction_reason: string
+  reviewer_id: string
+  senior_id: string
+  authority_evidence_ref: string
+  limits: { per_transaction: string; daily: string; monthly: string; holdings: string }
+  representatives: string[]
+  beneficial_owner_refs: string[]
+}
+
+export interface StudyLimitsInput {
+  per_transaction: string
+  daily: string
+  monthly: string
+  holdings: string
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (currentToken) headers['Authorization'] = `Bearer ${currentToken}`
@@ -201,6 +233,89 @@ export function login(data: { username: string; password: string }) {
 }
 export function getMe() { return request<MeResponse>('/auth/me') }
 
+function studyPost<T>(path: string, data?: unknown, idempotencyKey?: string) {
+  return request<T>(path, {
+    method: 'POST',
+    ...(idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {}),
+    ...(data === undefined ? {} : { body: JSON.stringify(data) }),
+  })
+}
+
+export function getStudyIdentity() { return request<string>('/identities/me') }
+export function createStudySubject(data: { subject_id: string; category: StudySubjectView['category'] }) {
+  return studyPost<{ status: string }>('/subjects', data)
+}
+export function openStudyWallet(data: { subject_id: string }) {
+  return studyPost<{ status: string }>('/customer-wallets', data)
+}
+export function getStudyBalance(subjectID: string) {
+  return request<string>('/customer-wallets/' + encodeURIComponent(subjectID) + '/balance')
+}
+export function transferStudyFunds(data: { from: string; to: string; amount: string }, idempotencyKey: string) {
+  return studyPost<unknown>('/retail-transfers', data, idempotencyKey)
+}
+export function getStudySubject(subjectID: string) {
+  return request<StudySubjectView>('/subjects/' + encodeURIComponent(subjectID))
+}
+export function protectStudySubject(subjectID: string) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/endorsement-policies')
+}
+export function recordStudyReview(subjectID: string, data: { risk_level: 'standard' | 'high'; pep: boolean }) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/reviews', data)
+}
+export function setStudyLimits(subjectID: string, data: StudyLimitsInput) {
+  return request<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/limits', {
+    method: 'PUT', body: JSON.stringify(data),
+  })
+}
+export function setStudyBusinessAuthority(subjectID: string, data: { representatives: string[]; beneficial_owner_refs: string[] }) {
+  return request<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/business-authority', {
+    method: 'PUT', body: JSON.stringify(data),
+  })
+}
+export function decideStudySubject(subjectID: string, approved: boolean) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/decisions', { approved })
+}
+export function restrictSubject(subjectID: string, reason_code: StudyRestrictionReason) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/restrictions', { reason_code })
+}
+export function requestSubjectRelease(subjectID: string, authority_evidence_ref: string) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/restriction-release-requests', { authority_evidence_ref })
+}
+export function approveSubjectRelease(subjectID: string) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/restriction-release-decisions')
+}
+export type StudyStaffRole = 'kyc_reviewer' | 'senior_approver' | 'compliance_officer'
+export function createStudyStaff(clientID: string) {
+  return studyPost<{ status: string }>('/staff', { client_id: clientID })
+}
+export function protectStudyStaff(clientID: string) {
+  return studyPost<{ status: string }>('/staff/' + encodeURIComponent(clientID) + '/endorsement-policies')
+}
+export function setStudyStaffRole(clientID: string, role: StudyStaffRole) {
+  return request<{ status: string }>('/staff/' + encodeURIComponent(clientID) + '/role', {
+    method: 'PUT', body: JSON.stringify({ role }),
+  })
+}
+export function fundStudyWallet(data: { subject_id: string; distributor_id: string; amount: string }, idempotencyKey: string) {
+  return studyPost<unknown>('/conversions', data, idempotencyKey)
+}
+export function initializeStudyMonetary() {
+  return studyPost<{ status: string }>('/monetary-initializations')
+}
+export function registerStudyDistributor(data: { distributor_id: string }) {
+  return studyPost<{ status: string }>('/distributors', data)
+}
+export function mintStudyRupiah(data: { amount: string }, idempotencyKey: string) {
+  return studyPost<{ status: string }>('/issuances', data, idempotencyKey)
+}
+export function allocateStudyReserve(data: { distributor_id: string; amount: string }, idempotencyKey: string) {
+  return studyPost<{ status: string }>('/reserve-allocations', data, idempotencyKey)
+}
+export function redeemStudyReserve(data: { distributor_id: string; amount: string }, idempotencyKey: string) {
+  return studyPost<{ status: string }>('/reserve-redemptions', data, idempotencyKey)
+}
+
 export function createWallet(data: { owner_id: string }) {
   return request<Wallet>('/wallets', { method: 'POST', body: JSON.stringify(data) })
 }
@@ -241,8 +356,8 @@ export function unfreezeParticipant(participantId: string) {
   return request(`/participants/${participantId}/unfreeze`, { method: 'POST' })
 }
 
-export function submitKycProfile(data: any) {
-  return request('/kyc/profiles', { method: 'POST', body: JSON.stringify(data) })
+export function submitKycProfile(data: any, idempotencyKey: string) {
+  return request('/kyc/profiles', { method: 'POST', headers: { 'Idempotency-Key': idempotencyKey }, body: JSON.stringify(data) })
 }
 export function refreshKycProfile(profileId: string, data: any) {
   return request(`/kyc/profiles/${profileId}/refresh`, { method: 'POST', body: JSON.stringify(data) })
@@ -266,11 +381,11 @@ export function listLimits(scope?: string) {
   return request<SystemLimit[]>(`/limits${qs}`)
 }
 
-export function requestIssuance(data: { amount: string }) {
-  return request('/issuance-requests', { method: 'POST', body: JSON.stringify(data) })
+export function requestIssuance(data: { amount: string }, idempotencyKey: string) {
+  return request('/issuance-requests', { method: 'POST', headers: { 'Idempotency-Key': idempotencyKey }, body: JSON.stringify(data) })
 }
-export function requestRedemption(data: { participant_id: string; amount: string }) {
-  return request('/redemption-requests', { method: 'POST', body: JSON.stringify(data) })
+export function requestRedemption(data: { participant_id: string; amount: string }, idempotencyKey: string) {
+  return request('/redemption-requests', { method: 'POST', headers: { 'Idempotency-Key': idempotencyKey }, body: JSON.stringify(data) })
 }
 export function submitTransfer(data: { sender_id: string; receiver_id: string; amount: string }, idempotencyKey: string) {
   return request('/transfers', {

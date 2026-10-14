@@ -1,6 +1,6 @@
 import Transfer from './Transfer'
-import QrisPayments from './QrisPayments'
-import type { DemoPrefill } from './DemoPanel'
+// import QrisPayments from './QrisPayments'
+import type { DemoPrefill } from '../App'
 
 interface Props {
   role: string
@@ -19,11 +19,11 @@ export default function Pay({ role, selectedWallet, prefill, onPrefillConsumed }
         <div>
           <div className="eyebrow">Pay</div>
           <h2>Send Digital Rupiah</h2>
-          <p className="muted">Use a Wallet ID, saved contact, or QRIS.</p>
+          <p className="muted">Use a Wallet ID or saved contact.</p>
         </div>
       </section>
       <Transfer role={role} selectedWallet={selectedWallet} prefill={prefill} onPrefillConsumed={onPrefillConsumed} />
-      {(role === 'kyc_verified' || role === 'merchant') && <QrisPayments role={role} selectedWallet={selectedWallet} />}
+      {/* {(role === 'kyc_verified' || role === 'merchant') && <QrisPayments role={role} selectedWallet={selectedWallet} />} */}
     </div>
   )
 }

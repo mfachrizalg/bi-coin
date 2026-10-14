@@ -11,7 +11,7 @@ import {
   type Participant,
 } from '../lib/api'
 import { ParticipantTypeLabel } from '../lib/constants'
-import type { DemoPrefill } from './DemoPanel'
+import type { DemoPrefill } from '../App'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 
 const badge = (type: string) => (
@@ -35,6 +35,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
   const [error, setError] = useState('')
   const [notice, setNotice] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [busy, setBusy] = useState('')
+  const issuanceKeys = useRef(new Map<string, string>())
 
   const genId = (): string => crypto.randomUUID()
 
@@ -70,7 +71,11 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
 	if (!confirmAction(`Issue ${issueForm.amount} Digital Rupiah to Treasury?`)) return
 	try {
 	  setBusy('issue')
-		await requestIssuance({ amount: issueForm.amount })
+		const amount = issueForm.amount
+		const idempotencyKey = issuanceKeys.current.get(amount) ?? crypto.randomUUID()
+		issuanceKeys.current.set(amount, idempotencyKey)
+		await requestIssuance({ amount }, idempotencyKey)
+		issuanceKeys.current.delete(amount)
 			notify('Digital Rupiah issued to Treasury')
 		setIssueForm({ amount: '' })
       load()

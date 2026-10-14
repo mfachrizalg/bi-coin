@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getMetrics, getTopology, getTransactions, listLimits, type MetricsReport, type SystemLimit, type Topology, type TransactionRecord } from '../lib/api'
+import { getMetrics, getTopology, listLimits, type MetricsReport, type SystemLimit, type Topology } from '../lib/api'
 import { formatRupiah } from '../lib/money'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 
@@ -7,7 +7,6 @@ export default function Observability() {
   const [metrics, setMetrics] = useState<MetricsReport | null>(null)
   const [topology, setTopology] = useState<Topology | null>(null)
   const [limits, setLimits] = useState<SystemLimit[]>([])
-  const [transactions, setTransactions] = useState<TransactionRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -16,19 +15,14 @@ export default function Observability() {
       getMetrics(),
       getTopology(),
       listLimits(),
-      getTransactions({ transaction_type: 'qris_payment' }),
     ])
       .then(results => {
         const errors = results.filter(result => result.status === 'rejected').map(result => String(result.reason?.message ?? result.reason))
         if (errors.length) setError(errors.join('; '))
-        const [metricsResult, topologyResult, limitsResult, transactionsResult] = results
+        const [metricsResult, topologyResult, limitsResult] = results
         if (metricsResult.status === 'fulfilled') setMetrics(metricsResult.value)
         if (topologyResult.status === 'fulfilled') setTopology(topologyResult.value)
         if (limitsResult.status === 'fulfilled') setLimits(limitsResult.value ?? [])
-        if (transactionsResult.status === 'fulfilled') {
-          setTransactions((transactionsResult.value ?? []).slice().sort((a, b) =>
-            Date.parse(b.timestamp) - Date.parse(a.timestamp)).slice(0, 8))
-        }
       })
       .finally(() => setLoading(false))
   }, [])
@@ -97,36 +91,7 @@ export default function Observability() {
         </article>
       </section>
 
-      <article className="surface-card">
-        <h3>Recent QRIS payments</h3>
-        <div className="table-shell">
-          {loading ? <LoadingSkeleton kind="table" label="Loading recent QRIS payments" rows={5} /> : <table className="data-table">
-            <thead>
-              <tr>
-                <th>Tx ID</th>
-                <th>Sender</th>
-                <th>Merchant</th>
-                <th>Amount</th>
-                <th>Reference</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.length === 0 && (
-                <tr><td colSpan={5} className="empty-cell">No `qris_payment` transactions found.</td></tr>
-              )}
-              {transactions.map(tx => (
-                <tr key={tx.tx_id}>
-                  <td><code>{tx.tx_id}</code></td>
-                  <td>{tx.participant_id}</td>
-                  <td>{tx.counterparty_id}</td>
-					<td>{formatRupiah(tx.amount)}</td>
-                  <td>{tx.reference_id ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>}
-        </div>
-      </article>
+      {/* QRIS history panel is disabled with the feature. */}
     </div>
   )
 }

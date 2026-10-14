@@ -18,6 +18,7 @@ const appSource = fs.readFileSync(new URL('../src/App.tsx', import.meta.url), 'u
 const qrisSource = fs.readFileSync(new URL('../src/pages/QrisPayments.tsx', import.meta.url), 'utf8')
 const stylesSource = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
 const contactsSource = fs.readFileSync(new URL('../src/pages/Contacts.tsx', import.meta.url), 'utf8')
+const studySource = fs.readFileSync(new URL('../src/pages/StudyConsole.tsx', import.meta.url), 'utf8')
 const walletSource = fs.readFileSync(new URL('../src/pages/WalletList.tsx', import.meta.url), 'utf8')
 const overviewSource = fs.readFileSync(new URL('../src/pages/Overview.tsx', import.meta.url), 'utf8')
 const skeletonSource = fs.readFileSync(new URL('../src/components/LoadingSkeleton.tsx', import.meta.url), 'utf8')
@@ -36,7 +37,9 @@ test('transfer requests carry an idempotency key and suppress duplicate submits'
 })
 
 test('issuance targets Treasury and distribution selects only a Custodian', () => {
-  assert.match(apiSource, /requestIssuance\(data: \{ amount: string \}\)/)
+  assert.match(apiSource, /requestIssuance\(data: \{ amount: string \}, idempotencyKey: string\)/)
+  assert.match(apiSource, /requestRedemption\([\s\S]*?idempotencyKey: string/)
+  assert.match(apiSource, /submitKycProfile\(data: any, idempotencyKey: string\)/)
   assert.match(apiSource, /receiver_participant_id: string/)
   assert.match(apiSource, /headers: \{ 'Idempotency-Key': idempotencyKey \}/)
   assert.doesNotMatch(participantsSource, /sender_participant_id/)
@@ -195,34 +198,6 @@ test('QRIS switching to a different intent clears stale pay result state', async
   }
 })
 
-test('DemoPanel exposes disclosure and current-step aria state', async () => {
-  const { moduleUrl, hooksModuleUrl } = compileFrontendModule('pages/DemoPanel.tsx')
-  const [{ default: DemoPanel }, hooksModule] = await Promise.all([
-    import(moduleUrl),
-    import(hooksModuleUrl),
-  ])
-
-  const renderer = createRenderer(hooksModule, DemoPanel, {
-    currentStep: 3,
-    onStep: () => {},
-    onPrefill: () => {},
-  })
-  renderer.render()
-
-  const disclosureButton = findByText(renderer.getTree(), 'button', 'Phase 1 — Bank Onboarding')
-  assert.ok(disclosureButton.props['aria-controls'])
-  assert.equal(disclosureButton.props['aria-expanded'], true)
-
-  const currentStepButton = findByText(renderer.getTree(), 'button', 'Issue Rp 100,000,000 to Treasury')
-  assert.equal(currentStepButton.props['aria-current'], 'step')
-
-  disclosureButton.props.onClick()
-  renderer.render()
-
-  const collapsedButton = findByText(renderer.getTree(), 'button', 'Phase 1 — Bank Onboarding')
-  assert.equal(collapsedButton.props['aria-expanded'], false)
-})
-
 test('responsive and accessibility foundations are present', () => {
   assert.doesNotMatch(stylesSource, /min-width:\s*1280px/)
   assert.match(stylesSource, /@media\s*\(max-width:/)
@@ -291,4 +266,126 @@ test('API errors preserve backend text and use an English fallback', async () =>
   assert.equal(api.formatApiError({ message: 'wallet frozen' }, 409, 'Conflict'), 'wallet frozen')
   assert.equal(api.formatApiError(null, 500, 'Internal Server Error'), 'The service is unavailable. Try again.')
   assert.equal(api.formatApiError(null, 0, ''), 'The request could not be completed.')
+})
+
+test('compliance API preserves authenticated routes, decimal strings, and idempotency keys', async () => {
+  const { moduleUrl } = compileFrontendModule('lib/api.ts')
+  const api = await import(moduleUrl)
+  const calls = []
+  const originalFetch = global.fetch
+  api.setAccessToken('study-token')
+  assert.deepEqual(api.studyRestrictionReasonOptions.map(option => option.value), [
+    'dttot', 'authority_order', 'internal_review',
+  ])
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options })
+    return jsonResponse(String(url).endsWith('/balance') ? '9007199254740993' : { status: 'ok' })
+  }
+  try {
+    assert.equal(await api.getStudyBalance('retail/one'), '9007199254740993')
+    await api.createStudySubject({ subject_id: 'retail/one', category: 'retail' })
+    await api.setStudyLimits('retail/one', {
+      per_transaction: '9007199254740993', daily: '9007199254740994', monthly: '9007199254740995', holdings: '9007199254740996',
+    })
+    await api.setStudyBusinessAuthority('business-1', { representatives: ['client-1'], beneficial_owner_refs: ['sha256-ref-1'] })
+    await api.transferStudyFunds({ from: 'retail/one', to: 'merchant-two', amount: '9007199254740993' }, 'study-transfer-key')
+  } finally {
+    api.setAccessToken('')
+    global.fetch = originalFetch
+  }
+  assert.equal(calls[0].url, '/api/customer-wallets/retail%2Fone/balance')
+  assert.equal(calls[0].options.headers.Authorization, 'Bearer study-token')
+  assert.deepEqual(JSON.parse(calls[2].options.body), {
+    per_transaction: '9007199254740993', daily: '9007199254740994', monthly: '9007199254740995', holdings: '9007199254740996',
+  })
+  assert.equal(calls[2].options.method, 'PUT')
+  assert.equal(calls[3].options.method, 'PUT')
+  assert.deepEqual(JSON.parse(calls[3].options.body), { representatives: ['client-1'], beneficial_owner_refs: ['sha256-ref-1'] })
+  assert.equal(calls[4].options.headers['Idempotency-Key'], 'study-transfer-key')
+})
+
+test('staff API encodes client IDs and sends the selected role', async () => {
+  const { moduleUrl } = compileFrontendModule('lib/api.ts')
+  const api = await import(moduleUrl)
+  const calls = []
+  const originalFetch = global.fetch
+  api.setAccessToken('staff-token')
+  global.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options })
+    return jsonResponse({ status: 'ok' })
+  }
+  try {
+    await api.createStudyStaff('x509::client/1')
+    await api.protectStudyStaff('x509::client/1')
+    await api.setStudyStaffRole('x509::client/1', 'senior_approver')
+  } finally {
+    api.setAccessToken('')
+    global.fetch = originalFetch
+  }
+  assert.equal(calls[0].url, '/api/staff')
+  assert.deepEqual(JSON.parse(calls[0].options.body), { client_id: 'x509::client/1' })
+  assert.equal(calls[1].url, '/api/staff/x509%3A%3Aclient%2F1/endorsement-policies')
+  assert.equal(calls[2].url, '/api/staff/x509%3A%3Aclient%2F1/role')
+  assert.equal(calls[2].options.method, 'PUT')
+  assert.deepEqual(JSON.parse(calls[2].options.body), { role: 'senior_approver' })
+})
+
+test('organization function tabs show only the signed-in organization actions', async () => {
+  const { moduleUrl, hooksModuleUrl } = compileFrontendModule('pages/StudyConsole.tsx')
+  const [{ default: StudyConsole }, hooksModule] = await Promise.all([import(moduleUrl), import(hooksModuleUrl)])
+  const expandedText = node => {
+    if (node == null || typeof node === 'boolean') return ''
+    if (Array.isArray(node)) return node.map(expandedText).join('')
+    if (typeof node === 'string' || typeof node === 'number') return String(node)
+    if (typeof node.type === 'function') return expandedText(node.type(node.props))
+    return expandedText(node.props?.children)
+  }
+  const validator = createRenderer(hooksModule, StudyConsole, { role: 'supervisor', section: 'study_audit' })
+  const validatorText = expandedText(validator.render())
+  assert.match(validatorText, /ValidatorMSP/)
+  assert.doesNotMatch(validatorText, /Restrict subject|Transfer rupiah|Mint/)
+
+  const retail = createRenderer(hooksModule, StudyConsole, { role: 'authenticated', section: 'study_identity' })
+  const retailText = expandedText(retail.render())
+  assert.match(retailText, /Create pending subject/)
+  assert.doesNotMatch(retailText, /Transfer rupiah|Set limits|Convert to retail wallet/)
+  const unverifiedWallet = createRenderer(hooksModule, StudyConsole, { role: 'authenticated', section: 'study_wallet' })
+  assert.match(expandedText(unverifiedWallet.render()), /cannot access this function/)
+  const retailTransfer = createRenderer(hooksModule, StudyConsole, { role: 'kyc_verified', section: 'study_transfer' })
+  assert.match(expandedText(retailTransfer.render()), /Transfer rupiah/)
+
+  const distributor = createRenderer(hooksModule, StudyConsole, { role: 'pjp', section: 'study_approval' })
+  const approvalText = expandedText(distributor.render())
+  assert.match(approvalText, /DistributorMSP/)
+  assert.match(approvalText, /Record review/)
+  assert.doesNotMatch(approvalText, /Business authority|Restrict subject|Convert to retail wallet/)
+  const business = createRenderer(hooksModule, StudyConsole, { role: 'pjp', section: 'study_business' })
+  assert.match(expandedText(business.render()), /Set business authority/)
+  const centralBank = createRenderer(hooksModule, StudyConsole, { role: 'bank_indonesia', section: 'study_monetary' })
+  assert.match(expandedText(centralBank.render()), /CentralBankMSP/)
+  assert.match(expandedText(centralBank.render()), /Allocate reserve/)
+
+  const staff = createRenderer(hooksModule, StudyConsole, { role: 'bank_indonesia', section: 'study_staff' })
+  const staffText = expandedText(staff.render())
+  assert.match(staffText, /Create staff/)
+  assert.match(staffText, /Protect staff/)
+  assert.match(staffText, /Set role/)
+  assert.doesNotMatch(staffText, /Mint|Transfer rupiah/)
+  const restrictions = createRenderer(hooksModule, StudyConsole, { role: 'pjp', section: 'study_restrictions' })
+  assert.match(expandedText(restrictions.render()), /Restrict subject/)
+
+  assert.doesNotMatch(appSource, /Controls study/)
+  assert.match(appSource, /study_identity: \{ label: 'Subject onboarding' \}/)
+  assert.match(appSource, /study_audit: \{ label: 'Controls audit' \}/)
+  assert.match(appSource, /startsWith\('study_'/)
+  assert.match(appSource, /bank_indonesia: \{ label: 'Bank Indonesia', shell: 'institutional', tabs: \['study_staff', 'study_monetary'\] \}/)
+  assert.match(appSource, /supervisor: \{ label: 'Auditor', shell: 'institutional', tabs: \['study_audit'\] \}/)
+  assert.match(appSource, /validator_bank: \{ label: 'Validator Bank', shell: 'institutional', tabs: \[\] \}/)
+  assert.match(appSource, /has no workspace in the demo/)
+  assert.doesNotMatch(appSource, /tabs: \[[^\]]*'(overview|participants|wallets|create|transfer|contacts|activity|supervision|prototype)'/)
+  assert.doesNotMatch(appSource, /DemoPanel|Show demo/)
+  const legacyValidatorConfig = appSource.match(/validator_bank: \{[^\n]+/)
+  assert.ok(legacyValidatorConfig)
+  assert.doesNotMatch(legacyValidatorConfig[0], /'study_/)
+  assert.match(studySource, /server for each username/)
 })

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   createRetailCustomer,
   createWallet,
@@ -6,7 +6,7 @@ import {
   refreshKycProfile,
   submitKycProfile,
 } from '../lib/api'
-import type { DemoPrefill } from './DemoPanel'
+import type { DemoPrefill } from '../App'
 
 interface Props {
   prefill?: DemoPrefill
@@ -14,6 +14,7 @@ interface Props {
 }
 
 export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
+  const kycKeys = useRef(new Map<string, string>())
   const [ownerId, setOwnerId] = useState('')
   const [subjectType, setSubjectType] = useState<'retail_customer' | 'merchant'>('retail_customer')
   const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('low')
@@ -62,14 +63,19 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
     try {
       const caseID = providerCaseId || `case-${customerId}`
       const accountID = walletAccountId || `ACC-${customerId.toUpperCase()}-001`
-      const profile = await submitKycProfile({
+      const request = {
         subject_type: subjectType,
         subject_id: customerId,
         provider_case_id: caseID,
         legal_name: legalName,
         document_type: documentType,
         document_number: documentNumber,
-      })
+      }
+      const requestKey = JSON.stringify(request)
+      const idempotencyKey = kycKeys.current.get(requestKey) ?? crypto.randomUUID()
+      kycKeys.current.set(requestKey, idempotencyKey)
+      const profile = await submitKycProfile(request, idempotencyKey)
+      kycKeys.current.delete(requestKey)
       const profileID = (profile as any)?.profile_id
       if (!profileID) throw new Error('KYC profile response did not include profile_id')
       setKycProfileId(profileID)
@@ -108,7 +114,6 @@ export default function CreateWallet({ prefill, onPrefillConsumed }: Props) {
         risk_level: riskLevel,
         due_diligence_level: dueDiligenceLevel,
         senior_approval: seniorApproval,
-        checks: { sanctions: 'pass', aml: 'pass' },
         document_hashes: [],
       })
       setKycProfileId(profileID)

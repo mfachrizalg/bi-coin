@@ -10,7 +10,7 @@ import {
   type Wallet,
 } from '../lib/api'
 import { recordPaymentReceipt } from './Activity'
-import type { DemoPrefill } from './DemoPanel'
+import type { DemoPrefill } from '../App'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 
 interface Props {
