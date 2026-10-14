@@ -58,12 +58,7 @@ expected endorsement failures. These tests verify the selected scenarios; they
 do not establish identity authenticity, screening effectiveness, actual PPATK
 reporting, or institutional compliance.
 
-Performance evidence is secondary and comes from Hyperledger Caliper on the
-separate five-organization \texttt{digital-rupiah} v3.0 baseline. The fixed-rate
-one-worker tests report 20 TPS for low-contention retail transfer and 2.01 TPS
-under high contention. These measurements do not benchmark the three-chaincode
-extension. Findings are limited to synthetic functional tests and a single-host
-performance baseline.
+Performance evidence is secondary and comes from Hyperledger Caliper on the separate five-organization \texttt{digital-rupiah} v3.0 baseline and, in a separate one-worker run, the controls-study extension. The fixed-rate one-worker tests on the baseline report 20 TPS for low-contention retail transfer and 2.01 TPS under high contention. These baseline measurements do not benchmark the three-chaincode extension. Findings are limited to synthetic functional tests and single-host performance measurements.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -108,7 +103,7 @@ two-tier model~\cite{sethaput2025,aryani2023critlit}.
 The primary evaluation in this work tests whether selected customer controls
 and organizational endorsement boundaries behave as designed in synthetic
 scenarios. The Caliper results provide secondary performance evidence for a
-separate baseline and are not measurements of the controls-study extension.
+separate baseline; the controls-study extension has its own one-worker Caliper run, reported in its subsection.
 
 To address this gap, we implement a Digital Rupiah prototype on a permissioned
 Hyperledger Fabric network~\cite{androulaki2018}. The prototype maps Bank
@@ -500,16 +495,7 @@ same-channel transaction, so all three policies apply to that funding flow.
 These policies and distinct-staff approvals are experimental design choices;
 they are not presented as statutory endorsement rules.
 
-The revised compliance benchmark measures the three new chaincodes with one
-Caliper worker on one host. All 31 workloads are bracketed and confirmed with
-three 30-second rounds each, with 31 of 31 preflight checks passing. Read
-operations reach 272 to 296 operations per second. Verified write throughput
-ranges from 0.184 to 4.75 TPS across 21 write workloads, and most write
-workloads confirm at 0.78 TPS or below. All functional checks pass: 20 of 20
-scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of
-15 action outcomes. The write ceiling matches the observed commit cadence
-(two-second batch timeout, one transaction per block), but this causal link is
-not isolated.
+The compliance benchmark measures the three controls-study chaincodes with one Caliper worker on one host. All 31 workloads are confirmed with three 30-second rounds each, with 31 of 31 preflight checks passing. Thirty of 31 workloads are bracketed by measured probes; the fund-reserve upper bound is unresolved because its probe failed on a fetch error before measurement. All functional checks pass: 20 of 20 scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. Read operations reach 272 to 296 operations per second. Confirmed passing write rates range from 0.184 to 4.75 TPS across 21 write workloads, with verified throughput at those rates between 0.200 and 4.613 TPS; 19 of 21 confirm at 0.78 TPS or below. The write ceiling's cause is not isolated: the study orderer's batch timeout is two seconds, and the run records no block contents, so the link to the write ceiling is not established.
 
 \subsection{Baseline On-Chain and Off-Chain Data}
 The Go chaincode in \texttt{digital\_rupiah.go} groups functions for
@@ -655,8 +641,7 @@ CouchDB instance per peer.
 
 The Caliper measurements in this section apply only to this five-organization
 baseline and \texttt{digital-rupiah} v3.0. The four-MSP controls-study
-extension is functionally smoke-tested but has no Caliper throughput or latency
-results; the baseline figures must not be attributed to its three chaincodes.
+extension is functionally smoke-tested but has its own one-worker Caliper run, reported in the Controls-Study Extension subsection; the baseline figures must not be attributed to its three chaincodes.
 
 \begin{table}[!t]
 \caption{Final testbed configuration}
@@ -886,10 +871,9 @@ interoperability.
 The controls-study extension is limited to synthetic chaincode integration
 scenarios. It does not use live identity verification or screening feeds, submit
 reports to PPATK, or establish the effectiveness of a risk model or institutional
-compliance. Its backend HTTP path has not been evaluated end-to-end. Performance
+compliance. Its backend HTTP path is exercised by functional tests but has not been load-measured. Performance
 results for the three new chaincodes are limited to one Caliper worker on one
-host with 30-second confirmation windows. The run was interrupted by a host restart
-and resumed under the same stamp from its last checkpoint.
+host with 30-second confirmation windows. The run was interrupted by a host or power interruption and resumed under the same stamp from its last checkpoint.
 
 
 \section{Conclusion}
@@ -916,7 +900,7 @@ A separate four-MSP controls-study extension implements three domain chaincodes
 and passes synthetic integration smoke scenarios for distinct senior approval,
 restriction evidence, reserve funding, retail payment, read-only ValidatorMSP
 access, and expected endorsement failures. This functional evidence is
-independent of the Caliper results above.
+independent of the baseline Caliper results above.
 
 
 \section*{Artifact Availability}
@@ -924,8 +908,7 @@ The baseline chaincode, five-organization network definition, Go backend, and
 Hyperledger Caliper workloads are available at
 \url{https://github.com/mfachrizalg/bi-coin}. The separate controls-study
 chaincodes and four-MSP network are under \texttt{bi-coin-fabric/study} and
-\texttt{bi-coin-fabric/network/study}; they are not included in the reported
-Caliper measurements.
+\texttt{bi-coin-fabric/network/study}; they are not included in the baseline Caliper measurements.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
