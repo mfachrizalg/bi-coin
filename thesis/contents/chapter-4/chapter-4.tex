@@ -8,6 +8,10 @@ ketiga membandingkan hasil penelitian dengan penelitian terdahulu.
 
 \section{Hasil Implementasi Sistem}
 
+Bagian ini melaporkan implementasi baseline \texttt{digital-rupiah} v3.0 dan
+hasil kinerjanya. Lingkungan kontrol empat MSP dan tiga \textit{chaincode}
+dilaporkan terpisah pada bagian akhir bab ini.
+
 \subsection{Jaringan Hyperledger Fabric}
 
 Jaringan \textit{blockchain} berhasil dibangun dengan lima organisasi peserta
@@ -161,8 +165,8 @@ sesuai rancangan, yaitu:
 Selain pengujian berbasis skenario tersebut, verifikasi fungsional juga
 diperkuat dengan \textit{unit test} otomatis pada lapisan \textit{backend} dan
 \textit{chaincode}. Hasil verifikasi menunjukkan bahwa paket uji
-\textit{backend} lulus seluruh pengujian dengan 57 pengujian pada 6 paket,
-sedangkan paket uji \textit{chaincode} lulus seluruh pengujian dengan 53
+\textit{backend} lulus seluruh pengujian dengan 76 pengujian pada 6 paket,
+sedangkan paket uji \textit{chaincode} lulus seluruh pengujian dengan 58
 pengujian pada 1 paket. Pada lapisan \textit{backend}, pengujian tersebut
 memverifikasi pemilihan metode layanan ke \textit{chaincode} beserta urutan
 argumennya, pembentukan \textit{anchor hash}, propagasi kegagalan
@@ -192,11 +196,9 @@ diverifikasi pada tingkat yang sesuai untuk penelitian prototipe.
 \section{Hasil Evaluasi Kinerja Final}
 
 Profil kinerja final dijalankan pada jaringan yang dibangun ulang dari keadaan
-bersih untuk setiap profil. Manifes gabungan
-\texttt{20260909-final-evidence-manifest.json} mencatat \textit{seed} suite
-20260909 (pengurutan profil); berkas konfigurasi transfer menggunakan
-\textit{seed} workload 20260725. \textit{Chaincode} \texttt{digital-rupiah}
-versi 3.0 sequence 1,
+bersih untuk setiap profil. Manifes final dan manifes studi pengganti mencatat
+\textit{seed} suite dan \textit{seed} workload, \textit{chaincode}
+\texttt{digital-rupiah} versi 3.0 sequence 1,
 Hyperledger Caliper 0.6.0, dan hash masukan serta artefak. Pengujian memakai
 satu \textit{host}, lima organisasi, satu \textit{peer} per organisasi, satu
 \textit{orderer} Raft, dan CouchDB pada setiap \textit{peer}. Topologi tersebut
@@ -213,7 +215,7 @@ menjadi konteks hasil dan tidak menunjukkan toleransi kegagalan produksi.
 \midrule
 Host & Intel Core i7-7700HQ, 4 inti fisik, 8 thread, 2,80 GHz \\
 Memori & 15,52 GiB \\
-Runtime & Node.js 22.23.2, npm 10.9.1, Docker 27.5.1 \\
+Runtime & Node.js 22.23.2, npm 10.9.8, Docker client 29.5.3 / Engine 29.8.1 \\
 Fabric / CouchDB & 2.5 / 3.2 \\
 Caliper & 0.6.0 \\
 Jaringan / kontrak & Garuda / \texttt{digital-rupiah} v3.0, sequence 1 \\
@@ -230,6 +232,15 @@ ditawarkan adalah jumlah transaksi yang dikirim dibagi durasi pengukuran,
 sedangkan laju yang berhasil dicapai adalah jumlah penyelesaian berhasil dibagi
 durasi yang sama. Latensi yang dilaporkan menggunakan batas Fabric Caliper,
 \texttt{time\_final - time\_create}, untuk penyelesaian berhasil.
+
+Studi pengganti menetapkan jumlah transfer ritel sebesar Rp100, lebih rendah
+daripada batas harian dompet STANDARD sebesar Rp10.000.000. Jumlah tersebut
+digunakan sebagai kontrol sintetis untuk memisahkan pengaruh batas kebijakan
+dompet dari kontensi, bukan sebagai representasi nominal pembayaran ritel.
+Profil berpasangan menguji kontensi rendah dan tinggi pada 20, 75, dan 150 TPS
+dengan lima pengulangan. Studi pengganti Rp1.000 mengulang distribusi pada 75
+TPS, penebusan pada 20 TPS, serta kalibrasi transfer ritel pada 30, 40, dan 50
+TPS.
 
 \begin{table}[H]
 \caption{Beban berkelanjutan pada pengujian primer}
@@ -265,27 +276,39 @@ yang memenuhi kriteria. Laju uji dan statistik lengkap per pengulangan tersedia
 pada artefak \textit{summary} benchmark.
 
 \begin{table}[H]
-\caption{Kategori kegagalan pada seluruh pengujian primer}
+\caption{Kategori kegagalan pada pengujian primer pengganti}
 \label{tab:diagnostik-kegagalan-transfer}
 \centering
 \scriptsize
-\begin{tabular}{@{}lr@{}}
+\begin{tabular}{@{}p{5.0cm}lr@{}}
 \toprule
-\textbf{Kategori} & \textbf{Jumlah} \\
+\textbf{Beban kerja} & \textbf{Kategori} & \textbf{Jumlah} \\
 \midrule
-MVCC read conflict & 358.413 \\
-Unknown failure & 1.013.243 \\
+Distribusi / kalibrasi Rp1.000 & \textit{MVCC read conflict} & 46.716 \\
+Transfer rendah Rp100 & \textit{MVCC read conflict} & 68.922 \\
+Transfer rendah Rp100 & Batas konkurensi gateway & 45.774 \\
+Transfer tinggi Rp100 & \textit{MVCC read conflict} & 110.570 \\
+Transfer tinggi Rp100 & Batas konkurensi gateway & 1.501 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pada pengujian primer, analyzer mengklasifikasikan 358.413 kegagalan sebagai
-\textit{MVCC read conflict} dan 1.013.243 sebagai \textit{Unknown failure}.
-Status 11 menunjukkan transaksi membaca versi state yang berubah sebelum
-validasi. Kategori \textit{Unknown failure} dipertahankan sebagai kategori
-konservatif ketika log tidak menyediakan alasan yang cukup untuk klasifikasi
-lebih spesifik; kategori ini tidak ditafsirkan sebagai bukti tunggal dari
-kontensi atau kapasitas gateway.
+Pada studi pengganti, analyzer mengklasifikasikan 272.924 kegagalan sebagai
+\textit{MVCC read conflict} dan 47.275 sebagai kegagalan batas konkurensi
+gateway. Angka tersebut hanya mencakup beban kerja pengganti pada tabel, bukan
+seluruh operasi pada suite bukti final sebelumnya. Konflik MVCC terjadi ketika
+transaksi membaca versi state yang berubah sebelum validasi, sedangkan batas
+konkurensi gateway menunjukkan kejenuhan pada batas Fabric Gateway. Kedua
+kategori tersebut tidak ditafsirkan sebagai bukti tunggal dari bottleneck
+produksi.
+
+Kontrol berpasangan Rp100 memperjelas pengaruh kontensi. Pada 20 TPS, kontensi
+rendah menyelesaikan 2.401 dari 2.401 permintaan, dengan laju berhasil 20,01
+TPS, tingkat keberhasilan 100\%, dan p95 0,63 detik. Kontensi tinggi hanya
+mencapai sekitar 10\% penyelesaian, dengan laju berhasil 2,01 TPS dan p95 0,59
+detik. Pada 75 dan 150 TPS, kedua profil juga tidak memenuhi kriteria
+keberlanjutan karena menghasilkan konflik MVCC atau kegagalan batas konkurensi
+gateway.
 
 \begin{table}[H]
 \caption{Statistik pengulangan pada beban berkelanjutan}
@@ -406,9 +429,9 @@ teknologi. Tabel~\ref{tab:perbandingan-cbdc} membandingkan jenis artefak,
 lingkup bukti, dan posisi kontribusi. Jika angka kinerja disebutkan, angka
 tersebut hanya menjelaskan konfigurasi masing-masing artefak dan tidak
 dimaksudkan sebagai peringkat langsung antarsistem. Dalam kerangka itu,
-penelitian ini mengisi ruang purwarupa CBDC ritel berbasis Hyperledger Fabric,
-sedangkan Aryani berfokus pada kajian literatur dan PoC Proyek Garuda pada
-Rupiah Digital grosir.
+penelitian ini menyajikan purwarupa CBDC ritel berbasis Hyperledger Fabric
+dengan pengawasan dan tolok ukur Caliper, sedangkan Aryani berfokus pada kajian
+literatur dan PoC Proyek Garuda pada Rupiah Digital grosir.
 
 \begin{table}[H]
     \caption{Perbandingan penelitian ini dengan tinjauan literatur Aryani (2023) dan PoC Proyek Garuda (2024).}
@@ -432,6 +455,14 @@ Rupiah Digital grosir.
     \end{tabular}
 \end{table}
 
+Rohmalia dan Nugraha \cite{rohmalia2023retail} juga melaporkan purwarupa CBDC
+ritel berbasis Fabric dengan pembuatan akun dan transfer antarpengguna.
+Implementasi penelitian ini mencakup distribusi melalui bank/PJP, pembayaran
+pedagang, dan pengawasan, lalu mencatat kinerjanya melalui Caliper. Waktu
+pengiriman satu dan 50 data yang dilaporkan Rohmalia dan Nugraha tidak
+dibandingkan langsung dengan \textit{throughput} atau latensi penelitian ini
+karena beban dan batas pengukurannya berbeda.
+
 Perbandingan ini terbatas pada posisi kontribusi dan ruang lingkup teknis.
 Kalibrasi menggunakan satu, dua, empat, dan delapan \textit{worker}, sedangkan
 pengujian primer menggunakan satu \textit{worker} yang dipilih berdasarkan
@@ -444,3 +475,104 @@ Hyperledger Fabric. Variasi tingkat sukses pada lima pengulangan setiap beban
 menunjukkan bahwa hasil ini merupakan garis dasar lokal yang dapat diulang,
 bukan kapasitas maksimum Hyperledger Fabric atau bukti reproduksibilitas lintas
 mesin \cite{fabric_perf2023}.
+
+\section{Hasil Uji Kontrol pada Lingkungan Terisolasi}
+
+Lingkungan studi kontrol dijalankan terpisah dari jaringan lima organisasi
+yang digunakan untuk pengukuran Caliper. Empat \textit{peer} bergabung pada
+kanal \texttt{rupiah-study}; tiga \textit{chaincode}, yaitu
+\texttt{rupiah-monetary}, \texttt{rupiah-controls}, dan
+\texttt{rupiah-payments}, berhasil dikomit dengan persetujuan definisi dari
+keempat MSP.
+
+Urutan pesan pada pembatasan dan pelepasan, konversi \textit{wholesale-to-retail}, serta
+transfer ritel ditampilkan pada Gambar~\ref{fig:ch3-study-sequence-release},
+Gambar~\ref{fig:ch3-study-sequence-conversion}, dan
+Gambar~\ref{fig:ch3-study-sequence-transfer}. Hasil pengujian berikut
+mengevaluasi alur kontrol sintetis tersebut.
+
+\textit{Unit test} pada ketiga modul \textit{chaincode} dan seluruh paket
+\textit{backend} lulus. Uji integrasi sintetis pada jaringan juga lulus untuk
+pendaftaran subjek, persetujuan risiko tinggi oleh staf berbeda, alur
+pembukaan dompet dan pembayaran, pendanaan dari cadangan, pembatasan dan
+pembukaan pembatasan dengan bukti otoritas, serta pembacaan subjek oleh
+\texttt{ValidatorMSP}. Uji tersebut menolak transaksi moneter, pembayaran,
+pendanaan, dan perubahan kontrol ketika organisasi pendukung tidak memenuhi
+kebijakan yang berlaku.
+
+Hasil ini menunjukkan perilaku fungsional pada skenario sintetis yang diuji,
+bukan kepatuhan hukum menyeluruh, efektivitas deteksi AML/CFT pada populasi
+nyata, atau keberhasilan pengiriman laporan kepada PPATK.
+
+Pengujian kinerja untuk ketiga \textit{chaincode} studi dijalankan dengan satu \textit{worker} Caliper pada satu host lokal menggunakan \textit{stamp} \texttt{run-20261014-01}. Seluruh 31 beban kerja diukur dan dikonfirmasi, dengan pemeriksaan kesiapan 31 dari 31 lulus. Run ini sempat terhenti karena restart host dan dilanjutkan dengan \textit{stamp} yang sama dari titik pemeriksaan terakhir. Setelah pelanjutan, konfirmasi \texttt{fund-reserve} gagal dengan HTTP 500 sehingga pencariannya diulang seluruhnya. Pemeriksaan kebenaran lulus, yaitu 20 dari 20 skenario, 207 dari 207 sel otorisasi, 27 dari 27 kasus validasi, dan 15 dari 15 hasil aksi, tanpa pemeriksaan yang tidak terselesaikan. Kapasitas terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
+
+\begin{table}[H]
+\centering
+\caption{Kapasitas terkonfirmasi tiga \textit{chaincode} studi pada satu \textit{worker} (\textit{stamp} \texttt{run-20261014-01})}
+\label{tab:ch4-kapasitas-kontrol}
+\begin{tabular}{llllrr}
+\toprule
+Beban kerja & \textit{Chaincode} & Jenis & Terkonfirmasi (ops/s) & Gagal pertama (ops/s) \\
+\midrule
+\texttt{create-pending} & \texttt{rupiah-controls} & tulis & 4,75 & 5,125 \\
+\texttt{protect-subject} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{create-staff-pending} & \texttt{rupiah-controls} & tulis & 0,195313 & 0,207031 \\
+\texttt{protect-staff} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{set-staff-role} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{record-review} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{approve-standard} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{decide-high-risk} & \texttt{rupiah-controls} & tulis & 0,195313 & 0,207031 \\
+\texttt{set-limits} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{set-business-authority} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{freeze-subject} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{request-unfreeze} & \texttt{rupiah-controls} & tulis & 0,78125 & 0,828125 \\
+\texttt{approve-unfreeze} & \texttt{rupiah-controls} & tulis & 0,195313 & 0,207031 \\
+\texttt{read-caller-identity} & \texttt{rupiah-controls} & baca & 296 & 320 \\
+\texttt{can-pay} & \texttt{rupiah-controls} & baca & 296 & 320 \\
+\texttt{read-limits} & \texttt{rupiah-controls} & baca & 296 & 320 \\
+\texttt{can-act-for} & \texttt{rupiah-controls} & baca & 296 & 320 \\
+\texttt{validator-read-subject} & \texttt{rupiah-controls} & baca & 296 & 320 \\
+\texttt{register-distributor} & \texttt{rupiah-monetary} & tulis & 0,78125 & 0,828125 \\
+\texttt{mint} & \texttt{rupiah-monetary} & tulis & 0,195313 & 0,207031 \\
+\texttt{allocate-reserve} & \texttt{rupiah-monetary} & tulis & 0,195313 & 0,207031 \\
+\texttt{redeem-reserve} & \texttt{rupiah-monetary} & tulis & 0,195313 & 0,207031 \\
+\texttt{read-treasury} & \texttt{rupiah-monetary} & baca & 296 & 320 \\
+\texttt{read-total-supply} & \texttt{rupiah-monetary} & baca & 296 & 320 \\
+\texttt{read-reserve} & \texttt{rupiah-monetary} & baca & 296 & 320 \\
+\texttt{open-wallet} & \texttt{rupiah-payments} & tulis & 4,625 & 5 \\
+\texttt{transfer-retail} & \texttt{rupiah-payments} & tulis & 0,78125 & 0,828125 \\
+\texttt{transfer-merchant} & \texttt{rupiah-payments} & tulis & 0,195313 & 0,207031 \\
+\texttt{read-balance} & \texttt{rupiah-payments} & baca & 272 & 296 \\
+\texttt{read-receipt} & \texttt{rupiah-payments} & baca & 272 & 296 \\
+\texttt{fund-reserve} & \texttt{rupiah-payments} & tulis & 0,183594 & 0,195313 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Operasi baca mencapai 272 hingga 296 ops/s pada sepuluh beban baca. Operasi tulis terverifikasi berada pada rentang 0,184 hingga 4,75 TPS pada 21 beban tulis, dengan \texttt{create-pending} (4,75 TPS) dan \texttt{open-wallet} (4,625 TPS) sebagai nilai tertinggi. Sebagian besar beban tulis terkonfirmasi pada 0,78 TPS atau lebih rendah. Pola ini sesuai dengan batas komit yang teramati: konfigurasi orderer studi memakai \texttt{BatchTimeout} 2 detik, dan blok yang teramati hanya memuat satu transaksi. Hubungan sebab-akibat ini belum diuji secara terpisah. Angka tersebut berlaku untuk satu \textit{worker}, satu host, dan durasi konfirmasi 30 detik, sehingga tidak dimaksudkan sebagai kapasitas produksi.
+
+Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk 31 beban kerja yang terkonfirmasi. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai per kelompok komponen, dengan rata-rata median CPU dan puncak maksimum antar jendela.
+
+\begin{table}[H]
+\centering
+\caption{Konsumsi sumber daya komponen pada jendela konfirmasi 30 detik (31 beban kerja)}
+\label{tab:ch4-sumber-daya-kontrol}
+\begin{tabular}{lrrrr}
+\toprule
+Komponen & CPU rata-rata median (\%) & CPU puncak maks (\%) & Memori puncak maks (MiB) & Delta RX median (MB) \\
+\midrule
+Peer Fabric \texttt{centralbank} & 1,50 & 68,83 & 154,2 & 1,00 \\
+Peer Fabric \texttt{distributor} & 1,37 & 6,99 & 154,1 & 1,00 \\
+Peer Fabric \texttt{enduser} & 1,39 & 91,23 & 160,8 & 1,00 \\
+Peer Fabric \texttt{validator} & 1,31 & 70,99 & 153,9 & 1,00 \\
+Orderer Fabric & 0,10 & 1,52 & 80,8 & 0,10 \\
+CouchDB & 0,96 & 70,76 & 66,8 & 0,00 \\
+Fabric CA & 0,00 & 1,03 & 28,9 & 0,00 \\
+PostgreSQL & 0,03 & 0,79 & 37,8 & 0,00 \\
+Kontainer \textit{chaincode} & 0,02 & 30,58 & 25,3 & 0,21 \\
+Klien Caliper & 0,40 & 17,98 & 313,5 & 7,69 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Peer Fabric memakai CPU rata-rata median 1,31\% hingga 1,50\% dengan puncak 6,99\% hingga 91,23\%, sedangkan CouchDB mencapai puncak 70,76\%. Puncak memori peer berada pada 153,9 hingga 160,8 MiB. Nilai rata-rata yang rendah menunjukkan bahwa sebagian besar jendela ukur tidak sepenuhnya sibuk; penyebabnya belum diuji secara terpisah. Kolom delta menunjukkan selisih kumulatif jaringan RX per jendela; delta I/O disk belum dirangkum pada tabel ini. Nilai ini hanya mewakili pengukuran pada satu host dan tidak dibandingkan dengan pengujian primer.

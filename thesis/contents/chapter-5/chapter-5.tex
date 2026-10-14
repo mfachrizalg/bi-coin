@@ -14,6 +14,13 @@ sebagai berikut.
     kustodian. Implementasi dijalankan pada Hyperledger Fabric 2.5 dengan lima
     organisasi, \textit{backend} Go, CouchDB, dan PostgreSQL, sehingga alur
     tersebut dapat direalisasikan sebagai artefak teknis yang dapat diuji.
+    \item Sebagai eksperimen kontrol terpisah, penelitian ini membangun jaringan
+    empat MSP dan tiga \textit{chaincode} dengan data sintetis. Uji integrasi
+    memverifikasi persetujuan risiko tinggi oleh dua staf berbeda, pembatasan
+    dan pembukaan pembatasan berbukti, pembayaran, pendanaan, pembacaan
+    \texttt{ValidatorMSP}, dan penolakan transaksi yang tidak memenuhi
+    \textit{endorsement}. Bukti ini terbatas pada skenario uji; hasilnya tidak
+    menyatakan kepatuhan institusional atau efektivitas AML/CFT di dunia nyata.
     \item Sebagai bagian dari rumusan masalah pertama mengenai transfer ritel dan
     pengawasan, penelitian ini menunjukkan bahwa pemisahan peran organisasi,
     pemeriksaan MSP kustodian, kepemilikan dompet, status beku, dan kecukupan
@@ -34,19 +41,22 @@ sebagai berikut.
     pembukaan pembekuan, 25 TPS untuk penebusan, serta 20 TPS untuk transfer
     ritel dan pembayaran pedagang pada kontensi rendah. Penerbitan, distribusi,
     dan transfer ritel dengan kontensi tinggi tidak memenuhi kriteria tersebut
-    pada laju yang diuji. Hasil ini berlaku pada satu inang dan topologi lokal,
-    sehingga belum menetapkan kapasitas nasional atau reproduktibilitas lintas
-    mesin.
+    pada laju yang diuji. Pada kontrol berpasangan dengan jumlah Rp100, kontensi
+    rendah mencapai 20,01 TPS dengan tingkat keberhasilan 100\% pada 20 TPS,
+    sedangkan kontensi tinggi hanya mencapai 2,01 TPS dan sekitar 10\%
+    penyelesaian. Hasil ini berlaku pada satu inang dan topologi lokal, sehingga
+    belum menetapkan kapasitas nasional atau reproduktibilitas lintas mesin.
 \end{enumerate}
 
 \section{Saran}
 
 \begin{enumerate}
+    \item Menguji sensitivitas kapasitas tulis terhadap \texttt{BatchTimeout} orderer. Perbandingan jumlah \textit{worker} merupakan penelitian lanjutan karena pengukuran pada studi ini dibatasi pada satu \textit{worker} dan satu host.
     \item Mengulang protokol Caliper pada beberapa perangkat keras dan topologi
     jaringan, kemudian menjalankan \textit{soak test} berdurasi panjang untuk
     menguji kestabilan hasil di luar satu inang.
-    \item Menelusuri kegagalan penerbitan dan distribusi serta kategori
-    \textit{Unknown failure} dengan instrumentasi tahap \textit{endorsement},
+    \item Menelusuri kegagalan penerbitan dan distribusi serta konflik MVCC dan
+    batas konkurensi gateway dengan instrumentasi tahap \textit{endorsement},
     validasi, dan pengiriman agar penyebab bisnis dan infrastruktur dapat
     dipisahkan.
     \item Memperluas skenario kontensi dompet bersama dan menguji kebijakan
@@ -63,4 +73,7 @@ sebagai berikut.
     yang mencakup perangkat aman, pencegahan \textit{double-spending}, dan
     rekonsiliasi sesuai Project Polaris \cite{polaris_security,
     polaris_handbook}.
+    \item Menguji API \textit{backend} secara \textit{end-to-end} dengan basis
+    data studi dan identitas per pengguna, lalu menjalankan Caliper terpisah
+    pada tiga \textit{chaincode} apabila evaluasi kinerjanya diperlukan.
 \end{enumerate}

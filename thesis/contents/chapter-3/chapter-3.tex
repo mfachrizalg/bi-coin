@@ -3,9 +3,11 @@
 \section{Metode yang Digunakan}
 
 Metode yang digunakan adalah \textit{prototyping} dengan tahapan perancangan,
-implementasi, dan pengujian. Sistem dibangun sebagai purwarupa fungsional yang
-kemudian dievaluasi kinerjanya secara kuantitatif menggunakan Hyperledger
-Caliper. Siklus SDLC metode \textit{prototyping} yang diterapkan ditunjukkan
+implementasi, dan pengujian. Evaluasi utama memverifikasi kontrol terpilih
+melalui skenario fungsional dan kebijakan \textit{endorsement}, serta mengukur
+kapasitas lokal tiga \textit{chaincode} eksperimen pada jaringan empat MSP
+menggunakan Hyperledger Caliper.
+Siklus SDLC metode \textit{prototyping} yang diterapkan ditunjukkan
 pada Gambar~\ref{fig:sdlc-proto}: keempat fase (analisis kebutuhan, perancangan,
 implementasi, dan evaluasi) diulang secara iteratif hingga purwarupa memenuhi
 spesifikasi.
@@ -37,7 +39,7 @@ aktor dan batas wewenangnya, antarmuka utama sistem, kebutuhan fungsional, dan
 kebutuhan nonfungsional sebelum implementasi dilakukan. Pada penelitian ini,
 ruang lingkup perangkat lunak mencakup empat antarmuka utama, yaitu aplikasi
 klien, \textit{backend API}, basis data luring PostgreSQL, dan jaringan
-\textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya.
+\textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya. Aplikasi klien hanya berfungsi sebagai alat bantu demonstrasi dan tidak termasuk dalam evaluasi penelitian ini.
 
 Pemangku kepentingan utama terdiri atas Bank Indonesia sebagai penerbit dan
 pengawas, bank validator dan PJP sebagai kustodian institusional, pedagang dan
@@ -118,6 +120,11 @@ pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
 
 \subsubsection{Perancangan Arsitektur Sistem Blockchain}
 
+Arsitektur dan lima organisasi pada subbab ini menjelaskan baseline
+\texttt{digital-rupiah} v3.0 yang digunakan untuk pengukuran kinerja. Lingkungan
+empat MSP untuk pengujian kontrol dijelaskan terpisah pada bagian eksperimen
+kontrol di bawah.
+
 Secara konseptual, sistem menggunakan model distribusi Rupiah Digital dua
 jenjang sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
 Jenjang distribusi institusional menghubungkan Treasury Bank Indonesia selaku
@@ -183,7 +190,7 @@ dan auditabilitas transaksi.
 
 \input{contents/figures/system-architecture}
 
-Jaringan \textit{blockchain} dirancang dengan lima organisasi peserta dan satu
+Jaringan baseline \textit{blockchain} dirancang dengan lima organisasi peserta dan satu
 organisasi \textit{orderer}, merepresentasikan ekosistem Rupiah Digital
 multipihak. Setiap organisasi memiliki MSP dan \textit{peer} tersendiri dengan
 basis data status CouchDB. Rincian organisasi disajikan pada
@@ -192,7 +199,7 @@ Tabel~\ref{tab:jaringan}.
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Organisasi pada jaringan Rupiah Digital}
+	\caption{Organisasi pada jaringan baseline Rupiah Digital}
 	\label{tab:jaringan}
 	\centering
 	\begin{tabular}{p{3.6cm} p{3.2cm} p{5.6cm}}
@@ -429,48 +436,45 @@ eksternal \cite{androulaki2018}.
 
 \subsection{Metode Pengujian}
 
-Pengujian terdiri atas pengujian fungsional dan pengujian kinerja. Pengujian
-fungsional memverifikasi bahwa setiap alur proses berjalan sesuai rancangan,
-termasuk otorisasi dan keselamatan transfer. Verifikasi fungsional dilakukan
-melalui dua bentuk pengujian yang saling melengkapi, yaitu skenario fungsional
-\textit{end-to-end} pada purwarupa serta \textit{unit test} otomatis pada logika
-layanan \textit{backend} dan aturan bisnis \textit{chaincode}. Pengujian skenario
-digunakan untuk memastikan integrasi antarkomponen berjalan sesuai rancangan,
-sedangkan \textit{unit test} digunakan untuk memeriksa ketepatan aturan pada
-lapisan yang lebih terisolasi, seperti kontrol akses berbasis peran,
-pembaruan status dompet, dan pembaruan saldo atomik.
-Pengujian kinerja dilakukan menggunakan Hyperledger Caliper untuk mengukur
-\textit{throughput} dan latensi pada berbagai skenario beban. Suite pengujian
-Caliper dibagi menjadi tiga kelompok, yaitu garis dasar transfer ritel, profil
-\textit{repeatability} untuk beban puncak, serta profil khusus yang menekankan
-konformansi kebijakan dan konservasi saldo pada permintaan agregat berlebih.
+Pengujian dibagi menjadi pengujian fungsional dan pengujian kinerja. Pengujian
+fungsional menggunakan skenario \textit{ledger smoke test}, \textit{unit test},
+serta matriks otorisasi dan validasi API. Skenario tersebut memeriksa status
+transaksi dan dampak yang diharapkan pada ledger. Penolakan hanya dinilai benar
+jika keadaan ledger sebelum dan sesudah transaksi tetap sama.
 
-Skenario pengujian kinerja dibagi menjadi pilot saturasi, kalibrasi jumlah
-\textit{worker}, dan pengujian primer. Setiap jenis transaksi diukur secara
-terpisah sehingga penerbitan, distribusi, transfer, pembayaran pedagang,
-penebusan, kueri saldo, serta perubahan status dompet tidak dicampur menjadi
-satu angka TPS. Transfer ritel juga memiliki profil kontensi rendah dan
-kontensi tinggi dengan pengirim bersama. Pilot digunakan untuk menemukan
-wilayah saturasi, sedangkan pengujian primer memakai jumlah \textit{worker}
-terkecil yang dipilih dari kalibrasi dan mengulang setiap beban lima kali.
-Konfigurasi pengujian dirangkum pada Tabel~\ref{tab:skenario}, sedangkan
-jenis transaksi dan kontensi dipisahkan pada Tabel~\ref{tab:uji-fungsional}.
+Pengujian kinerja mengukur 30 metode kontrak publik dengan Hyperledger Caliper
+dan konektor Fabric. Metode \texttt{Initialize} dan
+\texttt{DebitReserveForFunding} hanya diperiksa secara fungsional karena
+\texttt{DebitReserveForFunding} dipanggil secara internal oleh konversi. Metode
+\texttt{Transfer} diuji dengan variasi penerima ritel dan pedagang sehingga
+terdapat 31 beban kerja kinerja. Operasi baca dilaporkan sebagai operasi
+terverifikasi per detik, sedangkan transaksi tulis dilaporkan sebagai TPS
+terverifikasi. Semua panggilan kinerja diarahkan langsung ke \textit{chaincode};
+latensi pemrosesan API, PostgreSQL, dan KYC tidak digabungkan ke hasil Fabric.
+
+Seluruh pengujian kinerja memakai satu \textit{worker} lokal. Inisialisasi ronde
+Caliper menyiapkan koneksi; tidak ada ronde pemanasan bertimer. Matriks API
+merupakan pemeriksaan kebenaran yang terpisah: 207 sel peran-rute untuk
+otorisasi, 27 kasus validasi permintaan JSON, dan 15 pemeriksaan hasil aksi
+tanpa badan permintaan.
+
+Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port host, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan drain memenuhi batas. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya diambil setiap detik untuk setiap komponen selama jendela ukur. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai percobaan terpisah dan tidak dihitung sebagai bukti kapasitas. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Skenario beban pengujian kinerja}
+	\caption{Tahap pencarian dan konfirmasi kapasitas}
 	\label{tab:skenario}
 	\centering
-	\begin{tabular}{p{3.2cm} p{2cm} p{2.5cm} p{4.1cm}}
+	\begin{tabular}{p{2.7cm} p{10cm}}
 	\toprule
-	\textbf{Ronde} & \textbf{Durasi/jumlah} & \textbf{Laju (TPS)} & \textbf{Beban kerja} \\
+	\textbf{Tahap} & \textbf{Prosedur dan kriteria} \\
 	\midrule
-	Pilot saturasi & 30 detik & 5, 10, 20, 40, 60, 80, 100, 150 & Transfer ritel, kontensi rendah, satu \textit{worker} \\
-	Kalibrasi \textit{worker} & 60 detik & 30, 40, 50 & Transfer ritel, 1/2/4/8 \textit{worker}, lima pengulangan \\
-	Pengujian primer & 120 detik & Per jenis transaksi & Satu \textit{worker} terpilih, lima pengulangan per laju \\
-	Kontensi tinggi & 120 detik & Per laju primer & Transfer ritel dengan satu pengirim bersama, lima pengulangan \\
-	Demonstrasi KYC & Lima pengulangan & -- & Go/PostgreSQL/KYC secara \textit{end-to-end}, terpisah dari Fabric \\
+	Kesiapan & Petakan penanda tangan ke MSP yang berwenang, konfigurasi tiga \textit{chaincode} dan empat MSP, lalu pastikan setiap beban kerja berhasil. Inisialisasi ronde Caliper menyiapkan koneksi tanpa ronde pemanasan bertimer. \\
+	Braket & Gunakan hasil terdahulu hanya sebagai petunjuk laju awal; bila tidak tersedia, mulai pada 32 operasi/detik. Tetapkan rentang 0,1--4.096 operasi/detik. Jika laju awal lulus tetapi belum ada batas gagal, kalikan laju dengan empat; jika laju awal gagal tetapi belum ada batas lulus, bagi laju dengan empat sampai braket terbentuk. \\
+	Pencarian biner & Uji titik tengah braket dalam ronde 10 detik sampai selisih relatif laju gagal terhadap laju lulus paling besar 10\%. Kesalahan konfigurasi atau data uji menghentikan pencarian beban kerja tersebut untuk diagnosis. \\
+	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. \\
+	Interpretasi & Kelulusan pada batas 4.096 operasi/detik dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh 31 beban kerja adalah 46,5 menit, di luar penyiapan, pencarian, dan verifikasi. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -479,47 +483,55 @@ jenis transaksi dan kontensi dipisahkan pada Tabel~\ref{tab:uji-fungsional}.
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Jenis transaksi dan kontensi yang diukur secara terpisah}
+	\caption{Cakupan 20 skenario fungsional dan assertion yang dijalankan}
 	\label{tab:uji-fungsional}
 	\centering
-	\begin{tabular}{p{3.4cm} p{1.1cm} p{1.6cm} p{5.2cm}}
+	\begin{tabular}{p{3.1cm} p{9.6cm}}
 	\toprule
-	\textbf{Profil} & \textbf{Tx} & \textbf{Laju (TPS)} & \textbf{Hasil yang diharapkan} \\
+	\textbf{Kelompok skenario} & \textbf{Skenario katalog dan hasil yang diperiksa} \\
 	\midrule
-	Penerbitan & -- & Primer & Fungsi \textit{Mint} pada Treasury \\
-	Distribusi & -- & Primer & Distribusi ke kustodian \\
-	Transfer ritel & -- & Primer & Transfer antarpelanggan pada kontensi rendah dan tinggi \\
-	Pembayaran pedagang & -- & Primer & Transfer pelanggan--pedagang \\
-	Penebusan & -- & Primer & Fungsi \textit{Burn} dari dompet \\
-	Kueri dan status dompet & -- & Primer & Kueri saldo, pembekuan, dan pembukaan pembekuan \\
+	KYC dan pemisahan kewenangan & \texttt{kyc-risk-pep}, \texttt{staff-separation}, \texttt{business-authority}, \texttt{restriction-reasons}, dan \texttt{fresh-release-evidence}; hasil izin/penolakan dan bukti pelepasan diperiksa terhadap keadaan subjek pada ledger. \\
+	Otorisasi dan transfer & \texttt{authorization-endorsement}, \texttt{transaction-limits}, \texttt{transfer-category-matrix}, dan \texttt{transfer-replay-conflict}; identitas pemanggil, kebijakan endorsement, batas, kategori transfer, referensi ulang, serta dampak ledger diperiksa. \\
+	Konversi dan penebusan & \texttt{conversion-replay-conflict}, \texttt{conversion-insufficient-reserve}, \texttt{conversion-holdings-limit}, \texttt{conversion-failure-atomicity}, \texttt{redemption-replay-conflict}, dan \texttt{redemption-conservation}; konflik/replay, saldo reserve, batas kepemilikan, atomisitas kegagalan, dan konservasi nilai diverifikasi. \\
+	Akses baca, inisialisasi, dan API & \texttt{msp-read-authorization}, \texttt{initialization-and-nested-debit}, \texttt{api-route-authorization-matrix}, \texttt{api-request-validation-matrix}, dan \texttt{api-route-action-outcomes}; hasil ledger, validasi, otorisasi, dan dampak aksi diperiksa secara terpisah. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
 \endgroup
 
-Metrik yang diukur meliputi laju yang ditawarkan, laju yang berhasil dicapai,
-tingkat keberhasilan, latensi rata-rata, median (p50), p95, p99, simpangan
-baku, minimum, maksimum, serta penggunaan sumber daya \cite{hlf_metrics}.
-Laju yang ditawarkan dihitung dari seluruh transaksi yang dikirim, sedangkan
-laju yang berhasil dicapai hanya menghitung penyelesaian berhasil.
-Tingkat keberhasilan dihitung dengan Persamaan~\ref{eq:benchmark-success-rate}.
+Setiap skenario katalog dipetakan ke assertion yang dapat dijalankan; jumlah
+baris katalog tidak diperlakukan sebagai jumlah pengujian yang berhasil.
+Metrik setiap laju mencakup jumlah dan laju operasi yang dikirim, hasil
+terverifikasi, kegagalan, waktu habis, hasil belum terselesaikan, antrean pada
+batas akhir ronde, serta penyelesaian terlambat. Latensi dilaporkan sebagai
+median, p95, maksimum, dan jumlah sampel. Penggunaan sumber daya mencakup
+rata-rata dan puncak CPU serta memori per komponen, juga delta I/O jaringan dan
+disk; sampel diambil setiap satu detik \cite{hlf_metrics}. Kegagalan dicatat
+bersama ID transaksi, diagnostik Gateway/peer, kode validasi, dan kelas sebab;
+sebab terkonfirmasi dibedakan dari hipotesis.
 
-\begin{equation}
-    R_s = \frac{N_{\mathrm{success}}}{N_{\mathrm{submitted}}} \times 100\%
-    \label{eq:benchmark-success-rate}
-\end{equation}
+Untuk sebuah kandidat kapasitas, seluruh hasil pada jendela ukur harus
+terverifikasi, tanpa kegagalan tak terduga, waktu habis, ataupun hasil belum
+terselesaikan, serta dengan jejak transaksi dan jendela sumber daya yang lengkap.
+Penolakan yang diharapkan hanya dihitung benar apabila assertion
+memastikan keadaan ledger tidak berubah. Jumlah operasi yang terkirim harus
+berada dalam toleransi 5\% dari target dengan pembulatan satu permintaan, dan
+laju terverifikasi setelah drain harus mencapai sedikitnya 90\% dari laju
+terkirim. Dengan demikian, 100\% merupakan ketepatan yang diamati hanya untuk
+beban kerja dan durasi yang diuji; skenario fungsional yang belum terselesaikan
+menghalangi klaim konformansi keseluruhan.
 
 Laju yang ditawarkan dihitung dengan Persamaan~\ref{eq:benchmark-offered}.
 
 \begin{equation}
-    T_{\mathrm{offered}} = \frac{N_{\mathrm{submitted}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
+    T_{\mathrm{offered}} = \frac{N_{\mathrm{delivered}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
     \label{eq:benchmark-offered}
 \end{equation}
 
-Laju yang berhasil dicapai dihitung dengan Persamaan~\ref{eq:benchmark-throughput}.
+Laju terverifikasi setelah drain dihitung dengan Persamaan~\ref{eq:benchmark-throughput}.
 
 \begin{equation}
-    T_{\mathrm{achieved}} = \frac{N_{\mathrm{success}}}{t_{\mathrm{end}} - t_{\mathrm{start}}}
+    T_{\mathrm{verified,drain}} = \frac{N_{\mathrm{verified}}}{(t_{\mathrm{end}} - t_{\mathrm{start}}) + t_{\mathrm{drain}}}
     \label{eq:benchmark-throughput}
 \end{equation}
 
@@ -530,65 +542,44 @@ Latensi transaksi berhasil ke-$i$ dihitung dengan Persamaan~\ref{eq:benchmark-la
     \label{eq:benchmark-latency}
 \end{equation}
 
-Pada persamaan tersebut, $N_{\mathrm{submitted}}$ adalah jumlah transaksi yang
-dikirim, $N_{\mathrm{success}}$ adalah jumlah penyelesaian berhasil, dan selang
-$t_{\mathrm{end}}-t_{\mathrm{start}}$ dinyatakan dalam detik pengukuran. Latensi
-memakai batas observasi Caliper, yaitu waktu \texttt{time\_final} dikurangi
-\texttt{time\_create} untuk transaksi yang selesai berhasil. Nilai ini
-menggambarkan jalur Fabric dari pembuatan permintaan hingga finalisasi; latensi
-API, PostgreSQL, dan KYC tidak termasuk dalam angka tersebut. Kegagalan akibat
-konflik MVCC, batas konkurensi gateway, serta kategori lain tetap dicatat dan
-diklasifikasikan, bukan dihilangkan dari hasil.
+Pada persamaan tersebut, $N_{\mathrm{delivered}}$ adalah jumlah operasi yang
+terkirim selama jendela ukur, $N_{\mathrm{verified}}$ adalah jumlah hasil yang
+terverifikasi termasuk penolakan yang diharapkan dengan keadaan ledger tetap,
+dan $t_{\mathrm{drain}}$ adalah waktu sejak akhir jendela sampai penyelesaian
+terakhir. Untuk operasi baca, $T_{\mathrm{verified,drain}}$ dilaporkan sebagai
+operasi kueri terverifikasi per detik; untuk operasi tulis, nilai tersebut
+dilaporkan sebagai TPS terverifikasi. Latensi dihitung dari waktu mulai hingga
+penyelesaian hasil pada jejak transaksi Caliper. Angka kinerja hanya mencakup
+jalur langsung ke \textit{chaincode}; waktu validasi, otorisasi, dan pemrosesan
+API, PostgreSQL, maupun KYC diperiksa terpisah dan tidak digabungkan ke hasil
+Fabric.
 
 \paragraph{Justifikasi pemilihan parameter.}
 Parameter pengujian dipilih berdasarkan dua pertimbangan: literatur dan
 rekayasa sistem.
 
-\noindent\textit{Berdasarkan literatur.}
-Kalibrasi satu, dua, empat, dan delapan \textit{worker} digunakan untuk
-memisahkan pengaruh pembangkit beban Caliper dari kapasitas jaringan Fabric.
-Penambahan \textit{worker} tidak otomatis meningkatkan kapasitas jaringan
-karena hambatan dapat berpindah ke eksekusi \textit{peer}, validasi blok, atau
-pemrosesan \textit{orderer} \cite{androulaki2018, fabric_perf2023,
-hlf_caliper}. Kontrol laju \textit{fixed-rate} dipilih karena mempertahankan
-laju pengiriman sebagai variabel independen, sehingga penurunan throughput dan
-peningkatan latensi dapat diamati sebagai fungsi laju tersebut
-\cite{hlf_caliper}. Beban berkelanjutan ditetapkan sebelum interpretasi hasil,
-yaitu sedikitnya 99\% penyelesaian berhasil dan p95 latensi transaksi berhasil
-paling tinggi 2,5 detik pada seluruh lima pengulangan.
+Parameter pencarian mengikuti konfigurasi Caliper Fabric v0.6 dan protokol
+batas yang ditetapkan: satu \textit{worker}, rentang 0,1--4.096 operasi/detik,
+probe 10 detik, dan toleransi braket 10\% \cite{hlf_caliper}. Petunjuk laju
+dari pengukuran terdahulu hanya menentukan titik awal, bukan menetapkan hasil;
+braket dan konfirmasi diperoleh ulang untuk setiap beban kerja. Tiga ronde
+konfirmasi masing-masing 30 detik mengurangi ketergantungan pada satu
+pengukuran singkat, tetapi hasilnya tetap hanya mendukung klaim kapasitas lokal
+yang diamati.
 
-\noindent\textit{Berdasarkan pertimbangan teknis sistem.}
-Ronde pemanasan berlangsung 30 detik dan ronde pengukuran 120 detik. Pilot
-transfer ritel menggunakan laju 5--150 TPS. Kalibrasi menggunakan 30, 40,
-dan 50 TPS dengan satu, dua, empat, dan delapan \textit{worker}; setiap
-kombinasi diulang lima kali. Setelah kalibrasi, pengujian primer menggunakan
-satu \textit{worker} dan lima pengulangan untuk setiap laju yang dipilih dari
-pilot per jenis transaksi. Penerbitan, distribusi, transfer, pembayaran
-pedagang, penebusan, kueri saldo, pembekuan, dan pembukaan pembekuan dijalankan
-sebagai profil terpisah. Transfer ritel juga diuji pada kontensi rendah dan
-kontensi tinggi dengan satu pengirim bersama. Tidak ada komposisi 70/25/5;
-setiap baris primer mewakili satu fungsi dan satu pola kontensi.
+Fixture disiapkan sebelum jendela ukur dan ledger diverifikasi setelahnya.
+Pool berputar digunakan untuk transisi yang mengizinkan pengulangan, sedangkan
+operasi satu kali memperoleh rekaman baru. Kunci moneter yang secara inheren
+dibagi tetap dipertahankan dan setiap transaksi memakai referensi unik agar
+replay dapat dibedakan dari operasi baru. Progres mencatat tahap, laju, jumlah
+fixture yang disiapkan, dan waktu berjalan; hasil probe yang gagal atau tidak
+konklusif tetap disimpan dan tidak dihitung sebagai kapasitas lulus.
 
-Profil agregat \textit{overspend} mengirim 200 transfer masing-masing Rp1.000 pada
-80 TPS dengan 4 \textit{worker} dari satu dompet bersaldo awal Rp50.000 menuju
-20 penerima. Karena permintaan agregat Rp200.000 melebihi saldo, skenario
-menguji konservasi saldo sekaligus perebutan satu kunci. Status generik yang
-dikembalikan konektor tidak digunakan untuk menetapkan penyebab setiap
-penolakan. Skenario ini tidak diklaim sebagai simulasi serangan
-\textit{double-spend} protokol.
-
-Setiap profil dijalankan pada jaringan dan buku besar baru. Urutan konfigurasi
-1, 2, 4, dan 8 \textit{worker} diacak secara deterministik dengan \textit{seed}
-suite 20260909. Berkas konfigurasi transfer mempertahankan \textit{seed}
-workload 20260725; generator bilangan acak beban kerja juga memakai \textit{seed} yang
-dicampur dengan indeks ronde dan \textit{worker}. Runner menghapus laporan lama
-sebelum eksekusi, membatalkan validitas ronde jika setup gagal, dan mencatat
-status, versi runtime, hash konfigurasi/beban kerja, revisi Git, keadaan
-\textit{working tree}, urutan profil, serta \textit{seed} dalam manifes JSON.
-Langkah ini mendukung \textit{repeatability} pada lingkungan yang sama; hasil
-belum membuktikan \textit{reproducibility} lintas mesin. Saldo awal dan seluruh
-parameter populasi merupakan pilihan rekayasa, bukan estimasi distribusi
-pengguna nasional.
+Pengujian berlangsung pada satu host dengan satu \textit{worker} Caliper.
+Karena itu, hasil membatasi bukti pada kapasitas lokal jangka pendek;
+perbandingan jumlah \textit{worker} dan pengujian lintas-host ditempatkan
+sebagai penelitian lanjutan. Saldo awal dan populasi fixture merupakan pilihan
+rekayasa, bukan estimasi distribusi pengguna nasional.
 
 \paragraph{Kesesuaian dengan skenario CBDC ritel.}
 Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
@@ -613,9 +604,9 @@ status dompet.
 Penggunaan Caliper dan metrik \textit{throughput}/latensi mengikuti praktik
 pengukuran kinerja blockchain yang menekankan laju transaksi, latensi, dan
 karakterisasi kegagalan transaksi \cite{hlf_caliper, hlf_metrics,
-fabric_perf2023}. Profil agregat \textit{overspend} menambah bukti konservasi
-saldo, sedangkan konflik versi pada dompet pengirim bersama dianalisis sebagai
-karakteristik implementasi.
+fabric_perf2023}. Konservasi nilai, replay, dan atomisitas kegagalan diperiksa
+melalui skenario fungsional dengan verifikasi keadaan ledger sebelum dan
+sesudah transaksi.
 
 Perbedaan utama dengan sistem CBDC ritel produksi adalah skala (populasi
 pengujian sintetis berbanding jutaan pengguna nyata), topologi jaringan (satu
@@ -824,43 +815,34 @@ dipaparkan pada Bab~IV.
 
 Hyperledger Caliper dikonfigurasi dengan file jaringan (\textit{network config})
 yang mendeskripsikan topologi \textit{peer}, \textit{orderer}, kanal, dan
-identitas MSP. Modul beban kerja (\textit{workload modules}) ditulis dalam
-JavaScript untuk mensimulasikan transfer antarpelanggan,
-transfer pelanggan-ke-pedagang, pembacaan dompet, operasi moneter, dan kueri
-pengawasan sesuai Tabel~\ref{tab:skenario}.
+identitas MSP. Modul beban kerja ditulis dalam JavaScript dan mengambil
+identitas penanda tangan serta daftar operasi dari katalog benchmark. Katalog
+mencakup seluruh metode publik tiga \textit{chaincode}; variasi
+\texttt{Transfer} untuk penerima ritel dan pedagang dihitung sebagai dua beban
+kerja, sedangkan \texttt{Initialize} dan debit reserve internal hanya diuji
+secara fungsional.
 
 Nilai \texttt{version: "2.0.0"} pada tingkat teratas konfigurasi jaringan
 menyatakan versi skema konfigurasi Caliper, bukan versi Hyperledger Fabric atau
-\textit{chaincode}. Lingkungan pengujian menggunakan Hyperledger Fabric 2.5,
-sedangkan entri kontrak menetapkan \texttt{digital-rupiah} versi \texttt{3.0}.
-
-Lingkungan pengujian dirangkum pada Tabel~\ref{tab:lingkungan-uji}. Seluruh
-komponen dijalankan pada satu inang lokal berbasis \textit{container} Docker,
-sehingga parameter pemotongan blok \textit{orderer} dan versi perangkat lunak
-menjadi bagian dari konteks yang menentukan batas \textit{throughput} yang
-terukur pada BAB IV.
+\textit{chaincode}. Lingkungan studi kontrol dirangkum pada
+Tabel~\ref{tab:lingkungan-uji}; seluruh organisasi dan komponen jaringan
+dijalankan pada satu inang lokal berbasis \textit{container} Docker.
 
 \begin{table}[H]
 \centering
-\caption{Lingkungan pengujian purwarupa bi-coin}
+\caption{Lingkungan pengujian studi kontrol}
 \label{tab:lingkungan-uji}
-\begin{tabular}{ll}
+\begin{tabular}{lp{8.5cm}}
 \hline
 \textbf{Komponen} & \textbf{Spesifikasi} \\
 \hline
-Inang & Satu mesin lokal, \textit{container} Docker 29.6.2 \\
+Inang & Satu mesin lokal dengan \textit{container} Docker 29.6.2; satu \textit{worker} Caliper \\
 CPU & Intel Core i7-7700HQ @ 2,80 GHz (4 inti, 8 utas) \\
 Memori (RAM) & 16 GB \\
 Sistem operasi & Fedora Linux 44 (\textit{Workstation Edition}), x86\_64 \\
 Hyperledger Fabric & 2.5 (rilis 2.5.16) \\
-Basis data status & CouchDB \\
-Konsensus \textit{ordering} & Raft (\textit{etcdraft}) \\
-\textit{BatchTimeout} \textit{orderer} & 2 detik \\
-\textit{MaxMessageCount} \textit{orderer} & 10 pesan \\
-Ukuran blok maksimum & 10 MB (\textit{preferred} 2 MB) \\
-Kanal & \textit{mychannel}, kebijakan dukungan mayoritas \\
-Chaincode & \textit{digital-rupiah} v3.0, sequence 1 (Go 1.22, \textit{fabric-contract-api-go} v2.0.0) \\
-Backend & Go 1.23, \textit{fabric-gateway} v1.8.0 \\
+Topologi & Empat MSP, satu \textit{peer} per MSP, kanal \texttt{rupiah-study} \\
+\textit{Chaincode} & \texttt{rupiah-controls}, \texttt{rupiah-monetary}, dan \texttt{rupiah-payments} \\
 Hyperledger Caliper & 0.6.0 \\
 \hline
 \end{tabular}
@@ -868,11 +850,65 @@ Hyperledger Caliper & 0.6.0 \\
 
 \subsubsection{Menjalankan Pengujian Hyperledger Caliper}
 
-Pengujian dijalankan dengan kontrol laju \textit{fixed-rate}. Caliper terlebih
-dahulu menguji 1, 2, 4, dan 8 \textit{worker}; pengujian primer kemudian
-menetapkan satu \textit{worker} berdasarkan hasil kalibrasi. Setiap jenis
-transaksi dan pola kontensi dijalankan secara terpisah. Caliper mengumpulkan
-laju yang ditawarkan, laju yang berhasil dicapai, jumlah sukses/gagal/
-\textit{timeout}, latensi p50, p95, p99, simpangan baku, minimum, maksimum,
-alasan kegagalan, serta metrik sumber daya yang kemudian dianalisis pada
-Bab~IV. Demonstrasi Go/PostgreSQL/KYC dilaporkan terpisah dari batas Fabric.
+Pengujian memakai konektor Fabric dan kontrol laju \textit{fixed-rate} dengan
+satu \textit{worker}; setiap beban kerja diukur langsung pada
+\textit{chaincode}. Inisialisasi ronde Caliper menyiapkan koneksi tanpa
+pemanasan bertimer. Kueri dilaporkan sebagai operasi terverifikasi per detik,
+sedangkan operasi tulis dilaporkan sebagai TPS terverifikasi. Prosedur pencarian
+dan kriteria kandidat lulus mengikuti Tabel~\ref{tab:skenario}; pemeriksaan
+validasi, otorisasi, dan hasil aksi API tetap terpisah dari jendela kinerja.
+
+\subsubsection{Eksperimen Kontrol pada Lingkungan Terisolasi}
+
+Pengujian kontrol menggunakan jaringan Fabric 2.5 terpisah dengan satu kanal
+\texttt{rupiah-study} dan empat organisasi: \texttt{CentralBankMSP},
+\texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan \texttt{EndUserMSP}.
+\texttt{CentralBankMSP} mengoperasikan \textit{peer} penerbit dan satu
+\textit{orderer}; \texttt{ValidatorMSP} hanya menyediakan akses baca untuk
+audit. Basis data PostgreSQL studi menggunakan volume tersendiri dan data
+sintetis.
+
+Arsitektur integrasi dan pemisahan domain ditunjukkan pada
+Gambar~\ref{fig:ch3-study-controls}.
+\input{contents/figures/study-controls-architecture}
+
+Tiga \textit{chaincode} memisahkan kepemilikan state dan kebijakan default:
+\texttt{rupiah-monetary} mengelola Treasury, suplai, dan cadangan dengan
+\texttt{AND('CentralBankMSP.peer','DistributorMSP.peer')};
+\texttt{rupiah-controls} mengelola subjek pseudonim, keputusan KYC, risiko,
+peran staf, dan batas dengan kebijakan default
+\texttt{AND(DistributorMSP, OR(CentralBankMSP, EndUserMSP))};
+\texttt{rupiah-payments} mengelola dompet dan transfer dengan
+\texttt{AND('DistributorMSP.peer','EndUserMSP.peer')}. Kunci kontrol efektif
+menggunakan kebijakan berbasis state yang mensyaratkan
+\texttt{CentralBankMSP} dan \texttt{DistributorMSP}. Pendanaan cadangan
+memanggil ketiga \textit{chaincode} dalam satu transaksi sehingga seluruh
+kebijakan yang terlibat harus terpenuhi. Matriks ini merupakan rancangan
+eksperimental, bukan pernyataan bahwa aturan hukum menetapkan kebijakan
+\textit{endorsement} tersebut.
+
+Identitas klien X.509 dipetakan per nama pengguna dan dikelola oleh layanan
+\textit{backend}; identitas penanda tangan, subjek pelanggan, dan kustodian
+dompet tetap dipisahkan. Uji integrasi menggunakan subjek sintetis untuk
+keputusan KYC berisiko tinggi dengan dua staf berbeda, pembatasan dan pembukaan
+pembatasan dengan bukti, pendanaan, pembayaran, pembacaan oleh
+\texttt{ValidatorMSP}, serta transaksi negatif dengan dukungan yang tidak
+mencukupi. Pengujian ini tidak mengukur kinerja tiga \textit{chaincode} dan
+tidak mencakup verifikasi identitas langsung, umpan penyaringan eksternal,
+pengiriman laporan PPATK, atau efektivitas deteksi pada data nyata.
+
+Struktur kelas, fungsi setiap organisasi, dan aktivitas utama pada lingkungan
+studi dirangkum melalui diagram kelas (Gambar~\ref{fig:ch3-study-class}),
+activity diagram (Gambar~\ref{fig:ch3-study-activity}), dan diagram use case
+(Gambar~\ref{fig:ch3-study-use-case}). Urutan pesan untuk pelepasan
+pembatasan, konversi \textit{wholesale-to-retail}, dan transfer ritel ditunjukkan pada
+Gambar~\ref{fig:ch3-study-sequence-release},
+Gambar~\ref{fig:ch3-study-sequence-conversion}, dan
+Gambar~\ref{fig:ch3-study-sequence-transfer}. Seluruh diagram membatasi uraian
+pada empat MSP dan tiga \textit{chaincode} eksperimen kontrol.
+\input{contents/figures/study-controls-class}
+\input{contents/figures/study-controls-activity}
+\input{contents/figures/study-controls-use-case}
+\input{contents/figures/study-controls-sequence-release}
+\input{contents/figures/study-controls-sequence-conversion}
+\input{contents/figures/study-controls-sequence-transfer}

@@ -18,8 +18,8 @@
 
 \begin{document}
 
-\title{A Retail Digital Rupiah Prototype on Hyperledger Fabric: Two-Tier
-Business Processes and a Reproducible Benchmark}
+\title{A Retail Digital Rupiah Prototype on Hyperledger Fabric: Selected
+Controls and a Reproducible Performance Baseline}
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Muhammad Fachrizal Giffari}
 	\IEEEauthorblockA{\textit{Department of Electrical and} \\ \textit{Information Engineering} \\
@@ -43,34 +43,32 @@ Business Processes and a Reproducible Benchmark}
 \maketitle
 
 \begin{abstract}
-Bank Indonesia's public Project Garuda experiments focus on wholesale central
-bank digital currency. This paper asks how a testable retail Digital Rupiah
-prototype can represent a two-tier distribution model and institutional
-oversight on a permissioned ledger. We implement the prototype with Hyperledger
-Fabric 2.5, Go chaincode and backend services, CouchDB, and PostgreSQL. The
-prototype separates institutional and retail roles. Bank Indonesia issues
-Digital Rupiah into Treasury and distributes it directly to a validator bank or
-payment service provider acting as custodian. Backend ownership checks and
-chaincode MSP checks enforce user and organization boundaries, while the shared
-Fabric channel does not provide transaction privacy. Automated tests evaluate
-authorization and transfer safety. Hyperledger Caliper uses isolated
-transaction types, a fixed-rate pilot, calibration at one, two, four, and
-eight workers, and five primary repetitions per load. Calibration selects one
-worker for the primary study. Under the declared sustainability gate of at
-least 99\% successful completions and successful-transaction p95 latency at or
-below 2.5 seconds in every repetition, sustainable loads reach 190 TPS for
-balance queries, 50 TPS for wallet freeze, 65 TPS for wallet unfreeze, 25 TPS
-for redemption, and 20 TPS for low-contention retail transfer and merchant
-payment. Issuance, distribution, and deliberate high-contention retail
-transfer do not meet the gate at the tested rates. A separate five-repetition
-Go/PostgreSQL/KYC demonstration evaluates the service path. These measurements
-describe a single-host prototype and do not establish production capacity or
-cross-machine reproducibility.
+Bank Indonesia's Project Garuda publicly documents wholesale central bank
+digital currency. This paper reports a retail Digital Rupiah prototype and a
+separate controls-study extension on Hyperledger Fabric 2.5. The extension uses
+four peer MSPs---CentralBankMSP, DistributorMSP, ValidatorMSP, and EndUserMSP---
+and three Go chaincodes for monetary state, customer controls, and payments.
+ValidatorMSP has read-only audit access. Server-managed X.509 identities
+distinguish the signing actor, customer subject, and wallet custodian.
+
+Synthetic unit tests and a chaincode integration smoke test pass the high-risk
+KYC flow with distinct reviewer and senior approver, restriction and
+evidence-based release, reserve funding, retail payment, ValidatorMSP reads, and
+expected endorsement failures. These tests verify the selected scenarios; they
+do not establish identity authenticity, screening effectiveness, actual PPATK
+reporting, or institutional compliance.
+
+Performance evidence is secondary and comes from Hyperledger Caliper on the
+separate five-organization \texttt{digital-rupiah} v3.0 baseline. The fixed-rate
+one-worker tests report 20 TPS for low-contention retail transfer and 2.01 TPS
+under high contention. These measurements do not benchmark the three-chaincode
+extension. Findings are limited to synthetic functional tests and a single-host
+performance baseline.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Digital Rupiah, retail CBDC, Hyperledger Fabric, two-tier distribution,
-performance evaluation
+Digital Rupiah, retail CBDC, KYC and AML/CFT controls, endorsement,
+Hyperledger Fabric, two-tier distribution, performance baseline
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -107,10 +105,20 @@ not reproducible performance benchmarks. The surveyed literature therefore
 provides no integrated, openly measurable retail reference for the Indonesian
 two-tier model~\cite{sethaput2025,aryani2023critlit}.
 
+The primary evaluation in this work tests whether selected customer controls
+and organizational endorsement boundaries behave as designed in synthetic
+scenarios. The Caliper results provide secondary performance evidence for a
+separate baseline and are not measurements of the controls-study extension.
+
 To address this gap, we implement a Digital Rupiah prototype on a permissioned
 Hyperledger Fabric network~\cite{androulaki2018}. The prototype maps Bank
 Indonesia's business processes to chaincode transactions. This paper contributes:
 \begin{enumerate}
+	\item A separate controls-study extension with four peer MSPs and three
+	      domain chaincodes for monetary operations, customer controls, and
+	      payments. Synthetic integration scenarios exercise distinct senior
+	      approval, restriction evidence, reserve funding, read-only validation,
+	      and the combined endorsement requirements.
 	\item A two-tier Digital Rupiah chaincode that integrates hierarchical
 	      issuance and distribution, retail transfers, and supervisor-facing
 	      reconciliation. This extends the wholesale-only Garuda proof of concept
@@ -345,7 +353,7 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 			\draw[ar] (6.0, 2.2) -- (caord.north);
 		\end{tikzpicture}%
 	}
-	\caption{Full system architecture of the Digital Rupiah prototype: client
+\caption{Performance-baseline architecture of the Digital Rupiah prototype: client
 		layer, Go REST backend with JWT/RBAC, off-chain PostgreSQL store, Fabric
 		Gateway SDK, and the Hyperledger Fabric 2.5 network of five peer
 		organizations with CouchDB, a per-organization CA, and a Raft orderer.}
@@ -353,7 +361,7 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 \end{figure*}
 
 \subsection{Network Topology}
-The network runs five peer organizations on one application channel
+The performance-baseline network runs five peer organizations on one application channel
 (Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}).
 \emph{BankIndonesiaOrg} is the issuer; \emph{HimbaraBankOrg} (HIMBARA,
 Indonesia's association of state-owned banks) and \emph{CommercialBankOrg} are
@@ -417,14 +425,14 @@ chaincode lifecycle policy requires Bank Indonesia and one institutional partici
 		\textit{digital-rupiah channel} (institutional endorsement, TLS)}] {};
 		\end{tikzpicture}%
 	}
-	\caption{Hyperledger Fabric network topology: five peer organizations, each
+\caption{Performance-baseline Hyperledger Fabric topology: five peer organizations, each
 		with a CouchDB world state, on a single channel under a Raft orderer; the
 		Go backend endorses via the Fabric Gateway SDK.}
 	\label{fig:netarch}
 \end{figure*}
 
 \begin{table}[!t]
-	\caption{Network Topology of the Five-Organization Fabric Network}
+\caption{Performance-Baseline Topology of the Five-Organization Fabric Network}
 	\label{tab:topology}
 	\centering
 	\scriptsize
@@ -445,7 +453,65 @@ chaincode lifecycle policy requires Bank Indonesia and one institutional partici
 	\end{tabular}
 \end{table}
 
-\subsection{On-Chain and Off-Chain Data}
+\subsection{Controls-Study Extension}
+The controls-study extension runs on a fresh, isolated Fabric 2.5 network with
+one channel, \texttt{rupiah-study}, and four peer MSPs:
+\texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, and
+\texttt{EndUserMSP}. CentralBankMSP also operates the single orderer.
+ValidatorMSP provides read-only audit access and is not an ordinary payment
+endorser. The extension uses a separate PostgreSQL volume and synthetic state.
+Server-managed X.509 signers are mapped per application username; the signing
+identity, customer subject, and wallet custodian are represented separately.
+Fig.~\ref{fig:controls-study-architecture} summarizes this topology and the
+three chaincode policies.
+
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{%
+\input{../bi-coin-fabric/study/diagrams/controls-study-architecture.tikz}
+}
+\caption{Four-MSP controls-study architecture, chaincode domains, and endorsement boundaries.}
+\label{fig:controls-study-architecture}
+\end{figure*}
+
+The implementation separates monetary state, customer controls, and payments
+into three chaincodes. Table~\ref{tab:study-chaincodes} shows their default
+policies and state ownership.
+
+\begin{table*}[!t]
+\caption{Controls-study chaincode domains and endorsement policies}
+\label{tab:study-chaincodes}
+\centering
+\scriptsize
+\begin{tabular}{@{}p{2.8cm}p{5.1cm}p{8.8cm}@{}}
+\toprule
+\textbf{Chaincode} & \textbf{State owned} & \textbf{Default endorsement} \\
+\midrule
+\texttt{rupiah-monetary} & Treasury, supply, distributor reserves & \texttt{AND('CentralBankMSP.peer','DistributorMSP.peer')} \\
+\texttt{rupiah-controls} & Pseudonymous subjects, KYC/risk status, business authority, limits, restriction evidence & \shortstack[l]{\texttt{AND('DistributorMSP.peer',}\\\texttt{OR('CentralBankMSP.peer','EndUserMSP.peer'))}} \\
+\texttt{rupiah-payments} & Wallets, payment receipts, usage limits & \texttt{AND('DistributorMSP.peer','EndUserMSP.peer')} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Effective-control keys use a state-based policy requiring CentralBankMSP and
+DistributorMSP. \texttt{FundFromReserve} invokes all three chaincodes in one
+same-channel transaction, so all three policies apply to that funding flow.
+These policies and distinct-staff approvals are experimental design choices;
+they are not presented as statutory endorsement rules.
+
+The revised compliance benchmark measures the three new chaincodes with one
+Caliper worker on one host. All 31 workloads are bracketed and confirmed with
+three 30-second rounds each, with 31 of 31 preflight checks passing. Read
+operations reach 272 to 296 operations per second. Verified write throughput
+ranges from 0.184 to 4.75 TPS across 21 write workloads, and most write
+workloads confirm at 0.78 TPS or below. All functional checks pass: 20 of 20
+scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of
+15 action outcomes. The write ceiling matches the observed commit cadence
+(two-second batch timeout, one transaction per block), but this causal link is
+not isolated.
+
+\subsection{Baseline On-Chain and Off-Chain Data}
 The Go chaincode in \texttt{digital\_rupiah.go} groups functions for
 participants, wallets, issuance and redemption, retail transfers, and
 supervision (Table~\ref{tab:funcs}). Account and authentication data remain in
@@ -580,13 +646,17 @@ chaincode. Fabric MVCC validates the wallet versions before commit.}
 
 \subsection{Methodology}
 We evaluate the final prototype with Hyperledger Caliper 0.6.0 on a clean
-ledger for each profile. The combined manifest
-\texttt{20260909-final-evidence-manifest.json} records suite seed 20260909
-(profile ordering); the transfer configurations retain workload seed 20260725.
-It also records chaincode \texttt{digital-rupiah} version 3.0 sequence 1, runtime versions,
-input hashes, result hashes, and the single-host topology. The testbed has five
+ledger for each profile. The final-evidence and replacement-study manifests
+record suite and workload seeds, chaincode \texttt{digital-rupiah} version 3.0
+sequence 1, runtime versions, input hashes, result hashes, and the single-host
+topology. The testbed has five
 peer organizations, one peer per organization, one Raft orderer, and one
 CouchDB instance per peer.
+
+The Caliper measurements in this section apply only to this five-organization
+baseline and \texttt{digital-rupiah} v3.0. The four-MSP controls-study
+extension is functionally smoke-tested but has no Caliper throughput or latency
+results; the baseline figures must not be attributed to its three chaincodes.
 
 \begin{table}[!t]
 \caption{Final testbed configuration}
@@ -599,7 +669,7 @@ CouchDB instance per peer.
 \midrule
 Processor & Intel Core i7-7700HQ, 4 cores, 8 threads, 2.80 GHz \\
 Memory & 15.52 GiB \\
-Runtime & Node.js 22.23.2, npm 10.9.1, Docker 27.5.1 \\
+Runtime & Node.js 22.23.2, npm 10.9.8, Docker client 29.5.3 / Engine 29.8.1 \\
 Fabric / CouchDB & 2.5 / 3.2 \\
 Caliper & 0.6.0 \\
 Chaincode & \texttt{digital-rupiah} v3.0, sequence 1 \\
@@ -618,6 +688,13 @@ successful completions divided by that window. Latency is the Caliper Fabric
 boundary, \texttt{time\_final - time\_create}, for successful completions. The
 study also records failed and timed-out completions, failure categories, and
 host, container, disk, network, and Caliper-client resource metrics.
+
+The replacement protocol fixes each retail-transfer amount at Rp100, below the
+Rp10\,000\,000 STANDARD-wallet daily cap. This is a synthetic control amount,
+not a claim about a typical retail payment. The paired study repeats low and
+high contention at 20, 75, and 150 TPS for five repetitions each. The Rp1,000
+replacement evidence separately repeats distribution at 75 TPS, redemption at
+20 TPS, and retail-transfer calibration at 30, 40, and 50 TPS.
 
 \begin{table}[!t]
 \caption{Sustainable primary loads by transaction type}
@@ -653,25 +730,37 @@ submissions are retained in the failure analysis rather than converted into a
 throughput claim.
 
 \begin{table}[!t]
-\caption{Failure categories in primary workloads}
+\caption{Failure categories in replacement primary workloads}
 \label{tab:failure-diagnostics-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lr@{}}
+\begin{tabular}{@{}p{3.2cm}lr@{}}
 \toprule
-\textbf{Category} & \textbf{Count} \\
+\textbf{Workload} & \textbf{Category} & \textbf{Count} \\
 \midrule
-MVCC read conflict & 358,413 \\
-Unknown failure & 1,013,243 \\
+Rp1,000 distribution / calibration & MVCC read conflict & 46,716 \\
+Rp100 low-contention transfer & MVCC read conflict & 68,922 \\
+Rp100 low-contention transfer & Gateway concurrency limit & 45,774 \\
+Rp100 high-contention transfer & MVCC read conflict & 110,570 \\
+Rp100 high-contention transfer & Gateway concurrency limit & 1,501 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The primary logs classify 358,413 failures as MVCC read conflicts and 1,013,243
-as Unknown failure. Status 11 indicates that a transaction read a state version
-that changed before validation. Unknown failure is retained when the available
-log does not support a more specific category; it is not interpreted as proof
-of a single bottleneck.
+The replacement logs classify 272,924 failures as MVCC read conflicts and
+47,275 as gateway-concurrency failures. These counts cover only the replacement
+workloads in the table, not every operation in the legacy final-evidence suite.
+MVCC failures occur when a transaction reads a state version that changes before
+validation; gateway-concurrency failures indicate saturation at the Fabric
+Gateway boundary. Neither category is interpreted as proof of a single
+production bottleneck.
+
+The paired Rp100 control makes the contention effect explicit. At 20 TPS, low
+contention completes 2,401 of 2,401 submissions (20.01 achieved TPS, 100\%
+success, p95 0.63 s), whereas high contention completes about 10\% of
+submissions (2.01 achieved TPS, p95 0.59 s). At 75 and 150 TPS, both modes
+also fail the sustainability gate because the prototype saturates and produces
+MVCC or gateway-concurrency failures.
 
 \begin{table}[!t]
 \caption{Five-repetition summary at the highest passing loads}
@@ -727,7 +816,7 @@ latencies must not be combined with the Fabric transaction latency boundary.
 \label{tab:conformance-final}
 \centering
 \scriptsize
-\begin{tabular}{@{}lrrp{4.6cm}@{}}
+\begin{tabular}{@{}lrr>{\raggedright\arraybackslash}p{4.4cm}@{}}
 \toprule
 \textbf{Profile} & \textbf{Succ.} & \textbf{Fail} & \textbf{Oracle result} \\
 \midrule
@@ -778,7 +867,10 @@ population, one calibrated worker, and five repetitions. A distributed
 deployment and a graded-skew contention workload would be needed to
 characterize other operating conditions.
 
-The shared Fabric channel does not provide transaction privacy, and the
+The Rp100 paired retail-transfer study uses a deliberately synthetic control
+amount to remove the STANDARD-wallet daily-cap confounder; it should not be
+read as a representative payment-size distribution. The shared Fabric channel
+does not provide transaction privacy, and the
 prototype does not use private data collections or privacy-preserving
 cryptography. The single orderer provides ordering but does not tolerate its
 own failure. The prototype also omits offline payment and leaves connections to
@@ -790,6 +882,14 @@ cross-machine reproducibility. Future work should repeat the protocol on
 distributed hosts, instrument endorsement and commit phases, expand the
 contention workload, and evaluate privacy, offline payment, and
 interoperability.
+
+The controls-study extension is limited to synthetic chaincode integration
+scenarios. It does not use live identity verification or screening feeds, submit
+reports to PPATK, or establish the effectiveness of a risk model or institutional
+compliance. Its backend HTTP path has not been evaluated end-to-end. Performance
+results for the three new chaincodes are limited to one Caliper worker on one
+host with 30-second confirmation windows. The run was interrupted by a host restart
+and resumed under the same stamp from its last checkpoint.
 
 
 \section{Conclusion}
@@ -808,13 +908,24 @@ transfer do not meet the gate at the tested rates. All primary cells use five
 repetitions, and the final report separates offered TPS, achieved TPS, failure
 categories, latency percentiles, resource measurements, and variability. These
 results provide a local, auditable baseline for retail Digital Rupiah
-experiments, not a production-capacity claim.
+experiments, not a production-capacity claim. The controlled Rp100 comparison
+also shows that shared-key contention, independent of the wallet-cap funding
+limit, sharply reduces transfer completion at the same offered load.
+
+A separate four-MSP controls-study extension implements three domain chaincodes
+and passes synthetic integration smoke scenarios for distinct senior approval,
+restriction evidence, reserve funding, retail payment, read-only ValidatorMSP
+access, and expected endorsement failures. This functional evidence is
+independent of the Caliper results above.
 
 
 \section*{Artifact Availability}
-The chaincode, the five-organization network definition, the Go backend, and the
-Hyperledger Caliper workloads and benchmark configurations used in this paper are
-available at \url{https://github.com/mfachrizalg/bi-coin}.
+The baseline chaincode, five-organization network definition, Go backend, and
+Hyperledger Caliper workloads are available at
+\url{https://github.com/mfachrizalg/bi-coin}. The separate controls-study
+chaincodes and four-MSP network are under \texttt{bi-coin-fabric/study} and
+\texttt{bi-coin-fabric/network/study}; they are not included in the reported
+Caliper measurements.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
