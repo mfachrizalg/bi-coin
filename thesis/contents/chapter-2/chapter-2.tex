@@ -31,6 +31,12 @@ menegaskan perlunya analisis keamanan sejak tahap perancangan. Block-PAD
 \cite{unknown2026a} menawarkan kerangka transaksi CBDC yang tangguh dan
 fleksibel dengan memanfaatkan identitas digital.
 
+Lukito dkk. \cite{lukito2026governance} membandingkan sembilan program CBDC
+berdasarkan dokumen publik dan menguraikan perbedaan peran perantara dalam
+distribusi dua jenjang. Rancangan Rupiah Digital dalam penelitian ini merujuk
+pada dokumen Bank Indonesia
+\cite{bi_whitepaper2022, bi_garuda_poc}.
+
 Pada sisi ketahanan layanan, Project Polaris dari \textit{BIS Innovation Hub}
 menunjukkan bahwa dukungan
 pembayaran tanpa konektivitas memerlukan desain perangkat aman dan kontrol
@@ -39,6 +45,13 @@ diposisikan sebagai keterbatasan dan arah pengembangan lanjutan pada penelitian
 ini.
 
 \subsection{Penelitian Terdahulu Berbasis Hyperledger Fabric}
+
+Rohmalia dan Nugraha \cite{rohmalia2023retail} menyusun model CBDC ritel
+Indonesia berbasis Hyperledger Fabric yang mencakup pembuatan akun, konversi
+aset, dan transfer antarpengguna. Hasil implementasi yang mereka laporkan
+memperlihatkan pembuatan akun dan transfer, disertai waktu pengiriman untuk
+satu dan 50 data. Makalah tersebut tidak menyajikan pengawasan multipihak
+ataupun tolok ukur Caliper yang dapat diulang.
 
 Pada aspek platform dan kinerja, Androulaki dkk. \cite{androulaki2018}
 memperkenalkan Hyperledger Fabric sebagai \textit{distributed operating system}
@@ -61,9 +74,11 @@ Michalopoulos2025Privacy}, serta keamanan dan audit dalam
 kinerja Hyperledger Fabric \cite{androulaki2018, fabric_perf2023,
 unknown2024f, unknown2021, unknown2025i} dan desain CBDC untuk konteks
 Indonesia \cite{zams2020delphi, Syarifuddin2024OPTIMAL,
-aryani2023critlit}. Setiap kelompok menjawab sebagian persoalan. Dalam korpus
-yang ditinjau pada penelitian ini, belum ditemukan evaluasi satu artefak Fabric
-ritel yang memadukan seluruh komponen tersebut.
+aryani2023critlit, rohmalia2023retail, lukito2026governance}. Setiap kelompok
+menjawab sebagian persoalan. Dalam korpus yang ditinjau pada penelitian ini,
+belum ditemukan evaluasi satu artefak Fabric ritel yang memadukan distribusi
+berjenjang, transfer ritel, pengawasan, dan tolok ukur Caliper yang dapat
+diulang.
 
 \textbf{Celah penelitian.} Sintesis terbatas pada sumber yang dirujuk di bab ini
 menunjukkan empat kebutuhan yang belum dipenuhi secara bersamaan. (1) Satu
@@ -113,6 +128,8 @@ mencatat commit dan hash masukan agar konfigurasi hasil dapat dilacak.
 \endlastfoot
 Bhawana \& Kumar \cite{bhawana2021} & Permis\allowbreak sioned & Arsitektur CBDC & Tidak &
 Terbatas \\
+Rohmalia \& Nugraha \cite{rohmalia2023retail} & Hyper\allowbreak ledger Fabric &
+Purwarupa transfer ritel & Sebagian (akun, transfer) & Waktu pengiriman \\
 Islam \& In \cite{islam2023} & Con\allowbreak sortium & Privasi (UTXO) & Tidak & Tidak \\
 Hans dkk. \cite{hans2023} & Umum & Keamanan (STRIDE) & Tidak & Tidak \\
 Auer \& Böhme; Tsareva \& Komarov \cite{Auer2020The, Tsareva2024Retail} &

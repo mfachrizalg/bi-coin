@@ -1,32 +1,27 @@
-Eksperimen publik Proyek Garuda Bank Indonesia berfokus pada mata uang digital
-bank sentral (\textit{Central Bank Digital Currency}, CBDC) \textit{wholesale}.
-Penelitian ini mengkaji purwarupa Rupiah Digital ritel yang merepresentasikan
-model distribusi dua jenjang dan pengawasan institusional pada buku besar
-\textit{permissioned}. Purwarupa menggunakan Hyperledger Fabric 2.5,
-\textit{chaincode} dan layanan \textit{backend} Go, CouchDB, serta PostgreSQL.
+Penelitian ini mengimplementasikan dan menguji kontrol KYC dan AML/CFT terpilih
+pada purwarupa Rupiah Digital ritel berbasis Hyperledger Fabric 2.5. Lingkungan
+studi kontrol menggunakan jaringan terisolasi dengan empat MSP:
+\texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
+\texttt{EndUserMSP}. Tiga \textit{chaincode} Go memisahkan operasi moneter,
+kontrol pelanggan, dan pembayaran. Identitas X.509 yang dikelola \textit{backend}
+memisahkan penanda tangan, subjek pelanggan, dan kustodian dompet.
 
-Purwarupa memisahkan peran institusional dan ritel. Bank Indonesia menerbitkan
-Rupiah Digital ke Treasury, lalu mendistribusikannya secara langsung kepada bank
-validator atau PJP sebagai kustodian. Pemeriksaan kepemilikan pada
-\textit{backend} dan MSP pada \textit{chaincode} membatasi pengguna dan
-organisasi. Kanal Fabric bersama tidak memberikan privasi transaksi.
+Uji unit sintetis dan uji integrasi \textit{chaincode} lulus untuk keputusan KYC
+berisiko tinggi dengan peninjau dan pejabat senior yang berbeda, pembatasan dan
+pembukaan pembatasan berbukti, pendanaan cadangan, pembayaran ritel, pembacaan
+oleh \texttt{ValidatorMSP}, serta penolakan transaksi dengan \textit{endorsement}
+yang tidak mencukupi. Hasil ini hanya menunjukkan perilaku pada skenario sintetis
+yang diuji; penelitian tidak membuktikan keaslian identitas, efektivitas
+penyaringan, pengiriman laporan kepada PPATK, atau kepatuhan institusional.
 
-Pengujian otomatis mengevaluasi otorisasi dan keamanan transfer. Studi
-Hyperledger Caliper menggunakan jenis transaksi terisolasi, pilot dengan
-kontrol laju tetap, kalibrasi pada satu, dua, empat, dan delapan \textit{worker},
-serta lima pengulangan primer untuk setiap beban. Kalibrasi memilih satu
-\textit{worker}. Dengan kriteria sedikitnya 99\% penyelesaian berhasil dan
-latensi p95 transaksi berhasil paling tinggi 2,5 detik pada seluruh pengulangan,
-beban berkelanjutan mencapai 190 TPS untuk kueri saldo, 50 TPS untuk pembekuan
-dompet, 65 TPS untuk pembukaan pembekuan, 25 TPS untuk penebusan, serta 20 TPS
-untuk transfer ritel dan pembayaran pedagang pada kontensi rendah. Penerbitan,
-distribusi, dan transfer ritel dengan kontensi tinggi tidak memenuhi kriteria
-tersebut pada laju yang diuji. Demonstrasi terpisah sebanyak lima pengulangan
-mengevaluasi alur layanan Go/PostgreSQL/KYC. Hasil ini berlaku pada purwarupa
-satu inang dan tidak menetapkan kapasitas produksi atau reproduktibilitas lintas
-mesin.
+Sebagai bukti kinerja sekunder, Hyperledger Caliper menguji baseline terpisah
+berisi lima organisasi dengan \texttt{digital-rupiah} v3.0. Transfer ritel pada
+kontensi rendah mencapai 20 TPS, sedangkan uji berpasangan pada kontensi tinggi
+mencapai 2,01 TPS. Pengukuran tersebut tidak menguji tiga \textit{chaincode}
+lingkungan kontrol dan tidak menetapkan kapasitas produksi atau reproduktibilitas
+lintas mesin.
 
 \vspace{0.5cm}
 
-\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, Hyperledger Fabric,
-distribusi dua jenjang, evaluasi kinerja
+\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, KYC, AML/CFT,
+Hyperledger Fabric, \textit{endorsement}, distribusi dua jenjang

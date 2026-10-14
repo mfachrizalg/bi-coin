@@ -1,36 +1,31 @@
 \textit{
-Bank Indonesia's public Project Garuda experiments focus on wholesale central
-bank digital currency. This study asks how a testable retail Digital Rupiah
-prototype can represent a two-tier distribution model and institutional
-oversight on a permissioned ledger. It uses Hyperledger Fabric 2.5, Go
-chaincode and backend services, CouchDB, and PostgreSQL.
+This thesis implements and tests selected KYC and AML/CFT controls in a retail
+Digital Rupiah prototype using Hyperledger Fabric 2.5. Its controls-study
+extension uses a fresh four-MSP network---CentralBankMSP, DistributorMSP,
+ValidatorMSP, and EndUserMSP---and three Go chaincodes for monetary operations,
+customer controls, and payments. Server-managed X.509 identities distinguish
+the signing actor, customer subject, and wallet custodian.
 }
 
 \textit{
-The prototype separates institutional and retail roles. Bank Indonesia issues
-Digital Rupiah into Treasury and distributes it directly to a validator bank or
-payment service provider acting as custodian. Backend ownership and chaincode MSP
-checks enforce user and organization boundaries. The shared Fabric channel does
-not provide transaction privacy.
+Synthetic unit tests and a chaincode integration smoke test pass high-risk KYC
+decisions with distinct reviewer and senior approver, restriction and
+evidence-based release, reserve funding, retail payment, read-only ValidatorMSP
+access, and expected endorsement failures. These results establish behavior
+only for the tested synthetic scenarios; they do not establish identity
+authenticity, screening effectiveness, actual PPATK reporting, or institutional
+compliance.
 }
 
 \textit{
-Automated tests evaluate authorization and transfer safety. The Caliper study
-uses isolated transaction types, a fixed-rate pilot, calibration at one, two,
-four, and eight workers, and five primary repetitions per load. The smallest
-worker configuration selected by calibration is one worker. Under the declared
-sustainability gate of at least 99\% successful completions and a successful
-transaction p95 latency of at most 2.5 seconds in every repetition, sustainable
-loads reach 190 TPS for balance queries, 50 TPS for wallet freeze, 65 TPS for
-wallet unfreeze, 25 TPS for redemption, and 20 TPS for low-contention retail
-transfer and merchant payment. Issuance, distribution, and deliberate
-high-contention retail transfer do not meet the gate at the tested rates. A
-separate five-repetition Go/PostgreSQL/KYC demonstration evaluates the
-end-to-end service path. These measurements describe a single-host prototype
-and do not establish production capacity or cross-machine reproducibility.
+As secondary performance evidence, Hyperledger Caliper tests the separate
+five-organization \texttt{digital-rupiah} v3.0 baseline. Low-contention retail
+transfer reaches 20 TPS, while the paired high-contention test reaches 2.01 TPS.
+Those measurements do not benchmark the three-chaincode extension and do not
+establish production capacity or cross-machine reproducibility.
 }
 
 \vspace{0.5cm}
 
-\noindent\textbf{Keywords}: Digital Rupiah, retail CBDC, Hyperledger Fabric,
-two-tier distribution, performance evaluation
+\noindent\textbf{Keywords}: Digital Rupiah, retail CBDC, KYC, AML/CFT,
+Hyperledger Fabric, endorsement, two-tier distribution
