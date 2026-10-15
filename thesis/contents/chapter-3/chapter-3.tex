@@ -473,8 +473,8 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 	Kesiapan & Petakan penanda tangan ke MSP yang berwenang, konfigurasi tiga \textit{chaincode} dan empat MSP, lalu pastikan setiap beban kerja berhasil. Inisialisasi ronde Caliper menyiapkan koneksi tanpa ronde pemanasan bertimer. \\
 	Braket & Gunakan hasil terdahulu hanya sebagai petunjuk laju awal; bila tidak tersedia, mulai pada 32 operasi/detik. Tetapkan rentang 0,1--4.096 operasi/detik. Jika laju awal lulus tetapi belum ada batas gagal, kalikan laju dengan empat; jika laju awal gagal tetapi belum ada batas lulus, bagi laju dengan empat sampai braket terbentuk. \\
 	Pencarian biner & Uji titik tengah braket dalam ronde 10 detik sampai selisih relatif laju gagal terhadap laju lulus paling besar 10\%. Kesalahan konfigurasi atau data uji menghentikan pencarian beban kerja tersebut untuk diagnosis. \\
-	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. \\
-	Interpretasi & Kelulusan pada batas 4.096 operasi/detik dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh 31 beban kerja adalah 46,5 menit, di luar penyiapan, pencarian, dan verifikasi. \\
+	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. Galat penyiapan fixture tidak dihitung sebagai kegagalan konfirmasi; pada fund-reserve, percobaan tersebut diarsipkan dan pencarian beban kerja diulang. \\
+	Interpretasi & Kelulusan pada batas atas rentang pencarian, 4.096 operasi/detik, dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh 31 beban kerja adalah 46,5 menit, di luar penyiapan, pencarian, dan verifikasi. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
