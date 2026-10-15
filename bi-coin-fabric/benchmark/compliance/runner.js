@@ -13,6 +13,7 @@ const catalog = require('./case-catalog.json');
 
 const projectRoot = path.resolve(__dirname, '../..');
 const stamp = process.env.BENCHMARK_COMPLIANCE_STAMP;
+const scenarioFilter = process.env.BENCHMARK_COMPLIANCE_SCENARIOS;
 if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(stamp || '')) throw new Error('benchmark stamp must be 1-64 safe characters');
 if (projectRoot !== '/workspace' || fs.existsSync(path.join(projectRoot, '.git'))) {
     throw new Error('compliance benchmark and network resets are allowed only from the disposable /workspace copy');
@@ -239,6 +240,7 @@ async function runCapacity({ preflightOnly = false } = {}) {
         networkConfigPath: network.networkPath,
         identityMapPath: network.identityMapPath,
         preflightOnly,
+        scenarioFilter,
     });
     return report;
 }

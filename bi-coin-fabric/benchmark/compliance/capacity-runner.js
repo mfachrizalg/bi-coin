@@ -9,7 +9,17 @@ const { evaluateWindow } = require('./outcome-analysis');
 const { prepareFixturePool } = require('./prepare-fixtures');
 const { runCaliperRounds, readJsonLines } = require('./caliper-runner');
 
-async function runCapacityStudy({ projectRoot, resultDirectory, stamp, fixtureIds, startAPI, networkConfigPath, identityMapPath, preflightOnly = false }) {
+function selectScenarios(scenarios, filter) {
+    const wanted = String(filter || '').split(',').map(id => id.trim()).filter(Boolean);
+    if (!wanted.length) return scenarios;
+    const known = new Set(scenarios.map(scenario => scenario.id));
+    const unknown = wanted.filter(id => !known.has(id));
+    if (unknown.length) throw new Error(`unknown scenario in filter: ${unknown.join(', ')}`);
+    return scenarios.filter(scenario => wanted.includes(scenario.id));
+}
+
+
+async function runCapacityStudy({ projectRoot, resultDirectory, stamp, fixtureIds, startAPI, networkConfigPath, identityMapPath, preflightOnly = false, scenarioFilter }) {
     const startedAt = Date.now();
     const preflightPath = path.join(resultDirectory, 'preflight.json');
     const capacityPath = path.join(resultDirectory, 'capacity.json');
@@ -25,6 +35,8 @@ async function runCapacityStudy({ projectRoot, resultDirectory, stamp, fixtureId
     });
     preflight.workloads ||= [];
     report.workloads ||= [];
+report.scenario_filter = scenarioFilter || null;
+const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter);
 
     function checkpoint(phase, scenario, rate, fixtureProgress) {
         const state = {
@@ -97,7 +109,7 @@ async function runCapacityStudy({ projectRoot, resultDirectory, stamp, fixtureId
         fs.writeFileSync(preflightPath, `${JSON.stringify(preflight, null, 2)}\n`);
     }
 
-    for (const scenario of catalog.performance_scenarios) {
+    for (const scenario of scenarios) {
         if (preflight.workloads.some(item => item.id === scenario.id)) continue;
         let result;
         try {
@@ -141,7 +153,7 @@ async function runCapacityStudy({ projectRoot, resultDirectory, stamp, fixtureId
     }
 
     const preflightByID = new Map(preflight.workloads.map(item => [item.id, item]));
-    for (const scenario of catalog.performance_scenarios) {
+    for (const scenario of scenarios) {
         let workload = report.workloads.find(item => item.id === scenario.id);
         if (workload?.search?.complete || workload?.confirmation?.classification === 'pass'
             || workload?.confirmation?.classification === 'unstable-boundary') continue;
@@ -455,4 +467,4 @@ function readJSON(file, fallback) {
     }
 }
 
-module.exports = { runCapacityStudy, classifyRound, restoreSearch, snapshotSearch };
+module.exports = { runCapacityStudy, classifyRound, restoreSearch, snapshotSearch, selectScenarios };
