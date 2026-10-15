@@ -22,7 +22,7 @@ export default function Supply() {
       )}
       {loading ? <LoadingSkeleton kind="form" label="Loading circulating supply" rows={1} /> : <>
         <div className="supply-value">{formatRupiah(supply)}</div>
-        <div className="field-help">Total balance across five peer organizations.</div>
+        <div className="field-help">Total balance across four peer organizations.</div>
       </>}
     </div>
   )

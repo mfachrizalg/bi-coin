@@ -1,5 +1,5 @@
 export const ParticipantType = {
-  VALIDATOR: 'validator',
+  DISTRIBUTOR: 'distributor',
   OBSERVER: 'observer',
   PJP: 'pjp',
 } as const
@@ -7,7 +7,7 @@ export const ParticipantType = {
 export type ParticipantTypeValue = (typeof ParticipantType)[keyof typeof ParticipantType]
 
 export const ParticipantTypeLabel: Record<string, string> = {
-  validator: 'Validator Bank',
+  distributor: 'Distributor Bank',
   observer: 'Observer',
   pjp: 'PJP',
 }

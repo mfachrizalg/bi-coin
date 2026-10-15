@@ -80,7 +80,7 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	// Wallet reads for authenticated actors.
 	auth := r.NewRoute().Subrouter()
 	auth.Use(middleware.RequireRole(middleware.RoleAuthenticated, middleware.RoleKycVerified,
-		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP,
+		middleware.RoleBankPjp, middleware.RolePJP,
 		middleware.RoleBankIndonesia, middleware.RoleSupervisor, middleware.RoleMerchant))
 	auth.HandleFunc("/wallets", h.ListWallets).Methods("GET")
 
@@ -94,7 +94,7 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Bank/PJP performs retail onboarding and KYC decisions.
 	kycMutation := r.NewRoute().Subrouter()
-	kycMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP))
+	kycMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RolePJP))
 	kycMutation.HandleFunc("/wallets", h.CreateWallet).Methods("POST")
 	kycMutation.HandleFunc("/retail/customers", h.CreateRetailCustomer).Methods("POST")
 	kycMutation.HandleFunc("/kyc/profiles", h.SubmitKycProfile).Methods("POST")
@@ -102,7 +102,7 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Bank/PJP operates KYC; BI and supervisors have read-only oversight.
 	kycRead := r.NewRoute().Subrouter()
-	kycRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	kycRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
 	kycRead.HandleFunc("/retail/customers", h.ListRetailCustomers).Methods("GET")
 	kycRead.HandleFunc("/kyc/profiles/{profile_id}", h.GetKycProfile).Methods("GET")
 	kycRead.HandleFunc("/kyc/profiles/{profile_id}/provider-checks", h.ListKycProviderChecks).Methods("GET")
@@ -112,7 +112,7 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	transferPayments := r.NewRoute().Subrouter()
 	transferPayments.Use(middleware.RequireRole(
 		middleware.RoleKycVerified, middleware.RoleMerchant,
-		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP))
+		middleware.RoleBankPjp, middleware.RolePJP))
 	transferPayments.HandleFunc("/transfers", h.Transfer).Methods("POST")
 
 	// QRIS routes are disabled; retain their handlers and stores for a later restoration.
@@ -140,12 +140,12 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 	// Bank/PJP and Bank Indonesia may submit participant applications.
 	bankMutation := r.NewRoute().Subrouter()
-	bankMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankIndonesia))
+	bankMutation.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RolePJP, middleware.RoleBankIndonesia))
 	bankMutation.HandleFunc("/participants", h.SubmitParticipant).Methods("POST")
 
 	// Bank PJP, Bank Indonesia, and supervisors can read participant state.
 	participantRead := r.NewRoute().Subrouter()
-	participantRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	participantRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
 	participantRead.HandleFunc("/participants", h.ListParticipants).Methods("GET")
 	participantRead.HandleFunc("/participants/{participant_id}", h.GetParticipant).Methods("GET")
 
@@ -921,7 +921,7 @@ func TopologyHandler(w http.ResponseWriter, r *http.Request) {
 			{ID: "bi-node", Name: "Bank Indonesia", Type: "central_bank", Role: "issuer", Domain: "bi.go.id"},
 			{ID: "distributor-a", Name: "Distributor Bank A", Type: "distributor", Role: "distributor", Domain: "distributor-a.bi-coin"},
 			{ID: "distributor-b", Name: "Distributor Bank B", Type: "distributor", Role: "distributor", Domain: "distributor-b.bi-coin"},
-			{ID: "validator-ojk", Name: "OJK (ValidatorMSP)", Type: "validator", Role: "observer", Domain: "ojk.go.id"},
+			{ID: "validator-ojk", Name: "OJK (ValidatorMSP)", Type: "observer", Role: "observer", Domain: "ojk.go.id"},
 			{ID: "policy-node", Name: "Policy Oracle", Type: "policy", Role: "policy", Domain: "policy.bi-coin"},
 			{ID: "security-node", Name: "Security Node", Type: "security", Role: "security", Domain: "security.bi-coin"},
 			{ID: "api-gateway", Name: "API Gateway", Type: "gateway", Role: "api", Domain: "api.bi-coin"},

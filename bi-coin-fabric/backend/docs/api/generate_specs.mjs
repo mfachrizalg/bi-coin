@@ -782,7 +782,7 @@ const paths = {
   "/distribute": {
     post: op({
       tags: ["liquidity"],
-      summary: "Distribute Treasury funds to a Validator Bank or PJP Custodian",
+      summary: "Distribute Treasury funds to a Bank or PJP Custodian",
       description: "Requires Idempotency-Key header.",
       parameters: [parameters.IdempotencyKeyHeader],
       requestBody: ref("DistributeRequestBody"),
@@ -962,7 +962,6 @@ const rolePaths = {
   },
 };
 
-rolePaths.validator_bank = rolePaths.bank_pjp;
 rolePaths.pjp = rolePaths.bank_pjp;
 
 const descriptions = {
@@ -971,7 +970,6 @@ const descriptions = {
   kyc_verified: "Retail transfer and QRIS payer surface after KYC verification.",
   merchant: "Merchant QRIS and payment surface.",
   bank_pjp: "Custodian onboarding, KYC, retail customer, participant read, and wallet issuance surface.",
-  validator_bank: "Validator-bank onboarding, KYC, retail customer, participant read, and wallet issuance surface.",
   pjp: "PJP onboarding, KYC, retail customer, participant read, and wallet issuance surface.",
   bank_indonesia: "Bank Indonesia mutation and oversight surface.",
   supervisor: "Read-only oversight surface.",

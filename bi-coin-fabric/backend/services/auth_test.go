@@ -98,7 +98,7 @@ func TestAuthServiceRejectsTokenAfterRoleChange(t *testing.T) {
 	if err != nil {
 		t.Fatalf("login: %v", err)
 	}
-	users.users["operator"] = AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RoleValidatorBank, Active: true}
+	users.users["operator"] = AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RoleBankPjp, Active: true}
 	if _, err := auth.Verify(token.AccessToken); err == nil {
 		t.Fatal("expected role-changed token to be rejected")
 	}

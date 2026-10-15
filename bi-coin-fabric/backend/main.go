@@ -73,7 +73,6 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 		Authenticated: specAuthenticated,
 		KycVerified:   specKycVerified,
 		BankPjp:       specBankPjp,
-		ValidatorBank: specValidatorBank,
 		Pjp:           specPjp,
 		BankIndonesia: specBankIndonesia,
 		Merchant:      specMerchant,
@@ -84,7 +83,7 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 	topologyRoute := r.NewRoute().Subrouter()
 	topologyRoute.Use(middleware.RequireRole(
 		middleware.RolePublic, middleware.RoleAuthenticated, middleware.RoleKycVerified,
-		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP,
+		middleware.RoleBankPjp, middleware.RolePJP,
 		middleware.RoleBankIndonesia, middleware.RoleMerchant, middleware.RoleSupervisor,
 	))
 	topologyRoute.HandleFunc("/network/topology", handlers.TopologyHandler).Methods("GET")

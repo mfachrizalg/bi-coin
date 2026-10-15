@@ -98,9 +98,9 @@ const (
 type ParticipantType string
 
 const (
-	ParticipantValidator ParticipantType = "validator"
-	ParticipantObserver  ParticipantType = "observer"
-	ParticipantPJP       ParticipantType = "pjp"
+	ParticipantDistributor ParticipantType = "distributor"
+	ParticipantObserver    ParticipantType = "observer"
+	ParticipantPJP         ParticipantType = "pjp"
 )
 
 type ParticipantStatus string
@@ -726,8 +726,8 @@ func (s *SmartContract) CreateWallet(ctx contractapi.TransactionContextInterface
 	if err != nil {
 		return err
 	}
-	if custodian.Status != ParticipantActive || (custodian.ParticipantType != ParticipantValidator && custodian.ParticipantType != ParticipantPJP) || custodian.MSPID != callerMSP {
-		return fmt.Errorf("caller MSP %s is not an active Validator/PJP Custodian", callerMSP)
+	if custodian.Status != ParticipantActive || (custodian.ParticipantType != ParticipantDistributor && custodian.ParticipantType != ParticipantPJP) || custodian.MSPID != callerMSP {
+		return fmt.Errorf("caller MSP %s is not an active Distributor/PJP Custodian", callerMSP)
 	}
 	wallet := Wallet{
 		WalletID:               walletID,
@@ -1157,8 +1157,8 @@ func (s *SmartContract) SubmitKycProfile(ctx contractapi.TransactionContextInter
 	if err != nil {
 		return nil, err
 	}
-	if custodian.ParticipantType != ParticipantValidator && custodian.ParticipantType != ParticipantPJP {
-		return nil, fmt.Errorf("KYC profile caller must be an active Validator/PJP Custodian")
+	if custodian.ParticipantType != ParticipantDistributor && custodian.ParticipantType != ParticipantPJP {
+		return nil, fmt.Errorf("KYC profile caller must be an active Distributor/PJP Custodian")
 	}
 	exists, err := s.kycProfileExists(ctx, profileID)
 	if err != nil {
@@ -1710,7 +1710,7 @@ func (s *SmartContract) requireActiveWalletCustodian(ctx contractapi.Transaction
 	if err != nil {
 		return fmt.Errorf("wallet %s Custodian: %w", wallet.WalletID, err)
 	}
-	if custodian.Status != ParticipantActive || (custodian.ParticipantType != ParticipantValidator && custodian.ParticipantType != ParticipantPJP) {
+	if custodian.Status != ParticipantActive || (custodian.ParticipantType != ParticipantDistributor && custodian.ParticipantType != ParticipantPJP) {
 		return fmt.Errorf("wallet %s Custodian %s is not active and eligible", wallet.WalletID, custodianID)
 	}
 	if wallet.CustodianMSPID != "" && wallet.CustodianMSPID != custodian.MSPID {
@@ -2230,7 +2230,7 @@ func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInte
 	if p.Status != "active" {
 		return nil, fmt.Errorf("participant %s is not active", participantID)
 	}
-	if p.ParticipantType != ParticipantValidator && p.ParticipantType != ParticipantPJP {
+	if p.ParticipantType != ParticipantDistributor && p.ParticipantType != ParticipantPJP {
 		return nil, fmt.Errorf("participant %s cannot redeem", participantID)
 	}
 	walletID := fmt.Sprintf("wlt_%s", p.ParticipantID)
@@ -2351,8 +2351,8 @@ func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionConte
 	if err != nil {
 		return nil, fmt.Errorf("receiver participant: %w", err)
 	}
-	if receiver.ParticipantType != ParticipantValidator && receiver.ParticipantType != ParticipantPJP {
-		return nil, fmt.Errorf("receiver %s must be a validator or PJP; got %s", receiverParticipantID, receiver.ParticipantType)
+	if receiver.ParticipantType != ParticipantDistributor && receiver.ParticipantType != ParticipantPJP {
+		return nil, fmt.Errorf("receiver %s must be a distributor or PJP; got %s", receiverParticipantID, receiver.ParticipantType)
 	}
 	if receiver.Status != ParticipantActive {
 		return nil, fmt.Errorf("receiver participant %s is not active", receiverParticipantID)
@@ -2471,7 +2471,7 @@ func (s *SmartContract) GetTopology(ctx contractapi.TransactionContextInterface)
 		{"id": "bi-node", "name": "Bank Indonesia", "type": "central_bank", "role": "issuer", "domain": "bi.go.id"},
 		{"id": "distributor-a", "name": "Distributor Bank A", "type": "distributor", "role": "distributor", "domain": "distributor-a.bi-coin"},
 		{"id": "distributor-b", "name": "Distributor Bank B", "type": "distributor", "role": "distributor", "domain": "distributor-b.bi-coin"},
-		{"id": "validator-ojk", "name": "OJK (ValidatorMSP)", "type": "validator", "role": "observer", "domain": "ojk.go.id"},
+		{"id": "validator-ojk", "name": "OJK (ValidatorMSP)", "type": "observer", "role": "observer", "domain": "ojk.go.id"},
 		{"id": "policy-node", "name": "Policy Oracle", "type": "policy", "role": "policy", "domain": "policy.bi-coin"},
 		{"id": "security-node", "name": "Security Node", "type": "security", "role": "security", "domain": "security.bi-coin"},
 		{"id": "api-gateway", "name": "API Gateway", "type": "gateway", "role": "api", "domain": "api.bi-coin"},

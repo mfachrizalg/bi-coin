@@ -53,7 +53,6 @@ func TestCurrentRetailRoutesAreRegistered(t *testing.T) {
 		{http.MethodPost, "/kyc/profiles/kyc_budi/refresh", middleware.RoleBankPjp},
 		{http.MethodPost, "/transfers", middleware.RoleKycVerified},
 		{http.MethodPost, "/transfers", middleware.RoleMerchant},
-		{http.MethodPost, "/transfers", middleware.RoleValidatorBank},
 		{http.MethodPost, "/transfers", middleware.RolePJP},
 	}
 
@@ -188,7 +187,7 @@ func TestRetailKycMutationIsRestrictedToCustodianRoles(t *testing.T) {
 func TestExplicitCustodianRolesCanReachKycValidation(t *testing.T) {
 	router := mux.NewRouter()
 	New(nil, nil).RegisterRoutes(router)
-	for _, role := range []middleware.Role{middleware.RoleValidatorBank, middleware.RolePJP} {
+	for _, role := range []middleware.Role{middleware.RoleBankPjp, middleware.RolePJP} {
 		req := httptest.NewRequest(http.MethodPost, "/kyc/profiles", strings.NewReader("not-json"))
 		req = requestWithRole(req, role)
 		response := httptest.NewRecorder()
@@ -295,7 +294,7 @@ func TestOversightReadsAreLimitedToBankIndonesiaAndSupervisor(t *testing.T) {
 		{"/reports/metrics", "GetMetrics"},
 	}
 	allowed := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleSupervisor}
-	denied := []middleware.Role{middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankPjp, middleware.RoleKycVerified, middleware.RoleMerchant}
+	denied := []middleware.Role{middleware.RolePJP, middleware.RoleBankPjp, middleware.RoleKycVerified, middleware.RoleMerchant}
 
 	for _, route := range routes {
 		for _, role := range append(append([]middleware.Role{}, allowed...), denied...) {

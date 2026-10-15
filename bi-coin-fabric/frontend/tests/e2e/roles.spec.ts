@@ -84,13 +84,13 @@ for (const workspace of workspaces) {
   })
 }
 
-test('validator_bank has no workspace', async ({ page }) => {
-  await signIn(page, 'validator_bank')
+test('distributor bank has a workspace, not the empty placeholder', async ({ page }) => {
+  await signIn(page, 'bank_pjp')
 
   await expect(
-    page.getByRole('navigation', { name: 'Validator Bank workspace navigation' }).getByRole('button'),
-  ).toHaveCount(0)
-  await expect(page.getByText('This role has no workspace in the demo.', { exact: true })).toBeVisible()
+    page.getByRole('navigation', { name: 'Participant workspace navigation' }).getByRole('button'),
+  ).toHaveText(['Subject approval', 'Business authority', 'Restrictions', 'Wholesale conversion'])
+  await expect(page.getByText('This role has no workspace in the demo.', { exact: true })).toHaveCount(0)
 })
 
 test('a hash naming a tab outside the role renders no workspace', async ({ page }) => {

@@ -877,7 +877,7 @@
             "title": "Domain",
             "description": "Iroha domain namespace assigned to the participant.",
             "examples": [
-              "bank-a.paynet"
+              "distributor.bi-coin"
             ]
           },
           "account_id": {
@@ -893,7 +893,7 @@
             "$ref": "#/components/schemas/ParticipantType",
             "description": "Participant category in the wholesale Digital Rupiah network.",
             "examples": [
-              "validator"
+              "distributor"
             ]
           },
           "initial_reserve_balance": {
@@ -935,19 +935,20 @@
         "example": {
           "account_id": "bank-a-account",
           "compliance_status": "active",
-          "domain": "bank-a.paynet",
+          "domain": "distributor.bi-coin",
           "initial_reserve_balance": "1000",
           "name": "Bank A Demo",
           "participant_id": "bank-a",
-          "participant_type": "validator"
+          "participant_type": "distributor"
         }
       },
       "ParticipantType": {
         "type": "string",
         "enum": [
-          "validator",
-          "non_validator",
-          "no_node"
+          "distributor",
+          "observer",
+          "gateway",
+          "pjp"
         ],
         "title": "ParticipantType"
       },

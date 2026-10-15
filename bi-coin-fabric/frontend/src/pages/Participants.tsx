@@ -52,7 +52,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
     name: '',
     domain: '',
     account_id: '',
-    participant_type: 'validator',
+    participant_type: 'distributor',
     initial_reserve_balance: '0',
     compliance_status: 'pending',
   })
@@ -159,9 +159,9 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
 	    } catch (e) { notify(getErrorMessage(e), 'error') } finally { setBusy('') }
   }
 
-	const validators = participants.filter(p => p.participant_type === 'validator' && p.status === 'active')
+	const distributors = participants.filter(p => p.participant_type === 'distributor' && p.status === 'active')
 	const pjps = participants.filter(p => p.participant_type === 'pjp' && p.status === 'active')
-	const custodians = [...validators, ...pjps]
+	const custodians = [...distributors, ...pjps]
 
   return (
     <div className="workspace-stack participants-page">
@@ -233,8 +233,8 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
       </div>
 
       <div className="participant-forms-grid">
-        {/* Submit participant — validator bank/PJP + BI */}
-        {can(role, 'bank_pjp', 'validator_bank', 'pjp', 'bank_indonesia') && <section className="surface-card">
+        {/* Submit participant — distributor bank/PJP + BI */}
+        {can(role, 'bank_pjp', 'pjp', 'bank_indonesia') && <section className="surface-card">
           <h3>Register participant</h3>
           <form className="stack-small" onSubmit={handleSubmit}>
             <div className="button-row field-row">
@@ -265,7 +265,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
               onChange={e => setForm(f => ({ ...f, participant_type: e.target.value }))}
               className="app-input"
             >
-              <option value="validator">Bank / Validator</option>
+              <option value="distributor">Bank / Distributor</option>
               <option value="pjp">PJP (Payment Service Provider)</option>
               <option value="observer">Observer</option>
             </select>
@@ -279,7 +279,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
       {can(role, 'bank_indonesia') && <section className="surface-card">
         <h3>Distribute from Treasury</h3>
         <p className="field-help">
-              Bank Indonesia sends issued Digital Rupiah from Treasury to an active Validator Bank or PJP.
+              Bank Indonesia sends issued Digital Rupiah from Treasury to an active Distributor Bank or PJP.
             </p>
 				<form className="stack-small" onSubmit={handleDistribute}>
 					<select
@@ -287,7 +287,7 @@ export default function Participants({ role, prefill, onPrefillConsumed }: Props
               onChange={e => setDistForm(f => ({ ...f, receiver_participant_id: e.target.value }))}
               className="app-input"
             >
-						<option value="">Select a Validator Bank or PJP</option>
+						<option value="">Select a Distributor Bank or PJP</option>
 					{custodians.map(p => (
                 <option key={p.participant_id} value={p.participant_id}>{p.name} ({p.participant_id})</option>
               ))}

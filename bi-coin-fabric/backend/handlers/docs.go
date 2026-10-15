@@ -18,7 +18,7 @@ type roleInfo struct {
 
 var roleOrder = []string{
 	"public", "authenticated", "kyc_verified",
-	"bank_pjp", "validator_bank", "pjp", "bank_indonesia", "merchant", "supervisor",
+	"bank_pjp", "pjp", "bank_indonesia", "merchant", "supervisor",
 }
 
 // DocsSpecs holds the embedded OpenAPI JSON bytes keyed by role name.
@@ -28,7 +28,6 @@ type DocsSpecs struct {
 	Authenticated []byte
 	KycVerified   []byte
 	BankPjp       []byte
-	ValidatorBank []byte
 	Pjp           []byte
 	BankIndonesia []byte
 	Merchant      []byte
@@ -111,7 +110,6 @@ func NewDocsHandler(specs DocsSpecs) *DocsHandler {
 			"authenticated":  {Label: "Authenticated", DevKey: "dev-auth-key", Spec: specs.Authenticated, TagLine: "Principal profile and wallet listing"},
 			"kyc_verified":   {Label: "KYC Verified", DevKey: "dev-kyc-key", Spec: specs.KycVerified, TagLine: "Retail transfers"},
 			"bank_pjp":       {Label: "Bank / PJP", DevKey: "dev-bank-pjp-key", Spec: specs.BankPjp, TagLine: "Onboarding, KYC, retail customers, and wallet custody"},
-			"validator_bank": {Label: "Validator Bank", DevKey: "dev-validator-bank-key", Spec: specs.ValidatorBank, TagLine: "Validator-bank onboarding, KYC, and wallet custody"},
 			"pjp":            {Label: "PJP", DevKey: "dev-pjp-key", Spec: specs.Pjp, TagLine: "PJP onboarding, KYC, and wallet custody"},
 			"bank_indonesia": {Label: "Bank Indonesia", DevKey: "dev-bi-key", Spec: specs.BankIndonesia, TagLine: "Issuance, distribution, limits, RTGS, and oversight"},
 			"merchant":       {Label: "Merchant", DevKey: "dev-merchant-key", Spec: specs.Merchant, TagLine: "Merchant transfers"},

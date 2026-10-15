@@ -284,8 +284,8 @@ func (c *authorizationContract) EvaluateTransaction(name string, args ...string)
 
 func TestParticipantAndTreasuryMutationsRouteToLedgerForPermittedRoles(t *testing.T) {
 	biOnly := []middleware.Role{middleware.RoleBankIndonesia}
-	applicants := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankPjp}
-	roles := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleValidatorBank, middleware.RolePJP,
+	applicants := []middleware.Role{middleware.RoleBankIndonesia, middleware.RolePJP, middleware.RoleBankPjp}
+	roles := []middleware.Role{middleware.RoleBankIndonesia, middleware.RolePJP,
 		middleware.RoleBankPjp, middleware.RoleKycVerified, middleware.RoleMerchant}
 
 	routes := []struct {

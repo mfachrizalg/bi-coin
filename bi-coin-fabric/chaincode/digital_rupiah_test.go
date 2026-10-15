@@ -40,11 +40,13 @@ func TestSubmitAndApproveParticipantCreatesWholesaleWallet(t *testing.T) {
 	sc := &SmartContract{}
 	ctx, stub := newMockTransactionContext("tx-submit", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
 
-	if err := sc.SubmitParticipant(ctx, "bank-1", "Bank One", "bank.example", "acct-1", string(ParticipantValidator), "1000000", "pending"); err != nil {
+	ctx.SetClientIdentity(&mockClientIdentity{mspID: DistributorMSP})
+	if err := sc.SubmitParticipant(ctx, "bank-1", "Bank One", "bank.example", "acct-1", string(ParticipantDistributor), "1000000", "pending"); err != nil {
 		t.Fatalf("submit participant: %v", err)
 	}
 
 	setMockTransaction(stub, "tx-approve", time.Date(2026, time.June, 27, 12, 5, 0, 0, time.UTC))
+	ctx.SetClientIdentity(&mockClientIdentity{mspID: CentralBankMSP})
 	if err := sc.ApproveParticipant(ctx, "bank-1"); err != nil {
 		t.Fatalf("approve participant: %v", err)
 	}

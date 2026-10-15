@@ -66,7 +66,7 @@ func TestInitLedgerFailsWhenLegacyStateExistsWithoutSchemaSentinel(t *testing.T)
 	sc := &SmartContract{}
 	ctx, stub := newMockTransactionContext("tx-legacy", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
 
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
 	if err := sc.putWallet(ctx, "bi_treasury", Wallet{
 		WalletID:               "bi_treasury",
 		OwnerID:                "bank_indonesia",
@@ -232,19 +232,19 @@ func TestFreezeRejectOffboardAndCascadeAcrossWallets(t *testing.T) {
 	sc := &SmartContract{}
 	ctx, stub := newMockTransactionContext("tx-participant", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
 
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put participant wallet: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-retail-1", Wallet{WalletID: "wlt-retail-1", OwnerID: "cust-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, Tier: TierBasic, Balance: 25_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-retail-1", Wallet{WalletID: "wlt-retail-1", OwnerID: "cust-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, Tier: TierBasic, Balance: 25_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put retail wallet: %v", err)
 	}
 
 	setMockTransaction(stub, "tx-freeze", time.Date(2026, time.June, 27, 12, 5, 0, 0, time.UTC))
-	if err := sc.FreezeParticipant(ctx, "validator-1"); err != nil {
+	if err := sc.FreezeParticipant(ctx, "distributor-1"); err != nil {
 		t.Fatalf("freeze participant: %v", err)
 	}
-	for _, walletID := range []string{"wlt_validator-1", "wlt-retail-1"} {
+	for _, walletID := range []string{"wlt_distributor-1", "wlt-retail-1"} {
 		wallet, err := sc.getWallet(ctx, walletID)
 		if err != nil {
 			t.Fatalf("get wallet %s: %v", walletID, err)
@@ -254,10 +254,10 @@ func TestFreezeRejectOffboardAndCascadeAcrossWallets(t *testing.T) {
 		}
 	}
 
-	if err := sc.RejectParticipant(ctx, "validator-1"); err == nil || !strings.Contains(err.Error(), "pending") {
+	if err := sc.RejectParticipant(ctx, "distributor-1"); err == nil || !strings.Contains(err.Error(), "pending") {
 		t.Fatalf("reject active participant err = %v, want pending-only rejection", err)
 	}
-	if _, err := sc.OffboardParticipant(ctx, "validator-1"); err == nil || !strings.Contains(err.Error(), "non-zero balance") {
+	if _, err := sc.OffboardParticipant(ctx, "distributor-1"); err == nil || !strings.Contains(err.Error(), "non-zero balance") {
 		t.Fatalf("offboard funded participant err = %v, want non-zero balance rejection", err)
 	}
 }
@@ -268,18 +268,18 @@ func TestRequestIssuanceRtgsIsIdempotentAndCreditsTreasury(t *testing.T) {
 	if err := sc.InitLedger(ctx); err != nil {
 		t.Fatalf("init ledger: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 0, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
-		t.Fatalf("put validator wallet: %v", err)
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 0, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+		t.Fatalf("put distributor wallet: %v", err)
 	}
 
 	setMockTransaction(stub, "tx-rtgs-1", time.Date(2026, time.June, 27, 12, 10, 0, 0, time.UTC))
-	rawReceipt, err := sc.RequestIssuanceRtgs(ctx, "HIMBIDJAXXX", 250_000, "rtgs-ref-1")
+	rawReceipt, err := sc.RequestIssuanceRtgs(ctx, "DISTIDJAXXX", 250_000, "rtgs-ref-1")
 	if err != nil {
 		t.Fatalf("rtgs issuance: %v", err)
 	}
 	receipt := rawReceipt.(map[string]interface{})
-	if receipt["sender_bic"] != "HIMBIDJAXXX" {
+	if receipt["sender_bic"] != "DISTIDJAXXX" {
 		t.Fatalf("rtgs receipt = %+v, want sender_bic", receipt)
 	}
 	wallet, err := sc.getWallet(ctx, "bi_treasury")
@@ -291,7 +291,7 @@ func TestRequestIssuanceRtgsIsIdempotentAndCreditsTreasury(t *testing.T) {
 	}
 
 	setMockTransaction(stub, "tx-rtgs-2", time.Date(2026, time.June, 27, 12, 11, 0, 0, time.UTC))
-	rawReceipt2, err := sc.RequestIssuanceRtgs(ctx, "HIMBIDJAXXX", 250_000, "rtgs-ref-1")
+	rawReceipt2, err := sc.RequestIssuanceRtgs(ctx, "DISTIDJAXXX", 250_000, "rtgs-ref-1")
 	if err != nil {
 		t.Fatalf("repeated rtgs issuance: %v", err)
 	}
@@ -314,12 +314,12 @@ func TestMintRejectsNonTreasuryWallet(t *testing.T) {
 	if err := sc.InitLedger(ctx); err != nil {
 		t.Fatalf("init ledger: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot}); err != nil {
-		t.Fatalf("put validator wallet: %v", err)
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot}); err != nil {
+		t.Fatalf("put distributor wallet: %v", err)
 	}
 
-	if err := sc.Mint(ctx, "wlt_validator-1", 1); err == nil || !strings.Contains(err.Error(), "treasury") {
-		t.Fatalf("mint validator wallet err = %v, want treasury-only rejection", err)
+	if err := sc.Mint(ctx, "wlt_distributor-1", 1); err == nil || !strings.Contains(err.Error(), "treasury") {
+		t.Fatalf("mint distributor wallet err = %v, want treasury-only rejection", err)
 	}
 }
 
@@ -344,7 +344,7 @@ func TestExplicitIssuanceAndRedemptionAreReplaySafe(t *testing.T) {
 		t.Fatal("expected issuance reference payload conflict")
 	}
 
-	putActiveParticipant(t, sc, ctx, "bank-1", ParticipantValidator, DistributorMSP, "BANKIDJAXXX")
+	putActiveParticipant(t, sc, ctx, "bank-1", ParticipantDistributor, DistributorMSP, "BANKIDJAXXX")
 	if err := sc.putWallet(ctx, "wlt_bank-1", Wallet{WalletID: "wlt_bank-1", OwnerID: "bank-1", ParticipantID: "bank-1", CustodianParticipantID: "bank-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 1_000}); err != nil {
 		t.Fatalf("put participant wallet: %v", err)
 	}
@@ -374,24 +374,24 @@ func TestRequestIssuanceRtgsRejectsNonPositiveAmountWithoutStateChange(t *testin
 	if err := sc.InitLedger(ctx); err != nil {
 		t.Fatalf("init ledger: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 10_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
-		t.Fatalf("put validator wallet: %v", err)
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 10_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+		t.Fatalf("put distributor wallet: %v", err)
 	}
 
 	for i, amount := range []int64{0, -1} {
 		setMockTransaction(stub, "tx-rtgs-invalid-"+string(rune('1'+i)), base.Add(time.Duration(i+1)*time.Minute))
-		if _, err := sc.RequestIssuanceRtgs(ctx, "HIMBIDJAXXX", amount, "rtgs-invalid-ref"); err == nil || !strings.Contains(err.Error(), "amount must be positive") {
+		if _, err := sc.RequestIssuanceRtgs(ctx, "DISTIDJAXXX", amount, "rtgs-invalid-ref"); err == nil || !strings.Contains(err.Error(), "amount must be positive") {
 			t.Fatalf("rtgs amount %d err = %v, want positive-amount rejection", amount, err)
 		}
 	}
 
-	wallet, err := sc.getWallet(ctx, "wlt_validator-1")
+	wallet, err := sc.getWallet(ctx, "wlt_distributor-1")
 	if err != nil {
-		t.Fatalf("get validator wallet: %v", err)
+		t.Fatalf("get distributor wallet: %v", err)
 	}
 	if wallet.Balance != 10_000 {
-		t.Fatalf("validator wallet balance = %d, want unchanged 10000", wallet.Balance)
+		t.Fatalf("distributor wallet balance = %d, want unchanged 10000", wallet.Balance)
 	}
 	txs, err := sc.GetTransactions(ctx, "", "", "", "", "")
 	if err != nil {
@@ -409,9 +409,9 @@ func TestRequestIssuanceRtgsRequiresPerTxSystemLimitState(t *testing.T) {
 	if err := sc.InitLedger(ctx); err != nil {
 		t.Fatalf("init ledger: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 0, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
-		t.Fatalf("put validator wallet: %v", err)
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, Balance: 0, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+		t.Fatalf("put distributor wallet: %v", err)
 	}
 	limitKey, err := stub.CreateCompositeKey("syslimit", []string{string(ScopePerTxAmount)})
 	if err != nil {
@@ -419,12 +419,12 @@ func TestRequestIssuanceRtgsRequiresPerTxSystemLimitState(t *testing.T) {
 	}
 
 	delete(stub.State, limitKey)
-	if _, err := sc.RequestIssuanceRtgs(ctx, "HIMBIDJAXXX", 25_000, "rtgs-missing-limit"); err == nil || !strings.Contains(err.Error(), "per-transaction system limit") {
+	if _, err := sc.RequestIssuanceRtgs(ctx, "DISTIDJAXXX", 25_000, "rtgs-missing-limit"); err == nil || !strings.Contains(err.Error(), "per-transaction system limit") {
 		t.Fatalf("missing limit err = %v, want system limit error", err)
 	}
 
 	stub.State[limitKey] = []byte("{bad json")
-	if _, err := sc.RequestIssuanceRtgs(ctx, "HIMBIDJAXXX", 25_000, "rtgs-bad-limit"); err == nil || !strings.Contains(err.Error(), "per-transaction system limit") {
+	if _, err := sc.RequestIssuanceRtgs(ctx, "DISTIDJAXXX", 25_000, "rtgs-bad-limit"); err == nil || !strings.Contains(err.Error(), "per-transaction system limit") {
 		t.Fatalf("malformed limit err = %v, want system limit error", err)
 	}
 }
@@ -435,7 +435,7 @@ func TestDistributionKeepsSupplyConstantAndCreatesOneDistributionRecord(t *testi
 	if err := sc.InitLedger(ctx); err != nil {
 		t.Fatalf("init ledger: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
 	putActiveParticipant(t, sc, ctx, "pjp-1", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
 	treasury, err := sc.getWallet(ctx, "bi_treasury")
 	if err != nil {
@@ -489,15 +489,15 @@ func TestDistributionKeepsSupplyConstantAndCreatesOneDistributionRecord(t *testi
 	}
 }
 
-func TestDistributionCreditsValidatorBankDirectlyFromTreasury(t *testing.T) {
+func TestDistributionCreditsDistributorDirectlyFromTreasury(t *testing.T) {
 	sc := &SmartContract{}
 	ctx, stub := newMockTransactionContext("tx-init", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
 	if err := sc.InitLedger(ctx); err != nil {
 		t.Fatalf("init ledger: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1", CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
-		t.Fatalf("put validator wallet: %v", err)
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1", CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP, WalletType: WalletHot, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+		t.Fatalf("put distributor wallet: %v", err)
 	}
 	treasury, err := sc.getWallet(ctx, "bi_treasury")
 	if err != nil {
@@ -508,16 +508,16 @@ func TestDistributionCreditsValidatorBankDirectlyFromTreasury(t *testing.T) {
 		t.Fatalf("fund treasury wallet: %v", err)
 	}
 
-	setMockTransaction(stub, "tx-dist-validator", time.Date(2026, time.June, 27, 12, 5, 0, 0, time.UTC))
-	if _, err := sc.DistributeToParticipant(ctx, "validator-1", 125_000, "distribution-validator-ref"); err != nil {
-		t.Fatalf("distribute to validator: %v", err)
+	setMockTransaction(stub, "tx-dist-distributor", time.Date(2026, time.June, 27, 12, 5, 0, 0, time.UTC))
+	if _, err := sc.DistributeToParticipant(ctx, "distributor-1", 125_000, "distribution-distributor-ref"); err != nil {
+		t.Fatalf("distribute to distributor: %v", err)
 	}
-	wallet, err := sc.getWallet(ctx, "wlt_validator-1")
+	wallet, err := sc.getWallet(ctx, "wlt_distributor-1")
 	if err != nil {
-		t.Fatalf("get validator wallet: %v", err)
+		t.Fatalf("get distributor wallet: %v", err)
 	}
 	if wallet.Balance != 125_000 {
-		t.Fatalf("validator wallet balance = %d, want 125000", wallet.Balance)
+		t.Fatalf("distributor wallet balance = %d, want 125000", wallet.Balance)
 	}
 }
 
@@ -530,7 +530,7 @@ func TestDistributionRejectsObserverCustodian(t *testing.T) {
 	putActiveParticipant(t, sc, ctx, "observer-1", ParticipantObserver, ValidatorMSP, "OJKIDJAXXX")
 
 	setMockTransaction(stub, "tx-dist-observer", time.Date(2026, time.June, 27, 12, 5, 0, 0, time.UTC))
-	if _, err := sc.DistributeToParticipant(ctx, "observer-1", 1, "distribution-observer-ref"); err == nil || !strings.Contains(err.Error(), "validator or PJP") {
+	if _, err := sc.DistributeToParticipant(ctx, "observer-1", 1, "distribution-observer-ref"); err == nil || !strings.Contains(err.Error(), "distributor or PJP") {
 		t.Fatalf("distribute to observer err = %v, want Custodian eligibility rejection", err)
 	}
 }
@@ -544,10 +544,10 @@ func TestWholesaleCustodianCanFundRetailWallet(t *testing.T) {
 		t.Fatalf("init ledger: %v", err)
 	}
 	ctx.SetClientIdentity(&mockClientIdentity{mspID: DistributorMSP})
-	putActiveParticipant(t, sc, ctx, "validator-1", ParticipantValidator, DistributorMSP, "HIMBIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt_validator-1", Wallet{
-		WalletID: "wlt_validator-1", OwnerID: "validator-1", ParticipantID: "validator-1",
-		CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP,
+	putActiveParticipant(t, sc, ctx, "distributor-1", ParticipantDistributor, DistributorMSP, "DISTIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt_distributor-1", Wallet{
+		WalletID: "wlt_distributor-1", OwnerID: "distributor-1", ParticipantID: "distributor-1",
+		CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP,
 		WalletType: WalletHot, Balance: 500_000,
 		LastResetDay: "2026-06-27", LastResetMonth: "2026-06",
 	}); err != nil {
@@ -562,8 +562,8 @@ func TestWholesaleCustodianCanFundRetailWallet(t *testing.T) {
 		t.Fatalf("put retail KYC profile: %v", err)
 	}
 	if err := sc.putWallet(ctx, "wlt-retail-1", Wallet{
-		WalletID: "wlt-retail-1", OwnerID: "retail-1", ParticipantID: "validator-1",
-		CustodianParticipantID: "validator-1", CustodianMSPID: DistributorMSP,
+		WalletID: "wlt-retail-1", OwnerID: "retail-1", ParticipantID: "distributor-1",
+		CustodianParticipantID: "distributor-1", CustodianMSPID: DistributorMSP,
 		Tier: TierStandard, WalletType: WalletHot,
 		LastResetDay: "2026-06-27", LastResetMonth: "2026-06",
 	}); err != nil {
@@ -571,14 +571,14 @@ func TestWholesaleCustodianCanFundRetailWallet(t *testing.T) {
 	}
 
 	setMockTransaction(stub, "tx-wholesale-funding-commit", base.Add(time.Minute))
-	receipt, err := sc.Transfer(ctx, "wlt_validator-1", "wlt-retail-1", 100_000, "wholesale-funding-ref")
+	receipt, err := sc.Transfer(ctx, "wlt_distributor-1", "wlt-retail-1", 100_000, "wholesale-funding-ref")
 	if err != nil {
 		t.Fatalf("wholesale funding transfer: %v", err)
 	}
 	if receipt["status"] != string(TxSettled) {
 		t.Fatalf("receipt = %+v, want settled", receipt)
 	}
-	wholesale, err := sc.getWallet(ctx, "wlt_validator-1")
+	wholesale, err := sc.getWallet(ctx, "wlt_distributor-1")
 	if err != nil {
 		t.Fatalf("get wholesale wallet: %v", err)
 	}

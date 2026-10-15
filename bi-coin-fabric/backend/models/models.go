@@ -43,10 +43,10 @@ const (
 type ParticipantType string
 
 const (
-	PtValidator ParticipantType = "validator"
-	PtObserver  ParticipantType = "observer"
-	PtGateway   ParticipantType = "gateway"
-	PtPJP       ParticipantType = "pjp"
+	PtDistributor ParticipantType = "distributor"
+	PtObserver    ParticipantType = "observer"
+	PtGateway     ParticipantType = "gateway"
+	PtPJP         ParticipantType = "pjp"
 )
 
 type WalletType string

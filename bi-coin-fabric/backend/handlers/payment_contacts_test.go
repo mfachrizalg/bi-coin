@@ -18,7 +18,7 @@ func TestPaymentContactRoutesKeepInstitutionalRolesOut(t *testing.T) {
 	router := mux.NewRouter()
 	New(nil, nil).RegisterRoutes(router)
 
-	for _, role := range []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleSupervisor, middleware.RoleValidatorBank} {
+	for _, role := range []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleSupervisor, middleware.RoleBankPjp} {
 		req := httptest.NewRequest(http.MethodGet, "/payment-contacts", nil)
 		req = requestWithRole(req, role)
 		response := httptest.NewRecorder()
