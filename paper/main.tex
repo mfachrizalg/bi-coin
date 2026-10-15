@@ -58,7 +58,7 @@ expected endorsement failures. These tests verify the selected scenarios; they
 do not establish identity authenticity, screening effectiveness, actual PPATK
 reporting, or institutional compliance.
 
-Performance evidence is secondary and comes from Hyperledger Caliper on the separate five-organization \texttt{digital-rupiah} v3.0 baseline and, in a separate one-worker run, the controls-study extension. The fixed-rate one-worker tests on the baseline report 20 TPS for low-contention retail transfer and 2.01 TPS under high contention. These baseline measurements do not benchmark the three-chaincode extension. Findings are limited to synthetic functional tests and single-host performance measurements.
+Performance evidence is secondary and comes from a one-worker Hyperledger Caliper run on the four-organization controls-study extension. Findings are limited to synthetic functional tests and single-host performance measurements.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -82,7 +82,7 @@ blockchain ledger.
 
 Central-bank digital money involves a sequence of business processes, not a
 single ledger operation. The central bank \emph{issues} money into its Treasury
-and \emph{distributes} liquidity directly to a validator bank or PJP custodian.
+and \emph{distributes} liquidity directly to a distributor bank or PJP custodian.
 Custodians serve customers and merchants in the retail tier. Holders
 \emph{transact}, custodians \emph{redeem} money to the central bank, and the supervisor \emph{reconciles} and audits its
 circulation. A blockchain implementation must express these processes as
@@ -102,8 +102,7 @@ two-tier model~\cite{sethaput2025,aryani2023critlit}.
 
 The primary evaluation in this work tests whether selected customer controls
 and organizational endorsement boundaries behave as designed in synthetic
-scenarios. The Caliper results provide secondary performance evidence for a
-separate baseline; the controls-study extension has its own one-worker Caliper run, reported in its subsection.
+scenarios. The Caliper results provide secondary performance evidence for the controls-study extension, reported in its subsection.
 
 To address this gap, we implement a Digital Rupiah prototype on a permissioned
 Hyperledger Fabric network~\cite{androulaki2018}. The prototype maps Bank
@@ -122,13 +121,11 @@ Indonesia's business processes to chaincode transactions. This paper contributes
 	      balance checks, Fabric multi-version concurrency control (MVCC), and
 	      atomic wallet updates. The protocol lets endorsing organizations apply
 	      the same state-transition rules independently.
-	\item An open, reproducible retail-CBDC benchmark with Hyperledger
-	      Caliper~\cite{hlf_caliper} that documents the testbed, workload,
-	      deterministic population seeding, offered-load profiles, and
-	      authorization and aggregate-overspend checks. The benchmark reports
-	      throughput, latency, success rate, and container-level resource
-	      measurements while keeping the local testbed and one-worker scope
-	      explicit.
+\item An open, reproducible Hyperledger Caliper~\cite{hlf_caliper} benchmark for the
+		      four-organization controls-study extension. It documents the testbed, the
+		      31 workloads, and the functional checks for authorization, validation, and
+		      action outcomes. It reports read and write throughput while keeping the
+		      single-host, one-worker scope explicit.
 \end{enumerate}
 
 \section{Background and Related Work}
@@ -213,21 +210,22 @@ endorsement requirement for each process.
     minimum width=3.4cm, minimum height=0.9cm, font=\footnotesize},
   ar/.style={-{Stealth}, thick}
 ]
-\node[box] (bi) {Bank Indonesia\\ (Tier 1)};
-\node[box, right=1.7cm of bi] (bank) {Validator banks\\ (Tier 1)};
-\node[box, below=1.2cm of bank] (pjp) {PJP custodian\\ (Tier 1)};
-\node[box, right=1.7cm of pjp] (retail) {Retail users\\ (Tier 2)};
+\node[box] (bi) {CentralBankMSP\\ (Bank Indonesia, Tier 1)};
+\node[box, right=1.7cm of bi] (bank) {DistributorMSP\\ (banks, Tier 1)};
+\node[box, below=1.2cm of bank] (pjp) {DistributorMSP\\ (PJP custodian, Tier 1)};
+\node[box, right=1.7cm of pjp] (retail) {EndUserMSP\\ (retail, merchant,\\ business users, Tier 2)};
+\node[box, above=1.2cm of retail] (val) {ValidatorMSP\\ (OJK, PPATK; supervision)};
 \draw[ar] (bi) -- node[above, font=\scriptsize]{issuance to Treasury} (bank);
 \draw[ar] (bi) to[out=-25,in=155] node[below, font=\scriptsize]{direct distribution} (pjp);
 \draw[ar] (pjp) -- node[below, font=\scriptsize]{retail funding and transfer} (retail);
-\draw[ar, dashed] (retail.north) to[out=120,in=-30]
-  node[font=\scriptsize, right]{supervision} (bi.east);
+\draw[ar, dashed] (retail.north) -- node[right, font=\scriptsize]{read-only audit} (val.south);
 \end{tikzpicture}%
 }
-\caption{Two-tier actor structure of the Digital Rupiah prototype. Bank
-Indonesia issues Digital Rupiah into Treasury and distributes it directly to a
-validator bank or PJP custodian, which serves retail users. Dashed flow denotes
-supervisory visibility.}
+\caption{Two-tier actor structure of the Digital Rupiah prototype, mapped to the four
+Fabric MSPs. CentralBankMSP (Bank Indonesia) issues Digital Rupiah into Treasury and
+distributes it directly to a distributor bank or PJP custodian (DistributorMSP), which
+serves retail, merchant, and business users (EndUserMSP). ValidatorMSP (OJK and PPATK)
+holds read-only supervisory visibility, shown as a dashed flow.}
 \label{fig:twotier}
 \end{figure}
 
@@ -239,31 +237,30 @@ supervisory visibility.}
 	\setlength{\tabcolsep}{3.5pt}
 	\begin{tabular}{ll>{\raggedright\arraybackslash}p{3.8cm}}
 		\toprule
-	\textbf{Process} & \textbf{Initiator} & \textbf{Chaincode transaction} \\
+		\textbf{Process} & \textbf{Initiator} & \textbf{Chaincode transaction} \\
 		\midrule
-		Issuance       & Bank Indonesia & \texttt{Mint}, \texttt{RequestIssuance} \\
-	Distribution   & Bank Indonesia & \texttt{DistributeToParticipant}        \\
-		Wallet creation & Bank / PJP   & \texttt{CreateWallet}                  \\
-		Payment        & Customer       & \texttt{Transfer}                        \\
-		Redemption     & Participant    & \texttt{Burn}, \texttt{RequestRedemption} \\
-		Supervision    & OJK / BI       & \texttt{GetReconciliationReport},
-		\texttt{GetMetrics}, \texttt{GetSupervisionEvents}                         \\
+		Issuance        & CentralBankMSP & \texttt{Mint}, \texttt{RequestIssuance} \\
+		Distribution    & CentralBankMSP & \texttt{DistributeToParticipant} \\
+		Wallet creation & DistributorMSP & \texttt{CreateWallet} \\
+		Payment         & EndUserMSP     & \texttt{Transfer} \\
+		Redemption      & DistributorMSP & \texttt{Burn}, \texttt{RequestRedemption} \\
+		Supervision     & \shortstack[l]{ValidatorMSP\\ CentralBankMSP} & \texttt{GetReconciliationReport},
+		\texttt{GetMetrics}, \texttt{GetSupervisionEvents} \\
 		\bottomrule
 	\end{tabular}
 
 	\vspace{2pt}
-	{\scriptsize The channel endorsement policy accepts an institutional MSP from
-	Bank Indonesia, HimbaraBank, CommercialBank, or PJP; OJK is observer-only.}
+	{\scriptsize ValidatorMSP (OJK, PPATK) has read-only audit access and is not an
+	ordinary payment endorser.}
 \end{table}
 
-The institutional tier contains Bank Indonesia, validator banks, and PJP
-Custodians. These participants follow a lifecycle of submission, approval,
-freezing, unfreezing, rejection, and offboarding. Bank Indonesia mints Digital
-Rupiah only to the Treasury wallet, then distributes liquidity directly to an
-active validator bank or PJP through \texttt{DistributeToParticipant}. Each
-Custodian serves customers and merchants in the retail tier, where the shared
-transfer path applies ownership, wallet-status, authorization, and balance
-checks.
+The institutional tier contains CentralBankMSP (Bank Indonesia), distributor banks,
+and PJP custodians (DistributorMSP). These participants follow a lifecycle of submission,
+approval, freezing, unfreezing, rejection, and offboarding. Bank Indonesia mints Digital
+Rupiah only to the Treasury wallet, then distributes liquidity directly to an active bank
+or PJP through \texttt{DistributeToParticipant}. Each custodian serves customers and
+merchants (EndUserMSP) in the retail tier, where the shared transfer path applies
+ownership, wallet-status, authorization, and balance checks.
 
 \section{System Architecture}
 Fig.~\ref{fig:sysarch} shows the four-layer architecture: client, backend API,
@@ -308,68 +305,55 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 			\draw[rounded corners=8pt, black]   (-2.8, 2.2) rectangle (14.8, 11.0);
 			\node[font=\footnotesize\bfseries, anchor=south] at (6.0, 11.0)
 			{\textbf{Hyperledger Fabric 2.5}\quad
-			(digital-rupiah channel, institutional endorsement, TLS)};
+			(rupiah-study channel, TLS)};
 			\draw[ar] (gw.south) -- (6.0, 11.0)
 			node[lbl, right]{\textit{endorse} + submit (gRPC)};
-			\node[ordnode] (ord) at (6.0, 9.5) {orderer.paynet:7050\\Raft (1 node)};
-			\node[peer]   (pbi)  at (0.0,  7.0) {peer0.bi\\BankIndonesiaOrg\\:7051};
-			\node[peer]   (phim) at (3.0,  7.0) {peer0.himbara\\HimbaraBankOrg\\:9051};
-			\node[peer]   (pcom) at (6.0,  7.0) {peer0.commercial\\CommercialBankOrg\\:11051};
-			\node[peer]   (ppjp) at (9.0,  7.0) {peer0.pjp\\PJPOrg\\:13051};
-			\node[obsbox] (pojk) at (12.0, 7.0) {peer0.ojk\\OJKObserverOrg\\:12051};
-			\draw[ar] (ord.south) to[out=-110,in=80] (pbi.north);
-			\draw[ar] (ord.south) to[out=-100,in=80] (phim.north);
-			\draw[ar] (ord.south) -- (pcom.north);
-			\draw[ar] (ord.south) to[out=-80,in=100]  (ppjp.north);
-			\draw[ar] (ord.south) to[out=-70,in=100]  (pojk.north);
-			\draw[ar, dashed] (pbi.north) to[out=70,in=-120]
-			node[near end, left, font=\tiny]{submit} (ord.west);
-			\node[cdb] (cbi)  at (0.0,  5.5) {CouchDB :5984};
-			\node[cdb] (chim) at (3.0,  5.5) {CouchDB :6984};
-			\node[cdb] (ccom) at (6.0,  5.5) {CouchDB :7984};
-			\node[cdb] (cpjp) at (9.0,  5.5) {CouchDB :9984};
-			\node[cdb] (cojk) at (12.0, 5.5) {CouchDB :8984};
-			\draw[ar] (pbi)  -- (cbi);
-			\draw[ar] (phim) -- (chim);
-			\draw[ar] (pcom) -- (ccom);
-			\draw[ar] (ppjp) -- (cpjp);
-			\draw[ar] (pojk) -- (cojk);
-			\node[cabox] (cabi)  at (0.0,  4.0) {CA\\BankIndonesia};
-			\node[cabox] (cahim) at (3.0,  4.0) {CA\\HimbaraBank};
-			\node[cabox] (cacom) at (6.0,  4.0) {CA\\CommercialBank};
-			\node[cabox] (capjp) at (9.0,  4.0) {CA\\PJP};
-			\node[cabox] (caojk) at (12.0, 4.0) {CA\\OJKObserver};
-			\draw[bar] (cabi)  -- (cbi);
-			\draw[bar] (cahim) -- (chim);
-			\draw[bar] (cacom) -- (ccom);
-			\draw[bar] (capjp) -- (cpjp);
-			\draw[bar] (caojk) -- (cojk);
-			\node[cabox, minimum width=4.0cm] (caord) at (6.0, 1.0) {BankIndonesia Orderer CA};
+			\node[ordnode] (ord) at (6.0, 9.5) {orderer.centralbank\\(Raft, 1 node)};
+			\node[peer]   (pcb)   at (1.5,  7.0) {peer0.centralbank\\CentralBankMSP};
+			\node[peer]   (pdist) at (4.5,  7.0) {peer0.distributor\\DistributorMSP};
+			\node[obsbox] (pval)  at (7.5,  7.0) {peer0.validator\\ValidatorMSP\\(read-only)};
+			\node[peer]   (puser) at (10.5, 7.0) {peer0.enduser\\EndUserMSP};
+			\draw[ar] (ord.south) to[out=-130,in=70] (pcb.north);
+			\draw[ar] (ord.south) to[out=-110,in=80] (pdist.north);
+			\draw[ar] (ord.south) to[out=-70,in=100] (pval.north);
+			\draw[ar] (ord.south) to[out=-50,in=100] (puser.north);
+			\node[cdb] (cdbcb)   at (1.5,  5.5) {CouchDB};
+			\node[cdb] (cdbdist) at (4.5,  5.5) {CouchDB};
+			\node[cdb] (cdbval)  at (7.5,  5.5) {CouchDB};
+			\node[cdb] (cdbuser) at (10.5, 5.5) {CouchDB};
+			\draw[ar] (pcb)   -- (cdbcb);
+			\draw[ar] (pdist) -- (cdbdist);
+			\draw[ar] (pval)  -- (cdbval);
+			\draw[ar] (puser) -- (cdbuser);
+			\node[cabox, minimum width=4.0cm] (caord) at (6.0, 1.0) {CA ca.centralbank\\(hosted by CentralBankMSP)};
 			\draw[ar] (6.0, 2.2) -- (caord.north);
 		\end{tikzpicture}%
 	}
-\caption{Performance-baseline architecture of the Digital Rupiah prototype: client
-		layer, Go REST backend with JWT/RBAC, off-chain PostgreSQL store, Fabric
-		Gateway SDK, and the Hyperledger Fabric 2.5 network of five peer
-		organizations with CouchDB, a per-organization CA, and a Raft orderer.}
+\caption{Architecture of the Digital Rupiah prototype: client layer, Go REST backend with
+JWT/RBAC, off-chain PostgreSQL store, Fabric Gateway SDK, and the Hyperledger Fabric 2.5
+network of four peer organizations on the rupiah-study channel, with one CouchDB per
+organization, a single certificate authority, and a single-node Raft orderer.}
 	\label{fig:sysarch}
 \end{figure*}
 
 \subsection{Network Topology}
-The performance-baseline network runs five peer organizations on one application channel
-(Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}).
-\emph{BankIndonesiaOrg} is the issuer; \emph{HimbaraBankOrg} (HIMBARA,
-Indonesia's association of state-owned banks) and \emph{CommercialBankOrg} are
-validator and distributor banks; \emph{PJPOrg} represents the payment service
-provider; and \emph{OJKObserverOrg} is the supervisor (OJK, \emph{Otoritas Jasa
-Keuangan}, the financial-services authority), which initiates no business
-transactions and is excluded from chaincode approval. Each organization operates one
-peer with a CouchDB world state and maintains its own certificate authority and
-MSP for identity management. A single Raft orderer orders transactions; this
-configuration provides ordering but not crash fault tolerance, which requires at
-least three consenters. The
-channel endorsement policy accepts one of the four institutional MSPs, while the
-chaincode lifecycle policy requires Bank Indonesia and one institutional participant.
+The four-organization network runs one peer per organization on one application
+channel, \texttt{rupiah-study} (Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}).
+\texttt{CentralBankMSP} represents Bank Indonesia, the issuer. It also operates the
+single orderer and hosts the certificate authority \texttt{ca.centralbank}.
+\texttt{DistributorMSP} represents the banks and payment service providers (PJP)
+that distribute Digital Rupiah. \texttt{ValidatorMSP} represents the supervisors: the
+Financial Services Authority (OJK, \emph{Otoritas Jasa Keuangan}) and the Indonesian
+Financial Transaction Reports and Analysis Center (PPATK, \emph{Pusat Pelaporan dan
+Analisis Transaksi Keuangan}). It has read-only audit access and is not an ordinary
+payment endorser of the controls-study chaincodes. \texttt{EndUserMSP} represents
+retail, merchant, and business users. Each organization operates one peer with its
+own CouchDB world state and MSP. A single Raft orderer orders transactions; this
+configuration provides ordering but not crash fault tolerance, which requires at least
+three consenters. The application-channel \texttt{Endorsement} and
+\texttt{LifecycleEndorsement} policies require a majority of the four organization
+\texttt{Endorsement} policies, whereas the controls-study chaincodes use the explicit
+policies listed in Table~\ref{tab:study-chaincodes}.
 
 \begin{figure*}[!t]
 	\centering
@@ -391,59 +375,52 @@ chaincode lifecycle policy requires Bank Indonesia and one institutional partici
 				pathlabel/.style={font=\scriptsize, midway, align=center},
 			]
 			\node[backend] (be)  at (-2.5, 3.5) {Backend API\\Go + Fabric Gateway SDK};
-			\node[ordnode] (ord) at ( 5.5, 3.5) {orderer.paynet:7050\\(Raft Leader)};
+			\node[ordnode] (ord) at ( 5.5, 3.5) {orderer.centralbank\\(Raft, single node)};
 			\draw[ar] (be.east) -- node[pathlabel,above]{gRPC} (ord.west);
-			\node[peer]     (pbi)  at ( 0.0, 1.2) {peer0.bi\\BankIndonesiaOrg\\:7051};
-			\node[peer]     (phim) at ( 3.0, 1.2) {peer0.himbara\\HimbaraBankOrg\\:9051};
-			\node[peer]     (pcom) at ( 6.0, 1.2) {peer0.commercial\\CommercialBankOrg\\:11051};
-			\node[peer]     (ppjp) at ( 9.0, 1.2) {peer0.pjp\\PJPOrg\\:13051};
-			\node[observer] (pojk) at (12.0, 1.2) {peer0.ojk\\OJKObserverOrg\\:12051};
-			\draw[ar] (ord.south) to[out=-100,in=90] (pbi.north);
-			\draw[ar] (ord.south) to[out=-100,in=90] (phim.north);
-			\draw[ar] (ord.south) -- (pcom.north);
-			\draw[ar] (ord.south) to[out=-80,in=90]  (ppjp.north);
-			\draw[ar] (ord.south) to[out=-80,in=90]  (pojk.north);
-			\draw[gar] (be.south) to[out=-80,in=180]
-			node[pathlabel,left]{\textit{endorse}} (pbi.west);
-			\node[cdb] (cbi)  at ( 0.0, -0.2) {CouchDB :5984};
-			\node[cdb] (chim) at ( 3.0, -0.2) {CouchDB :6984};
-			\node[cdb] (ccom) at ( 6.0, -0.2) {CouchDB :7984};
-			\node[cdb] (cpjp) at ( 9.0, -0.2) {CouchDB :9984};
-			\node[cdb] (cojk) at (12.0, -0.2) {CouchDB :8984};
-			\draw[ar] (pbi)  -- (cbi);
-			\draw[ar] (phim) -- (chim);
-			\draw[ar] (pcom) -- (ccom);
-			\draw[ar] (ppjp) -- (cpjp);
-			\draw[ar] (pojk) -- (cojk);
-			\node[chanbox, fit=(pbi)(phim)(pcom)(ppjp)(pojk)(cbi)(chim)(ccom)(cpjp)(cojk),
+			\node[peer]     (pcb)   at ( 0.0, 1.2) {peer0.centralbank\\CentralBankMSP};
+			\node[peer]     (pdist) at ( 3.0, 1.2) {peer0.distributor\\DistributorMSP};
+			\node[observer] (pval)  at ( 6.0, 1.2) {peer0.validator\\ValidatorMSP\\(read-only)};
+			\node[peer]     (puser) at ( 9.0, 1.2) {peer0.enduser\\EndUserMSP};
+			\node[cdb] (cdbcb)   at ( 0.0, -0.2) {CouchDB};
+			\node[cdb] (cdbdist) at ( 3.0, -0.2) {CouchDB};
+			\node[cdb] (cdbval)  at ( 6.0, -0.2) {CouchDB};
+			\node[cdb] (cdbuser) at ( 9.0, -0.2) {CouchDB};
+			\node[chanbox, fit=(pcb)(pdist)(pval)(puser)(cdbcb)(cdbdist)(cdbval)(cdbuser),
 				label={[font=\footnotesize\bfseries]below:%
-		\textit{digital-rupiah channel} (institutional endorsement, TLS)}] {};
+		\textit{rupiah-study channel} (TLS)}] (chan) {};
+			\draw[gar] (be.south) to[out=-90,in=180] node[pathlabel,left]{\textit{endorse}} (chan.west);
+			\draw[ar] (ord.south) to[out=-110,in=80]  (pcb.north);
+			\draw[ar] (ord.south) to[out=-100,in=85]  (pdist.north);
+			\draw[ar] (ord.south) to[out=-80,in=95]   (pval.north);
+			\draw[ar] (ord.south) to[out=-70,in=100]  (puser.north);
+			\draw[ar] (pcb)   -- (cdbcb);
+			\draw[ar] (pdist) -- (cdbdist);
+			\draw[ar] (pval)  -- (cdbval);
+			\draw[ar] (puser) -- (cdbuser);
 		\end{tikzpicture}%
 	}
-\caption{Performance-baseline Hyperledger Fabric topology: five peer organizations, each
-		with a CouchDB world state, on a single channel under a Raft orderer; the
-		Go backend endorses via the Fabric Gateway SDK.}
+\caption{Hyperledger Fabric topology of the four-organization network: one peer per
+organization, each with a CouchDB world state, on the rupiah-study channel under a
+single-node Raft orderer. The Go backend endorses through the Fabric Gateway SDK.}
 	\label{fig:netarch}
 \end{figure*}
 
 \begin{table}[!t]
-\caption{Performance-Baseline Topology of the Five-Organization Fabric Network}
+	\caption{Topology of the Four-Organization Fabric Network}
 	\label{tab:topology}
 	\centering
 	\scriptsize
 	\setlength{\tabcolsep}{3.5pt}
-	\begin{tabular}{lllr}
+	\begin{tabular}{@{}p{2.2cm}p{2.7cm}p{2.3cm}r@{}}
 		\toprule
-		\textbf{Organization} & \textbf{Role} & \textbf{Peer} & \textbf{CouchDB} \\
+		\textbf{Organization} & \textbf{Role} & \textbf{Peer} & \textbf{Host port} \\
 		\midrule
-		BankIndonesiaOrg  & Issuer            & peer0.bi:7051         & :5984 \\
-		HimbaraBankOrg    & Validator         & peer0.himbara:9051    & :6984 \\
-		CommercialBankOrg & Validator         & peer0.commercial:11051 & :7984 \\
-		PJPOrg            & Distributor       & peer0.pjp:13051       & :9984 \\
-		OJKObserverOrg    & Supervisor        & peer0.ojk:12051       & :8984 \\
+		CentralBankMSP & Issuer; hosts orderer and CA & peer0.centralbank & 17051 \\
+		DistributorMSP & Distributor (banks, PJP) & peer0.distributor & 18051 \\
+		ValidatorMSP & Read-only audit (OJK, PPATK) & peer0.validator & 19051 \\
+		EndUserMSP & End users (retail, merchant, business) & peer0.enduser & 20051 \\
 		\midrule
-		\multicolumn{4}{l}{Ordering: orderer.paynet:7050 (single-node Raft); per-org CA;
-		TLS enabled} \\
+		\multicolumn{4}{@{}p{7.9cm}@{}}{Full peer names end in \texttt{.rupiah.study}, for example \texttt{peer0.centralbank.rupiah.study}. Peers listen on container port 7051. Orderer: \texttt{orderer.centralbank.rupiah.study} (single-node Raft, host port 17050). Certificate authority: \texttt{ca.centralbank}. One CouchDB per organization.} \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -495,9 +472,9 @@ same-channel transaction, so all three policies apply to that funding flow.
 These policies and distinct-staff approvals are experimental design choices;
 they are not presented as statutory endorsement rules.
 
-The compliance benchmark measures the three controls-study chaincodes with one Caliper worker on one host. All 31 workloads are confirmed with three 30-second rounds each, with 31 of 31 preflight checks passing. Thirty of 31 workloads are bracketed by measured probes; the \texttt{fund-reserve} upper bound is unresolved because two upper-bound probes failed on fetch errors before measurement. The nearest measured failure is 0.21875 ops/s, about 19\% above the confirmed 0.183594 ops/s. All functional checks pass: 20 of 20 scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. Read operations sustain 272 to 296 operations per second offered, with all verifications passing; delivered load fell to 0.50 to 0.93 of target in the failing probes, so these are lower bounds on read capacity. Confirmed passing write rates (in ops/s, equal to TPS for writes) range from 0.184 to 4.75 TPS across 21 write workloads, with verified throughput at those rates of 0.200 to 4.613 TPS, the mean of three confirmation rounds per workload; 19 of 21 confirm at 0.78125 ops/s or below. In 20 of the 21 write workloads (fund-reserve excluded, since its failing probe was a fetch error), the first failing probe exceeded the drain limit: verified throughput over duration plus drain must reach 90 percent of the delivered rate, which is equivalent to a drain of at most one-ninth of the probe duration (1.1 s for 10 s probes). The median drain was 1.73 s for failing 10 s probes and 0.06 s for passing ones. The configured two-second batch timeout is a plausible source of this drain latency, but the run records no block contents, so the link is not isolated.
+The compliance benchmark measures the three controls-study chaincodes with one Caliper worker on one host. In run-20261014-01, all 31 workloads are confirmed with three 30-second rounds each, with 31 of 31 preflight checks passing. Thirty of 31 workloads are bracketed by measured probes; the \texttt{fund-reserve} upper bound is unresolved because two upper-bound probes failed on fetch errors before measurement. The nearest measured failure is 0.21875 ops/s, about 19\% above the confirmed 0.183594 ops/s. All functional checks pass: 20 of 20 scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. Read operations sustain 272 to 296 operations per second offered, with all verifications passing; delivered load fell to 0.50 to 0.93 of target in the failing probes, so these are lower bounds on read capacity. Confirmed passing write rates (in ops/s, equal to TPS for writes) range from 0.184 to 4.75 TPS across 21 write workloads, with verified throughput at those rates of 0.200 to 4.613 TPS, the mean of three confirmation rounds per workload; 19 of 21 confirm at 0.78125 ops/s or below. In 20 of the 21 write workloads (fund-reserve excluded, since its failing probe was a fetch error), the first failing probe exceeded the drain limit: verified throughput over duration plus drain must reach 90 percent of the delivered rate, which is equivalent to a drain of at most one-ninth of the probe duration (1.1 s for 10 s probes). The median drain was 1.73 s for failing 10 s probes and 0.06 s for passing ones. The configured two-second batch timeout is a plausible source of this drain latency, but the run records no block contents, so the link is not isolated. A fresh-network run (run-20261015-01) measured read-balance at 212 ops/s, with a failing probe at 224 ops/s, and read-receipt at 236 ops/s, with a failing probe at 248 ops/s. Both are bracketed by measured probes, and the fund-reserve result is inconclusive.
 
-\subsection{Baseline On-Chain and Off-Chain Data}
+\subsection{On-Chain and Off-Chain Data}
 The Go chaincode in \texttt{digital\_rupiah.go} groups functions for
 participants, wallets, issuance and redemption, retail transfers, and
 supervision (Table~\ref{tab:funcs}). Account and authentication data remain in
@@ -545,10 +522,10 @@ Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 		\midrule
 		Public          & Health check, login                         \\
 		Authenticated   & View own profile, list wallets              \\
-	Bank/PJP        & Create wallet, fund retail wallets         \\
-		Bank Indonesia  & Issue, redeem liquidity, approve participant \\
-		Merchant        & Initiate transfer, view balance             \\
-		Supervisor      & Reconciliation, metrics, supervision events \\
+		\shortstack[l]{Bank or PJP\\(DistributorMSP)} & Create wallet, fund retail wallets \\
+		\shortstack[l]{Bank Indonesia\\(CentralBankMSP)} & Issue, redeem liquidity, approve participant \\
+		\shortstack[l]{Merchant\\(EndUserMSP)} & Initiate transfer, view balance \\
+		\shortstack[l]{Supervisor\\(ValidatorMSP)} & Reconciliation, metrics, supervision events \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -558,10 +535,8 @@ prototype's guarantees should be read. The backend maps JWT roles to permitted
 operations and restricts customers to their own wallets. The chaincode checks
 the caller's organization, wallet status, transfer amount, and available
 balance before it writes the state transition. Every endorsing peer re-evaluates
-these rules independently, while the channel endorsement policy restricts
-validation to institutional MSPs. The
-single backend and PostgreSQL instance remain trust and availability
-concentration points for this prototype.
+these rules independently. The single backend and PostgreSQL instance remain trust
+and availability concentration points for this prototype.
 
 \section{Protocol and Determinism}
 \label{sec:proto}
@@ -583,7 +558,7 @@ admits the transfer only if every one of the following checks passes:
 If any check fails, the transfer is rejected. A successful transfer decreases
 the sender balance, increases the receiver balance, records the transaction,
 and emits the supervision event used by the read-only observer path. Treasury
-distribution accepts only active validator-bank or PJP custodians, and a PJP
+distribution accepts only active bank or PJP custodians, and a PJP
 cannot call issuance directly.
 
 \subsection{Determinism and Double-Spend Safety}
@@ -631,20 +606,18 @@ chaincode. Fabric MVCC validates the wallet versions before commit.}
 \label{sec:eval}
 
 \subsection{Methodology}
-We evaluate the final prototype with Hyperledger Caliper 0.6.0 on a clean
-ledger for each profile. The final-evidence and replacement-study manifests
-record suite and workload seeds, chaincode \texttt{digital-rupiah} version 3.0
-sequence 1, runtime versions, input hashes, result hashes, and the single-host
-topology. The testbed has five
-peer organizations, one peer per organization, one Raft orderer, and one
-CouchDB instance per peer.
+The controls-study benchmark runs Hyperledger Caliper 0.6.0 with one worker on one
+host, against the four-organization network and its three chaincodes. Each workload
+is confirmed over three 30-second rounds, and its verified throughput is the mean of
+the three rounds. A probe exceeds the drain limit when verified throughput over the
+probe duration plus drain falls below 90 percent of the delivered rate. The testbed
+has four peer organizations, one peer per organization, a single-node Raft orderer,
+and one CouchDB instance per organization.
 
-The Caliper measurements in this section apply only to this five-organization
-baseline and \texttt{digital-rupiah} v3.0. The four-MSP controls-study
-extension is functionally tested but has its own one-worker Caliper run, reported in the Controls-Study Extension subsection; the baseline figures must not be attributed to its three chaincodes.
+The Caliper measurements in this section apply only to the four-MSP controls-study extension and its three chaincodes, reported in the Controls-Study Extension subsection.
 
 \begin{table}[!t]
-\caption{Final testbed configuration}
+\caption{Testbed configuration of the controls-study benchmark}
 \label{tab:testbed-final}
 \centering
 \scriptsize
@@ -652,216 +625,40 @@ extension is functionally tested but has its own one-worker Caliper run, reporte
 \toprule
 \textbf{Component} & \textbf{Specification} \\
 \midrule
-Processor & Intel Core i7-7700HQ, 4 cores, 8 threads, 2.80 GHz \\
+Host & One host; Intel Core i7-7700HQ, 4 cores, 8 threads, 2.80 GHz \\
 Memory & 15.52 GiB \\
-Runtime & Node.js 22.23.2, npm 10.9.8, Docker client 29.5.3 / Engine 29.8.1 \\
-Fabric / CouchDB & 2.5 / 3.2 \\
-Caliper & 0.6.0 \\
-Chaincode & \texttt{digital-rupiah} v3.0, sequence 1 \\
+Isolation & Docker-in-Docker \\
+Fabric & 2.5 \\
+CouchDB & 3.3, one instance per organization \\
+Fabric CA & 1.5.9, one CA (\texttt{ca.centralbank}) \\
+Caliper & 0.6.0; one worker; 30 s confirmation windows \\
+Chaincodes & \texttt{rupiah-monetary}, \texttt{rupiah-controls}, \texttt{rupiah-payments} \\
+Channel & \texttt{rupiah-study} \\
+Organizations & CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP; one peer each \\
 Ordering & Single-node Raft; batch timeout 2 s; maximum 10 messages \\
-Endorsement & One institutional MSP: BI, HimbaraBank, CommercialBank, or PJP \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The primary study isolates each transaction type and contention mode. A pilot
-uses fixed-rate retail transfers, calibration compares one, two, four, and
-eight workers, and the primary study fixes the smallest worker count sustaining
-the highest passing load. Each primary cell has five repetitions. Offered TPS
-is submitted transactions divided by the measured window; achieved TPS is
-successful completions divided by that window. Latency is the Caliper Fabric
-boundary, \texttt{time\_final - time\_create}, for successful completions. The
-study also records failed and timed-out completions, failure categories, and
-host, container, disk, network, and Caliper-client resource metrics.
-
-The replacement protocol fixes each retail-transfer amount at Rp100, below the
-Rp10\,000\,000 STANDARD-wallet daily cap. This is a synthetic control amount,
-not a claim about a typical retail payment. The paired study repeats low and
-high contention at 20, 75, and 150 TPS for five repetitions each. The Rp1,000
-replacement evidence separately repeats distribution at 75 TPS, redemption at
-20 TPS, and retail-transfer calibration at 30, 40, and 50 TPS.
-
-\begin{table}[!t]
-\caption{Sustainable primary loads by transaction type}
-\label{tab:results-final}
-\centering
-\scriptsize
-\setlength{\tabcolsep}{1.8pt}
-\begin{tabular}{@{}llrrrrrr@{}}
-\toprule
-\textbf{Function} & \textbf{Contention} & \textbf{Load} & \textbf{Offered} &
-\textbf{Achieved} & \textbf{Success} & \textbf{p95} & \textbf{p99} \\
-& & & \textbf{(TPS)} & \textbf{(TPS)} & \textbf{(\%)} & \textbf{(s)} & \textbf{(s)} \\
-\midrule
-Balance query & Low & 190 & 190.0 & 190.0 & 100.00 & 0.01 & 0.01 \\
-Wallet freeze & Low & 50 & 50.0 & 50.0 & 100.00 & 0.28 & 0.37 \\
-Wallet unfreeze & Low & 65 & 65.0 & 65.0 & 100.00 & 0.27 & 0.35 \\
-Redemption & Low & 25 & 25.0 & 25.0 & 100.00 & 0.53 & 0.60 \\
-Retail transfer & Low & 20 & 20.0 & 20.0 & 100.00 & 0.72 & 0.89 \\
-Merchant payment & Low & 20 & 20.0 & 20.0 & 100.00 & 0.66 & 0.75 \\
-Issuance & Low & -- & -- & -- & $<$99 & -- & -- \\
-Distribution & Low & -- & -- & -- & $<$99 & -- & -- \\
-Retail transfer & High & -- & -- & -- & $<$99 & -- & -- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The sustainability rule was fixed before interpretation: every one of five
-repetitions had to reach at least 99\% successful completions and successful-
-transaction p95 latency at or below 2.5 seconds. The table reports the highest
-passing load for each operation. Issuance, distribution, and high-contention
-retail transfer have no passing load in the tested range; their failed
-submissions are retained in the failure analysis rather than converted into a
-throughput claim.
-
-\begin{table}[!t]
-\caption{Failure categories in replacement primary workloads}
-\label{tab:failure-diagnostics-final}
-\centering
-\scriptsize
-\begin{tabular}{@{}p{3.2cm}lr@{}}
-\toprule
-\textbf{Workload} & \textbf{Category} & \textbf{Count} \\
-\midrule
-Rp1,000 distribution / calibration & MVCC read conflict & 46,716 \\
-Rp100 low-contention transfer & MVCC read conflict & 68,922 \\
-Rp100 low-contention transfer & Gateway concurrency limit & 45,774 \\
-Rp100 high-contention transfer & MVCC read conflict & 110,570 \\
-Rp100 high-contention transfer & Gateway concurrency limit & 1,501 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The replacement logs classify 272,924 failures as MVCC read conflicts and
-47,275 as gateway-concurrency failures. These counts cover only the replacement
-workloads in the table, not every operation in the legacy final-evidence suite.
-MVCC failures occur when a transaction reads a state version that changes before
-validation; gateway-concurrency failures indicate saturation at the Fabric
-Gateway boundary. Neither category is interpreted as proof of a single
-production bottleneck.
-
-The paired Rp100 control makes the contention effect explicit. At 20 TPS, low
-contention completes 2,401 of 2,401 submissions (20.01 achieved TPS, 100\%
-success, p95 0.63 s), whereas high contention completes about 10\% of
-submissions (2.01 achieved TPS, p95 0.59 s). At 75 and 150 TPS, both modes
-also fail the sustainability gate because the prototype saturates and produces
-MVCC or gateway-concurrency failures.
-
-\begin{table}[!t]
-\caption{Five-repetition summary at the highest passing loads}
-\label{tab:repeat-final}
-\centering
-\scriptsize
-\begin{tabular}{@{}lrrrrr@{}}
-\toprule
-\textbf{Function} & \textbf{Load} & \textbf{Offered} & \textbf{Achieved} &
-\textbf{Success (\%)} & \textbf{p95 (s)} \\
-\midrule
-Balance query & 190 & 190.0 & 190.0 & 100.00 & 0.01 \\
-Wallet freeze & 50 & 50.0 & 50.0 & 100.00 & 0.28 \\
-Wallet unfreeze & 65 & 65.0 & 65.0 & 100.00 & 0.27 \\
-Redemption & 25 & 25.0 & 25.0 & 100.00 & 0.53 \\
-Retail transfer & 20 & 20.0 & 20.0 & 100.00 & 0.72 \\
-Merchant payment & 20 & 20.0 & 20.0 & 100.00 & 0.66 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Each row is the mean of five repetitions. The complete per-run standard
-deviations, p50, p95, p99, minimum, and maximum values remain available in the
-machine-readable benchmark summary. The table excludes operations without a
-passing load under the declared sustainability rule.
-
-\begin{table}[!t]
-\caption{Separate PostgreSQL/KYC demonstration}
-\label{tab:functionality-final}
-\centering
-\scriptsize
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-\textbf{Stage} & \textbf{Runs} & \textbf{Mean (ms)} & \textbf{SD (ms)} \\
-\midrule
-Login & 5 & 186.85 & 34.77 \\
-Customer creation & 5 & 2,069.02 & 8.60 \\
-KYC submission & 5 & 2,071.99 & 7.02 \\
-KYC refresh & 5 & 2,064.70 & 8.31 \\
-Wallet creation & 5 & 2,075.16 & 6.05 \\
-KYC read & 5 & 1.14 & 0.41 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-This five-repetition demonstration measures the Go/PostgreSQL/KYC service path
-separately from the direct Fabric benchmark. It covers login, customer
-creation, KYC submission and refresh, wallet creation, and KYC reads. Its
-latencies must not be combined with the Fabric transaction latency boundary.
-
-\begin{table}[!t]
-\caption{Semantic conformance profiles}
-\label{tab:conformance-final}
-\centering
-\scriptsize
-\begin{tabular}{@{}lrr>{\raggedright\arraybackslash}p{4.4cm}@{}}
-\toprule
-\textbf{Profile} & \textbf{Succ.} & \textbf{Fail} & \textbf{Oracle result} \\
-\midrule
-Authorization & 2 & 1 & PASS; one expected custodian-mismatch rejection. \\
-Boundary & 4 & 4 & PASS; 8/8 cases, zero mismatches, zero infrastructure errors. \\
-Negative path & 0 & 7 & PASS; 7/7 expected rejection rules enforced. \\
-Aggregate overspend & 10 & 190 & PASS; final sender balance Rp40,000. \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The failed counts in these semantic profiles represent expected policy
-rejections. The aggregate-overspend workload requested Rp200,000 from an
-initial Rp50,000 sender balance. Ten transfers committed and 190 were rejected;
-the final balance remained Rp40,000. These observations support the tested
-authorization and balance invariants, but do not constitute a formal security
-proof.
-
-\begin{table}[!t]
-\caption{Resource metrics collected in the primary study}
-\label{tab:resources-final}
-\centering
-\scriptsize
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Layer} & \textbf{Metrics} \\
-\midrule
-Host & CPU, memory, I/O, IOPS, and disk latency \\
-Fabric containers & CPU, memory, network, IOPS, and disk service latency \\
-Caliper client & Process CPU \\
-Prometheus & Monitoring CPU and memory \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The resource sampler records host, container, disk, network, Prometheus, and
-Caliper-client measurements. The primary results are interpreted together with
-these measurements and the categorized failures; they remain bounded to the
-single-host testbed and do not establish production capacity.
 
 \section{Limitations and Future Work}
 \label{sec:limits}
 The evaluation uses a single host with one peer per organization and no
 geographic distribution or network latency. Its Caliper results therefore apply
 only to the reported configuration and do not estimate national-scale
-performance. Each primary profile uses a clean ledger, a fixed seeded
-population, one calibrated worker, and five repetitions. A distributed
+performance. Each controls-study workload is confirmed with one worker over three
+30-second rounds. A distributed
 deployment and a graded-skew contention workload would be needed to
 characterize other operating conditions.
 
-The Rp100 paired retail-transfer study uses a deliberately synthetic control
-amount to remove the STANDARD-wallet daily-cap confounder; it should not be
-read as a representative payment-size distribution. The shared Fabric channel
+The shared Fabric channel
 does not provide transaction privacy, and the
 prototype does not use private data collections or privacy-preserving
 cryptography. The single orderer provides ordering but does not tolerate its
 own failure. The prototype also omits offline payment and leaves connections to
 domestic infrastructure such as BI-RTGS and BI-FAST as stubs.
 
-The authorization and aggregate-overspend profiles cover the tested paths only.
+The authorization, validation, and action-outcome checks cover the tested paths only.
 They do not establish formal security, production readiness, or
 cross-machine reproducibility. Future work should repeat the protocol on
 distributed hosts, instrument endorsement and commit phases, expand the
@@ -878,36 +675,26 @@ host with 30-second confirmation windows. The run was interrupted by a host or p
 
 \section{Conclusion}
 This paper implements Bank Indonesia's digital money business processes in a
-two-tier Digital Rupiah prototype on a five-organization Hyperledger Fabric
-network. The chaincode integrates hierarchical issuance and distribution,
+two-tier Digital Rupiah prototype on a four-organization Hyperledger Fabric network. The chaincode integrates hierarchical issuance and distribution,
 retail transfers, organization-aware authorization, and supervisor-facing
 reconciliation.
 
 The transfer protocol combines explicit wallet-state checks with Fabric MVCC.
-Under the declared sustainability gate, the primary study reaches 190 TPS for
-balance queries, 50 TPS for wallet freeze, 65 TPS for wallet unfreeze, 25 TPS
-for redemption, and 20 TPS for low-contention retail transfer and merchant
-payment. Issuance, distribution, and deliberate high-contention retail
-transfer do not meet the gate at the tested rates. All primary cells use five
-repetitions, and the final report separates offered TPS, achieved TPS, failure
-categories, latency percentiles, resource measurements, and variability. These
-results provide a local, auditable baseline for retail Digital Rupiah
-experiments, not a production-capacity claim. The controlled Rp100 comparison
-also shows that shared-key contention, independent of the wallet-cap funding
-limit, sharply reduces transfer completion at the same offered load.
+Performance evidence rests on the four-organization controls-study extension.
 
 A separate four-MSP controls-study extension implements three domain chaincodes
 and passes synthetic integration scenarios for distinct senior approval,
 restriction evidence, reserve funding, retail payment, read-only ValidatorMSP
-access, and expected endorsement failures. This functional evidence does not depend on the baseline Caliper results above.
+access, and expected endorsement failures. This functional evidence does not depend on the Caliper results above.
 
 
 \section*{Artifact Availability}
-The baseline chaincode, five-organization network definition, Go backend, and
-Hyperledger Caliper workloads are available at
-\url{https://github.com/mfachrizalg/bi-coin}. The separate controls-study
-chaincodes and four-MSP network are under \texttt{bi-coin-fabric/study} and
-\texttt{bi-coin-fabric/network/study}; they are not included in the baseline Caliper measurements.
+The digital-rupiah chaincode, the four-organization network definition, the Go backend,
+and the Hyperledger Caliper workloads are available at
+\url{https://github.com/mfachrizalg/bi-coin}. The controls-study chaincodes and four-MSP
+network are under \texttt{bi-coin-fabric/study} and
+\texttt{bi-coin-fabric/network/study}, and their Caliper results are reported in the
+Controls-Study Extension subsection.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
