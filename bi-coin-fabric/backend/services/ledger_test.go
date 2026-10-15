@@ -103,7 +103,7 @@ func TestTransferRejectsEmptyReceipt(t *testing.T) {
 		Amount:         "1500",
 		IdempotencyKey: "transfer-invalid-receipt",
 	})
-	if err == nil || err.Error() != "invalid ledger receipt: invalid character 'o' in literal null (expecting 'u')" {
+	if err == nil || !strings.Contains(err.Error(), "invalid ledger receipt") {
 		t.Fatalf("transfer err = %v, want invalid ledger receipt", err)
 	}
 	if contract.submittedName != "Transfer" {
@@ -114,6 +114,101 @@ func TestTransferRejectsEmptyReceipt(t *testing.T) {
 		if contract.submittedArgs[i] != wantArgs[i] {
 			t.Fatalf("arg[%d] = %q, want %q", i, contract.submittedArgs[i], wantArgs[i])
 		}
+	}
+}
+
+func TestTransferRecoversCommittedReceiptForPendingJournal(t *testing.T) {
+	key := "transfer-committed-before-journal"
+	reference := operationReference(":TEST-MSP", "test", key)
+	receipt, _ := json.Marshal(models.TransferResult{Status: "settled", TxID: "tx-committed", ReferenceID: reference, SenderID: "wlt-a", ReceiverID: "wlt-b", Amount: 1_500})
+	contract := &fakeLedgerContract{evaluateResult: receipt}
+	svc := NewLedgerServiceForTest(contract, nil, "")
+	_, _, err := svc.beginOperation(context.Background(), "transfer", key, struct {
+		SenderID   string
+		ReceiverID string
+		Amount     int64
+	}{"wlt-a", "wlt-b", 1_500})
+	if err != nil {
+		t.Fatalf("seed pending journal: %v", err)
+	}
+
+	result, err := svc.Transfer(models.TransferRequest{SenderID: "wlt-a", ReceiverID: "wlt-b", Amount: "1500", IdempotencyKey: key})
+	if err != nil {
+		t.Fatalf("recover committed transfer: %v", err)
+	}
+	if result.TxID != "tx-committed" || contract.submissionCount != 0 {
+		t.Fatalf("recovery = %+v after %d submissions; want original receipt without submission", result, contract.submissionCount)
+	}
+}
+
+type failOperationUpdateOnce struct {
+	OperationJournalStore
+	err error
+}
+
+func (s *failOperationUpdateOnce) UpdateOperation(ctx context.Context, operation OperationJournal) error {
+	if s.err != nil {
+		err := s.err
+		s.err = nil
+		return err
+	}
+	return s.OperationJournalStore.UpdateOperation(ctx, operation)
+}
+
+func TestTransferRetriesAfterReceiptPersistenceFailureWithoutSecondSubmission(t *testing.T) {
+	key := "transfer-receipt-write-failure"
+	reference := operationReference(":TEST-MSP", "test", key)
+	receipt, _ := json.Marshal(models.TransferResult{Status: "settled", TxID: "tx-once", ReferenceID: reference, SenderID: "wlt-a", ReceiverID: "wlt-b", Amount: 1_500})
+	contract := &fakeLedgerContract{submitResult: receipt}
+	svc := NewLedgerServiceForTest(contract, nil, "")
+	svc.operations = &failOperationUpdateOnce{OperationJournalStore: svc.operations, err: errors.New("journal unavailable")}
+	request := models.TransferRequest{SenderID: "wlt-a", ReceiverID: "wlt-b", Amount: "1500", IdempotencyKey: key}
+	if _, err := svc.Transfer(request); err == nil {
+		t.Fatal("expected receipt journal write failure")
+	}
+	if contract.submissionCount != 1 {
+		t.Fatalf("initial submissions = %d, want 1", contract.submissionCount)
+	}
+
+	contract.evaluateResult = receipt
+	result, err := svc.Transfer(request)
+	if err != nil {
+		t.Fatalf("recover after journal failure: %v", err)
+	}
+	if result.TxID != "tx-once" || contract.submissionCount != 1 {
+		t.Fatalf("recovery = %+v after %d submissions; want tx-once and one submission", result, contract.submissionCount)
+	}
+}
+
+func TestOperationJournalStatusCannotRegressOrChangeReceipt(t *testing.T) {
+	store := newMemoryOperationJournal()
+	operation := OperationJournal{PrincipalScope: "scope", PrincipalID: "principal", IdempotencyKey: "key", Operation: "transfer", RequestHash: "hash", OperationRef: "ref", Status: OperationPending}
+	if _, _, err := store.BeginOperation(context.Background(), operation); err != nil {
+		t.Fatalf("begin operation: %v", err)
+	}
+	submitted := operation
+	submitted.Status = OperationSubmitted
+	submitted.TxID = "tx-1"
+	submitted.Response = json.RawMessage(`{"tx_id":"tx-1"}`)
+	if err := store.UpdateOperation(context.Background(), submitted); err != nil {
+		t.Fatalf("mark submitted: %v", err)
+	}
+	completed := submitted
+	completed.Status = OperationCompleted
+	if err := store.UpdateOperation(context.Background(), completed); err != nil {
+		t.Fatalf("mark completed: %v", err)
+	}
+	if err := store.UpdateOperation(context.Background(), submitted); err != nil {
+		t.Fatalf("late matching submitted update: %v", err)
+	}
+	conflicting := submitted
+	conflicting.Response = json.RawMessage(`{"tx_id":"tx-other"}`)
+	if err := store.UpdateOperation(context.Background(), conflicting); err == nil {
+		t.Fatal("expected conflicting late receipt to be rejected")
+	}
+	current, err := store.GetOperation(context.Background(), operation.PrincipalScope, operation.PrincipalID, operation.IdempotencyKey)
+	if err != nil || current.Status != OperationCompleted || current.TxID != "tx-1" {
+		t.Fatalf("journal after late updates = %+v, %v; want completed tx-1", current, err)
 	}
 }
 
@@ -135,18 +230,18 @@ func TestLedgerServiceLiquidityAndLimitCommands(t *testing.T) {
 		{
 			name: "request issuance",
 			run: func(svc *LedgerService) error {
-				return svc.RequestIssuance(2500000)
+				return svc.RequestIssuance(2500000, "issuance-1")
 			},
 			wantName: "RequestIssuance",
-			wantArgs: []string{"2500000"},
+			wantArgs: []string{"2500000", operationReference(":TEST-MSP", "test", "issuance-1")},
 		},
 		{
 			name: "request redemption",
 			run: func(svc *LedgerService) error {
-				return svc.RequestRedemption("bank-1", 1750000)
+				return svc.RequestRedemption("bank-1", 1750000, "redemption-1")
 			},
 			wantName: "RequestRedemption",
-			wantArgs: []string{"bank-1", "1750000"},
+			wantArgs: []string{"bank-1", "1750000", operationReference(":TEST-MSP", "test", "redemption-1")},
 		},
 		{
 			name: "distribute to participant",
@@ -181,7 +276,7 @@ func TestLedgerServiceLiquidityAndLimitCommands(t *testing.T) {
 	}
 }
 
-func TestDistributionPendingKeyDoesNotSubmitFabric(t *testing.T) {
+func TestDistributionPendingKeyRecoversUsingSameLedgerReference(t *testing.T) {
 	contract := &fakeLedgerContract{}
 	svc := NewLedgerServiceForTest(contract, nil, "")
 	_, _, err := svc.beginOperation(context.Background(), "distribution", "pending-distribution", struct {
@@ -193,11 +288,11 @@ func TestDistributionPendingKeyDoesNotSubmitFabric(t *testing.T) {
 	}
 
 	err = svc.DistributeToParticipant("pjp-1", 900_000, "pending-distribution")
-	if err == nil || !strings.Contains(err.Error(), "already in progress") {
-		t.Fatalf("pending distribution err = %v, want in-progress conflict", err)
+	if err != nil {
+		t.Fatalf("retry pending distribution: %v", err)
 	}
-	if contract.submittedName != "" {
-		t.Fatalf("pending distribution submitted Fabric transaction %q", contract.submittedName)
+	if contract.submittedName != "DistributeToParticipant" || contract.submittedArgs[2] != operationReference(":TEST-MSP", "test", "pending-distribution") {
+		t.Fatalf("pending distribution = %s %v, want same ledger reference", contract.submittedName, contract.submittedArgs)
 	}
 }
 

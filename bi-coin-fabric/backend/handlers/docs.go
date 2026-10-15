@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -38,17 +39,82 @@ type DocsHandler struct {
 	roles map[string]roleInfo
 }
 
+func currentOpenAPISpec(source []byte) ([]byte, error) {
+	var spec map[string]json.RawMessage
+	if err := json.Unmarshal(source, &spec); err != nil {
+		return nil, err
+	}
+	var paths map[string]json.RawMessage
+	if err := json.Unmarshal(spec["paths"], &paths); err != nil {
+		return nil, err
+	}
+	for path := range paths {
+		if strings.HasPrefix(path, "/qris") {
+			delete(paths, path)
+		}
+	}
+	for _, path := range []string{"/issuance-requests", "/redemption-requests", "/kyc/profiles"} {
+		pathData, ok := paths[path]
+		if !ok {
+			continue
+		}
+		var pathItem map[string]json.RawMessage
+		if err := json.Unmarshal(pathData, &pathItem); err != nil {
+			return nil, err
+		}
+		postData, ok := pathItem["post"]
+		if !ok {
+			continue
+		}
+		var post map[string]json.RawMessage
+		if err := json.Unmarshal(postData, &post); err != nil {
+			return nil, err
+		}
+		var parameters []json.RawMessage
+		if raw := post["parameters"]; len(raw) > 0 {
+			if err := json.Unmarshal(raw, &parameters); err != nil {
+				return nil, err
+			}
+		}
+		hasKey := false
+		for _, raw := range parameters {
+			var parameter struct {
+				Name string `json:"name"`
+				In   string `json:"in"`
+			}
+			if err := json.Unmarshal(raw, &parameter); err == nil && parameter.Name == "Idempotency-Key" && parameter.In == "header" {
+				hasKey = true
+			}
+		}
+		if !hasKey {
+			parameter, err := json.Marshal(map[string]interface{}{
+				"name": "Idempotency-Key", "in": "header", "required": true,
+				"schema": map[string]interface{}{"type": "string", "minLength": 1},
+			})
+			if err != nil {
+				return nil, err
+			}
+			parameters = append(parameters, parameter)
+		}
+		post["parameters"], _ = json.Marshal(parameters)
+		pathItem["post"], _ = json.Marshal(post)
+		paths[path], _ = json.Marshal(pathItem)
+	}
+	spec["paths"], _ = json.Marshal(paths)
+	return json.Marshal(spec)
+}
+
 func NewDocsHandler(specs DocsSpecs) *DocsHandler {
 	return &DocsHandler{
 		roles: map[string]roleInfo{
 			"public":         {Label: "Public", DevKey: "dev-public-key", Spec: specs.Public, TagLine: "Health, topology, and JWT login"},
 			"authenticated":  {Label: "Authenticated", DevKey: "dev-auth-key", Spec: specs.Authenticated, TagLine: "Principal profile and wallet listing"},
-			"kyc_verified":   {Label: "KYC Verified", DevKey: "dev-kyc-key", Spec: specs.KycVerified, TagLine: "Retail transfers and QRIS payer flows"},
+			"kyc_verified":   {Label: "KYC Verified", DevKey: "dev-kyc-key", Spec: specs.KycVerified, TagLine: "Retail transfers"},
 			"bank_pjp":       {Label: "Bank / PJP", DevKey: "dev-bank-pjp-key", Spec: specs.BankPjp, TagLine: "Onboarding, KYC, retail customers, and wallet custody"},
 			"validator_bank": {Label: "Validator Bank", DevKey: "dev-validator-bank-key", Spec: specs.ValidatorBank, TagLine: "Validator-bank onboarding, KYC, and wallet custody"},
 			"pjp":            {Label: "PJP", DevKey: "dev-pjp-key", Spec: specs.Pjp, TagLine: "PJP onboarding, KYC, and wallet custody"},
 			"bank_indonesia": {Label: "Bank Indonesia", DevKey: "dev-bi-key", Spec: specs.BankIndonesia, TagLine: "Issuance, distribution, limits, RTGS, and oversight"},
-			"merchant":       {Label: "Merchant", DevKey: "dev-merchant-key", Spec: specs.Merchant, TagLine: "Merchant transfers and QRIS intent lifecycle"},
+			"merchant":       {Label: "Merchant", DevKey: "dev-merchant-key", Spec: specs.Merchant, TagLine: "Merchant transfers"},
 			"supervisor":     {Label: "Supervisor", DevKey: "dev-supervisor-key", Spec: specs.Supervisor, TagLine: "Read-only oversight and reporting"},
 		},
 	}
@@ -173,8 +239,13 @@ func (d *DocsHandler) handleSpec(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unknown role", http.StatusNotFound)
 		return
 	}
+	currentSpec, err := currentOpenAPISpec(info.Spec)
+	if err != nil {
+		http.Error(w, "invalid API specification", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write(info.Spec)
+	w.Write(currentSpec)
 }

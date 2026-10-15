@@ -5,12 +5,12 @@ const os = require('node:os');
 const path = require('node:path');
 const { WorkloadModuleBase } = require('@hyperledger/caliper-core');
 
-const CONTRACT = { contractId: 'digital-rupiah', contractVersion: '3.0' };
+const CONTRACT = { contractId: 'rupiah-payments', contractVersion: '1.0' };
 
 const ACTORS = Object.freeze({
-    bi: { invokerMspId: 'BankIndonesiaOrgMSP', invokerIdentity: 'User1' },
-    himbara: { invokerMspId: 'HimbaraBankOrgMSP', invokerIdentity: 'User1' },
-    commercial: { invokerMspId: 'CommercialBankOrgMSP', invokerIdentity: 'User1' },
+    bi: { invokerMspId: 'CentralBankMSP', invokerIdentity: 'User1' },
+    distributor: { invokerMspId: 'DistributorMSP', invokerIdentity: 'User1' },
+    commercial: { invokerMspId: 'DistributorMSP', invokerIdentity: 'User1' },
 });
 
 function actorRequest(request, actor = 'bi') {
@@ -223,7 +223,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
         }
     }
 
-    async waitForWallet(walletId, actor = 'himbara') {
+    async waitForWallet(walletId, actor = 'distributor') {
         let lastError;
         for (let attempt = 0; attempt < 120; attempt++) {
             try {
@@ -263,20 +263,20 @@ class RetailWorkloadBase extends WorkloadModuleBase {
             if (!participantExists) {
                 await this.submit('SubmitParticipant', [
                     participantId,
-                    'Benchmark Himbara Custodian',
-                    'himbara.paynet',
+                    'Benchmark Distributor Custodian',
+                    'distributor.bi-coin',
                     `${participantId}-account`,
                     'validator',
                     '0',
                     'pending',
-                ], false, 'himbara', true);
+                ], false, 'distributor', true);
                 await this.submit('ApproveParticipant', [participantId], false, 'bi', true);
             }
             await this.waitForWallet(walletId);
 
             let current = 0n;
             try {
-                const response = await this.submit('GetWallet', [walletId], true, 'himbara');
+                const response = await this.submit('GetWallet', [walletId], true, 'distributor');
                 const payload = transactionPayload(transactionResults(response)[0]);
                 if (payload) current = BigInt(JSON.parse(payload).balance || 0);
             } catch {
@@ -295,7 +295,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
         });
     }
 
-    async fundRetailWallet(walletId, amount, actor = 'himbara') {
+    async fundRetailWallet(walletId, amount, actor = 'distributor') {
         if (amount <= 0) return;
         await this.submit('Transfer', [this.custodianWalletId, walletId, amount], false, actor, true);
     }
@@ -359,7 +359,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
      * Seed merchants and customers (tier mix + funding).
      * `fundedRatio` of customers are funded normally; the remainder are underfunded.
      */
-    async seedPopulation({ numCustomers, numMerchants, fundedRatio, fundStandard, fundBasic, fundReceiverStandard = 1000000, fundReceivers = true, seed = this.roundIndex === 0, custodianSetup = true }) {
+    async seedPopulation({ numCustomers, numMerchants, fundedRatio, fundStandard, fundBasic, fundReceiverStandard = 1000000, fundReceivers = true, senderCount = Number(this.arg('transactionSlots', 0)), seed = this.roundIndex === 0, custodianSetup = true }) {
         this.customers = [];
         this.standardCustomers = [];
         this.merchants = [];
@@ -373,9 +373,9 @@ class RetailWorkloadBase extends WorkloadModuleBase {
             if (seed) merchantTasks.push(async () => {
                 const profileId = `kyc_${id}`;
                 const hashes = JSON.stringify([`sha256:${id}`]);
-                await this.submit('SubmitKycProfile', [profileId, 'merchant', id, hashes], false, 'himbara', true);
-                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z'], false, 'himbara', true);
-                await this.submit('CreateWallet', [walletId, id, 'MERCHANT'], false, 'himbara', true);
+                await this.submit('SubmitKycProfile', [profileId, 'merchant', id, hashes], false, 'distributor', true);
+                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', 'standard', false, hashes, '2099-12-31T23:59:59Z'], false, 'distributor', true);
+                await this.submit('CreateWallet', [walletId, id, 'MERCHANT'], false, 'distributor', true);
             });
         }
         await this.runPool(merchantTasks, seedConcurrency);
@@ -390,7 +390,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
             const tier = basic ? 'BASIC' : 'STANDARD';
             const perTxCap = basic ? PER_TX_BASIC : PER_TX_STANDARD;
             const funded = (i / numCustomers) < fundedRatio;
-            const sender = !basic && standardIndex < Number(this.arg('transactionSlots', 0));
+            const sender = !basic && standardIndex < senderCount;
             const fund = funded && (fundReceivers || sender)
                 ? (basic ? fundBasic : sender ? fundStandard : fundReceiverStandard)
                 : 0;
@@ -403,10 +403,10 @@ class RetailWorkloadBase extends WorkloadModuleBase {
                 const profileId = `kyc_${id}`;
                 const hashes = JSON.stringify([`sha256:${id}`]);
                 const diligence = basic ? 'simplified' : 'standard';
-                await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'himbara', true);
-                await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'himbara', true);
-                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', diligence, false, hashes, '2099-12-31T23:59:59Z'], false, 'himbara', true);
-                await this.submit('CreateWallet', [walletId, id, tier], false, 'himbara', true);
+                await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'distributor', true);
+                await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'distributor', true);
+                await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', diligence, false, hashes, '2099-12-31T23:59:59Z'], false, 'distributor', true);
+                await this.submit('CreateWallet', [walletId, id, tier], false, 'distributor', true);
             });
             if (seed && fund > 0) fundTasks.push(async () => {
                 await this.fundRetailWallet(walletId, fund);

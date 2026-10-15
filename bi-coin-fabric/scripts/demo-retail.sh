@@ -59,24 +59,24 @@ echo "$LIMITS" | python3 -m json.tool 2>/dev/null || echo "$LIMITS"
 
 # ─── Phase 2: Bank Onboarding (Wholesale Layer) ──────────────────────────────
 header "PHASE 2 — Bank Onboarding (Wholesale Layer)"
-info "BI onboards Himbara Bank as validator participant"
+info "BI onboards Distributor Bank"
 
-step "Submit Himbara Bank participant"
+step "Submit Distributor Bank participant"
 BANK_SUBMIT=$(curl -s -X POST "$BASE/participants" \
   -H "X-API-Key: $BI_KEY" -H "Content-Type: application/json" \
-  -d '{"participant_id":"himbara","name":"Himbara Bank","domain":"himbara.paynet","account_id":"himbara-account","participant_type":"validator","compliance_status":"verified"}')
+  -d '{"participant_id":"distributor","name":"Distributor Bank","domain":"distributor.bi-coin","account_id":"distributor-account","participant_type":"validator","compliance_status":"verified"}')
 echo "$BANK_SUBMIT" | python3 -m json.tool 2>/dev/null || echo "$BANK_SUBMIT"
 
-step "BI approves Himbara Bank → auto-creates wlt_himbara"
-BANK_APPROVE=$(curl -s -X POST "$BASE/participants/himbara/approve" \
+step "BI approves Distributor Bank → auto-creates wlt_distributor"
+BANK_APPROVE=$(curl -s -X POST "$BASE/participants/distributor/approve" \
   -H "X-API-Key: $BI_KEY" -H "Content-Type: application/json")
 echo "$BANK_APPROVE" | python3 -m json.tool 2>/dev/null || echo "$BANK_APPROVE"
-ok "Himbara Bank: status=active, wallet=wlt_himbara created"
+ok "Distributor Bank: status=active, wallet=wlt_distributor created"
 
 step "Submit GoPay PJP (retail gateway)"
 PJP_SUBMIT=$(curl -s -X POST "$BASE/participants" \
   -H "X-API-Key: $BANK_KEY" -H "Content-Type: application/json" \
-  -d '{"participant_id":"gopay","name":"GoPay PJP","domain":"gopay.paynet","account_id":"gopay-account","participant_type":"pjp","compliance_status":"verified"}')
+  -d '{"participant_id":"gopay","name":"GoPay PJP","domain":"gopay.bi-coin","account_id":"gopay-account","participant_type":"pjp","compliance_status":"verified"}')
 echo "$PJP_SUBMIT" | python3 -m json.tool 2>/dev/null || echo "$PJP_SUBMIT"
 
 step "BI approves GoPay → auto-creates wlt_gopay"
@@ -137,7 +137,7 @@ ok "Merchant KYC: status=approved — eligible for MERCHANT tier"
 
 # ─── Phase 4: Register Retail Customer ───────────────────────────────────────
 header "PHASE 4 — Retail Customer Registration"
-info "Alice registers via Himbara Bank mobile app"
+info "Alice registers via Distributor Bank mobile app"
 
 step "Create retail customer: Alice"
 ALICE=$(curl -s -X POST "$BASE/retail/customers" \
@@ -165,26 +165,26 @@ curl -s "$BASE/retail/customers" -H "X-API-Key: $BANK_KEY" | python3 -m json.too
 
 # ─── Phase 5: BI Issues Digital Rupiah ───────────────────────────────────────
 header "PHASE 5 — BI Issues Digital Rupiah (Issuance)"
-info "Bank Indonesia is sole issuer — mints DR into Himbara Bank wholesale wallet"
+info "Bank Indonesia is sole issuer — mints DR into Distributor Bank wholesale wallet"
 
-step "BI issues Rp 50,000,000 to Himbara Bank"
+step "BI issues Rp 50,000,000 to Distributor Bank"
 ISSUANCE=$(curl -s -X POST "$BASE/issuance-requests" \
   -H "X-API-Key: $BI_KEY" -H "Content-Type: application/json" \
-  -d '{"participant_id":"himbara","amount":"50000000"}')
+  -d '{"participant_id":"distributor","amount":"50000000"}')
 echo "$ISSUANCE" | python3 -m json.tool 2>/dev/null || echo "$ISSUANCE"
-ok "wlt_himbara balance: +50,000,000 DR"
+ok "wlt_distributor balance: +50,000,000 DR"
 
 step "Check balances (world state)"
 curl -s "$BASE/balances" -H "X-API-Key: $BI_KEY" | python3 -m json.tool 2>/dev/null || true
 
 # ─── Phase 6: Two-Tier Distribution ─────────────────────────────────────────
 header "PHASE 6 — Two-Tier Distribution (Wholesale → Retail)"
-info "Himbara Bank distributes DR to GoPay PJP"
+info "Distributor Bank distributes DR to GoPay PJP"
 
-step "Himbara distributes Rp 10,000,000 to GoPay (retail gateway)"
+step "Distributor distributes Rp 10,000,000 to GoPay (retail gateway)"
 DIST=$(curl -s -X POST "$BASE/distribute" \
   -H "X-API-Key: $BANK_KEY" -H "Content-Type: application/json" \
-  -d '{"sender_participant_id":"himbara","receiver_participant_id":"gopay","amount":10000000}')
+  -d '{"sender_participant_id":"distributor","receiver_participant_id":"gopay","amount":10000000}')
 echo "$DIST" | python3 -m json.tool 2>/dev/null || echo "$DIST"
 ok "wlt_gopay balance: +10,000,000 DR"
 

@@ -18,11 +18,19 @@ const duration = Number(arg('duration', 120));
 const warmupDuration = Number(arg('warmup-duration', 30));
 const transactionSlots = Number(arg('transaction-slots', Math.max(10, Math.min(50, Math.ceil(targetTps / workers * 2)))));
 const seed = Number(arg('seed', process.env.BENCHMARK_SEED || 20260725));
+const operationAmount = Number(arg('operation-amount', 1000));
 const measuredLabel = `${operation}-${contention}-${targetTps}tps`;
 
 if (!output) throw new Error('usage: node scripts/generate-study-config.js --output <file> [options]');
 if (!Number.isInteger(workers) || ![1, 2, 4, 8].includes(workers)) throw new Error('workers must be one of 1, 2, 4, or 8');
 if (!Number.isFinite(targetTps) || targetTps <= 0) throw new Error('target-tps must be positive');
+for (const [name, value] of Object.entries({ duration, warmupDuration, transactionSlots, operationAmount })) {
+    if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`${name} must be a positive safe integer`);
+}
+const senderBudget = Math.ceil(targetTps * duration / workers) + Math.ceil(Math.min(5, targetTps) * warmupDuration / workers) + 2;
+if (operation === 'retail-transfer' && contention === 'high' && senderBudget * operationAmount > 10000000) {
+    throw new Error('high-contention workload exceeds the STANDARD sender daily budget; reduce operation-amount or offered load');
+}
 
 const containers = [
     '/peer0.bi.paynet',
@@ -56,7 +64,8 @@ function round(label, seconds, tps) {
           contention: ${contention}
           scenario: ${scenario}
           transactionSlots: ${transactionSlots}
-          operationAmount: 1000
+          operationAmount: ${operationAmount}
+          transactionBudget: ${Math.ceil(tps * seconds) + workers}
           fundStandard: 20000000
           fundReceiverStandard: 1000000
           maxTransferAmount: 50000
@@ -99,4 +108,4 @@ ${yamlList(containers, '          ')}
 
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, config);
-console.log(JSON.stringify({ output, operation, contention, scenario, workers, targetTps, duration, measuredLabel }));
+console.log(JSON.stringify({ output, operation, contention, scenario, workers, targetTps, duration, operationAmount, measuredLabel }));

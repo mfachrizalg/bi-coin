@@ -28,10 +28,8 @@ class JsonlTransactionObserver extends TxObserverInterface {
         await super.activate(roundIndex, roundLabel);
         if (!this.stream) {
             fs.mkdirSync(this.traceDir, { recursive: true });
-            this.stream = fs.createWriteStream(
-                path.join(this.traceDir, `transactions-worker-${this.workerIndex}.jsonl`),
-                { flags: 'a' },
-            );
+            const file = path.join(this.traceDir, `transactions-worker-${this.workerIndex}.jsonl`);
+            this.stream = fs.createWriteStream(null, { fd: fs.openSync(file, 'wx') });
         }
     }
 

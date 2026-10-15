@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strings"
 	"testing"
 
@@ -52,9 +55,6 @@ func TestCurrentRetailRoutesAreRegistered(t *testing.T) {
 		{http.MethodPost, "/transfers", middleware.RoleMerchant},
 		{http.MethodPost, "/transfers", middleware.RoleValidatorBank},
 		{http.MethodPost, "/transfers", middleware.RolePJP},
-		{http.MethodPost, "/qris/resolve", middleware.RoleKycVerified},
-		{http.MethodPost, "/qris/pay", middleware.RoleKycVerified},
-		{http.MethodPost, "/qris/intents", middleware.RoleMerchant},
 	}
 
 	for _, route := range currentRoutes {
@@ -69,16 +69,95 @@ func TestCurrentRetailRoutesAreRegistered(t *testing.T) {
 	}
 }
 
-func TestKycVerifiedCannotCreateQrisIntent(t *testing.T) {
+func TestQrisRoutesAreNotRegistered(t *testing.T) {
 	router := mux.NewRouter()
 	New(nil, nil).RegisterRoutes(router)
+	for _, route := range []struct {
+		method string
+		path   string
+	}{
+		{http.MethodPost, "/qris/resolve"},
+		{http.MethodPost, "/qris/pay"},
+		{http.MethodPost, "/qris/intents"},
+		{http.MethodGet, "/qris/intents"},
+		{http.MethodGet, "/qris/intents/intent-1"},
+		{http.MethodPost, "/qris/intents/intent-1/cancel"},
+	} {
+		req := httptest.NewRequest(route.method, route.path, nil)
+		if router.Match(req, &mux.RouteMatch{}) {
+			t.Errorf("%s %s is still registered", route.method, route.path)
+		}
+	}
+}
 
-	req := httptest.NewRequest(http.MethodPost, "/qris/intents", strings.NewReader(`{}`))
-	req = requestWithRole(req, middleware.RoleKycVerified)
-	response := httptest.NewRecorder()
-	router.ServeHTTP(response, req)
-	if response.Code != http.StatusForbidden {
-		t.Fatalf("kyc_verified create qris got %d, want 403", response.Code)
+func TestKycIssuanceAndRedemptionRequireIdempotencyKeys(t *testing.T) {
+	router := mux.NewRouter()
+	New(nil, nil).RegisterRoutes(router)
+	for _, route := range []struct {
+		path string
+		role middleware.Role
+		body string
+	}{
+		{"/kyc/profiles", middleware.RolePJP, `{"subject_type":"retail_customer","subject_id":"customer-1"}`},
+		{"/issuance-requests", middleware.RoleBankIndonesia, `{"amount":"1000"}`},
+		{"/redemption-requests", middleware.RoleBankIndonesia, `{"participant_id":"bank-1","amount":"1000"}`},
+	} {
+		req := httptest.NewRequest(http.MethodPost, route.path, strings.NewReader(route.body))
+		req = requestWithRole(req, route.role)
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, req)
+		if response.Code != http.StatusUnprocessableEntity || !strings.Contains(response.Body.String(), "Idempotency-Key is required") {
+			t.Errorf("%s got %d %s; want missing-key validation", route.path, response.Code, response.Body.String())
+		}
+	}
+}
+
+func TestDocsHideDisabledQrisPaths(t *testing.T) {
+	spec := []byte(`{"paths":{"/transfers":{"post":{}},"/qris/pay":{"post":{}},"/issuance-requests":{"post":{}},"/redemption-requests":{"post":{}},"/kyc/profiles":{"post":{}}}}`)
+	router := mux.NewRouter()
+	NewDocsHandler(DocsSpecs{KycVerified: spec, Merchant: spec}).RegisterRoutes(router)
+
+	for _, role := range []string{"kyc_verified", "merchant"} {
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/docs/"+role+"/openapi.json", nil))
+		if response.Code != http.StatusOK {
+			t.Fatalf("%s API docs got %d, want 200", role, response.Code)
+		}
+		var document struct {
+			Paths map[string]json.RawMessage `json:"paths"`
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &document); err != nil {
+			t.Fatalf("decode %s API docs: %v", role, err)
+		}
+		if _, ok := document.Paths["/qris/pay"]; ok {
+			t.Errorf("%s API docs still expose QRIS", role)
+		}
+		if _, ok := document.Paths["/transfers"]; !ok {
+			t.Errorf("%s API docs lost transfers", role)
+		}
+		for _, path := range []string{"/issuance-requests", "/redemption-requests", "/kyc/profiles"} {
+			var operation struct {
+				Parameters []struct {
+					Name     string `json:"name"`
+					In       string `json:"in"`
+					Required bool   `json:"required"`
+				} `json:"parameters"`
+			}
+			var pathItem map[string]json.RawMessage
+			if err := json.Unmarshal(document.Paths[path], &pathItem); err != nil {
+				t.Fatalf("decode %s path: %v", path, err)
+			}
+			if err := json.Unmarshal(pathItem["post"], &operation); err != nil {
+				t.Fatalf("decode %s operation: %v", path, err)
+			}
+			requiredKey := false
+			for _, parameter := range operation.Parameters {
+				requiredKey = requiredKey || (parameter.Name == "Idempotency-Key" && parameter.In == "header" && parameter.Required)
+			}
+			if !requiredKey {
+				t.Errorf("%s docs do not require Idempotency-Key", path)
+			}
+		}
 	}
 }
 
@@ -203,4 +282,57 @@ func mustParseURL(t *testing.T, path string) *url.URL {
 		t.Fatalf("parse URL: %v", err)
 	}
 	return u
+}
+
+func TestOversightReadsAreLimitedToBankIndonesiaAndSupervisor(t *testing.T) {
+	routes := []struct {
+		path      string
+		chaincode string
+	}{
+		{"/transactions", "GetTransactions"},
+		{"/supervision/events", "GetSupervisionEvents"},
+		{"/reports/reconciliation", "GetReconciliationReport"},
+		{"/reports/metrics", "GetMetrics"},
+	}
+	allowed := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleSupervisor}
+	denied := []middleware.Role{middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankPjp, middleware.RoleKycVerified, middleware.RoleMerchant}
+
+	for _, route := range routes {
+		for _, role := range append(append([]middleware.Role{}, allowed...), denied...) {
+			t.Run(string(role)+route.path, func(t *testing.T) {
+				contract := &oversightContract{}
+				router := mux.NewRouter()
+				New(services.NewLedgerServiceForTest(contract, nil, ""), nil).RegisterRoutes(router)
+
+				req := requestWithRole(httptest.NewRequest(http.MethodGet, route.path, nil), role)
+				response := httptest.NewRecorder()
+				router.ServeHTTP(response, req)
+
+				wantCode, wantCalls := http.StatusForbidden, []string(nil)
+				if slices.Contains(allowed, role) {
+					wantCode, wantCalls = http.StatusOK, []string{route.chaincode}
+				}
+				if response.Code != wantCode {
+					t.Fatalf("got %d, want %d: %s", response.Code, wantCode, response.Body.String())
+				}
+				if strings.Join(contract.evaluated, ",") != strings.Join(wantCalls, ",") {
+					t.Fatalf("chaincode evaluations = %v, want %v", contract.evaluated, wantCalls)
+				}
+			})
+		}
+	}
+}
+
+type oversightContract struct{ evaluated []string }
+
+func (c *oversightContract) SubmitTransaction(name string, args ...string) ([]byte, error) {
+	return nil, fmt.Errorf("oversight read submitted %s", name)
+}
+
+func (c *oversightContract) EvaluateTransaction(name string, args ...string) ([]byte, error) {
+	c.evaluated = append(c.evaluated, name)
+	if name == "GetTransactions" || name == "GetSupervisionEvents" {
+		return []byte("[]"), nil
+	}
+	return []byte("{}"), nil
 }

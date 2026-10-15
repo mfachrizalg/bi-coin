@@ -8,7 +8,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
 )
 
-func TestBankIndonesiaOnlyFunctionsRejectBankPjpMSP(t *testing.T) {
+func TestCentralBankOnlyFunctionsRejectDistributorMSP(t *testing.T) {
 	contract := new(SmartContract)
 	now := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
 
@@ -37,7 +37,7 @@ func TestBankIndonesiaOnlyFunctionsRejectBankPjpMSP(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx, _ := newMockTransactionContextWithMSP("tx-"+test.name, now, PJPMSP)
+			ctx, _ := newMockTransactionContextWithMSP("tx-"+test.name, now, DistributorMSP)
 			err := test.call(ctx)
 			if err == nil || !strings.Contains(err.Error(), "not authorized") {
 				t.Fatalf("%s error = %v, want MSP authorization rejection", test.name, err)
@@ -46,12 +46,12 @@ func TestBankIndonesiaOnlyFunctionsRejectBankPjpMSP(t *testing.T) {
 	}
 }
 
-func TestOJKObserverCannotInvokeMutations(t *testing.T) {
+func TestValidatorCannotInvokeMutations(t *testing.T) {
 	contract := new(SmartContract)
 	ctx, _ := newMockTransactionContextWithMSP(
 		"tx-ojk-mutation",
 		time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC),
-		OJKObserverMSP,
+		ValidatorMSP,
 	)
 
 	err := contract.SubmitParticipant(ctx, "pjp_1", "PJP 1", "pjp.test", "acct-1", "pjp", "0", "pending")
@@ -65,7 +65,7 @@ func TestBankPjpCanSubmitParticipant(t *testing.T) {
 	ctx, _ := newMockTransactionContextWithMSP(
 		"tx-pjp-submit",
 		time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC),
-		PJPMSP,
+		DistributorMSP,
 	)
 
 	if err := contract.SubmitParticipant(ctx, "pjp_1", "PJP 1", "pjp.test", "acct-1", "pjp", "0", "pending"); err != nil {
@@ -73,12 +73,12 @@ func TestBankPjpCanSubmitParticipant(t *testing.T) {
 	}
 }
 
-func TestOJKObserverCanReadLedgerState(t *testing.T) {
+func TestValidatorCanReadLedgerState(t *testing.T) {
 	contract := new(SmartContract)
 	ctx, _ := newMockTransactionContextWithMSP(
 		"tx-ojk-read",
 		time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC),
-		OJKObserverMSP,
+		ValidatorMSP,
 	)
 
 	if _, err := contract.GetTotalSupply(ctx); err != nil {

@@ -103,3 +103,34 @@ func TestAuthServiceRejectsTokenAfterRoleChange(t *testing.T) {
 		t.Fatal("expected role-changed token to be rejected")
 	}
 }
+
+func TestAuthServiceRejectsTokenAfterIdentityReassignment(t *testing.T) {
+	hash, err := HashPassword("secret")
+	if err != nil {
+		t.Fatalf("hash password: %v", err)
+	}
+	for _, field := range []string{"subject", "participant", "custodian"} {
+		t.Run(field, func(t *testing.T) {
+			user := AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RolePJP, SubjectID: "subject-1", ParticipantID: "participant-1", CustodianMSPID: "PJP-MSP", Active: true}
+			users := memoryUserStore{users: map[string]AuthUser{"operator": user}}
+			auth := NewAuthService(users, "test-secret-32-bytes-long", time.Hour)
+			token, err := auth.Login(models.LoginRequest{Username: "operator", Password: "secret"})
+			if err != nil {
+				t.Fatalf("login: %v", err)
+			}
+			switch field {
+			case "subject":
+				user.SubjectID = "subject-2"
+			case "participant":
+				user.ParticipantID = "participant-2"
+			case "custodian":
+				user.CustodianMSPID = "OTHER-MSP"
+			}
+			users.users["operator"] = user
+			auth.users = users
+			if _, err := auth.Verify(token.AccessToken); err == nil {
+				t.Fatal("expected reassigned identity claim to invalidate token")
+			}
+		})
+	}
+}

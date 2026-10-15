@@ -148,3 +148,51 @@ test('aggregate statistics keep pilot and calibration phases separate', () => {
     assert.deepEqual(summaries.map(value => value.phase).sort(), ['calibration', 'pilot']);
     assert.equal(summaries.every(value => value.repetitions === 1), true);
 });
+
+test('measured failures retain multiline peer rejection details', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'bi-coin-details-'));
+    try {
+        fs.writeFileSync(path.join(directory, 'trace.jsonl'), [
+            { event: 'submitted', roundLabel: 'measured', count: 2, timestamp: 1000 },
+            ...[1, 2].map(id => ({ event: 'finished', roundLabel: 'measured', result: { id, status: 'failed', flags: 0 } })),
+        ].map(JSON.stringify).join('\n'));
+        fs.writeFileSync(path.join(directory, 'caliper.log'), [
+            'Started round 2 (measured)',
+            'Failed to perform submit transaction [DistributeToParticipant] EndorseError: 10 ABORTED',
+            'Details:',
+            '- peer0.bi: chaincode response 500, insufficient balance: have 0, need 1000',
+            'Failed to perform submit transaction [Transfer] EndorseError: 10 ABORTED',
+            'Details:',
+            '- peer0.bank: chaincode response 500, transfer would exceed receiver max balance 20000000',
+            'Finished round 2 (measured)',
+        ].join('\n'));
+        const [row] = summarizeRun({ measuredRound: 'measured', durationSeconds: 120,
+            traceFiles: ['trace.jsonl'], logFile: 'caliper.log' }, directory);
+        assert.deepEqual(row.failureReasons, { 'Insufficient balance': 1, 'Wallet-tier limit exceeded': 1 });
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
+
+test('a run cannot combine submissions from separate measurement attempts', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'bi-coin-attempt-'));
+    try {
+        fs.writeFileSync(path.join(directory, 'trace.jsonl'), [1000, 3600000].map(timestamp => JSON.stringify({
+            event: 'submitted', roundLabel: 'measured', count: 1, timestamp,
+        })).join('\n'));
+        assert.throws(() => summarizeRun({ measuredRound: 'measured', durationSeconds: 120,
+            traceFiles: ['trace.jsonl'] }, directory), /measurement window/);
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
+
+test('malformed transaction evidence is rejected rather than silently skipped', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'bi-coin-invalid-trace-'));
+    try {
+        fs.writeFileSync(path.join(directory, 'trace.jsonl'), '{broken\n');
+        assert.throws(() => summarizeRun({ traceFiles: ['trace.jsonl'] }, directory), /invalid transaction trace/);
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});

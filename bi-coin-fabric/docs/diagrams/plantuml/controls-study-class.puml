@@ -1,0 +1,74 @@
+@startuml controls-study-class
+title Diagram Kelas Studi Kontrol Rupiah Digital
+left to right direction
+skinparam monochrome true
+skinparam dpi 300
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 16
+skinparam classAttributeFontSize 13
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+class StudyHandler <<backend handler>> {
+  -svc: StudyLedgerService
+  +Identity()
+  +CreateSubject()
+  +Transfer()
+  +GetSubject()
+}
+
+class StudyLedgerService <<backend service>> {
+  -identities
+  -contracts
+  +IdentityMSP()
+  +Submit()
+  +Evaluate()
+}
+
+interface FabricContract {
+  +SubmitTransaction()
+  +EvaluateTransaction()
+}
+
+class FabricStudyIdentity <<per-user configuration>> {
+  +Username
+  +MSPID
+  +PeerEndpoint
+  +GatewayPeer
+}
+
+class ControlsContract <<rupiah-controls>> {
+  +CreatePending()
+  +RecordReview()
+  +SetLimits()
+  +SetBusinessAuthority()
+  +FreezeSubject()
+  +GetSubject()
+}
+
+class PaymentsContract <<rupiah-payments>> {
+  +OpenWallet()
+  +Transfer()
+  +FundFromReserve()
+  +GetBalance()
+}
+
+class MonetaryContract <<rupiah-monetary>> {
+  +Initialize()
+  +Mint()
+  +RegisterDistributor()
+  +AllocateReserve()
+  +RedeemReserve()
+}
+
+StudyHandler --> StudyLedgerService
+StudyLedgerService o-- FabricStudyIdentity
+StudyLedgerService --> FabricContract
+FabricContract ..> ControlsContract
+FabricContract ..> PaymentsContract
+FabricContract ..> MonetaryContract
+PaymentsContract ..> ControlsContract
+PaymentsContract ..> MonetaryContract
+@enduml

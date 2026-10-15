@@ -15,7 +15,7 @@ const INFRASTRUCTURE_FAILURE = /proposalresponsepayloads do not match|channel ha
 
 /**
  * Proves that a wallet is spendable only through its custodian MSP.
- * Setup runs as BI; the measured transfer is submitted by Himbara and must
+ * Setup runs as BI; the measured transfer is submitted by Distributor and must
  * fail with a chaincode custody error, not an infrastructure/endorsement error.
  */
 class CustodyAuthorizationWorkload extends RetailWorkloadBase {
@@ -44,9 +44,9 @@ class CustodyAuthorizationWorkload extends RetailWorkloadBase {
         const response = await this.sutAdapter.sendRequests(actorRequest({
             ...CONTRACT,
             contractFunction: 'Transfer',
-            contractArguments: [this.senderWallet, this.receiverWallet, '1000', `custody_${this.ns()}_himbara`],
+            contractArguments: [this.senderWallet, this.receiverWallet, '1000', `custody_${this.ns()}_distributor`],
             readOnly: false,
-        }, 'himbara'));
+        }, 'distributor'));
         const results = transactionResults(response);
         const diagnostics = results.map(transactionDiagnostic);
         const failed = results.filter((tx) => transactionStatus(tx) === 'failed');
@@ -73,7 +73,7 @@ class CustodyAuthorizationWorkload extends RetailWorkloadBase {
         const oracle = {
             event: 'authorization-oracle',
             worker: this.workerIndex,
-            actor: ACTORS.himbara,
+            actor: ACTORS.distributor,
             targetCustodian: ACTORS.bi.invokerMspId,
             total: results.length,
             failed: failed.length,

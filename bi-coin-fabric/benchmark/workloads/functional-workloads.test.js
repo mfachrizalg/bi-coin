@@ -113,22 +113,3 @@ test('supervision history setup uses distinct STANDARD wallets', () => {
     assert.ok(pairs.every(({ sender, receiver }) =>
         sender.tier === 'STANDARD' && receiver.tier === 'STANDARD' && sender.id !== receiver.id));
 });
-
-test('admin policy workload writes unique auto-limit policy keys', async () => {
-    const { createWorkloadModule } = require('./admin-policy');
-    const workload = createWorkloadModule();
-    const { calls, adapter } = captureAdapter();
-    workload.workerIndex = 0;
-    workload.roundIndex = 0;
-    workload.roundArguments = { scenario: 'admin' };
-    workload.sutAdapter = adapter;
-
-    await workload.submitTransaction();
-    await workload.submitTransaction();
-
-    assert.deepEqual(calls.map(call => call.contractFunction), [
-        'SetAutoLimitPolicy',
-        'SetAutoLimitPolicy',
-    ]);
-    assert.notEqual(calls[0].contractArguments[0], calls[1].contractArguments[0]);
-});

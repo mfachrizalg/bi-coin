@@ -1,0 +1,37 @@
+@startuml controls-study-activity
+title Activity Diagram Alur Kontrol dan Pembayaran
+skinparam monochrome true
+skinparam dpi 300
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam shadowing false
+
+|EndUserMSP|
+start
+:Periksa identitas terpetakan;
+:Ajukan subjek pseudonim;
+|DistributorMSP|
+:Reviewer melindungi dan meninjau subjek;
+:Senior approver menetapkan batas;
+if (Risiko tinggi atau PEP?) then (Ya)
+  :Senior approver memutuskan\ndengan identitas berbeda;
+else (Tidak)
+  :Reviewer memutuskan\npersetujuan standar;
+endif
+if (Subjek disetujui?) then (Ya)
+  |EndUserMSP|
+  :Buka dompet;
+  |CentralBankMSP|
+  :Alokasikan cadangan ke distributor;
+  |DistributorMSP|
+  :FundFromReserve\n(atomik pada tiga chaincode);
+  |EndUserMSP|
+  :Transfer dengan Idempotency-Key;
+  |ValidatorMSP|
+  :Baca kontrol subjek\n(baca-saja);
+  stop
+else (Tidak)
+  :Subjek ditolak;
+  stop
+endif
+@enduml

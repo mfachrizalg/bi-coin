@@ -150,8 +150,8 @@ test('benchmark setup seeds a shared custodian through Treasury distribution', a
         'RequestIssuance',
         'DistributeToParticipant',
     ]);
-    assert.equal(calls[1].invokerMspId, 'HimbaraBankOrgMSP');
-    assert.equal(calls[5].invokerMspId, 'BankIndonesiaOrgMSP');
+    assert.equal(calls[1].invokerMspId, 'DistributorMSP');
+    assert.equal(calls[5].invokerMspId, 'CentralBankMSP');
     assert.equal(calls[6].contractArguments[1], '1000');
 });
 

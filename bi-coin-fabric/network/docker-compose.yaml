@@ -1,18 +1,39 @@
 version: '2'
 
+volumes:
+  ca-centralbank-data:
+
 networks:
-  paynet:
-    name: paynet
+  bi-coin:
+    name: bi-coin
 
 services:
-  orderer.paynet:
-    container_name: orderer.paynet
+  ca.centralbank:
+    container_name: ca.centralbank
+    image: hyperledger/fabric-ca:1.5.9
+    environment:
+      - FABRIC_CA_SERVER_CA_NAME=ca-centralbank
+      - FABRIC_CA_SERVER_TLS_ENABLED=false
+      - FABRIC_CA_SERVER_PORT=7054
+    command:
+      - sh
+      - -c
+      - fabric-ca-server start -b caadmin:adminpw -d
+    volumes:
+      - ca-centralbank-data:/etc/hyperledger/fabric-ca-server
+    ports:
+      - 127.0.0.1:7054:7054
+    networks:
+      - bi-coin
+
+  orderer.bi-coin:
+    container_name: orderer.bi-coin
     image: hyperledger/fabric-orderer:2.5
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_LISTENPORT=7050
-      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPID=CentralBankMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
@@ -32,53 +53,53 @@ services:
     working_dir: /root
     command: orderer
     volumes:
-      - ./organizations/ordererOrganizations/paynet/orderers/orderer.paynet/msp:/var/hyperledger/orderer/msp
-      - ./organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls:/var/hyperledger/orderer/tls
+      - ./organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/msp:/var/hyperledger/orderer/msp
+      - ./organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/tls:/var/hyperledger/orderer/tls
     ports:
       - 7050:7050
       - 7053:7053
     networks:
-      - paynet
+      - bi-coin
 
-  peer0.bi.paynet:
-    container_name: peer0.bi.paynet
+  peer0.bi-coin:
+    container_name: peer0.bi-coin
     image: hyperledger/fabric-peer:2.5
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=bi-coin
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.bi.paynet
-      - CORE_PEER_ADDRESS=peer0.bi.paynet:7051
+      - CORE_PEER_ID=peer0.bi-coin
+      - CORE_PEER_ADDRESS=peer0.bi-coin:7051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.bi.paynet:7052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.bi-coin:7052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.bi.paynet:7051
-      - CORE_PEER_LOCALMSPID=BankIndonesiaOrgMSP
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi-coin:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.bi-coin:7051
+      - CORE_PEER_LOCALMSPID=CentralBankMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.bi.paynet:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.bi-coin:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls:/etc/hyperledger/fabric/tls
+      - ./organizations/peerOrganizations/bi-coin/peers/peer0.bi-coin/msp:/etc/hyperledger/fabric/msp
+      - ./organizations/peerOrganizations/bi-coin/peers/peer0.bi-coin/tls:/etc/hyperledger/fabric/tls
     ports:
       - 7051:7051
     depends_on:
-      - orderer.paynet
-      - couchdb0.bi.paynet
+      - orderer.bi-coin
+      - couchdb.bi-coin
     networks:
-      - paynet
+      - bi-coin
 
-  couchdb0.bi.paynet:
-    container_name: couchdb0.bi.paynet
+  couchdb.bi-coin:
+    container_name: couchdb.bi-coin
     image: couchdb:3.2
     environment:
       - COUCHDB_USER=admin
@@ -86,47 +107,47 @@ services:
     ports:
       - 5984:5984
     networks:
-      - paynet
+      - bi-coin
 
-  peer0.himbara.paynet:
-    container_name: peer0.himbara.paynet
+  peer0.distributor.bi-coin:
+    container_name: peer0.distributor.bi-coin
     image: hyperledger/fabric-peer:2.5
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=bi-coin
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.himbara.paynet
-      - CORE_PEER_ADDRESS=peer0.himbara.paynet:9051
+      - CORE_PEER_ID=peer0.distributor.bi-coin
+      - CORE_PEER_ADDRESS=peer0.distributor.bi-coin:9051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.himbara.paynet:9052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.distributor.bi-coin:9052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.himbara.paynet:9051
-      - CORE_PEER_LOCALMSPID=HimbaraBankOrgMSP
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi-coin:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.distributor.bi-coin:9051
+      - CORE_PEER_LOCALMSPID=DistributorMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.himbara.paynet:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.distributor.bi-coin:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls:/etc/hyperledger/fabric/tls
+      - ./organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/msp:/etc/hyperledger/fabric/msp
+      - ./organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls:/etc/hyperledger/fabric/tls
     ports:
       - 9051:9051
     depends_on:
-      - orderer.paynet
-      - couchdb0.himbara.paynet
+      - orderer.bi-coin
+      - couchdb.distributor.bi-coin
     networks:
-      - paynet
+      - bi-coin
 
-  couchdb0.himbara.paynet:
-    container_name: couchdb0.himbara.paynet
+  couchdb.distributor.bi-coin:
+    container_name: couchdb.distributor.bi-coin
     image: couchdb:3.2
     environment:
       - COUCHDB_USER=admin
@@ -134,95 +155,47 @@ services:
     ports:
       - 6984:5984
     networks:
-      - paynet
+      - bi-coin
 
-  peer0.commercial.paynet:
-    container_name: peer0.commercial.paynet
+  peer0.validator.bi-coin:
+    container_name: peer0.validator.bi-coin
     image: hyperledger/fabric-peer:2.5
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=bi-coin
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.commercial.paynet
-      - CORE_PEER_ADDRESS=peer0.commercial.paynet:11051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.commercial.paynet:11052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.commercial.paynet:11051
-      - CORE_PEER_LOCALMSPID=CommercialBankOrgMSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.commercial.paynet:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
-    volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - 11051:11051
-    depends_on:
-      - orderer.paynet
-      - couchdb0.commercial.paynet
-    networks:
-      - paynet
-
-  couchdb0.commercial.paynet:
-    container_name: couchdb0.commercial.paynet
-    image: couchdb:3.2
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - 7984:5984
-    networks:
-      - paynet
-
-  peer0.ojk.paynet:
-    container_name: peer0.ojk.paynet
-    image: hyperledger/fabric-peer:2.5
-    environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.ojk.paynet
-      - CORE_PEER_ADDRESS=peer0.ojk.paynet:12051
+      - CORE_PEER_ID=peer0.validator.bi-coin
+      - CORE_PEER_ADDRESS=peer0.validator.bi-coin:12051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:12051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.ojk.paynet:12052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.validator.bi-coin:12052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:12052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ojk.paynet:12051
-      - CORE_PEER_LOCALMSPID=OJKObserverOrgMSP
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi-coin:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.validator.bi-coin:12051
+      - CORE_PEER_LOCALMSPID=ValidatorMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.ojk.paynet:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.validator.bi-coin:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/ojk.paynet/peers/peer0.ojk.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/ojk.paynet/peers/peer0.ojk.paynet/tls:/etc/hyperledger/fabric/tls
+      - ./organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/msp:/etc/hyperledger/fabric/msp
+      - ./organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls:/etc/hyperledger/fabric/tls
     ports:
       - 12051:12051
     depends_on:
-      - orderer.paynet
-      - couchdb0.ojk.paynet
+      - orderer.bi-coin
+      - couchdb.validator.bi-coin
     networks:
-      - paynet
+      - bi-coin
 
-  couchdb0.ojk.paynet:
-    container_name: couchdb0.ojk.paynet
+  couchdb.validator.bi-coin:
+    container_name: couchdb.validator.bi-coin
     image: couchdb:3.2
     environment:
       - COUCHDB_USER=admin
@@ -230,47 +203,47 @@ services:
     ports:
       - 8984:5984
     networks:
-      - paynet
+      - bi-coin
 
-  peer0.pjp.paynet:
-    container_name: peer0.pjp.paynet
+  peer0.enduser.bi-coin:
+    container_name: peer0.enduser.bi-coin
     image: hyperledger/fabric-peer:2.5
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=bi-coin
       - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.pjp.paynet
-      - CORE_PEER_ADDRESS=peer0.pjp.paynet:13051
+      - CORE_PEER_ID=peer0.enduser.bi-coin
+      - CORE_PEER_ADDRESS=peer0.enduser.bi-coin:13051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:13051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.pjp.paynet:13052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.enduser.bi-coin:13052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:13052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.pjp.paynet:13051
-      - CORE_PEER_LOCALMSPID=PJPOrgMSP
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi-coin:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.enduser.bi-coin:13051
+      - CORE_PEER_LOCALMSPID=EndUserMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.pjp.paynet:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.enduser.bi-coin:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/tls:/etc/hyperledger/fabric/tls
+      - ./organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/msp:/etc/hyperledger/fabric/msp
+      - ./organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls:/etc/hyperledger/fabric/tls
     ports:
       - 13051:13051
     depends_on:
-      - orderer.paynet
-      - couchdb0.pjp.paynet
+      - orderer.bi-coin
+      - couchdb.enduser.bi-coin
     networks:
-      - paynet
+      - bi-coin
 
-  couchdb0.pjp.paynet:
-    container_name: couchdb0.pjp.paynet
+  couchdb.enduser.bi-coin:
+    container_name: couchdb.enduser.bi-coin
     image: couchdb:3.2
     environment:
       - COUCHDB_USER=admin
@@ -278,4 +251,4 @@ services:
     ports:
       - 9984:5984
     networks:
-      - paynet
+      - bi-coin

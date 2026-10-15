@@ -1,125 +1,89 @@
 Organizations:
-  - &BankIndonesiaOrg
-    Name: BankIndonesiaOrg
-    ID: BankIndonesiaOrgMSP
-    MSPDir: organizations/peerOrganizations/bi.paynet/msp
+  - &CentralBank
+    Name: CentralBankMSP
+    ID: CentralBankMSP
+    MSPDir: organizations/peerOrganizations/bi-coin/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.peer','BankIndonesiaOrgMSP.client')"
+        Rule: "OR('CentralBankMSP.admin', 'CentralBankMSP.peer', 'CentralBankMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.client')"
+        Rule: "OR('CentralBankMSP.admin', 'CentralBankMSP.client', 'CentralBankMSP.orderer')"
       Admins:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.admin')"
+        Rule: "OR('CentralBankMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.member')"
+        Rule: "OR('CentralBankMSP.peer')"
+    OrdererEndpoints:
+      - "orderer.bi-coin:7050"
     AnchorPeers:
-      - Host: peer0.bi.paynet
+      - Host: peer0.bi-coin
         Port: 7051
 
-  - &HimbaraBankOrg
-    Name: HimbaraBankOrg
-    ID: HimbaraBankOrgMSP
-    MSPDir: organizations/peerOrganizations/himbara.paynet/msp
+  - &Distributor
+    Name: DistributorMSP
+    ID: DistributorMSP
+    MSPDir: organizations/peerOrganizations/distributor.bi-coin/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.peer','HimbaraBankOrgMSP.client')"
+        Rule: "OR('DistributorMSP.admin', 'DistributorMSP.peer', 'DistributorMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.client')"
+        Rule: "OR('DistributorMSP.admin', 'DistributorMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.admin')"
+        Rule: "OR('DistributorMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.member')"
+        Rule: "OR('DistributorMSP.peer')"
     AnchorPeers:
-      - Host: peer0.himbara.paynet
+      - Host: peer0.distributor.bi-coin
         Port: 9051
 
-  - &CommercialBankOrg
-    Name: CommercialBankOrg
-    ID: CommercialBankOrgMSP
-    MSPDir: organizations/peerOrganizations/commercial.paynet/msp
+  - &Validator
+    Name: ValidatorMSP
+    ID: ValidatorMSP
+    MSPDir: organizations/peerOrganizations/validator.bi-coin/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.admin','CommercialBankOrgMSP.peer','CommercialBankOrgMSP.client')"
+        Rule: "OR('ValidatorMSP.admin', 'ValidatorMSP.peer', 'ValidatorMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.admin','CommercialBankOrgMSP.client')"
+        Rule: "OR('ValidatorMSP.admin', 'ValidatorMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.admin')"
+        Rule: "OR('ValidatorMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.member')"
+        Rule: "OR('ValidatorMSP.peer')"
     AnchorPeers:
-      - Host: peer0.commercial.paynet
-        Port: 11051
-
-  - &OJKObserverOrg
-    Name: OJKObserverOrg
-    ID: OJKObserverOrgMSP
-    MSPDir: organizations/peerOrganizations/ojk.paynet/msp
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.admin','OJKObserverOrgMSP.peer','OJKObserverOrgMSP.client')"
-      Writers:
-        Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.admin','OJKObserverOrgMSP.client')"
-      Admins:
-        Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.admin')"
-      Endorsement:
-        Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.member')"
-    AnchorPeers:
-      - Host: peer0.ojk.paynet
+      - Host: peer0.validator.bi-coin
         Port: 12051
 
-  - &PJPOrg
-    Name: PJPOrg
-    ID: PJPOrgMSP
-    MSPDir: organizations/peerOrganizations/pjp.paynet/msp
+  - &EndUser
+    Name: EndUserMSP
+    ID: EndUserMSP
+    MSPDir: organizations/peerOrganizations/enduser.bi-coin/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('PJPOrgMSP.admin','PJPOrgMSP.peer','PJPOrgMSP.client')"
+        Rule: "OR('EndUserMSP.admin', 'EndUserMSP.peer', 'EndUserMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('PJPOrgMSP.admin','PJPOrgMSP.client')"
+        Rule: "OR('EndUserMSP.admin', 'EndUserMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('PJPOrgMSP.admin')"
+        Rule: "OR('EndUserMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('PJPOrgMSP.member')"
+        Rule: "OR('EndUserMSP.peer')"
     AnchorPeers:
-      - Host: peer0.pjp.paynet
+      - Host: peer0.enduser.bi-coin
         Port: 13051
-
-  - &OrdererOrg
-    Name: OrdererOrg
-    ID: OrdererMSP
-    MSPDir: organizations/ordererOrganizations/paynet/msp
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('OrdererMSP.member')"
-      Writers:
-        Type: Signature
-        Rule: "OR('OrdererMSP.member')"
-      Admins:
-        Type: Signature
-        Rule: "OR('OrdererMSP.admin')"
-    OrdererEndpoints:
-      - orderer.paynet:7050
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -138,28 +102,28 @@ Application: &ApplicationDefaults
       Rule: "ANY Readers"
     Writers:
       Type: Signature
-      Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.client','HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.client','CommercialBankOrgMSP.admin','CommercialBankOrgMSP.client','PJPOrgMSP.admin','PJPOrgMSP.client')"
+      Rule: "OR('CentralBankMSP.admin','CentralBankMSP.client','DistributorMSP.admin','DistributorMSP.client','EndUserMSP.admin','EndUserMSP.client')"
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
     LifecycleEndorsement:
       Type: Signature
-      Rule: "AND('BankIndonesiaOrgMSP.member',OR('HimbaraBankOrgMSP.member','CommercialBankOrgMSP.member','PJPOrgMSP.member'))"
+      Rule: "AND('CentralBankMSP.member',OR('DistributorMSP.member','EndUserMSP.member'))"
     Endorsement:
       Type: Signature
-      Rule: "OR('BankIndonesiaOrgMSP.member','HimbaraBankOrgMSP.member','CommercialBankOrgMSP.member','PJPOrgMSP.member')"
+      Rule: "OR('CentralBankMSP.member','DistributorMSP.member','EndUserMSP.member')"
   Capabilities: *ApplicationCapabilities
 
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-    - orderer.paynet:7050
+    - orderer.bi-coin:7050
   EtcdRaft:
     Consenters:
-      - Host: orderer.paynet
+      - Host: orderer.bi-coin
         Port: 7050
-        ClientTLSCert: organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls/server.crt
-        ServerTLSCert: organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls/server.crt
+        ClientTLSCert: organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/tls/server.crt
   BatchTimeout: 2s
   BatchSize:
     MaxMessageCount: 10
@@ -201,14 +165,13 @@ Profiles:
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *OrdererOrg
+        - *CentralBank
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *BankIndonesiaOrg
-        - *HimbaraBankOrg
-        - *CommercialBankOrg
-        - *OJKObserverOrg
-        - *PJPOrg
+        - *CentralBank
+        - *Distributor
+        - *Validator
+        - *EndUser
       Capabilities: *ApplicationCapabilities

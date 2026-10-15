@@ -23,6 +23,7 @@ if (action === 'init') {
         schemaVersion: 1,
         study: option('study', 'Digital Rupiah statistical benchmark'),
         durationSeconds: Number(option('duration', 120)),
+        operationAmount: Number(option('operation-amount', 1000)),
         runs: [],
     });
     process.exit(0);
@@ -41,6 +42,7 @@ const traceFiles = fs.existsSync(absoluteRunDirectory)
     : [];
 const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
 const run = {
+    operationAmount: metadata.operationAmount ?? 1000,
     scenarioId: option('scenario-id'),
     transactionFamily: option('family'),
     operation: option('operation'),

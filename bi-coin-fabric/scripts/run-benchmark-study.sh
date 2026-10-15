@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 STAMP="${BENCHMARK_STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}"
 SEED="${BENCHMARK_SEED:-20260725}"
+OPERATION_AMOUNT="${BENCHMARK_OPERATION_AMOUNT:-1000}"
 STUDY_DIR="$PROJECT_DIR/benchmark/results/statistical-$STAMP"
 METADATA="$STUDY_DIR/metadata.json"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://127.0.0.1:9090}"
@@ -15,8 +16,10 @@ cd "$PROJECT_DIR"
 mkdir -p "$STUDY_DIR/runs"
 
 if [ ! -f "$METADATA" ]; then
-  node scripts/record-study-run.js "$METADATA" init --study "Digital Rupiah statistical benchmark" --duration 120
+  node scripts/record-study-run.js "$METADATA" init --study "Digital Rupiah statistical benchmark" --duration 120 --operation-amount "$OPERATION_AMOUNT"
 fi
+node -e 'const m = require(process.argv[1]); if ((m.operationAmount ?? 1000) !== Number(process.argv[2])) throw new Error("operation amount changed: use a new BENCHMARK_STAMP");' "$METADATA" "$OPERATION_AMOUNT"
+node scripts/write-study-manifest.js "$STUDY_DIR" --capture-source-only
 
 validate_source() {
   {
@@ -108,6 +111,10 @@ run_is_complete() {
       && Number(candidate.targetTps) === Number(targetTps)
       && Number(candidate.workerCount) === Number(workerCount)
     ));
+    if (run) {
+      try { require("./scripts/analyze-benchmark-results").summarizeRun(run, root); }
+      catch { process.exit(1); }
+    }
     const hasMeasuredSubmissions = run && (run.traceFiles || []).some(file => {
       if (!exists(file)) return false;
       return fs.readFileSync(path.resolve(root, file), "utf8").split(/\r?\n/).some(line => {
@@ -156,7 +163,7 @@ run_one() {
   if run_is_complete "$operation-$contention" "$phase" "$repetition" "$target_tps" "$workers"; then
     return 0
   fi
-  mkdir -p "$run_dir"
+  run_dir="$(mktemp -d "$STUDY_DIR/runs/${run_id}.XXXXXX")"
   node scripts/generate-study-config.js \
     --output "$run_dir/benchconfig.yaml" \
     --operation "$operation" \
@@ -165,6 +172,7 @@ run_one() {
     --workers "$workers" \
     --target-tps "$target_tps" \
     --duration "$duration" \
+    --operation-amount "$OPERATION_AMOUNT" \
     --seed "$SEED" >"$run_dir/config-generation.json"
 
   if ! reset_network "$run_dir"; then
@@ -185,7 +193,7 @@ run_one() {
   rm -f report.html
   set +e
   BENCHMARK_TRACE_DIR="$run_dir" \
-    BENCHMARK_STAMP="${STAMP}_${run_id}" \
+    BENCHMARK_STAMP="${STAMP}_$(basename "$run_dir")" \
     ./node_modules/.bin/caliper launch manager \
       --caliper-benchconfig "$run_dir/benchconfig.yaml" \
       --caliper-networkconfig benchmark/networkconfig.yaml \
@@ -220,12 +228,16 @@ operations=(issuance distribution retail-transfer merchant-payment redemption ba
 
 MODE="${1:-full}"
 case "$MODE" in
-  pilot|calibrate|primary|full) ;;
+  pilot|calibrate|primary|full|cell) ;;
   *)
-    echo "usage: $0 [pilot|calibrate|primary|full]" >&2
+    echo "usage: $0 [pilot|calibrate|primary|full] or cell <operation> <low|high> <pilot|scenario-pilot|calibration|primary> <workers> <tps> [seconds]" >&2
     exit 2
     ;;
 esac
+if [ "$MODE" = cell ] && { [ "$#" -lt 6 ] || [ "$#" -gt 7 ]; }; then
+  echo "cell requires operation, contention, phase, workers, tps, and optional seconds" >&2
+  exit 2
+fi
 
 run_initial_pilot() {
   for rate in "${pilot_rates[@]}"; do
@@ -292,6 +304,18 @@ run_primary() {
 start_metrics
 validate_source
 case "$MODE" in
+  cell)
+    case "$2" in issuance|distribution|retail-transfer|merchant-payment|redemption|balance-query|wallet-freeze|wallet-unfreeze) ;; *) exit 2 ;; esac
+    case "$3" in low|high) ;; *) exit 2 ;; esac
+    case "$4" in
+      primary|calibration) repetitions=(1 2 3 4 5) ;;
+      pilot|scenario-pilot) repetitions=(1) ;;
+      *) exit 2 ;;
+    esac
+    for repetition in "${repetitions[@]}"; do
+      run_one "$2" "$3" "$4" "$repetition" "$5" "$6" "${7:-120}"
+    done
+    ;;
   pilot)
     run_initial_pilot
     ;;
@@ -313,7 +337,7 @@ case "$MODE" in
 esac
 
 analyze
-if [ "$MODE" = primary ] || [ "$MODE" = full ]; then
+if [ "$MODE" = primary ] || [ "$MODE" = full ] || [ "$MODE" = cell ]; then
   node scripts/validate-study-artifacts.js "$STUDY_DIR" >"$STUDY_DIR/validation.json"
   node scripts/write-study-manifest.js "$STUDY_DIR" >"$STUDY_DIR/manifest-path.txt"
 fi

@@ -68,7 +68,7 @@ class RetailTransferWorkload extends RetailWorkloadBase {
             contractFunction: 'Transfer',
             contractArguments: contractArguments.map(String),
             readOnly: false,
-        }, 'himbara'));
+        }, 'distributor'));
     }
 }
 

@@ -26,8 +26,49 @@ type mockStub struct {
 	putStateErrors map[string]error
 }
 
+// bufferedMockStub models Fabric transaction simulation: GetState reads committed state, while PutState is only staged until Commit.
+type bufferedMockStub struct {
+	shim.ChaincodeStubInterface
+	writes map[string][]byte
+}
+
+func newBufferedMockStub(stub shim.ChaincodeStubInterface) *bufferedMockStub {
+	return &bufferedMockStub{ChaincodeStubInterface: stub, writes: make(map[string][]byte)}
+}
+
+func (s *bufferedMockStub) PutState(key string, value []byte) error {
+	s.writes[key] = append([]byte(nil), value...)
+	return nil
+}
+
+func (s *bufferedMockStub) DelState(key string) error {
+	s.writes[key] = nil
+	return nil
+}
+
+func (s *bufferedMockStub) Commit() error {
+	keys := make([]string, 0, len(s.writes))
+	for key := range s.writes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		if s.writes[key] == nil {
+			if err := s.ChaincodeStubInterface.DelState(key); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := s.ChaincodeStubInterface.PutState(key, s.writes[key]); err != nil {
+			return err
+		}
+	}
+	clear(s.writes)
+	return nil
+}
+
 func newMockTransactionContext(txID string, ts time.Time) (*contractapi.TransactionContext, *mockStub) {
-	return newMockTransactionContextWithMSP(txID, ts, BankIndonesiaMSP)
+	return newMockTransactionContextWithMSP(txID, ts, CentralBankMSP)
 }
 
 func newMockTransactionContextWithMSP(txID string, ts time.Time, mspID string) (*contractapi.TransactionContext, *mockStub) {

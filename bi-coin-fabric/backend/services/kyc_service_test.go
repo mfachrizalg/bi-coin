@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"reflect"
 	"strings"
@@ -14,6 +15,7 @@ import (
 type fakeLedgerContract struct {
 	submittedName  string
 	submittedArgs  []string
+	submissionCount int
 	submitResult   []byte
 	submitErr      error
 	evaluatedName  string
@@ -70,6 +72,23 @@ func TestRefreshKycProfileRejectsIncompleteHighRiskApproval(t *testing.T) {
 func (f *fakeLedgerContract) SubmitTransaction(name string, args ...string) ([]byte, error) {
 	f.submittedName = name
 	f.submittedArgs = args
+	f.submissionCount++
+	if f.submitResult == nil && f.submitErr == nil {
+		switch name {
+		case "RequestIssuance":
+			return []byte(`{"status":"issued","reference_id":"` + args[1] + `","wallet_id":"bi_treasury","amount":` + args[0] + `,"tx_id":"tx-issuance"}`), nil
+		case "RequestRedemption":
+			return []byte(`{"status":"redeemed","reference_id":"` + args[2] + `","participant_id":"` + args[0] + `","amount":` + args[1] + `,"tx_id":"tx-redemption"}`), nil
+		case "SubmitKycProfile":
+			var hashes []string
+			_ = json.Unmarshal([]byte(args[3]), &hashes)
+			result, _ := json.Marshal(map[string]interface{}{
+				"profile_id": args[0], "subject_type": args[1], "subject_id": args[2],
+				"document_hashes": hashes, "caller_msp_id": "TEST-MSP", "reference_id": args[4], "tx_id": "tx-kyc",
+			})
+			return result, nil
+		}
+	}
 	if f.submitResult == nil && name == "DistributeToParticipant" {
 		return []byte(`{"status":"settled","tx_id":"tx-distribution","reference_id":"` + args[2] + `","sender_id":"bi_treasury","receiver_id":"wlt_` + args[0] + `","amount":900000}`), f.submitErr
 	}
@@ -213,6 +232,7 @@ func TestSubmitKycProfileStoresRawOffChainAndAnchorsOnlyHashOnLedger(t *testing.
 	req := models.KycProfileRequest{
 		SubjectType:    models.KycRetailCustomer,
 		SubjectID:      "cust-1",
+		IdempotencyKey: "kyc-submit-1",
 		LegalName:      "Alice Customer",
 		DocumentType:   "ktp",
 		DocumentNumber: "1234567890",
@@ -228,10 +248,10 @@ func TestSubmitKycProfileStoresRawOffChainAndAnchorsOnlyHashOnLedger(t *testing.
 	if contract.submittedName != "SubmitKycProfile" {
 		t.Fatalf("submitted %q", contract.submittedName)
 	}
-	if len(contract.submittedArgs) != 4 {
-		t.Fatalf("ledger args = %v, want 4 sanitized args", contract.submittedArgs)
+	if len(contract.submittedArgs) != 5 {
+		t.Fatalf("ledger args = %v, want 5 sanitized args", contract.submittedArgs)
 	}
-	if contract.submittedArgs[2] == "1234567890" || contract.submittedArgs[2] == "Alice Customer" {
+	if contract.submittedArgs[2] != "cust-1" || strings.Contains(contract.submittedArgs[3], "1234567890") || strings.Contains(contract.submittedArgs[3], "Alice Customer") {
 		t.Fatalf("ledger args contain raw KYC: %v", contract.submittedArgs)
 	}
 	if profile.ProfileID == "" || len(profile.DocumentHashes) != 1 {
@@ -247,6 +267,7 @@ func TestSubmitKycProfilePropagatesOffChainStoreFailure(t *testing.T) {
 	_, err := svc.SubmitKycProfile(models.KycProfileRequest{
 		SubjectType:    models.KycRetailCustomer,
 		SubjectID:      "cust-1",
+		IdempotencyKey: "kyc-store-failure",
 		LegalName:      "Alice Customer",
 		DocumentType:   "ktp",
 		DocumentNumber: "1234567890",
@@ -267,15 +288,32 @@ func TestSubmitKycProfileLeavesPendingRecordWhenLedgerFails(t *testing.T) {
 	_, err := svc.SubmitKycProfile(models.KycProfileRequest{
 		SubjectType:    models.KycRetailCustomer,
 		SubjectID:      "cust-2",
+		IdempotencyKey: "kyc-ledger-retry",
 		LegalName:      "Bob Customer",
 		DocumentType:   "ktp",
 		DocumentNumber: "1234567890",
 	})
-	if err == nil || !strings.Contains(err.Error(), "pending off-chain record is retryable") {
+	if err == nil || !strings.Contains(err.Error(), "operation remains retryable") {
 		t.Fatalf("submit kyc err = %v, want retryable pending error", err)
 	}
 	if store.profile == nil || store.kycAnchored {
 		t.Fatalf("pending KYC record = %+v anchored=%t, want unanchored record", store.profile, store.kycAnchored)
+	}
+	profileID := store.profile.ProfileID
+	contract.submitErr = nil
+	profile, err := svc.SubmitKycProfile(models.KycProfileRequest{
+		SubjectType:    models.KycRetailCustomer,
+		SubjectID:      "cust-2",
+		IdempotencyKey: "kyc-ledger-retry",
+		LegalName:      "Bob Customer",
+		DocumentType:   "ktp",
+		DocumentNumber: "1234567890",
+	})
+	if err != nil {
+		t.Fatalf("retry KYC submission: %v", err)
+	}
+	if profile.ProfileID != profileID || store.profile.ProfileID != profileID || !store.kycAnchored {
+		t.Fatalf("retry profile = %+v, store = %+v anchored=%t; want original %s and anchored", profile, store.profile, store.kycAnchored, profileID)
 	}
 }
 

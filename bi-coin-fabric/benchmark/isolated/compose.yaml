@@ -1,0 +1,37 @@
+services:
+  daemon:
+    image: docker:29.8.1-dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    volumes:
+      - daemon-data:/var/lib/docker
+      - ${BENCHMARK_WORKSPACE:?Set a disposable workspace}:/workspace:z
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  runner:
+    build: .
+    network_mode: service:daemon
+    depends_on:
+      daemon:
+        condition: service_healthy
+    environment:
+      DOCKER_HOST: tcp://127.0.0.1:2375
+      BENCHMARK_SOURCE_COMMIT: ${BENCHMARK_SOURCE_COMMIT:-}
+      BENCHMARK_SOURCE_DIRTY: ${BENCHMARK_SOURCE_DIRTY:-}
+    volumes:
+      - ${BENCHMARK_WORKSPACE:?Set a disposable workspace}:/workspace:z
+      - ${BENCHMARK_IMAGE_BUNDLE:-/dev/null}:/image-bundle.tar:ro
+      - ${FABRIC_SAMPLES:?Set the installed Fabric tools directory}/bin:/opt/fabric-samples/bin:ro
+      - ${FABRIC_SAMPLES:?Set the installed Fabric tools directory}/config:/opt/fabric-samples/config:ro
+      - go-cache:/root/go
+      - go-build-cache:/root/.cache/go-build
+
+volumes:
+  daemon-data:
+  go-cache:
+  go-build-cache:

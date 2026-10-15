@@ -104,7 +104,8 @@ function readTraceFiles(resultDirectory, traceFiles) {
         const absolute = path.isAbsolute(file) ? file : path.join(resultDirectory, file);
         if (!fs.existsSync(absolute)) continue;
         for (const line of fs.readFileSync(absolute, 'utf8').split(/\r?\n/).filter(Boolean)) {
-            try { events.push(JSON.parse(line)); } catch { /* retain raw logs for diagnosis */ }
+            try { events.push(JSON.parse(line)); }
+            catch { throw new Error(`invalid transaction trace: ${absolute}`); }
         }
     }
     return events;
@@ -123,14 +124,30 @@ function readCaliperFailureReasons(run, resultDirectory) {
     const label = run.measuredRound;
     let active = !label;
     const reasons = [];
+    let message = '';
+    const flush = () => {
+        if (message) reasons.push(classifyFailure({ message }));
+        message = '';
+    };
     for (const rawLine of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
         const line = rawLine.replace(/\x1b\[[0-9;]*m/g, '');
-        if (label && line.includes(`Started round`) && line.includes(`(${label})`)) active = true;
-        if (active && /Failed to perform (?:submit|query) transaction/.test(line)) {
-            reasons.push(classifyFailure({ message: line }));
+        if (/^\d{4}[.-]\d{2}[.-]\d{2}[-T ]/.test(line)) flush();
+        if (label && line.includes(`Started round`) && line.includes(`(${label})`)) {
+            flush();
+            active = true;
         }
-        if (label && active && line.includes(`Finished round`) && line.includes(`(${label})`)) active = false;
+        if (label && active && line.includes(`Finished round`) && line.includes(`(${label})`)) {
+            flush();
+            active = false;
+        }
+        if (active && /Failed to perform (?:submit|query) transaction/.test(line)) {
+            flush();
+            message = line;
+        } else if (message && /^\s*(?:Details:|-\s)/.test(line)) {
+            message += ` ${line}`;
+        }
     }
+    flush();
     return reasons;
 }
 
@@ -148,6 +165,13 @@ function summarizeRun(run, resultDirectory) {
     const labels = run.measuredRound ? new Set([run.measuredRound]) : allLabels;
     const rows = [];
     for (const label of labels) {
+        const timestamps = events.filter(event => event.event === 'submitted'
+            && event.roundLabel === label && Number.isFinite(event.timestamp)).map(event => event.timestamp);
+        const earliest = timestamps.reduce((value, timestamp) => Math.min(value, timestamp), Infinity);
+        const latest = timestamps.reduce((value, timestamp) => Math.max(value, timestamp), -Infinity);
+        if (timestamps.length && latest - earliest > Number(run.durationSeconds) * 1000 + 5000) {
+            throw new Error(`${run.runDirectory || label}: submissions exceed one measurement window`);
+        }
         const results = finished.get(label) || [];
         const totalSubmitted = submitted.get(label) || results.length;
         const successResults = results.filter(result => String(result.status).toLowerCase() === 'success' && result.verified !== false);
@@ -173,6 +197,9 @@ function summarizeRun(run, resultDirectory) {
             reasons[category] = (reasons[category] || 0) + 1;
         }
         const loggedReasons = readCaliperFailureReasons(run, resultDirectory);
+        if (run.logFile && totalSubmitted > 0 && loggedReasons.length !== failedResults.length + timeoutResults.length) {
+            throw new Error(`${run.runDirectory || label}: failure counts differ between transaction trace and measured log`);
+        }
         if (loggedReasons.length === failedResults.length + timeoutResults.length) {
             for (const category of Object.keys(reasons)) delete reasons[category];
             for (const category of loggedReasons) reasons[category] = (reasons[category] || 0) + 1;

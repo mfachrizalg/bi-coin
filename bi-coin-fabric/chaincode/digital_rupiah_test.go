@@ -2,10 +2,39 @@ package main
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
 )
+
+func TestRetiredMonetaryFeaturesAreNotExposed(t *testing.T) {
+	contract := reflect.TypeOf(&SmartContract{})
+	for _, method := range []string{"PayQris", "SetAutoLimitPolicy", "GetAutoLimitPolicy"} {
+		if _, ok := contract.MethodByName(method); ok {
+			t.Errorf("retired method %s is still exposed by the chaincode contract", method)
+		}
+	}
+}
+
+func TestReceiptAmountComparisonPreservesInt64Precision(t *testing.T) {
+	sc := &SmartContract{}
+	ctx, _ := newMockTransactionContext("tx-large-receipt", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
+	amount := int64(9_007_199_254_740_993)
+	if err := sc.putIdempotencyReceipt(ctx, "transfer", "large-amount", map[string]interface{}{"amount": amount}); err != nil {
+		t.Fatalf("put receipt: %v", err)
+	}
+	receipt, err := sc.getIdempotencyReceipt(ctx, "transfer", "large-amount")
+	if err != nil {
+		t.Fatalf("get receipt: %v", err)
+	}
+	if err := requireReceiptFields(receipt, map[string]interface{}{"amount": amount}); err != nil {
+		t.Fatalf("exact amount replay failed: %v", err)
+	}
+	if err := requireReceiptFields(receipt, map[string]interface{}{"amount": amount + 1}); err == nil {
+		t.Fatal("expected neighboring int64 amount to conflict")
+	}
+}
 
 func TestSubmitAndApproveParticipantCreatesWholesaleWallet(t *testing.T) {
 	sc := &SmartContract{}
@@ -80,11 +109,19 @@ func TestFreezeAndUnfreezeParticipantTogglesWalletState(t *testing.T) {
 
 func TestSubmitAndRefreshKycProfilePersistsAuditTrail(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, stub := newMockTransactionContext("tx-submit-kyc", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
+	ctx, stub := newMockTransactionContextWithMSP("tx-submit-kyc", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
+	putActiveParticipant(t, sc, ctx, "pjp-kyc", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
 
-	if err := sc.SubmitKycProfile(ctx, "kyc-1", string(SubjectRetailCustomer), "cust-1", `["sha256:doc1"]`); err != nil {
+	receipt, err := sc.SubmitKycProfile(ctx, "kyc-1", string(SubjectRetailCustomer), "cust-1", `["sha256:doc1"]`, "kyc-ref-1")
+	if err != nil {
 		t.Fatalf("submit KYC profile: %v", err)
 	}
+	setMockTransaction(stub, "tx-replay-kyc", time.Date(2026, time.June, 27, 12, 5, 0, 0, time.UTC))
+	replayed, err := sc.SubmitKycProfile(ctx, "kyc-1", string(SubjectRetailCustomer), "cust-1", `["sha256:doc1"]`, "kyc-ref-1")
+	if err != nil || replayed["tx_id"] != receipt["tx_id"] {
+		t.Fatalf("KYC retry = %v, %v; want original receipt %v", replayed, err, receipt)
+	}
+	ctx.SetClientIdentity(&mockClientIdentity{mspID: CentralBankMSP})
 	setMockTransaction(stub, "tx-refresh-kyc", time.Date(2026, time.June, 27, 12, 10, 0, 0, time.UTC))
 	if err := sc.RefreshKycProfile(ctx, "kyc-1", string(KycApproved), string(RiskHigh), string(DueDiligenceEnhanced), true, `["sha256:doc2"]`, "2027-06-27T12:00:00Z"); err != nil {
 		t.Fatalf("refresh KYC profile: %v", err)
@@ -112,7 +149,8 @@ func TestSubmitAndRefreshKycProfilePersistsAuditTrail(t *testing.T) {
 
 func TestCreateWalletRejectsTierMismatchAndUsesPolicyDerivedTier(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, stub := newMockTransactionContext("tx-kyc", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
+	ctx, stub := newMockTransactionContextWithMSP("tx-kyc", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
+	putActiveParticipant(t, sc, ctx, "pjp-wallet-custodian", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
 
 	profile := approvedProfile(SubjectRetailCustomer, DueDiligenceStandard, RiskMedium, false)
 	profile.ProfileID = "kyc-cust-1"
@@ -140,11 +178,23 @@ func TestCreateWalletRejectsTierMismatchAndUsesPolicyDerivedTier(t *testing.T) {
 	if wallet.Tier != TierStandard {
 		t.Fatalf("wallet tier = %s, want %s", wallet.Tier, TierStandard)
 	}
+	custodian, err := sc.getParticipant(ctx, "pjp-wallet-custodian")
+	if err != nil {
+		t.Fatalf("read Custodian: %v", err)
+	}
+	custodian.Status = ParticipantOffboarded
+	if err := sc.putParticipant(ctx, custodian); err != nil {
+		t.Fatalf("offboard Custodian: %v", err)
+	}
+	setMockTransaction(stub, "tx-wallet-after-offboard", time.Date(2026, time.June, 27, 12, 15, 0, 0, time.UTC))
+	if err := sc.CreateWallet(ctx, "wlt-after-offboard", "cust-1", string(TierStandard)); err == nil {
+		t.Fatal("expected offboarded Custodian wallet creation to fail")
+	}
 }
 
 func TestTransferRequiresApprovedKycAnchor(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, _ := newMockTransactionContextWithMSP("tx-transfer", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), PJPMSP)
+	ctx, _ := newMockTransactionContextWithMSP("tx-transfer", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
 
 	if err := sc.putLimit(ctx, TierLimit{Tier: TierBasic, MaxBalance: 2_000_000, DailyTxLimit: 500_000, MonthlyTxLimit: 5_000_000, MonthlyIncomingLimit: 20_000_000, PerTxLimit: 250_000}); err != nil {
 		t.Fatalf("put basic limit: %v", err)
@@ -152,11 +202,11 @@ func TestTransferRequiresApprovedKycAnchor(t *testing.T) {
 	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 9_000_000}); err != nil {
 		t.Fatalf("put per-tx system limit: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, PJPMSP, "PJPIDJAXXX")
-	if err := sc.putWallet(ctx, "wlt-a", Wallet{WalletID: "wlt-a", OwnerID: "cust-a", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierBasic, Balance: 500_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
+	if err := sc.putWallet(ctx, "wlt-a", Wallet{WalletID: "wlt-a", OwnerID: "cust-a", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierBasic, Balance: 500_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put sender wallet: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-b", Wallet{WalletID: "wlt-b", OwnerID: "cust-b", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierBasic, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-b", Wallet{WalletID: "wlt-b", OwnerID: "cust-b", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierBasic, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put receiver wallet: %v", err)
 	}
 
@@ -168,7 +218,7 @@ func TestTransferRequiresApprovedKycAnchor(t *testing.T) {
 
 func TestTransferUpdatesBalancesRecordsTransactionAndEmitsHighRiskEvent(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, stub := newMockTransactionContextWithMSP("tx-limits", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), PJPMSP)
+	ctx, stub := newMockTransactionContextWithMSP("tx-limits", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
 
 	limit := TierLimit{Tier: TierStandard, MaxBalance: 20_000_000, DailyTxLimit: 10_000_000, MonthlyTxLimit: 40_000_000, MonthlyIncomingLimit: 40_000_000, PerTxLimit: 2_500_000}
 	if err := sc.putLimit(ctx, limit); err != nil {
@@ -177,7 +227,7 @@ func TestTransferUpdatesBalancesRecordsTransactionAndEmitsHighRiskEvent(t *testi
 	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 9_000_000}); err != nil {
 		t.Fatalf("put per-tx system limit: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, PJPMSP, "PJPIDJAXXX")
+	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
 	senderProfile := approvedProfile(SubjectRetailCustomer, DueDiligenceEnhanced, RiskHigh, true)
 	senderProfile.ProfileID = "kyc-sender"
 	senderProfile.SubjectID = "cust-sender"
@@ -194,10 +244,10 @@ func TestTransferUpdatesBalancesRecordsTransactionAndEmitsHighRiskEvent(t *testi
 	if err := sc.putKycProfile(ctx, receiverProfile); err != nil {
 		t.Fatalf("put receiver KYC profile: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-sender", Wallet{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierStandard, Balance: 1_000_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-sender", Wallet{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 1_000_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put sender wallet: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-receiver", Wallet{WalletID: "wlt-receiver", OwnerID: "cust-receiver", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierStandard, Balance: 250_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-receiver", Wallet{WalletID: "wlt-receiver", OwnerID: "cust-receiver", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 250_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put receiver wallet: %v", err)
 	}
 
@@ -209,6 +259,23 @@ func TestTransferUpdatesBalancesRecordsTransactionAndEmitsHighRiskEvent(t *testi
 	if receipt["status"] != string(TxSettled) || receipt["reference_id"] != "transfer-ref-1" {
 		t.Fatalf("transfer receipt = %+v, want settled status", receipt)
 	}
+	setMockTransaction(stub, "tx-lower-per-tx-limit", time.Date(2026, time.June, 27, 12, 11, 0, 0, time.UTC))
+	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 50_000}); err != nil {
+		t.Fatalf("lower per-transaction limit: %v", err)
+	}
+	setMockTransaction(stub, "tx-transfer-replay", time.Date(2026, time.June, 27, 12, 12, 0, 0, time.UTC))
+	replayed, err := sc.Transfer(ctx, "wlt-sender", "wlt-receiver", 100_000, "transfer-ref-1")
+	if err != nil || replayed["tx_id"] != receipt["tx_id"] {
+		t.Fatalf("same-payload replay = %v, %v; want original receipt %v", replayed, err, receipt)
+	}
+	if _, err := sc.Transfer(ctx, "wlt-sender", "wlt-receiver", 200_000, "transfer-ref-1"); err == nil || !strings.Contains(err.Error(), "different amount") {
+		t.Fatalf("changed-payload replay error = %v, want payload conflict", err)
+	}
+	ctx.SetClientIdentity(&mockClientIdentity{mspID: CentralBankMSP})
+	if _, err := sc.Transfer(ctx, "wlt-sender", "wlt-receiver", 100_000, "transfer-ref-1"); err == nil || !strings.Contains(err.Error(), "custodian MSP mismatch") {
+		t.Fatalf("foreign-custodian replay error = %v, want custody rejection", err)
+	}
+	ctx.SetClientIdentity(&mockClientIdentity{mspID: DistributorMSP})
 
 	senderWallet, err := sc.getWallet(ctx, "wlt-sender")
 	if err != nil {
@@ -249,9 +316,10 @@ func TestTransferUpdatesBalancesRecordsTransactionAndEmitsHighRiskEvent(t *testi
 	}
 }
 
+/*
 func TestPayQrisRequiresReference(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, _ := newMockTransactionContextWithMSP("tx-qris", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), PJPMSP)
+	ctx, _ := newMockTransactionContextWithMSP("tx-qris", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
 
 	_, err := sc.PayQris(ctx, "wlt-sender", "wlt-receiver", 100_000, "")
 	if err == nil || !strings.Contains(err.Error(), "reference") {
@@ -261,7 +329,7 @@ func TestPayQrisRequiresReference(t *testing.T) {
 
 func TestPayQrisRecordsReferenceAndTransactionType(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, stub := newMockTransactionContextWithMSP("tx-limits", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), PJPMSP)
+	ctx, stub := newMockTransactionContextWithMSP("tx-limits", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
 
 	limit := TierLimit{Tier: TierStandard, MaxBalance: 20_000_000, DailyTxLimit: 10_000_000, MonthlyTxLimit: 40_000_000, MonthlyIncomingLimit: 40_000_000, PerTxLimit: 2_500_000}
 	if err := sc.putLimit(ctx, limit); err != nil {
@@ -270,7 +338,7 @@ func TestPayQrisRecordsReferenceAndTransactionType(t *testing.T) {
 	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 9_000_000}); err != nil {
 		t.Fatalf("put per-tx system limit: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, PJPMSP, "PJPIDJAXXX")
+	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
 	senderProfile := approvedProfile(SubjectRetailCustomer, DueDiligenceEnhanced, RiskHigh, true)
 	senderProfile.ProfileID = "kyc-sender"
 	senderProfile.SubjectID = "cust-sender"
@@ -287,10 +355,10 @@ func TestPayQrisRecordsReferenceAndTransactionType(t *testing.T) {
 	if err := sc.putKycProfile(ctx, receiverProfile); err != nil {
 		t.Fatalf("put merchant KYC profile: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-sender", Wallet{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierStandard, Balance: 1_000_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-sender", Wallet{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 1_000_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put sender wallet: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-merchant", Wallet{WalletID: "wlt-merchant", OwnerID: "merchant-1", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierStandard, Balance: 250_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-merchant", Wallet{WalletID: "wlt-merchant", OwnerID: "merchant-1", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 250_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put merchant wallet: %v", err)
 	}
 
@@ -314,6 +382,7 @@ func TestPayQrisRecordsReferenceAndTransactionType(t *testing.T) {
 		t.Fatalf("transactions = %+v, want QRIS payment with reference", txs)
 	}
 }
+*/
 
 func TestSetAndListSystemLimits(t *testing.T) {
 	sc := &SmartContract{}
@@ -339,7 +408,7 @@ func TestBurnPropagatesAuditWriteFailure(t *testing.T) {
 	sc := &SmartContract{}
 	ctx, stub := newMockTransactionContext("tx-burn", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
 
-	if err := sc.putWallet(ctx, "wlt-burn", Wallet{WalletID: "wlt-burn", OwnerID: "bank_indonesia", ParticipantID: "bank_indonesia", CustodianParticipantID: "bank_indonesia", CustodianMSPID: BankIndonesiaMSP, WalletType: WalletHot, Balance: 500_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-burn", Wallet{WalletID: "wlt-burn", OwnerID: "bank_indonesia", ParticipantID: "bank_indonesia", CustodianParticipantID: "bank_indonesia", CustodianMSPID: CentralBankMSP, WalletType: WalletHot, Balance: 500_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put burn wallet: %v", err)
 	}
 	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 9_000_000}); err != nil {
@@ -359,9 +428,97 @@ func TestBurnPropagatesAuditWriteFailure(t *testing.T) {
 	}
 }
 
+func TestTransferBelowTierMinimumDoesNotAutoRedeem(t *testing.T) {
+	sc := &SmartContract{}
+	ctx, stub := newMockTransactionContextWithMSP("tx-small-balance", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
+	limit := TierLimit{Tier: TierStandard, MinBalance: 100_000, MaxBalance: 20_000_000, DailyTxLimit: 10_000_000, MonthlyTxLimit: 40_000_000, MonthlyIncomingLimit: 40_000_000, PerTxLimit: 2_500_000}
+	if err := sc.putLimit(ctx, limit); err != nil {
+		t.Fatalf("put standard limit: %v", err)
+	}
+	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 9_000_000}); err != nil {
+		t.Fatalf("put per-tx system limit: %v", err)
+	}
+	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
+	for _, subjectID := range []string{"cust-sender", "cust-receiver"} {
+		profile := approvedProfile(SubjectRetailCustomer, DueDiligenceStandard, RiskLow, false)
+		profile.ProfileID = "kyc-" + subjectID
+		profile.SubjectID = subjectID
+		if err := sc.putKycProfile(ctx, profile); err != nil {
+			t.Fatalf("put KYC for %s: %v", subjectID, err)
+		}
+	}
+	for _, wallet := range []Wallet{
+		{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"},
+		{WalletID: "wlt-receiver", OwnerID: "cust-receiver", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"},
+	} {
+		if err := sc.putWallet(ctx, wallet.WalletID, wallet); err != nil {
+			t.Fatalf("put wallet %s: %v", wallet.WalletID, err)
+		}
+	}
+	buffered := newBufferedMockStub(stub)
+	ctx.SetStub(buffered)
+
+	if _, err := sc.Transfer(ctx, "wlt-sender", "wlt-receiver", 90_000, "small-balance-transfer"); err != nil {
+		t.Fatalf("transfer below minimum: %v", err)
+	}
+	if err := buffered.Commit(); err != nil {
+		t.Fatalf("commit simulated state writes: %v", err)
+	}
+	sender, err := sc.getWallet(ctx, "wlt-sender")
+	if err != nil {
+		t.Fatalf("read sender: %v", err)
+	}
+	receiver, err := sc.getWallet(ctx, "wlt-receiver")
+	if err != nil {
+		t.Fatalf("read receiver: %v", err)
+	}
+	if sender.Balance != 10_000 || receiver.Balance != 90_000 || sender.Balance+receiver.Balance != 100_000 {
+		t.Fatalf("balances sender=%d receiver=%d, want 10000 and 90000 with unchanged supply", sender.Balance, receiver.Balance)
+	}
+}
+
+func TestParticipantTransactionHistoryMatchesCustodianWallets(t *testing.T) {
+	sc := &SmartContract{}
+	ctx, stub := newMockTransactionContext("tx-history", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC))
+	for _, wallet := range []Wallet{
+		{WalletID: "wlt_bank-1", ParticipantID: "bank-1", CustodianParticipantID: "bank-1"},
+		{WalletID: "wlt_customer-1", ParticipantID: "bank-1", CustodianParticipantID: "bank-1"},
+		{WalletID: "wlt_merchant-1", ParticipantID: "bank-1", CustodianParticipantID: "bank-1"},
+		{WalletID: "wlt_other", ParticipantID: "other", CustodianParticipantID: "other"},
+		{WalletID: "wlt_other-2", ParticipantID: "other", CustodianParticipantID: "other"},
+	} {
+		if err := sc.putWallet(ctx, wallet.WalletID, wallet); err != nil {
+			t.Fatalf("put wallet %s: %v", wallet.WalletID, err)
+		}
+	}
+	setMockTransaction(stub, "tx-distribution", time.Date(2026, time.June, 27, 12, 1, 0, 0, time.UTC))
+	if err := sc.recordTransaction(ctx, TxDistribution, "bi_treasury", "wlt_bank-1", 500_000, TxSettled, "distribution-1"); err != nil {
+		t.Fatalf("record distribution: %v", err)
+	}
+	setMockTransaction(stub, "tx-retail", time.Date(2026, time.June, 27, 12, 2, 0, 0, time.UTC))
+	if err := sc.recordTransaction(ctx, TxTransfer, "wlt_customer-1", "wlt_merchant-1", 25_000, TxSettled, "transfer-1"); err != nil {
+		t.Fatalf("record retail transfer: %v", err)
+	}
+	setMockTransaction(stub, "tx-other", time.Date(2026, time.June, 27, 12, 3, 0, 0, time.UTC))
+	if err := sc.recordTransaction(ctx, TxTransfer, "wlt_other", "wlt_other-2", 10_000, TxSettled, "unrelated"); err != nil {
+		t.Fatalf("record unrelated transfer: %v", err)
+	}
+
+	rows, err := sc.GetTransactionHistory(ctx, "bank-1", "", "", "", "")
+	if err != nil {
+		t.Fatalf("get participant history: %v", err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("participant rows = %+v, want distribution and retail transfer only", rows)
+	}
+	if rows[0].TransactionType != TxDistribution || rows[1].TransactionType != TxTransfer {
+		t.Fatalf("participant transaction types = %s, %s", rows[0].TransactionType, rows[1].TransactionType)
+	}
+}
+
 func TestTransferPropagatesAuditWriteFailure(t *testing.T) {
 	sc := &SmartContract{}
-	ctx, stub := newMockTransactionContextWithMSP("tx-transfer", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), PJPMSP)
+	ctx, stub := newMockTransactionContextWithMSP("tx-transfer", time.Date(2026, time.June, 27, 12, 0, 0, 0, time.UTC), DistributorMSP)
 
 	limit := TierLimit{Tier: TierStandard, MaxBalance: 20_000_000, DailyTxLimit: 10_000_000, MonthlyTxLimit: 40_000_000, MonthlyIncomingLimit: 40_000_000, PerTxLimit: 2_500_000}
 	if err := sc.putLimit(ctx, limit); err != nil {
@@ -370,7 +527,7 @@ func TestTransferPropagatesAuditWriteFailure(t *testing.T) {
 	if err := sc.putSystemLimit(ctx, SystemLimit{Scope: ScopePerTxAmount, Value: 9_000_000}); err != nil {
 		t.Fatalf("put per-tx system limit: %v", err)
 	}
-	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, PJPMSP, "PJPIDJAXXX")
+	putActiveParticipant(t, sc, ctx, "pjp-custodian", ParticipantPJP, DistributorMSP, "PJPIDJAXXX")
 	for _, profile := range []KycProfile{
 		{ProfileID: "kyc-sender", SubjectType: SubjectRetailCustomer, SubjectID: "cust-sender", DocumentHashes: []string{"sha256:a"}, Status: KycApproved, RiskLevel: RiskLow, DueDiligenceLevel: DueDiligenceStandard, CreatedAt: "2026-06-27T12:00:00Z", UpdatedAt: "2026-06-27T12:00:00Z"},
 		{ProfileID: "kyc-receiver", SubjectType: SubjectRetailCustomer, SubjectID: "cust-receiver", DocumentHashes: []string{"sha256:b"}, Status: KycApproved, RiskLevel: RiskLow, DueDiligenceLevel: DueDiligenceStandard, CreatedAt: "2026-06-27T12:00:00Z", UpdatedAt: "2026-06-27T12:00:00Z"},
@@ -379,10 +536,10 @@ func TestTransferPropagatesAuditWriteFailure(t *testing.T) {
 			t.Fatalf("put profile %s: %v", profile.ProfileID, err)
 		}
 	}
-	if err := sc.putWallet(ctx, "wlt-sender", Wallet{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierStandard, Balance: 500_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-sender", Wallet{WalletID: "wlt-sender", OwnerID: "cust-sender", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 500_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put sender wallet: %v", err)
 	}
-	if err := sc.putWallet(ctx, "wlt-receiver", Wallet{WalletID: "wlt-receiver", OwnerID: "cust-receiver", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: PJPMSP, Tier: TierStandard, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
+	if err := sc.putWallet(ctx, "wlt-receiver", Wallet{WalletID: "wlt-receiver", OwnerID: "cust-receiver", ParticipantID: "pjp-custodian", CustodianParticipantID: "pjp-custodian", CustodianMSPID: DistributorMSP, Tier: TierStandard, Balance: 100_000, LastResetDay: "2026-06-27", LastResetMonth: "2026-06"}); err != nil {
 		t.Fatalf("put receiver wallet: %v", err)
 	}
 	stub.failPutStatePrefix("\x00audit\x00", errors.New("audit write failed"))

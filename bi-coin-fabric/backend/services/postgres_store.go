@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -291,28 +292,31 @@ func (s *PostgresStore) SubmitKycProfile(ctx context.Context, req models.KycProf
 	}
 	defer tx.Rollback()
 	hashesJSON, _ := json.Marshal(anchor.DocumentHashes)
-	_, err = tx.ExecContext(ctx, `
+	result, err := tx.ExecContext(ctx, `
 INSERT INTO kyc_profiles (
 	profile_id, subject_type, subject_id, custodian_msp_id, provider_case_id, legal_name,
 	document_type, document_number, document_hashes, status, risk_level, expires_at
 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-ON CONFLICT (profile_id) DO UPDATE
-SET subject_type = EXCLUDED.subject_type,
-    subject_id = EXCLUDED.subject_id,
-    custodian_msp_id = EXCLUDED.custodian_msp_id,
-    provider_case_id = EXCLUDED.provider_case_id,
-    legal_name = EXCLUDED.legal_name,
-    document_type = EXCLUDED.document_type,
-    document_number = EXCLUDED.document_number,
-    document_hashes = EXCLUDED.document_hashes,
-    status = EXCLUDED.status,
-    risk_level = EXCLUDED.risk_level,
-    ledger_anchored = FALSE,
-    updated_at = now()
+ON CONFLICT (profile_id) DO NOTHING
 `, anchor.ProfileID, string(req.SubjectType), req.SubjectID, custodianMSPID, nullableString(req.ProviderCaseID), nullableString(req.LegalName),
 		nullableString(req.DocumentType), nullableString(req.DocumentNumber), string(hashesJSON), string(anchor.Status), string(anchor.RiskLevel), nullableString(""))
 	if err != nil {
 		return nil, err
+	}
+	created, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if created == 0 {
+		_ = tx.Rollback()
+		existing, err := s.GetKycProfile(ctx, anchor.ProfileID)
+		if err != nil {
+			return nil, err
+		}
+		if existing.SubjectType != req.SubjectType || existing.SubjectID != req.SubjectID || existing.CustodianMSPID != custodianMSPID || !slices.Equal(existing.DocumentHashes, anchor.DocumentHashes) {
+			return nil, fmt.Errorf("KYC profile %s already exists with different details", anchor.ProfileID)
+		}
+		return existing, nil
 	}
 	if err := s.insertAuditTx(ctx, tx, anchor.ProfileID, "profile_created", "KYC profile submitted off-chain"); err != nil {
 		return nil, err
@@ -674,9 +678,12 @@ WHERE principal_scope = $1 AND principal_id = $2 AND idempotency_key = $3
 func (s *PostgresStore) UpdateOperation(ctx context.Context, operation OperationJournal) error {
 	result, err := s.db.ExecContext(ctx, `
 UPDATE operation_journal
-SET status = $1, tx_id = NULLIF($2, ''), response = $3, updated_at = now()
+SET status = $1, tx_id = COALESCE(tx_id, NULLIF($2, '')), response = COALESCE(response, $3), updated_at = now()
 WHERE principal_scope = $4 AND principal_id = $5 AND idempotency_key = $6
   AND request_hash = $7
+  AND (tx_id IS NULL OR NULLIF($2, '') IS NULL OR tx_id = $2)
+  AND (response IS NULL OR $3 IS NULL OR response = $3)
+  AND (status = $1 OR (status = 'pending' AND $1 IN ('submitted', 'completed')) OR (status = 'submitted' AND $1 = 'completed'))
 `, string(operation.Status), operation.TxID, nullableJSON(operation.Response), operation.PrincipalScope,
 		operation.PrincipalID, operation.IdempotencyKey, operation.RequestHash)
 	if err != nil {
@@ -687,6 +694,15 @@ WHERE principal_scope = $4 AND principal_id = $5 AND idempotency_key = $6
 		return err
 	}
 	if updated != 1 {
+		current, readErr := s.GetOperation(ctx, operation.PrincipalScope, operation.PrincipalID, operation.IdempotencyKey)
+		if readErr != nil {
+			return fmt.Errorf("operation journal entry was not updated: %w", readErr)
+		}
+		if current.RequestHash == operation.RequestHash && operationStatusRank(current.Status) >= operationStatusRank(operation.Status) &&
+			(operation.TxID == "" || current.TxID == operation.TxID) &&
+			(len(operation.Response) == 0 || string(current.Response) == string(operation.Response)) {
+			return nil
+		}
 		return fmt.Errorf("operation journal entry was not updated")
 	}
 	return nil

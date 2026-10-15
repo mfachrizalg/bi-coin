@@ -32,18 +32,18 @@ function captureWorkload(operation) {
 
 test('isolated workload maps each requested operation to its chaincode call', async () => {
     const cases = [
-        ['issuance', 'Mint', 'BankIndonesiaOrgMSP'],
-        ['distribution', 'DistributeToParticipant', 'BankIndonesiaOrgMSP'],
-        ['redemption', 'Burn', 'BankIndonesiaOrgMSP'],
-        ['balance-query', 'GetWallet', 'HimbaraBankOrgMSP'],
-        ['wallet-freeze', 'FreezeWallet', 'BankIndonesiaOrgMSP'],
-        ['wallet-unfreeze', 'UnfreezeWallet', 'BankIndonesiaOrgMSP'],
+        ['issuance', 'Mint', 'CentralBankMSP'],
+        ['distribution', 'DistributeToParticipant', 'CentralBankMSP'],
+        ['redemption', 'Burn', 'CentralBankMSP'],
+        ['balance-query', 'GetWallet', 'DistributorMSP'],
+        ['wallet-freeze', 'FreezeWallet', 'CentralBankMSP'],
+        ['wallet-unfreeze', 'UnfreezeWallet', 'CentralBankMSP'],
     ];
 
     for (const [operation, contractFunction, invokerMspId] of cases) {
         const { workload, calls } = captureWorkload(operation);
         workload.standardCustomers = [standardCustomer(0), standardCustomer(1)];
-        workload.custodianParticipantId = 'himbara';
+        workload.custodianParticipantId = 'distributor';
         workload.configureMeasuredTraffic(1);
         await workload.submitTransaction();
 
@@ -86,4 +86,35 @@ test('merchant payment is a direct Transfer to a merchant wallet', async () => {
 
     assert.equal(calls[0].contractFunction, 'Transfer');
     assert.deepEqual(calls[0].contractArguments.slice(0, 2), ['wlt-customer-0', 'wlt-merchant-0']);
+});
+
+test('high-contention seeding funds only the shared sender, leaving receiver headroom', async () => {
+    const workload = new TransactionTypeWorkload();
+    const funding = new Map();
+    workload.ensureBenchmarkCustodian = async () => {};
+    workload.submit = async () => [{ status: 'success' }];
+    workload.fundRetailWallet = async (wallet, amount) => funding.set(wallet, amount);
+    await workload.initializeWorkloadModule(0, 1, 0, {
+        operation: 'retail-transfer', contention: 'high', transactionSlots: 3,
+        operationAmount: 100, transactionBudget: 30, fundStandard: 20000000,
+    }, {}, {});
+    assert.equal(funding.get(workload.transactionPlans[0].sender.walletId), 20000000);
+    for (const { receiver } of workload.transactionPlans) {
+        assert.equal(funding.get(receiver.walletId) || 0, 0);
+    }
+});
+
+test('distribution reserves measured liquidity in Treasury after custodian setup', async () => {
+    const workload = new TransactionTypeWorkload();
+    const calls = [];
+    workload.ensureBenchmarkCustodian = async () => { workload.custodianParticipantId = 'custodian'; };
+    workload.withSetupLock = async (_, action) => action();
+    workload.submit = async (fn, args) => {
+        calls.push({ fn, args });
+        return [{ status: 'success', result: JSON.stringify({ balance: 200 }) }];
+    };
+    await workload.initializeWorkloadModule(0, 1, 0, {
+        operation: 'distribution', transactionSlots: 10, operationAmount: 100, transactionBudget: 30,
+    }, {}, {});
+    assert.deepEqual(calls.find(call => call.fn === 'RequestIssuance'), { fn: 'RequestIssuance', args: ['2800'] });
 });

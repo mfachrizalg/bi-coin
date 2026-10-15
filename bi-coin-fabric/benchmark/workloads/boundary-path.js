@@ -80,10 +80,10 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         const profileId = `kyc_${id}`;
         const hashes = JSON.stringify([`sha256:${id}`]);
         const dd = tier === 'BASIC' ? 'simplified' : 'standard';
-        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'himbara');
-        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'himbara');
-        await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', dd, false, hashes, '2099-12-31T23:59:59Z'], false, 'himbara');
-        await this.submit('CreateWallet', [walletId, id, tier], false, 'himbara');
+        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'distributor');
+        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'distributor');
+        await this.submit('RefreshKycProfile', [profileId, 'approved', 'low', dd, false, hashes, '2099-12-31T23:59:59Z'], false, 'distributor');
+        await this.submit('CreateWallet', [walletId, id, tier], false, 'distributor');
         if (fund > 0) await this.fundRetailWallet(walletId, fund);
         return { id, walletId, tier };
     }
@@ -104,11 +104,11 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         // Daily outgoing cap. The daily counter is advanced during seeding so the
         // round needs only one submission per assertion.
         this.dailyExact = await this.pair('daily_exact', { fund: 1000000 });
-        await this.submit('Transfer', [this.dailyExact.sender.walletId, this.dailyExact.sink.walletId, 250000], false, 'himbara');
+        await this.submit('Transfer', [this.dailyExact.sender.walletId, this.dailyExact.sink.walletId, 250000], false, 'distributor');
 
         this.dailyOver = await this.pair('daily_over', { fund: 1000000 });
-        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000], false, 'himbara');
-        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000], false, 'himbara');
+        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000], false, 'distributor');
+        await this.submit('Transfer', [this.dailyOver.sender.walletId, this.dailyOver.sink.walletId, 250000], false, 'distributor');
 
         // Receiver maximum balance. The BASIC receiver sits 1,000 below its
         // ceiling in the first case and exactly on it in the second. Wholesale
@@ -124,7 +124,7 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         // drained during seeding so the round submission has nothing left.
         this.balExact = await this.pair('bal_exact', { fund: 200000 });
         this.balOver = await this.pair('bal_over', { fund: 200000 });
-        await this.submit('Transfer', [this.balOver.sender.walletId, this.balOver.sink.walletId, 200000], false, 'himbara');
+        await this.submit('Transfer', [this.balOver.sender.walletId, this.balOver.sink.walletId, 200000], false, 'distributor');
     }
 
     buildCases() {
@@ -159,7 +159,7 @@ class BoundaryPathWorkload extends RetailWorkloadBase {
         const request = { ...CONTRACT, contractFunction: 'Transfer', contractArguments: [...args, `boundary_${this.ns()}_${sequence}`].map(String), readOnly: false };
         let committed;
         try {
-            const res = await this.sutAdapter.sendRequests(actorRequest(request, 'himbara'));
+            const res = await this.sutAdapter.sendRequests(actorRequest(request, 'distributor'));
             const results = transactionResults(res);
             const diagnostics = results.map(transactionDiagnostic);
             const diagnosticText = diagnostics.join('\n');

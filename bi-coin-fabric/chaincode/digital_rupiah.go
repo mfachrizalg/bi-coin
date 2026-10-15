@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
@@ -14,11 +16,9 @@ type SmartContract struct {
 }
 
 const (
-	BankIndonesiaMSP  = "BankIndonesiaOrgMSP"
-	HimbaraBankMSP    = "HimbaraBankOrgMSP"
-	CommercialBankMSP = "CommercialBankOrgMSP"
-	OJKObserverMSP    = "OJKObserverOrgMSP"
-	PJPMSP            = "PJPOrgMSP"
+	CentralBankMSP = "CentralBankMSP"
+	DistributorMSP = "DistributorMSP"
+	ValidatorMSP   = "ValidatorMSP"
 
 	schemaStateKey  = "schema::digital_rupiah_v3"
 	schemaVersionV3 = "v3"
@@ -41,12 +41,12 @@ func requireMSP(ctx contractapi.TransactionContextInterface, allowed ...string) 
 	return fmt.Errorf("access denied: MSP %s is not authorized", mspID)
 }
 
-func requireBankIndonesia(ctx contractapi.TransactionContextInterface) error {
-	return requireMSP(ctx, BankIndonesiaMSP)
+func requireCentralBank(ctx contractapi.TransactionContextInterface) error {
+	return requireMSP(ctx, CentralBankMSP)
 }
 
 func requireInstitution(ctx contractapi.TransactionContextInterface) error {
-	return requireMSP(ctx, BankIndonesiaMSP, HimbaraBankMSP, CommercialBankMSP, PJPMSP)
+	return requireMSP(ctx, CentralBankMSP, DistributorMSP)
 }
 
 func currentMSP(ctx contractapi.TransactionContextInterface) (string, error) {
@@ -282,13 +282,6 @@ type SystemLimit struct {
 	Value int64      `json:"value"`
 }
 
-type AutoLimitPolicy struct {
-	ParticipantID  string `json:"participant_id"`
-	AutoRedemption bool   `json:"auto_redemption"`
-	MinBalance     int64  `json:"min_balance"`
-	UpdatedAt      string `json:"updated_at"`
-}
-
 type TransactionRecord struct {
 	RecordID        string            `json:"record_id,omitempty"`
 	TxID            string            `json:"tx_id"`
@@ -356,7 +349,7 @@ func txNow(ctx contractapi.TransactionContextInterface) time.Time {
 }
 
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	if existing, err := ctx.GetStub().GetState(schemaStateKey); err != nil {
@@ -391,7 +384,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		OwnerID:                "bank_indonesia",
 		ParticipantID:          "bank_indonesia",
 		CustodianParticipantID: "bank_indonesia",
-		CustodianMSPID:         BankIndonesiaMSP,
+		CustodianMSPID:         CentralBankMSP,
 		Tier:                   "",
 		WalletType:             WalletHot,
 		Balance:                0,
@@ -464,7 +457,7 @@ func (s *SmartContract) SubmitParticipant(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) ApproveParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	p, err := s.getParticipant(ctx, participantID)
@@ -505,7 +498,7 @@ func (s *SmartContract) ApproveParticipant(ctx contractapi.TransactionContextInt
 }
 
 func (s *SmartContract) FreezeParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	p, err := s.getParticipant(ctx, participantID)
@@ -530,7 +523,7 @@ func (s *SmartContract) FreezeParticipant(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) UnfreezeParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	p, err := s.getParticipant(ctx, participantID)
@@ -552,7 +545,7 @@ func (s *SmartContract) UnfreezeParticipant(ctx contractapi.TransactionContextIn
 }
 
 func (s *SmartContract) RejectParticipant(ctx contractapi.TransactionContextInterface, participantID string) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	p, err := s.getParticipant(ctx, participantID)
@@ -571,7 +564,7 @@ func (s *SmartContract) RejectParticipant(ctx contractapi.TransactionContextInte
 }
 
 func (s *SmartContract) OffboardParticipant(ctx contractapi.TransactionContextInterface, participantID string) (map[string]interface{}, error) {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return nil, err
 	}
 	p, err := s.getParticipant(ctx, participantID)
@@ -622,7 +615,7 @@ func (s *SmartContract) CreateWholesaleWallet(ctx contractapi.TransactionContext
 	if err != nil {
 		return err
 	}
-	if callerMSP != BankIndonesiaMSP && participant.MSPID != "" && callerMSP != participant.MSPID {
+	if callerMSP != CentralBankMSP && participant.MSPID != "" && callerMSP != participant.MSPID {
 		return fmt.Errorf("access denied: MSP %s does not custody participant %s", callerMSP, participantID)
 	}
 	exists, err := s.walletExists(ctx, walletID)
@@ -727,7 +720,14 @@ func (s *SmartContract) CreateWallet(ctx contractapi.TransactionContextInterface
 	now := txNow(ctx)
 	custodianParticipantID, err := s.resolveCustodianParticipantID(ctx, callerMSP)
 	if err != nil {
-		custodianParticipantID = ownerID
+		return err
+	}
+	custodian, err := s.getParticipant(ctx, custodianParticipantID)
+	if err != nil {
+		return err
+	}
+	if custodian.Status != ParticipantActive || (custodian.ParticipantType != ParticipantValidator && custodian.ParticipantType != ParticipantPJP) || custodian.MSPID != callerMSP {
+		return fmt.Errorf("caller MSP %s is not an active Validator/PJP Custodian", callerMSP)
 	}
 	wallet := Wallet{
 		WalletID:               walletID,
@@ -749,7 +749,7 @@ func (s *SmartContract) CreateWallet(ctx contractapi.TransactionContextInterface
 // ─── Mint / Burn / Transfer ──────────────────────────────────────────
 
 func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, walletID string, amount int64) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	if walletID != "bi_treasury" {
@@ -796,7 +796,7 @@ func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface, wallet
 }
 
 func (s *SmartContract) Burn(ctx contractapi.TransactionContextInterface, walletID string, amount int64) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	if amount <= 0 {
@@ -837,6 +837,7 @@ func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface, se
 	return s.settleTransfer(ctx, senderID, receiverID, amount, TxTransfer, referenceID, referenceID, "TRANSFER", "HIGH_RISK_TRANSFER")
 }
 
+/*
 func (s *SmartContract) PayQris(ctx contractapi.TransactionContextInterface, senderID string, receiverID string, amount int64, referenceID string) (map[string]interface{}, error) {
 	if err := requireInstitution(ctx); err != nil {
 		return nil, err
@@ -846,21 +847,14 @@ func (s *SmartContract) PayQris(ctx contractapi.TransactionContextInterface, sen
 	}
 	return s.settleTransfer(ctx, senderID, receiverID, amount, TxQrisPayment, "qris:"+referenceID, referenceID, "QRIS_PAYMENT", "HIGH_RISK_QRIS_PAYMENT")
 }
+*/
 
 func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterface, senderID string, receiverID string, amount int64, txType TransactionType, idempotencyKey string, relatedIntentID string, auditAction string, riskEvent string) (map[string]interface{}, error) {
-	if receipt, err := s.getIdempotencyReceipt(ctx, string(txType), idempotencyKey); err != nil {
-		return nil, err
-	} else if receipt != nil {
-		return receipt, nil
-	}
 	if amount <= 0 {
 		return nil, fmt.Errorf("amount must be positive")
 	}
 	if senderID == receiverID {
 		return nil, fmt.Errorf("sender and receiver must differ")
-	}
-	if err := s.ensurePerTxLimit(ctx, amount); err != nil {
-		return nil, err
 	}
 	sender, err := s.getWallet(ctx, senderID)
 	if err != nil {
@@ -869,11 +863,31 @@ func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterfa
 	if err := s.requireWalletCustodianMSP(ctx, sender); err != nil {
 		return nil, err
 	}
+	if receipt, err := s.getIdempotencyReceipt(ctx, string(txType), idempotencyKey); err != nil {
+		return nil, err
+	} else if receipt != nil {
+		if err := requireReceiptFields(receipt, map[string]interface{}{
+			"transaction_type": string(txType), "sender_id": senderID, "receiver_id": receiverID,
+			"amount": amount, "reference_id": relatedIntentID,
+		}); err != nil {
+			return nil, err
+		}
+		return receipt, nil
+	}
+	if err := s.ensurePerTxLimit(ctx, amount); err != nil {
+		return nil, err
+	}
+	if err := s.requireActiveWalletCustodian(ctx, sender); err != nil {
+		return nil, err
+	}
 	if sender.Frozen {
 		return nil, fmt.Errorf("sender wallet %s is frozen", senderID)
 	}
 	receiver, err := s.getWallet(ctx, receiverID)
 	if err != nil {
+		return nil, err
+	}
+	if err := s.requireActiveWalletCustodian(ctx, receiver); err != nil {
 		return nil, err
 	}
 	if receiver.Frozen {
@@ -931,14 +945,6 @@ func (s *SmartContract) settleTransfer(ctx contractapi.TransactionContextInterfa
 	}
 	if err := s.putWallet(ctx, receiverID, receiver); err != nil {
 		return nil, err
-	}
-	if sender.Tier != "" && senderLimit.MinBalance > 0 && sender.Balance < senderLimit.MinBalance {
-		policy, err := s.getAutoLimitPolicy(ctx, sender.ParticipantID)
-		if err == nil && policy.AutoRedemption && sender.Balance > 0 {
-			if arErr := s.autoRedeem(ctx, senderID, sender.Balance); arErr != nil {
-				_ = s.emitAudit(ctx, "AUTO_REDEMPTION_FAILED", senderID, "", sender.Balance)
-			}
-		}
 	}
 	if err := s.emitAudit(ctx, auditAction, senderID, receiverID, amount); err != nil {
 		return nil, err
@@ -1033,7 +1039,7 @@ func (s *SmartContract) GetAuditLog(ctx contractapi.TransactionContextInterface,
 // ─── Freeze / Unfreeze ──────────────────────────────────────────────
 
 func (s *SmartContract) FreezeWallet(ctx contractapi.TransactionContextInterface, walletID string) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	wallet, err := s.getWallet(ctx, walletID)
@@ -1046,7 +1052,7 @@ func (s *SmartContract) FreezeWallet(ctx contractapi.TransactionContextInterface
 }
 
 func (s *SmartContract) UnfreezeWallet(ctx contractapi.TransactionContextInterface, walletID string) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	wallet, err := s.getWallet(ctx, walletID)
@@ -1061,7 +1067,7 @@ func (s *SmartContract) UnfreezeWallet(ctx contractapi.TransactionContextInterfa
 // ─── SetTierLimit ────────────────────────────────────────────────────
 
 func (s *SmartContract) SetTierLimit(ctx contractapi.TransactionContextInterface, tier string, maxBalance int64, minBalance int64, dailyTxLimit int64, monthlyTxLimit int64, monthlyIncomingLimit int64, perTxLimit int64) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	limit := TierLimit{
@@ -1079,7 +1085,7 @@ func (s *SmartContract) SetTierLimit(ctx contractapi.TransactionContextInterface
 // ─── System Policy Limits ────────────────────────────────────────────
 
 func (s *SmartContract) SetSystemLimit(ctx contractapi.TransactionContextInterface, scope string, value int64) error {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return err
 	}
 	ls := LimitScope(scope)
@@ -1111,102 +1117,55 @@ func (s *SmartContract) ListSystemLimits(ctx contractapi.TransactionContextInter
 	return limits, nil
 }
 
-// ─── Auto-Limit Policy ────────────────────────────────────────────────
-
-func (s *SmartContract) SetAutoLimitPolicy(ctx contractapi.TransactionContextInterface, participantID string, autoRedemption bool, minBalance int64) error {
-	if err := requireBankIndonesia(ctx); err != nil {
-		return err
-	}
-	policy := AutoLimitPolicy{
-		ParticipantID:  participantID,
-		AutoRedemption: autoRedemption,
-		MinBalance:     minBalance,
-		UpdatedAt:      txNow(ctx).Format(time.RFC3339),
-	}
-	if err := s.putAutoLimitPolicy(ctx, policy); err != nil {
-		return err
-	}
-	return s.emitSupervisionEvent(ctx, "auto_limit_policy_set", "participant", participantID, policy)
-}
-
-func (s *SmartContract) GetAutoLimitPolicy(ctx contractapi.TransactionContextInterface, participantID string) (*AutoLimitPolicy, error) {
-	return s.getAutoLimitPolicy(ctx, participantID)
-}
-
-func (s *SmartContract) autoRedeem(ctx contractapi.TransactionContextInterface, walletID string, amount int64) error {
-	wallet, err := s.getWallet(ctx, walletID)
-	if err != nil {
-		return err
-	}
-	if wallet.Balance < amount {
-		return fmt.Errorf("auto-redeem: insufficient balance %d for amount %d", wallet.Balance, amount)
-	}
-	wallet.Balance -= amount
-	wallet.UpdatedAt = txNow(ctx).Format(time.RFC3339)
-	if err := s.putWallet(ctx, walletID, wallet); err != nil {
-		return err
-	}
-	if err := s.emitAudit(ctx, "AUTO_REDEMPTION", walletID, "", amount); err != nil {
-		return err
-	}
-	_ = s.emitSupervisionEvent(ctx, "auto_redemption", "wallet", walletID, map[string]interface{}{
-		"wallet_id": walletID,
-		"amount":    amount,
-	})
-	return s.recordTransaction(ctx, TxBurn, walletID, "", amount, TxSettled, "")
-}
-
-func (s *SmartContract) getAutoLimitPolicy(ctx contractapi.TransactionContextInterface, participantID string) (*AutoLimitPolicy, error) {
-	key, err := ctx.GetStub().CreateCompositeKey("autolimit", []string{participantID})
-	if err != nil {
-		return nil, err
-	}
-	data, err := ctx.GetStub().GetState(key)
-	if err != nil {
-		return nil, err
-	}
-	if data == nil {
-		return nil, fmt.Errorf("auto-limit policy for %s not found", participantID)
-	}
-	var p AutoLimitPolicy
-	if err := json.Unmarshal(data, &p); err != nil {
-		return nil, err
-	}
-	return &p, nil
-}
-
-func (s *SmartContract) putAutoLimitPolicy(ctx contractapi.TransactionContextInterface, policy AutoLimitPolicy) error {
-	key, err := ctx.GetStub().CreateCompositeKey("autolimit", []string{policy.ParticipantID})
-	if err != nil {
-		return err
-	}
-	data, err := json.Marshal(policy)
-	if err != nil {
-		return err
-	}
-	return ctx.GetStub().PutState(key, data)
-}
-
 // ─── KYC / KYB Profiles ─────────────────────────────────────────────
 
-func (s *SmartContract) SubmitKycProfile(ctx contractapi.TransactionContextInterface, profileID string, subjectType string, subjectID string, documentHashesJSON string) error {
+func (s *SmartContract) SubmitKycProfile(ctx contractapi.TransactionContextInterface, profileID string, subjectType string, subjectID string, documentHashesJSON string, reference string) (map[string]interface{}, error) {
 	if err := requireInstitution(ctx); err != nil {
-		return err
+		return nil, err
 	}
-	exists, err := s.kycProfileExists(ctx, profileID)
+	if profileID == "" || subjectID == "" || reference == "" {
+		return nil, fmt.Errorf("profile id, subject id, and reference are required")
+	}
+	callerMSP, err := currentMSP(ctx)
 	if err != nil {
-		return err
-	}
-	if exists {
-		return fmt.Errorf("KYC profile %s already exists", profileID)
+		return nil, err
 	}
 	st := KycSubjectType(subjectType)
 	if st != SubjectParticipant && st != SubjectRetailCustomer && st != SubjectMerchant {
-		return fmt.Errorf("invalid KYC subject type: %s", subjectType)
+		return nil, fmt.Errorf("invalid KYC subject type: %s", subjectType)
 	}
 	var hashes []string
 	if err := json.Unmarshal([]byte(documentHashesJSON), &hashes); err != nil {
-		return fmt.Errorf("invalid document_hashes: %w", err)
+		return nil, fmt.Errorf("invalid document_hashes: %w", err)
+	}
+	if receipt, err := s.getIdempotencyReceipt(ctx, "kyc_profile", reference); err != nil {
+		return nil, err
+	} else if receipt != nil {
+		if err := requireReceiptFields(receipt, map[string]interface{}{
+			"profile_id": profileID, "subject_type": subjectType, "subject_id": subjectID,
+			"document_hashes": hashes, "caller_msp_id": callerMSP,
+		}); err != nil {
+			return nil, err
+		}
+		return receipt, nil
+	}
+	custodianID, err := s.resolveCustodianParticipantID(ctx, callerMSP)
+	if err != nil {
+		return nil, err
+	}
+	custodian, err := s.getParticipant(ctx, custodianID)
+	if err != nil {
+		return nil, err
+	}
+	if custodian.ParticipantType != ParticipantValidator && custodian.ParticipantType != ParticipantPJP {
+		return nil, fmt.Errorf("KYC profile caller must be an active Validator/PJP Custodian")
+	}
+	exists, err := s.kycProfileExists(ctx, profileID)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, fmt.Errorf("KYC profile %s already exists without a matching operation receipt", profileID)
 	}
 	now := txNow(ctx)
 	profile := KycProfile{
@@ -1222,9 +1181,20 @@ func (s *SmartContract) SubmitKycProfile(ctx contractapi.TransactionContextInter
 		UpdatedAt:         now.Format(time.RFC3339),
 	}
 	if err := s.putKycProfile(ctx, profile); err != nil {
-		return err
+		return nil, err
 	}
-	return s.emitKycAudit(ctx, profileID, "profile_created", "", "pending", "KYC profile submitted")
+	if err := s.emitKycAudit(ctx, profileID, "profile_created", "", "pending", "KYC profile submitted"); err != nil {
+		return nil, err
+	}
+	receipt := map[string]interface{}{
+		"profile_id": profileID, "subject_type": subjectType, "subject_id": subjectID,
+		"document_hashes": hashes, "caller_msp_id": callerMSP, "reference_id": reference,
+		"tx_id": ctx.GetStub().GetTxID(),
+	}
+	if err := s.putIdempotencyReceipt(ctx, "kyc_profile", reference, receipt); err != nil {
+		return nil, err
+	}
+	return receipt, nil
 }
 
 func (s *SmartContract) RefreshKycProfile(ctx contractapi.TransactionContextInterface, profileID string, status string, riskLevel string, dueDiligenceLevel string, seniorApproval bool, documentHashesJSON string, expiresAt string) error {
@@ -1364,6 +1334,18 @@ func (s *SmartContract) GetTransactionHistory(ctx contractapi.TransactionContext
 	}
 	defer iter.Close()
 	var records []*TransactionRecord
+	walletIDs := map[string]struct{}{}
+	if participantID != "" {
+		wallets, err := s.listWallets(ctx, func(w Wallet) bool {
+			return w.ParticipantID == participantID || w.CustodianParticipantID == participantID
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, wallet := range wallets {
+			walletIDs[wallet.WalletID] = struct{}{}
+		}
+	}
 	for iter.HasNext() {
 		kv, err := iter.Next()
 		if err != nil {
@@ -1373,8 +1355,12 @@ func (s *SmartContract) GetTransactionHistory(ctx contractapi.TransactionContext
 		if err := json.Unmarshal(kv.Value, &tr); err != nil {
 			continue
 		}
-		if participantID != "" && tr.SenderID != participantID && tr.ReceiverID != participantID {
-			continue
+		if participantID != "" {
+			_, senderMatch := walletIDs[tr.SenderID]
+			_, receiverMatch := walletIDs[tr.ReceiverID]
+			if !senderMatch && !receiverMatch {
+				continue
+			}
 		}
 		if txType != "" && string(tr.TransactionType) != txType {
 			continue
@@ -1712,6 +1698,27 @@ func (s *SmartContract) requireWalletCustodianMSP(ctx contractapi.TransactionCon
 	return nil
 }
 
+func (s *SmartContract) requireActiveWalletCustodian(ctx contractapi.TransactionContextInterface, wallet Wallet) error {
+	if wallet.WalletID == "bi_treasury" {
+		return nil
+	}
+	custodianID := s.walletCustodianParticipantID(wallet)
+	if custodianID == "" {
+		return fmt.Errorf("wallet %s has no institutional Custodian", wallet.WalletID)
+	}
+	custodian, err := s.getParticipant(ctx, custodianID)
+	if err != nil {
+		return fmt.Errorf("wallet %s Custodian: %w", wallet.WalletID, err)
+	}
+	if custodian.Status != ParticipantActive || (custodian.ParticipantType != ParticipantValidator && custodian.ParticipantType != ParticipantPJP) {
+		return fmt.Errorf("wallet %s Custodian %s is not active and eligible", wallet.WalletID, custodianID)
+	}
+	if wallet.CustodianMSPID != "" && wallet.CustodianMSPID != custodian.MSPID {
+		return fmt.Errorf("wallet %s Custodian MSP does not match its participant", wallet.WalletID)
+	}
+	return nil
+}
+
 func (s *SmartContract) getLimit(ctx contractapi.TransactionContextInterface, tier WalletTier) (TierLimit, error) {
 	key, err := ctx.GetStub().CreateCompositeKey("limit", []string{string(tier)})
 	if err != nil {
@@ -1896,11 +1903,24 @@ func (s *SmartContract) getIdempotencyReceipt(ctx contractapi.TransactionContext
 		return nil, err
 	}
 	var receipt map[string]interface{}
-	if err := json.Unmarshal([]byte(record.Payload), &receipt); err != nil {
+	decoder := json.NewDecoder(strings.NewReader(record.Payload))
+	decoder.UseNumber()
+	if err := decoder.Decode(&receipt); err != nil {
 		return nil, err
 	}
 	return receipt, nil
 }
+
+func requireReceiptFields(receipt map[string]interface{}, expected map[string]interface{}) error {
+	for field, value := range expected {
+		if fmt.Sprint(receipt[field]) != fmt.Sprint(value) {
+			return fmt.Errorf("idempotency reference was already used for a different %s", field)
+		}
+	}
+	return nil
+}
+
+func equalStrings(a, b []string) bool { return slices.Equal(a, b) }
 
 func (s *SmartContract) putIdempotencyReceipt(ctx contractapi.TransactionContextInterface, operation string, key string, receipt map[string]interface{}) error {
 	if key == "" {
@@ -2163,13 +2183,45 @@ func (s *SmartContract) ListWallets(ctx contractapi.TransactionContextInterface,
 	return s.ListWalletsByParticipant(ctx, participantID)
 }
 
-func (s *SmartContract) RequestIssuance(ctx contractapi.TransactionContextInterface, amount int64) (interface{}, error) {
-	return nil, s.Mint(ctx, "bi_treasury", amount)
+func (s *SmartContract) RequestIssuance(ctx contractapi.TransactionContextInterface, amount int64, reference string) (map[string]interface{}, error) {
+	if err := requireCentralBank(ctx); err != nil {
+		return nil, err
+	}
+	if reference == "" || amount <= 0 {
+		return nil, fmt.Errorf("positive amount and reference are required")
+	}
+	if receipt, err := s.getIdempotencyReceipt(ctx, "issuance", reference); err != nil {
+		return nil, err
+	} else if receipt != nil {
+		if err := requireReceiptFields(receipt, map[string]interface{}{"amount": amount, "wallet_id": "bi_treasury"}); err != nil {
+			return nil, err
+		}
+		return receipt, nil
+	}
+	if err := s.Mint(ctx, "bi_treasury", amount); err != nil {
+		return nil, err
+	}
+	receipt := map[string]interface{}{"status": "issued", "reference_id": reference, "amount": amount, "wallet_id": "bi_treasury", "tx_id": ctx.GetStub().GetTxID()}
+	if err := s.putIdempotencyReceipt(ctx, "issuance", reference, receipt); err != nil {
+		return nil, err
+	}
+	return receipt, nil
 }
 
-func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInterface, participantID string, amount int64) (interface{}, error) {
-	if err := requireInstitution(ctx); err != nil {
+func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInterface, participantID string, amount int64, reference string) (map[string]interface{}, error) {
+	if err := requireCentralBank(ctx); err != nil {
 		return nil, err
+	}
+	if reference == "" || amount <= 0 {
+		return nil, fmt.Errorf("positive amount and reference are required")
+	}
+	if receipt, err := s.getIdempotencyReceipt(ctx, "redemption", reference); err != nil {
+		return nil, err
+	} else if receipt != nil {
+		if err := requireReceiptFields(receipt, map[string]interface{}{"participant_id": participantID, "amount": amount}); err != nil {
+			return nil, err
+		}
+		return receipt, nil
 	}
 	p, err := s.getParticipant(ctx, participantID)
 	if err != nil {
@@ -2178,12 +2230,22 @@ func (s *SmartContract) RequestRedemption(ctx contractapi.TransactionContextInte
 	if p.Status != "active" {
 		return nil, fmt.Errorf("participant %s is not active", participantID)
 	}
+	if p.ParticipantType != ParticipantValidator && p.ParticipantType != ParticipantPJP {
+		return nil, fmt.Errorf("participant %s cannot redeem", participantID)
+	}
 	walletID := fmt.Sprintf("wlt_%s", p.ParticipantID)
-	return nil, s.Burn(ctx, walletID, amount)
+	if err := s.Burn(ctx, walletID, amount); err != nil {
+		return nil, err
+	}
+	receipt := map[string]interface{}{"status": "redeemed", "reference_id": reference, "participant_id": p.ParticipantID, "wallet_id": walletID, "amount": amount, "tx_id": ctx.GetStub().GetTxID()}
+	if err := s.putIdempotencyReceipt(ctx, "redemption", reference, receipt); err != nil {
+		return nil, err
+	}
+	return receipt, nil
 }
 
 func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextInterface, participantID string, amount int64, reference string) (interface{}, error) {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return nil, err
 	}
 	if reference == "" {
@@ -2195,6 +2257,14 @@ func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextIn
 	if receipt, err := s.getIdempotencyReceipt(ctx, "rtgs_issuance", reference); err != nil {
 		return nil, err
 	} else if receipt != nil {
+		if err := requireReceiptFields(receipt, map[string]interface{}{"amount": amount}); err != nil {
+			return nil, err
+		}
+		requestedParticipant, _ := receipt["participant_id"].(string)
+		requestedBIC, _ := receipt["sender_bic"].(string)
+		if participantID != requestedParticipant && participantID != requestedBIC {
+			return nil, fmt.Errorf("idempotency reference was already used for a different participant")
+		}
 		return receipt, nil
 	}
 	p, err := s.getParticipantByBICOrID(ctx, participantID)
@@ -2257,7 +2327,7 @@ func (s *SmartContract) RequestIssuanceRtgs(ctx contractapi.TransactionContextIn
 
 // DistributeToParticipant transfers liquidity from Treasury to an institutional Custodian.
 func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionContextInterface, receiverParticipantID string, amount int64, referenceID string) (map[string]interface{}, error) {
-	if err := requireBankIndonesia(ctx); err != nil {
+	if err := requireCentralBank(ctx); err != nil {
 		return nil, err
 	}
 	if referenceID == "" {
@@ -2266,6 +2336,9 @@ func (s *SmartContract) DistributeToParticipant(ctx contractapi.TransactionConte
 	if receipt, err := s.getIdempotencyReceipt(ctx, "distribution", referenceID); err != nil {
 		return nil, err
 	} else if receipt != nil {
+		if err := requireReceiptFields(receipt, map[string]interface{}{"amount": amount, "receiver_participant_id": receiverParticipantID}); err != nil {
+			return nil, err
+		}
 		return receipt, nil
 	}
 	if amount <= 0 {
@@ -2348,25 +2421,70 @@ func (s *SmartContract) GetTransactions(ctx contractapi.TransactionContextInterf
 	return s.GetTransactionHistory(ctx, participantID, txType, status, fromTimestamp, toTimestamp)
 }
 
+func (s *SmartContract) GetOperationReceipt(ctx contractapi.TransactionContextInterface, operation string, reference string) (interface{}, error) {
+	if reference == "" {
+		return nil, fmt.Errorf("reference is required")
+	}
+	key := reference
+	if operation == "qris_pay" {
+		key = "qris:" + reference
+		operation = string(TxQrisPayment)
+	}
+	if operation != "transfer" && operation != "qris_payment" && operation != "distribution" && operation != "issuance" && operation != "redemption" && operation != "kyc_profile" {
+		return nil, fmt.Errorf("unsupported operation receipt: %s", operation)
+	}
+	receipt, err := s.getIdempotencyReceipt(ctx, operation, key)
+	if err != nil || receipt == nil {
+		return receipt, err
+	}
+	switch operation {
+	case "transfer", "qris_payment":
+		senderID, ok := receipt["sender_id"].(string)
+		if !ok {
+			return nil, fmt.Errorf("receipt has no sender wallet")
+		}
+		wallet, err := s.getWallet(ctx, senderID)
+		if err != nil {
+			return nil, err
+		}
+		if err := s.requireWalletCustodianMSP(ctx, wallet); err != nil {
+			return nil, err
+		}
+	case "distribution", "issuance", "redemption":
+		if err := requireCentralBank(ctx); err != nil {
+			return nil, err
+		}
+	case "kyc_profile":
+		callerMSP, err := currentMSP(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if receipt["caller_msp_id"] != callerMSP {
+			return nil, fmt.Errorf("KYC receipt is outside caller custody")
+		}
+	}
+	return receipt, nil
+}
+
 func (s *SmartContract) GetTopology(ctx contractapi.TransactionContextInterface) (interface{}, error) {
 	nodes := []map[string]string{
 		{"id": "bi-node", "name": "Bank Indonesia", "type": "central_bank", "role": "issuer", "domain": "bi.go.id"},
-		{"id": "validator-a", "name": "Himbara Bank", "type": "validator", "role": "validator", "domain": "bank-himbara.paynet"},
-		{"id": "validator-b", "name": "Commercial Bank", "type": "validator", "role": "validator", "domain": "bank-commercial.paynet"},
-		{"id": "observer-node", "name": "OJK Observer", "type": "observer", "role": "observer", "domain": "ojk.go.id"},
-		{"id": "policy-node", "name": "Policy Oracle", "type": "policy", "role": "policy", "domain": "policy.paynet"},
-		{"id": "security-node", "name": "Security Node", "type": "security", "role": "security", "domain": "security.paynet"},
-		{"id": "api-gateway", "name": "API Gateway", "type": "gateway", "role": "api", "domain": "api.paynet"},
+		{"id": "distributor-a", "name": "Distributor Bank A", "type": "distributor", "role": "distributor", "domain": "distributor-a.bi-coin"},
+		{"id": "distributor-b", "name": "Distributor Bank B", "type": "distributor", "role": "distributor", "domain": "distributor-b.bi-coin"},
+		{"id": "validator-ojk", "name": "OJK (ValidatorMSP)", "type": "validator", "role": "observer", "domain": "ojk.go.id"},
+		{"id": "policy-node", "name": "Policy Oracle", "type": "policy", "role": "policy", "domain": "policy.bi-coin"},
+		{"id": "security-node", "name": "Security Node", "type": "security", "role": "security", "domain": "security.bi-coin"},
+		{"id": "api-gateway", "name": "API Gateway", "type": "gateway", "role": "api", "domain": "api.bi-coin"},
 	}
 	links := []map[string]string{
-		{"source": "bi-node", "target": "validator-a", "type": "consensus"},
-		{"source": "bi-node", "target": "validator-b", "type": "consensus"},
-		{"source": "validator-a", "target": "validator-b", "type": "p2p"},
-		{"source": "validator-a", "target": "api-gateway", "type": "api"},
-		{"source": "validator-b", "target": "api-gateway", "type": "api"},
-		{"source": "observer-node", "target": "validator-a", "type": "observe"},
-		{"source": "observer-node", "target": "validator-b", "type": "observe"},
-		{"source": "bi-node", "target": "observer-node", "type": "oversight"},
+		{"source": "bi-node", "target": "distributor-a", "type": "consensus"},
+		{"source": "bi-node", "target": "distributor-b", "type": "consensus"},
+		{"source": "distributor-a", "target": "distributor-b", "type": "p2p"},
+		{"source": "distributor-a", "target": "api-gateway", "type": "api"},
+		{"source": "distributor-b", "target": "api-gateway", "type": "api"},
+		{"source": "validator-ojk", "target": "distributor-a", "type": "observe"},
+		{"source": "validator-ojk", "target": "distributor-b", "type": "observe"},
+		{"source": "bi-node", "target": "validator-ojk", "type": "oversight"},
 	}
 	return map[string]interface{}{"nodes": nodes, "links": links}, nil
 }

@@ -19,23 +19,23 @@ func TestValidateRejectsMissingSecretsAndSchema(t *testing.T) {
 
 func TestResolveGatewayByMSP(t *testing.T) {
 	cfg := &Config{
-		MSPID:                 "BI-MSP",
+		MSPID:                 "CentralBankMSP",
 		DatabaseURL:           "postgres://example",
 		AuthJWTSecret:         "1234567890abcdef",
 		KycHashSecret:         "hash-secret",
 		ContractSchemaVersion: "v3",
 		AuthTokenTTL:          1,
 		FabricGatewaysJSON: `[
-			{"msp_id":"BI-MSP","peer_endpoint":"peer0.bi:7051","cert_path":"cert.pem","key_path":"key.pem","tls_cert_path":"tls.pem"},
-			{"msp_id":"PJP-MSP","peer_endpoint":"peer0.pjp:7051","cert_path":"cert2.pem","key_path":"key2.pem","tls_cert_path":"tls2.pem"}
+			{"msp_id":"CentralBankMSP","peer_endpoint":"peer0.bi-coin:7051","cert_path":"cert.pem","key_path":"key.pem","tls_cert_path":"tls.pem"},
+			{"msp_id":"DistributorMSP","peer_endpoint":"peer0.distributor.bi-coin:7051","cert_path":"cert2.pem","key_path":"key2.pem","tls_cert_path":"tls2.pem"}
 		]`,
 	}
 
-	gateway, err := cfg.ResolveGateway("PJP-MSP")
+	gateway, err := cfg.ResolveGateway("DistributorMSP")
 	if err != nil {
 		t.Fatalf("resolve gateway: %v", err)
 	}
-	if gateway.MSPID != "PJP-MSP" || gateway.PeerEndpoint != "peer0.pjp:7051" {
+	if gateway.MSPID != "DistributorMSP" || gateway.PeerEndpoint != "peer0.distributor.bi-coin:7051" {
 		t.Fatalf("gateway = %+v", gateway)
 	}
 }

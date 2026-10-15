@@ -1,5 +1,7 @@
 # Benchmark evidence and statistical study
 
+> **Revised compliance benchmark:** use [`compliance/README.md`](compliance/README.md) for current compliance performance evidence. Its one-worker Caliper binary search and confirmation protocol replaces the older selected-rate, warmup, and worker-scaling procedure for the thesis compliance results. Results below remain historical statistical-study evidence and are not starting capacity claims unless imported only as search hints.
+
 The primary study uses isolated transaction types and five-run statistics. The
 former mixed transaction selector is removed; retail transfers, merchant
 payments, queries, and administrative operations are separate Caliper rounds.

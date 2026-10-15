@@ -1,6 +1,6 @@
 'use strict';
 
-const { RetailWorkloadBase, CONTRACT, actorRequest } = require('./retail-base');
+const { RetailWorkloadBase, CONTRACT, actorRequest, transactionPayload, transactionResults } = require('./retail-base');
 
 const OPERATIONS = Object.freeze([
     'issuance',
@@ -52,12 +52,26 @@ class TransactionTypeWorkload extends RetailWorkloadBase {
             break;
         case 'distribution':
             await this.ensureBenchmarkCustodian();
+            await this.withSetupLock('distribution-liquidity', async () => {
+                const budget = Number(this.arg('transactionBudget', 0));
+                const amount = Number(this.arg('operationAmount', 1000));
+                if (!Number.isSafeInteger(budget) || budget <= 0 || !Number.isSafeInteger(amount) || amount <= 0) {
+                    throw new Error('distribution requires a positive transactionBudget and operationAmount');
+                }
+                const response = await this.submit('GetWallet', ['bi_treasury'], true, 'bi');
+                const balance = BigInt(JSON.parse(transactionPayload(transactionResults(response)[0])).balance);
+                const required = BigInt(budget) * BigInt(amount);
+                if (balance < required) {
+                    await this.submit('RequestIssuance', [(required - balance).toString()], false, 'bi', true);
+                }
+            });
             this.configureMeasuredTraffic(this.transactionSlots);
             break;
         case 'retail-transfer':
             await this.seedPopulation({
                 numCustomers: standardCountFor(this.contention === 'high' ? this.transactionSlots + 1 : this.transactionSlots * 2),
                 numMerchants: 0,
+                senderCount: this.contention === 'high' ? 1 : this.transactionSlots,
                 fundedRatio: 1,
                 fundStandard: this.arg('fundStandard', 20000000),
                 fundBasic: this.arg('fundBasic', 500000),
@@ -213,11 +227,11 @@ class TransactionTypeWorkload extends RetailWorkloadBase {
                 plan.receiver.walletId,
                 Math.min(amount, plan.sender.perTxCap || amount),
                 `transfer_${this.ns()}_${index}`,
-            ], false, 'himbara');
+            ], false, 'distributor');
         case 'redemption':
             return this.measuredRequest(plan, 'Burn', [plan.wallet.walletId, amount], false, 'bi');
         case 'balance-query':
-            return this.measuredRequest(plan, 'GetWallet', [plan.wallet.walletId], true, 'himbara');
+            return this.measuredRequest(plan, 'GetWallet', [plan.wallet.walletId], true, 'distributor');
         case 'wallet-freeze':
             return this.measuredRequest(plan, 'FreezeWallet', [plan.wallet.walletId], false, 'bi');
         case 'wallet-unfreeze':

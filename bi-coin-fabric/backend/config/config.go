@@ -21,6 +21,16 @@ type FabricGateway struct {
 	CustodianMSPID string   `json:"custodian_msp_id,omitempty"`
 }
 
+type FabricStudyIdentity struct {
+	Username     string `json:"username"`
+	MSPID        string `json:"msp_id"`
+	PeerEndpoint string `json:"peer_endpoint"`
+	GatewayPeer  string `json:"gateway_peer"`
+	CertPath     string `json:"cert_path"`
+	KeyPath      string `json:"key_path"`
+	TLSCertPath  string `json:"tls_cert_path"`
+}
+
 type Config struct {
 	Port          string
 	MSPID         string
@@ -33,17 +43,19 @@ type Config struct {
 	ChaincodeName string
 	DatabaseURL   string
 
-	AuthJWTSecret          string
-	AuthTokenTTL           time.Duration
-	AuthBootstrapUsersJSON string
-	KycHashSecret          string
-	FabricGatewaysJSON     string
-	ContractSchemaVersion  string
-	MaxBodyBytes           int64
-	ReadTimeout            time.Duration
-	ReadHeaderTimeout      time.Duration
-	WriteTimeout           time.Duration
-	IdleTimeout            time.Duration
+	AuthJWTSecret             string
+	AuthTokenTTL              time.Duration
+	AuthBootstrapUsersJSON    string
+	KycHashSecret             string
+	FabricGatewaysJSON        string
+	FabricStudyIdentitiesJSON string
+	StudyChannelName          string
+	ContractSchemaVersion     string
+	MaxBodyBytes              int64
+	ReadTimeout               time.Duration
+	ReadHeaderTimeout         time.Duration
+	WriteTimeout              time.Duration
+	IdleTimeout               time.Duration
 
 	// Role-based API keys
 	PublicAPIKey        string
@@ -68,17 +80,19 @@ func Load() *Config {
 		ChaincodeName: getEnv("FABRIC_CHAINCODE_NAME", "digital-rupiah"),
 		DatabaseURL:   getEnv("DATABASE_URL", ""),
 
-		AuthJWTSecret:          getEnv("AUTH_JWT_SECRET", ""),
-		AuthTokenTTL:           time.Duration(getEnvInt("AUTH_TOKEN_TTL_SECONDS", 3600)) * time.Second,
-		AuthBootstrapUsersJSON: getEnv("AUTH_BOOTSTRAP_USERS_JSON", ""),
-		KycHashSecret:          getEnv("KYC_HASH_SECRET", ""),
-		FabricGatewaysJSON:     getEnv("FABRIC_GATEWAYS_JSON", ""),
-		ContractSchemaVersion:  getEnv("CONTRACT_SCHEMA_VERSION", ""),
-		MaxBodyBytes:           int64(getEnvInt("HTTP_MAX_BODY_BYTES", 1<<20)),
-		ReadTimeout:            time.Duration(getEnvInt("HTTP_READ_TIMEOUT_SECONDS", 15)) * time.Second,
-		ReadHeaderTimeout:      time.Duration(getEnvInt("HTTP_READ_HEADER_TIMEOUT_SECONDS", 5)) * time.Second,
-		WriteTimeout:           time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT_SECONDS", 30)) * time.Second,
-		IdleTimeout:            time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT_SECONDS", 60)) * time.Second,
+		AuthJWTSecret:             getEnv("AUTH_JWT_SECRET", ""),
+		AuthTokenTTL:              time.Duration(getEnvInt("AUTH_TOKEN_TTL_SECONDS", 3600)) * time.Second,
+		AuthBootstrapUsersJSON:    getEnv("AUTH_BOOTSTRAP_USERS_JSON", ""),
+		KycHashSecret:             getEnv("KYC_HASH_SECRET", ""),
+		FabricGatewaysJSON:        getEnv("FABRIC_GATEWAYS_JSON", ""),
+		FabricStudyIdentitiesJSON: getEnv("FABRIC_STUDY_IDENTITIES_JSON", ""),
+		StudyChannelName:          getEnv("FABRIC_STUDY_CHANNEL_NAME", "rupiah-study"),
+		ContractSchemaVersion:     getEnv("CONTRACT_SCHEMA_VERSION", ""),
+		MaxBodyBytes:              int64(getEnvInt("HTTP_MAX_BODY_BYTES", 1<<20)),
+		ReadTimeout:               time.Duration(getEnvInt("HTTP_READ_TIMEOUT_SECONDS", 15)) * time.Second,
+		ReadHeaderTimeout:         time.Duration(getEnvInt("HTTP_READ_HEADER_TIMEOUT_SECONDS", 5)) * time.Second,
+		WriteTimeout:              time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT_SECONDS", 30)) * time.Second,
+		IdleTimeout:               time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT_SECONDS", 60)) * time.Second,
 
 		PublicAPIKey:        getEnv("PUBLIC_API_KEY", ""),
 		AuthenticatedAPIKey: getEnv("AUTHENTICATED_API_KEY", ""),
@@ -109,7 +123,39 @@ func (c *Config) Validate() error {
 	if _, err := c.ParseFabricGateways(); err != nil {
 		return err
 	}
+	if strings.TrimSpace(c.FabricStudyIdentitiesJSON) != "" {
+		if _, err := c.ParseFabricStudyIdentities(); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (c *Config) ParseFabricStudyIdentities() (map[string]FabricStudyIdentity, error) {
+	if strings.TrimSpace(c.FabricStudyIdentitiesJSON) == "" {
+		return nil, fmt.Errorf("FABRIC_STUDY_IDENTITIES_JSON is required")
+	}
+	var identities []FabricStudyIdentity
+	if err := json.Unmarshal([]byte(c.FabricStudyIdentitiesJSON), &identities); err != nil {
+		return nil, fmt.Errorf("FABRIC_STUDY_IDENTITIES_JSON: %w", err)
+	}
+	if len(identities) == 0 {
+		return nil, fmt.Errorf("FABRIC_STUDY_IDENTITIES_JSON must contain at least one identity")
+	}
+	byUsername := make(map[string]FabricStudyIdentity, len(identities))
+	for _, identity := range identities {
+		if strings.TrimSpace(identity.Username) == "" || !oneOfStudyMSP(identity.MSPID) {
+			return nil, fmt.Errorf("FABRIC_STUDY_IDENTITIES_JSON identity username and supported msp_id are required")
+		}
+		if strings.TrimSpace(identity.PeerEndpoint) == "" || strings.TrimSpace(identity.CertPath) == "" || strings.TrimSpace(identity.KeyPath) == "" || strings.TrimSpace(identity.TLSCertPath) == "" {
+			return nil, fmt.Errorf("FABRIC_STUDY_IDENTITIES_JSON identity %s is incomplete", identity.Username)
+		}
+		if _, exists := byUsername[identity.Username]; exists {
+			return nil, fmt.Errorf("FABRIC_STUDY_IDENTITIES_JSON duplicate username %s", identity.Username)
+		}
+		byUsername[identity.Username] = identity
+	}
+	return byUsername, nil
 }
 
 func (c *Config) ParseFabricGateways() (map[string]FabricGateway, error) {
@@ -171,4 +217,13 @@ func getEnvInt(key string, fallback int) int {
 		return fallback
 	}
 	return parsed
+}
+
+func oneOfStudyMSP(mspID string) bool {
+	switch mspID {
+	case "CentralBankMSP", "DistributorMSP", "ValidatorMSP", "EndUserMSP":
+		return true
+	default:
+		return false
+	}
 }

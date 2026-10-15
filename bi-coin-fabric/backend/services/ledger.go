@@ -12,7 +12,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"net"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -202,9 +204,6 @@ func (s *LedgerService) beginOperation(ctx context.Context, operation string, ke
 	if !created && (existing.Operation != candidate.Operation || existing.RequestHash != candidate.RequestHash) {
 		return nil, false, Conflict("idempotency key was already used for a different request")
 	}
-	if !created && existing.Status == OperationPending {
-		return nil, false, Conflict("operation is already in progress")
-	}
 	return &existing, !created && existing.Status == OperationCompleted && len(existing.Response) > 0, nil
 }
 
@@ -256,8 +255,73 @@ func (s *LedgerService) completeOperation(ctx context.Context, operation *Operat
 	return nil
 }
 
+func (s *LedgerService) readOperationReceipt(operation string, reference string) ([]byte, error) {
+	receipt, err := s.contract.EvaluateTransaction("GetOperationReceipt", operation, reference)
+	if err != nil {
+		return nil, err
+	}
+	if len(receipt) == 0 || strings.TrimSpace(string(receipt)) == "null" {
+		return nil, nil
+	}
+	return receipt, nil
+}
+
+func (s *LedgerService) saveOperationReceipt(operation *OperationJournal, receipt []byte, validate func([]byte) error) error {
+	if err := validate(receipt); err != nil {
+		return err
+	}
+	var tx struct {
+		TxID string `json:"tx_id"`
+	}
+	if err := json.Unmarshal(receipt, &tx); err != nil || tx.TxID == "" {
+		return Internal("invalid ledger operation receipt", err)
+	}
+	if operation.Status == OperationPending {
+		if err := s.recordSubmittedOperation(context.Background(), operation, tx.TxID, json.RawMessage(receipt)); err != nil {
+			return err
+		}
+	}
+	return s.completeOperation(context.Background(), operation)
+}
+
+func (s *LedgerService) submitOperation(operation *OperationJournal, transaction string, args []string, receiptOperation string, validate func([]byte) error) ([]byte, error) {
+	if operation.Status == OperationCompleted || operation.Status == OperationSubmitted {
+		if len(operation.Response) > 0 {
+			if err := validate(operation.Response); err != nil {
+				return nil, err
+			}
+			if operation.Status != OperationCompleted {
+				if err := s.completeOperation(context.Background(), operation); err != nil {
+					return nil, err
+				}
+			}
+			return operation.Response, nil
+		}
+	}
+	if receipt, err := s.readOperationReceipt(receiptOperation, operation.OperationRef); err == nil && receipt != nil {
+		if err := s.saveOperationReceipt(operation, receipt, validate); err != nil {
+			return nil, err
+		}
+		return receipt, nil
+	}
+	receipt, submitErr := s.contract.SubmitTransaction(transaction, args...)
+	if submitErr != nil {
+		if recovered, err := s.readOperationReceipt(receiptOperation, operation.OperationRef); err == nil && recovered != nil {
+			if err := s.saveOperationReceipt(operation, recovered, validate); err != nil {
+				return nil, err
+			}
+			return recovered, nil
+		}
+		return nil, submitErr
+	}
+	if err := s.saveOperationReceipt(operation, receipt, validate); err != nil {
+		return nil, err
+	}
+	return receipt, nil
+}
+
 func connectFabricContract(gateway config.FabricGateway, cfg *config.Config) (FabricContract, func() error, error) {
-	creds, err := credentials.NewClientTLSFromFile(gateway.TLSCertPath, "")
+	creds, err := credentials.NewClientTLSFromFile(gateway.TLSCertPath, gatewayTLSServerName(gateway.GatewayPeer))
 	if err != nil {
 		return nil, nil, fmt.Errorf("tls creds: %w", err)
 	}
@@ -284,6 +348,14 @@ func connectFabricContract(gateway config.FabricGateway, cfg *config.Config) (Fa
 		gw.Close()
 		return clientConn.Close()
 	}, nil
+}
+
+func gatewayTLSServerName(gatewayPeer string) string {
+	host, _, err := net.SplitHostPort(gatewayPeer)
+	if err != nil {
+		return gatewayPeer
+	}
+	return host
 }
 
 // ForPrincipal resolves exactly one configured Fabric gateway for a request.
@@ -865,7 +937,28 @@ func (s *LedgerService) SubmitKycProfile(req models.KycProfileRequest) (*models.
 	if req.SubjectID == "" {
 		return nil, InvalidInput("subject_id is required")
 	}
-	profileID := fmt.Sprintf("kyc_%s", uuid.New().String())
+	operation, replay, err := s.beginOperation(context.Background(), "kyc_profile", req.IdempotencyKey, req)
+	if err != nil {
+		return nil, err
+	}
+	if replay || (operation.Status == OperationSubmitted && len(operation.Response) > 0) {
+		var profile models.KycProfile
+		if err := json.Unmarshal(operation.Response, &profile); err != nil {
+			return nil, Internal("invalid persisted KYC profile receipt", err)
+		}
+		if operation.Status == OperationSubmitted {
+			if s.kycStore != nil {
+				if err := s.kycStore.MarkKycAnchored(context.Background(), profile.ProfileID); err != nil {
+					return nil, Internal("failed to finalize KYC anchor", err)
+				}
+			}
+			if err := s.completeOperation(context.Background(), operation); err != nil {
+				return nil, err
+			}
+		}
+		return &profile, nil
+	}
+	profileID := "kyc_" + operation.OperationRef
 	hashes := req.DocumentHashes
 	if len(hashes) == 0 && req.DocumentNumber != "" {
 		hashes = []string{s.hashKycValue(req.DocumentType + ":" + req.DocumentNumber)}
@@ -880,7 +973,10 @@ func (s *LedgerService) SubmitKycProfile(req models.KycProfileRequest) (*models.
 		RiskLevel:         models.RiskLow,
 		DueDiligenceLevel: models.DueDiligenceSimplified,
 	}
-	hashesJSON, _ := json.Marshal(hashes)
+	hashesJSON, err := json.Marshal(hashes)
+	if err != nil {
+		return nil, Internal("failed to serialize KYC document hashes", err)
+	}
 	var profile *models.KycProfile
 	if s.kycStore != nil {
 		var err error
@@ -889,14 +985,53 @@ func (s *LedgerService) SubmitKycProfile(req models.KycProfileRequest) (*models.
 			return nil, Internal("failed to persist KYC profile", err)
 		}
 	}
-	if _, err := s.contract.SubmitTransaction("SubmitKycProfile",
-		profileID, string(req.SubjectType), req.SubjectID, string(hashesJSON)); err != nil {
-		return nil, Internal("failed to anchor KYC profile; pending off-chain record is retryable", err)
+	validateReceipt := func(data []byte) (string, error) {
+		var receipt struct {
+			ProfileID      string   `json:"profile_id"`
+			SubjectType    string   `json:"subject_type"`
+			SubjectID      string   `json:"subject_id"`
+			DocumentHashes []string `json:"document_hashes"`
+			CallerMSPID    string   `json:"caller_msp_id"`
+			TxID           string   `json:"tx_id"`
+		}
+		if err := json.Unmarshal(data, &receipt); err != nil {
+			return "", Internal("invalid KYC ledger receipt", err)
+		}
+		if receipt.ProfileID != profileID || receipt.SubjectType != string(req.SubjectType) || receipt.SubjectID != req.SubjectID || !slices.Equal(receipt.DocumentHashes, hashes) || receipt.CallerMSPID != s.kycCustodianScope() || receipt.TxID == "" {
+			return "", Internal("invalid KYC ledger receipt", nil)
+		}
+		return receipt.TxID, nil
+	}
+	receipt, err := s.readOperationReceipt("kyc_profile", operation.OperationRef)
+	if err != nil {
+		return nil, Internal("failed to read KYC ledger receipt", err)
+	}
+	if receipt == nil {
+		receipt, err = s.contract.SubmitTransaction("SubmitKycProfile",
+			profileID, string(req.SubjectType), req.SubjectID, string(hashesJSON), operation.OperationRef)
+		if err != nil {
+			receipt, err = s.readOperationReceipt("kyc_profile", operation.OperationRef)
+			if err != nil || receipt == nil {
+				return nil, Internal("failed to anchor KYC profile; operation remains retryable", err)
+			}
+		}
+	}
+	txID, err := validateReceipt(receipt)
+	if err != nil {
+		return nil, err
 	}
 	if s.kycStore != nil {
 		if err := s.kycStore.MarkKycAnchored(context.Background(), profileID); err != nil {
 			return nil, Internal("failed to finalize KYC anchor; retry the request", err)
 		}
+	}
+	if err := s.recordSubmittedOperation(context.Background(), operation, txID, profile); err != nil {
+		return nil, err
+	}
+	if err := s.completeOperation(context.Background(), operation); err != nil {
+		return nil, err
+	}
+	if profile != nil {
 		return profile, nil
 	}
 	return &anchor, nil
@@ -1067,23 +1202,66 @@ func (s *LedgerService) ListSystemLimits(scope string) ([]*models.SystemLimit, e
 
 // ─── Liquidity ───────────────────────────────────────────────────────────────
 
-func (s *LedgerService) RequestIssuance(amount int64) error {
-	amountStr := fmt.Sprintf("%d", amount)
-	result, err := s.contract.SubmitTransaction("RequestIssuance", amountStr)
-	if err != nil {
-		return fmt.Errorf("chaincode RequestIssuance: %w", err)
+func (s *LedgerService) RequestIssuance(amount int64, idempotencyKey string) error {
+	if amount <= 0 {
+		return InvalidInput("amount must be positive")
 	}
-	_ = result
+	operation, _, err := s.beginOperation(context.Background(), "issuance", idempotencyKey, struct{ Amount int64 }{amount})
+	if err != nil {
+		return err
+	}
+	_, err = s.submitOperation(operation, "RequestIssuance", []string{fmt.Sprintf("%d", amount), operation.OperationRef}, "issuance", func(data []byte) error {
+		var receipt struct {
+			Status      string `json:"status"`
+			ReferenceID string `json:"reference_id"`
+			WalletID    string `json:"wallet_id"`
+			Amount      int64  `json:"amount"`
+			TxID        string `json:"tx_id"`
+		}
+		if err := json.Unmarshal(data, &receipt); err != nil {
+			return Internal("invalid issuance receipt", err)
+		}
+		if receipt.Status != "issued" || receipt.ReferenceID != operation.OperationRef || receipt.WalletID != "bi_treasury" || receipt.Amount != amount || receipt.TxID == "" {
+			return Internal("invalid issuance receipt", nil)
+		}
+		return nil
+	})
+	if err != nil {
+		return Internal("failed to submit issuance", err)
+	}
 	return nil
 }
 
-func (s *LedgerService) RequestRedemption(participantID string, amount int64) error {
-	amountStr := fmt.Sprintf("%d", amount)
-	result, err := s.contract.SubmitTransaction("RequestRedemption", participantID, amountStr)
-	if err != nil {
-		return fmt.Errorf("chaincode RequestRedemption: %w", err)
+func (s *LedgerService) RequestRedemption(participantID string, amount int64, idempotencyKey string) error {
+	if participantID == "" || amount <= 0 {
+		return InvalidInput("participant_id and positive amount are required")
 	}
-	_ = result
+	operation, _, err := s.beginOperation(context.Background(), "redemption", idempotencyKey, struct {
+		ParticipantID string
+		Amount        int64
+	}{participantID, amount})
+	if err != nil {
+		return err
+	}
+	_, err = s.submitOperation(operation, "RequestRedemption", []string{participantID, fmt.Sprintf("%d", amount), operation.OperationRef}, "redemption", func(data []byte) error {
+		var receipt struct {
+			Status        string `json:"status"`
+			ReferenceID   string `json:"reference_id"`
+			ParticipantID string `json:"participant_id"`
+			Amount        int64  `json:"amount"`
+			TxID          string `json:"tx_id"`
+		}
+		if err := json.Unmarshal(data, &receipt); err != nil {
+			return Internal("invalid redemption receipt", err)
+		}
+		if receipt.Status != "redeemed" || receipt.ReferenceID != operation.OperationRef || receipt.ParticipantID != participantID || receipt.Amount != amount || receipt.TxID == "" {
+			return Internal("invalid redemption receipt", nil)
+		}
+		return nil
+	})
+	if err != nil {
+		return Internal("failed to submit redemption", err)
+	}
 	return nil
 }
 
@@ -1117,35 +1295,26 @@ func (s *LedgerService) DistributeToParticipant(receiverParticipantID string, am
 	if len(idempotencyKeys) > 0 {
 		key = idempotencyKeys[0]
 	}
-	operation, replay, err := s.beginOperation(context.Background(), "distribution", key, struct {
+	operation, _, err := s.beginOperation(context.Background(), "distribution", key, struct {
 		ReceiverParticipantID string
 		Amount                int64
 	}{receiverParticipantID, amount})
 	if err != nil {
 		return err
 	}
-	if replay {
-		return nil
-	}
-	if operation.Status == OperationSubmitted {
-		return s.completeOperation(context.Background(), operation)
-	}
-	result, err := s.contract.SubmitTransaction("DistributeToParticipant",
-		receiverParticipantID, fmt.Sprintf("%d", amount), operation.OperationRef)
+	_, err = s.submitOperation(operation, "DistributeToParticipant", []string{
+		receiverParticipantID, fmt.Sprintf("%d", amount), operation.OperationRef,
+	}, "distribution", func(data []byte) error {
+		var receipt models.TransferResult
+		if err := s.unwrapRequired(data, &receipt); err != nil {
+			return err
+		}
+		return validateMoneyReceipt(receipt, operation.OperationRef, "bi_treasury", fmt.Sprintf("wlt_%s", receiverParticipantID), amount)
+	})
 	if err != nil {
 		return Internal("failed to submit distribution", err)
 	}
-	var receipt models.TransferResult
-	if err := s.unwrapRequired(result, &receipt); err != nil {
-		return err
-	}
-	if err := validateMoneyReceipt(receipt, operation.OperationRef, "bi_treasury", fmt.Sprintf("wlt_%s", receiverParticipantID), amount); err != nil {
-		return err
-	}
-	if err := s.recordSubmittedOperation(context.Background(), operation, receipt.TxID, receipt); err != nil {
-		return err
-	}
-	return s.completeOperation(context.Background(), operation)
+	return nil
 }
 
 func (s *LedgerService) Transfer(req models.TransferRequest) (*models.TransferResult, error) {
@@ -1153,7 +1322,7 @@ func (s *LedgerService) Transfer(req models.TransferRequest) (*models.TransferRe
 	if err != nil {
 		return nil, InvalidInput("invalid amount")
 	}
-	operation, replay, err := s.beginOperation(context.Background(), "transfer", req.IdempotencyKey, struct {
+	operation, _, err := s.beginOperation(context.Background(), "transfer", req.IdempotencyKey, struct {
 		SenderID   string
 		ReceiverID string
 		Amount     int64
@@ -1161,32 +1330,20 @@ func (s *LedgerService) Transfer(req models.TransferRequest) (*models.TransferRe
 	if err != nil {
 		return nil, err
 	}
-	if replay || (operation.Status == OperationSubmitted && len(operation.Response) > 0) {
-		var saved models.TransferResult
-		if err := json.Unmarshal(operation.Response, &saved); err != nil {
-			return nil, Internal("invalid persisted transfer receipt", err)
+	result, err := s.submitOperation(operation, "Transfer", []string{
+		req.SenderID, req.ReceiverID, fmt.Sprintf("%d", amount), operation.OperationRef,
+	}, "transfer", func(data []byte) error {
+		var tr models.TransferResult
+		if err := s.unwrapRequired(data, &tr); err != nil {
+			return err
 		}
-		if err := s.completeOperation(context.Background(), operation); err != nil {
-			return nil, err
-		}
-		return &saved, nil
-	}
-	result, err := s.contract.SubmitTransaction("Transfer",
-		req.SenderID, req.ReceiverID, fmt.Sprintf("%d", amount), operation.OperationRef)
+		return validateMoneyReceipt(tr, operation.OperationRef, req.SenderID, req.ReceiverID, amount)
+	})
 	if err != nil {
 		return nil, Internal("failed to submit transfer", err)
 	}
 	var tr models.TransferResult
 	if err := s.unwrapRequired(result, &tr); err != nil {
-		return nil, err
-	}
-	if err := validateMoneyReceipt(tr, operation.OperationRef, req.SenderID, req.ReceiverID, amount); err != nil {
-		return nil, err
-	}
-	if err := s.recordSubmittedOperation(context.Background(), operation, tr.TxID, tr); err != nil {
-		return nil, err
-	}
-	if err := s.completeOperation(context.Background(), operation); err != nil {
 		return nil, err
 	}
 	return &tr, nil

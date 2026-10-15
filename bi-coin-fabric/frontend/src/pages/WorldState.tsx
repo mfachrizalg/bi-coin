@@ -8,11 +8,10 @@ interface OrgConfig {
 }
 
 const ORGS: OrgConfig[] = [
-  { label: 'Bank Indonesia', org: 'bi.paynet', port: 5984 },
-  { label: 'Himbara Bank', org: 'himbara.paynet', port: 6984 },
-  { label: 'Validator Bank', org: 'commercial.paynet', port: 7984 },
-  { label: 'Observer', org: 'ojk.paynet', port: 8984 },
-  { label: 'PJP', org: 'pjp.paynet', port: 9984 },
+  { label: 'Central Bank', org: 'bi-coin', port: 5984 },
+  { label: 'Distributor', org: 'distributor.bi-coin', port: 6984 },
+  { label: 'Validator', org: 'validator.bi-coin', port: 8984 },
+  { label: 'End User', org: 'enduser.bi-coin', port: 9984 },
 ]
 
 export default function WorldState() {

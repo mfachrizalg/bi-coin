@@ -1,11 +1,13 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -39,6 +41,19 @@ type OperationJournalStore interface {
 	BeginOperation(ctx context.Context, operation OperationJournal) (existing OperationJournal, created bool, err error)
 	GetOperation(ctx context.Context, scope string, principalID string, key string) (*OperationJournal, error)
 	UpdateOperation(ctx context.Context, operation OperationJournal) error
+}
+
+func operationStatusRank(status OperationStatus) int {
+	switch status {
+	case OperationPending:
+		return 1
+	case OperationSubmitted:
+		return 2
+	case OperationCompleted:
+		return 3
+	default:
+		return 0
+	}
 }
 
 func operationReference(scope, principalID, key string) string {
@@ -85,6 +100,32 @@ func (s *memoryOperationJournal) UpdateOperation(_ context.Context, operation Op
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	key := operation.PrincipalScope + "\x00" + operation.PrincipalID + "\x00" + operation.IdempotencyKey
+	existing, ok := s.entries[key]
+	if !ok {
+		return sql.ErrNoRows
+	}
+	if existing.RequestHash != operation.RequestHash || operationStatusRank(operation.Status) == 0 {
+		return fmt.Errorf("operation journal entry does not match")
+	}
+	if operationStatusRank(operation.Status) < operationStatusRank(existing.Status) {
+		if existing.TxID == operation.TxID && bytes.Equal(existing.Response, operation.Response) {
+			return nil
+		}
+		return fmt.Errorf("operation journal status cannot move backward")
+	}
+	if existing.TxID != "" && operation.TxID != "" && existing.TxID != operation.TxID {
+		return fmt.Errorf("operation journal transaction id conflicts")
+	}
+	if len(existing.Response) > 0 && len(operation.Response) > 0 && !bytes.Equal(existing.Response, operation.Response) {
+		return fmt.Errorf("operation journal receipt conflicts")
+	}
+	if operation.TxID == "" {
+		operation.TxID = existing.TxID
+	}
+	if len(operation.Response) == 0 {
+		operation.Response = existing.Response
+	}
+	operation.CreatedAt = existing.CreatedAt
 	operation.UpdatedAt = time.Now().UTC()
 	s.entries[key] = operation
 	return nil

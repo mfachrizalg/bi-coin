@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 
@@ -86,7 +87,7 @@ func TestRetailActorCannotUseInstitutionalRedemptionRoute(t *testing.T) {
 	}
 }
 
-func TestQrisMutationsRejectForeignWallet(t *testing.T) {
+func TestQrisMutationsAreDisabled(t *testing.T) {
 	contract := &authorizationContract{
 		walletOwners: map[string]string{"wlt_alice": "alice"},
 	}
@@ -121,8 +122,8 @@ func TestQrisMutationsRejectForeignWallet(t *testing.T) {
 			response := httptest.NewRecorder()
 			router.ServeHTTP(response, req)
 
-			if response.Code != http.StatusForbidden {
-				t.Fatalf("foreign-wallet QRIS mutation got %d, want 403", response.Code)
+			if response.Code != http.StatusNotFound {
+				t.Fatalf("QRIS mutation got %d, want 404 while disabled", response.Code)
 			}
 			if len(contract.submissions) != 0 {
 				t.Fatalf("foreign-wallet QRIS mutation reached chaincode: %+v", contract.submissions)
@@ -244,6 +245,12 @@ func (c *authorizationContract) SubmitTransaction(name string, args ...string) (
 	switch name {
 	case "Transfer":
 		return []byte(`{"status":"settled","tx_id":"tx-1","reference_id":"` + args[3] + `","sender_id":"` + args[0] + `","receiver_id":"` + args[1] + `","amount":1000}`), nil
+	case "RequestIssuance":
+		return []byte(`{"status":"issued","reference_id":"` + args[1] + `","wallet_id":"bi_treasury","amount":` + args[0] + `,"tx_id":"tx-1"}`), nil
+	case "RequestRedemption":
+		return []byte(`{"status":"redeemed","reference_id":"` + args[2] + `","participant_id":"` + args[0] + `","amount":` + args[1] + `,"tx_id":"tx-1"}`), nil
+	case "DistributeToParticipant":
+		return []byte(`{"status":"settled","tx_id":"tx-1","reference_id":"` + args[2] + `","sender_id":"bi_treasury","receiver_id":"wlt_` + args[0] + `","amount":` + args[1] + `}`), nil
 	case "PayQris":
 		return []byte(`{"status":"paid","tx_id":"tx-1"}`), nil
 	default:
@@ -254,6 +261,8 @@ func (c *authorizationContract) SubmitTransaction(name string, args ...string) (
 func (c *authorizationContract) EvaluateTransaction(name string, args ...string) ([]byte, error) {
 	c.evaluations = append(c.evaluations, contractCall{name: name, args: append([]string(nil), args...)})
 	switch name {
+	case "GetOperationReceipt":
+		return []byte("null"), nil
 	case "GetWallet":
 		wallet := map[string]string{
 			"wallet_id": args[0],
@@ -270,5 +279,61 @@ func (c *authorizationContract) EvaluateTransaction(name string, args ...string)
 		]`), nil
 	default:
 		return []byte("{}"), nil
+	}
+}
+
+func TestParticipantAndTreasuryMutationsRouteToLedgerForPermittedRoles(t *testing.T) {
+	biOnly := []middleware.Role{middleware.RoleBankIndonesia}
+	applicants := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleValidatorBank, middleware.RolePJP, middleware.RoleBankPjp}
+	roles := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleValidatorBank, middleware.RolePJP,
+		middleware.RoleBankPjp, middleware.RoleKycVerified, middleware.RoleMerchant}
+
+	routes := []struct {
+		path      string
+		body      string
+		chaincode string
+		allowed   []middleware.Role
+	}{
+		{"/participants", `{"participant_id":"pjp_1","name":"PJP One","participant_type":"pjp"}`, "SubmitParticipant", applicants},
+		{"/participants/pjp_1/approve", "", "ApproveParticipant", biOnly},
+		{"/participants/pjp_1/freeze", "", "FreezeParticipant", biOnly},
+		{"/participants/pjp_1/unfreeze", "", "UnfreezeParticipant", biOnly},
+		{"/participants/pjp_1/reject", "", "RejectParticipant", biOnly},
+		{"/participants/pjp_1/offboard", "", "OffboardParticipant", biOnly},
+		{"/issuance-requests", `{"amount":"1000"}`, "RequestIssuance", biOnly},
+		{"/redemption-requests", `{"participant_id":"pjp_1","amount":"1000"}`, "RequestRedemption", biOnly},
+		{"/distribute", `{"receiver_participant_id":"pjp_1","amount":"1000"}`, "DistributeToParticipant", biOnly},
+	}
+
+	for _, route := range routes {
+		for _, role := range roles {
+			t.Run(string(role)+route.path, func(t *testing.T) {
+				contract := &authorizationContract{}
+				router := mux.NewRouter()
+				New(services.NewLedgerServiceForTest(contract, nil, ""), nil).RegisterRoutes(router)
+
+				req := httptest.NewRequest(http.MethodPost, route.path, strings.NewReader(route.body))
+				req.Header.Set("Idempotency-Key", "mutation-"+string(role))
+				req = requestWithIdentity(req, role, string(role))
+				response := httptest.NewRecorder()
+				router.ServeHTTP(response, req)
+
+				if !slices.Contains(route.allowed, role) {
+					if response.Code != http.StatusForbidden || len(contract.submissions) != 0 {
+						t.Fatalf("got %d with submissions %+v, want 403 and no chaincode call", response.Code, contract.submissions)
+					}
+					return
+				}
+				if response.Code != http.StatusOK {
+					t.Fatalf("got %d, want 200: %s", response.Code, response.Body.String())
+				}
+				if len(contract.submissions) != 1 || contract.submissions[0].name != route.chaincode {
+					t.Fatalf("submissions = %+v, want one %s", contract.submissions, route.chaincode)
+				}
+				if strings.Contains(route.path, "pjp_1") && contract.submissions[0].args[0] != "pjp_1" {
+					t.Fatalf("%s args = %v, want pjp_1 first", route.chaincode, contract.submissions[0].args)
+				}
+			})
+		}
 	}
 }

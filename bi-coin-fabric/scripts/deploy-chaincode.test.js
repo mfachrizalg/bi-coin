@@ -23,6 +23,17 @@ test('Garuda lifecycle commit collects endorsements from the validator peers', (
 
     assert.match(block, /--peerAddresses localhost:7051/);
     assert.match(block, /--peerAddresses localhost:9051/);
-    assert.match(block, /--peerAddresses localhost:11051/);
+    assert.match(block, /--peerAddresses localhost:12051/);
     assert.match(block, /--peerAddresses localhost:13051/);
+});
+
+test('incremental upgrades replace approvals only when they match the committed definition', () => {
+    assert.match(script, /COMMITTED_SEQUENCE/);
+    assert.match(script, /approval_matches_committed/);
+    assert.match(script, /mismatched uncommitted approval/);
+});
+
+test('default deployment does not target an older committed sequence', () => {
+    assert.match(script, /already at newer version .*; no upgrade requested/);
+    assert.match(script, /Requested sequence .* is older than committed sequence/);
 });

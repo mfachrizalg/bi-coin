@@ -60,6 +60,13 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 	r.Use(limitRequestBody(cfg.MaxBodyBytes))
 
 	h.RegisterRoutes(r)
+	studySvc, err := services.NewStudyLedgerService(cfg)
+	if err != nil {
+		log.Fatalf("study ledger service: %v", err)
+	}
+	if studySvc != nil {
+		handlers.RegisterStudyRoutes(r, studySvc)
+	}
 
 	docs := handlers.NewDocsHandler(handlers.DocsSpecs{
 		Public:        specPublic,
@@ -89,7 +96,7 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 		AllowCredentials: true,
 	})
 
-	return &http.Server{
+	server := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           c.Handler(r),
 		ReadTimeout:       cfg.ReadTimeout,
@@ -97,6 +104,14 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 		WriteTimeout:      cfg.WriteTimeout,
 		IdleTimeout:       cfg.IdleTimeout,
 	}
+	if studySvc != nil {
+		server.RegisterOnShutdown(func() {
+			if err := studySvc.Close(); err != nil {
+				log.Printf("close study Fabric gateways: %v", err)
+			}
+		})
+	}
+	return server
 }
 
 func limitRequestBody(maxBytes int64) func(http.Handler) http.Handler {

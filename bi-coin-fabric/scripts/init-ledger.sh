@@ -15,7 +15,7 @@ export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
 export CORE_PEER_TLS_ENABLED=true
 
 ORG="$PROJECT_DIR/network/organizations"
-ORDERER_CA="$ORG/ordererOrganizations/paynet/orderers/orderer.paynet/msp/tlscacerts/tlsca.paynet-cert.pem"
+ORDERER_CA="$ORG/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/msp/tlscacerts/tlsca.bi-coin-cert.pem"
 
 set_peer() { # mspid domain port
   export CORE_PEER_LOCALMSPID="$1" CORE_PEER_ADDRESS="localhost:$3"
@@ -24,19 +24,19 @@ set_peer() { # mspid domain port
 }
 
 echo "Invoking InitLedger..."
-set_peer BankIndonesiaOrgMSP bi.paynet 7051
-peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.paynet \
+set_peer CentralBankMSP bi-coin 7051
+peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.bi-coin \
   --tls --cafile "$ORDERER_CA" -C "$CHANNEL_NAME" -n "$CC_NAME" \
   -c '{"function":"InitLedger","Args":[]}' \
-  --peerAddresses localhost:7051  --tlsRootCertFiles "$ORG/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls/ca.crt" \
-  --peerAddresses localhost:9051  --tlsRootCertFiles "$ORG/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls/ca.crt" \
-  --peerAddresses localhost:11051 --tlsRootCertFiles "$ORG/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls/ca.crt" \
+  --peerAddresses localhost:7051  --tlsRootCertFiles "$ORG/peerOrganizations/bi-coin/peers/peer0.bi-coin/tls/ca.crt" \
+  --peerAddresses localhost:9051  --tlsRootCertFiles "$ORG/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls/ca.crt" \
+  --peerAddresses localhost:12051  --tlsRootCertFiles "$ORG/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls/ca.crt" \
+  --peerAddresses localhost:13051  --tlsRootCertFiles "$ORG/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls/ca.crt" \
   --waitForEvent
 
-echo "Pre-warming chaincode container on all 5 peers..."
-for spec in "BankIndonesiaOrgMSP bi.paynet 7051" "HimbaraBankOrgMSP himbara.paynet 9051" \
-            "CommercialBankOrgMSP commercial.paynet 11051" "OJKObserverOrgMSP ojk.paynet 12051" \
-            "PJPOrgMSP pjp.paynet 13051"; do
+echo "Pre-warming chaincode container on all 4 peers..."
+for spec in "CentralBankMSP bi-coin 7051" "DistributorMSP distributor.bi-coin 9051" \
+            "ValidatorMSP validator.bi-coin 12051" "EndUserMSP enduser.bi-coin 13051"; do
   set_peer $spec
   peer chaincode query -C "$CHANNEL_NAME" -n "$CC_NAME" -c '{"function":"GetTotalSupply","Args":[]}' >/dev/null 2>&1 || true
   echo "  warmed peer0.$(echo $spec | awk '{print $2}')"

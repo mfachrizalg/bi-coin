@@ -104,6 +104,9 @@ func (s *AuthService) Verify(token string) (*middleware.TokenClaims, error) {
 	if err != nil || user == nil || !user.Active || user.Role != middleware.Role(payload.Role) {
 		return nil, errors.New("inactive auth user")
 	}
+	if user.SubjectID != payload.SubjectID || user.ParticipantID != payload.ParticipantID || user.CustodianMSPID != payload.CustodianMSP {
+		return nil, errors.New("auth user identity or custody changed")
+	}
 	return &middleware.TokenClaims{
 		Username:       payload.Sub,
 		Role:           middleware.Role(payload.Role),

@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -25,13 +27,26 @@ type Handler struct {
 type ledgerServiceContextKey struct{}
 
 func decodeJSON(w http.ResponseWriter, r *http.Request, target interface{}) bool {
-	if err := json.NewDecoder(r.Body).Decode(target); err != nil {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
 		var maxBytesError *http.MaxBytesError
 		if errors.As(err, &maxBytesError) {
 			writeError(w, http.StatusRequestEntityTooLarge, "request body too large")
 			return false
 		}
 		writeValidationError(w, "invalid request body")
+		return false
+	}
+	if err := validateJSONShape(body); err != nil {
+		writeValidationError(w, "request body must contain one JSON value with unique object fields")
+		return false
+	}
+	if err := json.Unmarshal(body, target); err != nil {
+		writeValidationError(w, "invalid request body")
+		return false
+	}
+	if err := validateRequest(target); err != nil {
+		writeRequestValidationErrors(w, err)
 		return false
 	}
 	return true
@@ -100,19 +115,20 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 		middleware.RoleBankPjp, middleware.RoleValidatorBank, middleware.RolePJP))
 	transferPayments.HandleFunc("/transfers", h.Transfer).Methods("POST")
 
-	// Approved customers and merchants initiate QRIS payments and read balances.
-	retailPayments := r.NewRoute().Subrouter()
-	retailPayments.Use(middleware.RequireRole(middleware.RoleKycVerified, middleware.RoleMerchant))
-	retailPayments.HandleFunc("/qris/resolve", h.ResolveQris).Methods("POST")
-	retailPayments.HandleFunc("/qris/pay", h.PayQris).Methods("POST")
-	retailPayments.HandleFunc("/balances", h.GetBalances).Methods("GET")
-
-	merchantQris := r.NewRoute().Subrouter()
-	merchantQris.Use(middleware.RequireRole(middleware.RoleMerchant))
-	merchantQris.HandleFunc("/qris/intents", h.CreateQrisIntent).Methods("POST")
-	merchantQris.HandleFunc("/qris/intents", h.ListQrisIntents).Methods("GET")
-	merchantQris.HandleFunc("/qris/intents/{intent_id}", h.GetQrisIntent).Methods("GET")
-	merchantQris.HandleFunc("/qris/intents/{intent_id}/cancel", h.CancelQrisIntent).Methods("POST")
+	// QRIS routes are disabled; retain their handlers and stores for a later restoration.
+	// retailPayments := r.NewRoute().Subrouter()
+	// retailPayments.Use(middleware.RequireRole(middleware.RoleKycVerified, middleware.RoleMerchant))
+	// retailPayments.HandleFunc("/qris/resolve", h.ResolveQris).Methods("POST")
+	// retailPayments.HandleFunc("/qris/pay", h.PayQris).Methods("POST")
+	// merchantQris := r.NewRoute().Subrouter()
+	// merchantQris.Use(middleware.RequireRole(middleware.RoleMerchant))
+	// merchantQris.HandleFunc("/qris/intents", h.CreateQrisIntent).Methods("POST")
+	// merchantQris.HandleFunc("/qris/intents", h.ListQrisIntents).Methods("GET")
+	// merchantQris.HandleFunc("/qris/intents/{intent_id}", h.GetQrisIntent).Methods("GET")
+	// merchantQris.HandleFunc("/qris/intents/{intent_id}/cancel", h.CancelQrisIntent).Methods("POST")
+	retailBalances := r.NewRoute().Subrouter()
+	retailBalances.Use(middleware.RequireRole(middleware.RoleKycVerified, middleware.RoleMerchant))
+	retailBalances.HandleFunc("/balances", h.GetBalances).Methods("GET")
 
 	policyMutation := r.NewRoute().Subrouter()
 	policyMutation.Use(middleware.RequireRole(middleware.RoleBankIndonesia))
@@ -158,7 +174,8 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 func (h *Handler) principalLedger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if h.svc == nil || middleware.GetRole(r) == middleware.RolePublic || r.URL.Path == "/health" || r.URL.Path == "/auth/login" || r.URL.Path == "/auth/me" {
+		route := mux.CurrentRoute(r)
+		if h.svc == nil || (route != nil && strings.HasPrefix(route.GetName(), "compliance.")) || middleware.GetRole(r) == middleware.RolePublic || r.URL.Path == "/health" || r.URL.Path == "/auth/login" || r.URL.Path == "/auth/me" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -510,6 +527,11 @@ func (h *Handler) SubmitKycProfile(w http.ResponseWriter, r *http.Request) {
 	if !decodeJSON(w, r, &req) {
 		return
 	}
+	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
+	if req.IdempotencyKey == "" {
+		writeValidationError(w, "Idempotency-Key is required")
+		return
+	}
 	profile, err := h.ledger(r).SubmitKycProfile(req)
 	if err != nil {
 		writeServiceError(w, err)
@@ -604,7 +626,12 @@ func (h *Handler) RequestIssuance(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "invalid amount")
 		return
 	}
-	if err := h.ledger(r).RequestIssuance(amount); err != nil {
+	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
+	if req.IdempotencyKey == "" {
+		writeValidationError(w, "Idempotency-Key is required")
+		return
+	}
+	if err := h.ledger(r).RequestIssuance(amount, req.IdempotencyKey); err != nil {
 		writeServiceError(w, err)
 		return
 	}
@@ -643,7 +670,12 @@ func (h *Handler) RequestRedemption(w http.ResponseWriter, r *http.Request) {
 		writeValidationError(w, "invalid amount")
 		return
 	}
-	if err := h.ledger(r).RequestRedemption(req.ParticipantID, amount); err != nil {
+	req.IdempotencyKey = r.Header.Get("Idempotency-Key")
+	if req.IdempotencyKey == "" {
+		writeValidationError(w, "Idempotency-Key is required")
+		return
+	}
+	if err := h.ledger(r).RequestRedemption(req.ParticipantID, amount, req.IdempotencyKey); err != nil {
 		writeServiceError(w, err)
 		return
 	}
@@ -887,22 +919,22 @@ func TopologyHandler(w http.ResponseWriter, r *http.Request) {
 	topo := models.Topology{
 		Nodes: []models.TopologyNode{
 			{ID: "bi-node", Name: "Bank Indonesia", Type: "central_bank", Role: "issuer", Domain: "bi.go.id"},
-			{ID: "validator-a", Name: "Himbara Bank", Type: "validator", Role: "validator", Domain: "bank-himbara.paynet"},
-			{ID: "validator-b", Name: "Commercial Bank", Type: "validator", Role: "validator", Domain: "bank-commercial.paynet"},
-			{ID: "observer-node", Name: "OJK Observer", Type: "observer", Role: "observer", Domain: "ojk.go.id"},
-			{ID: "policy-node", Name: "Policy Oracle", Type: "policy", Role: "policy", Domain: "policy.paynet"},
-			{ID: "security-node", Name: "Security Node", Type: "security", Role: "security", Domain: "security.paynet"},
-			{ID: "api-gateway", Name: "API Gateway", Type: "gateway", Role: "api", Domain: "api.paynet"},
+			{ID: "distributor-a", Name: "Distributor Bank A", Type: "distributor", Role: "distributor", Domain: "distributor-a.bi-coin"},
+			{ID: "distributor-b", Name: "Distributor Bank B", Type: "distributor", Role: "distributor", Domain: "distributor-b.bi-coin"},
+			{ID: "validator-ojk", Name: "OJK (ValidatorMSP)", Type: "validator", Role: "observer", Domain: "ojk.go.id"},
+			{ID: "policy-node", Name: "Policy Oracle", Type: "policy", Role: "policy", Domain: "policy.bi-coin"},
+			{ID: "security-node", Name: "Security Node", Type: "security", Role: "security", Domain: "security.bi-coin"},
+			{ID: "api-gateway", Name: "API Gateway", Type: "gateway", Role: "api", Domain: "api.bi-coin"},
 		},
 		Links: []models.TopologyLink{
-			{Source: "bi-node", Target: "validator-a", Type: "consensus"},
-			{Source: "bi-node", Target: "validator-b", Type: "consensus"},
-			{Source: "validator-a", Target: "validator-b", Type: "p2p"},
-			{Source: "validator-a", Target: "api-gateway", Type: "api"},
-			{Source: "validator-b", Target: "api-gateway", Type: "api"},
-			{Source: "observer-node", Target: "validator-a", Type: "observe"},
-			{Source: "observer-node", Target: "validator-b", Type: "observe"},
-			{Source: "bi-node", Target: "observer-node", Type: "oversight"},
+			{Source: "bi-node", Target: "distributor-a", Type: "consensus"},
+			{Source: "bi-node", Target: "distributor-b", Type: "consensus"},
+			{Source: "distributor-a", Target: "distributor-b", Type: "p2p"},
+			{Source: "distributor-a", Target: "api-gateway", Type: "api"},
+			{Source: "distributor-b", Target: "api-gateway", Type: "api"},
+			{Source: "validator-ojk", Target: "distributor-a", Type: "observe"},
+			{Source: "validator-ojk", Target: "distributor-b", Type: "observe"},
+			{Source: "bi-node", Target: "validator-ojk", Type: "oversight"},
 		},
 	}
 	writeJSON(w, http.StatusOK, topo)

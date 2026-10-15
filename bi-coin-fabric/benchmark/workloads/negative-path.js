@@ -65,10 +65,10 @@ class NegativePathWorkload extends RetailWorkloadBase {
         const profileId = `kyc_${id}`;
         const hashes = JSON.stringify([`sha256:${id}`]);
         const dd = diligence || (tier === 'BASIC' ? 'simplified' : 'standard');
-        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'himbara');
-        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'himbara');
-        await this.submit('RefreshKycProfile', [profileId, 'approved', risk, dd, senior, hashes, expiresAt], false, 'himbara');
-        await this.submit('CreateWallet', [walletId, id, tier], false, 'himbara');
+        await this.submit('CreateRetailCustomer', [id, `sha256:identity:${id}`, walletId, profileId], false, 'distributor');
+        await this.submit('SubmitKycProfile', [profileId, 'retail_customer', id, hashes], false, 'distributor');
+        await this.submit('RefreshKycProfile', [profileId, 'approved', risk, dd, senior, hashes, expiresAt], false, 'distributor');
+        await this.submit('CreateWallet', [walletId, id, tier], false, 'distributor');
         if (fund > 0) await this.fundRetailWallet(walletId, fund);
         return { id, walletId, tier };
     }
@@ -136,7 +136,7 @@ class NegativePathWorkload extends RetailWorkloadBase {
         console.log(`[negative-path] CASE worker=${this.workerIndex} label=${label}`);
         let response;
         try {
-            response = await this.sutAdapter.sendRequests(actorRequest(request, 'himbara'));
+            response = await this.sutAdapter.sendRequests(actorRequest(request, 'distributor'));
         } catch (err) {
             this.infrastructureErrors += 1;
             throw new Error(`[negative-path] ORACLE ERROR: connector threw before returning a status for "${label}": ${err}`);

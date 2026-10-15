@@ -95,6 +95,7 @@ type KycProfileRequest struct {
 	LegalName      string         `json:"legal_name,omitempty"`
 	DocumentType   string         `json:"document_type,omitempty"`
 	DocumentNumber string         `json:"document_number,omitempty"`
+	IdempotencyKey string         `json:"-"`
 }
 
 type KycProviderResultRequest struct {
@@ -144,7 +145,8 @@ type AmountRequest struct {
 }
 
 type IssuanceRequest struct {
-	Amount string `json:"amount"`
+	Amount         string `json:"amount"`
+	IdempotencyKey string `json:"-"`
 }
 
 type TransferRequest struct {

@@ -52,7 +52,7 @@ check "Network topology" GET "/network/topology"
 
 SMOKE_ID="smoke-$(date +%s%N)"
 check "Submit validator participant" POST "/participants" 200 \
-  "{\"participant_id\":\"$SMOKE_ID\",\"name\":\"Smoke Validator\",\"domain\":\"$SMOKE_ID.paynet\",\"account_id\":\"$SMOKE_ID-account\",\"participant_type\":\"validator\"}"
+  "{\"participant_id\":\"$SMOKE_ID\",\"name\":\"Smoke Validator\",\"domain\":\"$SMOKE_ID.bi-coin\",\"account_id\":\"$SMOKE_ID-account\",\"participant_type\":\"validator\"}"
 check "Approve validator participant" POST "/participants/$SMOKE_ID/approve" 200 ""
 
 check "Issue into Treasury" POST "/issuance-requests" 200 '{"amount":"1000000"}'

@@ -27,7 +27,7 @@ class SupervisionReadsWorkload extends RetailWorkloadBase {
         const seedTransfers = this.arg('seedTransfers', 10);
         const seedTransferAmount = this.arg('seedTransferAmount', 50000);
         for (const { sender, receiver } of this.planSeedTransfers(seedTransfers)) {
-            await this.submit('Transfer', [sender.walletId, receiver.walletId, seedTransferAmount], false, 'himbara');
+            await this.submit('Transfer', [sender.walletId, receiver.walletId, seedTransferAmount], false, 'distributor');
         }
 
         this.txIndex = 0;
