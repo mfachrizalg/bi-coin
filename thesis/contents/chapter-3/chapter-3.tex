@@ -42,7 +42,7 @@ klien, \textit{backend API}, basis data luring PostgreSQL, dan jaringan
 \textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya. Aplikasi klien hanya berfungsi sebagai alat bantu demonstrasi dan tidak termasuk dalam evaluasi penelitian ini.
 
 Pemangku kepentingan utama terdiri atas Bank Indonesia sebagai penerbit dan
-pengawas, bank validator dan PJP sebagai kustodian institusional, pedagang dan
+pengawas, bank distributor dan PJP sebagai kustodian institusional, pedagang dan
 pelanggan ritel sebagai pengguna transaksi, serta supervisor dan pengamat OJK
 sebagai pihak yang membutuhkan fungsi baca dan pelaporan. Setiap pemangku
 kepentingan tersebut kemudian diterjemahkan menjadi
@@ -58,8 +58,8 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         \toprule
         \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
         \midrule
-        FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembekuan, pencairan, dan penghentian peserta sesuai peran Bank Indonesia, bank validator, dan PJP. \\
-        FR-02 & Sistem harus mendukung penerbitan Digital Rupiah oleh Bank Indonesia ke dalam Treasury dan distribusi langsung kepada bank validator atau PJP sebagai kustodian institusional. \\
+        FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembekuan, pencairan, dan penghentian peserta sesuai peran Bank Indonesia, bank distributor, dan PJP. \\
+        FR-02 & Sistem harus mendukung penerbitan Digital Rupiah oleh Bank Indonesia ke dalam Treasury dan distribusi langsung kepada bank distributor atau PJP sebagai kustodian institusional. \\
         FR-03 & Sistem harus menolak transfer yang tidak diotorisasi, melibatkan dompet beku, bernilai tidak valid, atau melebihi saldo pengirim, lalu memperbarui saldo secara atomik. \\
         FR-04 & Sistem harus menyediakan laporan rekonsiliasi, metrik, riwayat transaksi, dan \textit{event} pengawasan bagi peran yang berwenang. \\
         FR-05 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, PJP/bank, merchant, dan supervisor. \\
@@ -239,7 +239,7 @@ organisasi, serta \textit{backend API} yang terhubung ke jaringan melalui
 \input{contents/figures/network-architecture}
 
 Kebutuhan fungsional sistem dimodelkan dengan diagram use case. Aktor sistem
-terdiri atas Bank Indonesia, bank validator, PJP, pedagang (\textit{merchant}),
+terdiri atas Bank Indonesia, bank distributor, PJP, pedagang (\textit{merchant}),
 pelanggan ritel, supervisor, dan pengamat OJK. Diagram use case keseluruhan
 ditunjukkan pada Gambar~\ref{fig:uc01}, sedangkan rincian operasi
 institusional dan ritel ditunjukkan pada Gambar~\ref{fig:uc02} dan
