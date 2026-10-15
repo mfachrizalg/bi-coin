@@ -44,7 +44,6 @@ const sourceFiles = ['scripts', 'chaincode', 'study', 'backend', 'frontend/src',
         'package-lock.json',
         'frontend/package.json',
         'frontend/package-lock.json',
-        'benchmark/networkconfig.yaml',
     ].map(file => path.join(projectRoot, file)).filter(fs.existsSync))
     .filter(file => /\.(?:go|js|mjs|sh|json|ya?ml|md|ts|tsx)$|\/go\.(?:mod|sum)$|\/Dockerfile$/.test(file)
         || path.relative(projectRoot, file).split(path.sep).slice(0, 2).join(path.sep) === ['backend', 'vendor'].join(path.sep)

@@ -23,7 +23,7 @@ test('manifest preserves the executed source and remains valid after its output 
         fs.mkdirSync(path.join(project, 'network/study/packages'), { recursive: true });
         const script = path.join(project, 'scripts/write-study-manifest.js');
         fs.copyFileSync(__filename.replace('.test.js', '.js'), script);
-        for (const file of ['package.json', 'package-lock.json', 'benchmark/networkconfig.yaml']) {
+        for (const file of ['package.json', 'package-lock.json']) {
             fs.writeFileSync(path.join(project, file), '{}\n');
         }
         const source = path.join(project, 'scripts/example.js');
