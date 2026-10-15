@@ -24,11 +24,10 @@ build_gateway_json() {
     first=false
     json+="{\"msp_id\":\"$msp\",\"peer_endpoint\":\"localhost:$port\",\"cert_path\":\"../network/organizations/peerOrganizations/$org/users/Admin@${org}/msp/signcerts/Admin@${org}-cert.pem\",\"key_path\":\"../network/organizations/peerOrganizations/$org/users/Admin@${org}/msp/keystore/priv_sk\",\"tls_cert_path\":\"../network/organizations/peerOrganizations/$org/peers/peer0.$org/tls/ca.crt\"}"
   done <<'GATEWAYS'
-BankIndonesiaOrgMSP|bi.paynet|7051
-HimbaraBankOrgMSP|himbara.paynet|9051
-CommercialBankOrgMSP|commercial.paynet|11051
-OJKObserverOrgMSP|ojk.paynet|12051
-PJPOrgMSP|pjp.paynet|13051
+CentralBankMSP|bi-coin|7051
+DistributorMSP|distributor.bi-coin|9051
+ValidatorMSP|validator.bi-coin|12051
+EndUserMSP|enduser.bi-coin|13051
 GATEWAYS
 
   json+="]"

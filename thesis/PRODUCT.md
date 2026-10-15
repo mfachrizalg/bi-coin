@@ -31,8 +31,8 @@ A working two-tier retail Digital Rupiah prototype on a permissioned Hyperledger
 ## Capabilities and Constraints
 
 - Thesis acceptance covers participant lifecycle, treasury issuance, two-tier distribution, retail transfer, participant freeze, and supervision. KYC is implementation-only and QRIS is code-only; both are excluded from acceptance criteria and must be labeled so.
-- Monetary flow: Bank Indonesia Treasury -> Validator Bank/PJP Custodian -> Retail Customer/Merchant wallet.
-- Terminology is binding: `../bi-coin-fabric/CONTEXT.md` terms and their Avoid lists (for example, Issuance not Minting; Participant roles are Validator Bank, Observer, and PJP).
+- Monetary flow: Bank Indonesia Treasury -> Distributor Bank/PJP Custodian -> Retail Customer/Merchant wallet.
+- Terminology is binding: `../bi-coin-fabric/CONTEXT.md` terms and their Avoid lists (for example, Issuance not Minting; Participant roles are Distributor Bank, Observer, and PJP).
 - Frontend interface decisions live in `../bi-coin-fabric/docs/adr/0004-frontend-experience-boundaries.md` and `0005-frontend-language-and-interface-design.md`.
 - Benchmark numbers come only from the canonical 113543 worker-sweep run (transfer 7.8–14.5 TPS, functional 3.7–19.9 TPS, 616 tx, 0 failures). The 9.0/45.9/57.7 single-run figures are retired.
 - Undecided: final defense date (`main.tex` still reads 8–13 Juli 2026) and examiner names.
