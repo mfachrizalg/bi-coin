@@ -1,12 +1,14 @@
 # Final evidence claim map
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 This map is the citation boundary for the revised thesis, paper, and defense
 briefs. Performance values are local measurements; `PASS` rows are semantic
 oracles, not production-capacity claims.
 
 | Claim | Source of truth | Evidence artifact |
 |---|---|---|
-| Two-tier custody is BI Treasury → validator bank/PJP custodian → retail wallet. | `chaincode/digital_rupiah.go`; `docs/diagrams/plantuml/activity-diagrams.puml` | `benchmark/results/20260909-final-08-functionality.log` |
+| Two-tier custody is BI Treasury → distributor bank/PJP custodian → retail wallet. | `chaincode/digital_rupiah.go`; `docs/diagrams/plantuml/activity-diagrams.puml` | `benchmark/results/20260909-final-08-functionality.log` |
 | Direct retail `Mint` is rejected; issuance credits `bi_treasury`. | `chaincode/digital_rupiah.go`; `chaincode/digital_rupiah_v3_test.go` | `benchmark/results/20260909-final-08-functionality.html` |
 | Functional flows complete 168/168 transactions. | `benchmark/benchconfigs/functionality.yaml` | `benchmark/results/20260909-final-08-functionality.log` and `.html` |
 | Boundary oracle passes all eight exact-limit cases. | `scripts/validate-boundary-log.js` | `benchmark/results/20260909-final-boundary.log` and `.html` |

@@ -1,5 +1,7 @@
 # Remaining paper and thesis review
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 Date: 20 September 2026. This supplements, rather than replaces, the [initial nine findings](joint-paper-thesis-review-2026-09-20.md). Manuscripts and application code remain unchanged.
 
 ## Coverage and assessment
@@ -92,7 +94,7 @@ Loading a file directly with `lstinputlisting` prevents copying drift; it does n
 
 ### R19 — One remaining distribution description contradicts the selected prototype
 
-**Major: internal consistency.** [Chapter 3:607](../../thesis/contents/chapter-3/chapter-3.tex#L607) describes `BI → bank → PJP → retail customer`. The active research questions, conclusions, glossary, and implementation describe direct distribution from Bank Indonesia to a validator bank **or** PJP custodian, followed by retail service.
+**Major: internal consistency.** [Chapter 3:607](../../thesis/contents/chapter-3/chapter-3.tex#L607) describes `BI → bank → PJP → retail customer`. The active research questions, conclusions, glossary, and implementation describe direct distribution from Bank Indonesia to a distributor bank **or** PJP custodian, followed by retail service.
 
 **Remedy:** use one accurate representation of the implemented route throughout the thesis and figures. Keep policy-roadmap alternatives explicitly distinguished from the simplified prototype; do not change the implementation or invent an intermediate bank-to-PJP hop to reconcile an old sentence.
 

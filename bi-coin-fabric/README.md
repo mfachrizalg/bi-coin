@@ -21,7 +21,7 @@ and supervision.
             PostgreSQL KYC/Auth
 ```
 
-Monetary flow: `Bank Indonesia Treasury -> Validator Bank/PJP Custodian reserve -> Retail Customer/Merchant wallet`.
+Monetary flow: `Bank Indonesia Treasury -> Distributor Bank/PJP Custodian reserve -> Retail Customer/Merchant wallet`.
 Issuance credits only `bi_treasury`; Custodian funding uses the ordinary transfer policy.
 
 ## Components
@@ -77,7 +77,7 @@ Default PoC users are defined in `.env.example`, for example `bi` / `bi-password
 | POST | `/transfers` | Transfer with KYC and tier-limit enforcement; requires `Idempotency-Key` |
 | POST | `/qris/pay` | Settle QRIS payment; requires `Idempotency-Key` |
 | POST | `/issuance-requests` | BI-only issuance into Treasury |
-| POST | `/distribute` | BI-only Treasury distribution to a Validator Bank or PJP Custodian; requires `Idempotency-Key` |
+| POST | `/distribute` | BI-only Treasury distribution to a Distributor Bank or PJP Custodian; requires `Idempotency-Key` |
 
 ## Chaincode Functions
 

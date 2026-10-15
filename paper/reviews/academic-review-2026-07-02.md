@@ -1,5 +1,7 @@
 # Academic Peer-Review Package
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 ## Manuscript
 
 **Title:** *Blockchain-based Digital Money for Bank Indonesia Business Process*  
@@ -277,7 +279,7 @@ The manuscript explicitly acknowledges lack of transaction privacy, private data
 
 ### W1. One orderer cannot provide Raft crash fault tolerance
 
-**Problem:** The architecture shows one `orderer.paynet` and labels it “Raft CFT” ([main.tex:345](/home/mfachrizalg/2026/Skripsi/bi-coin/paper/main.tex:345), [main.tex:473](/home/mfachrizalg/2026/Skripsi/bi-coin/paper/main.tex:473)). Repository configuration also contains one orderer service.
+**Problem:** The architecture shows one `orderer.bi-coin` and labels it “Raft CFT” ([main.tex:345](/home/mfachrizalg/2026/Skripsi/bi-coin/paper/main.tex:345), [main.tex:473](/home/mfachrizalg/2026/Skripsi/bi-coin/paper/main.tex:473)). Repository configuration also contains one orderer service.
 
 **Why it matters:** Raft with one node tolerates zero orderer failures. The label overstates availability and can mislead readers about fault tolerance.
 

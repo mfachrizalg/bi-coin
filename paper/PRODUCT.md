@@ -33,8 +33,8 @@ A working retail Digital Rupiah research prototype on a permissioned Hyperledger
 ## Capabilities and Constraints
 
 - The paper's claims must stay consistent with the thesis: same scope, same terminology, same numbers.
-- Terminology follows `../bi-coin-fabric/CONTEXT.md` (for example, Issuance not Minting; Participant roles are Validator Bank, Observer, and PJP).
-- Monetary flow: Bank Indonesia Treasury -> Validator Bank/PJP Custodian -> Retail Customer/Merchant wallet.
+- Terminology follows `../bi-coin-fabric/CONTEXT.md` (for example, Issuance not Minting; Participant roles are Distributor Bank, Observer, and PJP).
+- Monetary flow: Bank Indonesia Treasury -> Distributor Bank/PJP Custodian -> Retail Customer/Merchant wallet.
 - The shared Fabric channel gives no transaction privacy. The paper must keep stating this.
 - Measurements describe a single-host prototype. They do not establish production capacity or cross-machine reproducibility.
 - OPEN: which benchmark evidence is binding.

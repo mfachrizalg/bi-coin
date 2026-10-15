@@ -1,5 +1,7 @@
 # Comprehensive `bi-coin-fabric` Review
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 **Review window:** 24--25 August 2026  
 **Baseline:** `master` at `0207584077575bc859f16f8be9811211890b3e0c`  
 **Disposition:** Review complete; source remediations applied for F1--F12; final conformance evidence is captured in `benchmark/results/20260909-final-evidence-manifest.json`
@@ -29,7 +31,7 @@ The frontend, backend, chaincode, benchmark workloads, smoke script, and network
 
 **Code-correctness verdict: GREEN for thesis scope, AMBER for production hardening.** F1--F12 have source-level fixes and focused regressions; the legacy `bank_pjp` role remains only as a compatibility alias and the topology remains single-node per role. QRIS remains code-only and KYC implementation-only.
 
-The accepted custody model is **Treasury -> Custodian -> Wallet Owner**: Bank Indonesia distributes directly from its treasury to either a Validator Bank or a Payment Service Provider. Observers cannot be Custodians. This corrects prior shorthand that implied a mandatory Validator Bank-to-PJP hop; the current source implements the clarified flow.
+The accepted custody model is **Treasury -> Custodian -> Wallet Owner**: Bank Indonesia distributes directly from its treasury to either a Distributor Bank or a Payment Service Provider. Observers cannot be Custodians. This corrects prior shorthand that implied a mandatory Distributor Bank-to-PJP hop; the current source implements the clarified flow.
 
 ### Isolated live evidence
 
@@ -37,13 +39,13 @@ The fresh 7--8 September Docker-in-Docker ledger confirmed the remediated core p
 
 - The upgraded chaincode rejected `Mint(wlt_live-retail-0908, 1)` with `issuance must credit bi_treasury`.
 - `RequestIssuance(100000)` followed by `DistributeToParticipant(live-custodian-0908, 100000, ...)` committed; the Validator wallet received the funds while Treasury supply stayed constant.
-- A Himbara-custodied wholesale wallet funded a KYC-approved STANDARD retail wallet; balances became `50000` and `50000`, with `monthly_received=50000` on the retail wallet.
+- A distributor-custodied wholesale wallet funded a KYC-approved STANDARD retail wallet; balances became `50000` and `50000`, with `monthly_received=50000` on the retail wallet.
 
 The isolated environment also completed Vite browser login as the disposable BI user and rendered all three initialized system limits. It proves the bootstrap/read and core mutation paths; the corrected Caliper conformance artifacts below complete the relevant acceptance checks.
 
 ### 8 September 2026 remediation update
 
-**F5 remediated.** `Mint` now rejects every destination except `bi_treasury`; amount-only issuance and RTGS issuance credit Treasury. Treasury distribution accepts an active Validator Bank or PJP Custodian and rejects all other participant types. The public API and BI workspace no longer accept an issuance target or a distribution sender. The isolated browser/backend/Fabric run verified Treasury issuance followed by successful direct distributions to both a Validator Bank and a PJP.
+**F5 remediated.** `Mint` now rejects every destination except `bi_treasury`; amount-only issuance and RTGS issuance credit Treasury. Treasury distribution accepts an active Distributor Bank or PJP Custodian and rejects all other participant types. The public API and BI workspace no longer accept an issuance target or a distribution sender. The isolated browser/backend/Fabric run verified Treasury issuance followed by successful direct distributions to both a Distributor Bank and a PJP.
 
 The distribution receipt now uses the shared settled money-operation shape, so a committed Treasury distribution returns HTTP 200 rather than committing on Fabric and then failing backend receipt validation.
 
@@ -55,7 +57,7 @@ The isolated live API returned `{"wallet_id":"bi_treasury","balance":"200"}` wit
 
 **F1--F4 remediated in source.** Benchmark fixture funding now uses a serialized Treasury/Custodian path, the runner fails closed on transaction failures, the boundary oracle requires all eight cases, and OJK is excluded from application writers/endorsement and chaincode approval. `configtxgen` validates the current channel policy. The full sweep confirmed multi-worker setup completes and emits reports.
 
-**F8 remediated with compatibility alias.** JWT verification now reloads the auth user and rejects deactivated users; explicit `validator_bank` and `pjp` roles are accepted by backend routes and frontend workspace guards. The legacy `bank_pjp` role remains as a migration alias.
+**F8 remediated with compatibility alias.** JWT verification now reloads the auth user and rejects deactivated users; explicit `bank_pjp` and `pjp` roles are accepted by backend routes and frontend workspace guards. The legacy `bank_pjp` role remains as a migration alias.
 
 **F10--F12 remediated in source.** The full suite generates and validates Caliper assets, network/deploy scripts fail closed, smoke uses JWT plus current Treasury routes, manifests hash inputs and artifacts with runtime/image/topology metadata, and the single-node topology is explicitly recorded as a limitation.
 
@@ -149,7 +151,7 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 **Impact.** BI can bypass the published treasury-to-Custodian distribution path, weakening the thesis's two-tier claim.
 
-**Smallest remediation.** Reject `Mint` destinations other than the canonical BI Treasury wallet. Permit distribution only from that treasury to an eligible Validator Bank or PJP Custodian, and preserve redemption back to the treasury.
+**Smallest remediation.** Reject `Mint` destinations other than the canonical BI Treasury wallet. Permit distribution only from that treasury to an eligible Distributor Bank or PJP Custodian, and preserve redemption back to the treasury.
 
 **Regression.** Treasury mint succeeds; otherwise-identical minting to validator, PJP, merchant, or retail wallets fails without changing supply.
 
@@ -191,7 +193,7 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 **Impact.** An authorized submission workflow is hidden, capabilities cannot be separated cleanly, and deactivation does not immediately revoke an existing token.
 
-**Remediation applied.** Explicit `validator_bank` and `pjp` roles now pass the same custodian route surface; `bank_pjp` remains accepted only for existing deployments. Lifecycle controls remain BI-only.
+**Remediation applied.** Explicit `bank_pjp` and `pjp` roles now pass the same custodian route surface; `bank_pjp` remains accepted only for existing deployments. Lifecycle controls remain BI-only.
 
 **Regression.** Role-matrix tests cover visible actions and routes. A token issued before deactivation must fail on its next protected request.
 
@@ -219,7 +221,7 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 **Impact.** Old ignored files can mask a clean-checkout failure, and the setup contract is unclear.
 
-**Smallest remediation.** Call the generator explicitly with `bash` during preflight, verify every path referenced by `benchmark/networkconfig.yaml`, and document that BI, Himbara, and Commercial Bank are the Caliper client identities.
+**Smallest remediation.** Call the generator explicitly with `bash` during preflight, verify every path referenced by `benchmark/networkconfig.yaml`, and document that BI, Distributor Bank A, and Distributor Bank B are the Caliper client identities.
 
 **Regression.** Remove only generated network identities in an isolated test checkout, run preflight, and assert all referenced profile/cert/key files are recreated.
 
@@ -318,7 +320,7 @@ The earlier `recovery-manifest.json` describes a sandbox Docker-permission setup
 ## Ordered follow-up roadmap
 
 1. **Use final evidence.** Cite the combined `20260909-final-evidence-manifest.json` and keep measured-with-failures performance results separate from PASS oracles.
-2. **Finish F8 hardening.** Migrate the compatibility `bank_pjp` role to explicit validator-bank and PJP roles together with gateway/bootstrap configuration.
+2. **Finish F8 hardening.** Migrate the compatibility `bank_pjp` role to explicit distributor-bank and PJP roles together with gateway/bootstrap configuration.
 3. **Keep HA out of scope unless claimed.** The one-orderer/one-peer topology remains a prototype limitation, not a demonstrated fault-tolerant deployment.
 
 ## Completion criteria for the remediation run

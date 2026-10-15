@@ -11,7 +11,7 @@ and supervision.
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     BI[👤 Bank Indonesia]
-    BV[👤 Validator Bank]
+    BV[👤 Distributor Bank]
     PJP[👤 PJP]
     M[👤 Merchant]
     PR[👤 Pelanggan Ritel]
@@ -54,7 +54,7 @@ flowchart LR
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     BI[👤 Bank Indonesia]
-    BV[👤 Validator Bank]
+    BV[👤 Distributor Bank]
     PJP[👤 PJP]
     SV[👤 Supervisor]
 

@@ -1,5 +1,7 @@
 # Revision Response — Round 2
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 - **Date:** 2026-07-27
 - **Manuscript:** `paper/main.tex`
 - **Against:** `paper/reviews/academic-review-2026-07-25.md` (P0/P1 roadmap)

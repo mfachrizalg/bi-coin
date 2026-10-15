@@ -1,5 +1,7 @@
 # Simulated Peer Review — Round 2 (Full Mode)
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 - **Date:** 2026-07-25
 - **Manuscript:** `paper/main.tex` (IEEE conference format, 1149 lines, builds clean: 0 undefined references, 0 undefined citations, 1 overfull vbox of 6.9pt)
 - **Title:** *A Retail Digital Rupiah Prototype on Hyperledger Fabric: Two-Tier Business Processes, Risk-Based KYC Tiers, and a Reproducible Benchmark*
@@ -219,7 +221,7 @@ values are presented without their regulatory provenance, which is a missed
 opportunity because the provenance appears to exist.
 
 ## Strengths
-1. Correct institutional mapping: issuer (BI), validator banks, PJP as
+1. Correct institutional mapping: issuer (BI), distributor banks, PJP as
    customer-facing distributors, OJK as supervisor — this matches the Garuda
    White Paper's intermediated design and is explained accessibly for
    non-Indonesian readers.

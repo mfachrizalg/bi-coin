@@ -129,7 +129,7 @@ flowchart TD
   end
 
   subgraph lane_c [Blockchain]
-    C7["Validasi penerima = Validator Bank/PJP"]:::action
+    C7["Validasi penerima = Distributor Bank/PJP"]:::action
     D5{"[penerima Custodian?]"}:::decision
     C8["Tolak distribusi"]:::action
     E3c((" ")):::startend

@@ -9,12 +9,12 @@ The monetary authority that governs the system and is the sole issuer of retail 
 _Avoid_: BI, Central Bank, Issuer
 
 **Participant**:
-An institution admitted in exactly one of three roles: Validator Bank, Observer, or Payment Service Provider. Bank Indonesia, Retail Customer, and Merchant are not Participants.
+An institution admitted in exactly one of three roles: Distributor Bank, Observer, or Payment Service Provider. Bank Indonesia, Retail Customer, and Merchant are not Participants.
 _Avoid_: Member, Network Member, Node Operator
 
-**Validator Bank**:
-A Participant bank responsible for validating authorized operations and providing retail digital rupiah services. The Auditor of the compliance study is not a Validator Bank.
-_Avoid_: Bank Validator, Bank Participant, Commercial Bank, Validator
+**Distributor Bank**:
+A Participant bank responsible for validating authorized operations and providing retail digital rupiah services. The Auditor of the compliance study is not a Distributor Bank.
+_Avoid_: Bank Validator, Validator Bank, Bank Participant, Commercial Bank, Validator
 
 **Observer**:
 The Participant role held by OJK for Supervision without authority to initiate or approve monetary operations.
@@ -22,7 +22,7 @@ _Avoid_: Regulator, Validator
 
 **Auditor**:
 A human role that performs Supervision. It is read-only: it can inspect controls records but cannot submit mutations. It is distinct from the institutional Observer Participant.
-_Avoid_: Supervisor, Observer, OJK, Validator Bank
+_Avoid_: Supervisor, Observer, OJK, Distributor Bank
 
 **Payment Service Provider (PJP)**:
 A non-bank Participant that provides retail digital rupiah payment services under the system's governance.
@@ -41,7 +41,7 @@ The Retail Customer or Merchant that benefits from the value held in a Wallet, r
 _Avoid_: Account Holder, Wallet User, Customer
 
 **Custodian**:
-Either a Validator Bank or Payment Service Provider Participant that administers a Wallet on behalf of its Wallet Owner. An Observer cannot be a Custodian.
+Either a Distributor Bank or Payment Service Provider Participant that administers a Wallet on behalf of its Wallet Owner. An Observer cannot be a Custodian.
 _Avoid_: Wallet Owner, Wallet Provider, Account Provider
 
 **Wallet**:
