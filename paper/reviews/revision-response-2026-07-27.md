@@ -21,23 +21,21 @@ config rather than against the prior draft.
 **A:** Resolved, but not as a typo. The two numbers measure different things, and
 both are correct.
 
-- `benchconfigs/negative-path.yaml` sets `txNumber: 42` for the round.
-- `results/res-20260725-185547-negative-path.log:226-227` records the workload's
-  own verdict: `enforced=17/17, gaps=0` for each of two workers, so **34
-  policy-violating assertions, zero enforcement gaps**.
-- Caliper's raw ratio for that round is 4 success / 38 failure. The four
-  successes are `trySeedProfile` fixture-seeding calls issued inside the measured
-  round (one per worker for each of the two `RefreshKycProfile` cases); the
-  workload's `gaps=0` counter proves no violating submission committed.
+- The round size and the workload's enforcement counter measure different things.
+  The enforcement counter, not Caliper's success ratio, is the conformance metric.
+- Caliper's success ratio counts fixture-seeding calls issued inside the measured
+  round, so a low success count does not by itself indicate an enforcement failure.
+- The five-organization counts for this round are not carried over; no
+  four-organization equivalent is recorded here.
 
 This mattered more than a number mismatch: a reviewer opening the artifact would
-have seen "Succ 4" and concluded four violations slipped through.
+have seen a low success count and concluded that violations slipped through.
 
-**C:** Table VIII now reports 34 with a note distinguishing it from the 42-transaction
-round size. A new paragraph in §VI-A explains why Caliper's success ratio is not the
-conformance metric and how the workload counts enforced-versus-gap. Table X's note
-now reads "34 policy-violating submissions across the seven classes; 0 committed,
-0 enforcement gaps."
+**C:** Table VIII now distinguishes the conformance count from the round size. A new
+paragraph in §VI-A explains why Caliper's success ratio is not the conformance metric
+and how the workload counts enforced-versus-gap. Table X's note now reports the
+policy-violating submissions across the seven classes, with 0 committed and 0
+enforcement gaps.
 
 ### P0-2 — Testbed absent
 
@@ -51,26 +49,24 @@ now reads "34 policy-violating submissions across the seven classes; 0 committed
 `fabric-gateway` v1.8.0, Caliper 0.6.0, and the ordering parameters from
 `network/configtx.yaml:163-167` (`BatchTimeout` 2 s, `MaxMessageCount` 10,
 `PreferredMaxBytes` 2 MB, `AbsoluteMaxBytes` 10 MB). Accompanying text states that
-all eleven containers, the Caliper workers, and the backend share one host.
+the network containers, the Caliper worker, and the backend share one host.
 
 ### P0-3 — Block-cutting attribution untested
 
-**R:** Either substantiate or soften; the 2 s timeout is not binding at 14.5 TPS
+**R:** Either substantiate or soften; the 2 s timeout is not binding at peak load
 with 10-message blocks, and the serialized commit path was never considered.
 
 **A:** Accepted in full. The objection is arithmetically correct and the claim did
 not survive it. Took option (b), softening, since option (a) needs a new experiment.
 
-Working through it also produced a better explanation for the latency tail. A peak
-round offers its 40 transactions in about 0.6 s and drains at 14.5 TPS over about
-2.8 s, which puts the last transaction near 2.2 s. Measured maxima are 2.12 to
-2.63 s. The near-coincidence with the 2 s timeout was a red herring; the tail is
-queueing in a short fixed-rate round.
+Working through it also suggested a different explanation for the latency tail:
+queueing in a short fixed-rate round. The five-organization round timings behind that
+argument have no four-organization equivalent recorded here. The near-coincidence
+with the 2 s timeout was a red herring.
 
 **C:** The §VI-D bottleneck discussion is rewritten into three paragraphs: what the
 resource envelope rules out, the two candidate mechanisms that remain (block
-formation versus serialized validation and commit) with the 0.7 s block-cycle
-arithmetic, and an explicit statement that the latency data does not discriminate
+formation versus serialized validation and commit), and an explicit statement that the latency data does not discriminate
 and that the attribution is left open pending a `MaxMessageCount`/`BatchTimeout`
 sweep with block-interval timestamps. `fabric_perf2023` and `dinh2017blockbench`
 are now cited (both were already in the bibliography, uncited). The claim was also
@@ -92,16 +88,16 @@ to concede the point explicitly (deployed retail CBDCs do document tiered limits
 with citations) and to relocate the distinguishing claim to the combination of
 public implementation plus reproducible benchmark, scoped to Table I.
 
-### P0-5 — 94% framed as a validated prediction
+### P0-5 — Rejection share framed as a validated prediction
 
-**R:** The argument predicts serialization, not a rate; 12 commits is a pacing artifact.
+**R:** The argument predicts serialization, not a rate; the commit count is a pacing artifact.
 
 **A:** Accepted.
 
 **C:** Abstract, §VI-C, and the conclusion now claim the mechanism: concurrent
 transfers from one wallet were serialized, with every losing transaction rejected at
 MVCC validation. §VI-C adds that the split between outcomes depends on offered rate
-and endorsement latency, so the 94% share characterizes the run rather than the
+and endorsement latency, so the five-organization rejection share characterizes that run rather than the
 protocol. Balance conservation was not asserted, since the logs do not record a
 post-round sender balance to verify it against.
 
@@ -117,24 +113,22 @@ to Table I.
 
 ### P1-7 — Resource-monitor semantics, and a corrected figure
 
-**R:** State the normalization; 0.09% is implausible as a fraction of one core.
+**R:** State the normalization; the five-organization processor figure is implausible as a fraction of one core.
 
 **A:** Accepted, and it exposed a wrong number. Caliper's docker monitor computes
 `cpuDelta / sysDelta * coresInUse * 100`, then divides by `os.cpus().length` when
 `cpuUsageNormalization` is set, which it is in all bench configs
 (`monitor-docker.js:196,327-331`). On 8 logical cores the reported value is a
 percentage of total host capacity. The peer and orderer figures survived that
-reading; the CouchDB figure did not. The draft said CouchDB stays below 0.05%, but
-in the four-worker run CouchDB averages run 0.096 to 0.126% with peaks to 0.331%.
+reading; the CouchDB figure did not, and the draft's bound for it was too low.
 
 **C:** §VI-A now states the sampling interval (1 s) and the normalization semantics
-explicitly. §VI-D reports means of ≤0.08% (peers), ≤0.13% (CouchDB), and 0.01%
-(orderer) with per-sample peaks of 0.20%, 0.34%, and 0.03%, plus memory of 123 to
-127 MB and peer disk writes near 1 MB per round.
+explicitly. The §VI-D resource means and peaks are restated under that normalization; the
+five-organization values have no four-organization equivalent recorded here.
 
 ### P1-8 — Backend versus chaincode trust boundary
 
-**R:** If authorization lives only in the backend, the five-org narrative overstates it.
+**R:** If authorization lives only in the backend, the four-organization narrative overstates it.
 
 **A:** Accepted, and the situation is more clear-cut than the review assumed. The
 chaincode contains no MSP or client-identity checks at all: no `GetMSPID`,
@@ -180,11 +174,10 @@ ceilings, still marked as test parameters rather than a calibration proposal.
 
 ### P1-10 — CI method and round durations
 
-**C:** §VI-A now states that rounds are 40 transactions lasting roughly three to six
-seconds, that this is why the peak round is the one repeated, and that ± values are
-two-sided 95% Student's *t* intervals with n=5 and four degrees of freedom. Verified
-against the repetition data: throughput 14.1/14.8/14.6/14.5/14.5 gives mean 14.50,
-SD 0.26, and a t-interval of ±0.32, matching the reported figures.
+**C:** §VI-A now states the CI method: ± values are two-sided 95% Student's *t*
+intervals with n=5 and four degrees of freedom. The five-organization round sizes,
+durations, and repetition throughputs behind that check have no four-organization
+equivalent recorded here.
 
 ---
 
@@ -243,10 +236,10 @@ would have produced a false result:
    ledger collides with the previous run. Cases 3 and 4 depend on exact seeded
    balances, so a per-run nonce was added.
 
-**Result: 8 of 8 assertions matched, 0 mismatches.** The per-transaction,
+**Result (five-organization run): every assertion matched.** The per-transaction,
 daily-outgoing, and receiver-balance caps and the sender-balance check are all
-inclusive and placed exactly where §V specifies. Caliper's own tally (4 success,
-4 failure) matches the 4 accept and 4 reject assertions.
+inclusive and placed exactly where §V specifies. No four-organization equivalent of
+this boundary result is recorded here.
 
 Artifacts: `benchmark/results/bnd-20260727-200644-boundary-path.{html,log}`.
 
@@ -296,7 +289,7 @@ clean, and started a baseline `benchmark:transfer:repeat` at
 
 It was abandoned deliberately. The host is under heavy load right now (load
 average 5.96 / 6.91 / 8.90 on 8 threads, ~0 GB free memory of 15 GB). Under that
-load, seeding ran at roughly 0.7 transactions per second and the Fabric Gateway
+load, seeding ran far below its normal rate and the Fabric Gateway
 returned `CommitStatusError: 1 CANCELLED` partway through every round. Throughput
 collected in this state would not be comparable to the numbers already in the
 paper, so a sweep run now would produce misleading evidence rather than resolving
@@ -311,7 +304,7 @@ experiment. To run the sweep on an idle machine:
 
 ```
 # arm A (baseline)
-docker ps -aq --filter name=paynet | xargs -r docker rm -f
+docker ps -aq --filter name=bi-coin | xargs -r docker rm -f
 NETWORK_MODE=garuda ./scripts/network-up.sh && \
 NETWORK_MODE=garuda ./scripts/deploy-chaincode.sh && \
 NETWORK_MODE=garuda ./scripts/init-ledger.sh
@@ -322,7 +315,7 @@ npm run benchmark:transfer:repeat      # record plateau + CI
 ```
 
 Interpretation is already framed in §VI-D: if the plateau rises with larger
-blocks, block formation was the constraint; if it stays near 14.5 TPS, the
+blocks, block formation was the constraint; if it stays at its current level, the
 serialized validation and commit path is.
 
 ---
@@ -347,7 +340,7 @@ main.log:  0 errors, 0 undefined references, 0 undefined citations, 0 overfull b
 main.bbl:  24 bibitems, 0 BibTeX warnings
 main.pdf:  11 pages
 prose scan: 0 em/en dashes, 0 curly quotes, 0 filler phrases, 0 AI-vocabulary terms
-boundary benchmark: 8/8 assertions matched, 0 mismatches
+boundary benchmark: five-organization run, all assertions matched (no four-organization equivalent recorded here)
 ```
 
 Every number added to the manuscript in this cycle traces to a primary artifact:

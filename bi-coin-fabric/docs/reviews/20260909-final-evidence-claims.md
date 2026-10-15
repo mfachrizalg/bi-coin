@@ -13,11 +13,13 @@ oracles, not production-capacity claims.
 | Unauthorized custodian mismatch is rejected without infrastructure error. | `benchmark/workloads/custody-authorization.js` | `benchmark/results/20260909-final-08-authorization.log` and `.html` |
 | Negative-path oracle enforces seven expected policy rejections. | `benchmark/workloads/negative-path.js` | `benchmark/results/20260909-final-08-negative-path.log` and `.html` |
 | Aggregate overspend commits 10 of 200 requests and ends at Rp40,000. | `benchmark/workloads/adversarial-double-spend.js` | `benchmark/results/20260909-final-08-aggregate-overspend.log` and `.html` |
-| Transfer completion throughput is 29.1–29.5 TPS at 30 TPS and 56.3–57.3 TPS at 60 TPS; success is reported separately. | `benchmark/benchconfigs/retail-transfer-workers-{1,2,4}.yaml` | `benchmark/results/20260909-final-08-transfer-w{1,2,4}.log` and `.html` |
-| Five peak repetitions average 54.8 TPS and 16.33% success. | `benchmark/benchconfigs/retail-transfer-workers-2.yaml` | `benchmark/results/20260909-final-08-transfer-repeat.log` and `.html` |
+| Write confirmed passing throughput on the four-organization network is 0.184 to 4.75 TPS across 21 write workloads. The five-organization transfer sweep at 30 and 60 TPS offered load has no four-organization equivalent in this map. | `benchmark/results/runtime-workspaces/compliance-run-20261012-06/workspace/benchmark/results/compliance-run-20261014-01/REPORT.md` | Per-workload rows in that `REPORT.md` |
+| No four-organization peak-repetition claim is made; the five-organization repetition average is removed from this map. | None | None |
 | Final transfer failures are classified as status 11 or gateway concurrency-limit messages. | Final transfer logs and runner diagnostics | `benchmark/results/20260909-final-08-transfer-w{1,2,4}.log`, `...-transfer-repeat.log` |
 | Monitored resources remain below host capacity in this run. | Final resource summary in thesis/paper | `benchmark/results/20260909-final-evidence-manifest.json` |
-| Reproduction context is one host, five organizations, one peer per organization, one Raft orderer, and CouchDB. | `benchmark/results/20260909-final-evidence-manifest.json` | Manifest runtime/topology metadata and input hashes |
+| The 20260909 evidence ran on one host with five organizations (superseded), one peer per organization, one Raft orderer, and CouchDB. The four-organization network runs one peer per organization, with CentralBankMSP as the orderer organization; this map records no orderer or state-database count for it. | `benchmark/results/20260909-final-evidence-manifest.json` | Manifest runtime/topology metadata and input hashes (five-organization record) |
+
+Every row that cites a 20260909 artifact was produced on the five-organization topology; no four-organization rerun of those artifacts is recorded in this map.
 
 The combined status ledger is
 `benchmark/results/20260909-final-evidence-status.tsv`. The manifest includes

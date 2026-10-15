@@ -44,7 +44,7 @@ Treat convergent findings as one strong signal, not five independent ones.
 
 ## Summary
 The manuscript presents an openly available retail Digital Rupiah prototype on a
-five-organization Fabric network, formalizes tier derivation and transfer
+four-organization Fabric network, formalizes tier derivation and transfer
 validity, and evaluates it with a documented Caliper protocol including
 negative-path and adversarial workloads. The revision since the last round is
 substantial: the concurrency sweep with confidence intervals, the conformance
@@ -109,21 +109,20 @@ results section can be trusted as written.
 1. Separation of the contention-free ceiling from the single-key conflict
    workload is exactly right, and the paper explains *why* they are separate
    (§VI-A, "The two designs are deliberately separate...").
-2. Reporting failures (2/816) with cause (seed exhaustion) rather than hiding
-   them.
-3. The repeated-peak protocol (n=5) with CI is correct practice; the arithmetic
-   checks out (±0.32 = t₀.₉₇₅,₄ × 0.26/√5).
+2. Reporting failures with cause (seed exhaustion) rather than hiding
+   them. The five-organization failure count has no four-organization equivalent here.
+3. The repeated-peak protocol (n=5) with CI is correct practice. The five-organization
+   CI arithmetic checked out, but its values have no four-organization equivalent here.
 4. η-vs-offered-load presentation (Fig. 5a) makes the saturation argument
    legible at a glance.
 
 ## Weaknesses
 
 1. **[MAJOR — data integrity] Conformance transaction count contradicts itself.**
-   Table VIII (Seeded Test Population) reports "Conformance / adversarial:
-   42 / 200" (`main.tex:851`), but §VI-C states "Across 34 attempts spanning
-   the seven rule classes" (`main.tex:1017`) and Table X's note repeats
-   "34 submissions across the seven classes" (`main.tex:1053`). One of these
-   numbers is wrong. *Fix:* recover the authoritative count from the Caliper
+   The five-organization seeded-population table (Table VIII, `main.tex:851`), the
+   §VI-C text (`main.tex:1017`), and Table X's note (`main.tex:1053`) disagree on the
+   conformance count. No four-organization equivalent is recorded in this review.
+   *Fix:* recover the authoritative count from the Caliper
    report/logs and make all three sites agree. A results-count contradiction,
    however small, undermines confidence in every other reported number.
 
@@ -141,16 +140,14 @@ results section can be trusted as written.
 
 3. **[MAJOR — causal validity] The block-cutting attribution is asserted, not
    demonstrated — and the stated parameters strain against it.**
-   The argument (§VI-D) is: no container approaches saturation, and max latency
-   sits just above the 2 s batch timeout, therefore block-cutting parameters
-   govern the 14.5 TPS plateau. Two problems:
-   - *The arithmetic:* at 14.5 TPS with MaxMessageCount = 10, blocks fill in
-     ≈0.69 s, so the 2 s timeout is not binding at peak — blocks are cut on
-     fill, and fill-based cutting does not by itself cap throughput at
-     14.5 TPS. The "max latency just above the timeout" observation therefore
-     does not identify the mechanism it is claimed to identify; something else
-     produces the ~2.2 s tail (plausibly first-block effects, the Gateway
-     commit-status wait, or validation/commit queueing).
+   The five-organization argument (§VI-D) was: no container approached saturation,
+   and max latency sat just above the 2 s batch timeout, therefore block-cutting
+   parameters governed the plateau. The plateau value and its block-fill arithmetic
+   have no four-organization equivalent in this review. Two problems:
+   - *The arithmetic:* the five-organization block-fill arithmetic does not identify
+     the mechanism the observation was claimed to identify. The latency tail that the
+     plateau argument relied on may come from first-block effects, the Gateway
+     commit-status wait, or validation/commit queueing.
    - *The logic:* "no monitored container is saturated" does not exclude the
      sequential commit path. Fabric validation and ledger commit are serialized
      per channel, and per-key CouchDB round-trips bound commit rate without any
@@ -167,22 +164,21 @@ results section can be trusted as written.
    phrasing accordingly.
 
 4. **[MAJOR — measurement validity] Resource-monitor numbers need their
-   normalization stated.** "Normalized processor use stays below 0.09% on the
-   peers" (`main.tex:1065`) is not plausible as a fraction of one core while
-   endorsing ~14.5 signed transactions per second (ECDSA verification alone
-   costs more). If this is Caliper's Docker monitor output normalized over all
-   host cores and averaged over the sampling window, say so and give the
-   sampling interval; otherwise the numbers on which Weakness 3's premise rests
-   are unconvincing. One sentence of measurement semantics resolves this.
+   normalization stated.** The five-organization peer processor figure
+   (`main.tex:1065`) has no four-organization equivalent in this review, but the
+   normalization question applies to any monitor output. If the output is normalized
+   over all host cores and averaged over the sampling window, say so and give the
+   sampling interval; otherwise the numbers on which Weakness 3's premise rests are
+   unconvincing. One sentence of measurement semantics resolves this.
 
-5. **[MINOR] Round length.** Every transfer round is 40 transactions
-   (Table VII note), i.e., ≈3–6 s of wall clock at the achieved rates. That is
-   short for steady-state throughput measurement; per-round numbers are noisy
-   and only the peak round has n=5. State round durations explicitly and
-   acknowledge the short-round caveat, or lengthen rounds in future work.
+5. **[MINOR] Round length.** The five-organization transfer rounds were short (Table
+   VII note), a poor basis for steady-state throughput measurement; per-round numbers
+   are noisy and only the peak round has n=5. No four-organization round-length
+   equivalent is recorded here. State round durations explicitly and acknowledge the
+   short-round caveat, or lengthen rounds in future work.
 
-6. **[MINOR] CI method unstated.** Report that the ±0.32 is a t-based 95% CI
-   with n=5 (df=4). One clause in §VI-A.
+6. **[MINOR] CI method unstated.** Report the CI method for the five-organization peak
+   repetitions (t-based 95%, n=5, df=4). One clause in §VI-A.
 
 7. **[MINOR] Determinism of window totals — key design unstated.** §V-C says
    the chaincode "sums the wallet's earlier incoming and outgoing transfers
@@ -193,10 +189,10 @@ results section can be trusted as written.
    (forcing MVCC conflicts on the balance keys), but the text should state the
    key design and this reasoning in one or two sentences.
 
-8. **[MINOR] Warmup efficiency.** η ≈ 0.75 already at ~10 TPS offered — the
-   system is not keeping pace even at the lightest load. Likely a short-round /
-   cold-start artifact; one sentence of explanation would pre-empt the
-   question.
+8. **[MINOR] Warmup efficiency.** The five-organization efficiency at the lightest
+   offered load (not keeping pace even there) has no four-organization equivalent in
+   this review. Likely a short-round / cold-start artifact; one sentence of explanation
+   would pre-empt the question.
 
 ## Scores (0–100)
 | Dimension | Score |
@@ -302,7 +298,7 @@ prototype is coherent and its business-process framing (Section III) is the
 paper's most transferable asset — a policy reader can follow money from Mint to
 Burn without knowing Fabric. The main gap from an operator's viewpoint is that
 the paper never states where its trust boundary actually sits: a single Go
-backend with RBAC in front of a five-organization ledger is a familiar pattern,
+backend with RBAC in front of a four-organization ledger is a familiar pattern,
 and a dangerous one to leave unexplained.
 
 ## Strengths
@@ -323,7 +319,7 @@ and a dangerous one to leave unexplained.
 1. **[MAJOR — trust boundary] Backend vs. chaincode enforcement is
    unspecified.** §IV states the backend "enforces role-based access control
    over seven roles... before any transaction reaches the chaincode." If
-   authorization lives only in one backend, then the five-organization
+   authorization lives only in one backend, then the four-organization
    MAJORITY endorsement provides integrity and availability but *not*
    decentralized authorization — any party controlling that backend (and its
    JWT secret) can act in any role, and the single PostgreSQL instance is a
@@ -335,14 +331,11 @@ and a dangerous one to leave unexplained.
    organization? per PJP?). Without this, the two-tier decentralization
    narrative overstates what the implementation guarantees.
 
-2. **[MINOR — governance] The endorsing "observer."** OJK "initiates no
-   business transactions but... still participates in endorsement under the
-   majority policy" (§IV-A). Operationally that makes the supervisor a
-   co-author of every state change it will later audit — a governance tension
-   worth two sentences: either justify it (supervisory veto by
-   endorsement-withholding may be a feature) or note that excluding OJK's peer
-   from the endorsement policy while keeping full ledger visibility is the
-   alternative.
+2. **[MINOR — governance] The endorsing "observer."** This finding was written for the
+   five-organization network, where OJK's peer endorsed under the majority policy
+   (§IV-A). In the four-organization network OJK sits in ValidatorMSP, which is
+   read-only audit, so the endorsement tension does not apply as written, and this
+   review establishes no endorsement role for it.
 
 3. **[MINOR — ops realism] Single-orderer recovery.** The no-CFT caveat is
    stated; add its operational consequence in one clause (orderer loss halts
@@ -374,15 +367,15 @@ and a dangerous one to leave unexplained.
 The paper's third contribution promises a benchmark that "identifies the
 throughput saturation point" and "localizes it with container-level resource
 metrics." What the experiments actually establish is narrower: the prototype
-saturates at ~14.5 TPS, and no monitored container shows high utilization. The
+saturated at a plateau with no four-organization equivalent in this review, and no monitored container shows high utilization. The
 *localization* — "the block-cutting parameters govern the plateau" — is an
 inference the paper never tests, and its own numbers push back: with a
-10-message block limit, a 14.5 TPS steady state fills blocks in ~0.7 s, so the
-2-second batch timeout the argument leans on ("maximum latency sits just above
-the two-second batch timeout") is not the binding constraint at peak load. The
-observation and the mechanism don't connect. Meanwhile, the resource numbers
-underwriting "nothing else is saturated" (processor use below 0.09%) are
-presented without measurement semantics, and the well-known Fabric bottleneck
+10-message block limit, the five-organization block-fill arithmetic shows that the
+2-second batch timeout the argument leans on ("maximum latency sits just above the
+two-second batch timeout") was not the binding constraint at peak load. No
+four-organization equivalent is recorded here. The observation and the mechanism don't
+connect. Meanwhile, the five-organization resource numbers
+underwriting "nothing else is saturated" are presented without measurement semantics, and the well-known Fabric bottleneck
 in this regime — the serialized validation/commit path, which throttles
 throughput while showing low aggregate CPU — is never considered. Strip the
 untested attribution and the benchmark contribution reduces to: a reproducible
@@ -390,8 +383,8 @@ protocol that measures a ceiling it cannot yet explain. That is still
 publishable — reproducible protocols for retail-CBDC workloads are genuinely
 scarce — but it is a smaller claim than the abstract, contribution list, and
 conclusion currently sell, and the paper repeats the strong version in all
-three places. Similarly, "94% of concurrent transfers rejected... which is the
-outcome the double-spend argument predicts" converts a timing-dependent
+three places. Similarly, the five-organization claim that most concurrent transfers were rejected
+("which is the outcome the double-spend argument predicts") converts a timing-dependent
 statistic into a validated prediction; the argument predicts *serialization*,
 not any particular percentage.
 
@@ -400,20 +393,20 @@ not any particular percentage.
 | # | Severity | Dimension | Location | Issue |
 |---|---|---|---|---|
 | DA-1 | MAJOR | Logic chain | Abstract; §I contribution 3; §VI-D ¶2; §VII ¶2 | "No component approaches saturation → block-cutting governs the ceiling" is a false dilemma: only two candidate causes (endorsement CPU, CouchDB) are eliminated; the serialized commit path, Gateway commit-status wait, and single-node Raft fsync are never considered. The attribution repeats in four load-bearing places. |
-| DA-2 | MAJOR | Prediction/observation conflation | Abstract; §VI-C ¶2; §VII | The double-spend argument predicts that conflicting transfers are rejected at validation (mechanism), not that 94% are (rate). The 12 commits are a function of Caliper pacing and endorsement latency; a different pacing yields a different percentage. Reword to claim the mechanism ("every committed transfer serialized correctly; all version conflicts were rejected") and, if possible, verify conservation (final sender balance = initial − Σ committed amounts) as the actual safety check. |
+| DA-2 | MAJOR | Prediction/observation conflation | Abstract; §VI-C ¶2; §VII | The double-spend argument predicts that conflicting transfers are rejected at validation (mechanism), not that any particular share is (rate). The five-organization commit count and rejection share are a function of Caliper pacing and endorsement latency; a different pacing yields a different share, and no four-organization equivalent is recorded here. Reword to claim the mechanism ("every committed transfer serialized correctly; all version conflicts were rejected") and, if possible, verify conservation (final sender balance = initial − Σ committed amounts) as the actual safety check. |
 | DA-3 | MINOR | Unfalsifiable universal | Abstract ¶1; §I ¶1 | "No publicly available system provides..." — unverifiable universal negative; hedge with "to our knowledge." (EIC concurs; flagged here for the logical form.) |
 | DA-4 | MINOR | Scope inflation | §II-C last sentence | "this prototype is the only one with two-tier intermediation, an integrated KYC-and-limit policy, and an openly reproducible benchmark" — scoped to Table I's five rows, but reads absolute. Add "among the systems in Table I." |
-| DA-5 | MINOR | Asymmetric evidence standard | §VI-C ¶1 | Conformance workload: 34 (or 42) hand-picked violations across 7 classes, ~5–6 per class, all rejected. This demonstrates each rule fires on one exemplar, not that rule boundaries are correct (no boundary-value cases: amount exactly at cap, expiry at the window edge, month rollover). Claim "each rule rejects exactly the input it is meant to exclude" overreaches — "rejects the tested violation class" is what was shown. |
+| DA-5 | MINOR | Asymmetric evidence standard | §VI-C ¶1 | Conformance workload (five-organization run): hand-picked violations across seven classes, all rejected; no four-organization equivalent is recorded here. This demonstrates each rule fires on one exemplar, not that rule boundaries are correct (no boundary-value cases: amount exactly at cap, expiry at the window edge, month rollover). Claim "each rule rejects exactly the input it is meant to exclude" overreaches — "rejects the tested violation class" is what was shown. |
 
 ## Cherry-Picking Check
-**Negative.** The paper reports its failures (2/816 with cause), reports η
+**Negative.** The paper reports its failures with cause, reports η
 degradation honestly, and separates workloads in a way that exposes rather than
 hides contention behavior. No selective reporting detected.
 
 ## Ignored Alternative Explanations
 1. Serialized per-channel validation/commit pipeline (low CPU, hard ceiling) — the standard Fabric explanation for this exact symptom pattern.
-2. Fabric Gateway SDK commit-status wait contributing the ~2.2 s latency tail independent of block cutting.
-3. Single-node Raft write/fsync latency on the same host disk as five CouchDB instances.
+2. Fabric Gateway SDK commit-status wait contributing the latency tail observed in the five-organization run, independent of block cutting.
+3. Single-node Raft write/fsync latency on the same host disk as the CouchDB instances.
 
 ## Missing Stakeholder Perspectives
 1. **End users:** authorized peers see all transaction data; the surveillance implication of a fully supervisor-visible retail ledger gets one limitation sentence. A retail CBDC paper claiming policy relevance should acknowledge the privacy-vs-supervision tension as a design tension, not only as a missing feature.
@@ -421,8 +414,8 @@ hides contention behavior. No selective reporting detected.
 
 ## Observations (Non-Defects)
 - The τ-function edge case (high-risk subject under standard due diligence) is correctly closed by the approval-time enforcement sentence in §V-A — checked, sound.
-- The 816-transaction arithmetic is internally consistent (9 sweep rounds × 40 + 5 repetition rounds × 40 + 256 functionality = 816).
-- The ±0.32 CI is arithmetically correct for n=5, SD 0.26.
+- The five-organization transaction arithmetic was internally consistent; no four-organization equivalent is recorded here.
+- The five-organization CI arithmetic is correct for n=5; no four-organization equivalent is recorded here.
 
 ## CRITICAL Issues
 **None.** No finding invalidates the soundness of the implementation or the
@@ -437,14 +430,14 @@ reporting-integrity issues that revision can resolve.
 
 | Issue | Raised by | Converges |
 |---|---|---|
-| Conformance count 42 vs 34 contradiction | R1-1 | — (single-seat, but objective/verifiable) |
+| Conformance count contradiction | R1-1 | — (single-seat, but objective/verifiable) |
 | Testbed environment absent from §VI-A | R1-2 | — (objective) |
 | Block-cutting attribution untested / oversold | R1-3, DA-1 | **Strong convergence** — the panel's central finding |
 | Resource-number normalization unstated | R1-4, (DA-1 premise) | Convergence |
 | Universal-negative claims need hedging | EIC-1, DA-3, DA-4 | Convergence |
 | Table I misstates e-CNY/eNaira public record | R2-1 | — (objective, checkable) |
 | Backend/chaincode trust boundary unspecified | R3-1 | — (single-seat, load-bearing) |
-| 94% framed as validated prediction | DA-2 | — |
+| Rejection share framed as validated prediction | DA-2 | — |
 
 ## Disagreement and Arbitration
 - **Severity of the resource-number issue:** R1 rates it MAJOR (it underpins the
@@ -453,7 +446,7 @@ reporting-integrity issues that revision can resolve.
   MAJOR stands but is cheap to fix.
 - **R3's trust-boundary finding vs. paper scope:** one could argue deployment
   topology is out of scope for a testbed paper. Arbitration: the paper's own
-  narrative ("five-organization," "each organization can validate
+  narrative ("four-organization," "each organization can validate
   independently") makes the claim; one clarifying paragraph is owed. MAJOR
   stands.
 - **Decision severity:** R3 leaned minor-to-major; R1/R2 major. Arbitration
@@ -468,7 +461,7 @@ Rule #4; decision is determined by the MAJOR set.
 Rationale: none of the findings requires new experiments *if* the
 block-cutting claim is softened (R1-3 option b), and most fixes are localized.
 The decision is nonetheless Major, not Minor, on two grounds: (1) a numeric
-contradiction inside the reported results (42 vs 34) must be resolved against
+contradiction inside the reported results (the conformance count) must be resolved against
 the primary logs, and reviewers must be able to re-verify; (2) the
 block-cutting attribution is a headline claim appearing in the abstract,
 contribution list, discussion, and conclusion — revising it changes what the
@@ -483,7 +476,7 @@ reporting or claim-calibration fix.
 ## Revision Roadmap (prioritized)
 
 ### P0 — Mandatory, blocking
-1. **Resolve 42 vs 34** conformance count from the Caliper logs; align
+1. **Resolve the conformance count contradiction** from the Caliper logs; align
    Table VIII (`main.tex:851`), §VI-C text (`:1017`), and Table X note
    (`:1053`). [R1-1]
 2. **Add testbed specification to §VI-A**: host CPU/cores/RAM/OS, Docker,
@@ -497,7 +490,7 @@ reporting or claim-calibration fix.
    commit path as an alternative (cite Thakkar et al. 2018). [R1-3, DA-1, R2-3]
 4. **Correct Table I** semantics or entries for e-CNY/eNaira tiered-limit
    documentation (split "documented" vs "open implementation"). [R2-1]
-5. **Reword the 94% claim** (abstract, §VI-C, conclusion) from "the outcome
+5. **Reword the rejection-share claim** (abstract, §VI-C, conclusion) from "the outcome
    the argument predicts" to the mechanism claim; add balance-conservation
    check if available from logs. [DA-2]
 
@@ -518,9 +511,10 @@ reporting or claim-calibration fix.
 12. Fix author-3 affiliation "Department *of* Electrical..." (`main.tex:37`). [EIC-3]
 13. One sentence: window-total key design (range read vs rich query) and why
     wallet-key MVCC suffices. [R1-7]
-14. Two sentences: OJK-as-endorser governance rationale; single-orderer
-    recovery consequence; MERCHANT caps are test parameters. [R3-2/3/4]
-15. Add Aurum + Drex to §II; cite Blockbench; explain warmup η≈0.75. [R2-4, R1-8]
+14. Two sentences: single-orderer recovery consequence; MERCHANT caps are test
+    parameters. The OJK-as-endorser item (R3-2) does not apply to the four-organization
+    network, where OJK sits in ValidatorMSP, which is read-only audit. [R3-2/3/4]
+15. Add Aurum + Drex to §II; cite Blockbench; explain the warmup efficiency result. [R2-4, R1-8]
 16. Prune `references.bib` placeholder entries (~100 `unknown*` keys). [R2-5]
 17. Boundary-value conformance cases (amount exactly at cap, expiry edge,
     month rollover) — or scope the §VI-C claim to tested classes. [DA-5]
