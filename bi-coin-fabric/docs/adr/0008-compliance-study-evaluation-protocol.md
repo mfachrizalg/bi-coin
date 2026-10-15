@@ -1,0 +1,3 @@
+# Compliance study evaluation protocol
+
+The new four-organization, three-chaincode study is evaluated first for conformance against an explicit matrix of implemented controls and synthetic cases; the legacy Caliper results from the superseded five-organization network remain separate. API and direct-ledger correctness and performance are reported separately, performance uses one worker and descriptive fixed-duration load curves without a universal pass threshold, and every new restriction requires a new reviewer release request followed by approval from a distinct senior identity. The study covers only selected controls and does not claim institutional compliance, real-world detection effectiveness, or production capacity.
