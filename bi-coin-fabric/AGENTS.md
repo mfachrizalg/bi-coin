@@ -9,8 +9,8 @@ This repository is a local Hyperledger Fabric prototype for a two-tier retail Di
 | frontend/ | React and TypeScript experiences for institutional operators, Retail Customers, and Merchants | Vite serves port 5173 and proxies /api to the Go API on port 8080. |
 | backend/ | Go REST API, authentication, role checks, request-scoped Fabric access, and off-chain services | Reads PostgreSQL for application data and uses Fabric Gateway to submit or evaluate chaincode transactions. |
 | chaincode/ | Go Fabric contract and authoritative ledger rules | Runs on Fabric peers; checks caller MSP and ledger state for protected operations. |
-| network/, scripts/ | Local network, channel, chaincode deployment, ledger initialization, and smoke workflows | start.sh coordinates network and deployment, PostgreSQL, backend, and frontend startup. |
-| benchmark/ | Caliper workloads, observers, isolated transaction studies, and result analysis | Measures direct Fabric workloads. The Go/PostgreSQL/KYC demonstration is a separate end-to-end path. |
+| network/, scripts/ | Local four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP), channel, chaincode deployment, ledger initialization, and smoke workflows | start.sh coordinates network and deployment, PostgreSQL, backend, and frontend startup. |
+| benchmark/ | Caliper workloads, observers, and the compliance benchmark for the four-organization rupiah-study network (network/study/, study/chaincode/) | Measures direct Fabric workloads. The Go/PostgreSQL/KYC demonstration is a separate end-to-end path. |
 
 The main request path is:
 
@@ -60,30 +60,29 @@ Requirement IDs and descriptions come from the thesis Chapter 3 SRS table. Chapt
 | NFR-01 permissioned network and endorsement | network/crypto-config.yaml, network/configtx.yaml, network/docker-compose.yaml, scripts/network-up.sh, scripts/deploy-chaincode.sh | Network/config inspection and scripts/deploy-chaincode.test.js; thesis Chapter 3 architecture and Chapter 4 network result |
 | NFR-02 auditability and traceability | Chaincode audit/history/supervision records; PostgreSQL KYC audit records | chaincode/digital_rupiah_v3_test.go, chaincode/offchain_kyc_test.go, backend/services/kyc_service_test.go; thesis Chapter 4 functional evidence |
 | NFR-03 separated system layers | frontend/, backend/, chaincode/, docker-compose.postgres.yaml, backend stores and Fabric gateway | Architecture and backend/integration_test.go; thesis Chapter 3 architecture |
-| NFR-04 quantitative performance evaluation | benchmark/workloads/, benchmark/observers/, benchmark/benchconfigs/, scripts/run-benchmark-study.sh | benchmark/results/*/validation.json, summary.json, REPORT.md, and manifest.json; thesis Chapter 4 performance section |
-| NFR-05 repeatable experiment evidence | Study configuration, source capture, manifest, and artifact validation under scripts/ | scripts/generate-study-config.test.js, scripts/write-study-manifest.test.js, scripts/validate-study-artifacts.test.js; captured result manifests |
+| NFR-04 quantitative performance evaluation | benchmark/compliance/, benchmark/workloads/, benchmark/observers/, scripts/run-compliance-benchmark.sh, network/study/, study/chaincode/ | benchmark/results/compliance-*/correctness.json, capacity.json, summary.json, REPORT.md, and manifest.json; thesis Chapter 4 performance section |
+| NFR-05 repeatable experiment evidence | Protocol hash, source capture, and manifest (benchmark/compliance/runner.js, scripts/write-study-manifest.js) | scripts/write-study-manifest.test.js; captured result manifests; thesis Chapter 4 limits this item to the configuration manifest because the read rates of run-20261014-01 and run-20261015-01 differ |
 
 The thesis source files are ../thesis/contents/chapter-1/chapter-1.tex, ../thesis/contents/chapter-3/chapter-3.tex, ../thesis/contents/chapter-4/chapter-4.tex, and ../thesis/contents/chapter-5/chapter-5.tex. Treat their current working-tree contents as the thesis claims for this checkout.
 
 ## Thesis performance claims and evidence status
 
-Chapter 4 reports the following sustainable rates using five repetitions, at least 99% success, and successful-transaction p95 at most 2.5 seconds. These are thesis claims, not permanent system guarantees.
+Chapter 4 reports capacity from the four-organization compliance benchmark: one Caliper worker on one local host, channel rupiah-study, and the chaincodes rupiah-controls, rupiah-monetary, and rupiah-payments. A rate passes only after three 30-second confirmation rounds. These are thesis claims, not permanent system guarantees.
 
 | Thesis result | Reported value | Evidence to inspect |
 |---|---:|---|
-| Balance query | 190 TPS | benchmark/results/statistical-20260917-pilot6/summary.json |
-| Wallet freeze / unfreeze | 50 / 65 TPS | Same pilot summary |
-| Redemption | 25 TPS | Pilot summary and the newer Rp1,000 replacement summary below |
-| Low-contention retail transfer / merchant payment | 20 / 20 TPS | Pilot summary and the newer Rp100 transfer replacement below |
-| Issuance, distribution, and high-contention transfer | No sustainable rate in the tested range | Pilot summary, run rows, and newer targeted replacements |
+| Verified read operations (run-20261014-01) | 272 to 296 ops/s, a lower bound limited by client delivery | compliance-run-20261014-01 summary.json and REPORT.md |
+| Highest passing write rate (run-20261014-01) | 0.184 to 4.75 TPS | Same summary |
+| Fresh-network read check (run-20261015-01) | read-balance 212 ops/s, read-receipt 236 ops/s | compliance-run-20261015-01 summary.json |
+| Correctness checks (run-20261014-01) | 20/20 scenarios, 207/207 API authorization cells, 27/27 validation cases, 15/15 action outcomes | correctness.json in the same directory |
 
-Evidence checkpoint for this checkout (2026-09-24):
+Evidence checkpoint for this checkout (2026-10-16):
 
-- The pilot has 380 runs and 140 scenarios, and its validation.json says valid. Its manifest also marks the captured worktree dirty and records 340 changed paths. Do not describe this run as clean-source evidence.
-- statistical-review-replacements-20260920T173457Z-rp100 and statistical-review-replacements-20260920T173457Z-rp1000 each have valid validation output and a captured source/ snapshot based on commit d959f8252efde79405c5e1bb6a8793250cba5c96.
-- The Rp100 replacement supports low-contention transfer at 20 TPS. Its high-contention 20 TPS row averages 2.005 achieved TPS and 10.02% success; reconcile the precise percentage with the thesis Chapter 5 value before repeating it.
-- The Rp1,000 replacement tests distribution at 75 TPS and redemption at 20 TPS. Distribution fails that tested rate; redemption sustains 20 TPS. The thesis currently reports redemption at 25 TPS, so reconcile that claim against the replacement run before treating it as current.
-- For a new result, inspect the exact amount, workload, source snapshot, manifest, validation, and summary. Do not select a result directory only because its name contains “final”; benchmark/README-P1-benchmarks.md defines the study workflow and evidence rules.
+- Both result directories are in git-ignored disposable workspaces under benchmark/results/runtime-workspaces/. The run-20261014-01 manifest records the four MSPs, three chaincodes, protocol hash, runtime versions, and a source/ snapshot, but no source commit; do not describe it as clean-source evidence. The run-20261015-01 manifest records base commit b223f58a1db3deea575c8002229a1db0d077d235 and marks the worktree dirty.
+- The run-20261014-01 summary.json lists all 31 workloads as bracketed, including fund-reserve (0.183594 passing, 0.195313 failing). Thesis Chapter 4 reports 30 of 31 and treats fund-reserve as inconclusive (0.183594 to 0.21875); reconcile the two before repeating either.
+- Thesis Chapter 4 limits NFR-05 to the configuration manifest because the read rates of the two runs differ.
+- Result files outside runtime-workspaces/ (statistical-*, statistical-review-replacements-*, e2e-*, and the dated Caliper logs) were produced between June and September 2026, before the four-organization network. ADR 0008 keeps that evidence separate; do not cite it as four-organization evidence.
+- For a new result, inspect the stamp, source snapshot, manifest, correctness.json, capacity.json, and summary.json. benchmark/compliance/README.md defines the workflow and evidence rules; benchmark/README-P1-benchmarks.md is the superseded five-organization guide.
 
 ## Checks
 
@@ -94,7 +93,7 @@ Run commands from the owning directory:
 | Frontend | npm test, npm run build, and npm run test:e2e when UI behavior changes |
 | Backend | go test ./... |
 | Chaincode | go test ./... |
-| Benchmark scripts | npm run test:benchmarks; read the study guide before starting a live Fabric benchmark |
-| Full local smoke flow | ./scripts/run-full-suite.sh after reviewing its network and ledger preconditions |
+| Benchmark scripts | npm run test:benchmarks; read benchmark/compliance/README.md before starting a live Fabric benchmark |
+| Full local smoke flow | ./start.sh in one shell (it runs network-up, deploy-chaincode, and init-ledger, then keeps the backend and frontend running); when the API answers on port 8080, ./scripts/smoke-test.sh in a second shell |
 
-For benchmark interpretation and operational preconditions, read benchmark/README-P1-benchmarks.md. For terminology, read CONTEXT.md; for architecture decisions, read docs/adr/.
+For benchmark interpretation and operational preconditions, read benchmark/compliance/README.md. For terminology, read CONTEXT.md; for architecture decisions, read docs/adr/.

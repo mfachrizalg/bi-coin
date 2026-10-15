@@ -1,5 +1,7 @@
 # Disposable replacement benchmarks
 
+> **Superseded replacement matrix.** The Rp100 and Rp1000 matrix below ran on the five-organization network. `scripts/run-benchmark-replacements.sh` and `scripts/run-benchmark-study.sh` were removed in commit 9769cf2, so the commands in this file no longer run. Results are kept as evidence. The disposable-daemon isolation design (compose file, Dockerfile, daemon checks) is still in use. For current four-organization evidence, read [`../compliance/README.md`](../compliance/README.md).
+
 This environment runs its own Docker daemon. The runner shares that daemon's network namespace so the existing localhost endpoints work. No host Docker socket or host ports are exposed. Bind only a disposable source copy as `BENCHMARK_WORKSPACE`; never bind the active checkout or its crypto/ledger directories.
 
 The source tree and transaction amount are frozen at study creation. Resumed attempts receive new directories; previous attempt evidence is retained. The validator rejects mixed windows, mismatched trace/log counts, malformed traces, missing telemetry, and incomplete repetition groups.

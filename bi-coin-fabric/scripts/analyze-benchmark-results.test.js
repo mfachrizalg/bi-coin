@@ -160,10 +160,10 @@ test('measured failures retain multiline peer rejection details', () => {
             'Started round 2 (measured)',
             'Failed to perform submit transaction [DistributeToParticipant] EndorseError: 10 ABORTED',
             'Details:',
-            '- peer0.bi: chaincode response 500, insufficient balance: have 0, need 1000',
+            '- peer0.bi-coin: chaincode response 500, insufficient balance: have 0, need 1000',
             'Failed to perform submit transaction [Transfer] EndorseError: 10 ABORTED',
             'Details:',
-            '- peer0.bank: chaincode response 500, transfer would exceed receiver max balance 20000000',
+            '- peer0.distributor.bi-coin: chaincode response 500, transfer would exceed receiver max balance 20000000',
             'Finished round 2 (measured)',
         ].join('\n'));
         const [row] = summarizeRun({ measuredRound: 'measured', durationSeconds: 120,
