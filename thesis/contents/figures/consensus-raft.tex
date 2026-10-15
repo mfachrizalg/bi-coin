@@ -21,7 +21,7 @@
 
 %--- Fase 1: Endorsement ---
 \node[proc]     (client1)   at (0,    0)    {Klien};
-\node[proc]     (endorse)   at (0,   -2.4)  {Endorsing Peers\\(BI, HIMBARA,\\COMMERCIAL)};
+\node[proc]     (endorse)   at (0,   -2.4)  {Endorsing Peers\\(BI, DISTRIBUTOR,\\ENDUSER)};
 \node[stepnum]  at (-0.15, -0.85) {1};
 \node[stepnum]  at ( 0.15, -1.55) {2};
 
@@ -37,7 +37,7 @@
 
 %--- Fase 2: Ordering (Raft) ---
 \node[proc]    (client2) at (5.2,  0)    {Klien\\(kumpul \textit{endorsement})};
-\node[raftbox] (leader)  at (5.2, -2.9)  {Orderer tunggal (Raft)\\orderer.bi-coin:7050};
+\node[raftbox] (leader)  at (5.2, -2.9)  {Orderer tunggal (Raft)\\orderer.centralbank.rupiah.study:7050};
 \node[stepnum] at (3.2, -1.0) {3};
 
 \draw[ar] (client2.south) --
@@ -46,7 +46,7 @@
   label={[font=\footnotesize\bfseries]above:Fase \textit{Ordering} (Raft)}] (ph2) {};
 
 %--- Fase 3: Validasi & Commit ---
-\node[proc]      (peers)    at (10.5,  0)    {Semua Peer\\(5 organisasi)};
+\node[proc]      (peers)    at (10.5,  0)    {Semua Peer\\(empat organisasi)};
 \node[proc]      (validate) at (10.5, -2.0)  {Validasi:\\MVCC + kebijakan\\
                                                \textit{endorsement}};
 \node[commitbox] (world)    at (10.5, -3.8)  {Commit ke \textit{ledger}\\

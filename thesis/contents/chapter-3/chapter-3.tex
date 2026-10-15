@@ -24,7 +24,7 @@ sistem, arsitektur jaringan, perancangan use case, dan model data
 \subsubsection{Analisis Kebutuhan Sistem}
 
 Analisis kebutuhan mengidentifikasi aktor sistem (Bank Indonesia, bank
-validator, PJP, pedagang, pelanggan ritel, supervisor, dan pengamat OJK) beserta
+distributor, PJP, pedagang, pelanggan ritel, supervisor, dan pengamat OJK) beserta
 kebutuhan fungsionalnya, yaitu penerbitan dan distribusi likuiditas berjenjang,
 transfer antarpelanggan serta pelanggan-ke-pedagang, pengawasan, dan pelaporan.
 Kebutuhan ini menjadi dasar perancangan activity diagram dan arsitektur
@@ -273,7 +273,7 @@ operasi \textit{chaincode}.
 	\endhead
 	\bottomrule
 	\endlastfoot
-	\texttt{Participant}       & Entitas peserta (validator/observer/PJP), MSP kustodian,
+	\texttt{Participant}       & Entitas peserta (distributor/observer/PJP), MSP kustodian,
 	dan BIC opsional beserta status siklus hidup                                           \\
 \texttt{Wallet}            & Dompet dengan pemilik, peserta dan MSP kustodian, saldo, dan status beku \\
 \texttt{Transaction\allowbreak Record} & Catatan transaksi untuk audit dan pelaporan  \\
@@ -764,14 +764,14 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
     auth := r.NewRoute().Subrouter()
     auth.Use(middleware.RequireRole(
         middleware.RoleAuthenticated, middleware.RoleBankPjp,
-        middleware.RoleValidatorBank, middleware.RolePJP,
+        middleware.RolePJP,
         middleware.RoleBankIndonesia))
     auth.HandleFunc("/wallets", h.ListWallets).Methods("GET")
 
     // Bank/PJP mengelola dompet dan distribusi ritel
     walletMutation := r.NewRoute().Subrouter()
     walletMutation.Use(middleware.RequireRole(
-        middleware.RoleBankPjp, middleware.RoleValidatorBank,
+        middleware.RoleBankPjp,
         middleware.RolePJP))
     walletMutation.HandleFunc("/wallets", h.CreateWallet).Methods("POST")
 
