@@ -102,7 +102,7 @@ ditegakkan
 Kegagalan setup KYC kedaluwarsa justru menghapus kasus itu secara diam-diam
 ([negative-path.js:74](/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/negative-path.js:74)).
 Log mentah menunjukkan kegagalan setup dan jumlah verdict target yang lebih sedikit
-daripada 42 request yang dinyatakan desain.
+daripada jumlah request yang dinyatakan desain. Padanan jumlah request untuk jaringan empat organisasi tidak tercatat dalam ulasan ini.
 
 **Perbaikan minimum:** fixture harus *fail closed*; setiap kasus harus memeriksa
 kode/kelas error spesifik, bukan sekadar status gagal; verifikasi bahwa state
@@ -111,13 +111,14 @@ per aturan. Pengujian harus gagal bila fixture tidak terbentuk.
 
 ### C3. Skenario “double-spend” bukan percobaan overspending
 
-Saldo awal pengirim sekitar Rp19 juta, sedangkan 200 transaksi × Rp1.000 hanya
-meminta Rp200 ribu
+Pada workload lima organisasi sebelumnya, total permintaan transfer tidak melampaui
+saldo awal pengirim; angka saldo dan jumlah transaksi tidak dikutip lagi, dan
+padanannya untuk jaringan empat organisasi tidak tercatat dalam ulasan ini
 ([adversarial.yaml:9](/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/adversarial.yaml:9),
 [adversarial.yaml:19](/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/adversarial.yaml:19)).
 Workload mengklasifikasikan setiap kegagalan sebagai konflik MVCC
 ([adversarial-double-spend.js:98](/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/workloads/adversarial-double-spend.js:98)),
-padahal log mentah juga berisi kegagalan endorsement. Dua belas transaksi yang
+padahal log mentah juga berisi kegagalan endorsement. Transaksi yang
 berhasil bukan indikasi pelanggaran: beberapa pembelanjaan sah memang dapat
 berhasil selama totalnya tidak melampaui saldo. Kesimpulan pencegahan
 *double-spend* pada
@@ -160,12 +161,12 @@ lama dengan hasil baru.
 
 ### M2. Desain eksperimen terlalu pendek dan memiliki confounder
 
-Empat puluh transaksi pada 60 TPS hanya berlangsung sekitar 0,67 detik, lebih
-pendek daripada `BatchTimeout` dua detik dan hanya menghasilkan beberapa blok
+Ronde transfer pada jaringan lima organisasi sebelumnya terlalu pendek: durasinya
+lebih pendek daripada `BatchTimeout` dua detik dan hanya menghasilkan beberapa blok
 ([retail-transfer-workers-2.yaml:39](/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/benchmark/benchconfigs/retail-transfer-workers-2.yaml:39),
 [configtx.yaml:163](/home/mfachrizalg/2026/Skripsi/bi-coin/bi-coin-fabric/network/configtx.yaml:163)).
 Sel W1/W2/W4 dijalankan berurutan setelah satu reset, dengan populasi dan state
-yang berubah. Generator beban juga berbagi host dengan target.
+yang berubah. Generator beban juga berbagi host dengan target. Padanan durasi ronde untuk jaringan empat organisasi tidak tercatat dalam ulasan ini.
 
 **Perbaikan minimum:** gunakan ronde berdurasi beberapa menit dengan warm-up,
 pengulangan independen, populasi tetap, reset per sel, urutan sel teracak, dan
@@ -174,7 +175,7 @@ hasil sebagai karakterisasi *short-run*, bukan titik saturasi.
 
 ### M3. Repeatability disebut reproducibility dan provenance belum cukup
 
-Lima ronde berurutan pada host yang sama menunjukkan repeatability, bukan
+Ronde berurutan pada host yang sama menunjukkan repeatability, bukan
 reproducibility lintas lingkungan. RNG tidak memiliki seed tetap. Skrip suite
 tidak merekam commit SHA, status working tree, hash konfigurasi, image digest,
 seed, dan status setiap ronde. Salinan `report.html` lama bahkan dapat terarsipkan
@@ -188,12 +189,12 @@ terdokumentasi dan dapat diulang”.
 
 ### M4. Interpretasi interval kepercayaan keliru
 
-Observasi 14,1 TPS berada di luar CI rerata yang dilaporkan
-\([14,18; 14,82]\), tetapi narasi menyatakan seluruh observasi berada di dalam
+Satu observasi throughput pada jaringan lima organisasi sebelumnya berada di luar CI
+rerata yang dilaporkan, tetapi narasi menyatakan seluruh observasi berada di dalam
 interval
 ([Bab IV:382](/home/mfachrizalg/2026/Skripsi/bi-coin/thesis/contents/chapter-4/chapter-4.tex:382),
 [Bab IV:407](/home/mfachrizalg/2026/Skripsi/bi-coin/thesis/contents/chapter-4/chapter-4.tex:407)).
-CI rerata memang bukan interval yang harus memuat setiap observasi.
+CI rerata memang bukan interval yang harus memuat setiap observasi. Padanan CI untuk jaringan empat organisasi tidak tercatat dalam ulasan ini.
 
 **Perbaikan minimum:** hapus interpretasi containment; jelaskan estimator,
 ukuran sampel, simpangan baku, rumus/derajat kebebasan Student-t, dan laporkan

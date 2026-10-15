@@ -1,4 +1,5 @@
 % Arsitektur jaringan Hyperledger Fabric sistem Rupiah Digital (TikZ).
+% Purwarupa studi empat organisasi, kanal rupiah-study.
 % Di-input dari BAB III §3.2.2 setelah tab:jaringan.
 
 \begin{figure}[H]
@@ -24,47 +25,42 @@
 
 %--- Backend + Orderer ---
 \node[backend] (be)  at (-2.5, 3.5) {Backend API\\Go + Fabric Gateway SDK};
-\node[ordnode] (ord) at ( 5.5, 3.5) {orderer.paynet:7050\\(Raft Leader)};
+\node[ordnode] (ord) at ( 4.5, 3.5) {orderer.centralbank:7050\\(Raft, satu node)};
 \draw[ar] (be.east) -- node[pathlabel,above]{gRPC} (ord.west);
 
-%--- Peer nodes ---
-\node[peer]     (pbi)  at ( 0.0, 1.2) {peer0.bi\\BankIndonesiaOrg\\:7051};
-\node[peer]     (phim) at ( 3.0, 1.2) {peer0.himbara\\HimbaraBankOrg\\:9051};
-\node[peer]     (pcom) at ( 6.0, 1.2) {peer0.commercial\\CommercialBankOrg\\:11051};
-\node[peer]     (ppjp) at ( 9.0, 1.2) {peer0.pjp\\PJPOrg\\:13051};
-\node[observer] (pojk) at (12.0, 1.2) {peer0.ojk\\OJKObserverOrg\\:12051};
+%--- Peer nodes (empat organisasi) ---
+\node[peer]     (pcb)   at ( 0.0, 1.2) {peer0.centralbank\\CentralBankMSP\\:17051};
+\node[peer]     (pdist) at ( 3.0, 1.2) {peer0.distributor\\DistributorMSP\\:18051};
+\node[observer] (pval)  at ( 6.0, 1.2) {peer0.validator\\ValidatorMSP (audit)\\:19051};
+\node[peer]     (pusr)  at ( 9.0, 1.2) {peer0.enduser\\EndUserMSP\\:20051};
 
 %--- Orderer delivers block to all peers ---
-\draw[ar] (ord.south) to[out=-100,in=90] (pbi.north);
-\draw[ar] (ord.south) to[out=-100,in=90] (phim.north);
-\draw[ar] (ord.south) -- (pcom.north);
-\draw[ar] (ord.south) to[out=-80,in=90]  (ppjp.north);
-\draw[ar] (ord.south) to[out=-80,in=90]  (pojk.north);
+\draw[ar] (ord.south) to[out=-100,in=90] (pcb.north);
+\draw[ar] (ord.south) to[out=-100,in=90] (pdist.north);
+\draw[ar] (ord.south) -- (pval.north);
+\draw[ar] (ord.south) to[out=-80,in=90]  (pusr.north);
 
-%--- Backend gateway to peer0.bi ---
-\draw[gar] (be.south) to[out=-80,in=180]
-  node[pathlabel,left]{\textit{endorse}} (pbi.west);
+%--- Backend gateway ke peer0.distributor (gateway peer contoh pada network/study/README.md) ---
+\draw[gar] (be.south) -- node[pathlabel,above,sloped]{\textit{endorse}} (pdist.north);
 
-%--- CouchDB state databases ---
-\node[cdb] (cbi)  at ( 0.0, -0.2) {CouchDB :5984};
-\node[cdb] (chim) at ( 3.0, -0.2) {CouchDB :6984};
-\node[cdb] (ccom) at ( 6.0, -0.2) {CouchDB :7984};
-\node[cdb] (cpjp) at ( 9.0, -0.2) {CouchDB :9984};
-\node[cdb] (cojk) at (12.0, -0.2) {CouchDB :8984};
+%--- CouchDB state databases (satu per organisasi) ---
+\node[cdb] (ccb)   at ( 0.0, -0.2) {CouchDB :17584};
+\node[cdb] (cdist) at ( 3.0, -0.2) {CouchDB :18584};
+\node[cdb] (cval)  at ( 6.0, -0.2) {CouchDB :19584};
+\node[cdb] (cusr)  at ( 9.0, -0.2) {CouchDB :20584};
 
-\draw[ar] (pbi)  -- (cbi);
-\draw[ar] (phim) -- (chim);
-\draw[ar] (pcom) -- (ccom);
-\draw[ar] (ppjp) -- (cpjp);
-\draw[ar] (pojk) -- (cojk);
+\draw[ar] (pcb)   -- (ccb);
+\draw[ar] (pdist) -- (cdist);
+\draw[ar] (pval)  -- (cval);
+\draw[ar] (pusr)  -- (cusr);
 
-%--- mychannel bounding box ---
-\node[chanbox, fit=(pbi)(phim)(pcom)(ppjp)(pojk)(cbi)(chim)(ccom)(cpjp)(cojk),
+%--- rupiah-study bounding box ---
+\node[chanbox, fit=(pcb)(pdist)(pval)(pusr)(ccb)(cdist)(cval)(cusr),
   label={[font=\footnotesize\bfseries]below:%
-    \textit{mychannel} (kebijakan dukungan mayoritas, TLS)}] {};
+    \textit{rupiah-study} (kebijakan endorsement per kontrak, TLS)}] {};
 
 \end{tikzpicture}%
 }
-\caption{Arsitektur jaringan baseline kinerja \texttt{digital-rupiah} v3.0 dengan lima organisasi}
+\caption{Arsitektur jaringan purwarupa studi Rupiah Digital pada kanal \texttt{rupiah-study} dengan empat organisasi}
 \label{fig:arsitektur-jaringan}
 \end{figure}

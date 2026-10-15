@@ -1,47 +1,62 @@
----
-name: PayNet Garuda Network
+# Study Caliper network config. benchmark/compliance/caliper-config.js writes this
+# structure as caliper-network.json at run time (writeFabricNetworkConfig).
+name: Retail Rupiah Compliance Study
 version: "2.0.0"
 caliper:
   blockchain: fabric
 
 channels:
-  - channelName: mychannel
+  - channelName: rupiah-study
     contracts:
-      - id: digital-rupiah
+      - id: rupiah-monetary
+      - id: rupiah-controls
+      - id: rupiah-payments
 
 organizations:
-  - mspid: BankIndonesiaOrgMSP
+  - mspid: CentralBankMSP
     identities:
       certificates:
-        - name: User1
-          clientSignedCert:
-            path: network/organizations/peerOrganizations/bi.paynet/users/User1@bi.paynet/msp/signcerts/cert.pem
+        # UNRESOLVED: CentralBankMSP signer names and key/certificate paths
+        - name: <username>
           clientPrivateKey:
-            path: network/organizations/peerOrganizations/bi.paynet/users/User1@bi.paynet/msp/keystore/key.pem
+            path: <absolute path to signer key>
+          clientSignedCert:
+            path: <absolute path to signer certificate>
     connectionProfile:
-      path: network/organizations/peerOrganizations/bi.paynet/connection-bi.json
-      discover: true
+      path: <result-dir>/caliper-network/connection-profiles/CentralBankMSP.json
 
-  - mspid: HimbaraBankOrgMSP
+  - mspid: DistributorMSP
     identities:
       certificates:
-        - name: User1
-          clientSignedCert:
-            path: network/organizations/peerOrganizations/himbara.paynet/users/User1@himbara.paynet/msp/signcerts/cert.pem
+        # example: one of three DistributorMSP signers (User1), values from network/study/README.md
+        - name: pjp-reviewer
           clientPrivateKey:
-            path: network/organizations/peerOrganizations/himbara.paynet/users/User1@himbara.paynet/msp/keystore/key.pem
+            path: /absolute/path/to/User1@distributor.rupiah.study/msp/keystore/priv_sk
+          clientSignedCert:
+            path: /absolute/path/to/User1@distributor.rupiah.study/msp/signcerts/User1@distributor.rupiah.study-cert.pem
     connectionProfile:
-      path: network/organizations/peerOrganizations/himbara.paynet/connection-himbara.json
-      discover: true
+      path: <result-dir>/caliper-network/connection-profiles/DistributorMSP.json
 
-  - mspid: CommercialBankOrgMSP
+  - mspid: ValidatorMSP
     identities:
       certificates:
-        - name: User1
-          clientSignedCert:
-            path: network/organizations/peerOrganizations/commercial.paynet/users/User1@commercial.paynet/msp/signcerts/cert.pem
+        # UNRESOLVED: ValidatorMSP signer names and key/certificate paths
+        - name: <username>
           clientPrivateKey:
-            path: network/organizations/peerOrganizations/commercial.paynet/users/User1@commercial.paynet/msp/keystore/key.pem
+            path: <absolute path to signer key>
+          clientSignedCert:
+            path: <absolute path to signer certificate>
     connectionProfile:
-      path: network/organizations/peerOrganizations/commercial.paynet/connection-commercial.json
-      discover: true
+      path: <result-dir>/caliper-network/connection-profiles/ValidatorMSP.json
+
+  - mspid: EndUserMSP
+    identities:
+      certificates:
+        # UNRESOLVED: EndUserMSP signer names (eight identities exist) and key/certificate paths
+        - name: <username>
+          clientPrivateKey:
+            path: <absolute path to signer key>
+          clientSignedCert:
+            path: <absolute path to signer certificate>
+    connectionProfile:
+      path: <result-dir>/caliper-network/connection-profiles/EndUserMSP.json

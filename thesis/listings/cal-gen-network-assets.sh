@@ -1,53 +1,32 @@
-#!/bin/bash
-# Generates Caliper connection profiles + stable identity files for the garuda network.
-# Idempotent; safe to re-run after the network is up. Run from repo root.
+#!/usr/bin/env bash
+# Study excerpt from network/study/bootstrap-centralbank.sh: CentralBankMSP
+# identities are enrolled from ca.centralbank. Caliper connection profiles are
+# written at run time by benchmark/compliance/caliper-config.js.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-ORG_ROOT="$PROJECT_DIR/network/organizations/peerOrganizations"
+NETWORK_DIR="$SCRIPT_DIR"
+CRYPTO_DIR="$NETWORK_DIR/organizations/peerOrganizations/centralbank.rupiah.study"
+ORDERER_DIR="$NETWORK_DIR/organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study"
+FABRIC_SAMPLES="${FABRIC_SAMPLES:-$HOME/fabric-samples}"
+FABRIC_CA_CLIENT="$FABRIC_SAMPLES/bin/fabric-ca-client"
+CA_ENDPOINT="127.0.0.1:17054"
+CA_NAME="ca-centralbank"
+DOMAIN="centralbank.rupiah.study"
 
-# org | OrgName | MSPID | peerPort
-ORGS=(
-  "bi|BankIndonesiaOrg|BankIndonesiaOrgMSP|7051"
-  "himbara|HimbaraBankOrg|HimbaraBankOrgMSP|9051"
-  "commercial|CommercialBankOrg|CommercialBankOrgMSP|11051"
-)
-
-for entry in "${ORGS[@]}"; do
-  IFS='|' read -r ORG ORGNAME MSPID PORT <<< "$entry"
-  DOMAIN="${ORG}.paynet"
-  ORG_DIR="$ORG_ROOT/$DOMAIN"
-  PEER="peer0.$DOMAIN"
-  TLS_CA="$ORG_DIR/peers/$PEER/tls/ca.crt"
-  USER_MSP="$ORG_DIR/users/User1@$DOMAIN/msp"
-
-  # Stable identity filenames (cryptogen emits hashed keystore names).
-  cp "$USER_MSP/signcerts/User1@$DOMAIN-cert.pem" "$USER_MSP/signcerts/cert.pem"
-  cp "$USER_MSP/keystore/"*_sk "$USER_MSP/keystore/key.pem"
-
-  cat > "$ORG_DIR/connection-$ORG.json" <<EOF
-{
-  "name": "$ORG-paynet",
-  "version": "1.0.0",
-  "client": { "organization": "$ORGNAME" },
-  "channels": {
-    "mychannel": { "peers": { "$PEER": {} } }
-  },
-  "organizations": {
-    "$ORGNAME": { "mspid": "$MSPID", "peers": ["$PEER"] }
-  },
-  "peers": {
-    "$PEER": {
-      "url": "grpcs://localhost:$PORT",
-      "tlsCACerts": { "path": "$TLS_CA" },
-      "grpcOptions": {
-        "ssl-target-name-override": "$PEER",
-        "hostnameOverride": "$PEER"
-      }
-    }
-  }
-}
-EOF
-  echo "Generated connection-$ORG.json + stable identity for $MSPID"
+: "${STUDY_CA_ADMIN_USER:?set STUDY_CA_ADMIN_USER for the local study CA}"
+: "${STUDY_CA_ADMIN_SECRET:?set STUDY_CA_ADMIN_SECRET for the local study CA}"
+# ...
+register_enroll admin admin "$CRYPTO_DIR/users/Admin@$DOMAIN/msp"
+register_enroll user1 client "$CRYPTO_DIR/users/User1@$DOMAIN/msp"
+register_enroll user2 client "$CRYPTO_DIR/users/User2@$DOMAIN/msp"
+# ...
+register_node peer0 peer "$CRYPTO_DIR/peers/peer0.$DOMAIN" "peer0.$DOMAIN,localhost,127.0.0.1"
+register_node orderer orderer "$ORDERER_DIR" "orderer.$DOMAIN,localhost,127.0.0.1"
+# ...
+write_msp_config "$CRYPTO_DIR/msp"
+for local_msp in "$CRYPTO_DIR/users/Admin@$DOMAIN/msp" "$CRYPTO_DIR/peers/peer0.$DOMAIN/msp" "$CRYPTO_DIR/users/User1@$DOMAIN/msp" "$CRYPTO_DIR/users/User2@$DOMAIN/msp" "$ORDERER_DIR/msp"; do
+  write_msp_config "$local_msp"
 done
+
+echo "CentralBankMSP materials created under $NETWORK_DIR/organizations."

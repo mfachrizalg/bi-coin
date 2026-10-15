@@ -1,140 +1,151 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-CHAINCODE_DIR="$PROJECT_DIR/chaincode"
-CHAINCODE_NAME="${CHAINCODE_NAME:-digital-rupiah}"
-CHAINCODE_VERSION="${CHAINCODE_VERSION:-1.0}"
-CHAINCODE_SEQUENCE="${CHAINCODE_SEQUENCE:-1}"
-CHANNEL_NAME="${CHANNEL_NAME:-mychannel}"
-NETWORK_MODE="${NETWORK_MODE:-test-network}"
-
+NETWORK_DIR="$PROJECT_DIR/network/study"
+CHAINCODE_DIR="$PROJECT_DIR/study/chaincode"
 FABRIC_SAMPLES="${FABRIC_SAMPLES:-$HOME/fabric-samples}"
-TEST_NETWORK="$FABRIC_SAMPLES/test-network"
-
-echo "Packaging chaincode..."
+CHANNEL_NAME="${STUDY_CHANNEL_NAME:-rupiah-study}"
+PROJECT_NAME="bi-coin-rupiah-study"
+PACKAGE_DIR="$NETWORK_DIR/packages"
+CLI_CONTAINER="study-cli"
+ORDERER_TLS_CA="/study/organizations/peerOrganizations/centralbank.rupiah.study/msp/tlscacerts/tlsca-cert.pem"
+PACKAGE_VERSION="1.0"
+PACKAGE_SEQUENCE="1"
 
 export PATH="$FABRIC_SAMPLES/bin:$PATH"
-
-if [ "$NETWORK_MODE" = "garuda" ]; then
-  NETWORK_DIR="$PROJECT_DIR/network"
-  export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
-
-  peer lifecycle chaincode package "${CHAINCODE_NAME}.tar.gz" \
-    --path "$CHAINCODE_DIR" \
-    --lang golang \
-    --label "${CHAINCODE_NAME}_${CHAINCODE_VERSION}"
-
-  echo "Installing chaincode on all 5 org peers..."
-
-  for org in bi himbara commercial ojk pjp; do
-    case "$org" in
-      bi)         MSPID=BankIndonesiaOrgMSP; PORT=7051;  ORG_DOMAIN=bi.paynet ;;
-      himbara)    MSPID=HimbaraBankOrgMSP;   PORT=9051;  ORG_DOMAIN=himbara.paynet ;;
-      commercial) MSPID=CommercialBankOrgMSP; PORT=11051; ORG_DOMAIN=commercial.paynet ;;
-      ojk)        MSPID=OJKObserverOrgMSP;   PORT=12051; ORG_DOMAIN=ojk.paynet ;;
-      pjp)        MSPID=PJPOrgMSP;           PORT=13051; ORG_DOMAIN=pjp.paynet ;;
-    esac
-
-    export CORE_PEER_TLS_ENABLED=true
-    export CORE_PEER_LOCALMSPID="$MSPID"
-    export CORE_PEER_TLS_ROOTCERT_FILE="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/peers/peer0.$ORG_DOMAIN/tls/ca.crt"
-    export CORE_PEER_MSPCONFIGPATH="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp"
-    export CORE_PEER_ADDRESS="localhost:$PORT"
-
-    # Idempotent: a re-run on an already-installed peer must not abort the script.
-    peer lifecycle chaincode install "${CHAINCODE_NAME}.tar.gz" 2>&1 | grep -v "already successfully installed" || true
-  done
-
-  PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "${CHAINCODE_NAME}_${CHAINCODE_VERSION}" | awk '{print $3}' | sed 's/,//')
-  echo "Package ID: $PACKAGE_ID"
-
-  echo "Approving chaincode for all 5 orgs..."
-  TLS_CA="$NETWORK_DIR/organizations/ordererOrganizations/paynet/orderers/orderer.paynet/msp/tlscacerts/tlsca.paynet-cert.pem"
-
-  for org in bi himbara commercial ojk pjp; do
-    case "$org" in
-      bi)         MSPID=BankIndonesiaOrgMSP; PORT=7051;  ORG_DOMAIN=bi.paynet ;;
-      himbara)    MSPID=HimbaraBankOrgMSP;   PORT=9051;  ORG_DOMAIN=himbara.paynet ;;
-      commercial) MSPID=CommercialBankOrgMSP; PORT=11051; ORG_DOMAIN=commercial.paynet ;;
-      ojk)        MSPID=OJKObserverOrgMSP;   PORT=12051; ORG_DOMAIN=ojk.paynet ;;
-      pjp)        MSPID=PJPOrgMSP;           PORT=13051; ORG_DOMAIN=pjp.paynet ;;
-    esac
-
-    export CORE_PEER_LOCALMSPID="$MSPID"
-    export CORE_PEER_TLS_ROOTCERT_FILE="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/peers/peer0.$ORG_DOMAIN/tls/ca.crt"
-    export CORE_PEER_MSPCONFIGPATH="$NETWORK_DIR/organizations/peerOrganizations/$ORG_DOMAIN/users/Admin@$ORG_DOMAIN/msp"
-    export CORE_PEER_ADDRESS="localhost:$PORT"
-
-    peer lifecycle chaincode approveformyorg \
-      -o localhost:7050 \
-      --ordererTLSHostnameOverride orderer.paynet \
-      --channelID "$CHANNEL_NAME" \
-      --name "$CHAINCODE_NAME" \
-      --version "$CHAINCODE_VERSION" \
-      --package-id "$PACKAGE_ID" \
-      --sequence "$CHAINCODE_SEQUENCE" \
-      --tls --cafile "$TLS_CA"
-  done
-
-  echo "Committing chaincode..."
-  peer lifecycle chaincode commit \
-    -o localhost:7050 \
-    --ordererTLSHostnameOverride orderer.paynet \
-    --channelID "$CHANNEL_NAME" \
-    --name "$CHAINCODE_NAME" \
-    --version "$CHAINCODE_VERSION" \
-    --sequence "$CHAINCODE_SEQUENCE" \
-    --tls --cafile "$TLS_CA" \
-    --peerAddresses localhost:7051  --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls/ca.crt" \
-    --peerAddresses localhost:9051  --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls/ca.crt" \
-    --peerAddresses localhost:11051 --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls/ca.crt" \
-    --peerAddresses localhost:13051 --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/tls/ca.crt"
-
-  echo "Chaincode deployed successfully on Garuda network (4 validators + 1 observer + 1 PJP)."
+export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
+mkdir -p "$PACKAGE_DIR"
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE=(docker compose)
 else
-  cd "$TEST_NETWORK"
-  export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
-
-  peer lifecycle chaincode package "${CHAINCODE_NAME}.tar.gz" \
-    --path "$CHAINCODE_DIR" \
-    --lang golang \
-    --label "${CHAINCODE_NAME}_${CHAINCODE_VERSION}"
-
-  echo "Installing chaincode on Org1..."
-  export CORE_PEER_TLS_ENABLED=true
-  export CORE_PEER_LOCALMSPID=Org1MSP
-  export CORE_PEER_TLS_ROOTCERT_FILE="$TEST_NETWORK/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
-  export CORE_PEER_MSPCONFIGPATH="$TEST_NETWORK/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp"
-  export CORE_PEER_ADDRESS=localhost:7051
-
-  peer lifecycle chaincode install "${CHAINCODE_NAME}.tar.gz"
-
-  PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "${CHAINCODE_NAME}_${CHAINCODE_VERSION}" | awk '{print $3}' | sed 's/,//')
-
-  echo "Package ID: $PACKAGE_ID"
-
-  echo "Approving chaincode for Org1..."
-  peer lifecycle chaincode approveformyorg \
-    -o localhost:7050 \
-    --ordererTLSHostnameOverride orderer.example.com \
-    --channelID "$CHANNEL_NAME" \
-    --name "$CHAINCODE_NAME" \
-    --version "$CHAINCODE_VERSION" \
-    --package-id "$PACKAGE_ID" \
-    --sequence "$CHAINCODE_SEQUENCE" \
-    --tls --cafile "$TEST_NETWORK/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
-
-  echo "Committing chaincode..."
-  peer lifecycle chaincode commit \
-    -o localhost:7050 \
-    --ordererTLSHostnameOverride orderer.example.com \
-    --channelID "$CHANNEL_NAME" \
-    --name "$CHAINCODE_NAME" \
-    --version "$CHAINCODE_VERSION" \
-    --sequence "$CHAINCODE_SEQUENCE" \
-    --tls --cafile "$TEST_NETWORK/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
-
-  echo "Chaincode deployed successfully."
+  COMPOSE=(docker-compose)
 fi
+"${COMPOSE[@]}" --project-name "$PROJECT_NAME" --file "$NETWORK_DIR/docker-compose.yaml" --profile tools up -d study-cli
+
+select_peer() {
+  case "$1" in
+    centralbank)
+      MSPID=CentralBankMSP; ADDRESS=peer0.centralbank.rupiah.study:7051; DOMAIN=centralbank.rupiah.study ;;
+    distributor)
+      MSPID=DistributorMSP; ADDRESS=peer0.distributor.rupiah.study:7051; DOMAIN=distributor.rupiah.study ;;
+    validator)
+      MSPID=ValidatorMSP; ADDRESS=peer0.validator.rupiah.study:7051; DOMAIN=validator.rupiah.study ;;
+    enduser)
+      MSPID=EndUserMSP; ADDRESS=peer0.enduser.rupiah.study:7051; DOMAIN=enduser.rupiah.study ;;
+    *) echo "unknown peer org: $1" >&2; exit 2 ;;
+  esac
+  TLS_ROOT="/study/organizations/peerOrganizations/$DOMAIN/peers/peer0.$DOMAIN/tls/ca.crt"
+  ADMIN_MSP="/study/organizations/peerOrganizations/$DOMAIN/users/Admin@$DOMAIN/msp"
+}
+
+peer_cli() {
+  local org="$1"
+  shift
+  select_peer "$org"
+  docker exec \
+    -e FABRIC_CFG_PATH=/etc/hyperledger/fabric \
+    -e CORE_PEER_TLS_ENABLED=true \
+    -e CORE_PEER_LOCALMSPID="$MSPID" \
+    -e CORE_PEER_ADDRESS="$ADDRESS" \
+    -e CORE_PEER_TLS_ROOTCERT_FILE="$TLS_ROOT" \
+    -e CORE_PEER_MSPCONFIGPATH="$ADMIN_MSP" \
+    "$CLI_CONTAINER" peer "$@"
+}
+
+package_chaincode() {
+  local name="$1" source="$2" label="$3"
+  if [[ -f "$PACKAGE_DIR/$name.tar.gz" ]]; then
+    return
+  fi
+  peer lifecycle chaincode package \
+    "$PACKAGE_DIR/$name.tar.gz" \
+    --path "$CHAINCODE_DIR/$source" \
+    --lang golang \
+    --label "$label"
+}
+
+deploy_one() {
+  local name="$1" source="$2" policy="$3" label package_id
+  label="${name}_${PACKAGE_VERSION}"
+
+  if peer_cli centralbank lifecycle chaincode querycommitted -C "$CHANNEL_NAME" -n "$name" >/dev/null 2>&1; then
+    echo "$name is already committed; skipping."
+    return
+  fi
+
+  echo "Packaging $name..."
+  package_chaincode "$name" "$source" "$label"
+
+  for org in centralbank distributor validator enduser; do
+    echo "Installing $name on $org..."
+    output="$(peer_cli "$org" lifecycle chaincode install "/study/packages/$name.tar.gz" 2>&1)" || {
+      if [[ "$output" != *"already successfully installed"* ]]; then
+        printf '%s\n' "$output" >&2
+        exit 1
+      fi
+    }
+  done
+
+  package_id="$(peer_cli centralbank lifecycle chaincode queryinstalled | awk -v label="$label" '$0 ~ label {gsub(",", "", $3); print $3; exit}')"
+  if [[ -z "$package_id" ]]; then
+    echo "package id not found for $label" >&2
+    exit 1
+  fi
+
+  for org in centralbank distributor validator enduser; do
+    select_peer "$org"
+    if approved="$(peer_cli "$org" lifecycle chaincode queryapproved --channelID "$CHANNEL_NAME" --name "$name" --output json 2>/dev/null)"; then
+      if [[ "$approved" == *"\"version\": \"$PACKAGE_VERSION\""* && "$approved" == *"\"sequence\": $PACKAGE_SEQUENCE"* && "$approved" == *"\"package_id\": \"$package_id\""* ]]; then
+        echo "$name already has the matching $org approval."
+        continue
+      fi
+      echo "$name has a different uncommitted approval for $org." >&2
+      exit 1
+    fi
+    echo "Approving $name for $org..."
+    peer_cli "$org" lifecycle chaincode approveformyorg \
+      -o orderer.centralbank.rupiah.study:7050 \
+      --ordererTLSHostnameOverride orderer.centralbank.rupiah.study \
+      --channelID "$CHANNEL_NAME" \
+      --name "$name" \
+      --version "$PACKAGE_VERSION" \
+      --package-id "$package_id" \
+      --sequence "$PACKAGE_SEQUENCE" \
+      --signature-policy "$policy" \
+      --tls --cafile "$ORDERER_TLS_CA" \
+      --waitForEventTimeout 2m
+  done
+
+  echo "Checking $name approvals..."
+  peer_cli centralbank lifecycle chaincode checkcommitreadiness \
+    -C "$CHANNEL_NAME" \
+    -n "$name" \
+    --version "$PACKAGE_VERSION" \
+    --sequence "$PACKAGE_SEQUENCE" \
+    --signature-policy "$policy"
+
+  echo "Committing $name..."
+  peer_cli centralbank lifecycle chaincode commit \
+    -o orderer.centralbank.rupiah.study:7050 \
+    --ordererTLSHostnameOverride orderer.centralbank.rupiah.study \
+    --channelID "$CHANNEL_NAME" \
+    --name "$name" \
+    --version "$PACKAGE_VERSION" \
+    --sequence "$PACKAGE_SEQUENCE" \
+    --signature-policy "$policy" \
+    --tls --cafile "$ORDERER_TLS_CA" \
+    --peerAddresses peer0.centralbank.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/centralbank.rupiah.study/peers/peer0.centralbank.rupiah.study/tls/ca.crt \
+    --peerAddresses peer0.distributor.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/distributor.rupiah.study/peers/peer0.distributor.rupiah.study/tls/ca.crt \
+    --peerAddresses peer0.validator.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/validator.rupiah.study/peers/peer0.validator.rupiah.study/tls/ca.crt \
+    --peerAddresses peer0.enduser.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/enduser.rupiah.study/peers/peer0.enduser.rupiah.study/tls/ca.crt \
+    --waitForEventTimeout 2m
+  peer_cli centralbank lifecycle chaincode querycommitted -C "$CHANNEL_NAME" -n "$name"
+}
+
+deploy_one rupiah-monetary monetary "AND('CentralBankMSP.peer','DistributorMSP.peer')"
+deploy_one rupiah-controls controls "AND('DistributorMSP.peer',OR('CentralBankMSP.peer','EndUserMSP.peer'))"
+deploy_one rupiah-payments payments "AND('DistributorMSP.peer','EndUserMSP.peer')"
+
+echo "Committed rupiah-monetary, rupiah-controls, and rupiah-payments with their domain policies."

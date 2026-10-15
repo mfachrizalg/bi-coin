@@ -117,10 +117,9 @@ melalui batas otorisasi serta \textit{endorsement} yang dapat diamati, dan
 (iii) melaporkan kinerja dengan konfigurasi serta artefak yang dapat diulang.
 Penelitian ini menempatkan verifikasi kontrol sebagai evaluasi utama melalui
 lingkungan studi terisolasi yang menggunakan empat organisasi Fabric dan tiga
-\textit{chaincode} domain. Pengukuran Hyperledger Caliper pada purwarupa
-\texttt{digital-rupiah} v3.0 tetap dilaporkan sebagai bukti kinerja sekunder;
-hasil tersebut tidak dianggap sebagai pengukuran kinerja lingkungan kontrol
-yang baru.
+\textit{chaincode} domain. Pengukuran Hyperledger Caliper pada ekstensi studi kontrol empat organisasi dengan satu \textit{worker} pada satu \textit{host}
+dilaporkan sebagai bukti kinerja sekunder;
+pengukuran tersebut tidak menetapkan kapasitas produksi.
 
 \section{Rumusan Masalah}
 
@@ -133,9 +132,9 @@ sebagai berikut.
 	\item Apakah kontrol KYC dan AML/CFT terpilih, pemisahan persetujuan staf,
 	      bukti pembatasan/pembukaan pembatasan, dan kebijakan \textit{endorsement}
 	      bekerja sesuai skenario fungsional sintetis?
-	\item Bagaimana karakteristik kinerja purwarupa \texttt{digital-rupiah} v3.0
+	\item Bagaimana karakteristik kinerja ekstensi studi kontrol empat organisasi
 	      pada beban yang diuji menggunakan Hyperledger Caliper sebagai bukti
-	      sekunder yang terpisah dari lingkungan studi kontrol?
+	      kinerja sekunder?
 \end{enumerate}
 
 \section{Tujuan Penelitian}
@@ -150,7 +149,7 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	      yang berbeda, pembatasan/pembukaan pembatasan, alur pendanaan dan
 	      pembayaran, serta penolakan transaksi dengan dukungan organisasi yang
 	      tidak mencukupi.
-	\item Melaporkan hasil Caliper pada purwarupa \texttt{digital-rupiah} v3.0
+	\item Melaporkan hasil Caliper pada ekstensi studi kontrol empat organisasi
 	      sebagai evaluasi kinerja sekunder, tanpa mengatribusikannya kepada tiga
 	      \textit{chaincode} lingkungan studi kontrol.
 \end{enumerate}
@@ -164,8 +163,8 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	\item Pengujian kontrol utama menggunakan jaringan Fabric 2.5 terisolasi pada
 	      kanal \texttt{rupiah-study}, empat MSP, satu \textit{peer} per MSP, dan
 	      satu \textit{orderer} di bawah \texttt{CentralBankMSP}. Pengukuran kinerja
-	      sekunder menggunakan lingkungan lima organisasi dan \textit{chaincode}
-	      \texttt{digital-rupiah} v3.0 yang terpisah.
+	      sekunder menggunakan Hyperledger Caliper pada ekstensi studi kontrol empat organisasi
+	      dengan satu \textit{worker} pada satu \textit{host}.
 	\item Penelitian berfokus pada kontrol KYC dan AML/CFT terpilih serta
 	      verifikasi fungsionalnya; penelitian ini tidak menilai kepatuhan
 	      institusional secara menyeluruh, efektivitas model risiko di dunia nyata,
@@ -174,9 +173,9 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	      \textit{CBDC rate}, didelegasikan pada studi terpisah seperti
 	      \cite{SyarifuddinBakhtiar2021Monetary}.
 	\item Evaluasi kinerja dilakukan menggunakan Hyperledger Caliper dengan beban
-	      yang dihasilkan oleh sejumlah \textit{worker} pada lingkungan pengujian lokal.
+	      yang dihasilkan oleh satu \textit{worker} pada lingkungan pengujian lokal.
 	\item Pengujian dijalankan pada satu inang
-	      (\textit{single host}) dengan satu, dua, dan empat \textit{worker} Caliper dan satu
+	      (\textit{single host}) dengan satu \textit{worker} Caliper dan satu
 	      \textit{peer} per organisasi, tanpa latensi jaringan dan persebaran geografis
 	      yang nyata. Karena itu, angka \textit{throughput} dan latensi yang diperoleh
 	      tidak dapat langsung digeneralisasi ke perangkat keras maupun topologi
@@ -184,7 +183,7 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	\item Komposisi beban transaksi dan distribusi
 	      nilai yang digunakan merupakan asumsi desain yang menyerupai pola pembayaran
 	      ritel di Indonesia, bukan jejak transaksi empiris. Profil transfer menggunakan
-	      konfigurasi terpisah untuk satu, dua, dan empat \textit{worker}; setiap profil
+	      konfigurasi untuk satu \textit{worker}; profil tersebut
 	      menetapkan populasi, slot transaksi, saldo awal, dan durasi pada berkas
 	      konfigurasi yang ikut dihash dalam manifes. Ronde pemanasan berlangsung
 	      30 detik, sedangkan ronde terukur berlangsung 120 detik.
@@ -245,7 +244,7 @@ Penelitian ini diharapkan memberikan manfaat sebagai berikut.
 	      distribusi kepada kustodian bank atau PJP, transaksi antarpengguna, dan pengawasan oleh
 	      bank sentral.
 	\item Menjelaskan penerapan Hyperledger Fabric untuk memodelkan pemisahan
-	      peran antara BI, peserta distribusi, dan pengguna ritel tanpa
+	      peran antara \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan \texttt{EndUserMSP} tanpa
 	      menempatkan data portal pada buku besar.
 	\item Menyediakan purwarupa yang dapat digunakan sebagai bahan eksperimen
 	      teknis untuk menguji alur penerbitan, transfer, otorisasi, dan

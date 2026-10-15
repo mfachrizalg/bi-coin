@@ -1,4 +1,4 @@
-% Arsitektur dua jenjang sistem Rupiah Digital (TikZ).
+% Arsitektur dua jenjang sistem Rupiah Digital (TikZ), purwarupa empat organisasi.
 % Di-input dari BAB III §3.2.1 sebelum fig:arsitektur.
 
 \begin{figure}[H]
@@ -17,69 +17,54 @@
 
 %── Jenjang distribusi institusional ──────────────────────────────────────────
 
-\node[actor] (bi)         at (0,    0)    {Bank Indonesia\\(Penerbit)};
-\node[actor] (himbara)    at (6.0,  1.5)  {Himbara Bank\\(Validator)};
-\node[actor] (commercial) at (6.0, -1.5)  {Commercial Bank\\(Validator)};
-\node[actor] (ojk)        at (11.5, 0)    {OJK\\(Observer)};
+\node[actor] (bi)          at (0,    0)    {Bank Indonesia\\(Penerbit)\\CentralBankMSP};
+\node[actor] (distributor) at (7.0,  0)    {Distributor\\(bank dan PJP)\\DistributorMSP};
+\node[actor] (validator)   at (14.0, 0)    {Validator\\(OJK, PPATK)\\ValidatorMSP, observer};
 
-% BI Treasury → bank/PJP custodian (penerbitan dan distribusi)
-\draw[ar] (bi.east) to[out=15,in=175]
-  node[pl, above, sloped, pos=0.55]{Distribusi dari Treasury} (himbara.west);
-\draw[ar] (bi.east) to[out=-15,in=-175]
-  node[pl, below, sloped, pos=0.55]{Distribusi dari Treasury} (commercial.west);
+% BI Treasury → Distributor (penerbitan dan distribusi)
+\draw[ar] (bi.east) -- node[pl, above]{Distribusi dari Treasury} (distributor.west);
 
 % Pelaporan dan akses baca pengawasan
-\draw[dar] (bi.north east) to[out=60,in=180] (6.0,2.2)
-  to[out=0,in=120] (ojk.north west);
-\node[font=\scriptsize, align=center, fill=white, inner sep=1pt]
-  at (6.0,2.2) {Laporan};
-\draw[dar] (ojk.south west) to[out=180,in=0] (6.0,-2.3)
-  to[out=180,in=-60] (bi.south east);
-\node[font=\scriptsize, align=center, fill=white, inner sep=1pt]
-  at (6.0,-2.3) {Akses baca};
-
-% Peserta validator → OJK (pelaporan)
-\draw[dar] (himbara.east)    -- (ojk.north west);
-\draw[dar] (commercial.east) -- (ojk.south west);
+\draw[dar] (distributor.east) -- node[pl, above]{Laporan} (validator.west);
+\draw[dar] (bi.north) to[out=60,in=120] node[pl, above]{Akses baca} (validator.north);
 
 \node[zonebox,
-  fit=(bi)(himbara)(commercial)(ojk),
-  label={[font=\footnotesize\bfseries, anchor=south west]north west:%
+  fit=(bi)(distributor)(validator),
+  label={[font=\footnotesize\bfseries, anchor=north west]south west:%
     Jenjang 1: Distribusi Institusional}] (j1) {};
 
 %── Batas jenjang ─────────────────────────────────────────────────────────────
 
-\draw[dashed, thick, gray!70] (-1.0, -2.8) -- (13.5, -2.8);
-\node[font=\scriptsize, gray!70, anchor=east] at (13.5, -2.55)
+\draw[dashed, thick, gray!70] (-1.0, -2.8) -- (15.5, -2.8);
+\node[font=\scriptsize, gray!70, anchor=east] at (15.5, -2.55)
   {Batas jenjang distribusi};
 
 %── Distribusi lintas jenjang ─────────────────────────────────────────────────
 
-\node[actor] (pjp) at (6.0, -4.5) {PJP\\(Kustodian)};
+\node[actor] (enduser) at (7.0, -4.5) {EndUser\\(EndUserMSP)};
 
-\draw[ar] (bi.south) to[out=-90,in=180] (2.5,-3.7)
-  to[out=0,in=155] (pjp.north west);
-\node[font=\scriptsize, align=center, anchor=west, fill=white, inner sep=1pt]
-  at (3.0,-3.7) {Distribusi langsung\\ke kustodian};
+\draw[ar] (distributor.south) -- node[pl, right]{Distribusi langsung\\ke EndUser} (enduser.north);
 
 %── Jenjang 2: Retail ────────────────────────────────────────────────────────
 
-\node[wbox] (customer) at (4.0, -6.8) {Pelanggan Ritel};
-\node[wbox] (merchant) at (8.0, -6.8) {Pedagang};
+\node[wbox] (customer) at (3.5,  -6.8) {Pelanggan Ritel};
+\node[wbox] (merchant) at (7.0,  -6.8) {Pedagang};
+\node[wbox] (business) at (10.5, -6.8) {Bisnis};
 
-\draw[ar] (pjp) -- (customer);
-\draw[ar] (pjp) -- (merchant);
+\draw[ar] (enduser.south) -- (customer.north);
+\draw[ar] (enduser.south) -- (merchant.north);
+\draw[ar] (enduser.south) -- (business.north);
 
 \node[zonebox,
-  fit=(pjp)(customer)(merchant),
+  fit=(enduser)(customer)(merchant)(business),
   label={[font=\footnotesize\bfseries, anchor=south west]north west:%
     Jenjang 2: Layanan Ritel}] (j2) {};
 
-\node[font=\scriptsize, gray] at (6.0, -8.3)
+\node[font=\scriptsize, gray] at (7.0, -8.3)
   {Transfer P2P/pedagang};
 
 \end{tikzpicture}%
 }
-\caption{Arsitektur distribusi dua jenjang pada purwarupa Rupiah Digital ritel.}
+\caption{Arsitektur distribusi dua jenjang pada purwarupa Rupiah Digital ritel dengan empat organisasi: Bank Indonesia (CentralBankMSP) menerbitkan, Distributor (bank dan PJP) mendistribusikan, EndUser (ritel, pedagang, dan bisnis) melayani, dan Validator (OJK, PPATK) mengawasi secara baca.}
 \label{fig:arsitektur-dua-jenjang}
 \end{figure}

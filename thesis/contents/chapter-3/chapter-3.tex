@@ -120,17 +120,20 @@ pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
 
 \subsubsection{Perancangan Arsitektur Sistem Blockchain}
 
-Arsitektur dan lima organisasi pada subbab ini menjelaskan baseline
-\texttt{digital-rupiah} v3.0 yang digunakan untuk pengukuran kinerja. Lingkungan
-empat MSP untuk pengujian kontrol dijelaskan terpisah pada bagian eksperimen
-kontrol di bawah.
+Arsitektur pada subbab ini menjelaskan jaringan studi empat organisasi yang
+digunakan untuk pengukuran kinerja dan pengujian kontrol, yaitu
+\texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
+\texttt{EndUserMSP}. Rincian lingkungan studi kontrol dijelaskan pada bagian
+eksperimen kontrol di bawah.
 
 Secara konseptual, sistem menggunakan model distribusi Rupiah Digital dua
 jenjang sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
-Jenjang distribusi institusional menghubungkan Treasury Bank Indonesia selaku
-penerbit dengan bank validator (HimbaraBank dan CommercialBank) atau PJP sebagai
-kustodian melalui jaringan Hyperledger Fabric. Jenjang layanan ritel menyediakan
-pembayaran melalui kustodian, termasuk transfer antarpelanggan,
+Jenjang distribusi institusional menyalurkan Digital Rupiah dari Treasury Bank
+Indonesia selaku penerbit (\texttt{CentralBankMSP}) kepada bank dan PJP sebagai
+kustodian institusional (\texttt{DistributorMSP}) melalui jaringan Hyperledger
+Fabric. Jenjang layanan ritel menyediakan pembayaran melalui kustodian kepada
+pengguna ritel, pedagang, dan pengguna bisnis (\texttt{EndUserMSP}), termasuk
+transfer antarpelanggan,
 transfer pelanggan-ke-pedagang, dan kontrol akses berbasis peran. Jenjang
 institusional tersebut menjelaskan jalur distribusi menuju layanan ritel, bukan
 implementasi instrumen w-Digital
@@ -190,42 +193,46 @@ dan auditabilitas transaksi.
 
 \input{contents/figures/system-architecture}
 
-Jaringan baseline \textit{blockchain} dirancang dengan lima organisasi peserta dan satu
-organisasi \textit{orderer}, merepresentasikan ekosistem Rupiah Digital
-multipihak. Setiap organisasi memiliki MSP dan \textit{peer} tersendiri dengan
-basis data status CouchDB. Rincian organisasi disajikan pada
+Jaringan studi \textit{blockchain} dirancang dengan empat organisasi, yaitu
+\texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
+\texttt{EndUserMSP}. Setiap organisasi memiliki satu \textit{peer} dan satu basis
+data status CouchDB. Keempat organisasi tersebut merepresentasikan peran Bank
+Indonesia, bank dan PJP, pengawas, serta pengguna akhir pada model dua jenjang.
+\textit{Orderer} Raft dengan satu node (\texttt{orderer.centralbank.rupiah.study})
+dan satu CA (\texttt{ca.centralbank}) diselenggarakan oleh \texttt{CentralBankMSP},
+dengan batas waktu pemotongan blok dua detik dan maksimum sepuluh
+\textit{message} per blok. Rincian organisasi disajikan pada
 Tabel~\ref{tab:jaringan}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Organisasi pada jaringan baseline Rupiah Digital}
+	\caption{Organisasi pada jaringan studi Rupiah Digital}
 	\label{tab:jaringan}
 	\centering
-	\begin{tabular}{p{3.6cm} p{3.2cm} p{5.6cm}}
+	\small
+	\begin{tabular}{p{2.9cm} p{2.7cm} p{3.4cm} p{3.4cm}}
 	\toprule
-	\textbf{Organisasi}  & \textbf{Peran} & \textbf{Keterangan}                         \\
+	\textbf{Organisasi} & \textbf{Peran} & \textbf{Peran pada jaringan} & \textbf{MSP} \\
 	\midrule
-	BankIndonesiaOrg     & Penerbit       & Penerbitan dan penarikan Digital Rupiah,
-	pengawasan                                                                          \\
-	HimbaraBankOrg       & Validator      & Validator jaringan; penerima distribusi BI   \\
-	CommercialBank\allowbreak Org & Validator & Validator jaringan; penerima distribusi BI   \\
-	PJPOrg               & PJP            & Penyedia layanan ritel; penerima distribusi BI \\
-	OJKObserverOrg       & Observer       & Pengamatan/pengawasan (baca)                \\
-	BankIndonesia\allowbreak Orderer & Orderer & Layanan pengurutan (Raft)                   \\
+	Bank Indonesia & Penerbit dan pengawas & Penerbitan dan penarikan Digital Rupiah; menyelenggarakan \textit{orderer} dan CA tunggal & \texttt{CentralBankMSP} \\
+	Bank dan PJP & Distributor & Kustodian institusional penerima distribusi dari Bank Indonesia; wajib dalam kebijakan \textit{endorsement} default ketiga \textit{chaincode} & \texttt{DistributorMSP} \\
+	OJK, PPATK, dan supervisor & \textit{Validator} & Akses baca untuk audit dan pengawasan; tidak termasuk dalam kebijakan \textit{endorsement} default & \texttt{ValidatorMSP} \\
+	Pedagang, pelanggan ritel, dan pengguna bisnis & Pengguna & Pelaku transaksi ritel; ikut memberikan \textit{endorsement} pada pembayaran bersama \texttt{DistributorMSP} & \texttt{EndUserMSP} \\
 	\bottomrule
 	\end{tabular}
 \end{table}
 \endgroup
 
-Seluruh peserta tergabung dalam satu kanal (\textit{channel}) dengan kebijakan
-\textit{endorsement} yang menerima salah satu MSP institusional yang ditetapkan
-pada konfigurasi kanal. Kebijakan siklus hidup \textit{chaincode} tetap
-memerlukan persetujuan Bank Indonesia dan salah satu peserta institusional.
+Seluruh peserta tergabung dalam satu kanal (\textit{channel}) \texttt{rupiah-study}.
+Kebijakan \textit{endorsement} dan siklus hidup \textit{chaincode} default pada
+kanal menggunakan \texttt{MAJORITY Endorsement}, sedangkan tiga \textit{chaincode}
+eksperimen memiliki kebijakan \textit{endorsement} tersendiri sebagaimana
+dirangkum pada bagian eksperimen kontrol di bawah.
 Komunikasi antarsimpul diamankan dengan TLS.
 Topologi jaringan secara lengkap ditunjukkan pada
 Gambar~\ref{fig:arsitektur-jaringan}, yang memperlihatkan hubungan antara
-\textit{orderer}, kelima \textit{peer}, basis data CouchDB masing-masing
+\textit{orderer}, keempat \textit{peer}, basis data CouchDB masing-masing
 organisasi, serta \textit{backend API} yang terhubung ke jaringan melalui
 \textit{Fabric Gateway SDK}.
 
@@ -660,7 +667,7 @@ dibuat dengan \texttt{configtxgen}.
 
 Jaringan Fabric dibangun melalui skrip otomatisasi yang membangkitkan material
 kriptografi, blok genesis, dan konfigurasi kanal, kemudian menjalankan kontainer
-untuk lima \textit{peer}, lima CouchDB, dan satu \textit{orderer}. Chaincode
+untuk empat \textit{peer}, empat CouchDB, dan satu \textit{orderer}. Chaincode
 dipaketkan, dipasang pada seluruh organisasi, disetujui sesuai kebijakan
 dukungan, lalu di-\textit{commit} ke kanal.
 

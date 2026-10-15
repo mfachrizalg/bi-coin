@@ -1,8 +1,8 @@
 \textit{
 This thesis implements and tests selected KYC and AML/CFT controls in a retail
 Digital Rupiah prototype using Hyperledger Fabric 2.5. Its controls-study
-extension uses a fresh four-MSP network---CentralBankMSP, DistributorMSP,
-ValidatorMSP, and EndUserMSP---and three Go chaincodes for monetary operations,
+extension uses a fresh four-organization network (CentralBankMSP, DistributorMSP,
+ValidatorMSP, and EndUserMSP) and three Go chaincodes for monetary operations,
 customer controls, and payments. Server-managed X.509 identities distinguish
 the signing actor, customer subject, and wallet custodian.
 }
@@ -18,11 +18,7 @@ compliance.
 }
 
 \textit{
-As secondary performance evidence, Hyperledger Caliper tests the separate
-five-organization \texttt{digital-rupiah} v3.0 baseline. Low-contention retail
-transfer reaches 20 TPS, while the paired high-contention test reaches 2.01 TPS.
-Those measurements do not benchmark the three-chaincode extension and do not
-establish production capacity or cross-machine reproducibility.
+As secondary performance evidence, Hyperledger Caliper measures the four-organization controls-study extension with one worker on one host. Those measurements do not establish production capacity or cross-machine reproducibility.
 }
 
 \vspace{0.5cm}

@@ -1,281 +1,274 @@
-version: '2'
+name: bi-coin-rupiah-study
 
 networks:
-  paynet:
-    name: paynet
+  study:
+    name: rupiah-study
+
+volumes:
+  centralbank-peer-data:
+    name: bi-coin-rupiah-study-centralbank-peer
+  distributor-peer-data:
+    name: bi-coin-rupiah-study-distributor-peer
+  validator-peer-data:
+    name: bi-coin-rupiah-study-validator-peer
+  enduser-peer-data:
+    name: bi-coin-rupiah-study-enduser-peer
+  orderer-data:
+    name: bi-coin-rupiah-study-orderer
+  centralbank-couch-data:
+    name: bi-coin-rupiah-study-centralbank-couch
+  distributor-couch-data:
+    name: bi-coin-rupiah-study-distributor-couch
+  validator-couch-data:
+    name: bi-coin-rupiah-study-validator-couch
+  enduser-couch-data:
+    name: bi-coin-rupiah-study-enduser-couch
+  centralbank-ca-data:
+    name: bi-coin-rupiah-study-centralbank-ca
+  study-postgres-data:
+    name: bi-coin-rupiah-study-postgres
+
+x-couchdb-environment: &couchdb-environment
+  COUCHDB_USER: ${STUDY_COUCHDB_USER}
+  COUCHDB_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
+
+x-peer-environment: &peer-environment
+  FABRIC_LOGGING_SPEC: INFO
+  CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
+  CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE: rupiah-study
+  CORE_PEER_TLS_ENABLED: "true"
+  CORE_PEER_PROFILE_ENABLED: "true"
+  CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
+  CORE_PEER_TLS_KEY_FILE: /etc/hyperledger/fabric/tls/server.key
+  CORE_PEER_TLS_ROOTCERT_FILE: /etc/hyperledger/fabric/tls/ca.crt
+  CORE_PEER_LISTENADDRESS: 0.0.0.0:7051
+  CORE_PEER_CHAINCODEADDRESS: peer0:7052
+  CORE_PEER_CHAINCODELISTENADDRESS: 0.0.0.0:7052
+  CORE_LEDGER_STATE_STATEDATABASE: CouchDB
 
 services:
-  orderer.paynet:
-    container_name: orderer.paynet
-    image: hyperledger/fabric-orderer:2.5
+  ca.centralbank:
+    image: hyperledger/fabric-ca:1.5.9
+    container_name: study-ca-centralbank
+    profiles: [ca]
     environment:
-      - FABRIC_LOGGING_SPEC=INFO
-      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      - ORDERER_GENERAL_LISTENPORT=7050
-      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-      - ORDERER_GENERAL_TLS_ENABLED=true
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_GENERAL_BOOTSTRAPMETHOD=none
-      - ORDERER_CHANNELPARTICIPATION_ENABLED=true
-      - ORDERER_ADMIN_TLS_ENABLED=true
-      - ORDERER_ADMIN_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_ADMIN_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:7053
-    working_dir: /root
+      FABRIC_CA_SERVER_CA_NAME: ca-centralbank
+      FABRIC_CA_SERVER_TLS_ENABLED: "false"
+      FABRIC_CA_SERVER_PORT: 7054
+      STUDY_CA_ADMIN_USER: ${STUDY_CA_ADMIN_USER}
+      STUDY_CA_ADMIN_SECRET: ${STUDY_CA_ADMIN_SECRET}
+    command:
+      - sh
+      - -c
+      - fabric-ca-server start -b "$$STUDY_CA_ADMIN_USER:$$STUDY_CA_ADMIN_SECRET" -d
+    volumes:
+      - centralbank-ca-data:/etc/hyperledger/fabric-ca-server
+    ports:
+      - "127.0.0.1:17054:7054"
+    networks: [study]
+
+  study-cli:
+    image: hyperledger/fabric-tools:2.5
+    container_name: study-cli
+    profiles: [tools]
+    environment:
+      FABRIC_CFG_PATH: /etc/hyperledger/fabric
+      CORE_PEER_TLS_ENABLED: "true"
+    entrypoint:
+      - sh
+      - -c
+      - while true; do sleep 3600; done
+    volumes:
+      - ./organizations:/study/organizations:ro
+      - ../../study/chaincode:/study/chaincode:ro
+      - ./packages:/study/packages
+    networks: [study]
+
+  study-postgres:
+    image: postgres:16-alpine
+    container_name: study-postgres
+    profiles: [network]
+    environment:
+      POSTGRES_USER: ${STUDY_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${STUDY_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${STUDY_POSTGRES_DB}
+    volumes:
+      - study-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:15432:5432"
+    networks: [study]
+
+  orderer.centralbank.rupiah.study:
+    image: hyperledger/fabric-orderer:2.5
+    container_name: study-orderer-centralbank
+    profiles: [network]
+    environment:
+      FABRIC_LOGGING_SPEC: INFO
+      ORDERER_GENERAL_LISTENADDRESS: 0.0.0.0
+      ORDERER_GENERAL_LISTENPORT: 7050
+      ORDERER_GENERAL_LOCALMSPID: CentralBankMSP
+      ORDERER_GENERAL_LOCALMSPDIR: /var/hyperledger/orderer/msp
+      ORDERER_GENERAL_TLS_ENABLED: "true"
+      ORDERER_GENERAL_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_CLUSTER_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_BOOTSTRAPMETHOD: none
+      ORDERER_CHANNELPARTICIPATION_ENABLED: "true"
+      ORDERER_ADMIN_TLS_ENABLED: "true"
+      ORDERER_ADMIN_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_ADMIN_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_ADMIN_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_TLS_CLIENTROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_LISTENADDRESS: 0.0.0.0:7053
     command: orderer
     volumes:
-      - ./organizations/ordererOrganizations/paynet/orderers/orderer.paynet/msp:/var/hyperledger/orderer/msp
-      - ./organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls:/var/hyperledger/orderer/tls
+      - ./organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study/msp:/var/hyperledger/orderer/msp:ro
+      - ./organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study/tls:/var/hyperledger/orderer/tls:ro
+      - orderer-data:/var/hyperledger/production
     ports:
-      - 7050:7050
-      - 7053:7053
-    networks:
-      - paynet
+      - "17050:7050"
+      - "17053:7053"
+    networks: [study]
 
-  peer0.bi.paynet:
-    container_name: peer0.bi.paynet
+  couchdb.centralbank.rupiah.study:
+    image: couchdb:3.3
+    container_name: study-couchdb-centralbank
+    profiles: [network]
+    environment: *couchdb-environment
+    volumes:
+      - centralbank-couch-data:/opt/couchdb/data
+    ports: ["127.0.0.1:17584:5984"]
+    networks: [study]
+
+  peer0.centralbank.rupiah.study:
     image: hyperledger/fabric-peer:2.5
+    container_name: study-peer0-centralbank
+    profiles: [network]
     environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.bi.paynet
-      - CORE_PEER_ADDRESS=peer0.bi.paynet:7051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.bi.paynet:7052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.bi.paynet:7051
-      - CORE_PEER_LOCALMSPID=BankIndonesiaOrgMSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.bi.paynet:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      <<: *peer-environment
+      CORE_PEER_ID: peer0.centralbank.rupiah.study
+      CORE_PEER_ADDRESS: peer0.centralbank.rupiah.study:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.centralbank.rupiah.study:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.centralbank.rupiah.study:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.centralbank.rupiah.study:7051
+      CORE_PEER_LOCALMSPID: CentralBankMSP
+      CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.centralbank.rupiah.study:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/bi.paynet/peers/peer0.bi.paynet/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - 7051:7051
-    depends_on:
-      - orderer.paynet
-      - couchdb0.bi.paynet
-    networks:
-      - paynet
+      - ./organizations/peerOrganizations/centralbank.rupiah.study/peers/peer0.centralbank.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/centralbank.rupiah.study/peers/peer0.centralbank.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - centralbank-peer-data:/var/hyperledger/production
+    depends_on: [orderer.centralbank.rupiah.study, couchdb.centralbank.rupiah.study]
+    ports: ["17051:7051"]
+    networks: [study]
 
-  couchdb0.bi.paynet:
-    container_name: couchdb0.bi.paynet
-    image: couchdb:3.2
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - 5984:5984
-    networks:
-      - paynet
+  couchdb.distributor.rupiah.study:
+    image: couchdb:3.3
+    container_name: study-couchdb-distributor
+    profiles: [network]
+    environment: *couchdb-environment
+    volumes:
+      - distributor-couch-data:/opt/couchdb/data
+    ports: ["127.0.0.1:18584:5984"]
+    networks: [study]
 
-  peer0.himbara.paynet:
-    container_name: peer0.himbara.paynet
+  peer0.distributor.rupiah.study:
     image: hyperledger/fabric-peer:2.5
+    container_name: study-peer0-distributor
+    profiles: [network]
     environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.himbara.paynet
-      - CORE_PEER_ADDRESS=peer0.himbara.paynet:9051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.himbara.paynet:9052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.himbara.paynet:9051
-      - CORE_PEER_LOCALMSPID=HimbaraBankOrgMSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.himbara.paynet:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      <<: *peer-environment
+      CORE_PEER_ID: peer0.distributor.rupiah.study
+      CORE_PEER_ADDRESS: peer0.distributor.rupiah.study:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.distributor.rupiah.study:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.distributor.rupiah.study:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.distributor.rupiah.study:7051
+      CORE_PEER_LOCALMSPID: DistributorMSP
+      CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.distributor.rupiah.study:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/himbara.paynet/peers/peer0.himbara.paynet/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - 9051:9051
-    depends_on:
-      - orderer.paynet
-      - couchdb0.himbara.paynet
-    networks:
-      - paynet
+      - ./organizations/peerOrganizations/distributor.rupiah.study/peers/peer0.distributor.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/distributor.rupiah.study/peers/peer0.distributor.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - distributor-peer-data:/var/hyperledger/production
+    depends_on: [orderer.centralbank.rupiah.study, couchdb.distributor.rupiah.study]
+    ports: ["18051:7051"]
+    networks: [study]
 
-  couchdb0.himbara.paynet:
-    container_name: couchdb0.himbara.paynet
-    image: couchdb:3.2
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - 6984:5984
-    networks:
-      - paynet
+  couchdb.validator.rupiah.study:
+    image: couchdb:3.3
+    container_name: study-couchdb-validator
+    profiles: [network]
+    environment: *couchdb-environment
+    volumes:
+      - validator-couch-data:/opt/couchdb/data
+    ports: ["127.0.0.1:19584:5984"]
+    networks: [study]
 
-  peer0.commercial.paynet:
-    container_name: peer0.commercial.paynet
+  peer0.validator.rupiah.study:
     image: hyperledger/fabric-peer:2.5
+    container_name: study-peer0-validator
+    profiles: [network]
     environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.commercial.paynet
-      - CORE_PEER_ADDRESS=peer0.commercial.paynet:11051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.commercial.paynet:11052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.commercial.paynet:11051
-      - CORE_PEER_LOCALMSPID=CommercialBankOrgMSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.commercial.paynet:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      <<: *peer-environment
+      CORE_PEER_ID: peer0.validator.rupiah.study
+      CORE_PEER_ADDRESS: peer0.validator.rupiah.study:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.validator.rupiah.study:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.validator.rupiah.study:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.validator.rupiah.study:7051
+      CORE_PEER_LOCALMSPID: ValidatorMSP
+      CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.validator.rupiah.study:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/commercial.paynet/peers/peer0.commercial.paynet/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - 11051:11051
-    depends_on:
-      - orderer.paynet
-      - couchdb0.commercial.paynet
-    networks:
-      - paynet
+      - ./organizations/peerOrganizations/validator.rupiah.study/peers/peer0.validator.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/validator.rupiah.study/peers/peer0.validator.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - validator-peer-data:/var/hyperledger/production
+    depends_on: [orderer.centralbank.rupiah.study, couchdb.validator.rupiah.study]
+    ports: ["19051:7051"]
+    networks: [study]
 
-  couchdb0.commercial.paynet:
-    container_name: couchdb0.commercial.paynet
-    image: couchdb:3.2
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - 7984:5984
-    networks:
-      - paynet
+  couchdb.enduser.rupiah.study:
+    image: couchdb:3.3
+    container_name: study-couchdb-enduser
+    profiles: [network]
+    environment: *couchdb-environment
+    volumes:
+      - enduser-couch-data:/opt/couchdb/data
+    ports: ["127.0.0.1:20584:5984"]
+    networks: [study]
 
-  peer0.ojk.paynet:
-    container_name: peer0.ojk.paynet
+  peer0.enduser.rupiah.study:
     image: hyperledger/fabric-peer:2.5
+    container_name: study-peer0-enduser
+    profiles: [network]
     environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.ojk.paynet
-      - CORE_PEER_ADDRESS=peer0.ojk.paynet:12051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:12051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.ojk.paynet:12052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:12052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ojk.paynet:12051
-      - CORE_PEER_LOCALMSPID=OJKObserverOrgMSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.ojk.paynet:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
+      <<: *peer-environment
+      CORE_PEER_ID: peer0.enduser.rupiah.study
+      CORE_PEER_ADDRESS: peer0.enduser.rupiah.study:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.enduser.rupiah.study:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.enduser.rupiah.study:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.enduser.rupiah.study:7051
+      CORE_PEER_LOCALMSPID: EndUserMSP
+      CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.enduser.rupiah.study:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/ojk.paynet/peers/peer0.ojk.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/ojk.paynet/peers/peer0.ojk.paynet/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - 12051:12051
-    depends_on:
-      - orderer.paynet
-      - couchdb0.ojk.paynet
-    networks:
-      - paynet
-
-  couchdb0.ojk.paynet:
-    container_name: couchdb0.ojk.paynet
-    image: couchdb:3.2
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - 8984:5984
-    networks:
-      - paynet
-
-  peer0.pjp.paynet:
-    container_name: peer0.pjp.paynet
-    image: hyperledger/fabric-peer:2.5
-    environment:
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=paynet
-      - FABRIC_LOGGING_SPEC=INFO
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=peer0.pjp.paynet
-      - CORE_PEER_ADDRESS=peer0.pjp.paynet:13051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:13051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.pjp.paynet:13052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:13052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.bi.paynet:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.pjp.paynet:13051
-      - CORE_PEER_LOCALMSPID=PJPOrgMSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0.pjp.paynet:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
-    volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/msp:/etc/hyperledger/fabric/msp
-      - ./organizations/peerOrganizations/pjp.paynet/peers/peer0.pjp.paynet/tls:/etc/hyperledger/fabric/tls
-    ports:
-      - 13051:13051
-    depends_on:
-      - orderer.paynet
-      - couchdb0.pjp.paynet
-    networks:
-      - paynet
-
-  couchdb0.pjp.paynet:
-    container_name: couchdb0.pjp.paynet
-    image: couchdb:3.2
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - 9984:5984
-    networks:
-      - paynet
+      - ./organizations/peerOrganizations/enduser.rupiah.study/peers/peer0.enduser.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/enduser.rupiah.study/peers/peer0.enduser.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - enduser-peer-data:/var/hyperledger/production
+    depends_on: [orderer.centralbank.rupiah.study, couchdb.enduser.rupiah.study]
+    ports: ["20051:7051"]
+    networks: [study]

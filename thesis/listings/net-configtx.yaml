@@ -1,125 +1,89 @@
 Organizations:
-  - &BankIndonesiaOrg
-    Name: BankIndonesiaOrg
-    ID: BankIndonesiaOrgMSP
-    MSPDir: organizations/peerOrganizations/bi.paynet/msp
+  - &CentralBank
+    Name: CentralBankMSP
+    ID: CentralBankMSP
+    MSPDir: organizations/peerOrganizations/centralbank.rupiah.study/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.peer','BankIndonesiaOrgMSP.client')"
+        Rule: "OR('CentralBankMSP.admin', 'CentralBankMSP.peer', 'CentralBankMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.admin','BankIndonesiaOrgMSP.client')"
+        Rule: "OR('CentralBankMSP.admin', 'CentralBankMSP.client', 'CentralBankMSP.orderer')"
       Admins:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.admin')"
+        Rule: "OR('CentralBankMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('BankIndonesiaOrgMSP.member')"
+        Rule: "OR('CentralBankMSP.peer')"
+    OrdererEndpoints:
+      - "orderer.centralbank.rupiah.study:7050"
     AnchorPeers:
-      - Host: peer0.bi.paynet
+      - Host: peer0.centralbank.rupiah.study
         Port: 7051
 
-  - &HimbaraBankOrg
-    Name: HimbaraBankOrg
-    ID: HimbaraBankOrgMSP
-    MSPDir: organizations/peerOrganizations/himbara.paynet/msp
+  - &Distributor
+    Name: DistributorMSP
+    ID: DistributorMSP
+    MSPDir: organizations/peerOrganizations/distributor.rupiah.study/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.peer','HimbaraBankOrgMSP.client')"
+        Rule: "OR('DistributorMSP.admin', 'DistributorMSP.peer', 'DistributorMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.admin','HimbaraBankOrgMSP.client')"
+        Rule: "OR('DistributorMSP.admin', 'DistributorMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.admin')"
+        Rule: "OR('DistributorMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('HimbaraBankOrgMSP.member')"
+        Rule: "OR('DistributorMSP.peer')"
     AnchorPeers:
-      - Host: peer0.himbara.paynet
-        Port: 9051
+      - Host: peer0.distributor.rupiah.study
+        Port: 7051
 
-  - &CommercialBankOrg
-    Name: CommercialBankOrg
-    ID: CommercialBankOrgMSP
-    MSPDir: organizations/peerOrganizations/commercial.paynet/msp
+  - &Validator
+    Name: ValidatorMSP
+    ID: ValidatorMSP
+    MSPDir: organizations/peerOrganizations/validator.rupiah.study/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.admin','CommercialBankOrgMSP.peer','CommercialBankOrgMSP.client')"
+        Rule: "OR('ValidatorMSP.admin', 'ValidatorMSP.peer', 'ValidatorMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.admin','CommercialBankOrgMSP.client')"
+        Rule: "OR('ValidatorMSP.admin', 'ValidatorMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.admin')"
+        Rule: "OR('ValidatorMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('CommercialBankOrgMSP.member')"
+        Rule: "OR('ValidatorMSP.peer')"
     AnchorPeers:
-      - Host: peer0.commercial.paynet
-        Port: 11051
+      - Host: peer0.validator.rupiah.study
+        Port: 7051
 
-  - &OJKObserverOrg
-    Name: OJKObserverOrg
-    ID: OJKObserverOrgMSP
-    MSPDir: organizations/peerOrganizations/ojk.paynet/msp
+  - &EndUser
+    Name: EndUserMSP
+    ID: EndUserMSP
+    MSPDir: organizations/peerOrganizations/enduser.rupiah.study/msp
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.admin','OJKObserverOrgMSP.peer','OJKObserverOrgMSP.client')"
+        Rule: "OR('EndUserMSP.admin', 'EndUserMSP.peer', 'EndUserMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.admin','OJKObserverOrgMSP.client')"
+        Rule: "OR('EndUserMSP.admin', 'EndUserMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.admin')"
+        Rule: "OR('EndUserMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('OJKObserverOrgMSP.member')"
+        Rule: "OR('EndUserMSP.peer')"
     AnchorPeers:
-      - Host: peer0.ojk.paynet
-        Port: 12051
-
-  - &PJPOrg
-    Name: PJPOrg
-    ID: PJPOrgMSP
-    MSPDir: organizations/peerOrganizations/pjp.paynet/msp
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('PJPOrgMSP.admin','PJPOrgMSP.peer','PJPOrgMSP.client')"
-      Writers:
-        Type: Signature
-        Rule: "OR('PJPOrgMSP.admin','PJPOrgMSP.client')"
-      Admins:
-        Type: Signature
-        Rule: "OR('PJPOrgMSP.admin')"
-      Endorsement:
-        Type: Signature
-        Rule: "OR('PJPOrgMSP.member')"
-    AnchorPeers:
-      - Host: peer0.pjp.paynet
-        Port: 13051
-
-  - &OrdererOrg
-    Name: OrdererOrg
-    ID: OrdererMSP
-    MSPDir: organizations/ordererOrganizations/paynet/msp
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('OrdererMSP.member')"
-      Writers:
-        Type: Signature
-        Rule: "OR('OrdererMSP.member')"
-      Admins:
-        Type: Signature
-        Rule: "OR('OrdererMSP.admin')"
-    OrdererEndpoints:
-      - orderer.paynet:7050
+      - Host: peer0.enduser.rupiah.study
+        Port: 7051
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -128,7 +92,6 @@ Capabilities:
     V2_0: true
   Application: &ApplicationCapabilities
     V2_0: true
-    V2_5: true
 
 Application: &ApplicationDefaults
   Organizations:
@@ -153,18 +116,19 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-    - orderer.paynet:7050
+    - orderer.centralbank.rupiah.study:7050
   EtcdRaft:
     Consenters:
-      - Host: orderer.paynet
+      - Host: orderer.centralbank.rupiah.study
         Port: 7050
-        ClientTLSCert: organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls/server.crt
-        ServerTLSCert: organizations/ordererOrganizations/paynet/orderers/orderer.paynet/tls/server.crt
+        ClientTLSCert: organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study/tls/server.crt
   BatchTimeout: 2s
   BatchSize:
     MaxMessageCount: 10
     AbsoluteMaxBytes: 10 MB
     PreferredMaxBytes: 2 MB
+  Organizations:
   Policies:
     Readers:
       Type: ImplicitMeta
@@ -193,22 +157,19 @@ Channel: &ChannelDefaults
       Rule: "MAJORITY Admins"
   Capabilities: *ChannelCapabilities
 
-# Fabric v3 channel-participation: a single application-channel profile producing the
-# channel genesis block (no system channel, no Consortiums).
 Profiles:
-  GarudaApplicationChannel:
+  RetailRupiahStudyChannel:
     <<: *ChannelDefaults
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *OrdererOrg
+        - *CentralBank
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *BankIndonesiaOrg
-        - *HimbaraBankOrg
-        - *CommercialBankOrg
-        - *OJKObserverOrg
-        - *PJPOrg
+        - *CentralBank
+        - *Distributor
+        - *Validator
+        - *EndUser
       Capabilities: *ApplicationCapabilities
