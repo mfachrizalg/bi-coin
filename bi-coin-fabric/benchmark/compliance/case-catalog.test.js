@@ -20,7 +20,7 @@ test('catalog covers every public study transaction and route role cell', () => 
     const routeKeys = catalog.api_routes.map(item => `${item.method} ${item.path}`);
     assert.equal(new Set(routeKeys).size, routeKeys.length, 'API route duplicated');
     assert.equal(catalog.api_routes.reduce((count, route) => count + route.roles.length, 0), 42);
-    assert.equal(catalog.api_routes.length * roles.length, 207);
+    assert.equal(catalog.api_routes.length * roles.length, 184);
 
     const sourceRoot = path.resolve(__dirname, '../../study/chaincode');
     const files = {

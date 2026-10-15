@@ -10,7 +10,6 @@ const CONTRACT = { contractId: 'rupiah-payments', contractVersion: '1.0' };
 const ACTORS = Object.freeze({
     bi: { invokerMspId: 'CentralBankMSP', invokerIdentity: 'User1' },
     distributor: { invokerMspId: 'DistributorMSP', invokerIdentity: 'User1' },
-    commercial: { invokerMspId: 'DistributorMSP', invokerIdentity: 'User1' },
 });
 
 function actorRequest(request, actor = 'bi') {
@@ -266,7 +265,7 @@ class RetailWorkloadBase extends WorkloadModuleBase {
                     'Benchmark Distributor Custodian',
                     'distributor.bi-coin',
                     `${participantId}-account`,
-                    'validator',
+                    'distributor',
                     '0',
                     'pending',
                 ], false, 'distributor', true);

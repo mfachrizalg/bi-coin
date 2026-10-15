@@ -59,19 +59,19 @@ echo "$LIMITS" | python3 -m json.tool 2>/dev/null || echo "$LIMITS"
 
 # ─── Phase 2: Bank Onboarding (Wholesale Layer) ──────────────────────────────
 header "PHASE 2 — Bank Onboarding (Wholesale Layer)"
-info "BI onboards Distributor Bank"
+info "BI onboards Distributor Bank A"
 
-step "Submit Distributor Bank participant"
+step "Submit Distributor Bank A participant"
 BANK_SUBMIT=$(curl -s -X POST "$BASE/participants" \
   -H "X-API-Key: $BI_KEY" -H "Content-Type: application/json" \
-  -d '{"participant_id":"distributor","name":"Distributor Bank","domain":"distributor.bi-coin","account_id":"distributor-account","participant_type":"validator","compliance_status":"verified"}')
+  -d '{"participant_id":"distributor-a","name":"Distributor Bank A","domain":"distributor-a.bi-coin","account_id":"distributor-a-account","participant_type":"distributor","compliance_status":"verified"}')
 echo "$BANK_SUBMIT" | python3 -m json.tool 2>/dev/null || echo "$BANK_SUBMIT"
 
-step "BI approves Distributor Bank → auto-creates wlt_distributor"
-BANK_APPROVE=$(curl -s -X POST "$BASE/participants/distributor/approve" \
+step "BI approves Distributor Bank A → auto-creates wlt_distributor-a"
+BANK_APPROVE=$(curl -s -X POST "$BASE/participants/distributor-a/approve" \
   -H "X-API-Key: $BI_KEY" -H "Content-Type: application/json")
 echo "$BANK_APPROVE" | python3 -m json.tool 2>/dev/null || echo "$BANK_APPROVE"
-ok "Distributor Bank: status=active, wallet=wlt_distributor created"
+ok "Distributor Bank A: status=active, wallet=wlt_distributor-a created"
 
 step "Submit GoPay PJP (retail gateway)"
 PJP_SUBMIT=$(curl -s -X POST "$BASE/participants" \
@@ -137,7 +137,7 @@ ok "Merchant KYC: status=approved — eligible for MERCHANT tier"
 
 # ─── Phase 4: Register Retail Customer ───────────────────────────────────────
 header "PHASE 4 — Retail Customer Registration"
-info "Alice registers via Distributor Bank mobile app"
+info "Alice registers via Distributor Bank A mobile app"
 
 step "Create retail customer: Alice"
 ALICE=$(curl -s -X POST "$BASE/retail/customers" \
@@ -165,26 +165,26 @@ curl -s "$BASE/retail/customers" -H "X-API-Key: $BANK_KEY" | python3 -m json.too
 
 # ─── Phase 5: BI Issues Digital Rupiah ───────────────────────────────────────
 header "PHASE 5 — BI Issues Digital Rupiah (Issuance)"
-info "Bank Indonesia is sole issuer — mints DR into Distributor Bank wholesale wallet"
+info "Bank Indonesia is sole issuer — mints DR into Distributor Bank A wholesale wallet"
 
-step "BI issues Rp 50,000,000 to Distributor Bank"
+step "BI issues Rp 50,000,000 to Distributor Bank A"
 ISSUANCE=$(curl -s -X POST "$BASE/issuance-requests" \
   -H "X-API-Key: $BI_KEY" -H "Content-Type: application/json" \
-  -d '{"participant_id":"distributor","amount":"50000000"}')
+  -d '{"participant_id":"distributor-a","amount":"50000000"}')
 echo "$ISSUANCE" | python3 -m json.tool 2>/dev/null || echo "$ISSUANCE"
-ok "wlt_distributor balance: +50,000,000 DR"
+ok "wlt_distributor-a balance: +50,000,000 DR"
 
 step "Check balances (world state)"
 curl -s "$BASE/balances" -H "X-API-Key: $BI_KEY" | python3 -m json.tool 2>/dev/null || true
 
 # ─── Phase 6: Two-Tier Distribution ─────────────────────────────────────────
 header "PHASE 6 — Two-Tier Distribution (Wholesale → Retail)"
-info "Distributor Bank distributes DR to GoPay PJP"
+info "Distributor Bank A distributes DR to GoPay PJP"
 
-step "Distributor distributes Rp 10,000,000 to GoPay (retail gateway)"
+step "Distributor Bank A distributes Rp 10,000,000 to GoPay (retail gateway)"
 DIST=$(curl -s -X POST "$BASE/distribute" \
   -H "X-API-Key: $BANK_KEY" -H "Content-Type: application/json" \
-  -d '{"sender_participant_id":"distributor","receiver_participant_id":"gopay","amount":10000000}')
+  -d '{"sender_participant_id":"distributor-a","receiver_participant_id":"gopay","amount":10000000}')
 echo "$DIST" | python3 -m json.tool 2>/dev/null || echo "$DIST"
 ok "wlt_gopay balance: +10,000,000 DR"
 
@@ -254,7 +254,7 @@ echo -e "  ${GREEN}✓${NC} Bank onboarding — participants approved, wallets a
 echo -e "  ${GREEN}✓${NC} KYC profiles — document hashes anchored on Fabric"
 echo -e "  ${GREEN}✓${NC} Retail customer and merchant KYC subjects registered on-chain"
 echo -e "  ${GREEN}✓${NC} BI issues Digital Rupiah (sole issuer)"
-echo -e "  ${GREEN}✓${NC} Two-tier distribution: BI → Bank → PJP (GoPay)"
+echo -e "  ${GREEN}✓${NC} Two-tier distribution: BI → Distributor Bank A → PJP (GoPay)"
 echo -e "  ${GREEN}✓${NC} Tier limits visible for BASIC/STANDARD/MERCHANT transfer policy"
 echo -e "  ${GREEN}✓${NC} Direct retail transfer policy available for funded retail wallets"
 echo -e "  ${GREEN}✓${NC} Audit trail, supervision events, reconciliation report"

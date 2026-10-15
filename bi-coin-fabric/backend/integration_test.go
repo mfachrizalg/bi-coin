@@ -69,8 +69,8 @@ func TestKycPostgresFabricEndToEnd(t *testing.T) {
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	baseURL := "http://" + listener.Addr().String()
-	username := envOr("INTEGRATION_USERNAME", "validator")
-	password := envOr("INTEGRATION_PASSWORD", "validator-password")
+	username := envOr("INTEGRATION_USERNAME", "pjp")
+	password := envOr("INTEGRATION_PASSWORD", "pjp-password")
 	measurements := map[string][]float64{}
 	for repetition := 1; repetition <= 5; repetition++ {
 		var login models.LoginResponse
