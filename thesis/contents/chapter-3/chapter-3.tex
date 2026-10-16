@@ -287,6 +287,10 @@ Tabel~\ref{tab:model-data}, sistem memakai PostgreSQL untuk menyimpan kredensial
 autentikasi portal dan jejak audit yang bersifat \textit{append-only}. Data
 identitas mentah tidak ditempatkan pada \textit{ledger}.
 
+Gambar~\ref{fig:ch3-erd-offchain} memperlihatkan delapan tabel PostgreSQL beserta kunci primernya. Dua relasi, yaitu dari \texttt{payment\_contacts} ke \texttt{auth\_users} dan dari \texttt{kyc\_provider\_checks} ke \texttt{kyc\_profiles}, dinyatakan sebagai kendala kunci asing dengan \texttt{ON DELETE CASCADE}. Kolom yang merujuk ke ledger tidak memiliki kendala kunci asing karena ledger berada di luar PostgreSQL.
+
+\input{contents/figures/erd-offchain}
+
 \subsection{Metode Implementasi}
 
 Pemilihan teknologi dalam implementasi didasarkan pada kesesuaian dengan

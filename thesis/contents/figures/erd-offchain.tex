@@ -1,9 +1,9 @@
 % Diagram Entity-Relationship basis data luring (off-chain) PostgreSQL.
 % Sumber kebenaran skema: backend/services/postgres_store.go:56-176 (fungsi migrate, termasuk ALTER TABLE ADD COLUMN).
 % Tanda $^{\dagger}$ pada kolom: referensi ke state ledger, tanpa kendala basis data.
-% Belum di-input dalam dokumen; disiapkan untuk BAB III (Perancangan Basis Data Luring).
+% Di-input pada BAB III, subbagian Perancangan Basis Data Luring.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
@@ -164,5 +164,5 @@
 \end{tikzpicture}%
 }
 \caption{Diagram \textit{Entity-Relationship} basis data luring (\textit{off-chain}) pada PostgreSQL, sesuai skema yang dibuat backend. Tabel \texttt{auth\_users} terhubung ke \texttt{payment\_contacts} melalui kunci asing. Tabel \texttt{kyc\_profiles} menjadi pusat relasi profil KYC, pemeriksaan penyedia, dan jejak audit. Tabel \texttt{qris\_intents} dan \texttt{operation\_journal} tidak memiliki kunci asing dan merujuk ke state ledger.}
-\label{fig:erd-offchain}
+\label{fig:ch3-erd-offchain}
 \end{figure}
