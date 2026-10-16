@@ -1,6 +1,7 @@
 % Diagram Entity-Relationship basis data luring (off-chain) PostgreSQL.
-% Sumber kebenaran skema: backend/services/postgres_store.go:51-115.
-% Di-input dari BAB III (Perancangan Basis Data Luring).
+% Sumber kebenaran skema: backend/services/postgres_store.go:56-176 (fungsi migrate, termasuk ALTER TABLE ADD COLUMN).
+% Tanda $^{\dagger}$ pada kolom: referensi ke state ledger, tanpa kendala basis data.
+% Belum di-input dalam dokumen; disiapkan untuk BAB III (Perancangan Basis Data Luring).
 
 \begin{figure}[H]
 \centering
@@ -16,49 +17,66 @@
   card/.style={font=\scriptsize, fill=white, inner sep=1pt},
 ]
 
-%==================== KOLOM TENGAH: kyc_profiles (hub) ====================
-\node[ehdr] (ph) at (6.2,0) {kyc\_profiles};
-\node[erow, below=0pt of ph]  (p1)  {\underline{\texttt{profile\_id}} \hfill TEXT};
-\node[erow, below=0pt of p1]  (p2)  {\texttt{subject\_type} \hfill TEXT};
-\node[erow, below=0pt of p2]  (p3)  {\texttt{subject\_id} \hfill TEXT};
-\node[erow, below=0pt of p3]  (p4)  {\texttt{provider\_case\_id} \hfill TEXT};
-\node[erow, below=0pt of p4]  (p5)  {\texttt{legal\_name} \hfill TEXT};
-\node[erow, below=0pt of p5]  (p6)  {\texttt{document\_type} \hfill TEXT};
-\node[erow, below=0pt of p6]  (p7)  {\texttt{document\_number} \hfill TEXT};
-\node[erow, below=0pt of p7]  (p8)  {\texttt{document\_hashes} \hfill JSONB};
-\node[erow, below=0pt of p8]  (p9)  {\texttt{status} \hfill TEXT};
-\node[erow, below=0pt of p9]  (p10) {\texttt{risk\_level} \hfill TEXT};
-\node[erow, below=0pt of p10] (p11) {\texttt{due\_diligence\_level} \hfill TEXT};
-\node[erow, below=0pt of p11] (p12) {\texttt{senior\_approval} \hfill BOOLEAN};
-\node[erow, below=0pt of p12] (p13) {\texttt{rejection\_reason} \hfill TEXT};
-\node[erow, below=0pt of p13] (p14) {\texttt{expires\_at} \hfill TEXT};
-\node[erow, below=0pt of p14] (p15) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-\node[erow, below=0pt of p15] (p16) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
-\node[ebox, fit=(ph)(p16)] (PROF) {};
-
-%==================== KOLOM KIRI: retail_customers ====================
+%==================== KOLOM KIRI ATAS: retail_customers ====================
 \node[ehdr] (rh) at (0,0) {retail\_customers};
 \node[erow, below=0pt of rh] (r1) {\underline{\texttt{customer\_id}} \hfill TEXT};
 \node[erow, below=0pt of r1] (r2) {\texttt{legal\_name} \hfill TEXT};
 \node[erow, below=0pt of r2] (r3) {\texttt{identity\_hash} \hfill TEXT};
-\node[erow, below=0pt of r3] (r4) {\texttt{wallet\_account\_id} \hfill TEXT};
+\node[erow, below=0pt of r3] (r4) {\texttt{wallet\_account\_id}$^{\dagger}$ \hfill TEXT};
 \node[erow, below=0pt of r4] (r5) {\texttt{kyc\_profile\_id} \textit{(ref)} \hfill TEXT};
-\node[erow, below=0pt of r5] (r6) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-\node[erow, below=0pt of r6] (r7) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
-\node[ebox, fit=(rh)(r7)] (RETAIL) {};
+\node[erow, below=0pt of r5] (r6) {\texttt{custodian\_msp\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of r6] (r7) {\texttt{created\_at} \hfill TIMESTAMPTZ};
+\node[erow, below=0pt of r7] (r8) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
+\node[ebox, fit=(rh)(r8)] (RETAIL) {};
 
-%==================== KOLOM KIRI BAWAH: auth_users (terisolasi) ====================
-\node[ehdr] (uh) at (0,-4.6) {auth\_users};
+%==================== KOLOM KIRI BAWAH: auth_users ====================
+\node[ehdr] (uh) at (0,-4.9) {auth\_users};
 \node[erow, below=0pt of uh] (u1) {\underline{\texttt{username}} \hfill TEXT};
 \node[erow, below=0pt of u1] (u2) {\texttt{password\_hash} \hfill TEXT};
 \node[erow, below=0pt of u2] (u3) {\texttt{role} \hfill TEXT};
-\node[erow, below=0pt of u3] (u4) {\texttt{active} \hfill BOOLEAN};
-\node[erow, below=0pt of u4] (u5) {\texttt{created\_at} \hfill TIMESTAMPTZ};
-\node[erow, below=0pt of u5] (u6) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
-\node[ebox, fit=(uh)(u6)] (AUTH) {};
+\node[erow, below=0pt of u3] (u4) {\texttt{subject\_id} \hfill TEXT};
+\node[erow, below=0pt of u4] (u5) {\texttt{participant\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of u5] (u6) {\texttt{custodian\_msp\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of u6] (u7) {\texttt{active} \hfill BOOLEAN};
+\node[erow, below=0pt of u7] (u8) {\texttt{created\_at} \hfill TIMESTAMPTZ};
+\node[erow, below=0pt of u8] (u9) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
+\node[ebox, fit=(uh)(u9)] (AUTH) {};
+
+%==================== KOLOM KIRI BAWAH: payment_contacts ====================
+\node[ehdr] (pch) at (0,-10.6) {payment\_contacts};
+\node[erow, below=0pt of pch] (pc1) {\underline{\texttt{contact\_id}} \hfill TEXT};
+\node[erow, below=0pt of pc1] (pc2) {\texttt{owner\_username} \textit{(FK)} \hfill TEXT};
+\node[erow, below=0pt of pc2] (pc3) {\texttt{label} \hfill TEXT};
+\node[erow, below=0pt of pc3] (pc4) {\texttt{wallet\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of pc4] (pc5) {\texttt{recipient\_type} \hfill TEXT};
+\node[erow, below=0pt of pc5] (pc6) {\texttt{created\_at} \hfill TIMESTAMPTZ};
+\node[erow, below=0pt of pc6] (pc7) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
+\node[ebox, fit=(pch)(pc7)] (PC) {};
+
+%==================== KOLOM TENGAH: kyc_profiles (hub) ====================
+\node[ehdr] (ph) at (5.6,0) {kyc\_profiles};
+\node[erow, below=0pt of ph]  (p1)  {\underline{\texttt{profile\_id}} \hfill TEXT};
+\node[erow, below=0pt of p1]  (p2)  {\texttt{subject\_type} \hfill TEXT};
+\node[erow, below=0pt of p2]  (p3)  {\texttt{subject\_id} \hfill TEXT};
+\node[erow, below=0pt of p3]  (p4)  {\texttt{custodian\_msp\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of p4]  (p5)  {\texttt{provider\_case\_id} \hfill TEXT};
+\node[erow, below=0pt of p5]  (p6)  {\texttt{legal\_name} \hfill TEXT};
+\node[erow, below=0pt of p6]  (p7)  {\texttt{document\_type} \hfill TEXT};
+\node[erow, below=0pt of p7]  (p8)  {\texttt{document\_number} \hfill TEXT};
+\node[erow, below=0pt of p8]  (p9)  {\texttt{document\_hashes} \hfill JSONB};
+\node[erow, below=0pt of p9]  (p10) {\texttt{status} \hfill TEXT};
+\node[erow, below=0pt of p10] (p11) {\texttt{risk\_level} \hfill TEXT};
+\node[erow, below=0pt of p11] (p12) {\texttt{due\_diligence\_level} \hfill TEXT};
+\node[erow, below=0pt of p12] (p13) {\texttt{senior\_approval} \hfill BOOLEAN};
+\node[erow, below=0pt of p13] (p14) {\texttt{rejection\_reason} \hfill TEXT};
+\node[erow, below=0pt of p14] (p15) {\texttt{expires\_at} \hfill TEXT};
+\node[erow, below=0pt of p15] (p16) {\texttt{ledger\_anchored} \hfill BOOLEAN};
+\node[erow, below=0pt of p16] (p17) {\texttt{created\_at} \hfill TIMESTAMPTZ};
+\node[erow, below=0pt of p17] (p18) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
+\node[ebox, fit=(ph)(p18)] (PROF) {};
 
 %==================== KOLOM KANAN ATAS: kyc_provider_checks ====================
-\node[ehdr] (ch) at (12.4,0) {kyc\_provider\_checks};
+\node[ehdr] (ch) at (11.2,0) {kyc\_provider\_checks};
 \node[erow, below=0pt of ch]  (c1)  {\underline{\texttt{check\_id}} \hfill TEXT};
 \node[erow, below=0pt of c1]  (c2)  {\texttt{profile\_id} \textit{(FK)} \hfill TEXT};
 \node[erow, below=0pt of c2]  (c3)  {\texttt{provider\_case\_id} \hfill TEXT};
@@ -72,7 +90,7 @@
 \node[ebox, fit=(ch)(c10)] (CHECK) {};
 
 %==================== KOLOM KANAN BAWAH: kyc_audit_events ====================
-\node[ehdr] (ah) at (12.4,-5.4) {kyc\_audit\_events};
+\node[ehdr] (ah) at (11.2,-5.9) {kyc\_audit\_events};
 \node[erow, below=0pt of ah] (a1) {\underline{\texttt{event\_id}} \hfill TEXT};
 \node[erow, below=0pt of a1] (a2) {\texttt{profile\_id} \textit{(ref)} \hfill TEXT};
 \node[erow, below=0pt of a2] (a3) {\texttt{action} \hfill TEXT};
@@ -80,30 +98,71 @@
 \node[erow, below=0pt of a4] (a5) {\texttt{created\_at} \hfill TIMESTAMPTZ};
 \node[ebox, fit=(ah)(a5)] (AUDIT) {};
 
+%==================== KOLOM KANAN PALING KANAN: qris_intents ====================
+\node[ehdr] (qh) at (16.8,0) {qris\_intents};
+\node[erow, below=0pt of qh]  (q1)  {\underline{\texttt{intent\_id}} \hfill TEXT};
+\node[erow, below=0pt of q1]  (q2)  {\texttt{mode} \hfill TEXT};
+\node[erow, below=0pt of q2]  (q3)  {\texttt{merchant\_id} \hfill TEXT};
+\node[erow, below=0pt of q3]  (q4)  {\texttt{merchant\_wallet\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of q4]  (q5)  {\texttt{amount} \hfill BIGINT};
+\node[erow, below=0pt of q5]  (q6)  {\texttt{status} \hfill TEXT};
+\node[erow, below=0pt of q6]  (q7)  {\texttt{label} \hfill TEXT};
+\node[erow, below=0pt of q7]  (q8)  {\texttt{payload} \hfill TEXT};
+\node[erow, below=0pt of q8]  (q9)  {\texttt{reference\_id} \hfill TEXT};
+\node[erow, below=0pt of q9]  (q10) {\texttt{expires\_at} \hfill TEXT};
+\node[erow, below=0pt of q10] (q11) {\texttt{paid\_by\_wallet\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of q11] (q12) {\texttt{paid\_at} \hfill TEXT};
+\node[erow, below=0pt of q12] (q13) {\texttt{tx\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of q13] (q14) {\texttt{created\_at} \hfill TIMESTAMPTZ};
+\node[erow, below=0pt of q14] (q15) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
+\node[ebox, fit=(qh)(q15)] (QRIS) {};
+
+%==================== KOLOM KANAN PALING KANAN BAWAH: operation_journal ====================
+\node[ehdr] (oh) at (16.8,-8.0) {operation\_journal};
+\node[erow, below=0pt of oh]  (o1)  {\underline{\texttt{principal\_scope}} \hfill TEXT};
+\node[erow, below=0pt of o1]  (o2)  {\underline{\texttt{principal\_id}} \hfill TEXT};
+\node[erow, below=0pt of o2]  (o3)  {\underline{\texttt{idempotency\_key}} \hfill TEXT};
+\node[erow, below=0pt of o3]  (o4)  {\texttt{operation} \hfill TEXT};
+\node[erow, below=0pt of o4]  (o5)  {\texttt{request\_hash} \hfill TEXT};
+\node[erow, below=0pt of o5]  (o6)  {\texttt{operation\_ref} \hfill TEXT};
+\node[erow, below=0pt of o6]  (o7)  {\texttt{status} \hfill TEXT};
+\node[erow, below=0pt of o7]  (o8)  {\texttt{tx\_id}$^{\dagger}$ \hfill TEXT};
+\node[erow, below=0pt of o8]  (o9)  {\texttt{response} \hfill JSONB};
+\node[erow, below=0pt of o9]  (o10) {\texttt{created\_at} \hfill TIMESTAMPTZ};
+\node[erow, below=0pt of o10] (o11) {\texttt{updated\_at} \hfill TIMESTAMPTZ};
+\node[ebox, fit=(oh)(o11)] (OPJ) {};
+
 %==================== RELASI ====================
+% auth_users 1 --< N payment_contacts  (FK keras, ON DELETE CASCADE)
+\draw[rel] (AUTH.south) -- (PC.north)
+  node[card, pos=0.25] {1} node[card, pos=0.75] {N};
+
 % kyc_profiles 1 --< N kyc_provider_checks  (FK keras, ON DELETE CASCADE)
-\draw[rel] (PROF.east |- c2) -- (CHECK.west)
-  node[card, pos=0.08] {1} node[card, pos=0.92] {N};
+\draw[rel] (PROF.east |- p1) -- (CHECK.west |- c2)
+  node[card, pos=0.1] {1} node[card, pos=0.9] {N};
 
 % kyc_profiles 1 --< N kyc_audit_events  (referensi lunak via profile_id)
-\draw[soft] (PROF.east |- p15) -- (AUDIT.west)
-  node[card, pos=0.06] {1} node[card, pos=0.94] {N};
+\draw[soft] (PROF.east |- a2) -- (AUDIT.west |- a2)
+  node[card, pos=0.1] {1} node[card, pos=0.9] {N};
 
 % retail_customers N --> 0..1 kyc_profiles  (referensi lunak, nullable)
 \draw[soft] (RETAIL.east |- r5) -- (PROF.west |- r5)
-  node[card, pos=0.06] {N} node[card, pos=0.94] {0..1};
+  node[card, pos=0.1] {N} node[card, pos=0.9] {0..1};
 
 %==================== LEGENDA ====================
 \node[align=left, font=\scriptsize, draw=black, rounded corners=2pt,
-  fill=gray!5, inner sep=4pt] at (6.2,-9.3)
+  fill=gray!5, inner sep=4pt] at (9.0,-15.6)
   {\textbf{Keterangan:} \underline{teks} = \textit{primary key} (PK);
    \textit{(FK)} = \textit{foreign key} dengan kendala basis data;
-   \textit{(ref)} = referensi lunak (tanpa kendala).\\
+   \textit{(ref)} = referensi lunak dalam basis data (tanpa kendala);\\
+   $^{\dagger}$ = referensi ke state ledger (tanpa kendala basis data).\\
    Garis utuh = relasi berkendala (\textit{ON DELETE CASCADE});
-   garis putus-putus = referensi lunak.};
+   garis putus-putus = referensi lunak.\\
+   \texttt{payment\_contacts}: \textit{UNIQUE} (owner\_username, wallet\_id); recipient\_type bernilai retail\_customer atau merchant.\\
+   \texttt{operation\_journal}: PK komposit (principal\_scope, principal\_id, idempotency\_key).};
 
 \end{tikzpicture}%
 }
-\caption{Diagram \textit{Entity-Relationship} basis data luring (\textit{off-chain}) pada PostgreSQL. Tabel \texttt{auth\_users} berdiri sendiri untuk autentikasi portal, sedangkan \texttt{kyc\_profiles} menjadi pusat relasi profil KYC, riwayat pemeriksaan penyedia, dan jejak audit.}
+\caption{Diagram \textit{Entity-Relationship} basis data luring (\textit{off-chain}) pada PostgreSQL, sesuai skema yang dibuat backend. Tabel \texttt{auth\_users} terhubung ke \texttt{payment\_contacts} melalui kunci asing. Tabel \texttt{kyc\_profiles} menjadi pusat relasi profil KYC, pemeriksaan penyedia, dan jejak audit. Tabel \texttt{qris\_intents} dan \texttt{operation\_journal} tidak memiliki kunci asing dan merujuk ke state ledger.}
 \label{fig:erd-offchain}
 \end{figure}
