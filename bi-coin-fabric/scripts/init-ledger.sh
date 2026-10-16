@@ -30,7 +30,6 @@ peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.bi-
   -c '{"function":"InitLedger","Args":[]}' \
   --peerAddresses localhost:7051  --tlsRootCertFiles "$ORG/peerOrganizations/bi-coin/peers/peer0.bi-coin/tls/ca.crt" \
   --peerAddresses localhost:9051  --tlsRootCertFiles "$ORG/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls/ca.crt" \
-  --peerAddresses localhost:12051  --tlsRootCertFiles "$ORG/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls/ca.crt" \
   --peerAddresses localhost:13051  --tlsRootCertFiles "$ORG/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls/ca.crt" \
   --waitForEvent
 

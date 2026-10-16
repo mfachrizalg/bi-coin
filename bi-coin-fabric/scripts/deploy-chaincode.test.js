@@ -16,15 +16,14 @@ test('Garuda lifecycle approval is sent only to the approving organization peer'
     assert.doesNotMatch(block, /localhost:(7051|9051|11051|13051)/);
 });
 
-test('Garuda lifecycle commit collects endorsements from the validator peers', () => {
+test('Garuda lifecycle commit collects endorsements from the approving orgs only (validator is read-only)', () => {
     const start = script.indexOf('peer lifecycle chaincode commit');
     const end = script.indexOf('\n\n  echo "Chaincode deployed successfully', start);
     const block = script.slice(start, end);
 
     assert.match(block, /--peerAddresses localhost:7051/);
     assert.match(block, /--peerAddresses localhost:9051/);
-    assert.match(block, /--peerAddresses localhost:12051/);
-    assert.match(block, /--peerAddresses localhost:13051/);
+    assert.doesNotMatch(block, /--peerAddresses localhost:(12051|13051)/);
 });
 
 test('incremental upgrades replace approvals only when they match the committed definition', () => {

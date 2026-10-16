@@ -90,13 +90,14 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
   PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "${CHAINCODE_NAME}_${CHAINCODE_VERSION}" | awk '{print $3}' | sed 's/,//')
   echo "Package ID: $PACKAGE_ID"
 
-  echo "Approving chaincode for CentralBank and Distributor orgs..."
+  echo "Approving chaincode for CentralBank, Distributor, and EndUser orgs..."
   TLS_CA="$NETWORK_DIR/organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/msp/tlscacerts/tlsca.bi-coin-cert.pem"
 
-  for org in centralbank distributor; do
+  for org in centralbank distributor enduser; do
     case "$org" in
       centralbank) MSPID=CentralBankMSP; PORT=7051; ORG_DOMAIN=bi-coin ;;
       distributor) MSPID=DistributorMSP; PORT=9051; ORG_DOMAIN=distributor.bi-coin ;;
+      enduser)     MSPID=EndUserMSP;     PORT=13051; ORG_DOMAIN=enduser.bi-coin ;;
     esac
 
     export CORE_PEER_LOCALMSPID="$MSPID"
@@ -157,13 +158,9 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
     --peerAddresses localhost:7051 \
     --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/bi-coin/peers/peer0.bi-coin/tls/ca.crt" \
     --peerAddresses localhost:9051 \
-    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls/ca.crt" \
-    --peerAddresses localhost:12051 \
-    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls/ca.crt" \
-    --peerAddresses localhost:13051 \
-    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls/ca.crt"
+    --tlsRootCertFiles "$NETWORK_DIR/organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls/ca.crt"
 
-  echo "Chaincode deployed successfully on four-organization network (CentralBank, Distributor, Validator, EndUser)."
+  echo "Chaincode deployed successfully on CentralBank and Distributor orgs."
 else
   cd "$TEST_NETWORK"
   export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"

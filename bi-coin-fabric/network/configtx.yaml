@@ -22,6 +22,23 @@ Organizations:
       - Host: peer0.bi-coin
         Port: 7051
 
+  - &OrdererOrg
+    Name: OrdererMSP
+    ID: OrdererMSP
+    MSPDir: organizations/ordererOrganizations/bi-coin/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - "orderer.bi-coin:7050"
+
   - &Distributor
     Name: DistributorMSP
     ID: DistributorMSP
@@ -165,7 +182,7 @@ Profiles:
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *CentralBank
+        - *OrdererOrg
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults

@@ -187,6 +187,14 @@ if [ "$NETWORK_MODE" = "garuda" ]; then
       --client-key "$ORDERER_TLS/server.key"
   fi
 
+  if ! osnadmin channel list -o localhost:7053 \
+      --ca-file "$ORDERER_TLS/ca.crt" \
+      --client-cert "$ORDERER_TLS/server.crt" \
+      --client-key "$ORDERER_TLS/server.key" 2>/dev/null | grep -q "$CHANNEL_NAME"; then
+    echo "orderer did not join $CHANNEL_NAME" >&2
+    exit 1
+  fi
+
   echo "Joining peers to channel $CHANNEL_NAME..."
   export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
   export CORE_PEER_TLS_ENABLED=true
