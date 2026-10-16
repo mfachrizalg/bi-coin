@@ -1,0 +1,56 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  flow/.style={-{Stealth}, thick},
+  app/.style={draw, rounded corners=2pt, fill=gray!8, align=center,
+    text width=3.0cm, minimum height=0.9cm},
+  org/.style={draw, rounded corners=2pt, fill=blue!5, align=center,
+    text width=2.8cm, minimum height=0.9cm},
+  contract/.style={draw, rounded corners=2pt, fill=green!5, align=center,
+    text width=4.0cm, minimum height=1.65cm},
+  channel/.style={draw, dashed, rounded corners=4pt, inner sep=0.3cm}
+]
+\node[app] (users) at (0,6.8)
+  {Customers\\retail individual\\merchant individual seller\\business/company};
+\node[app, text width=3.5cm] (api) at (4.8,6.8)
+  {Go Backend API\\per-user X.509 signing};
+\node[app, text width=3.5cm] (db) at (9.8,6.8)
+  {Isolated PostgreSQL\\\texttt{bi\_coin\_study}};
+\draw[flow] (users.east) -- node[above]{HTTPS} (api.west);
+\draw[<->, thick] (api.east) -- node[above]{off-chain} (db.west);
+
+\node[org] (central) at (0,4.0)
+  {\texttt{CentralBankMSP}\\peer + single orderer};
+\node[org] (distributor) at (3.6,4.0)
+  {\texttt{DistributorMSP}\\peer + PJP staff};
+\node[org] (validator) at (7.2,4.0)
+  {\texttt{ValidatorMSP}\\peer / read-only audit};
+\node[org] (enduser) at (10.8,4.0)
+  {\texttt{EndUserMSP}\\peer + customer identities};
+
+\node[contract] (monetary) at (0.8,1.65)
+  {\texttt{rupiah-monetary}\\Treasury, supply, reserves\\
+   Default: \texttt{AND(}\\
+   \texttt{CentralBankMSP.peer,}\\
+   \texttt{DistributorMSP.peer)}};
+\node[contract] (controls) at (5.4,1.65)
+  {\texttt{rupiah-controls}\\KYC, risk, authority, limits\\
+   Default: \texttt{AND(}\\
+   \texttt{DistributorMSP.peer, OR(}\\
+   \texttt{CentralBankMSP.peer,}\\
+   \texttt{EndUserMSP.peer))}\\
+   {\tiny SBE: CentralBankMSP + DistributorMSP}};
+\node[contract] (payments) at (10.0,1.65)
+  {\texttt{rupiah-payments}\\wallets, receipts, limits\\
+   Default: \texttt{AND(}\\
+   \texttt{DistributorMSP.peer,}\\
+   \texttt{EndUserMSP.peer)}};
+\node[app, text width=10.5cm, minimum height=0.55cm] (funding) at (5.4,0.0)
+  {\texttt{FundFromReserve} invokes payments, controls, and monetary; all three policies apply};
+
+\node[channel, fit=(central)(distributor)(validator)(enduser)
+  (monetary)(controls)(payments)(funding),
+  label={[font=\scriptsize\bfseries, anchor=south west]north west:
+    Channel \texttt{rupiah-study}}] (fabric) {};
+\draw[flow] (api.south) -- node[right, fill=white, inner sep=1pt]{Fabric Gateway}
+  (5.4,4.8);
+\end{tikzpicture}
