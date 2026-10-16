@@ -1,18 +1,18 @@
 # Disposable replacement benchmarks
 
-> **Superseded replacement matrix.** The Rp100 and Rp1000 matrix below ran on the five-organization network. `scripts/run-benchmark-replacements.sh` and `scripts/run-benchmark-study.sh` were removed in commit 9769cf2, so the commands in this file no longer run. Results are kept as evidence. The disposable-daemon isolation design (compose file, Dockerfile, daemon checks) is still in use. For current four-organization evidence, read [`../compliance/README.md`](../compliance/README.md).
+> **Superseded replacement matrix.** The Rp100 and Rp1000 matrix below ran before the four-organization network, and its results are kept as evidence only. The replacement protocol used `scripts/run-benchmark-replacements.sh` and `scripts/run-benchmark-study.sh`. Commit 9769cf2 removed both runners; they remain at `9769cf2^`, so the matrix commands in this file no longer run. The disposable-daemon isolation design (compose file, Dockerfile, daemon checks) is still in use. For current four-organization evidence, read [`../compliance/README.md`](../compliance/README.md).
 
 This environment runs its own Docker daemon. The runner shares that daemon's network namespace so the existing localhost endpoints work. No host Docker socket or host ports are exposed. Bind only a disposable source copy as `BENCHMARK_WORKSPACE`; never bind the active checkout or its crypto/ledger directories.
 
-The source tree and transaction amount are frozen at study creation. Resumed attempts receive new directories; previous attempt evidence is retained. The validator rejects mixed windows, mismatched trace/log counts, malformed traces, missing telemetry, and incomplete repetition groups.
+The source tree and transaction amount are frozen at study creation. Resumed attempts receive new directories; previous attempt evidence is retained. For per-run result directories, `benchmark:validate` rejects mixed windows, mismatched trace/log counts, malformed traces, missing telemetry, and incomplete repetition groups; it does not check compliance results (see [`../README-P1-benchmarks.md`](../README-P1-benchmarks.md)).
 
 ## Preparation
 
 1. Copy the project to a disposable workspace, excluding `node_modules`, benchmark results, network organizations/channel artifacts, private environment files, and generated archives. Install dependencies there with `npm ci`.
 2. Set `BENCHMARK_WORKSPACE` to that copy and `FABRIC_SAMPLES` to a separate Fabric **2.5.16** tools/config bundle. Verify the release checksum. The runner needs the supplied glibc compatibility package for those binaries. Set `BENCHMARK_IMAGE_BUNDLE` to a read-only tar made with `docker save` from the exact local Fabric 2.5, Fabric CA 1.5.9, CouchDB 3.3, and PostgreSQL 16 images. The compliance runner imports that tar only into the verified disposable daemon.
 3. Start this Compose file under a new, explicit project name. Copy the exact local Fabric 2.5 and monitoring images into the disposable daemon. Verify that its daemon ID differs from the host's and that neither service mounts the host socket.
-4. In the runner, set `BENCHMARK_DISPOSABLE_DAEMON_ID` to that verified ID, `BENCHMARK_SOURCE_COMMIT` to the source copy's base commit, and a unique `BENCHMARK_REPLACEMENT_STAMP`. Run `bash scripts/run-benchmark-replacements.sh`.
-5. Preserve and validate the resulting study directories before removing only this disposable Compose project's containers and volumes. Keep historical results intact.
+4. In the runner, set `BENCHMARK_DISPOSABLE_DAEMON_ID` to that verified ID and `BENCHMARK_SOURCE_COMMIT` to the source copy's base commit. Also set `BENCHMARK_SOURCE_DIRTY=true` if the copy has uncommitted changes. Then start the compliance run described below.
+5. Preserve the resulting `compliance-<stamp>` directories, and check `correctness.json` and `manifest.json` in each, before removing only this disposable Compose project's containers and volumes. Keep historical results intact.
 
 The revised compliance study uses the current 31-workload catalog. After the disposable workspace contains the current `bi-coin-fabric/` source, use one stamp for both commands:
 
@@ -38,10 +38,10 @@ All primary/calibration conditions have five repetitions. These **56 runs** are 
 
 The Rp1,000 and Rp100 runs use different study stamps and must not be pooled. Record the nested environment and actual runtime versions; do not silently merge fresh measurements into old repetition groups. Full worker reselection requires a complete same-environment calibration across 1/2/4/8 workers, beyond this targeted matrix.
 
-For one condition, use:
+One condition was run with this command of the removed study runner (available at `9769cf2^`). The compliance runner takes no worker count, rate, or duration, so it has no equivalent.
 
 ```sh
 bash scripts/run-benchmark-study.sh cell <operation> <low|high> <pilot|scenario-pilot|calibration|primary> <workers> <tps> [seconds]
 ```
 
-The `cell` command runs one pilot repetition or five calibration/primary repetitions. `BENCHMARK_OPERATION_AMOUNT` defaults to 1000. A study stamp cannot be resumed with a different amount or source snapshot. High-contention configurations that exceed the STANDARD sender's declared daily budget are rejected before the network is reset.
+The `cell` command ran one pilot repetition or five calibration/primary repetitions. `BENCHMARK_OPERATION_AMOUNT` defaulted to 1000. A study stamp could not be resumed with a different amount or source snapshot. High-contention configurations that exceeded the STANDARD sender's declared daily budget were rejected before the network was reset.

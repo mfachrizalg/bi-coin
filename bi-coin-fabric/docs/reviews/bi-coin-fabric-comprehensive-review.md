@@ -1,15 +1,15 @@
 # Comprehensive `bi-coin-fabric` Review
 
-> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP) and by its benchmark run `compliance-run-20261014-01`. The role `validator_bank` and participant type `validator` were removed; banks are the Distributor Bank participant type `distributor`. Role and participant names are restated in four-organization terms; findings, counts, and run identifiers stay as recorded at review time and are not evidence for the four-organization prototype.
 
 **Review window:** 24--25 August 2026  
 **Baseline:** `master` at `0207584077575bc859f16f8be9811211890b3e0c`  
-**Disposition:** Review complete; source remediations applied for F1--F12; final conformance evidence is captured in `benchmark/results/20260909-final-evidence-manifest.json`
+**Disposition:** Review complete; source remediations applied for F1--F12; final conformance evidence was captured in `benchmark/results/20260909-final-evidence-manifest.json` on the five-organization network and is superseded by `compliance-run-20261014-01`
 **Overall gate:** **AMBER / CONDITIONAL**
 
 ## Executive verdict
 
-- **Thesis/demo readiness: CONDITIONAL.** Corrected functionality and boundary profiles pass on fresh ledgers; performance profiles contain measured failures at peak load, so no zero-failure throughput claim is supported.
+- **Thesis/demo readiness: CONDITIONAL (five-organization evidence, superseded).** Corrected functionality and boundary profiles pass on fresh ledgers; performance profiles contain measured failures at peak load, so no zero-failure throughput claim is supported.
 - **Production readiness: NO-GO.** The prototype still has a single orderer/peer topology and retains the legacy combined `bank_pjp` role alias; those are explicit hardening limits.
 - **Documentation scope is now explicit.** KYC is implementation-only, QRIS is code-only, and both are excluded from thesis acceptance criteria. The core thesis path is participant lifecycle, BI Treasury issuance, two-tier distribution, retail transfer, freezing, and supervision.
 - **The review itself is complete.** Failed and interrupted profiles are retained as evidence; no success is inferred from a Caliper exit code alone.
@@ -27,18 +27,18 @@ Findings are classified twice:
 
 The frontend, backend, chaincode, benchmark workloads, smoke script, and network helpers were rechecked after remediation. Frontend contracts, the TypeScript/Vite build, backend and chaincode race-enabled Go tests, benchmark/oracle tests, and `go vet` all pass.
 
-**Thesis/demo verdict: CONDITIONAL.** The final Docker-in-Docker evidence package produced fresh reports for the performance and functional profiles; a separate clean-ledger boundary rerun produced `8/8`. The performance reports retain their success/failure counts and are reported as measured-with-failures rather than PASS.
+**Thesis/demo verdict: CONDITIONAL (five-organization evidence, superseded).** The final Docker-in-Docker evidence package produced fresh reports for the performance and functional profiles; a separate clean-ledger boundary rerun produced `8/8`. The performance reports retain their success/failure counts and are reported as measured-with-failures rather than PASS.
 
 **Code-correctness verdict: GREEN for thesis scope, AMBER for production hardening.** F1--F12 have source-level fixes and focused regressions; the legacy `bank_pjp` role remains only as a compatibility alias and the topology remains single-node per role. QRIS remains code-only and KYC implementation-only.
 
 The accepted custody model is **Treasury -> Custodian -> Wallet Owner**: Bank Indonesia distributes directly from its treasury to either a Distributor Bank or a Payment Service Provider. Observers cannot be Custodians. This corrects prior shorthand that implied a mandatory Distributor Bank-to-PJP hop; the current source implements the clarified flow.
 
-### Isolated live evidence
+### Isolated live evidence (five-organization ledger, superseded)
 
 The fresh 7--8 September Docker-in-Docker ledger confirmed the remediated core path without changing the host environment:
 
 - The upgraded chaincode rejected `Mint(wlt_live-retail-0908, 1)` with `issuance must credit bi_treasury`.
-- `RequestIssuance(100000)` followed by `DistributeToParticipant(live-custodian-0908, 100000, ...)` committed; the Validator wallet received the funds while Treasury supply stayed constant.
+- `RequestIssuance(100000)` followed by `DistributeToParticipant(live-custodian-0908, 100000, ...)` committed; the Distributor Bank wallet received the funds while Treasury supply stayed constant.
 - A distributor-custodied wholesale wallet funded a KYC-approved STANDARD retail wallet; balances became `50000` and `50000`, with `monthly_received=50000` on the retail wallet.
 
 The isolated environment also completed Vite browser login as the disposable BI user and rendered all three initialized system limits. It proves the bootstrap/read and core mutation paths; the corrected Caliper conformance artifacts below complete the relevant acceptance checks.
@@ -57,7 +57,7 @@ The isolated live API returned `{"wallet_id":"bi_treasury","balance":"200"}` wit
 
 **F1--F4 remediated in source.** Benchmark fixture funding now uses a serialized Treasury/Custodian path, the runner fails closed on transaction failures, the boundary oracle requires all eight cases, and OJK is excluded from application writers/endorsement and chaincode approval. `configtxgen` validates the current channel policy. The full sweep confirmed multi-worker setup completes and emits reports.
 
-**F8 remediated with compatibility alias.** JWT verification now reloads the auth user and rejects deactivated users; explicit `bank_pjp` and `pjp` roles are accepted by backend routes and frontend workspace guards. The legacy `bank_pjp` role remains as a migration alias.
+**F8 remediated with compatibility alias.** JWT verification now reloads the auth user and rejects deactivated users; explicit `pjp` role is accepted by backend routes and frontend workspace guards. The legacy `bank_pjp` role remains as a migration alias.
 
 **F10--F12 remediated in source.** The full suite generates and validates Caliper assets, network/deploy scripts fail closed, smoke uses JWT plus current Treasury routes, manifests hash inputs and artifacts with runtime/image/topology metadata, and the single-node topology is explicitly recorded as a limitation.
 
@@ -71,7 +71,7 @@ The isolated live API returned `{"wallet_id":"bi_treasury","balance":"200"}` wit
 | Frontend TypeScript/Vite build | PASS | 44 modules built |
 | Benchmark/oracle unit tests | PASS | 7/7 test files/subtests |
 | Thesis compile | PASS | 101 pages; zero undefined references/citations; final evidence tables visually checked on PDF pages 64--68 |
-| Current isolated conformance/performance artifacts | **CAPTURED** | Combined final manifest `20260909-final-evidence-manifest.json`; see current evidence below |
+| Five-organization isolated conformance/performance artifacts | **CAPTURED (superseded)** | Combined final manifest `20260909-final-evidence-manifest.json`; see the five-organization evidence section below |
 
 Final evidence runtime: Node 22.23.2, npm 10.9.1, Docker 27.5.1, Caliper CLI 0.6.0, Fabric peer/orderer image 2.5, and CouchDB 3.2. The host verification environment is separate; host/image version drift must be recorded when reproducing the run.
 
@@ -97,7 +97,7 @@ Final evidence runtime: Node 22.23.2, npm 10.9.1, Docker 27.5.1, Caliper CLI 0.6
 
 **Trigger.** Run `benchmark:transfer:w1`.
 
-**Evidence.** `scripts/run-full-suite.sh:101-145` primarily requires process success, a fresh report, and no failed-round marker. The resulting `transfer-w1` report records:
+**Evidence.** The five-organization suite runner (deleted in 9769cf2) primarily required process success, a fresh report, and no failed-round marker. The resulting `transfer-w1` report records:
 
 | Round | Success | Fail | Throughput |
 |---|---:|---:|---:|
@@ -153,7 +153,7 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 **Smallest remediation.** Reject `Mint` destinations other than the canonical BI Treasury wallet. Permit distribution only from that treasury to an eligible Distributor Bank or PJP Custodian, and preserve redemption back to the treasury.
 
-**Regression.** Treasury mint succeeds; otherwise-identical minting to validator, PJP, merchant, or retail wallets fails without changing supply.
+**Regression.** Treasury mint succeeds; otherwise-identical minting to distributor, PJP, merchant, or retail wallets fails without changing supply.
 
 ### F6 — P1 — Idempotency is absent at two UI boundaries and non-exclusive in the journal
 
@@ -193,7 +193,7 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 **Impact.** An authorized submission workflow is hidden, capabilities cannot be separated cleanly, and deactivation does not immediately revoke an existing token.
 
-**Remediation applied.** Explicit `bank_pjp` and `pjp` roles now pass the same custodian route surface; `bank_pjp` remains accepted only for existing deployments. Lifecycle controls remain BI-only.
+**Remediation applied.** Explicit `pjp` role now passes the same custodian route surface; `bank_pjp` remains accepted only for existing deployments. Lifecycle controls remain BI-only.
 
 **Regression.** Role-matrix tests cover visible actions and routes. A token issued before deactivation must fail on its next protected request.
 
@@ -213,15 +213,15 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 ### F10 — P2 — Clean-checkout benchmark orchestration is incomplete
 
-**Status: SOURCE REMEDIATED on 8 September 2026.**
+**Status: SOURCE REMEDIATED on 8 September 2026; the remediated preflight, generator, and network configuration were deleted with the five-organization pipeline (5cb19cb, 9769cf2).**
 
 **Trigger.** Run the documented suite without previously generated Caliper identities.
 
-**Historical evidence.** The earlier runner omitted the generator and trusted stale ignored identities. The current preflight invokes `bash benchmark/gen-network-assets.sh` and verifies every `path:` entry in `benchmark/networkconfig.yaml`; the three Caliper client organizations remain documented by the network configuration.
+**Historical evidence.** The earlier runner omitted the generator and trusted stale ignored identities.
 
 **Impact.** Old ignored files can mask a clean-checkout failure, and the setup contract is unclear.
 
-**Smallest remediation.** Call the generator explicitly with `bash` during preflight, verify every path referenced by `benchmark/networkconfig.yaml`, and document that BI, Distributor Bank A, and Distributor Bank B are the Caliper client identities.
+**Smallest remediation.** Document that CentralBankMSP, DistributorMSP, ValidatorMSP, and EndUserMSP are the Caliper client identities.
 
 **Regression.** Remove only generated network identities in an isolated test checkout, run preflight, and assert all referenced profile/cert/key files are recreated.
 
@@ -253,7 +253,7 @@ The runner recorded `PASS` despite 6,142 failed transactions.
 
 **Regression.** Smoke exercises the current role matrix. A manifest verifier detects any changed report, log, lockfile, script, topology file, or image digest.
 
-## Current isolated evidence (9 September 2026)
+## Isolated evidence on the five-organization network (9 September 2026, superseded)
 
 The final package uses fresh ledgers in `bi-coin-review-dind`. The manifest
 suite seed is `20260909`; transfer workload files retain deterministic seed
@@ -264,7 +264,7 @@ sweep's setup phase failed. The combined status and provenance files are
 `benchmark/results/20260909-final-evidence-status.tsv` and
 `benchmark/results/20260909-final-evidence-manifest.json`.
 
-| Profile | Current result | Evidence |
+| Profile | Recorded result | Evidence |
 |---|---|---|
 | Transfer w1 | `MEASURED_WITH_FAILURES` | `4,304` successes, `6,796` failures; report emitted |
 | Transfer w2 | `MEASURED_WITH_FAILURES` | `4,778` successes, `6,327` failures; report emitted |
@@ -313,14 +313,14 @@ The earlier `recovery-manifest.json` describes a sandbox Docker-permission setup
 ## Refuted and unconfirmed concerns
 
 - **Refuted:** participant creation does not return an empty object; `backend/handlers/handlers.go:293-304` returns the created participant. Retain a regression test, but no fix is warranted.
-- **Refuted:** current backend/chaincode participant enums align on `validator`, `observer`, and `pjp`; the remaining issue is loose frontend typing, not an enum contradiction.
+- **Refuted:** current backend/chaincode participant enums align on `distributor`, `observer`, and `pjp`; the remaining issue is loose frontend typing, not an enum contradiction.
 - **Unconfirmed:** the earlier monitor-schema concern was not reverified in this review and is excluded from the finding count.
 - **Hotspot only:** browser `sessionStorage` token storage is not labeled a vulnerability without a threat model.
 
 ## Ordered follow-up roadmap
 
-1. **Use final evidence.** Cite the combined `20260909-final-evidence-manifest.json` and keep measured-with-failures performance results separate from PASS oracles.
-2. **Finish F8 hardening.** Migrate the compatibility `bank_pjp` role to explicit distributor-bank and PJP roles together with gateway/bootstrap configuration.
+1. **Use final evidence.** Cite the four-organization `compliance-run-20261014-01` report; the combined `20260909-final-evidence-manifest.json` is five-organization evidence and is superseded. Keep measured-with-failures performance results separate from PASS oracles.
+2. **Finish F8 hardening.** Migrate the compatibility `bank_pjp` role to the explicit `pjp` role together with gateway/bootstrap configuration.
 3. **Keep HA out of scope unless claimed.** The one-orderer/one-peer topology remains a prototype limitation, not a demonstrated fault-tolerant deployment.
 
 ## Completion criteria for the remediation run

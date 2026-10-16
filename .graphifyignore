@@ -4,3 +4,36 @@ bi-coin-iroha/
 
 # Graphify status is generated from the graph and must not feed back into its own corpus.
 wiki/meta/graphify.md
+
+# Generated output (never authored). Throwaway ledger clones: runtime-workspaces holds a
+# full duplicate copy of chaincode/backend/network for every compliance run (~28k files).
+bi-coin-fabric/benchmark/results/runtime-workspaces/
+
+# Machine-generated Caliper/analysis artifacts. Authored evidence (REPORT.md, *.csv,
+# metadata.json, manifests) at the top of each results dir is kept.
+bi-coin-fabric/benchmark/results/*.html
+bi-coin-fabric/benchmark/results/*/runs/
+bi-coin-fabric/benchmark/results/*/source/
+
+# Scratch working tree (contains a second full clone of the repo under workspace/).
+tmp/
+
+# Graphify's own rendered output - same reason as wiki/meta/graphify.md above.
+graphify-out/graph.html
+graphify-out/GRAPH_REPORT.md
+
+# Nested graphify output from earlier runs scoped to a subtree (chaincode/, backend/,
+# frontend/ each have their own copy). Same reason as wiki/meta/graphify.md: a graph of
+# the corpus must not ingest graphs of the corpus. Note the leading */ - graphify matches
+# patterns per path component, so this catches nested copies WITHOUT excluding the
+# top-level graphify-out/ that this run writes to.
+*/graphify-out/
+
+# Machine-generated statistical reports (scripts/analyze-benchmark-results.js).
+# pilot6/REPORT.md alone is 13.5 MB / 92.5k rows of raw per-scenario tables;
+# the cited numbers live in thesis/contents/chapter-4 and the .csv/.json sidecars.
+bi-coin-fabric/benchmark/results/statistical-*/REPORT.md
+
+# Vendored CTAN pgfplots distribution (untracked, unpacked release tree).
+# The thesis does not use the pgfplots package.
+pgfplots/

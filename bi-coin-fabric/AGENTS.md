@@ -82,7 +82,7 @@ Evidence checkpoint for this checkout (2026-10-16):
 - The run-20261014-01 summary.json lists all 31 workloads as bracketed, including fund-reserve (0.183594 passing, 0.195313 failing). Thesis Chapter 4 reports 30 of 31 and treats fund-reserve as inconclusive (0.183594 to 0.21875); reconcile the two before repeating either.
 - Thesis Chapter 4 limits NFR-05 to the configuration manifest because the read rates of the two runs differ.
 - Result files outside runtime-workspaces/ (statistical-*, statistical-review-replacements-*, e2e-*, and the dated Caliper logs) were produced between June and September 2026, before the four-organization network. ADR 0008 keeps that evidence separate; do not cite it as four-organization evidence.
-- For a new result, inspect the stamp, source snapshot, manifest, correctness.json, capacity.json, and summary.json. benchmark/compliance/README.md defines the workflow and evidence rules; benchmark/README-P1-benchmarks.md is the superseded five-organization guide.
+- For a new result, inspect the stamp, source snapshot, manifest, correctness.json, capacity.json, and summary.json. benchmark/compliance/README.md defines the workflow and evidence rules; benchmark/README-P1-benchmarks.md lists the benchmark npm commands and which of them apply to compliance results.
 
 ## Checks
 

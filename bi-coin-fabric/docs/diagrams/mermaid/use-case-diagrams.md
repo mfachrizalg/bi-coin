@@ -11,7 +11,6 @@ and supervision.
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     BI[👤 Bank Indonesia]
-    BV[👤 Distributor Bank]
     PJP[👤 PJP]
     M[👤 Merchant]
     PR[👤 Pelanggan Ritel]
@@ -31,7 +30,6 @@ flowchart LR
 
     BI --> UC1
     BI --> UC2
-    BV --> UC1
     BI --> UC3
     PJP --> UC1
     PJP --> UC4
@@ -54,7 +52,6 @@ flowchart LR
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     BI[👤 Bank Indonesia]
-    BV[👤 Distributor Bank]
     PJP[👤 PJP]
     SV[👤 Supervisor]
 

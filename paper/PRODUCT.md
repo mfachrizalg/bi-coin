@@ -37,10 +37,9 @@ A working retail Digital Rupiah research prototype on a permissioned Hyperledger
 - Monetary flow: Bank Indonesia Treasury -> Distributor Bank/PJP Custodian -> Retail Customer/Merchant wallet.
 - The shared Fabric channel gives no transaction privacy. The paper must keep stating this.
 - Measurements describe a single-host prototype. They do not establish production capacity or cross-machine reproducibility.
-- OPEN: which benchmark evidence is binding.
-  - Option A, used by the current abstract: statistical study with sustainable loads of 190 TPS (balance query), 50 TPS (freeze), 65 TPS (unfreeze), 25 TPS (redemption), and 20 TPS (low-contention transfer and merchant payment). Rp100 paired control: low contention passes 20 TPS; high contention reaches 2.01 TPS and 10.04% success. Artifacts: `../bi-coin-fabric/benchmark/results/statistical-*`, `statistical-review-replacements-20260920T173457Z-rp100`, and `reviews/replacement-study-2026-09-21.md`.
-  - Option B, used by `../thesis/PRODUCT.md`: 113543 worker-sweep run (transfer 7.8–14.5 TPS, functional 3.7–19.9 TPS, 616 tx, 0 failures).
-  - Until this is decided, do not add, change, or restyle benchmark numbers in figures or tables. The 9.0/45.9/57.7 single-run figures are retired under both options.
+- RESOLVED 2026-10-16: the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP) is the only architecture, so every benchmark number must come from it. The binding evidence is run-20261014-01 (one Caliper worker, one host): confirmed reads 272 to 296 ops/s and passing writes 0.184 to 4.75 TPS, as reported in `main.tex` and thesis Chapter 4.
+  - Superseded, do not cite: the September statistical study (`../bi-coin-fabric/benchmark/results/statistical-*`, including the Rp100 paired control and `reviews/replacement-study-2026-09-21.md`), the 113543 worker-sweep run, and the 9.0/45.9/57.7 single-run figures. They ran on the earlier five-organization network.
+  - Do not add, change, or restyle benchmark numbers in figures or tables without a new four-organization run.
 
 ## Brand Commitments
 

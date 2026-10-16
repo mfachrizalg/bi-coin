@@ -1,5 +1,7 @@
 # Replacement benchmark study — 2026-09-21
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. The Rp1,000 and Rp100 replacement studies ran on the earlier five-organization network and are not evidence for the four-organization prototype. Terms and figures are kept as recorded.
+
 ## Decision implemented
 
 The contaminated Rp1,000 high-contention retail-transfer window was replaced with a fixed-amount paired study at **Rp100 per transfer**. Rp100 is a controlled synthetic amount: it keeps the workload below the Rp10,000,000 STANDARD-wallet daily cap while preserving the low-contention/high-contention comparison. It is not a claim about a typical retail payment amount.

@@ -1,0 +1,328 @@
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/chaincode	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/config	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/handlers	(cached)
+?   	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/middleware	[no test files]
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/models	(cached)
+ok  	github.com/mfachrizalg/bi-coin-retail-cbdc/backend/services	(cached)
+
+> bi-coin-fabric@1.0.0 test:benchmarks
+> node --test benchmark/workloads/*.test.js benchmark/observers/*.test.js scripts/*.test.js
+
+TAP version 13
+# Subtest: transaction observer serializes Caliper status and Map custom data
+ok 1 - transaction observer serializes Caliper status and Map custom data
+  ---
+  duration_ms: 2.760512
+  type: 'test'
+  ...
+# Subtest: one attempt retains its rounds but a new observer cannot append another attempt
+ok 2 - one attempt retains its rounds but a new observer cannot append another attempt
+  ---
+  duration_ms: 63.988095
+  type: 'test'
+  ...
+# Subtest: retail onboarding workload benchmarks the full onboarding workflow with unique identities
+ok 3 - retail onboarding workload benchmarks the full onboarding workflow with unique identities
+  ---
+  duration_ms: 382.277265
+  type: 'test'
+  ...
+# Subtest: monetary operations workload burns distinct funded wallets
+ok 4 - monetary operations workload burns distinct funded wallets
+  ---
+  duration_ms: 1.809378
+  type: 'test'
+  ...
+# Subtest: supervision read workload uses read-only query functions only
+ok 5 - supervision read workload uses read-only query functions only
+  ---
+  duration_ms: 1.539022
+  type: 'test'
+  ...
+# Subtest: supervision history setup uses distinct STANDARD wallets
+ok 6 - supervision history setup uses distinct STANDARD wallets
+  ---
+  duration_ms: 0.940704
+  type: 'test'
+  ...
+# Subtest: admin policy workload writes unique auto-limit policy keys
+ok 7 - admin policy workload writes unique auto-limit policy keys
+  ---
+  duration_ms: 1.366618
+  type: 'test'
+  ...
+# Subtest: assertSuccessfulResponse accepts explicit Caliper success
+ok 8 - assertSuccessfulResponse accepts explicit Caliper success
+  ---
+  duration_ms: 1.902165
+  type: 'test'
+  ...
+# Subtest: assertSuccessfulResponse rejects returned setup failure
+ok 9 - assertSuccessfulResponse rejects returned setup failure
+  ---
+  duration_ms: 1.36782
+  type: 'test'
+  ...
+# Subtest: transaction helpers read Caliper method-based results
+ok 10 - transaction helpers read Caliper method-based results
+  ---
+  duration_ms: 0.699966
+  type: 'test'
+  ...
+# Subtest: transactionDiagnostic preserves structured Caliper error details
+ok 11 - transactionDiagnostic preserves structured Caliper error details
+  ---
+  duration_ms: 0.314175
+  type: 'test'
+  ...
+# Subtest: transactionDiagnostic includes Caliper error-message fields
+ok 12 - transactionDiagnostic includes Caliper error-message fields
+  ---
+  duration_ms: 0.323608
+  type: 'test'
+  ...
+# Subtest: transactionPayload decodes typed byte arrays returned by Caliper
+ok 13 - transactionPayload decodes typed byte arrays returned by Caliper
+  ---
+  duration_ms: 0.638101
+  type: 'test'
+  ...
+# Subtest: duration workload rotates a STANDARD-only transaction plan
+ok 14 - duration workload rotates a STANDARD-only transaction plan
+  ---
+  duration_ms: 1.061684
+  type: 'test'
+  ...
+# Subtest: measured transfer returns a failed Caliper result without terminating the round
+ok 15 - measured transfer returns a failed Caliper result without terminating the round
+  ---
+  duration_ms: 1.017511
+  type: 'test'
+  ...
+# Subtest: population setup completes wallets before serialized funding
+ok 16 - population setup completes wallets before serialized funding
+  ---
+  duration_ms: 27.976935
+  type: 'test'
+  ...
+# Subtest: benchmark setup seeds a shared custodian through Treasury distribution
+ok 17 - benchmark setup seeds a shared custodian through Treasury distribution
+  ---
+  duration_ms: 8.15232
+  type: 'test'
+  ...
+# Subtest: setup lock recovers a dead owner
+ok 18 - setup lock recovers a dead owner
+  ---
+  duration_ms: 103.2105
+  type: 'test'
+  ...
+# Subtest: measured traffic contains only customer-to-customer transfers
+ok 19 - measured traffic contains only customer-to-customer transfers
+  ---
+  duration_ms: 5.639247
+  type: 'test'
+  ...
+# Subtest: measured traffic rejects a population too small to avoid contention
+ok 20 - measured traffic rejects a population too small to avoid contention
+  ---
+  duration_ms: 1.143913
+  type: 'test'
+  ...
+# Subtest: measured traffic preserves distinct transfer pairs for small worker-scaling rounds
+ok 21 - measured traffic preserves distinct transfer pairs for small worker-scaling rounds
+  ---
+  duration_ms: 1.111567
+  type: 'test'
+  ...
+# Subtest: isolated workload maps each requested operation to its chaincode call
+ok 22 - isolated workload maps each requested operation to its chaincode call
+  ---
+  duration_ms: 4.272883
+  type: 'test'
+  ...
+# Subtest: retail transfer low contention creates disjoint sender and receiver pairs
+ok 23 - retail transfer low contention creates disjoint sender and receiver pairs
+  ---
+  duration_ms: 1.984595
+  type: 'test'
+  ...
+# Subtest: retail transfer high contention shares one sender and keeps receivers distinct
+ok 24 - retail transfer high contention shares one sender and keeps receivers distinct
+  ---
+  duration_ms: 1.003179
+  type: 'test'
+  ...
+# Subtest: merchant payment is a direct Transfer to a merchant wallet
+ok 25 - merchant payment is a direct Transfer to a merchant wallet
+  ---
+  duration_ms: 0.897865
+  type: 'test'
+  ...
+# Subtest: high-contention seeding funds only the shared sender, leaving receiver headroom
+ok 26 - high-contention seeding funds only the shared sender, leaving receiver headroom
+  ---
+  duration_ms: 3.808902
+  type: 'test'
+  ...
+# Subtest: distribution reserves measured liquidity in Treasury after custodian setup
+ok 27 - distribution reserves measured liquidity in Treasury after custodian setup
+  ---
+  duration_ms: 1.179405
+  type: 'test'
+  ...
+# Subtest: percentiles use Type-7 interpolation and standard deviations are explicit
+ok 28 - percentiles use Type-7 interpolation and standard deviations are explicit
+  ---
+  duration_ms: 6.0575
+  type: 'test'
+  ...
+# Subtest: failure classification prefers a specific KYC reason over EndorseError
+ok 29 - failure classification prefers a specific KYC reason over EndorseError
+  ---
+  duration_ms: 2.850633
+  type: 'test'
+  ...
+# Subtest: run summary splits failed and timed-out completions
+ok 30 - run summary splits failed and timed-out completions
+  ---
+  duration_ms: 3.743668
+  type: 'test'
+  ...
+# Subtest: run summary uses measured Caliper log status codes when trace diagnostics are empty
+ok 31 - run summary uses measured Caliper log status codes when trace diagnostics are empty
+  ---
+  duration_ms: 3.891364
+  type: 'test'
+  ...
+# Subtest: aggregate statistics keep pilot and calibration phases separate
+ok 32 - aggregate statistics keep pilot and calibration phases separate
+  ---
+  duration_ms: 1.445464
+  type: 'test'
+  ...
+# Subtest: measured failures retain multiline peer rejection details
+ok 33 - measured failures retain multiline peer rejection details
+  ---
+  duration_ms: 2.199906
+  type: 'test'
+  ...
+# Subtest: a run cannot combine submissions from separate measurement attempts
+ok 34 - a run cannot combine submissions from separate measurement attempts
+  ---
+  duration_ms: 2.374413
+  type: 'test'
+  ...
+# Subtest: malformed transaction evidence is rejected rather than silently skipped
+ok 35 - malformed transaction evidence is rejected rather than silently skipped
+  ---
+  duration_ms: 1.183312
+  type: 'test'
+  ...
+# Subtest: Garuda lifecycle approval is sent only to the approving organization peer
+ok 36 - Garuda lifecycle approval is sent only to the approving organization peer
+  ---
+  duration_ms: 3.045568
+  type: 'test'
+  ...
+# Subtest: Garuda lifecycle commit collects endorsements from the validator peers
+ok 37 - Garuda lifecycle commit collects endorsements from the validator peers
+  ---
+  duration_ms: 0.391623
+  type: 'test'
+  ...
+# Subtest: controlled high-contention loads retain financial headroom and record their amount
+ok 38 - controlled high-contention loads retain financial headroom and record their amount
+  ---
+  duration_ms: 144.562225
+  type: 'test'
+  ...
+# Subtest: primary rates fall back to the highest tested rate when no pilot load passes
+ok 39 - primary rates fall back to the highest tested rate when no pilot load passes
+  ---
+  duration_ms: 64.092089
+  type: 'test'
+  ...
+# Subtest: accepts a custody rejection with no infrastructure failure
+ok 40 - accepts a custody rejection with no infrastructure failure
+  ---
+  duration_ms: 5.180597
+  type: 'test'
+  ...
+# Subtest: rejects endorsement failure as an invalid negative result
+ok 41 - rejects endorsement failure as an invalid negative result
+  ---
+  duration_ms: 1.044498
+  type: 'test'
+  ...
+# Subtest: accepts a passing boundary oracle
+ok 42 - accepts a passing boundary oracle
+  ---
+  duration_ms: 4.700556
+  type: 'test'
+  ...
+# Subtest: rejects infrastructure failures as boundary evidence
+    # Subtest: rejects an incomplete boundary oracle
+    ok 1 - rejects an incomplete boundary oracle
+      ---
+      duration_ms: 0.478163
+      type: 'test'
+      ...
+    1..1
+ok 43 - rejects infrastructure failures as boundary evidence
+  ---
+  duration_ms: 1.982648
+  type: 'test'
+  ...
+# Subtest: accepts a report with zero failed transactions
+ok 44 - accepts a report with zero failed transactions
+  ---
+  duration_ms: 4.253326
+  type: 'test'
+  ...
+# Subtest: rejects a failure-heavy report even when Caliper exited normally
+ok 45 - rejects a failure-heavy report even when Caliper exited normally
+  ---
+  duration_ms: 1.146465
+  type: 'test'
+  ...
+# Subtest: accepts one exact rejection for every negative-path rule
+ok 46 - accepts one exact rejection for every negative-path rule
+  ---
+  duration_ms: 3.76449
+  type: 'test'
+  ...
+# Subtest: rejects a generic endorsement failure without the expected reason
+ok 47 - rejects a generic endorsement failure without the expected reason
+  ---
+  duration_ms: 0.970013
+  type: 'test'
+  ...
+# Subtest: study artifact validation rejects unreconciled completion counts
+ok 48 - study artifact validation rejects unreconciled completion counts
+  ---
+  duration_ms: 6.667706
+  type: 'test'
+  ...
+# Subtest: study artifact validation accepts a compressed Prometheus trace
+ok 49 - study artifact validation accepts a compressed Prometheus trace
+  ---
+  duration_ms: 5.84788
+  type: 'test'
+  ...
+# Subtest: manifest preserves the executed source and remains valid after its output pointer is written
+ok 50 - manifest preserves the executed source and remains valid after its output pointer is written
+  ---
+  duration_ms: 559.357147
+  type: 'test'
+  ...
+1..50
+# tests 51
+# suites 0
+# pass 51
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1151.35546

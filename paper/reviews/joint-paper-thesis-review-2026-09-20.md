@@ -1,5 +1,7 @@
 # Joint paper and thesis review
 
+> **Four-organization restatement (2026-10-16):** five-organization evidence in this document is superseded by the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP). The role `validator_bank` and participant type `validator` were removed; banks are `distributor`. Terms are kept as recorded at review time and are not evidence for the four-organization prototype.
+
 Follow-on work: [additional findings R10–R21 and all-page review](remaining-review-audit-2026-09-20.md), with [coverage of all 59 active cited sources](citation-coverage-2026-09-20.md). These documents identify the remaining full-text and experimental verification gaps explicitly.
 
 Reviewed 19–20 September 2026 against working-tree snapshot `e32c768b7f33c8dae16824990dec23d0bf659018` and the existing uncommitted work. Standards: general IEEE paper expectations and the repository's DTETI thesis guidance. Deliverable: findings and revision roadmap, with manuscripts unchanged.

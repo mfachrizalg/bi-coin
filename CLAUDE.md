@@ -184,3 +184,17 @@ rtk init --global       # Add RTK to ~/.claude/CLAUDE.md
 
 Overall average: **60-90% token reduction** on common development operations.
 <!-- /rtk-instructions -->
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as local Markdown under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default triage roles are recorded as local status strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout, with existing Fabric context and ADRs read for Fabric work. See `docs/agents/domain.md`.

@@ -231,9 +231,9 @@ Kunci sitasi di `references.bib`:
 | **Jenis CBDC** | Ritel (analisis konseptual) | Grosir (PoC eksperimen) | **Ritel** (purwarupa) |
 | **Metodologi** | Tinjauan literatur kritis | PoC dengan 55 skenario uji | Implementasi + Caliper |
 | **Platform DLT** | Tidak dieksperimenkan (konseptual) | R3 Corda + Hyperledger Besu | **Hyperledger Fabric** |
-| **Topologi** | N/A | 1 klaster BI + 3 bank grosir | 5 organisasi + 1 orderer |
+| **Topologi** | N/A | 1 klaster BI + 3 bank grosir | 4 organisasi (orderer di bawah CentralBankMSP) |
 | **Konsensus** | N/A | Notary / QBFT (PoA) | **Raft** (etcdraft) |
-| **Throughput** | Kutipan: ~20 TPS (DLT), 65K (VISA) | **37 TPS (Corda), 39 TPS (Besu)** | Dari Caliper (10–150 TPS) |
+| **Throughput** | Kutipan: ~20 TPS (DLT), 65K (VISA) | **37 TPS (Corda), 39 TPS (Besu)** | Caliper satu worker, empat organisasi: baca terkonfirmasi 272–296 ops/s; tulis lulus 0,184–4,75 TPS |
 | **Dompet berjenjang** | Direkomendasikan (eNaira, e-CNY) | Tidak ada (wholesale) | **BASIC, STANDARD, MERCHANT** |
 | **KYC** | Direkomendasikan berjenjang | Tidak dibahas | **Off-chain + on-chain anchor** |
 | **Offline** | Direkomendasikan untuk r-CBDC | Tidak dibahas | Tidak diimplementasikan |

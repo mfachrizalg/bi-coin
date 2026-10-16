@@ -12,17 +12,20 @@ _Avoid_: BI, Central Bank, Issuer
 An institution admitted in exactly one of three roles: Distributor Bank, Observer, or Payment Service Provider. Bank Indonesia, Retail Customer, and Merchant are not Participants.
 _Avoid_: Member, Network Member, Node Operator
 
+**Distributor**:
+A Distributor Bank or Payment Service Provider Participant that receives Distribution from Bank Indonesia and holds a Distributor reserve. Distributors operate under DistributorMSP. An Observer is not a Distributor.
+
 **Distributor Bank**:
-A Participant bank responsible for validating authorized operations and providing retail digital rupiah services. The Auditor of the compliance study is not a Distributor Bank.
-_Avoid_: Bank Validator, Validator Bank, Bank Participant, Commercial Bank, Validator
+A Participant bank that receives Distribution from Bank Indonesia and provides retail digital rupiah services. The Auditor of the compliance study is not a Distributor Bank.
+_Avoid_: Bank Participant
 
 **Observer**:
-The Participant role held by OJK for Supervision without authority to initiate or approve monetary operations.
-_Avoid_: Regulator, Validator
+The Participant role held by OJK and PPATK for Supervision without authority to initiate or approve monetary operations. Observers operate under ValidatorMSP, which is read-only and outside the default endorsement policy.
+_Avoid_: Regulator
 
 **Auditor**:
 A human role that performs Supervision. It is read-only: it can inspect controls records but cannot submit mutations. It is distinct from the institutional Observer Participant.
-_Avoid_: Supervisor, Observer, OJK, Distributor Bank
+_Avoid_: Supervisor, Observer, OJK
 
 **Payment Service Provider (PJP)**:
 A non-bank Participant that provides retail digital rupiah payment services under the system's governance.
@@ -41,7 +44,7 @@ The Retail Customer or Merchant that benefits from the value held in a Wallet, r
 _Avoid_: Account Holder, Wallet User, Customer
 
 **Custodian**:
-Either a Distributor Bank or Payment Service Provider Participant that administers a Wallet on behalf of its Wallet Owner. An Observer cannot be a Custodian.
+A Distributor that administers a Wallet on behalf of its Wallet Owner. An Observer cannot be a Custodian.
 _Avoid_: Wallet Owner, Wallet Provider, Account Provider
 
 **Wallet**:
@@ -49,7 +52,7 @@ A retail digital rupiah holding attributed to one Wallet Owner and administered 
 _Avoid_: Account, Balance, Purse
 
 **Distributor reserve**:
-Digital Rupiah held by an authorized distributor for later wholesale use or conversion into retail holdings.
+Digital Rupiah held by an authorized Distributor for later wholesale use or conversion into retail holdings.
 _Avoid_: Retail reserve, Customer balance
 
 **Retail balance**:
@@ -65,7 +68,7 @@ The creation of Digital Rupiah exclusively by Bank Indonesia into its treasury, 
 _Avoid_: Minting, Printing, Distribution
 
 **Distribution**:
-The transfer of issued Digital Rupiah from Bank Indonesia's treasury to an authorized distributor for onward retail use.
+The transfer of issued Digital Rupiah from Bank Indonesia's treasury to an authorized Distributor for onward retail use.
 _Avoid_: Circulation, Issuance, Transfer
 
 **Redemption**:

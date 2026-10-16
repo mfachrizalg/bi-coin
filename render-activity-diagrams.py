@@ -16,7 +16,6 @@ REQUIRED_NAMES = [
     'AD01-Pendaftaran-Peserta',
     'AD02-Penerbitan-Digital-Rupiah',
     'AD03-Distribusi-Likuiditas-PJP',
-    'AD04-Onboarding-KYC-Pelanggan',
     'AD05-Transfer-Saldo-Ritel',
     'AD08-Pembekuan-Peserta',
     'AD10-Laporan-Supervisi',

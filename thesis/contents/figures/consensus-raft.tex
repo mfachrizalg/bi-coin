@@ -36,9 +36,9 @@
   label={[font=\footnotesize\bfseries]above:Fase \textit{Endorsement}}] (ph1) {};
 
 %--- Fase 2: Ordering (Raft) ---
-\node[proc]    (client2) at (5.2,  0)    {Klien\\(kumpul \textit{endorsement})};
-\node[raftbox] (leader)  at (5.2, -2.9)  {Orderer tunggal (Raft)\\orderer.centralbank.rupiah.study:7050};
-\node[stepnum] at (3.2, -1.0) {3};
+\node[proc]    (client2) at (5.75,  0)   {Klien\\(kumpul \textit{endorsement})};
+\node[raftbox] (leader)  at (5.75, -2.9) {Orderer tunggal (Raft)\\{\scriptsize orderer.centralbank.rupiah.study:7050}};
+\node[stepnum] at (3.75, -1.0) {3};
 
 \draw[ar] (client2.south) --
   node[pathlabel,right]{submit \textit{tx}\\terendorsement} (leader.north);
@@ -46,13 +46,13 @@
   label={[font=\footnotesize\bfseries]above:Fase \textit{Ordering} (Raft)}] (ph2) {};
 
 %--- Fase 3: Validasi & Commit ---
-\node[proc]      (peers)    at (10.5,  0)    {Semua Peer\\(empat organisasi)};
-\node[proc]      (validate) at (10.5, -2.0)  {Validasi:\\MVCC + kebijakan\\
+\node[proc]      (peers)    at (11.6,  0)    {Semua Peer\\(empat organisasi)};
+\node[proc]      (validate) at (11.6, -2.0)  {Validasi:\\MVCC + kebijakan\\
                                                \textit{endorsement}};
-\node[commitbox] (world)    at (10.5, -3.8)  {Commit ke \textit{ledger}\\
+\node[commitbox] (world)    at (11.6, -3.8)  {Commit ke \textit{ledger}\\
                                                (World State / CouchDB)};
-\node[stepnum] at (8.5, -1.0) {4};
-\node[stepnum] at (8.5, -2.9) {5};
+\node[stepnum] at (9.6, -1.0) {4};
+\node[stepnum] at (9.6, -2.9) {5};
 
 \draw[ar] (peers.south) --
   node[pathlabel,right]{periksa blok} (validate.north);
