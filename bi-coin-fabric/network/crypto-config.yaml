@@ -1,4 +1,22 @@
+OrdererOrgs:
+  - Name: CentralBank
+    Domain: bi-coin
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+
 PeerOrgs:
+  - Name: CentralBank
+    Domain: bi-coin
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+    Users:
+      Count: 1
+
   - Name: Distributor
     Domain: distributor.bi-coin
     EnableNodeOUs: true
