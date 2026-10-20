@@ -18,16 +18,14 @@ test('API matrix separates route authorization from JSON validation and selects 
         .map(role => [role, { username: role, password: 'test-password' }]));
     const requests = [];
     const apiFixtures = {
-        protectSubjectByRole: { bank_pjp: 'protect-bank', pjp: 'protect-pjp' },
-        releaseDecisionByRole: { bank_pjp: 'release-bank', pjp: 'release-pjp' },
+        protectSubjectByRole: { retail_bank: 'protect-bank' },
+        releaseDecisionByRole: { retail_bank: 'release-bank' },
         pendingStaffClientID: 'pending-staff-client',
         initializationReplayStateUnchanged: true,
     };
     const subjectStates = new Map([
         ['protect-bank', { status: 'pending', protected: false }],
-        ['protect-pjp', { status: 'pending', protected: false }],
         ['release-bank', { status: 'active', protected: true, restricted: true, senior_id: '' }],
-        ['release-pjp', { status: 'active', protected: true, restricted: true, senior_id: '' }],
     ]);
     const originalFetch = global.fetch;
     global.fetch = async (input, init = {}) => {
@@ -55,19 +53,16 @@ test('API matrix separates route authorization from JSON validation and selects 
                             ? apiFixtures.releaseDecisionByRole[role] || 'retail-subject'
                             : 'retail-subject')
                 .replace('{client_id}', candidate.path === '/staff/{client_id}/endorsement-policies'
-                    ? apiFixtures.pendingStaffClientID : 'missing-staff-fixture') === url.pathname);
+                    ? apiFixtures.pendingStaffClientID : 'missing-staff-fixture')
+                .replace('{distributor_id}', 'retail-bank') === url.pathname);
         assert.ok(route, `unexpected request ${init.method} ${url.pathname}`);
         const allowed = route.roles.includes(role);
         const subjectID = decodeURIComponent(url.pathname.split('/')[2] || '');
         let status = allowed ? route.json ? 422 : 204 : role === 'public' ? 401 : 403;
-        if (allowed && route.path === '/subjects/{subject_id}/restriction-release-decisions' && role === 'bank_pjp') status = 500;
+        if (allowed && route.path === '/subjects/{subject_id}/restriction-release-decisions' && role === 'retail_bank') status = 500;
         if (allowed && route.path === '/monetary-initializations' && role === 'bank_indonesia') status = 500;
         if (allowed && route.path === '/subjects/{subject_id}/endorsement-policies' && status < 400) {
             subjectStates.get(subjectID).protected = true;
-        }
-        if (allowed && route.path === '/subjects/{subject_id}/restriction-release-decisions' && role === 'pjp' && status < 400) {
-            subjectStates.get(subjectID).restricted = false;
-            subjectStates.get(subjectID).senior_id = 'senior';
         }
         requests.push({ route, role, url, init });
         return { ok: status < 400, status, text: async () => 'validation error' };

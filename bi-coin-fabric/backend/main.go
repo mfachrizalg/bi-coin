@@ -34,26 +34,15 @@ func main() {
 	}
 	authSvc := services.NewAuthService(store, cfg.AuthJWTSecret, cfg.AuthTokenTTL)
 
-	svc, err := services.NewLedgerService(cfg)
-	if err != nil {
-		log.Fatalf("ledger service: %v", err)
-	}
-	defer svc.Close()
-	svc.SetKycStore(store)
-
-	server := newHTTPServer(cfg, authSvc, svc, store)
-	log.Printf("Garuda Digital Rupiah API Gateway starting on :%s", cfg.Port)
+	server := newHTTPServer(cfg, authSvc)
+	log.Printf("bi-coin Digital Rupiah API Gateway starting on :%s", cfg.Port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("server: %v", err)
 	}
 }
 
-func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *services.LedgerService, stores ...*services.PostgresStore) *http.Server {
-	h := handlers.New(svc, authSvc)
-	// Contact shortcuts are private Postgres data owned by the authenticated user.
-	if len(stores) > 0 {
-		h.SetPaymentContactStore(stores[0])
-	}
+func newHTTPServer(cfg *config.Config, authSvc *services.AuthService) *http.Server {
+	h := handlers.New(authSvc)
 
 	r := mux.NewRouter()
 	r.Use(middleware.AuthMiddleware(authSvc))
@@ -72,21 +61,13 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, svc *servi
 		Public:        specPublic,
 		Authenticated: specAuthenticated,
 		KycVerified:   specKycVerified,
-		BankPjp:       specBankPjp,
-		Pjp:           specPjp,
+		RetailBank:    specRetailBank,
+		WholesaleBank: specWholesaleBank,
 		BankIndonesia: specBankIndonesia,
 		Merchant:      specMerchant,
-		Supervisor:    specSupervisor,
+		Auditor:       specAuditor,
 	})
 	docs.RegisterRoutes(r)
-
-	topologyRoute := r.NewRoute().Subrouter()
-	topologyRoute.Use(middleware.RequireRole(
-		middleware.RolePublic, middleware.RoleAuthenticated, middleware.RoleKycVerified,
-		middleware.RoleBankPjp, middleware.RolePJP,
-		middleware.RoleBankIndonesia, middleware.RoleMerchant, middleware.RoleSupervisor,
-	))
-	topologyRoute.HandleFunc("/network/topology", handlers.TopologyHandler).Methods("GET")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:3000"},

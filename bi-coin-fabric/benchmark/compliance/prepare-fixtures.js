@@ -38,13 +38,18 @@ function subjectID(stamp, attempt, scenario, pathName, index, suffix) {
     return `cf-${crypto.createHash('sha256').update(`${stamp}:${attempt}:${scenario}:${pathName}:${index}:${suffix}`).digest('hex').slice(0, 24)}`;
 }
 
+async function registerBank(request, distributorID, kind) {
+    // A repeated registration is rejected; the issuance that follows fails if the bank is still unregistered.
+    await request('bank_indonesia', 'POST', '/distributors', { distributor_id: distributorID, kind }).catch(() => {});
+}
+
 async function topUpReserve(api, stamp) {
     const { request } = await createApiClient(api);
     const topupAmount = '1000000000000';
-  await request('bank_indonesia', 'POST', '/issuances', { amount: topupAmount }, `compliance-topup-mint-${stamp}`);
-  await request('bank_indonesia', 'POST', '/reserve-allocations', {
-        distributor_id: 'pjp-demo', amount: topupAmount,
-    }, `compliance-topup-reserve-${stamp}`);
+    await registerBank(request, 'wholesale-bank', 'wholesale');
+    await registerBank(request, 'retail-bank', 'retail');
+  await request('bank_indonesia', 'POST', '/issuances', { distributor_id: 'wholesale-bank', amount: topupAmount }, `compliance-topup-wholesale-${stamp}`);
+  await request('bank_indonesia', 'POST', '/issuances', { distributor_id: 'retail-bank', amount: topupAmount }, `compliance-topup-retail-${stamp}`);
 }
 
 async function prepareSubject(client, id, owner, { category = 'retail', risk = 'standard', pep = false, active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
@@ -70,7 +75,10 @@ async function prepareSubject(client, id, owner, { category = 'retail', risk = '
 async function openAndFund(client, subject, owner, stamp, attempt, scenario, pathName, index) {
   await client.request(owner, 'POST', '/customer-wallets', { subject_id: subject });
   await client.request('reviewer', 'POST', '/conversions', {
-        subject_id: subject, distributor_id: 'pjp-demo', amount: '1000',
+        distributor_id: 'retail-bank', amount: '1000',
+    }, reference(stamp, attempt, scenario, pathName, index, 'prepare-convert'));
+  await client.request('reviewer', 'POST', '/wallet-fundings', {
+        subject_id: subject, distributor_id: 'retail-bank', amount: '1000',
     }, reference(stamp, attempt, scenario, pathName, index, 'prepare-fund'));
 }
 
@@ -79,7 +87,7 @@ async function prepareAccessMatrixFixtures(api, subjectID, stamp) {
     const fixtureID = purpose => `matrix-${crypto.createHash('sha256').update(`${stamp}:${subjectID}:${purpose}`).digest('hex').slice(0, 24)}`;
     const protectSubjectByRole = {};
     const releaseDecisionByRole = {};
-    for (const role of ['bank_pjp', 'pjp']) {
+    for (const role of ['retail_bank']) {
         const pendingID = fixtureID(`protect-${role}`);
         await client.request('kyc_verified', 'POST', '/subjects', { subject_id: pendingID, category: 'retail' });
         protectSubjectByRole[role] = pendingID;
@@ -183,32 +191,43 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             args = [id];
             break;
         case 'register-distributor':
-            body = { distributor_id: id };
-            args = [id];
+            body = { distributor_id: id, kind: 'retail' };
+            args = [id, 'retail'];
             break;
-        case 'mint':
-            body = { amount: '1' };
-            args = ['1', ref];
+        case 'issue':
+            body = { distributor_id: 'wholesale-bank', amount: '1' };
+            args = ['wholesale-bank', '1', ref];
             break;
-        case 'allocate-reserve':
         case 'redeem-reserve':
-            body = { distributor_id: 'pjp-demo', amount: '1' };
-            args = ['pjp-demo', '1', ref];
+            body = { distributor_id: 'wholesale-bank', amount: '1' };
+            args = ['wholesale-bank', '1', ref];
             break;
-        case 'read-treasury':
-        case 'read-total-supply':
+        case 'interbank-transfer':
+            body = { from_distributor_id: 'wholesale-bank', to_distributor_id: 'retail-bank', amount: '1' };
+            args = ['wholesale-bank', 'retail-bank', '1', ref];
+            break;
+        case 'convert-to-retail':
+            body = { distributor_id: 'retail-bank', amount: '1' };
+            args = ['retail-bank', '1', ref];
+            break;
+        case 'read-supply':
+        case 'read-wholesale-supply':
+        case 'read-retail-supply':
             args = [];
             break;
         case 'read-reserve':
-            args = ['pjp-demo'];
+            args = ['wholesale-bank'];
+            break;
+        case 'read-retail-float':
+            args = ['retail-bank'];
             break;
         case 'open-wallet':
             body = { subject_id: id };
             args = [id];
             break;
-        case 'fund-reserve':
-            body = { subject_id: id, distributor_id: 'pjp-demo', amount: '1' };
-            args = [id, 'pjp-demo', '1', ref];
+        case 'fund-wallet':
+            body = { subject_id: id, distributor_id: 'retail-bank', amount: '1' };
+            args = [id, 'retail-bank', '1', ref];
             break;
         case 'transfer-retail':
         case 'transfer-merchant':
@@ -226,7 +245,7 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
     const identity = directIdentity(api, apiUser);
     const mspId = api.identities.find(item => item.username === identity)?.msp_id;
     if (!mspId) throw new Error(`missing MSP mapping for Caliper signer ${identity}`);
-    const idempotencyRequired = ['transfer-retail', 'transfer-merchant', 'mint', 'allocate-reserve', 'redeem-reserve', 'fund-reserve'].includes(scenario.id);
+    const idempotencyRequired = ['transfer-retail', 'transfer-merchant', 'issue', 'redeem-reserve', 'interbank-transfer', 'convert-to-retail', 'fund-wallet'].includes(scenario.id);
     return {
         api: {
             user: apiUser,
@@ -271,15 +290,15 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
         apiItems.push(fixture.api);
         ledgerItems.push(fixture.ledger);
     } else {
-        if (['monetary', 'funded-subject', 'retail-transfer-pair', 'merchant-transfer-pair'].includes(fixtureProfile)) {
+        if (['monetary', 'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair'].includes(fixtureProfile)) {
             await topUpReserve(api, stamp);
         }
         const independentSubjectSetup = [
             'protected-pending-subject', 'standard-review-subject', 'high-risk-review-subject',
             'active-subject', 'active-business-subject', 'restricted-subject', 'release-requested-subject',
-            'funded-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-staff', 'protected-staff',
+            'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-staff', 'protected-staff',
         ].includes(fixtureProfile);
-        const sharesReserveKey = ['funded-subject', 'retail-transfer-pair', 'merchant-transfer-pair'].includes(fixtureProfile);
+        const sharesReserveKey = ['float-subject', 'retail-transfer-pair', 'merchant-transfer-pair'].includes(fixtureProfile);
         const preparationConcurrency = independentSubjectSetup && !sharesReserveKey ? 8 : 1;
         const prepareOne = async index => {
             const id = subjectID(stamp, attempt, catalogScenario.id, pathName, index, 'primary');
@@ -294,9 +313,14 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
                 await prepareSubject(client, id, 'kyc_verified');
             } else if (fixtureProfile === 'high-risk-review-subject') {
                 await prepareSubject(client, id, 'kyc_verified', { risk: 'high' });
-            } else if (fixtureProfile === 'active-subject' || fixtureProfile === 'funded-subject') {
+            } else if (fixtureProfile === 'active-subject') {
                 await prepareSubject(client, id, 'kyc_verified', { active: true });
-                if (fixtureProfile === 'funded-subject') await openAndFund(client, id, 'kyc_verified', stamp, attempt, catalogScenario.id, pathName, index);
+            } else if (fixtureProfile === 'float-subject') {
+                await prepareSubject(client, id, 'kyc_verified', { active: true });
+                await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: id });
+                await client.request('reviewer', 'POST', '/conversions', {
+                    distributor_id: 'retail-bank', amount: '1000',
+                }, reference(stamp, attempt, catalogScenario.id, pathName, index, 'prepare-convert'));
             } else if (fixtureProfile === 'active-business-subject') {
                 await prepareSubject(client, id, 'kyc_verified', { category: 'business', active: true });
             } else if (fixtureProfile === 'restricted-subject' || fixtureProfile === 'release-requested-subject') {

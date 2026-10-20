@@ -1,7 +1,7 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
 
-// Live study network only. Needs the backend with FABRIC_STUDY_IDENTITIES_JSON and
-// AUTH_BOOTSTRAP_USERS_JSON (network/study/README.md) on a fresh ledger: Create staff fails
+// Live study network only. Needs the backend with FABRIC_IDENTITIES_JSON and
+// AUTH_BOOTSTRAP_USERS_JSON (network/README.md) on a fresh ledger: Create staff fails
 // if the staff identity already exists. Env: E2E_STUDY=1,
 // E2E_STUDY_USERS='{"customer":{"username","password"}, "bi", "reviewer", "senior", "compliance", "auditor"}',
 // E2E_STAFF_IDS='{"reviewer":"<64-hex>","senior":"<64-hex>","compliance":"<64-hex>"}'.

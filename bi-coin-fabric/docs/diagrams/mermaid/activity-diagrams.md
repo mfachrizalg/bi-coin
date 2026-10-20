@@ -5,7 +5,7 @@ Generated for Luthfi thesis format.
 
 **Thesis scope:** KYC is implementation-only, and QRIS is code-only; both are
 excluded from thesis acceptance criteria. Thesis acceptance criteria cover participant lifecycle,
-treasury issuance, two-tier distribution, retail transfer, participant freeze,
+issuance to banks, two-tier distribution, retail transfer, participant restriction,
 and supervision.
 
 ---
@@ -18,45 +18,55 @@ flowchart TD
   classDef action fill:#fff,stroke:#000,color:#000
   classDef decision fill:#fff,stroke:#000,color:#000
 
-  subgraph lane_a [Klien/Bank]
+  subgraph lane_a [Distributor Bank]
     S1((" ")):::startend
-    A1["Mengirimkan data<br>pendaftaran peserta"]:::action
+    A1["Kirim data pendaftaran peserta"]:::action
   end
 
   subgraph lane_b [Backend API]
-    A2["Menerima data pendaftaran<br>& meneruskan ke blockchain"]:::action
-    A3["Simpan data peserta pending"]:::action
-    D1{"[disetujui?]"}:::decision
-    A4["Kirim notifikasi penolakan"]:::action
+    A2["POST /subjects"]:::action
+    A3["Validasi peran dan data pendaftaran"]:::action
+    D1{"Data valid?"}:::decision
+    A4["Kirim error validasi"]:::action
     E1a((" ")):::startend
-    A5["POST /participants/{id}/approve"]:::action
-    A6["Konfirmasi pendaftaran aktif"]:::action
+    A5["POST /subjects/{subject_id}/decisions"]:::action
+    A6["POST /subjects/{subject_id}/decisions"]:::action
+    A7["Kirim hasil pendaftaran"]:::action
     E1b((" ")):::startend
   end
 
   subgraph lane_c [Blockchain]
-    A7["SubmitParticipant()<br>→ status = pending"]:::action
-    A8["ApproveParticipant()<br>→ status = active"]:::action
-    A9["Buat wallet otomatis<br>(wlt_&lt;participantID&gt;)"]:::action
+    A8["CreatePending()<br>status = pending"]:::action
+    A9["ApproveStandard() / DecideHighRisk()<br>status = active"]:::action
+    A10["ApproveStandard() / DecideHighRisk()<br>status = rejected"]:::action
+  end
+
+  subgraph lane_d [Staf Distributor]
+    A11["Tinjau pengajuan peserta"]:::action
+    D2{"Pengajuan disetujui?"}:::decision
   end
 
   S1 --> A1
   A1 --> A2
-  A2 --> A7
-  A7 --> A3
+  A2 --> A3
   A3 --> D1
   D1 -->|"[tidak]"| A4
   A4 --> E1a
-  D1 -->|"[ya]"| A5
-  A5 --> A8
-  A8 --> A9
-  A9 --> A6
-  A6 --> E1b
+  D1 -->|"[ya]"| A8
+  A8 --> A11
+  A11 --> D2
+  D2 -->|"[ya]"| A5
+  A5 --> A9
+  A9 --> A7
+  D2 -->|"[tidak]"| A6
+  A6 --> A10
+  A10 --> A7
+  A7 --> E1b
 ```
 
 ---
 
-## AD02 — Penerbitan Digital Rupiah (Digital Rupiah Issuance)
+## AD02 — Penerbitan w-Rupiah Digital ke Distributor (w-Rupiah Digital Issuance)
 
 ```mermaid
 flowchart TD
@@ -66,11 +76,11 @@ flowchart TD
 
   subgraph lane_a [Bank Indonesia]
     S2((" ")):::startend
-    B1["Inisiasi permintaan<br>penerbitan"]:::action
+    B1["Inisiasi penerbitan<br>w-Rupiah Digital"]:::action
   end
 
   subgraph lane_b [Backend API]
-    B2["Menerima request penerbitan<br>(POST /issuance-requests)"]:::action
+    B2["Menerima request penerbitan<br>(POST /issuances)"]:::action
     B3["Validasi role pengirim<br>(harus BI)"]:::action
     D2{"[role valid?]"}:::decision
     B4["Kirim error 403"]:::action
@@ -81,10 +91,10 @@ flowchart TD
   end
 
   subgraph lane_c [Blockchain]
-    B7["RequestIssuance()<br>Validasi BI authority"]:::action
+    B7["Issue()<br>Validasi kewenangan BI<br>dan Distributor"]:::action
     B8["Tolak penerbitan"]:::action
     E2c((" ")):::startend
-    B9["Mint(bi_treasury)<br>supply += amount"]:::action
+    B9["Kredit reserve<br>dan supply wholesale"]:::action
     B10["Catat transaksi penerbitan<br>(emit audit)"]:::action
   end
 
@@ -104,7 +114,7 @@ flowchart TD
 
 ---
 
-## AD03 — Distribusi Likuiditas dari Treasury (Treasury Liquidity Distribution)
+## AD03 — Transfer Antarbank, Konversi, dan Pendanaan Dompet (Interbank Transfer, Conversion, and Wallet Funding)
 
 ```mermaid
 flowchart TD
@@ -112,48 +122,99 @@ flowchart TD
   classDef action fill:#fff,stroke:#000,color:#000
   classDef decision fill:#fff,stroke:#000,color:#000
 
-  subgraph lane_a [Bank Indonesia]
-    S3((" ")):::startend
-    C1["Inisiasi distribusi<br>likuiditas ke Custodian"]:::action
+  subgraph lane_a [Distributor Bank]
+    T0((" ")):::startend
+    T1["Inisiasi transfer antarbank"]:::action
   end
 
   subgraph lane_b [Backend API]
-    C2["Terima request distribusi<br>(POST /distribute)"]:::action
-    C3["Validasi role pengirim<br>= BI"]:::action
-    D4{"[role BI?]"}:::decision
-    C4["Kirim error"]:::action
-    E3a((" ")):::startend
-    C5["Teruskan ke blockchain"]:::action
-    C6["Kirim konfirmasi distribusi"]:::action
-    E3b((" ")):::startend
+    T2["Terima request transfer<br>(POST /interbank-transfers)"]:::action
+    T3["Validasi peran<br>Distributor Bank"]:::action
+    D1{"[Peran valid?]"}:::decision
+    T4["Kirim error 403"]:::action
+    TE1((" ")):::startend
+    T6["Kirim konfirmasi transfer"]:::action
+    V2["Terima request konversi<br>(POST /conversions)"]:::action
+    V3["Validasi peran<br>Retail Bank"]:::action
+    D2{"[Peran valid?]"}:::decision
+    V4["Kirim error 403"]:::action
+    VE1((" ")):::startend
+    V6["Kirim konfirmasi konversi"]:::action
+    F2["Terima request pendanaan<br>(POST /wallet-fundings)"]:::action
+    F3["Validasi peran<br>Retail Bank"]:::action
+    D3{"[Peran valid?]"}:::decision
+    F4["Kirim error 403"]:::action
+    FE1((" ")):::startend
+    F6["Kirim konfirmasi pendanaan"]:::action
+    FE2((" ")):::startend
   end
 
   subgraph lane_c [Blockchain]
-    C7["Validasi penerima = Distributor Bank/PJP"]:::action
-    D5{"[penerima Custodian?]"}:::decision
-    C8["Tolak distribusi"]:::action
-    E3c((" ")):::startend
-    C9["Transfer dari bi_treasury<br>kurangi saldo Treasury"]:::action
-    C10["Kredit wallet Custodian<br>tambah saldo penerima"]:::action
-    C11["Catat transaksi distribusi"]:::action
+    T7["TransferReserve() validasi nominal dan atribut pengirim"]:::action
+    D4{"[Saldo reserve cukup?]"}:::decision
+    T8["Tolak transfer"]:::action
+    TE2((" ")):::startend
+    T9["Kurangi reserve pengirim, tambah reserve penerima"]:::action
+    T10["Catat transaksi transfer"]:::action
+    V5["ConvertToRetail() validasi atribut dan kind retail"]:::action
+    D5{"[Saldo reserve cukup?]"}:::decision
+    V7["Tolak konversi"]:::action
+    VE2((" ")):::startend
+    V8["Debit reserve w-Rupiah Digital, kredit float r-Rupiah Digital"]:::action
+    V9["Catat transaksi konversi"]:::action
+    F5["FundWallet() validasi kelayakan dan limit"]:::action
+    D6{"[Subjek layak dan dalam limit?]"}:::decision
+    F7["Tolak pendanaan"]:::action
+    FE3((" ")):::startend
+    F8["Debit float r-Rupiah Digital, kredit dompet pelanggan"]:::action
+    F9["Catat transaksi pendanaan"]:::action
   end
 
-  S3 --> C1
-  C1 --> C2
-  C2 --> C3
-  C3 --> D4
-  D4 -->|"[tidak]"| C4
-  C4 --> E3a
-  D4 -->|"[ya]"| C5
-  C5 --> C7
-  C7 --> D5
-  D5 -->|"[tidak]"| C8
-  C8 --> E3c
-  D5 -->|"[ya]"| C9
-  C9 --> C10
-  C10 --> C11
-  C11 --> C6
-  C6 --> E3b
+  subgraph lane_d [Retail Bank]
+    V1["Inisiasi konversi ke r-Rupiah Digital"]:::action
+    F1["Inisiasi pendanaan dompet pelanggan"]:::action
+  end
+
+  T0 --> T1
+  T1 --> T2
+  T2 --> T3
+  T3 --> D1
+  D1 -->|"[tidak]"| T4
+  T4 --> TE1
+  D1 -->|"[ya]"| T7
+  T7 --> D4
+  D4 -->|"[tidak]"| T8
+  T8 --> TE2
+  D4 -->|"[ya]"| T9
+  T9 --> T10
+  T10 --> T6
+  T6 --> V1
+  V1 --> V2
+  V2 --> V3
+  V3 --> D2
+  D2 -->|"[tidak]"| V4
+  V4 --> VE1
+  D2 -->|"[ya]"| V5
+  V5 --> D5
+  D5 -->|"[tidak]"| V7
+  V7 --> VE2
+  D5 -->|"[ya]"| V8
+  V8 --> V9
+  V9 --> V6
+  V6 --> F1
+  F1 --> F2
+  F2 --> F3
+  F3 --> D3
+  D3 -->|"[tidak]"| F4
+  F4 --> FE1
+  D3 -->|"[ya]"| F5
+  F5 --> D6
+  D6 -->|"[tidak]"| F7
+  F7 --> FE3
+  D6 -->|"[ya]"| F8
+  F8 --> F9
+  F9 --> F6
+  F6 --> FE2
 ```
 
 ---
@@ -166,7 +227,7 @@ flowchart TD
   classDef action fill:#fff,stroke:#000,color:#000
   classDef decision fill:#fff,stroke:#000,color:#000
 
-  subgraph lane_a [Operator]
+  subgraph lane_a [Operator Distributor Bank]
     S4((" ")):::startend
     D1a["Mengirim data KYC<br>pelanggan"]:::action
   end
@@ -286,29 +347,32 @@ flowchart TD
 
 ---
 
-## AD08 — Pembekuan Peserta (Participant Freeze)
+## AD08 — Pembatasan Peserta (Participant Restriction)
 
 ```mermaid
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart TD
-    subgraph L1["🏊 Supervisor"]
-        S([Start]) --> S1["Inisiasi pembekuan peserta"]
-        S2["Inisiasi pembukaan blokir"]
+    subgraph L1["🏊 Staf Distributor"]
+        S([Start]) --> S1["Compliance Officer menginisiasi pembatasan peserta"]
+        S2["KYC Reviewer mengajukan permintaan pembukaan pembatasan"]
+        S3["Senior Approver menyetujui pembukaan pembatasan"]
     end
     subgraph L2["🏊 Backend API"]
-        B1["POST /participants/{id}/freeze"] --> B2["Validasi otorisasi supervisor"]
+        B1["POST /subjects/{subject_id}/restrictions"] --> B2["Validasi peran Distributor"]
         B2 --> D1{Otorisasi valid?}
         D1 -- tidak --> B3["Kirim error"] --> E1([End])
-        B4["POST /participants/{id}/unfreeze"]
+        B4["POST /subjects/{subject_id}/restriction-release-requests"]
+        B5["POST /subjects/{subject_id}/restriction-release-decisions"]
     end
     subgraph L3["🏊 Blockchain"]
-        C1["FreezeParticipant()<br/>ubah status ke frozen"]
-        C2["Freeze wallet terkait<br/>(cascade)"]
-        C3["Catat supervision event<br/>participant_frozen"]
-        D2{Akan di-unfreeze?}
-        C4["UnfreezeParticipant()<br/>status kembali active"]
-        C5["Unfreeze wallet"]
-        C6["Catat supervision event<br/>participant_unfrozen"] --> E3([End])
+        C1["FreezeSubject() ubah status peserta ke dibatasi"]
+        C2["Batasi subjek<br/>(transfer ditolak selama pembatasan)"]
+        C3["Catat pembatasan subjek"]
+        D2{Akan dibuka pembatasannya?}
+        C4["RequestUnfreeze() catat reviewer dan referensi bukti"]
+        C5["ApproveUnfreeze() status kembali ke active"]
+        C6["Buka pembatasan subjek"]
+        C7["Catat pembukaan pembatasan subjek"] --> E3([End])
     end
     S --> S1
     S1 --> B1
@@ -317,40 +381,30 @@ flowchart TD
     D2 -- tidak --> E2([End])
     D2 -- ya --> S2
     S2 --> B4
-    B4 --> C4 --> C5 --> C6
+    B4 --> C4 --> S3
+    S3 --> B5
+    B5 --> C5 --> C6 --> C7
     B3 --> E1
 ```
 
 ---
 
-## AD10 — Laporan Supervisi (Supervision Reports)
+## AD10 — Pembacaan Status Subjek oleh Auditor (Subject Status Read)
 
 ```mermaid
 %%{init: {'theme': 'neutral', 'themeVariables': {'primaryColor': '#ffffff', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart TD
-    subgraph L1["🏊 Supervisor"]
-        S([Start]) --> S1["Akses dashboard supervisi"]
+    subgraph L1["🏊 Observer/Auditor (OJK, PPATK)"]
+        S([Start]) --> S1["Akses status subjek"]
     end
     subgraph L2["🏊 Backend API"]
-        B1["Terima permintaan laporan"] --> FK{{Fork}}
-        FK --> B2["GET /supervision/events"]
-        FK --> B3["GET /reports/reconciliation"]
-        FK --> B4["GET /reports/metrics"]
-        B2 --> JN{{Join}}
-        B3 --> JN
-        B4 --> JN
-        JN --> B5["Gabungkan hasil laporan"]
-        B5 --> B6["Format laporan supervisi"]
-        B6 --> B7["Kirim laporan ke Supervisor"]
+        B1["GET /subjects/{subject_id}"] --> B2["Validasi peran (BI, Distributor Bank, atau Auditor)"]
+        B3["Kirim status subjek ke Auditor"]
     end
     subgraph L3["🏊 Blockchain"]
-        C1["GetSupervisionEvents()<br/>Kembalikan audit"]
-        C2["GetReconciliationReport()<br/>Supply, issued, burned"]
-        C3["GetMetrics()<br/>Statistik transaksi"]
+        C1["GetSubject()<br/>Kembalikan status subjek"]
     end
     S1 --> B1
-    B2 -.-> C1 -.-> JN
-    B3 -.-> C2 -.-> JN
-    B4 -.-> C3 -.-> JN
-    B7 --> E([End])
+    B2 -.-> C1 -.-> B3
+    B3 --> E([End])
 ```

@@ -1,5 +1,5 @@
 ---
-name: Garuda Digital Rupiah
+name: bi-coin Digital Rupiah
 description: Restrained central-bank utility interface for a two-tier retail Digital Rupiah prototype.
 colors:
   reserve-navy: "#173a5e"
@@ -17,8 +17,8 @@ colors:
   settled-green: "#18794e"
   caution-amber: "#9a6700"
   freeze-red: "#b42318"
-  role-validator: "#285f8f"
-  role-pjp: "#176b87"
+  role-wholesale-bank: "#285f8f"
+  role-retail-bank: "#176b87"
   role-observer: "#667085"
   console-night: "#102033"
 typography:
@@ -138,7 +138,7 @@ components:
     padding: "11px 12px"
 ---
 
-# Design System: Garuda Digital Rupiah
+# Design System: bi-coin Digital Rupiah
 
 ## Overview
 
@@ -146,7 +146,7 @@ components:
 
 The interface should read like a reconciled ledger page at a central-bank desk. It is quiet, ruled, and exact. Every screen is a set of bordered white sheets on a pale cool canvas. Navy carries authority, and figures sit in tabular columns so balances line up. Nothing decorates: no shadows, no gradients, no motion. Structure comes from 1px rules, tonal fills, and heavy uppercase labels.
 
-One visual system serves two densities. The institutional shell (Bank Indonesia, Participants, Supervisor) is compact: 16px card padding, 0.84rem table text, 9–10px cells. The retail shell (Retail Customer, Merchant) uses the same tokens with more room: 24px card padding and 46px buttons. The guided-demo rail and the Prototype Lab console are the only surfaces that invert to navy or night.
+One visual system serves two densities. The institutional shell (Bank Indonesia, Participants, Auditor) is compact: 16px card padding, 0.84rem table text, 9–10px cells. The retail shell (Retail Customer, Merchant) uses the same tokens with more room: 24px card padding and 46px buttons. The guided-demo rail is the only surface that inverts to navy.
 
 Confirmed anti-reference: the crypto/Web3 dashboard. That means no neon, no glowing coins, no dark trading-terminal mood, and no gradient hero panels. This is a monetary authority's utility tool, not a token exchange.
 
@@ -173,7 +173,7 @@ A cool, low-chroma navy-and-slate palette (hue about 250°), with three muted se
 - **Settled Green** (`settled-green`): active status, success banners, receipt cards, completed demo steps.
 - **Caution Amber** (`caution-amber`): pending status, warning callouts, manual demo actions.
 - **Freeze Red** (`freeze-red`): frozen status, error banners, destructive secondary buttons.
-- **Role tints** (`role-validator`, `role-pjp`, `role-observer`): participant-badge fills that distinguish Validator Bank, PJP, and Observer. They are for badges only.
+- **Role tints** (`role-wholesale-bank`, `role-retail-bank`, `role-observer`): participant-badge fills that distinguish Wholesale Bank, Retail Bank, and Observer. They are for badges only.
 
 ### Neutral
 - **Ink** (`ink`): all headings and body text.
@@ -184,7 +184,7 @@ A cool, low-chroma navy-and-slate palette (hue about 250°), with three muted se
 - **Surface Soft** (`surface-soft`): table header rows, hover fills, callouts, hero context blocks.
 - **Canvas** (`canvas`): page background behind all sheets.
 - **Chip Tint** (`chip-tint`): hero chips and demo role tags.
-- **Console Night** (`console-night`): the Prototype Lab world-state console only.
+- **Console Night** (`console-night`): historical; only the removed Prototype Lab world-state console used it.
 
 ### Named Rules
 **The One Voice Rule.** Reserve Navy is the only filled accent. A screen should have one navy filled button per task area. Everything else is a white secondary button.
@@ -228,7 +228,7 @@ Tables keep a 680px minimum width inside a horizontally scrolling shell, so they
 
 ## Elevation & Depth
 
-The system is flat by rule. There are no `box-shadow` values anywhere. Depth comes from three tonal layers (Canvas, Surface, Surface Soft) and 1px Rule Line borders. The sticky header separates from content with a bottom rule only. Inverted surfaces (the navy demo header and the Console Night world-state panel) mark tool chrome, not elevation.
+The system is flat by rule. There are no `box-shadow` values anywhere. Depth comes from three tonal layers (Canvas, Surface, Surface Soft) and 1px Rule Line borders. The sticky header separates from content with a bottom rule only. Inverted surfaces (the navy demo header) mark tool chrome, not elevation.
 
 ### Named Rules
 **The No-Shadow Rule.** Never add a shadow. If an element needs separation, give it a border or a different tonal layer.
@@ -248,7 +248,7 @@ Procedural and restrained, like forms at a bank counter.
 - **Disabled:** 0.62 opacity with a not-allowed cursor.
 
 ### Chips / Badges
-- **Participant badge:** pill with white 700-weight 0.75rem text on a role tint (navy by default; `role-validator`, `role-pjp`, or `role-observer` by role).
+- **Participant badge:** pill with white 700-weight 0.75rem text on a role tint (navy by default; `role-wholesale-bank`, `role-retail-bank`, or `role-observer` by role).
 - **Status:** plain colored text with no fill, using Settled Green, Caution Amber, or Freeze Red.
 
 ### Cards / Containers
@@ -277,9 +277,6 @@ The ledger itself. Full width with collapsed borders. The header row uses Surfac
 ### Guided Demo Rail (signature)
 A 320px white rail with a Reserve Navy header, pale-blue kicker text, and a thin progress bar. The current-step block sits on `#eef4f8`. Steps are grouped by phase. The active step has a 3px navy left edge and a filled navy number circle. Completed steps show a green number on a green tint. Manual actions appear in an amber box.
 
-### World-State Console (signature, Prototype Lab only)
-A Console Night panel with a navy toolbar, outlined small tabs (5px radius), and a white iframe frame. It is the only dark surface in the system and is clearly tool chrome.
-
 ### Loading Skeleton
 Static `#dfe5eb` blocks with a 4px radius, arranged to match the final layout. There is no shimmer or pulse.
 
@@ -297,7 +294,7 @@ Static `#dfe5eb` blocks with a 4px radius, arranged to match the final layout. T
 ### Don't:
 - **Don't** add `box-shadow`, gradients, glows, or blur.
 - **Don't** drift toward a crypto/Web3 dashboard: no neon accents, glowing coin imagery, dark trading-terminal themes, or gradient heroes.
-- **Don't** hardcode hex values in components. `DemoPanel.tsx` currently sets inline `phaseColor` values (`#2563eb`, `#16a34a`, `#d97706`, `#374151`) that sit outside the palette. Replace them with tokens rather than copying them.
+- **Don't** hardcode hex values in components.
 - **Don't** use saturated fills for status. Status is colored text or a tinted banner.
 - **Don't** add web fonts. The system sans and system mono stacks are the typography.
-- **Don't** use dark surfaces outside the demo rail header and the Prototype Lab console.
+- **Don't** use dark surfaces outside the demo rail header.

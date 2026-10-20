@@ -206,7 +206,7 @@ System architecture subsections. **Multiple figures required:**
 #### `\subsection{Perancangan API Gateway}`
 
 - REST API architecture (Go + gorilla/mux)
-- Role-based access: public, authenticated, kyc_verified, bank_pjp, bank_indonesia, merchant, supervisor
+- Role-based access: public, authenticated, kyc_verified, retail_bank, wholesale_bank, bank_indonesia, merchant, auditor
 - API endpoint design (table format)
 - Middleware: auth, rate limiting
 - Figure: API gateway architecture diagram (Gambar 3.4)
@@ -274,7 +274,7 @@ Present as table: Skenario | Function | Concurrent Users | Duration | Metrics Co
 - Remove `\textcolor{red}{...}` and `\textcolor{blue}{...}` instructional comments (keep `http://ugm.id/flowcharttutorial` if useful)
 - Remove or repurpose `\section{Etika, Masalah, dan Keterbatasan Penelitian (Opsional)}`: not needed for this engineering thesis unless human subjects involved
 - This is Retail CBDC on **Fabric**, not Wholesale CBDC on Iroha: do not reference Iroha/Garuda implementation
-- Chaincode functions: use actual names from `bi-coin-fabric/chaincode/digital_rupiah.go`
+- Chaincode functions: use actual names from `bi-coin-fabric/chaincode/{monetary,controls,payments}`
 - API endpoints: use actual routes from `bi-coin-fabric/backend/`
 - Do NOT include Caliper results: Ch4 handles results
 - All diagrams: use `\includegraphics` from `contents/chapter-3/` directory

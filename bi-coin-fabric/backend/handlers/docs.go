@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,14 +10,13 @@ import (
 
 type roleInfo struct {
 	Label   string
-	DevKey  string
 	Spec    []byte
 	TagLine string
 }
 
 var roleOrder = []string{
 	"public", "authenticated", "kyc_verified",
-	"bank_pjp", "pjp", "bank_indonesia", "merchant", "supervisor",
+	"retail_bank", "wholesale_bank", "bank_indonesia", "merchant", "auditor",
 }
 
 // DocsSpecs holds the embedded OpenAPI JSON bytes keyed by role name.
@@ -27,93 +25,28 @@ type DocsSpecs struct {
 	Public        []byte
 	Authenticated []byte
 	KycVerified   []byte
-	BankPjp       []byte
-	Pjp           []byte
+	RetailBank    []byte
+	WholesaleBank []byte
 	BankIndonesia []byte
 	Merchant      []byte
-	Supervisor    []byte
+	Auditor       []byte
 }
 
 type DocsHandler struct {
 	roles map[string]roleInfo
 }
 
-func currentOpenAPISpec(source []byte) ([]byte, error) {
-	var spec map[string]json.RawMessage
-	if err := json.Unmarshal(source, &spec); err != nil {
-		return nil, err
-	}
-	var paths map[string]json.RawMessage
-	if err := json.Unmarshal(spec["paths"], &paths); err != nil {
-		return nil, err
-	}
-	for path := range paths {
-		if strings.HasPrefix(path, "/qris") {
-			delete(paths, path)
-		}
-	}
-	for _, path := range []string{"/issuance-requests", "/redemption-requests", "/kyc/profiles"} {
-		pathData, ok := paths[path]
-		if !ok {
-			continue
-		}
-		var pathItem map[string]json.RawMessage
-		if err := json.Unmarshal(pathData, &pathItem); err != nil {
-			return nil, err
-		}
-		postData, ok := pathItem["post"]
-		if !ok {
-			continue
-		}
-		var post map[string]json.RawMessage
-		if err := json.Unmarshal(postData, &post); err != nil {
-			return nil, err
-		}
-		var parameters []json.RawMessage
-		if raw := post["parameters"]; len(raw) > 0 {
-			if err := json.Unmarshal(raw, &parameters); err != nil {
-				return nil, err
-			}
-		}
-		hasKey := false
-		for _, raw := range parameters {
-			var parameter struct {
-				Name string `json:"name"`
-				In   string `json:"in"`
-			}
-			if err := json.Unmarshal(raw, &parameter); err == nil && parameter.Name == "Idempotency-Key" && parameter.In == "header" {
-				hasKey = true
-			}
-		}
-		if !hasKey {
-			parameter, err := json.Marshal(map[string]interface{}{
-				"name": "Idempotency-Key", "in": "header", "required": true,
-				"schema": map[string]interface{}{"type": "string", "minLength": 1},
-			})
-			if err != nil {
-				return nil, err
-			}
-			parameters = append(parameters, parameter)
-		}
-		post["parameters"], _ = json.Marshal(parameters)
-		pathItem["post"], _ = json.Marshal(post)
-		paths[path], _ = json.Marshal(pathItem)
-	}
-	spec["paths"], _ = json.Marshal(paths)
-	return json.Marshal(spec)
-}
-
 func NewDocsHandler(specs DocsSpecs) *DocsHandler {
 	return &DocsHandler{
 		roles: map[string]roleInfo{
-			"public":         {Label: "Public", DevKey: "dev-public-key", Spec: specs.Public, TagLine: "Health, topology, and JWT login"},
-			"authenticated":  {Label: "Authenticated", DevKey: "dev-auth-key", Spec: specs.Authenticated, TagLine: "Principal profile and wallet listing"},
-			"kyc_verified":   {Label: "KYC Verified", DevKey: "dev-kyc-key", Spec: specs.KycVerified, TagLine: "Retail transfers"},
-			"bank_pjp":       {Label: "Bank / PJP", DevKey: "dev-bank-pjp-key", Spec: specs.BankPjp, TagLine: "Onboarding, KYC, retail customers, and wallet custody"},
-			"pjp":            {Label: "PJP", DevKey: "dev-pjp-key", Spec: specs.Pjp, TagLine: "PJP onboarding, KYC, and wallet custody"},
-			"bank_indonesia": {Label: "Bank Indonesia", DevKey: "dev-bi-key", Spec: specs.BankIndonesia, TagLine: "Issuance, distribution, limits, RTGS, and oversight"},
-			"merchant":       {Label: "Merchant", DevKey: "dev-merchant-key", Spec: specs.Merchant, TagLine: "Merchant transfers"},
-			"supervisor":     {Label: "Supervisor", DevKey: "dev-supervisor-key", Spec: specs.Supervisor, TagLine: "Read-only oversight and reporting"},
+			"public":         {Label: "Public", Spec: specs.Public, TagLine: "Health and JWT login"},
+			"authenticated":  {Label: "Authenticated", Spec: specs.Authenticated, TagLine: "Health, JWT login, and principal profile"},
+			"kyc_verified":   {Label: "KYC Verified", Spec: specs.KycVerified, TagLine: "Health, JWT login, and principal profile"},
+			"retail_bank":    {Label: "Retail Bank", Spec: specs.RetailBank, TagLine: "Health, JWT login, and principal profile"},
+			"wholesale_bank": {Label: "Wholesale Bank", Spec: specs.WholesaleBank, TagLine: "Health, JWT login, and principal profile"},
+			"bank_indonesia": {Label: "Bank Indonesia", Spec: specs.BankIndonesia, TagLine: "Health, JWT login, and principal profile"},
+			"merchant":       {Label: "Merchant", Spec: specs.Merchant, TagLine: "Health, JWT login, and principal profile"},
+			"auditor":        {Label: "Auditor", Spec: specs.Auditor, TagLine: "Health, JWT login, and principal profile"},
 		},
 	}
 }
@@ -141,7 +74,7 @@ func (d *DocsHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Garuda Digital Rupiah — API Docs</title>
+<title>bi-coin Digital Rupiah — API Docs</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
@@ -160,7 +93,7 @@ func (d *DocsHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
 <header>
-  <h1>Garuda Digital Rupiah — API Documentation</h1>
+  <h1>bi-coin Digital Rupiah — API Documentation</h1>
   <p>Select a role to browse its interactive Swagger UI</p>
 </header>
 <div class="auth-note">
@@ -189,7 +122,7 @@ func (d *DocsHandler) handleSwaggerUI(w http.ResponseWriter, r *http.Request) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>%s — Garuda Digital Rupiah API</title>
+<title>%s — bi-coin Digital Rupiah API</title>
 <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" integrity="sha384-wxLW6kwyHktdDGr6Pv1zgm/VGJh99lfUbzSn6HNHBENZlCN7W602k9VkGdxuFvPn" crossorigin="anonymous">
 <style>
   body { margin: 0; }
@@ -237,13 +170,8 @@ func (d *DocsHandler) handleSpec(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unknown role", http.StatusNotFound)
 		return
 	}
-	currentSpec, err := currentOpenAPISpec(info.Spec)
-	if err != nil {
-		http.Error(w, "invalid API specification", http.StatusInternalServerError)
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write(currentSpec)
+	w.Write(info.Spec)
 }

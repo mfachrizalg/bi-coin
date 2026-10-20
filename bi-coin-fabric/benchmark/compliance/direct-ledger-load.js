@@ -38,7 +38,7 @@ function withTimeout(operation, timeoutMs) {
     ]).finally(() => clearTimeout(timer));
 }
 
-function createLedgerSession({ identities, identityNames, channel = 'rupiah-study', timeoutMs = 30000 }) {
+function createLedgerSession({ identities, identityNames, channel = 'bi-coin', timeoutMs = 30000 }) {
     const connections = new Map();
     for (const name of new Set(identityNames)) {
         const identity = identities[name];

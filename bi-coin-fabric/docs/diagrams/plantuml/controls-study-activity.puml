@@ -21,10 +21,9 @@ endif
 if (Subjek disetujui?) then (Ya)
   |EndUserMSP|
   :Buka dompet;
-  |CentralBankMSP|
-  :Alokasikan cadangan ke distributor;
   |DistributorMSP|
-  :FundFromReserve\n(atomik pada tiga chaincode);
+  :ConvertToRetail\n(reserve ke float r-Rupiah Digital);
+  :FundWallet\n(atomik pada payments, cek controls);
   |EndUserMSP|
   :Transfer dengan Idempotency-Key;
   |ValidatorMSP|

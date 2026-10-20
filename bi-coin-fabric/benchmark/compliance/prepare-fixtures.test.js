@@ -11,8 +11,8 @@ const { operationFixture, prepareAccessMatrixFixtures, prepareFixturePool } = re
 test('every Caliper workload maps to its exact chaincode method and signer MSP', () => {
     const userMSPs = {
         kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP', reviewer: 'DistributorMSP', senior: 'DistributorMSP',
-        compliance: 'DistributorMSP', bank_indonesia: 'CentralBankMSP', merchant: 'EndUserMSP', supervisor: 'ValidatorMSP',
-        business_rep: 'EndUserMSP',
+        compliance: 'DistributorMSP', bank_indonesia: 'CentralBankMSP', merchant: 'EndUserMSP', auditor: 'ValidatorMSP',
+        business_rep: 'EndUserMSP', retail_bank: 'DistributorMSP', wholesale_bank: 'DistributorMSP',
     };
     const userKeys = Object.keys(userMSPs);
     const api = {
@@ -41,11 +41,11 @@ test('every Caliper workload maps to its exact chaincode method and signer MSP',
         assert.ok(Array.isArray(fixture.ledger.args), scenario.id);
         assert.equal(fixture.ledger.msp_id, userMSPs[scenario.actor], scenario.id);
         assert.equal(fixture.ledger.read_only, scenario.operation_kind === 'query', scenario.id);
-        if (['mint', 'allocate-reserve', 'redeem-reserve', 'fund-reserve', 'transfer-retail', 'transfer-merchant'].includes(scenario.id)) {
+        if (['issue', 'redeem-reserve', 'interbank-transfer', 'convert-to-retail', 'fund-wallet', 'transfer-retail', 'transfer-merchant'].includes(scenario.id)) {
             assert.ok(fixture.ledger.args.at(-1), `${scenario.id} requires a ledger reference`);
         }
     }
-    assert.equal(catalog.performance_scenarios.length, 31);
+    assert.equal(catalog.performance_scenarios.length, 34);
 });
 
 test('reserve-backed fixture setup serializes debits to the shared distributor reserve', async t => {
@@ -54,7 +54,7 @@ test('reserve-backed fixture setup serializes debits to the shared distributor r
 
     const mspByUser = {
         bank_indonesia: 'CentralBankMSP', kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP',
-        reviewer: 'DistributorMSP', senior: 'DistributorMSP', compliance: 'DistributorMSP',
+        reviewer: 'DistributorMSP', senior: 'DistributorMSP', compliance: 'DistributorMSP', retail_bank: 'DistributorMSP',
         merchant: 'EndUserMSP',
     };
     const api = {
@@ -82,7 +82,7 @@ test('reserve-backed fixture setup serializes debits to the shared distributor r
     };
 
     try {
-        for (const id of ['fund-reserve', 'transfer-retail', 'transfer-merchant']) {
+        for (const id of ['fund-wallet', 'transfer-retail', 'transfer-merchant']) {
             const catalogScenario = catalog.performance_scenarios.find(scenario => scenario.id === id);
             await prepareFixturePool({
                 api,
@@ -126,8 +126,8 @@ test('API action checks receive fresh subject and staff fixtures per authorized 
         ];
 
         assert.equal(new Set(subjectIDs).size, subjectIDs.length);
-        assert.equal(requests.filter(request => request.method === 'POST' && request.path === '/subjects').length, 4);
-        assert.equal(requests.filter(request => request.path.endsWith('/restriction-release-requests')).length, 2);
+        assert.equal(requests.filter(request => request.method === 'POST' && request.path === '/subjects').length, 2);
+        assert.equal(requests.filter(request => request.path.endsWith('/restriction-release-requests')).length, 1);
         assert.equal(requests.filter(request => request.method === 'POST' && request.path === '/staff').length, 1);
     } finally {
         global.fetch = originalFetch;

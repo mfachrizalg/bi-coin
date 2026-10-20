@@ -14,12 +14,12 @@ skinparam partitionBorderColor black
 
 title Pendaftaran Peserta
 
-|Bank/PJP|
+|Distributor Bank|
 start
 :Kirim data pendaftaran peserta;
 
 |Backend API|
-:POST /participants;
+:POST /subjects;
 :Validasi peran dan data pendaftaran;
 if (Data valid?) then (tidak)
   :Kirim error validasi;
@@ -28,23 +28,22 @@ else (ya)
 endif
 
 |Blockchain|
-:SubmitParticipant()
+:CreatePending()
 status = pending;
 
-|Bank Indonesia|
+|Staf Distributor|
 :Tinjau pengajuan peserta;
 if (Pengajuan disetujui?) then (ya)
   |Backend API|
-  :POST /participants/{id}/approve;
+  :POST /subjects/{subject_id}/decisions;
   |Blockchain|
-  :ApproveParticipant()
+  :ApproveStandard() / DecideHighRisk()
   status = active;
-  :Buat dompet peserta;
 else (tidak)
   |Backend API|
-  :POST /participants/{id}/reject;
+  :POST /subjects/{subject_id}/decisions;
   |Blockchain|
-  :RejectParticipant()
+  :ApproveStandard() / DecideHighRisk()
   status = rejected;
 endif
 
@@ -67,14 +66,14 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title Penerbitan Digital Rupiah
+title Penerbitan w-Rupiah Digital ke Distributor Bank
 
 |Bank Indonesia|
 start
-:Inisiasi permintaan penerbitan;
+:Inisiasi penerbitan w-Rupiah Digital;
 
 |Backend API|
-:POST /issuance-requests;
+:POST /issuances;
 :Validasi peran Bank Indonesia;
 if (Peran valid?) then (tidak)
   :Kirim error 403;
@@ -83,15 +82,13 @@ else (ya)
 endif
 
 |Blockchain|
-:RequestIssuance(amount);
-:Validasi kewenangan Bank Indonesia;
+:Issue() validasi kewenangan BI dan Distributor;
 if (Kewenangan valid?) then (tidak)
   :Tolak penerbitan;
   end
 else (ya)
 endif
-:Mint(bi_treasury);
-:Tambah saldo Treasury;
+:Kredit reserve Distributor dan supply wholesale;
 :Catat transaksi dan audit;
 
 |Backend API|
@@ -99,7 +96,7 @@ endif
 stop
 @enduml
 
-@startuml AD03-Distribusi-Likuiditas-PJP
+@startuml AD03-Transfer-Konversi-Pendanaan
 skinparam monochrome true
 skinparam defaultFontSize 11
 skinparam activityFontSize 11
@@ -113,15 +110,15 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title Distribusi Likuiditas dari Treasury ke Kustodian
+title Transfer Antarbank, Konversi, dan Pendanaan Dompet
 
-|Bank Indonesia|
+|Distributor Bank|
 start
-:Inisiasi distribusi likuiditas;
+:Inisiasi transfer antarbank;
 
 |Backend API|
-:POST /distribute;
-:Validasi peran Bank Indonesia;
+:Terima request transfer (POST /interbank-transfers);
+:Validasi peran Distributor Bank;
 if (Peran valid?) then (tidak)
   :Kirim error 403;
   end
@@ -129,18 +126,67 @@ else (ya)
 endif
 
 |Blockchain|
-:Validasi peserta penerima;
-if (Penerima aktif dan bertipe Distributor/PJP?) then (tidak)
-  :Tolak distribusi;
+:TransferReserve() validasi nominal dan atribut pengirim;
+if (Saldo reserve cukup?) then (tidak)
+  :Tolak transfer;
   end
 else (ya)
 endif
-:Kurangi saldo bi_treasury;
-:Tambah saldo dompet kustodian;
-:Catat transaksi distribusi;
+:Kurangi reserve pengirim, tambah reserve penerima;
+:Catat transaksi transfer;
 
 |Backend API|
-:Kirim konfirmasi distribusi;
+:Kirim konfirmasi transfer;
+
+|Retail Bank|
+:Inisiasi konversi ke r-Rupiah Digital;
+
+|Backend API|
+:Terima request konversi (POST /conversions);
+:Validasi peran Retail Bank;
+if (Peran valid?) then (tidak)
+  :Kirim error 403;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:ConvertToRetail() validasi atribut dan kind retail;
+if (Saldo reserve cukup?) then (tidak)
+  :Tolak konversi;
+  end
+else (ya)
+endif
+:Debit reserve w-Rupiah Digital, kredit float r-Rupiah Digital;
+:Catat transaksi konversi;
+
+|Backend API|
+:Kirim konfirmasi konversi;
+
+|Retail Bank|
+:Inisiasi pendanaan dompet pelanggan;
+
+|Backend API|
+:Terima request pendanaan (POST /wallet-fundings);
+:Validasi peran Retail Bank;
+if (Peran valid?) then (tidak)
+  :Kirim error 403;
+  end
+else (ya)
+endif
+
+|Blockchain|
+:FundWallet() validasi kelayakan dan limit;
+if (Subjek layak dan dalam limit?) then (tidak)
+  :Tolak pendanaan;
+  end
+else (ya)
+endif
+:Debit float r-Rupiah Digital, kredit dompet pelanggan;
+:Catat transaksi pendanaan;
+
+|Backend API|
+:Kirim konfirmasi pendanaan;
 stop
 @enduml
 
@@ -160,7 +206,7 @@ skinparam partitionBorderColor black
 
 title Onboarding KYC Pelanggan
 
-|Operator PJP|
+|Operator Distributor Bank|
 start
 :Kirim data KYC pelanggan;
 
@@ -177,7 +223,7 @@ endif
 :SubmitKycProfile()
 status = pending;
 
-|Operator PJP|
+|Operator Distributor Bank|
 :Proses verifikasi KYC;
 
 |Backend API|
@@ -263,15 +309,15 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title Pembekuan dan Pencairan Peserta
+title Pembatasan dan Pembukaan Pembatasan Peserta
 
-|Bank Indonesia|
+|Staf Distributor|
 start
-:Inisiasi pembekuan peserta;
+:Compliance Officer menginisiasi pembatasan peserta;
 
 |Backend API|
-:POST /participants/{id}/freeze;
-:Validasi peran Bank Indonesia;
+:POST /subjects/{subject_id}/restrictions;
+:Validasi peran Distributor;
 
 if (Otorisasi valid?) then (tidak)
   :Kirim error;
@@ -280,29 +326,35 @@ else (ya)
 endif
 
 |Blockchain|
-:FreezeParticipant()
-Ubah status peserta ke frozen;
-:Freeze wallet terkait (cascade);
-:Catat supervision event
-participant_frozen;
+:FreezeSubject() ubah status peserta ke dibatasi;
+:Batasi subjek (transfer ditolak selama pembatasan);
+:Catat pembatasan subjek;
 
-if (Akan di-unfreeze?) then (tidak)
+if (Akan dibuka pembatasannya?) then (tidak)
   end
 else (ya)
 endif
 
-|Bank Indonesia|
-:Inisiasi pembukaan blokir;
+|Staf Distributor|
+:KYC Reviewer mengajukan permintaan pembukaan pembatasan;
 
 |Backend API|
-:POST /participants/{id}/unfreeze;
+:POST /subjects/{subject_id}/restriction-release-requests;
 
 |Blockchain|
-:UnfreezeParticipant()
+:RequestUnfreeze() catat reviewer dan referensi bukti;
+
+|Staf Distributor|
+:Senior Approver menyetujui pembukaan pembatasan;
+
+|Backend API|
+:POST /subjects/{subject_id}/restriction-release-decisions;
+
+|Blockchain|
+:ApproveUnfreeze()
 status kembali ke active;
-:Unfreeze wallet;
-:Catat supervision event
-participant_unfrozen;
+:Buka pembatasan subjek;
+:Catat pembukaan pembatasan subjek;
 end
 
 @enduml
@@ -321,37 +373,22 @@ skinparam noteBorderColor black
 skinparam swimlaneBorderColor black
 skinparam partitionBorderColor black
 
-title Laporan Supervisi
+title Pembacaan Status Subjek oleh Auditor
 
-|Supervisor|
+|Observer/Auditor (OJK, PPATK)|
 start
-:Akses dashboard supervisi;
+:Akses status subjek;
 
 |Backend API|
-:Terima permintaan laporan;
+:GET /subjects/{subject_id};
+:Validasi peran (BI, Distributor Bank, atau Auditor);
 
-fork
-  :GET /supervision/events;
-  :GET /reports/reconciliation;
-  :GET /reports/metrics;
-fork again
-  |Blockchain|
-  :GetSupervisionEvents()
-  Kembalikan event audit;
-fork again
-  |Blockchain|
-  :GetReconciliationReport()
-  Total supply, issued, burned;
-fork again
-  |Blockchain|
-  :GetMetrics()
-  Statistik transaksi;
-end fork
+|Blockchain|
+:GetSubject()
+Kembalikan status subjek;
 
 |Backend API|
-:Gabungkan hasil laporan;
-:Format laporan supervisi;
-:Kirim laporan ke Supervisor;
+:Kirim status subjek ke Auditor;
 end
 
 @enduml

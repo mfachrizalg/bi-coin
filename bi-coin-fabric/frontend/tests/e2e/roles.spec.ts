@@ -10,7 +10,7 @@ const workspaces = [
     landingHeading: 'Staff roles',
   },
   {
-    role: 'supervisor',
+    role: 'auditor',
     roleLabel: 'Auditor',
     nav: 'Auditor workspace navigation',
     tabs: ['Controls audit'],
@@ -18,20 +18,20 @@ const workspaces = [
     landingHeading: 'Controls audit',
   },
   {
-    role: 'bank_pjp',
-    roleLabel: 'Participant',
-    nav: 'Participant workspace navigation',
-    tabs: ['Subject approval', 'Business authority', 'Restrictions', 'Wholesale conversion'],
+    role: 'retail_bank',
+    roleLabel: 'Retail Bank',
+    nav: 'Retail Bank workspace navigation',
+    tabs: ['Subject approval', 'Business authority', 'Restrictions', 'Reserve and float'],
     landingHash: '#/institutional/study-approval',
     landingHeading: 'Subject approval',
   },
   {
-    role: 'pjp',
-    roleLabel: 'PJP',
-    nav: 'PJP workspace navigation',
-    tabs: ['Subject approval', 'Business authority', 'Restrictions', 'Wholesale conversion'],
-    landingHash: '#/institutional/study-approval',
-    landingHeading: 'Subject approval',
+    role: 'wholesale_bank',
+    roleLabel: 'Wholesale Bank',
+    nav: 'Wholesale Bank workspace navigation',
+    tabs: ['Reserve and float'],
+    landingHash: '#/institutional/study-funding',
+    landingHeading: 'Reserve and float',
   },
   {
     role: 'authenticated',
@@ -85,16 +85,16 @@ for (const workspace of workspaces) {
 }
 
 test('distributor bank has a workspace, not the empty placeholder', async ({ page }) => {
-  await signIn(page, 'bank_pjp')
+  await signIn(page, 'retail_bank')
 
   await expect(
-    page.getByRole('navigation', { name: 'Participant workspace navigation' }).getByRole('button'),
-  ).toHaveText(['Subject approval', 'Business authority', 'Restrictions', 'Wholesale conversion'])
+    page.getByRole('navigation', { name: 'Retail Bank workspace navigation' }).getByRole('button'),
+  ).toHaveText(['Subject approval', 'Business authority', 'Restrictions', 'Reserve and float'])
   await expect(page.getByText('This role has no workspace in the demo.', { exact: true })).toHaveCount(0)
 })
 
 test('a hash naming a tab outside the role renders no workspace', async ({ page }) => {
-  await signIn(page, 'supervisor')
+  await signIn(page, 'auditor')
   await page.evaluate(() => {
     window.location.hash = '#/institutional/study-staff'
   })
@@ -104,12 +104,4 @@ test('a hash naming a tab outside the role renders no workspace', async ({ page 
   await expect(
     page.getByRole('navigation', { name: 'Auditor workspace navigation' }).getByRole('button', { name: 'Controls audit' }),
   ).not.toHaveAttribute('aria-current', 'page')
-})
-
-test('legacy demo tabs never render', async ({ page }) => {
-  await signIn(page, 'bank_indonesia')
-
-  for (const legacy of ['Overview', 'Participants', 'Supervision', 'Prototype lab']) {
-    await expect(page.getByText(legacy, { exact: true })).toHaveCount(0)
-  }
 })

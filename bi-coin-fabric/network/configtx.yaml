@@ -2,7 +2,7 @@ Organizations:
   - &CentralBank
     Name: CentralBankMSP
     ID: CentralBankMSP
-    MSPDir: organizations/peerOrganizations/bi-coin/msp
+    MSPDir: organizations/peerOrganizations/centralbank.bi-coin/msp
     Policies:
       Readers:
         Type: Signature
@@ -17,27 +17,10 @@ Organizations:
         Type: Signature
         Rule: "OR('CentralBankMSP.peer')"
     OrdererEndpoints:
-      - "orderer.bi-coin:7050"
+      - "orderer.centralbank.bi-coin:7050"
     AnchorPeers:
-      - Host: peer0.bi-coin
+      - Host: peer0.centralbank.bi-coin
         Port: 7051
-
-  - &OrdererOrg
-    Name: OrdererMSP
-    ID: OrdererMSP
-    MSPDir: organizations/ordererOrganizations/bi-coin/msp
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('OrdererMSP.member')"
-      Writers:
-        Type: Signature
-        Rule: "OR('OrdererMSP.member')"
-      Admins:
-        Type: Signature
-        Rule: "OR('OrdererMSP.admin')"
-    OrdererEndpoints:
-      - "orderer.bi-coin:7050"
 
   - &Distributor
     Name: DistributorMSP
@@ -58,7 +41,7 @@ Organizations:
         Rule: "OR('DistributorMSP.peer')"
     AnchorPeers:
       - Host: peer0.distributor.bi-coin
-        Port: 9051
+        Port: 7051
 
   - &Validator
     Name: ValidatorMSP
@@ -79,7 +62,7 @@ Organizations:
         Rule: "OR('ValidatorMSP.peer')"
     AnchorPeers:
       - Host: peer0.validator.bi-coin
-        Port: 12051
+        Port: 7051
 
   - &EndUser
     Name: EndUserMSP
@@ -100,7 +83,7 @@ Organizations:
         Rule: "OR('EndUserMSP.peer')"
     AnchorPeers:
       - Host: peer0.enduser.bi-coin
-        Port: 13051
+        Port: 7051
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -109,7 +92,6 @@ Capabilities:
     V2_0: true
   Application: &ApplicationCapabilities
     V2_0: true
-    V2_5: true
 
 Application: &ApplicationDefaults
   Organizations:
@@ -118,34 +100,35 @@ Application: &ApplicationDefaults
       Type: ImplicitMeta
       Rule: "ANY Readers"
     Writers:
-      Type: Signature
-      Rule: "OR('CentralBankMSP.admin','CentralBankMSP.client','DistributorMSP.admin','DistributorMSP.client','EndUserMSP.admin','EndUserMSP.client')"
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
     LifecycleEndorsement:
-      Type: Signature
-      Rule: "AND('CentralBankMSP.member',OR('DistributorMSP.member','EndUserMSP.member'))"
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
     Endorsement:
-      Type: Signature
-      Rule: "OR('CentralBankMSP.member','DistributorMSP.member','EndUserMSP.member')"
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
   Capabilities: *ApplicationCapabilities
 
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-    - orderer.bi-coin:7050
+    - orderer.centralbank.bi-coin:7050
   EtcdRaft:
     Consenters:
-      - Host: orderer.bi-coin
+      - Host: orderer.centralbank.bi-coin
         Port: 7050
-        ClientTLSCert: organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/tls/server.crt
-        ServerTLSCert: organizations/ordererOrganizations/bi-coin/orderers/orderer.bi-coin/tls/server.crt
+        ClientTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls/server.crt
   BatchTimeout: 2s
   BatchSize:
     MaxMessageCount: 10
     AbsoluteMaxBytes: 10 MB
     PreferredMaxBytes: 2 MB
+  Organizations:
   Policies:
     Readers:
       Type: ImplicitMeta
@@ -174,15 +157,13 @@ Channel: &ChannelDefaults
       Rule: "MAJORITY Admins"
   Capabilities: *ChannelCapabilities
 
-# Fabric v3 channel-participation: a single application-channel profile producing the
-# channel genesis block (no system channel, no Consortiums).
 Profiles:
-  GarudaApplicationChannel:
+  BiCoinChannel:
     <<: *ChannelDefaults
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *OrdererOrg
+        - *CentralBank
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults

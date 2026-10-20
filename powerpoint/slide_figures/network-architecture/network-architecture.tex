@@ -29,42 +29,38 @@
 
 %--- Backend + Orderer ---
 \node[backend] (be)  at (-2.5, 3.5) {Backend API\\Go + Fabric Gateway SDK};
-\node[ordnode] (ord) at ( 5.5, 3.5) {orderer.paynet:7050\\(Raft Leader)};
+\node[ordnode] (ord) at ( 5.5, 3.5) {orderer.centralbank:17050\\(Raft Leader)};
 \draw[ar] (be.east) -- node[pathlabel,above]{gRPC} (ord.west);
 
 %--- Peer nodes ---
-\node[peer]     (pbi)  at ( 0.0, 1.2) {peer0.bi\\BankIndonesiaOrg\\:7051};
-\node[peer]     (phim) at ( 3.0, 1.2) {peer0.himbara\\HimbaraBankOrg\\:9051};
-\node[peer]     (pcom) at ( 6.0, 1.2) {peer0.commercial\\CommercialBankOrg\\:11051};
-\node[peer]     (ppjp) at ( 9.0, 1.2) {peer0.pjp\\PJPOrg\\:13051};
-\node[observer] (pojk) at (12.0, 1.2) {peer0.ojk\\OJKObserverOrg\\:12051};
+\node[peer]     (pbi)   at ( 0.0, 1.2) {peer0.centralbank\\CentralBankMSP\\:17051};
+\node[peer]     (pdist) at ( 3.0, 1.2) {peer0.distributor\\DistributorMSP\\:18051};
+\node[peer]     (pend)  at ( 6.0, 1.2) {peer0.enduser\\EndUserMSP\\:20051};
+\node[observer] (pval)  at ( 9.0, 1.2) {peer0.validator\\ValidatorMSP\\:19051};
 
 %--- Orderer delivers block to all peers ---
 \draw[ar] (ord.south) to[out=-100,in=90] (pbi.north);
-\draw[ar] (ord.south) to[out=-100,in=90] (phim.north);
-\draw[ar] (ord.south) -- (pcom.north);
-\draw[ar] (ord.south) to[out=-80,in=90]  (ppjp.north);
-\draw[ar] (ord.south) to[out=-80,in=90]  (pojk.north);
+\draw[ar] (ord.south) to[out=-100,in=90] (pdist.north);
+\draw[ar] (ord.south) -- (pend.north);
+\draw[ar] (ord.south) to[out=-80,in=90]  (pval.north);
 
 %--- Backend gateway to peer0.bi ---
 \draw[gar] (be.south) to[out=-80,in=180]
   node[pathlabel,left]{\textit{endorse}} (pbi.west);
 
 %--- CouchDB state databases ---
-\node[cdb] (cbi)  at ( 0.0, -0.2) {CouchDB :5984};
-\node[cdb] (chim) at ( 3.0, -0.2) {CouchDB :6984};
-\node[cdb] (ccom) at ( 6.0, -0.2) {CouchDB :7984};
-\node[cdb] (cpjp) at ( 9.0, -0.2) {CouchDB :9984};
-\node[cdb] (cojk) at (12.0, -0.2) {CouchDB :8984};
+\node[cdb] (cbi)   at ( 0.0, -0.2) {CouchDB :17584};
+\node[cdb] (cdist) at ( 3.0, -0.2) {CouchDB :18584};
+\node[cdb] (cend)  at ( 6.0, -0.2) {CouchDB :20584};
+\node[cdb] (cval)  at ( 9.0, -0.2) {CouchDB :19584};
 
-\draw[ar] (pbi)  -- (cbi);
-\draw[ar] (phim) -- (chim);
-\draw[ar] (pcom) -- (ccom);
-\draw[ar] (ppjp) -- (cpjp);
-\draw[ar] (pojk) -- (cojk);
+\draw[ar] (pbi)   -- (cbi);
+\draw[ar] (pdist) -- (cdist);
+\draw[ar] (pend)  -- (cend);
+\draw[ar] (pval)  -- (cval);
 
 %--- mychannel bounding box ---
-\node[chanbox, fit=(pbi)(phim)(pcom)(ppjp)(pojk)(cbi)(chim)(ccom)(cpjp)(cojk),
+\node[chanbox, fit=(pbi)(pdist)(pend)(pval)(cbi)(cdist)(cend)(cval),
   label={[font=\footnotesize\bfseries]below:%
     \textit{mychannel} (endorsement institusional, TLS)}] {};
 

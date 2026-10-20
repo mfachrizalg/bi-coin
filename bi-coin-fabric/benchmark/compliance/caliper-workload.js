@@ -122,7 +122,7 @@ class ComplianceWorkload extends WorkloadModuleBase {
 function verifyQuery(transaction, payload) {
     if (transaction === 'GetCallerIdentity') return typeof payload === 'string' && payload.length > 0;
     if (['CanPay', 'CanActFor'].includes(transaction)) return payload === 'true' || payload === 'false';
-    if (['GetTreasury', 'GetTotalSupply', 'GetReserve', 'GetBalance'].includes(transaction)) return Number.isSafeInteger(Number(payload));
+    if (['GetWholesaleSupply', 'GetRetailSupply', 'GetTotalSupply', 'GetReserve', 'GetRetailFloat', 'GetBalance'].includes(transaction)) return Number.isSafeInteger(Number(payload));
     if (['GetLimits', 'GetSubject', 'GetReceipt'].includes(transaction)) {
         try {
             const value = JSON.parse(payload);

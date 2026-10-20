@@ -24,8 +24,8 @@ sistem, arsitektur jaringan, perancangan use case, dan model data
 \subsubsection{Analisis Kebutuhan Sistem}
 
 Analisis kebutuhan mengidentifikasi aktor sistem (Bank Indonesia, bank
-distributor, PJP, pedagang, pelanggan ritel, supervisor, dan pengamat OJK) beserta
-kebutuhan fungsionalnya, yaitu penerbitan dan distribusi likuiditas berjenjang,
+distributor, pedagang, pelanggan ritel, serta pengamat OJK dan PPATK melalui peran Auditor) beserta
+kebutuhan fungsionalnya, yaitu penerbitan langsung ke cadangan bank distributor, transfer antarbank, konversi dan pendanaan dompet ritel,
 transfer antarpelanggan serta pelanggan-ke-pedagang, pengawasan, dan pelaporan.
 Kebutuhan ini menjadi dasar perancangan activity diagram dan arsitektur
 pada subbab berikutnya.
@@ -42,8 +42,8 @@ klien, \textit{backend API}, basis data luring PostgreSQL, dan jaringan
 \textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya. Aplikasi klien hanya berfungsi sebagai alat bantu demonstrasi dan tidak termasuk dalam evaluasi penelitian ini.
 
 Pemangku kepentingan utama terdiri atas Bank Indonesia sebagai penerbit dan
-pengawas, bank distributor dan PJP sebagai kustodian institusional, pedagang dan
-pelanggan ritel sebagai pengguna transaksi, serta supervisor dan pengamat OJK
+pengawas, bank distributor (\textit{wholesale} dan \textit{retail}) sebagai pemegang cadangan, bank \textit{retail} sebagai kustodian, pedagang dan
+pelanggan ritel sebagai pengguna transaksi, serta pengamat OJK dan PPATK melalui peran Auditor
 sebagai pihak yang membutuhkan fungsi baca dan pelaporan. Setiap pemangku
 kepentingan tersebut kemudian diterjemahkan menjadi
 peran akses pada \textit{backend API} dan aturan bisnis pada \textit{chaincode}
@@ -58,11 +58,11 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         \toprule
         \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
         \midrule
-        FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembekuan, pencairan, dan penghentian peserta sesuai peran Bank Indonesia, bank distributor, dan PJP. \\
-        FR-02 & Sistem harus mendukung penerbitan Digital Rupiah oleh Bank Indonesia ke dalam Treasury dan distribusi langsung kepada bank distributor atau PJP sebagai kustodian institusional. \\
-        FR-03 & Sistem harus menolak transfer yang tidak diotorisasi, melibatkan dompet beku, bernilai tidak valid, atau melebihi saldo pengirim, lalu memperbarui saldo secara atomik. \\
+        FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembatasan, pembukaan pembatasan, dan penghentian peserta sesuai peran Bank Indonesia dan bank distributor. \\
+        FR-02 & Sistem harus mendukung penerbitan \textit{w-Rupiah Digital} oleh Bank Indonesia langsung ke cadangan bank distributor, baik bank \textit{wholesale} maupun bank \textit{retail}. \\
+        FR-03 & Sistem harus menolak transfer yang tidak diotorisasi, melibatkan dompet yang dibatasi, bernilai tidak valid, atau melebihi saldo pengirim, lalu memperbarui saldo secara atomik. \\
         FR-04 & Sistem harus menyediakan laporan rekonsiliasi, metrik, riwayat transaksi, dan \textit{event} pengawasan bagi peran yang berwenang. \\
-        FR-05 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, PJP/bank, merchant, dan supervisor. \\
+        FR-05 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, bank distributor, merchant, dan Auditor. \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -94,8 +94,8 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         \toprule
         \textbf{ID kebutuhan} & \textbf{Metode verifikasi utama} & \textbf{Bukti yang dituju} \\
         \midrule
-        FR-01, FR-02 & Skenario fungsional dan \textit{unit test} \textit{chaincode} & Siklus hidup peserta, penerbitan, dan distribusi dua jenjang berjalan sesuai aturan \\
-        FR-03 & \textit{Unit test} \textit{backend} dan \textit{chaincode} serta skenario transfer & Otorisasi, status beku, validasi saldo, dan pembaruan atomik ditegakkan konsisten \\
+        FR-01, FR-02 & Skenario fungsional dan \textit{unit test} \textit{chaincode} & Siklus hidup peserta, penerbitan, konversi, dan pendanaan dompet berjalan sesuai aturan \\
+        FR-03 & \textit{Unit test} \textit{backend} dan \textit{chaincode} serta skenario transfer & Otorisasi, status pembatasan, validasi saldo, dan pembaruan atomik ditegakkan konsisten \\
         FR-04, FR-05 & Skenario fungsional, \textit{unit test} \textit{backend}, dan inspeksi rute API & Hak akses, pelaporan, dan \textit{event} pengawasan tersedia bagi peran berwenang \\
         NFR-01, NFR-03, NFR-05 & Inspeksi arsitektur, konfigurasi, dan manifes benchmark & Struktur jaringan, pemisahan lapisan, dan \textit{repeatability} purwarupa terdokumentasi \\
         NFR-02 & Inspeksi model data dan \textit{unit test} terpilih & Keterlacakan audit dan riwayat transaksi dapat dipertahankan \\
@@ -109,10 +109,10 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
 Setiap proses utama dimodelkan dengan activity diagram bergaya
 \textit{swimlane} tiga jalur, yaitu jalur aktor, jalur \textit{backend API}, dan
 jalur \textit{blockchain} (\textit{chaincode}). Diagram tersebut mencakup
-pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan Digital Rupiah
-(Gambar~\ref{fig:ad02}), distribusi likuiditas dari Treasury Bank Indonesia kepada kustodian
+pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan \textit{w-Rupiah Digital}
+(Gambar~\ref{fig:ad02}), transfer antarbank dan konversi ke float ritel
 (Gambar~\ref{fig:ad03}). Proses lainnya meliputi transfer saldo ritel
-(Gambar~\ref{fig:ad05}), pembekuan dan pencairan peserta
+(Gambar~\ref{fig:ad05}), pembatasan dan pembukaan pembatasan peserta
 (Gambar~\ref{fig:ad08}), serta laporan dan pengawasan
 (Gambar~\ref{fig:ad10}).
 
@@ -126,18 +126,19 @@ digunakan untuk pengukuran kinerja dan pengujian kontrol, yaitu
 \texttt{EndUserMSP}. Rincian lingkungan studi kontrol dijelaskan pada bagian
 eksperimen kontrol di bawah.
 
-Secara konseptual, sistem menggunakan model distribusi Rupiah Digital dua
-jenjang sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
-Jenjang distribusi institusional menyalurkan Digital Rupiah dari Treasury Bank
-Indonesia selaku penerbit (\texttt{CentralBankMSP}) kepada bank dan PJP sebagai
-kustodian institusional (\texttt{DistributorMSP}) melalui jaringan Hyperledger
-Fabric. Jenjang layanan ritel menyediakan pembayaran melalui kustodian kepada
+Secara konseptual, sistem menggunakan model dua jenjang Rupiah Digital
+sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
+Jenjang institusional menerbitkan \textit{w-Rupiah Digital} langsung dari Bank
+Indonesia selaku penerbit (\texttt{CentralBankMSP}) ke cadangan bank distributor
+(\texttt{DistributorMSP}) melalui jaringan Hyperledger Fabric. Bank \textit{wholesale}
+menerima penerbitan serta melakukan transfer antarbank dan penebusan, sedangkan bank
+\textit{retail} juga melakukan konversi dan pendanaan dompet. Jenjang layanan ritel
+menyediakan pembayaran melalui bank \textit{retail} sebagai kustodian kepada
 pengguna ritel, pedagang, dan pengguna bisnis (\texttt{EndUserMSP}), termasuk
 transfer antarpelanggan,
-transfer pelanggan-ke-pedagang, dan kontrol akses berbasis peran. Jenjang
-institusional tersebut menjelaskan jalur distribusi menuju layanan ritel, bukan
-implementasi instrumen w-Digital
-Rupiah yang terpisah.
+transfer pelanggan-ke-pedagang, dan kontrol akses berbasis peran. Instrumen
+\textit{w-Rupiah Digital} dikelola pada chaincode \texttt{rupiah-monetary}, sedangkan
+\textit{r-Rupiah Digital} dikelola pada chaincode \texttt{rupiah-payments}.
 
 \input{contents/figures/two-tier-cbdc}
 
@@ -174,7 +175,7 @@ Fabric berdasarkan MSP kustodian pada konteks permintaan. Untuk pengguna ritel,
 backend juga mencocokkan subjek JWT dengan \texttt{owner\_id} dompet pengirim.
 Chaincode memvalidasi MSP pemanggil dan MSP kustodian dompet: mutasi moneter,
 dan siklus hidup peserta hanya menerima MSP yang diizinkan, sedangkan
-MSP pengamat tidak dapat memutasi buku besar. Kepemilikan nasabah tetap menjadi
+MSP Observer (MSP ID: \texttt{ValidatorMSP}) tidak dapat memutasi buku besar. Kepemilikan nasabah tetap menjadi
 batas kepercayaan backend karena identitas pemilik tidak digantikan oleh
 identitas klien Fabric pada chaincode.
 
@@ -183,8 +184,8 @@ Berdasarkan klasifikasi model pembayaran pada Bab~2, purwarupa
 (\textit{account-based wallet model}) yang diimplementasikan di atas
 \textit{ledger} Hyperledger Fabric. Klasifikasi ini diturunkan dari rancangan
 data \textit{on-chain}: objek \texttt{Wallet} menyimpan \texttt{OwnerID},
-status beku, dan \texttt{Balance}; fungsi \texttt{Transfer} memeriksa
-otorisasi, status beku, dan saldo, kemudian mendebit saldo pengirim
+status pembatasan, dan \texttt{Balance}; fungsi \texttt{Transfer} memeriksa
+otorisasi, status pembatasan, dan saldo, kemudian mendebit saldo pengirim
 serta mengkredit saldo penerima. Sistem tidak membentuk objek token pembawa
 (\textit{bearer token}), UTXO, atau nomor seri token yang berpindah antarpemilik.
 Mekanisme pembayaran purwarupa berupa dompet berbasis akun yang disederhanakan,
@@ -197,11 +198,11 @@ Jaringan studi \textit{blockchain} dirancang dengan empat organisasi, yaitu
 \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
 \texttt{EndUserMSP}. Setiap organisasi memiliki satu \textit{peer} dan satu basis
 data status CouchDB. Keempat organisasi tersebut merepresentasikan peran Bank
-Indonesia, bank dan PJP, pengawas, serta pengguna akhir pada model dua jenjang.
-\textit{Orderer} Raft dengan satu node (\texttt{orderer.centralbank.rupiah.study})
-dan satu CA (\texttt{ca.centralbank}) diselenggarakan oleh \texttt{CentralBankMSP},
+Indonesia, bank distributor, Observer, serta pengguna akhir pada model dua jenjang.
+\textit{Orderer} Raft dengan satu node (\texttt{orderer.centralbank.bi-coin})
+diselenggarakan oleh \texttt{CentralBankMSP},
 dengan batas waktu pemotongan blok dua detik dan maksimum sepuluh
-\textit{message} per blok. Rincian organisasi disajikan pada
+\textit{message} per blok. Setiap organisasi menjalankan CA Fabric sendiri, yaitu \texttt{ca.centralbank}, \texttt{ca.distributor}, \texttt{ca.validator}, dan \texttt{ca.enduser}. Rincian organisasi disajikan pada
 Tabel~\ref{tab:jaringan}.
 
 \begingroup
@@ -215,16 +216,16 @@ Tabel~\ref{tab:jaringan}.
 	\toprule
 	\textbf{Organisasi} & \textbf{Peran} & \textbf{Peran pada jaringan} & \textbf{MSP} \\
 	\midrule
-	Bank Indonesia & Penerbit dan pengawas & Penerbitan dan penarikan Digital Rupiah; menyelenggarakan \textit{orderer} dan CA tunggal & \texttt{CentralBankMSP} \\
-	Bank dan PJP & Distributor & Kustodian institusional penerima distribusi dari Bank Indonesia; wajib dalam kebijakan \textit{endorsement} default ketiga \textit{chaincode} & \texttt{DistributorMSP} \\
-	OJK, PPATK, dan supervisor & \textit{Validator} & Akses baca untuk audit dan pengawasan; tidak termasuk dalam kebijakan \textit{endorsement} default & \texttt{ValidatorMSP} \\
+	Bank Indonesia & Penerbit dan pengawas & Penerbitan \textit{w-Rupiah Digital} langsung ke cadangan bank distributor; pendaftaran bank distributor; menyelenggarakan \textit{orderer} dan CA sendiri & \texttt{CentralBankMSP} \\
+	Bank distributor (\textit{wholesale} dan \textit{retail}) & Distributor & Penerima penerbitan dari Bank Indonesia; bank \textit{retail} sebagai kustodian; wajib dalam kebijakan \textit{endorsement} default ketiga \textit{chaincode} & \texttt{DistributorMSP} \\
+	OJK dan PPATK melalui peran Auditor & \textit{Observer} & Akses baca untuk audit dan pengawasan; tidak termasuk dalam kebijakan \textit{endorsement} semua \textit{chaincode}, tetapi ikut menyetujui siklus hidup \textit{chaincode} & \texttt{ValidatorMSP} \\
 	Pedagang, pelanggan ritel, dan pengguna bisnis & Pengguna & Pelaku transaksi ritel; ikut memberikan \textit{endorsement} pada pembayaran bersama \texttt{DistributorMSP} & \texttt{EndUserMSP} \\
 	\bottomrule
 	\end{tabular}
 \end{table}
 \endgroup
 
-Seluruh peserta tergabung dalam satu kanal (\textit{channel}) \texttt{rupiah-study}.
+Seluruh peserta tergabung dalam satu kanal (\textit{channel}) \texttt{bi-coin}.
 Kebijakan \textit{endorsement} dan siklus hidup \textit{chaincode} default pada
 kanal menggunakan \texttt{MAJORITY Endorsement}, sedangkan tiga \textit{chaincode}
 eksperimen memiliki kebijakan \textit{endorsement} tersendiri sebagaimana
@@ -239,8 +240,8 @@ organisasi, serta \textit{backend API} yang terhubung ke jaringan melalui
 \input{contents/figures/network-architecture}
 
 Kebutuhan fungsional sistem dimodelkan dengan diagram use case. Aktor sistem
-terdiri atas Bank Indonesia, bank distributor, PJP, pedagang (\textit{merchant}),
-pelanggan ritel, supervisor, dan pengamat OJK. Diagram use case keseluruhan
+terdiri atas Bank Indonesia, bank distributor, pedagang (\textit{merchant}),
+pelanggan ritel, serta pengamat OJK dan PPATK melalui peran Auditor. Diagram use case keseluruhan
 ditunjukkan pada Gambar~\ref{fig:uc01}, sedangkan rincian operasi
 institusional dan ritel ditunjukkan pada Gambar~\ref{fig:uc02} dan
 Gambar~\ref{fig:uc03}.
@@ -249,8 +250,8 @@ Gambar~\ref{fig:uc03}.
 
 Pemetaan aktor pada diagram tersebut mengikuti kendali peran pada lapisan
 \textit{backend}. Pendaftaran peserta dapat diajukan oleh institusi, sedangkan
-persetujuan, penolakan, pembekuan, dan \textit{offboarding} hanya dapat
-dilakukan oleh Bank Indonesia. Supervisor dan pengamat OJK hanya memperoleh
+persetujuan, penolakan, dan \textit{offboarding} peserta hanya dapat
+dilakukan oleh Bank Indonesia. Pembatasan subjek dilakukan oleh \textit{compliance officer} distributor, permintaan pembukaan pembatasan diajukan oleh \textit{KYC reviewer}, dan persetujuan pembukaan pembatasan dilakukan oleh \textit{senior approver}. Peran Auditor untuk pengamat OJK dan PPATK hanya memperoleh
 jalur baca pengawasan. Status persetujuan peserta menjadi bagian dari siklus
 hidup peserta, bukan bukti alur persetujuan terpisah.
 
@@ -273,9 +274,9 @@ operasi \textit{chaincode}.
 	\endhead
 	\bottomrule
 	\endlastfoot
-	\texttt{Participant}       & Entitas peserta (distributor/observer/PJP), MSP kustodian,
+	\texttt{Participant}       & Entitas peserta (Distributor Bank/Observer), MSP kustodian,
 	dan BIC opsional beserta status siklus hidup                                           \\
-\texttt{Wallet}            & Dompet dengan pemilik, peserta dan MSP kustodian, saldo, dan status beku \\
+\texttt{Wallet}            & Dompet dengan pemilik, peserta dan MSP kustodian, saldo, dan status pembatasan \\
 \texttt{Transaction\allowbreak Record} & Catatan transaksi untuk audit dan pelaporan  \\
 \end{longtable}
 \endgroup
@@ -455,8 +456,8 @@ jika keadaan ledger sebelum dan sesudah transaksi tetap sama.
 
 Pengujian kinerja mengukur 30 metode kontrak publik dengan Hyperledger Caliper
 dan konektor Fabric. Metode \texttt{Initialize} dan
-\texttt{DebitReserveForFunding} hanya diperiksa secara fungsional karena
-\texttt{DebitReserveForFunding} dipanggil secara internal oleh konversi. Metode
+\texttt{DebitReserveForConversion} hanya diperiksa secara fungsional karena
+\texttt{DebitReserveForConversion} dipanggil secara internal oleh konversi. Metode
 \texttt{Transfer} diuji dengan variasi penerima ritel dan pedagang sehingga
 terdapat 31 beban kerja kinerja. Operasi baca dilaporkan sebagai operasi
 terverifikasi per detik, sedangkan transaksi tulis dilaporkan sebagai TPS
@@ -465,11 +466,11 @@ latensi pemrosesan API, PostgreSQL, dan KYC tidak digabungkan ke hasil Fabric.
 
 Seluruh pengujian kinerja memakai satu \textit{worker} lokal. Inisialisasi ronde
 Caliper menyiapkan koneksi; tidak ada ronde pemanasan bertimer. Matriks API
-merupakan pemeriksaan kebenaran yang terpisah: 207 sel peran-rute untuk
+pada run-20261014-01 merupakan pemeriksaan kebenaran yang terpisah: 207 sel peran-rute untuk
 otorisasi, 27 kasus validasi permintaan JSON, dan 15 pemeriksaan hasil aksi
 tanpa badan permintaan.
 
-Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port host, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan throughput terverifikasi terhadap durasi ditambah drain mencapai 90 persen laju terkirim, setara dengan drain paling lama sepersembilan durasi probe. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sekitar sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Run run-20261014-01 dijalankan sebelum perbaikan ini dan mencatat galat tersebut sebagai kegagalan transaksi, sebagaimana dilaporkan pada Bab~4. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
+Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port pada host luar, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan throughput terverifikasi terhadap durasi ditambah drain mencapai 90 persen laju terkirim, setara dengan drain paling lama sepersembilan durasi probe. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sembilan hingga sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Run run-20261014-01 dijalankan sebelum perbaikan ini dan mencatat galat tersebut sebagai kegagalan transaksi, sebagaimana dilaporkan pada Bab~4. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -484,7 +485,7 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 	Kesiapan & Petakan penanda tangan ke MSP yang berwenang, konfigurasi tiga \textit{chaincode} dan empat MSP, lalu pastikan setiap beban kerja berhasil. Inisialisasi ronde Caliper menyiapkan koneksi tanpa ronde pemanasan bertimer. \\
 	Braket & Gunakan hasil terdahulu hanya sebagai petunjuk laju awal; bila tidak tersedia, mulai pada 32 operasi/detik. Tetapkan rentang 0,1--4.096 operasi/detik. Jika laju awal lulus tetapi belum ada batas gagal, kalikan laju dengan empat; jika laju awal gagal tetapi belum ada batas lulus, bagi laju dengan empat sampai braket terbentuk. \\
 	Pencarian biner & Uji titik tengah braket dalam ronde 10 detik sampai selisih relatif laju gagal terhadap laju lulus paling besar 10\%. Kesalahan konfigurasi atau data uji menghentikan pencarian beban kerja tersebut untuk diagnosis. \\
-	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. Galat penyiapan fixture tidak dihitung sebagai kegagalan konfirmasi; pada fund-reserve, percobaan tersebut diarsipkan dan pencarian beban kerja diulang. \\
+	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. Galat penyiapan fixture tidak dihitung sebagai kegagalan konfirmasi; percobaan tersebut diarsipkan dan pencarian beban kerja diulang. \\
 	Interpretasi & Kelulusan pada batas atas rentang pencarian, 4.096 operasi/detik, dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh 31 beban kerja adalah 46,5 menit, di luar penyiapan, pencarian, dan verifikasi. \\
 	\bottomrule
 	\end{tabular}
@@ -494,7 +495,7 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Cakupan 20 skenario fungsional dan assertion yang dijalankan}
+	\caption{Cakupan 20 skenario fungsional pada run-20261014-01 dan assertion yang dijalankan}
 	\label{tab:uji-fungsional}
 	\centering
 	\begin{tabular}{p{3.1cm} p{9.6cm}}
@@ -596,8 +597,7 @@ rekayasa, bukan estimasi distribusi pengguna nasional.
 Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
 Digital ritel secara struktural. Setiap fungsi diuji secara terisolasi agar
 throughput, latensi, dan alasan kegagalan dapat diatribusikan pada fungsi yang
-diukur. Transfer antarpelanggan, pembayaran pelanggan--pedagang, penerbitan,
-distribusi, penebusan, kueri saldo, serta perubahan status dompet dipisahkan;
+diukur. Transfer antarpelanggan, pembayaran pelanggan--pedagang, penerbitan, transfer antarbank, konversi, pendanaan dompet, penebusan, kueri saldo, serta perubahan status dompet dipisahkan;
 transfer ritel juga memiliki profil kontensi rendah dan kontensi tinggi. Pola
 ini dipilih karena CBDC ritel mencakup transaksi pengguna, distribusi, dan
 pengawasan, bukan hanya setelmen antarlembaga. Literatur teknologi CBDC ritel
@@ -606,11 +606,11 @@ inti sistem pembayaran publik \cite{Auer2020The}. Oleh karena itu, beban kerja
 yang hanya menguji transfer institusional tidak memadai untuk menjawab rumusan
 masalah purwarupa Rupiah Digital ritel.
 
-Model dua jenjang penerbitan (BI\,→\,bank\,→\,PJP\,→\,pelanggan ritel) sesuai
+Model dua jenjang penerbitan (BI\,→\,bank distributor\,→\,pelanggan ritel) sesuai
 dengan rancangan Rupiah Digital yang ditetapkan dalam dokumen konsultatif Bank
 Indonesia \cite{bi_consultative, bi_garuda_poc}. Logika bisnis yang diuji bukan
 beban sintetik yang terlepas dari sistem, melainkan \textit{chaincode} aktual
-yang mengimplementasikan penerbitan, distribusi, transfer ritel, dan pembacaan
+yang mengimplementasikan penerbitan, transfer antarbank, konversi, pendanaan dompet, transfer ritel, dan pembacaan
 status dompet.
 Penggunaan Caliper dan metrik \textit{throughput}/latensi mengikuti praktik
 pengukuran kinerja blockchain yang menekankan laju transaksi, latensi, dan
@@ -663,82 +663,37 @@ Fabric, konfigurasi jaringan, \textit{deploy chaincode}, pengembangan
 \subsubsection{Instalasi Kerangka Kerja Hyperledger Fabric}
 
 Lingkungan pengembangan disiapkan dengan memasang Docker, Docker Compose, dan
-biner Fabric. Material kriptografi (sertifikat MSP dan TLS) dibangkitkan
-menggunakan \texttt{cryptogen}. Blok genesis dan profil konfigurasi kanal
+biner Fabric. Material kriptografi (sertifikat MSP dan TLS) diterbitkan oleh
+Fabric CA per organisasi (\texttt{ca.centralbank}, \texttt{ca.distributor}, \texttt{ca.validator}, dan \texttt{ca.enduser}). Blok genesis dan profil konfigurasi kanal
 dibuat dengan \texttt{configtxgen}.
 
 \subsubsection{Konfigurasi Jaringan Blockchain}
 
 Jaringan Fabric dibangun melalui skrip otomatisasi yang membangkitkan material
 kriptografi, blok genesis, dan konfigurasi kanal, kemudian menjalankan kontainer
-untuk empat \textit{peer}, empat CouchDB, dan satu \textit{orderer}. Chaincode
+untuk empat \textit{peer}, empat CouchDB, empat CA, dan satu \textit{orderer}. Chaincode
 dipaketkan, dipasang pada seluruh organisasi, disetujui sesuai kebijakan
 dukungan, lalu di-\textit{commit} ke kanal.
 
 \subsubsection{Deploy Chaincode}
 
-Logika bisnis Rupiah Digital ditulis dalam bahasa Go menggunakan \textit{Fabric
-	Contract API} v2. Chaincode mengimplementasikan fungsi penerbitan
-(\texttt{Mint}, \texttt{RequestIssuance}), penarikan (\texttt{Burn},
-\texttt{RequestRedemption}), distribusi dua jenjang
-(\texttt{DistributeToParticipant}), transfer (\texttt{Transfer}), serta
-pelaporan dan pengawasan.
+Logika bisnis Rupiah Digital ditulis dalam bahasa Go menggunakan \textit{Fabric Contract API} v2 dan dikemas dalam tiga \textit{chaincode} dengan domain tersendiri: \texttt{rupiah-monetary} untuk suplai dan cadangan \textit{w-Rupiah Digital}; \texttt{rupiah-controls} untuk subjek, keputusan KYC, risiko, peran staf, dan batas; serta \texttt{rupiah-payments} untuk float ritel, dompet, dan pembayaran \textit{r-Rupiah Digital}. Tabel~\ref{tab:ch3-chaincode-fungsi} merangkum fungsi publik masing-masing \textit{chaincode}. Aturan pemanggil dan batas nilai pada tiap fungsi diuraikan pada Bab~4.
 
-Gambar~\ref{lst:mint} menunjukkan implementasi fungsi \texttt{Mint} yang
-menambah saldo dompet setelah memverifikasi otorisasi dan status beku.
-
-\begin{figure}[H]
-\begin{lstlisting}[language=Go]
-func (s *SmartContract) Mint(ctx contractapi.TransactionContextInterface,
-    walletID string, amount int64) error {
-    if walletID != "bi_treasury" {
-        return fmt.Errorf("issuance must credit bi_treasury")
-    }
-    if amount <= 0 {
-        return fmt.Errorf("amount must be positive")
-    }
-    wallet, err := s.getWallet(ctx, walletID)
-    if err != nil { return err }
-    if wallet.Frozen {
-        return fmt.Errorf("wallet %s is frozen", walletID)
-    }
-    // ... validasi batas transaksi dan pasokan global ...
-    newBalance, err := checkedAddInt64(wallet.Balance, amount)
-    if err != nil { return err }
-    wallet.Balance = newBalance
-    wallet.UpdatedAt = txNow(ctx).Format(time.RFC3339)
-    if err := s.emitAudit(ctx, "MINT", walletID, "", amount); err != nil {
-        return err
-    }
-    return s.recordTransaction(ctx, TxMint, walletID, "", amount, TxSettled, "")
-}
-\end{lstlisting}
-\caption{Implementasi fungsi \texttt{Mint} pada \textit{chaincode}: memverifikasi otorisasi dan status beku sebelum menambah saldo dompet}
-\label{lst:mint}
-\end{figure}
-
-Gambar~\ref{lst:transfer} menunjukkan pemanggilan fungsi transfer bersama.
-Fungsi tersebut memeriksa otorisasi, status dompet, nilai positif, batas
-masuk, dan saldo pengirim sebelum memperbarui kedua dompet secara atomik.
-
-\begin{figure}[H]
-\begin{lstlisting}[language=Go]
-func (s *SmartContract) Transfer(ctx contractapi.TransactionContextInterface,
-    senderID string, receiverID string, amount int64, referenceID string) (map[string]interface{}, error) {
-    // ... periksa MSP kustodian, KYC penerima, status dompet, batas, dan saldo ...
-    if sender.Tier == "" {
-        // Pendanaan kustodian ke dompet ritel hanya mengkredit penerima.
-        // ... applyWholesaleFundingPolicy, putWallet, dan receipt idempotensi ...
-    } else {
-        // Transfer ritel mengurangi pengirim dan menambah penerima.
-        // ... applyRetailTransferPolicy, putWallet, dan receipt idempotensi ...
-    }
-    // ... putWallet, recordTransaction, audit, dan receipt idempotensi ...
-}
-\end{lstlisting}
-\caption{Pemeriksaan otorisasi, status dompet, dan kecukupan saldo sebelum transfer}
-\label{lst:transfer}
-\end{figure}
+\begin{table}[H]
+    \caption{Fungsi publik pada tiga \textit{chaincode} purwarupa}
+    \label{tab:ch3-chaincode-fungsi}
+    \centering
+    \small
+    \begin{tabular}{p{3.6cm} p{8.8cm}}
+        \toprule
+        \textbf{\textit{Chaincode}} & \textbf{Fungsi publik} \\
+        \midrule
+        \texttt{rupiah-monetary} & \texttt{Initialize}, \texttt{RegisterDistributor}, \texttt{Issue}, \texttt{RedeemReserve}, \texttt{TransferReserve}, \texttt{DebitReserveForConversion}, \texttt{GetWholesaleSupply}, \texttt{GetRetailSupply}, \texttt{GetTotalSupply}, \texttt{GetReserve} \\
+        \texttt{rupiah-controls} & \texttt{GetCallerIdentity}, \texttt{CreatePending}, \texttt{ProtectSubject}, \texttt{CreateStaffPending}, \texttt{ProtectStaff}, \texttt{SetStaffRole}, \texttt{RecordReview}, \texttt{ApproveStandard}, \texttt{DecideHighRisk}, \texttt{SetLimits}, \texttt{SetBusinessAuthority}, \texttt{FreezeSubject}, \texttt{RequestUnfreeze}, \texttt{ApproveUnfreeze}, \texttt{CanPay}, \texttt{GetLimits}, \texttt{CanActFor}, \texttt{GetSubject} \\
+        \texttt{rupiah-payments} & \texttt{OpenWallet}, \texttt{Transfer}, \texttt{ConvertToRetail}, \texttt{FundWallet}, \texttt{GetBalance}, \texttt{GetReceipt}, \texttt{GetRetailFloat} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \subsubsection{Pengembangan Fabric Gateway}
 
@@ -759,33 +714,7 @@ menunjukkan pengelompokan rute REST berdasarkan peran akses menggunakan
 \textit{middleware} \texttt{RequireRole}.
 
 \begin{figure}[H]
-\begin{lstlisting}[language=Go]
-func (h *Handler) RegisterRoutes(r *mux.Router) {
-    // Publik: tidak memerlukan autentikasi
-    r.HandleFunc("/health", h.Health).Methods("GET")
-
-    // Pembacaan dompet oleh aktor terautentikasi
-    auth := r.NewRoute().Subrouter()
-    auth.Use(middleware.RequireRole(
-        middleware.RoleAuthenticated, middleware.RoleBankPjp,
-        middleware.RolePJP,
-        middleware.RoleBankIndonesia))
-    auth.HandleFunc("/wallets", h.ListWallets).Methods("GET")
-
-    // Bank/PJP mengelola dompet dan distribusi ritel
-    walletMutation := r.NewRoute().Subrouter()
-    walletMutation.Use(middleware.RequireRole(
-        middleware.RoleBankPjp,
-        middleware.RolePJP))
-    walletMutation.HandleFunc("/wallets", h.CreateWallet).Methods("POST")
-
-    // Pelanggan/pedagang yang disetujui melakukan transfer
-    payments := r.NewRoute().Subrouter()
-    payments.Use(middleware.RequireRole(
-        middleware.RoleAuthenticated, middleware.RoleMerchant))
-    payments.HandleFunc("/transfers", h.Transfer).Methods("POST")
-}
-\end{lstlisting}
+\lstinputlisting[language=Go,basicstyle=\scriptsize\ttfamily,breaklines=true,firstline=56,lastline=69]{../bi-coin-fabric/backend/handlers/study_handlers.go}
 \caption{Pengelompokan rute REST \textit{backend} berdasarkan peran akses}
 \label{lst:routes}
 \end{figure}
@@ -810,7 +739,7 @@ dengan pengujian kinerja pada BAB IV.
 
 \textit{Unit test} \textit{chaincode} memverifikasi fungsi \texttt{CreateWallet}
 dan \texttt{Transfer} secara terisolasi menggunakan konteks transaksi tiruan
-(\textit{mock}). Pengujian mencakup pembuatan dompet, pemeriksaan status beku,
+(\textit{mock}). Pengujian mencakup pembuatan dompet, pemeriksaan status pembatasan,
 otorisasi, dan pembaruan saldo atomik.
 
 Pada lapisan \textit{backend}, \textit{unit test} memverifikasi bahwa batas
@@ -819,8 +748,7 @@ kepemilikan dompet ritel ditegakkan sebelum permintaan transfer diteruskan ke
 tidak cocok dengan pemilik dompet pengirim.
 
 Verifikasi lengkap kedua lapisan dijalankan melalui \texttt{go test ./...}
-pada masing-masing modul. Jumlah pengujian yang lulus pada setiap lapisan
-dipaparkan pada Bab~IV.
+pada masing-masing modul. Hasil \textit{unit test} tersebut tidak termasuk dalam artefak run-20261014-01 dan tidak dilaporkan sebagai hasil lulus pada Bab~IV.
 
 \subsubsection{Konfigurasi Hyperledger Caliper}
 
@@ -851,8 +779,8 @@ Inang & Satu mesin lokal dengan \textit{container} Docker 29.6.2; satu \textit{w
 CPU & Intel Core i7-7700HQ @ 2,80 GHz (4 inti, 8 utas) \\
 Memori (RAM) & 16 GB \\
 Sistem operasi & Fedora Linux 44 (\textit{Workstation Edition}), x86\_64 \\
-Hyperledger Fabric & 2.5 (rilis 2.5.16) \\
-Topologi & Empat MSP, satu \textit{peer} per MSP, kanal \texttt{rupiah-study} \\
+Hyperledger Fabric & 2.5 (tag image \texttt{hyperledger/fabric-peer:2.5}; patch tidak tercatat di artefak run) \\
+Topologi & Empat MSP, satu \textit{peer} per MSP, kanal \texttt{bi-coin} \\
 \textit{Chaincode} & \texttt{rupiah-controls}, \texttt{rupiah-monetary}, dan \texttt{rupiah-payments} \\
 Hyperledger Caliper & 0.6.0 \\
 \hline
@@ -872,7 +800,7 @@ validasi, otorisasi, dan hasil aksi API tetap terpisah dari jendela kinerja.
 \subsubsection{Eksperimen Kontrol pada Lingkungan Terisolasi}
 
 Pengujian kontrol menggunakan jaringan Fabric 2.5 terpisah dengan satu kanal
-\texttt{rupiah-study} dan empat organisasi: \texttt{CentralBankMSP},
+\texttt{bi-coin} dan empat organisasi: \texttt{CentralBankMSP},
 \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan \texttt{EndUserMSP}.
 \texttt{CentralBankMSP} mengoperasikan \textit{peer} penerbit dan satu
 \textit{orderer}; \texttt{ValidatorMSP} hanya menyediakan akses baca untuk
@@ -884,16 +812,16 @@ Gambar~\ref{fig:ch3-study-controls}.
 \input{contents/figures/study-controls-architecture}
 
 Tiga \textit{chaincode} memisahkan kepemilikan state dan kebijakan default:
-\texttt{rupiah-monetary} mengelola Treasury, suplai, dan cadangan dengan
+\texttt{rupiah-monetary} mengelola suplai dan cadangan \textit{w-Rupiah Digital} dengan
 \texttt{AND('CentralBankMSP.peer','DistributorMSP.peer')};
 \texttt{rupiah-controls} mengelola subjek pseudonim, keputusan KYC, risiko,
 peran staf, dan batas dengan kebijakan default
 \texttt{AND(DistributorMSP, OR(CentralBankMSP, EndUserMSP))};
-\texttt{rupiah-payments} mengelola dompet dan transfer dengan
+\texttt{rupiah-payments} mengelola float ritel, dompet, dan transfer dengan
 \texttt{AND('DistributorMSP.peer','EndUserMSP.peer')}. Kunci kontrol efektif
 menggunakan kebijakan berbasis state yang mensyaratkan
-\texttt{CentralBankMSP} dan \texttt{DistributorMSP}. Pendanaan cadangan
-memanggil ketiga \textit{chaincode} dalam satu transaksi sehingga seluruh
+\texttt{CentralBankMSP} dan \texttt{DistributorMSP}. Konversi dan pendanaan dompet
+memanggil lebih dari satu \textit{chaincode} dalam satu transaksi sehingga seluruh
 kebijakan yang terlibat harus terpenuhi. Matriks ini merupakan rancangan
 eksperimental, bukan pernyataan bahwa aturan hukum menetapkan kebijakan
 \textit{endorsement} tersebut.
@@ -912,7 +840,7 @@ Struktur kelas, fungsi setiap organisasi, dan aktivitas utama pada lingkungan
 studi dirangkum melalui diagram kelas (Gambar~\ref{fig:ch3-study-class}),
 activity diagram (Gambar~\ref{fig:ch3-study-activity}), dan diagram use case
 (Gambar~\ref{fig:ch3-study-use-case}). Urutan pesan untuk pelepasan
-pembatasan, konversi \textit{wholesale-to-retail}, dan transfer ritel ditunjukkan pada
+pembatasan, konversi ke float ritel, dan transfer ritel ditunjukkan pada
 Gambar~\ref{fig:ch3-study-sequence-release},
 Gambar~\ref{fig:ch3-study-sequence-conversion}, dan
 Gambar~\ref{fig:ch3-study-sequence-transfer}. Seluruh diagram membatasi uraian

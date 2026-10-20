@@ -1,26 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import WalletList from './pages/WalletList'
-import CreateWallet from './pages/CreateWallet'
-import Transfer from './pages/Transfer'
-import Pay from './pages/Pay'
-import Participants from './pages/Participants'
-import Overview from './pages/Overview'
-import Contacts from './pages/Contacts'
-import Activity from './pages/Activity'
-import Supervision from './pages/Supervision'
-import PrototypeLab from './pages/PrototypeLab'
 import OrganizationWorkspace from './pages/StudyConsole'
 import { getErrorMessage, getMe, hasAccessToken, login, onUnauthorized, setAccessToken } from './lib/api'
 import LoadingSkeleton from './components/LoadingSkeleton'
+import RequirementRail from './components/RequirementRail'
 
-export type Tab = 'overview' | 'participants' | 'wallets' | 'create' | 'transfer' | 'contacts' | 'activity' | 'supervision' | 'prototype' | 'study_identity' | 'study_wallet' | 'study_transfer' | 'study_approval' | 'study_business' | 'study_restrictions' | 'study_funding' | 'study_monetary' | 'study_audit' | 'study_staff'
-export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'bank_pjp' | 'pjp' | 'bank_indonesia' | 'merchant' | 'supervisor'
+export type Tab = 'study_identity' | 'study_wallet' | 'study_transfer' | 'study_approval' | 'study_business' | 'study_restrictions' | 'study_funding' | 'study_monetary' | 'study_audit' | 'study_staff'
+export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'retail_bank' | 'wholesale_bank' | 'bank_indonesia' | 'merchant' | 'auditor'
 
-export interface DemoPrefill {
-  target: 'submit' | 'issue' | 'distribute' | 'wallet' | 'kyc-customer' | 'kyc-approve' | 'transfer'
-  [key: string]: string
-}
 type Shell = 'institutional' | 'retail'
 
 interface RoleConfig {
@@ -33,56 +20,31 @@ export const ROLES: Record<Role, RoleConfig> = {
   public: { label: 'Public', shell: 'public', tabs: [] },
   authenticated: { label: 'Retail Customer', shell: 'retail', tabs: ['study_identity'] },
   kyc_verified: { label: 'Retail Customer', shell: 'retail', tabs: ['study_identity', 'study_wallet', 'study_transfer'] },
-  bank_pjp: { label: 'Participant', shell: 'institutional', tabs: ['study_approval', 'study_business', 'study_restrictions', 'study_funding'] },
-  pjp: { label: 'PJP', shell: 'institutional', tabs: ['study_approval', 'study_business', 'study_restrictions', 'study_funding'] },
+  retail_bank: { label: 'Retail Bank', shell: 'institutional', tabs: ['study_approval', 'study_business', 'study_restrictions', 'study_funding'] },
+  wholesale_bank: { label: 'Wholesale Bank', shell: 'institutional', tabs: ['study_funding'] },
   bank_indonesia: { label: 'Bank Indonesia', shell: 'institutional', tabs: ['study_staff', 'study_monetary'] },
   merchant: { label: 'Merchant', shell: 'retail', tabs: ['study_identity', 'study_wallet', 'study_transfer'] },
-  supervisor: { label: 'Auditor', shell: 'institutional', tabs: ['study_audit'] },
+  auditor: { label: 'Auditor', shell: 'institutional', tabs: ['study_audit'] },
 }
 
 export const TAB_META: Record<Tab, { label: string }> = {
-  overview: { label: 'Overview' },
-  participants: { label: 'Participants' },
-  wallets: { label: 'Wallets' },
-  create: { label: 'KYC and wallet' },
-  transfer: { label: 'Pay' },
-  contacts: { label: 'Contacts' },
-  activity: { label: 'Activity' },
-  supervision: { label: 'Supervision' },
-  prototype: { label: 'Prototype lab' },
   study_identity: { label: 'Subject onboarding' },
   study_wallet: { label: 'Wallet' },
   study_transfer: { label: 'Pay' },
   study_approval: { label: 'Subject approval' },
   study_business: { label: 'Business authority' },
   study_restrictions: { label: 'Restrictions' },
-  study_funding: { label: 'Wholesale conversion' },
+  study_funding: { label: 'Reserve and float' },
   study_monetary: { label: 'Monetary operations' },
   study_audit: { label: 'Controls audit' },
   study_staff: { label: 'Staff roles' },
 }
 
-const UI_STATE_KEY = 'garuda-ui-context'
-
-function readSession<T>(key: string, fallback: T): T {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const value = window.sessionStorage.getItem(key)
-    return value ? JSON.parse(value) as T : fallback
-  } catch {
-    return fallback
-  }
-}
-
-function writeSession(key: string, value: unknown) {
-  try { window.sessionStorage.setItem(key, JSON.stringify(value)) } catch { /* private browsing */ }
-}
-
 function routeFor(shell: Shell, tab: Tab) {
   if (shell === 'retail') {
-    return ({ overview: 'home', wallets: 'wallets', transfer: 'pay', contacts: 'contacts', activity: 'activity', study_identity: 'study-identity', study_wallet: 'study-wallet', study_transfer: 'study-transfer' } as Partial<Record<Tab, string>>)[tab] ?? 'home'
+    return ({ study_identity: 'study-identity', study_wallet: 'study-wallet', study_transfer: 'study-transfer' } as Partial<Record<Tab, string>>)[tab] ?? 'home'
   }
-  return ({ overview: 'overview', participants: 'participants', wallets: 'wallets', create: 'kyc', transfer: 'transfer', supervision: 'supervision', prototype: 'prototype-lab', study_approval: 'study-approval', study_business: 'study-business', study_restrictions: 'study-restrictions', study_funding: 'study-funding', study_monetary: 'study-monetary', study_audit: 'study-audit', study_staff: 'study-staff' } as Partial<Record<Tab, string>>)[tab] ?? 'overview'
+  return ({ study_approval: 'study-approval', study_business: 'study-business', study_restrictions: 'study-restrictions', study_funding: 'study-funding', study_monetary: 'study-monetary', study_audit: 'study-audit', study_staff: 'study-staff' } as Partial<Record<Tab, string>>)[tab] ?? 'overview'
 }
 
 function navigate(shell: Shell, tab: Tab) {
@@ -92,10 +54,10 @@ function navigate(shell: Shell, tab: Tab) {
 function tabFromHash(hash: string): Tab | undefined {
   const path = hash.replace(/^#\/?/, '').split('/').filter(Boolean)
   if (path[0] === 'retail') {
-    return ({ home: 'overview', wallets: 'wallets', pay: 'transfer', contacts: 'contacts', activity: 'activity', 'study-identity': 'study_identity', 'study-wallet': 'study_wallet', 'study-transfer': 'study_transfer' } as Record<string, Tab>)[path[1] ?? '']
+    return ({ 'study-identity': 'study_identity', 'study-wallet': 'study_wallet', 'study-transfer': 'study_transfer' } as Record<string, Tab>)[path[1] ?? '']
   }
   if (path[0] === 'institutional') {
-    return ({ overview: 'overview', participants: 'participants', wallets: 'wallets', kyc: 'create', transfer: 'transfer', supervision: 'supervision', limits: 'supervision', audit: 'supervision', observability: 'supervision', 'prototype-lab': 'prototype', supply: 'prototype', worldstate: 'prototype', 'study-approval': 'study_approval', 'study-business': 'study_business', 'study-restrictions': 'study_restrictions', 'study-funding': 'study_funding', 'study-monetary': 'study_monetary', 'study-audit': 'study_audit', 'study-staff': 'study_staff' } as Record<string, Tab>)[path[1] ?? '']
+    return ({ 'study-approval': 'study_approval', 'study-business': 'study_business', 'study-restrictions': 'study_restrictions', 'study-funding': 'study_funding', 'study-monetary': 'study_monetary', 'study-audit': 'study_audit', 'study-staff': 'study_staff' } as Record<string, Tab>)[path[1] ?? '']
   }
   return undefined
 }
@@ -111,17 +73,13 @@ export default function App() {
   const [sessionUser, setSessionUser] = useState('')
   const [authError, setAuthError] = useState('')
   const [sessionLoading, setSessionLoading] = useState(() => hasAccessToken())
-  const [tab, setTab] = useState<Tab>(() => tabFromHash(typeof window === 'undefined' ? '' : window.location.hash) ?? 'overview')
-  const [selectedWallet, setSelectedWallet] = useState(() => readSession(UI_STATE_KEY, { wallet: '' }).wallet)
-  const [demoPrefill, setDemoPrefill] = useState<DemoPrefill | null>(null)
+  const [tab, setTab] = useState<Tab>(() => tabFromHash(typeof window === 'undefined' ? '' : window.location.hash) ?? 'study_identity')
 
   function handleLogout() {
     setAccessToken('')
     setRole('public')
     setSessionUser('')
-    setSelectedWallet('')
-    setTab('overview')
-    setDemoPrefill(null)
+    setTab('study_identity')
     setSessionLoading(false)
     if (typeof window !== 'undefined') window.location.hash = '#/login'
   }
@@ -137,8 +95,6 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  useEffect(() => { writeSession(UI_STATE_KEY, { wallet: selectedWallet }) }, [selectedWallet])
-
   useEffect(() => {
     if (!hasAccessToken()) { setSessionLoading(false); return }
     getMe()
@@ -147,8 +103,8 @@ export default function App() {
         if (!nextRole) throw new Error('Account role is not recognized.')
         setSessionUser(me.username)
         setRole(nextRole)
-        const nextTab = tabFromHash(window.location.hash) ?? ROLES[nextRole].tabs[0] ?? 'overview'
-        setTab(ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0] ?? 'overview')
+        const nextTab = tabFromHash(window.location.hash) ?? ROLES[nextRole].tabs[0]
+        setTab(ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0])
       })
       .catch(() => handleLogout())
       .finally(() => setSessionLoading(false))
@@ -166,10 +122,10 @@ export default function App() {
       setSessionUser(me.username)
       setRole(nextRole)
       setPassword('')
-      const nextTab = tabFromHash(window.location.hash) ?? ROLES[nextRole].tabs[0] ?? 'overview'
-      setTab(ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0] ?? 'overview')
+      const nextTab = tabFromHash(window.location.hash) ?? ROLES[nextRole].tabs[0]
+      setTab(ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0])
       const nextShell = ROLES[nextRole].shell === 'public' ? 'retail' : ROLES[nextRole].shell
-      navigate(nextShell, ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0] ?? 'overview')
+      navigate(nextShell, ROLES[nextRole].tabs.includes(nextTab) ? nextTab : ROLES[nextRole].tabs[0])
     } catch (err) {
       setAuthError(getErrorMessage(err))
     }
@@ -207,12 +163,11 @@ export default function App() {
         <div className="topbar">
           <div className="brand-block">
             <span className="brand-mark" aria-hidden="true">G</span>
-            <div><strong>Garuda Digital Rupiah</strong><span>{cfg.label}</span></div>
+            <div><strong>bi-coin Digital Rupiah</strong><span>{cfg.label}</span></div>
           </div>
           <div className="header-context" aria-label="Session context">
             <div><span>Signed in</span><strong>{sessionUser}</strong></div>
             <div><span>Role</span><strong>{cfg.label}</strong></div>
-            <div><span>Wallet</span><strong>{selectedWallet || 'Not selected'}</strong></div>
           </div>
           <div className="topbar-actions">
             <button className="secondary-button" onClick={handleLogout}>Sign out</button>
@@ -230,20 +185,12 @@ export default function App() {
       <main className="app-main" id="main-content">
 
         <section className="workspace-shell" aria-live="polite">
-          <div className="workspace-layout">
+          <div className={`workspace-layout${view ? ' with-demo' : ''}`}>
             <div className="workspace-main">
               {cfg.tabs.length === 0 && <p className="muted">This role has no workspace in the demo.</p>}
-              {view === 'overview' && <Overview role={role} selectedWallet={selectedWallet} />}
-              {view === 'participants' && <Participants role={role} prefill={demoPrefill?.target === 'submit' || demoPrefill?.target === 'issue' || demoPrefill?.target === 'distribute' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} />}
-              {view === 'wallets' && <WalletList onSelect={setSelectedWallet} role={role} showParticipantBadges={cfg.shell === 'institutional'} />}
-              {view === 'create' && <CreateWallet prefill={demoPrefill?.target === 'wallet' || demoPrefill?.target === 'kyc-customer' || demoPrefill?.target === 'kyc-approve' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} />}
-              {view === 'transfer' && (shell === 'retail' ? <Pay role={role} selectedWallet={selectedWallet} prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} /> : <Transfer role={role} selectedWallet={selectedWallet} prefill={demoPrefill?.target === 'transfer' ? demoPrefill : undefined} onPrefillConsumed={() => setDemoPrefill(null)} />)}
-              {view === 'contacts' && <Contacts />}
-              {view === 'activity' && <Activity />}
-              {view === 'supervision' && <Supervision walletID={selectedWallet} />}
-              {view === 'prototype' && <PrototypeLab />}
               {view?.startsWith('study_') && <OrganizationWorkspace role={role} section={view} />}
             </div>
+            {view && <RequirementRail allowedTabs={allowedTabs} tab={view} onSelect={next => { setTab(next); navigate(shell, next) }} />}
           </div>
         </section>
       </main>

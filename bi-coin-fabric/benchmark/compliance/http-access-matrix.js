@@ -29,7 +29,8 @@ function routePath(route, subjectID, fixtureIds, apiFixtures, role) {
         : 'missing-staff-fixture';
     return route.path
         .replace('{subject_id}', encodeURIComponent(routeSubjectID))
-        .replace('{client_id}', encodeURIComponent(clientID));
+        .replace('{client_id}', encodeURIComponent(clientID))
+        .replace('{distributor_id}', 'retail-bank');
 }
 
 async function readSubjectState(baseURL, token, subjectID) {
@@ -112,7 +113,7 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
                     } else if (route.path === '/subjects/{subject_id}/restriction-release-decisions') {
                         const stateAfter = await readSubjectState(baseURL, tokens.get(role), actionSubjectID);
                         const unchanged = JSON.stringify(stateBefore) === JSON.stringify(stateAfter);
-                        if (role === 'bank_pjp') {
+                        if (role === 'retail_bank') {
                             const deniedWithoutMutation = response.status === 500 && unchanged;
                             actionExpected = 'staff-role denial leaves restriction unchanged';
                             actionClassification = deniedWithoutMutation ? 'pass' : 'violation';

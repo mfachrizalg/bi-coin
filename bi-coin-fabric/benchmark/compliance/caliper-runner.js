@@ -20,7 +20,7 @@ async function runCaliperRounds({ projectRoot, resultDirectory, networkConfigPat
             ...round,
             arguments: {
                 operationId: scenario.id,
-                channel: 'rupiah-study',
+                channel: 'bi-coin',
                 fixturePath: path.resolve(round.fixturePath),
                 identityMapPath: path.resolve(identityMapPath),
                 eventsPath,

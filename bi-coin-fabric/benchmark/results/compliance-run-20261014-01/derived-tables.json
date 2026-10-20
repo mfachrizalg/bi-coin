@@ -1,0 +1,2174 @@
+{
+  "study": "compliance-run-20261014-01",
+  "generated_by": "derive_tables.py",
+  "sources": {
+    "summary.json": {
+      "sha256": "74c39795d036c64bd13d9a798bbea0661134ab6556bfc297754343da963fc329"
+    },
+    "capacity.json": {
+      "sha256": "5c40c43060e253a047edad647870586ab6d3158a997ee33edce5d18d545c16bc"
+    }
+  },
+  "notes": [
+    "Resource rows: per confirmation window, sum each group instances. Then min, median, and max across the 93 windows for CPU mean, CPU peak, memory peak, and RX (spread). The Ch4 median and max values are the spread median and max.",
+    "Group CPU and memory peaks add per-instance peaks. summary.json has no per-second series, so these are upper bounds on the peak of the summed series.",
+    "Units: memory MiB = bytes / 2^20; RX MB = bytes / 10^6.",
+    "caliper-network-namespace repeats the caliper-client RX/TX counters in every window. It is excluded, so Klien Caliper counts RX once.",
+    "study-cli is measured but absent from the Ch4 table; its ch4 value is null.",
+    "Latency: p50 = latency_ms.median and p95 = latency_ms.p95 per confirmation round. Workload value = median of its 3 rounds; ranges kept. Percentiles are not pooled.",
+    "Capacity: first_failing_ops_per_second is null unless a measured probe (delivered_count present) failed at the recorded rate. fund-reserve recorded 0.195313 from a \"fetch failed\" probe; nearest measured failure is 0.21875."
+  ],
+  "resource_rows": [
+    {
+      "group": "Peer Fabric centralbank",
+      "instance_count": 1,
+      "instances": [
+        "study-peer0-centralbank"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 1.591667,
+      "cpu_peak_max_percent": 68.83,
+      "memory_peak_max_bytes": 161690419.2,
+      "memory_peak_max_mib": 154.2,
+      "rx_delta_median_bytes": 100000,
+      "rx_delta_median_mb": 0.1,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.966333,
+          "median": 1.591667,
+          "max": 59.759333
+        },
+        "cpu_peak_percent": {
+          "min": 1.4,
+          "median": 3.1,
+          "max": 68.83
+        },
+        "memory_peak_mib": {
+          "min": 69.02,
+          "median": 115.2,
+          "max": 154.2
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.1,
+          "max": 23.0
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 1.59,
+        "cpu_peak_max_percent": 68.83,
+        "memory_peak_max_mib": 154.2,
+        "rx_delta_median_mb": 0.1
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Peer Fabric distributor",
+      "instance_count": 1,
+      "instances": [
+        "study-peer0-distributor"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 1.441333,
+      "cpu_peak_max_percent": 6.99,
+      "memory_peak_max_bytes": 161585561.6,
+      "memory_peak_max_mib": 154.1,
+      "rx_delta_median_bytes": 0,
+      "rx_delta_median_mb": 0.0,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.968,
+          "median": 1.441333,
+          "max": 4.652333
+        },
+        "cpu_peak_percent": {
+          "min": 1.32,
+          "median": 2.93,
+          "max": 6.99
+        },
+        "memory_peak_mib": {
+          "min": 81.31,
+          "median": 106.7,
+          "max": 154.1
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0,
+          "max": 2.0
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 1.44,
+        "cpu_peak_max_percent": 6.99,
+        "memory_peak_max_mib": 154.1,
+        "rx_delta_median_mb": 0.0
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Peer Fabric enduser",
+      "instance_count": 1,
+      "instances": [
+        "study-peer0-enduser"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 1.444,
+      "cpu_peak_max_percent": 91.23,
+      "memory_peak_max_bytes": 168611020.8,
+      "memory_peak_max_mib": 160.8,
+      "rx_delta_median_bytes": 0,
+      "rx_delta_median_mb": 0.0,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.934667,
+          "median": 1.444,
+          "max": 80.502
+        },
+        "cpu_peak_percent": {
+          "min": 1.41,
+          "median": 3.12,
+          "max": 91.23
+        },
+        "memory_peak_mib": {
+          "min": 84.8,
+          "median": 122.6,
+          "max": 160.8
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0,
+          "max": 30.2
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 1.44,
+        "cpu_peak_max_percent": 91.23,
+        "memory_peak_max_mib": 160.8,
+        "rx_delta_median_mb": 0.0
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Peer Fabric validator",
+      "instance_count": 1,
+      "instances": [
+        "study-peer0-validator"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 1.36,
+      "cpu_peak_max_percent": 70.99,
+      "memory_peak_max_bytes": 160851558.4,
+      "memory_peak_max_mib": 153.4,
+      "rx_delta_median_bytes": 88000,
+      "rx_delta_median_mb": 0.088,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.946667,
+          "median": 1.36,
+          "max": 63.572667
+        },
+        "cpu_peak_percent": {
+          "min": 1.36,
+          "median": 2.54,
+          "max": 70.99
+        },
+        "memory_peak_mib": {
+          "min": 84.57,
+          "median": 110.5,
+          "max": 153.4
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.088,
+          "max": 25.0
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 1.36,
+        "cpu_peak_max_percent": 70.99,
+        "memory_peak_max_mib": 153.4,
+        "rx_delta_median_mb": 0.09
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Orderer Fabric",
+      "instance_count": 1,
+      "instances": [
+        "study-orderer-centralbank"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 0.116667,
+      "cpu_peak_max_percent": 1.52,
+      "memory_peak_max_bytes": 84766883.84,
+      "memory_peak_max_mib": 80.84,
+      "rx_delta_median_bytes": 0,
+      "rx_delta_median_mb": 0.0,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.026333,
+          "median": 0.116667,
+          "max": 0.668
+        },
+        "cpu_peak_percent": {
+          "min": 0.04,
+          "median": 0.43,
+          "max": 1.52
+        },
+        "memory_peak_mib": {
+          "min": 25.17,
+          "median": 41.58,
+          "max": 80.84
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0,
+          "max": 1.0
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 0.12,
+        "cpu_peak_max_percent": 1.52,
+        "memory_peak_max_mib": 80.8,
+        "rx_delta_median_mb": 0.0
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "CouchDB",
+      "instance_count": 4,
+      "instances": [
+        "study-couchdb-centralbank",
+        "study-couchdb-distributor",
+        "study-couchdb-enduser",
+        "study-couchdb-validator"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 4.018,
+      "cpu_peak_max_percent": 264.98,
+      "memory_peak_max_bytes": 266170531.84,
+      "memory_peak_max_mib": 253.84,
+      "rx_delta_median_bytes": 100,
+      "rx_delta_median_mb": 0.0001,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 2.302333,
+          "median": 4.018,
+          "max": 19.070333
+        },
+        "cpu_peak_percent": {
+          "min": 9.82,
+          "median": 18.51,
+          "max": 264.98
+        },
+        "memory_peak_mib": {
+          "min": 130.5,
+          "median": 203.84,
+          "max": 253.84
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0001,
+          "max": 1.09
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 4.02,
+        "cpu_peak_max_percent": 264.98,
+        "memory_peak_max_mib": 253.8,
+        "rx_delta_median_mb": 0.0
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Fabric CA",
+      "instance_count": 1,
+      "instances": [
+        "study-ca-centralbank"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 0.000333,
+      "cpu_peak_max_percent": 1.03,
+      "memory_peak_max_bytes": 30345789.44,
+      "memory_peak_max_mib": 28.94,
+      "rx_delta_median_bytes": 0,
+      "rx_delta_median_mb": 0.0,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0,
+          "median": 0.000333,
+          "max": 0.034333
+        },
+        "cpu_peak_percent": {
+          "min": 0,
+          "median": 0.01,
+          "max": 1.03
+        },
+        "memory_peak_mib": {
+          "min": 5.863,
+          "median": 7.648,
+          "max": 28.94
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0001
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 0.0,
+        "cpu_peak_max_percent": 1.03,
+        "memory_peak_max_mib": 28.9,
+        "rx_delta_median_mb": 0.0
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "PostgreSQL",
+      "instance_count": 1,
+      "instances": [
+        "study-postgres"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 0.032333,
+      "cpu_peak_max_percent": 0.79,
+      "memory_peak_max_bytes": 39646658.56,
+      "memory_peak_max_mib": 37.81,
+      "rx_delta_median_bytes": 0,
+      "rx_delta_median_mb": 0.0,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0,
+          "median": 0.032333,
+          "max": 0.070333
+        },
+        "cpu_peak_percent": {
+          "min": 0,
+          "median": 0.54,
+          "max": 0.79
+        },
+        "memory_peak_mib": {
+          "min": 9.137,
+          "median": 28.07,
+          "max": 37.81
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 0.03,
+        "cpu_peak_max_percent": 0.79,
+        "memory_peak_max_mib": 37.8,
+        "rx_delta_median_mb": 0.0
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Kontainer chaincode",
+      "instance_count": 12,
+      "instances": [
+        "dev-peer0.centralbank.rupiah.study-rupiah-controls_1.0-4dc3b0987b14d1e9d6c006d83bdc99b5ac10bb2757c8b2cd986ccd16f5973141",
+        "dev-peer0.centralbank.rupiah.study-rupiah-monetary_1.0-7e365283ddfc7ae2294179e09945a2f244ea3161fc376a81d9cecd3f177a4409",
+        "dev-peer0.centralbank.rupiah.study-rupiah-payments_1.0-d3c229bedce7dd92a440565115fcfbdfb46574b9df87d84b9aa6253818ea3096",
+        "dev-peer0.distributor.rupiah.study-rupiah-controls_1.0-4dc3b0987b14d1e9d6c006d83bdc99b5ac10bb2757c8b2cd986ccd16f5973141",
+        "dev-peer0.distributor.rupiah.study-rupiah-monetary_1.0-7e365283ddfc7ae2294179e09945a2f244ea3161fc376a81d9cecd3f177a4409",
+        "dev-peer0.distributor.rupiah.study-rupiah-payments_1.0-d3c229bedce7dd92a440565115fcfbdfb46574b9df87d84b9aa6253818ea3096",
+        "dev-peer0.enduser.rupiah.study-rupiah-controls_1.0-4dc3b0987b14d1e9d6c006d83bdc99b5ac10bb2757c8b2cd986ccd16f5973141",
+        "dev-peer0.enduser.rupiah.study-rupiah-monetary_1.0-7e365283ddfc7ae2294179e09945a2f244ea3161fc376a81d9cecd3f177a4409",
+        "dev-peer0.enduser.rupiah.study-rupiah-payments_1.0-d3c229bedce7dd92a440565115fcfbdfb46574b9df87d84b9aa6253818ea3096",
+        "dev-peer0.validator.rupiah.study-rupiah-controls_1.0-4dc3b0987b14d1e9d6c006d83bdc99b5ac10bb2757c8b2cd986ccd16f5973141",
+        "dev-peer0.validator.rupiah.study-rupiah-monetary_1.0-7e365283ddfc7ae2294179e09945a2f244ea3161fc376a81d9cecd3f177a4409",
+        "dev-peer0.validator.rupiah.study-rupiah-payments_1.0-d3c229bedce7dd92a440565115fcfbdfb46574b9df87d84b9aa6253818ea3096"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 0.312667,
+      "cpu_peak_max_percent": 55.78,
+      "memory_peak_max_bytes": 259994419.2,
+      "memory_peak_max_mib": 247.95,
+      "rx_delta_median_bytes": 202400.0,
+      "rx_delta_median_mb": 0.2024,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.062333,
+          "median": 0.312667,
+          "max": 48.895333
+        },
+        "cpu_peak_percent": {
+          "min": 0.5,
+          "median": 2.05,
+          "max": 55.78
+        },
+        "memory_peak_mib": {
+          "min": 97.546,
+          "median": 138.409,
+          "max": 247.95
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.2024,
+          "max": 41.0018
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 0.31,
+        "cpu_peak_max_percent": 55.78,
+        "memory_peak_max_mib": 248.0,
+        "rx_delta_median_mb": 0.2
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "Klien Caliper",
+      "instance_count": 1,
+      "instances": [
+        "caliper-client"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 0.691067,
+      "cpu_peak_max_percent": 17.982,
+      "memory_peak_max_bytes": 328777728,
+      "memory_peak_max_mib": 313.546875,
+      "rx_delta_median_bytes": 1835463,
+      "rx_delta_median_mb": 1.835463,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0.058333,
+          "median": 0.691067,
+          "max": 14.2011
+        },
+        "cpu_peak_percent": {
+          "min": 0.375,
+          "median": 12.25,
+          "max": 17.982
+        },
+        "memory_peak_mib": {
+          "min": 192.128906,
+          "median": 236.007812,
+          "max": 313.546875
+        },
+        "rx_delta_mb": {
+          "min": 1.54654,
+          "median": 1.835463,
+          "max": 21.783292
+        }
+      },
+      "ch4": {
+        "cpu_mean_median_percent": 0.69,
+        "cpu_peak_max_percent": 17.98,
+        "memory_peak_max_mib": 313.5,
+        "rx_delta_median_mb": 1.84
+      },
+      "ch4_mismatched_metrics": []
+    },
+    {
+      "group": "study-cli",
+      "instance_count": 1,
+      "instances": [
+        "study-cli"
+      ],
+      "window_count": 93,
+      "cpu_mean_median_percent": 0,
+      "cpu_peak_max_percent": 3.34,
+      "memory_peak_max_bytes": 860160,
+      "memory_peak_max_mib": 0.820312,
+      "rx_delta_median_bytes": 0,
+      "rx_delta_median_mb": 0.0,
+      "spread": {
+        "cpu_mean_percent": {
+          "min": 0,
+          "median": 0,
+          "max": 0.111333
+        },
+        "cpu_peak_percent": {
+          "min": 0,
+          "median": 0,
+          "max": 3.34
+        },
+        "memory_peak_mib": {
+          "min": 0.527344,
+          "median": 0.683594,
+          "max": 0.820312
+        },
+        "rx_delta_mb": {
+          "min": 0.0,
+          "median": 0.0,
+          "max": 0.0001
+        }
+      },
+      "ch4": null,
+      "ch4_mismatched_metrics": null
+    }
+  ],
+  "latency_rows": [
+    {
+      "workload": "create-pending",
+      "confirmed_ops_per_second": 4.75,
+      "p50_ms": 1159,
+      "p95_ms": 2005,
+      "p50_range_ms": [
+        1157,
+        1159
+      ],
+      "p95_range_ms": [
+        2004,
+        2006
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 4.75,
+          "p50_ms": 1157,
+          "p95_ms": 2005,
+          "max_ms": 2121,
+          "sample_count": 143
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 4.75,
+          "p50_ms": 1159,
+          "p95_ms": 2006,
+          "max_ms": 2093,
+          "sample_count": 143
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 4.75,
+          "p50_ms": 1159,
+          "p95_ms": 2004,
+          "max_ms": 2093,
+          "sample_count": 143
+        }
+      ]
+    },
+    {
+      "workload": "protect-subject",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 852,
+      "p95_ms": 2070,
+      "p50_range_ms": [
+        792,
+        945
+      ],
+      "p95_range_ms": [
+        2069,
+        2080
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 852,
+          "p95_ms": 2070,
+          "max_ms": 2124,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 945,
+          "p95_ms": 2080,
+          "max_ms": 2226,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 792,
+          "p95_ms": 2069,
+          "max_ms": 2072,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "create-staff-pending",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2069,
+      "p95_ms": 2078,
+      "p50_range_ms": [
+        2068,
+        2073
+      ],
+      "p95_range_ms": [
+        2075,
+        2122
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2073,
+          "p95_ms": 2122,
+          "max_ms": 2122,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2068,
+          "p95_ms": 2078,
+          "max_ms": 2078,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2069,
+          "p95_ms": 2075,
+          "max_ms": 2075,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "protect-staff",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 796,
+      "p95_ms": 2070,
+      "p50_range_ms": [
+        794,
+        857
+      ],
+      "p95_range_ms": [
+        2067,
+        2082
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 857,
+          "p95_ms": 2082,
+          "max_ms": 2125,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 796,
+          "p95_ms": 2070,
+          "max_ms": 2076,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 794,
+          "p95_ms": 2067,
+          "max_ms": 2074,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "set-staff-role",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 792,
+      "p95_ms": 2068,
+      "p50_range_ms": [
+        791,
+        936
+      ],
+      "p95_range_ms": [
+        2067,
+        2069
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 936,
+          "p95_ms": 2067,
+          "max_ms": 2208,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 792,
+          "p95_ms": 2069,
+          "max_ms": 2073,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 791,
+          "p95_ms": 2068,
+          "max_ms": 2071,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "record-review",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 852,
+      "p95_ms": 2071,
+      "p50_range_ms": [
+        799,
+        889
+      ],
+      "p95_range_ms": [
+        2070,
+        2074
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 852,
+          "p95_ms": 2071,
+          "max_ms": 2120,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 799,
+          "p95_ms": 2074,
+          "max_ms": 2079,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 889,
+          "p95_ms": 2070,
+          "max_ms": 2169,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "approve-standard",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 874,
+      "p95_ms": 2083,
+      "p50_range_ms": [
+        798,
+        875
+      ],
+      "p95_range_ms": [
+        2070,
+        2118
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 874,
+          "p95_ms": 2118,
+          "max_ms": 2155,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 875,
+          "p95_ms": 2083,
+          "max_ms": 2156,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 798,
+          "p95_ms": 2070,
+          "max_ms": 2078,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "decide-high-risk",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2060,
+      "p95_ms": 2062,
+      "p50_range_ms": [
+        2054,
+        2061
+      ],
+      "p95_range_ms": [
+        2060,
+        2120
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2061,
+          "p95_ms": 2120,
+          "max_ms": 2120,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2054,
+          "p95_ms": 2060,
+          "max_ms": 2060,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2060,
+          "p95_ms": 2062,
+          "max_ms": 2062,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "set-limits",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 804,
+      "p95_ms": 2078,
+      "p50_range_ms": [
+        794,
+        861
+      ],
+      "p95_range_ms": [
+        2069,
+        2080
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 861,
+          "p95_ms": 2080,
+          "max_ms": 2128,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 804,
+          "p95_ms": 2078,
+          "max_ms": 2083,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 794,
+          "p95_ms": 2069,
+          "max_ms": 2074,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "set-business-authority",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 793,
+      "p95_ms": 2071,
+      "p50_range_ms": [
+        791,
+        852
+      ],
+      "p95_range_ms": [
+        2066,
+        2075
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 852,
+          "p95_ms": 2075,
+          "max_ms": 2125,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 791,
+          "p95_ms": 2066,
+          "max_ms": 2072,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 793,
+          "p95_ms": 2071,
+          "max_ms": 2074,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "freeze-subject",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 788,
+      "p95_ms": 2067,
+      "p50_range_ms": [
+        788,
+        847
+      ],
+      "p95_range_ms": [
+        2067,
+        2077
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 847,
+          "p95_ms": 2077,
+          "max_ms": 2119,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 788,
+          "p95_ms": 2067,
+          "max_ms": 2067,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 788,
+          "p95_ms": 2067,
+          "max_ms": 2068,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "request-unfreeze",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 798,
+      "p95_ms": 2076,
+      "p50_range_ms": [
+        796,
+        844
+      ],
+      "p95_range_ms": [
+        2076,
+        2081
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 844,
+          "p95_ms": 2081,
+          "max_ms": 2115,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 796,
+          "p95_ms": 2076,
+          "max_ms": 2076,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 798,
+          "p95_ms": 2076,
+          "max_ms": 2079,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "approve-unfreeze",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2060,
+      "p95_ms": 2071,
+      "p50_range_ms": [
+        2059,
+        2066
+      ],
+      "p95_range_ms": [
+        2064,
+        2125
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2066,
+          "p95_ms": 2125,
+          "max_ms": 2125,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2060,
+          "p95_ms": 2071,
+          "max_ms": 2071,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2059,
+          "p95_ms": 2064,
+          "max_ms": 2064,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "read-caller-identity",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        7
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 84,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 19,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 22,
+          "sample_count": 8881
+        }
+      ]
+    },
+    {
+      "workload": "can-pay",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        8
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 85,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 72,
+          "sample_count": 8880
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 20,
+          "sample_count": 8881
+        }
+      ]
+    },
+    {
+      "workload": "read-limits",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        7
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 78,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 20,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 21,
+          "sample_count": 8880
+        }
+      ]
+    },
+    {
+      "workload": "can-act-for",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        8
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 81,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 20,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 20,
+          "sample_count": 8881
+        }
+      ]
+    },
+    {
+      "workload": "validator-read-subject",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        8
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 78,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 21,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 20,
+          "sample_count": 8880
+        }
+      ]
+    },
+    {
+      "workload": "register-distributor",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 802,
+      "p95_ms": 2080,
+      "p50_range_ms": [
+        797,
+        856
+      ],
+      "p95_range_ms": [
+        2077,
+        2086
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 856,
+          "p95_ms": 2086,
+          "max_ms": 2127,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 802,
+          "p95_ms": 2080,
+          "max_ms": 2082,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 797,
+          "p95_ms": 2077,
+          "max_ms": 2077,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "mint",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2069,
+      "p95_ms": 2085,
+      "p50_range_ms": [
+        2068,
+        2071
+      ],
+      "p95_range_ms": [
+        2074,
+        2125
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2071,
+          "p95_ms": 2125,
+          "max_ms": 2125,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2069,
+          "p95_ms": 2074,
+          "max_ms": 2074,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2068,
+          "p95_ms": 2085,
+          "max_ms": 2085,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "allocate-reserve",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2069,
+      "p95_ms": 2121,
+      "p50_range_ms": [
+        2064,
+        2070
+      ],
+      "p95_range_ms": [
+        2079,
+        2194
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2070,
+          "p95_ms": 2121,
+          "max_ms": 2121,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2069,
+          "p95_ms": 2194,
+          "max_ms": 2194,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2064,
+          "p95_ms": 2079,
+          "max_ms": 2079,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "redeem-reserve",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2066,
+      "p95_ms": 2122,
+      "p50_range_ms": [
+        2064,
+        2068
+      ],
+      "p95_range_ms": [
+        2074,
+        2197
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2068,
+          "p95_ms": 2122,
+          "max_ms": 2122,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2064,
+          "p95_ms": 2197,
+          "max_ms": 2197,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2066,
+          "p95_ms": 2074,
+          "max_ms": 2074,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "read-treasury",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        7
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 71,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 22,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 22,
+          "sample_count": 8881
+        }
+      ]
+    },
+    {
+      "workload": "read-total-supply",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        8
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 72,
+          "sample_count": 8879
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 19,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 27,
+          "sample_count": 8877
+        }
+      ]
+    },
+    {
+      "workload": "read-reserve",
+      "confirmed_ops_per_second": 296,
+      "p50_ms": 6,
+      "p95_ms": 7,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        7,
+        8
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 76,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 19,
+          "sample_count": 8881
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 296,
+          "p50_ms": 6,
+          "p95_ms": 7,
+          "max_ms": 17,
+          "sample_count": 8881
+        }
+      ]
+    },
+    {
+      "workload": "open-wallet",
+      "confirmed_ops_per_second": 4.625,
+      "p50_ms": 1161,
+      "p95_ms": 2035,
+      "p50_range_ms": [
+        1156,
+        1162
+      ],
+      "p95_range_ms": [
+        2035,
+        2043
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 4.625,
+          "p50_ms": 1156,
+          "p95_ms": 2035,
+          "max_ms": 2047,
+          "sample_count": 139
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 4.625,
+          "p50_ms": 1162,
+          "p95_ms": 2043,
+          "max_ms": 2070,
+          "sample_count": 139
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 4.625,
+          "p50_ms": 1161,
+          "p95_ms": 2035,
+          "max_ms": 2131,
+          "sample_count": 139
+        }
+      ]
+    },
+    {
+      "workload": "transfer-retail",
+      "confirmed_ops_per_second": 0.78125,
+      "p50_ms": 939,
+      "p95_ms": 2113,
+      "p50_range_ms": [
+        827,
+        1072
+      ],
+      "p95_range_ms": [
+        2103,
+        2122
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 939,
+          "p95_ms": 2122,
+          "max_ms": 2207,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 827,
+          "p95_ms": 2103,
+          "max_ms": 2108,
+          "sample_count": 24
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.78125,
+          "p50_ms": 1072,
+          "p95_ms": 2113,
+          "max_ms": 2350,
+          "sample_count": 24
+        }
+      ]
+    },
+    {
+      "workload": "transfer-merchant",
+      "confirmed_ops_per_second": 0.195313,
+      "p50_ms": 2101,
+      "p95_ms": 2134,
+      "p50_range_ms": [
+        2093,
+        2104
+      ],
+      "p95_range_ms": [
+        2109,
+        2157
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2104,
+          "p95_ms": 2157,
+          "max_ms": 2157,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2093,
+          "p95_ms": 2109,
+          "max_ms": 2109,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.195313,
+          "p50_ms": 2101,
+          "p95_ms": 2134,
+          "max_ms": 2134,
+          "sample_count": 6
+        }
+      ]
+    },
+    {
+      "workload": "read-balance",
+      "confirmed_ops_per_second": 272,
+      "p50_ms": 7,
+      "p95_ms": 10,
+      "p50_range_ms": [
+        6,
+        7
+      ],
+      "p95_range_ms": [
+        9,
+        10
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 272,
+          "p50_ms": 7,
+          "p95_ms": 10,
+          "max_ms": 82,
+          "sample_count": 8161
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 272,
+          "p50_ms": 6,
+          "p95_ms": 9,
+          "max_ms": 24,
+          "sample_count": 8161
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 272,
+          "p50_ms": 7,
+          "p95_ms": 10,
+          "max_ms": 93,
+          "sample_count": 8161
+        }
+      ]
+    },
+    {
+      "workload": "read-receipt",
+      "confirmed_ops_per_second": 272,
+      "p50_ms": 6,
+      "p95_ms": 8,
+      "p50_range_ms": [
+        6,
+        6
+      ],
+      "p95_range_ms": [
+        8,
+        9
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 272,
+          "p50_ms": 6,
+          "p95_ms": 9,
+          "max_ms": 101,
+          "sample_count": 8161
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 272,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 24,
+          "sample_count": 8161
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 272,
+          "p50_ms": 6,
+          "p95_ms": 8,
+          "max_ms": 24,
+          "sample_count": 8161
+        }
+      ]
+    },
+    {
+      "workload": "fund-reserve",
+      "confirmed_ops_per_second": 0.183594,
+      "p50_ms": 2147,
+      "p95_ms": 2195,
+      "p50_range_ms": [
+        2144,
+        2159
+      ],
+      "p95_range_ms": [
+        2163,
+        2289
+      ],
+      "rounds": [
+        {
+          "label": "confirm-1",
+          "target_ops_per_second": 0.183594,
+          "p50_ms": 2159,
+          "p95_ms": 2289,
+          "max_ms": 2289,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-2",
+          "target_ops_per_second": 0.183594,
+          "p50_ms": 2147,
+          "p95_ms": 2163,
+          "max_ms": 2163,
+          "sample_count": 6
+        },
+        {
+          "label": "confirm-3",
+          "target_ops_per_second": 0.183594,
+          "p50_ms": 2144,
+          "p95_ms": 2195,
+          "max_ms": 2195,
+          "sample_count": 6
+        }
+      ]
+    }
+  ],
+  "capacity_rows": [
+    {
+      "workload": "create-pending",
+      "chaincode": "rupiah-controls",
+      "transaction": "CreatePending",
+      "operation_kind": "write",
+      "family": "onboarding",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 4.75,
+      "first_failing_ops_per_second": 5.125,
+      "first_failing_recorded_ops_per_second": 5.125,
+      "nearest_measured_failing_ops_per_second": 5.125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "protect-subject",
+      "chaincode": "rupiah-controls",
+      "transaction": "ProtectSubject",
+      "operation_kind": "write",
+      "family": "onboarding",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "create-staff-pending",
+      "chaincode": "rupiah-controls",
+      "transaction": "CreateStaffPending",
+      "operation_kind": "write",
+      "family": "staff",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "protect-staff",
+      "chaincode": "rupiah-controls",
+      "transaction": "ProtectStaff",
+      "operation_kind": "write",
+      "family": "staff",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "set-staff-role",
+      "chaincode": "rupiah-controls",
+      "transaction": "SetStaffRole",
+      "operation_kind": "write",
+      "family": "staff",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "record-review",
+      "chaincode": "rupiah-controls",
+      "transaction": "RecordReview",
+      "operation_kind": "write",
+      "family": "onboarding",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "approve-standard",
+      "chaincode": "rupiah-controls",
+      "transaction": "ApproveStandard",
+      "operation_kind": "write",
+      "family": "onboarding",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "decide-high-risk",
+      "chaincode": "rupiah-controls",
+      "transaction": "DecideHighRisk",
+      "operation_kind": "write",
+      "family": "onboarding",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "set-limits",
+      "chaincode": "rupiah-controls",
+      "transaction": "SetLimits",
+      "operation_kind": "write",
+      "family": "limits",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "set-business-authority",
+      "chaincode": "rupiah-controls",
+      "transaction": "SetBusinessAuthority",
+      "operation_kind": "write",
+      "family": "authority",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "freeze-subject",
+      "chaincode": "rupiah-controls",
+      "transaction": "FreezeSubject",
+      "operation_kind": "write",
+      "family": "restrictions",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "request-unfreeze",
+      "chaincode": "rupiah-controls",
+      "transaction": "RequestUnfreeze",
+      "operation_kind": "write",
+      "family": "restrictions",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "approve-unfreeze",
+      "chaincode": "rupiah-controls",
+      "transaction": "ApproveUnfreeze",
+      "operation_kind": "write",
+      "family": "restrictions",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-caller-identity",
+      "chaincode": "rupiah-controls",
+      "transaction": "GetCallerIdentity",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "can-pay",
+      "chaincode": "rupiah-controls",
+      "transaction": "CanPay",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-limits",
+      "chaincode": "rupiah-controls",
+      "transaction": "GetLimits",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "can-act-for",
+      "chaincode": "rupiah-controls",
+      "transaction": "CanActFor",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "validator-read-subject",
+      "chaincode": "rupiah-controls",
+      "transaction": "GetSubject",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "register-distributor",
+      "chaincode": "rupiah-monetary",
+      "transaction": "RegisterDistributor",
+      "operation_kind": "write",
+      "family": "monetary",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "mint",
+      "chaincode": "rupiah-monetary",
+      "transaction": "Mint",
+      "operation_kind": "write",
+      "family": "monetary",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "allocate-reserve",
+      "chaincode": "rupiah-monetary",
+      "transaction": "AllocateReserve",
+      "operation_kind": "write",
+      "family": "monetary",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "redeem-reserve",
+      "chaincode": "rupiah-monetary",
+      "transaction": "RedeemReserve",
+      "operation_kind": "write",
+      "family": "monetary",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-treasury",
+      "chaincode": "rupiah-monetary",
+      "transaction": "GetTreasury",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-total-supply",
+      "chaincode": "rupiah-monetary",
+      "transaction": "GetTotalSupply",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-reserve",
+      "chaincode": "rupiah-monetary",
+      "transaction": "GetReserve",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 296,
+      "first_failing_ops_per_second": 320,
+      "first_failing_recorded_ops_per_second": 320,
+      "nearest_measured_failing_ops_per_second": 320,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "open-wallet",
+      "chaincode": "rupiah-payments",
+      "transaction": "OpenWallet",
+      "operation_kind": "write",
+      "family": "onboarding",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 4.625,
+      "first_failing_ops_per_second": 5,
+      "first_failing_recorded_ops_per_second": 5,
+      "nearest_measured_failing_ops_per_second": 5,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "transfer-retail",
+      "chaincode": "rupiah-payments",
+      "transaction": "Transfer",
+      "operation_kind": "write",
+      "family": "payments",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.78125,
+      "first_failing_ops_per_second": 0.828125,
+      "first_failing_recorded_ops_per_second": 0.828125,
+      "nearest_measured_failing_ops_per_second": 0.828125,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "transfer-merchant",
+      "chaincode": "rupiah-payments",
+      "transaction": "Transfer",
+      "operation_kind": "write",
+      "family": "payments",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.195313,
+      "first_failing_ops_per_second": 0.207031,
+      "first_failing_recorded_ops_per_second": 0.207031,
+      "nearest_measured_failing_ops_per_second": 0.207031,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-balance",
+      "chaincode": "rupiah-payments",
+      "transaction": "GetBalance",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 272,
+      "first_failing_ops_per_second": 296,
+      "first_failing_recorded_ops_per_second": 296,
+      "nearest_measured_failing_ops_per_second": 296,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "read-receipt",
+      "chaincode": "rupiah-payments",
+      "transaction": "GetReceipt",
+      "operation_kind": "query",
+      "family": "reads",
+      "rate_unit": "operations/second",
+      "confirmed_ops_per_second": 272,
+      "first_failing_ops_per_second": 296,
+      "first_failing_recorded_ops_per_second": 296,
+      "nearest_measured_failing_ops_per_second": 296,
+      "confirmation_classification": "pass"
+    },
+    {
+      "workload": "fund-reserve",
+      "chaincode": "rupiah-payments",
+      "transaction": "FundFromReserve",
+      "operation_kind": "write",
+      "family": "payments",
+      "rate_unit": "TPS",
+      "confirmed_ops_per_second": 0.183594,
+      "first_failing_ops_per_second": null,
+      "first_failing_recorded_ops_per_second": 0.195313,
+      "nearest_measured_failing_ops_per_second": 0.21875,
+      "confirmation_classification": "pass"
+    }
+  ],
+  "checks": {
+    "confirmation_windows": 93,
+    "components_per_window": 26,
+    "summary_capacity_disagreements": [],
+    "capacity_rows_without_measured_first_failing": [
+      "fund-reserve"
+    ],
+    "resource_rows_mismatching_ch4": [],
+    "caliper_network_namespace": {
+      "component": "caliper-network-namespace",
+      "duplicates": "caliper-client",
+      "windows": 93,
+      "rx_equal_windows": 93,
+      "tx_equal_windows": 93,
+      "treatment": "excluded from every group sum"
+    },
+    "probe_resource_sample_counts": {
+      "10": 261,
+      "9": 1,
+      "no_resource": 3
+    }
+  }
+}

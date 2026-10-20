@@ -3,16 +3,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-NETWORK_DIR="$PROJECT_DIR/network/study"
-CHAINCODE_DIR="$PROJECT_DIR/study/chaincode"
+NETWORK_DIR="$PROJECT_DIR/network"
+CHAINCODE_DIR="$PROJECT_DIR/chaincode"
 FABRIC_SAMPLES="${FABRIC_SAMPLES:-$HOME/fabric-samples}"
-CHANNEL_NAME="${STUDY_CHANNEL_NAME:-rupiah-study}"
-PROJECT_NAME="bi-coin-rupiah-study"
+CHANNEL_NAME="${FABRIC_CHANNEL_NAME:-bi-coin}"
+PROJECT_NAME="bi-coin"
 PACKAGE_DIR="$NETWORK_DIR/packages"
-CLI_CONTAINER="study-cli"
-ORDERER_TLS_CA="/study/organizations/peerOrganizations/centralbank.rupiah.study/msp/tlscacerts/tlsca-cert.pem"
-PACKAGE_VERSION="1.0"
-PACKAGE_SEQUENCE="1"
+CLI_CONTAINER="bi-coin-cli"
+ORDERER_TLS_CA="/network/organizations/peerOrganizations/centralbank.bi-coin/msp/tlscacerts/tlsca-cert.pem"
+PACKAGE_VERSION="2.0"
+PACKAGE_SEQUENCE="2"
 
 export PATH="$FABRIC_SAMPLES/bin:$PATH"
 export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
@@ -27,17 +27,17 @@ fi
 select_peer() {
   case "$1" in
     centralbank)
-      MSPID=CentralBankMSP; ADDRESS=peer0.centralbank.rupiah.study:7051; DOMAIN=centralbank.rupiah.study ;;
+      MSPID=CentralBankMSP; ADDRESS=peer0.centralbank.bi-coin:7051; DOMAIN=centralbank.bi-coin ;;
     distributor)
-      MSPID=DistributorMSP; ADDRESS=peer0.distributor.rupiah.study:7051; DOMAIN=distributor.rupiah.study ;;
+      MSPID=DistributorMSP; ADDRESS=peer0.distributor.bi-coin:7051; DOMAIN=distributor.bi-coin ;;
     validator)
-      MSPID=ValidatorMSP; ADDRESS=peer0.validator.rupiah.study:7051; DOMAIN=validator.rupiah.study ;;
+      MSPID=ValidatorMSP; ADDRESS=peer0.validator.bi-coin:7051; DOMAIN=validator.bi-coin ;;
     enduser)
-      MSPID=EndUserMSP; ADDRESS=peer0.enduser.rupiah.study:7051; DOMAIN=enduser.rupiah.study ;;
+      MSPID=EndUserMSP; ADDRESS=peer0.enduser.bi-coin:7051; DOMAIN=enduser.bi-coin ;;
     *) echo "unknown peer org: $1" >&2; exit 2 ;;
   esac
-  TLS_ROOT="/study/organizations/peerOrganizations/$DOMAIN/peers/peer0.$DOMAIN/tls/ca.crt"
-  ADMIN_MSP="/study/organizations/peerOrganizations/$DOMAIN/users/Admin@$DOMAIN/msp"
+  TLS_ROOT="/network/organizations/peerOrganizations/$DOMAIN/peers/peer0.$DOMAIN/tls/ca.crt"
+  ADMIN_MSP="/network/organizations/peerOrganizations/$DOMAIN/users/Admin@$DOMAIN/msp"
 }
 
 peer_cli() {
@@ -80,7 +80,7 @@ deploy_one() {
 
   for org in centralbank distributor validator enduser; do
     echo "Installing $name on $org..."
-    output="$(peer_cli "$org" lifecycle chaincode install "/study/packages/$name.tar.gz" 2>&1)" || {
+    output="$(peer_cli "$org" lifecycle chaincode install "/network/packages/$name.tar.gz" 2>&1)" || {
       if [[ "$output" != *"already successfully installed"* ]]; then
         printf '%s\n' "$output" >&2
         exit 1
@@ -106,8 +106,8 @@ deploy_one() {
     fi
     echo "Approving $name for $org..."
     peer_cli "$org" lifecycle chaincode approveformyorg \
-      -o orderer.centralbank.rupiah.study:7050 \
-      --ordererTLSHostnameOverride orderer.centralbank.rupiah.study \
+      -o orderer.centralbank.bi-coin:7050 \
+      --ordererTLSHostnameOverride orderer.centralbank.bi-coin \
       --channelID "$CHANNEL_NAME" \
       --name "$name" \
       --version "$PACKAGE_VERSION" \
@@ -128,18 +128,18 @@ deploy_one() {
 
   echo "Committing $name..."
   peer_cli centralbank lifecycle chaincode commit \
-    -o orderer.centralbank.rupiah.study:7050 \
-    --ordererTLSHostnameOverride orderer.centralbank.rupiah.study \
+    -o orderer.centralbank.bi-coin:7050 \
+    --ordererTLSHostnameOverride orderer.centralbank.bi-coin \
     --channelID "$CHANNEL_NAME" \
     --name "$name" \
     --version "$PACKAGE_VERSION" \
     --sequence "$PACKAGE_SEQUENCE" \
     --signature-policy "$policy" \
     --tls --cafile "$ORDERER_TLS_CA" \
-    --peerAddresses peer0.centralbank.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/centralbank.rupiah.study/peers/peer0.centralbank.rupiah.study/tls/ca.crt \
-    --peerAddresses peer0.distributor.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/distributor.rupiah.study/peers/peer0.distributor.rupiah.study/tls/ca.crt \
-    --peerAddresses peer0.validator.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/validator.rupiah.study/peers/peer0.validator.rupiah.study/tls/ca.crt \
-    --peerAddresses peer0.enduser.rupiah.study:7051 --tlsRootCertFiles /study/organizations/peerOrganizations/enduser.rupiah.study/peers/peer0.enduser.rupiah.study/tls/ca.crt \
+    --peerAddresses peer0.centralbank.bi-coin:7051 --tlsRootCertFiles /network/organizations/peerOrganizations/centralbank.bi-coin/peers/peer0.centralbank.bi-coin/tls/ca.crt \
+    --peerAddresses peer0.distributor.bi-coin:7051 --tlsRootCertFiles /network/organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls/ca.crt \
+    --peerAddresses peer0.validator.bi-coin:7051 --tlsRootCertFiles /network/organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls/ca.crt \
+    --peerAddresses peer0.enduser.bi-coin:7051 --tlsRootCertFiles /network/organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls/ca.crt \
     --waitForEventTimeout 2m
   peer_cli centralbank lifecycle chaincode querycommitted -C "$CHANNEL_NAME" -n "$name"
 }

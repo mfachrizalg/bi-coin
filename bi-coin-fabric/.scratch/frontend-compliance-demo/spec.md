@@ -32,7 +32,7 @@ Why `validator_bank` has no study tabs: `studyMSPForRole` (`study_handlers.go:42
 
 ## Facts checked (2026-10-14)
 
-- **F1** `GET /identities/me` and `POST /subjects` allow only `authenticated`, `kyc_verified`, `merchant` (`study_handlers.go:34-36`). BI and PJP cannot read their own client ID there. → OQ2.
+- **F1** `GET /identities/me` and `POST /subjects` allow only `authenticated`, `kyc_verified`, `merchant` (`study_handlers.go:34-36`). BI and both banks cannot read their own client ID there. → OQ2.
 - **F2** Client `checks` are stored unvalidated and never reach the ledger. The UI sends hardcoded passes (`CreateWallet.tsx:117`, via `refreshKycProfile`, `api.ts:247`). `validateKycDecision` (`backend/services/ledger.go:1097`) checks status, risk, due diligence and approval rules, not `Checks`. `PostgresStore.RefreshKycProfile` (`postgres_store.go:330`; body read from the benchmark copy, live body not read) writes `req.Checks` into `kyc_provider_checks`. The chaincode call (`ledger.go:1084-1085`) sends profile, status, risk, due diligence, senior approval, hashes and expiry only. → OQ3.
 - **F3** Hiding nav does not block routes. The hashchange handler (`App.tsx:149-156`) sets any tab from `tabFromHash` with no `ROLES[role].tabs` check. As BI, `#/institutional/kyc` renders `CreateWallet`. Login and role switch (`App.tsx:172-173, 196-197`) do check. Backend RBAC still enforces access.
 - **F4** Unverified: whether `decodeJSON` (`handlers.go:29`) rejects unknown fields. It checks JSON shape and duplicate keys (`validateJSONShape`). Affects contract tests only.
@@ -82,8 +82,8 @@ Follow `frontend/AGENTS.md`: change roles, routes, screen selection and contract
 
 ### Demo prep (no code)
 - Before any Fabric call, check benchmark run `20261014-01`. Last recorded running at 10:12 WIB. Do not touch the study network while it runs.
-- Run backend with `FABRIC_STUDY_IDENTITIES_JSON` and `AUTH_BOOTSTRAP_USERS_JSON`. Map reviewer, senior and compliance users to `User1`, `User2`, `User3` (`network/study/README.md:36-52`).
-- Seed staff via `scripts/study-smoke-test.js` (`setupStaff`, :202-244), or the Staff roles tab.
+- Run backend with `FABRIC_IDENTITIES_JSON` and `AUTH_BOOTSTRAP_USERS_JSON`. Map reviewer, senior and compliance users to `User1`, `User2`, `User3` (`network/README.md:36-52`).
+- Seed staff via `scripts/smoke-test.js` (`setupStaff`, :202-244), or the Staff roles tab.
 
 ## Verification
 1. `cd bi-coin-fabric/frontend && rtk npm test && rtk npm run build`

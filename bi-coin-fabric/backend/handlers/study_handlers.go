@@ -42,8 +42,9 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	customer.HandleFunc("/customer-wallets/{subject_id}/balance", h.GetBalance).Methods("GET").Name("compliance.customer-wallets.balance")
 
 	distributor := compliance.NewRoute().Subrouter()
-	distributor.Use(middleware.RequireRole(middleware.RolePJP, middleware.RoleBankPjp))
-	distributor.HandleFunc("/conversions", h.FundFromReserve).Methods("POST").Name("compliance.conversions.create")
+	distributor.Use(middleware.RequireRole(middleware.RoleRetailBank))
+	distributor.HandleFunc("/conversions", h.ConvertToRetail).Methods("POST").Name("compliance.conversions.create")
+	distributor.HandleFunc("/wallet-fundings", h.FundWallet).Methods("POST").Name("compliance.wallet-fundings.create")
 	distributor.HandleFunc("/subjects/{subject_id}/endorsement-policies", h.ProtectSubject).Methods("POST").Name("compliance.subjects.endorsement-policies.create")
 	distributor.HandleFunc("/subjects/{subject_id}/reviews", h.RecordReview).Methods("POST").Name("compliance.subjects.reviews.create")
 	distributor.HandleFunc("/subjects/{subject_id}/limits", h.SetLimits).Methods("PUT").Name("compliance.subjects.limits.update")
@@ -53,6 +54,10 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	distributor.HandleFunc("/subjects/{subject_id}/restriction-release-requests", h.RequestUnfreeze).Methods("POST").Name("compliance.subjects.restriction-release-requests.create")
 	distributor.HandleFunc("/subjects/{subject_id}/restriction-release-decisions", h.ApproveUnfreeze).Methods("POST").Name("compliance.subjects.restriction-release-decisions.create")
 
+	bank := compliance.NewRoute().Subrouter()
+	bank.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleWholesaleBank))
+	bank.HandleFunc("/interbank-transfers", h.TransferReserve).Methods("POST").Name("compliance.interbank-transfers.create")
+
 	centralBank := compliance.NewRoute().Subrouter()
 	centralBank.Use(middleware.RequireRole(middleware.RoleBankIndonesia))
 	centralBank.HandleFunc("/staff", h.CreateStaff).Methods("POST").Name("compliance.staff.create")
@@ -60,13 +65,17 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	centralBank.HandleFunc("/staff/{client_id}/role", h.SetStaffRole).Methods("PUT").Name("compliance.staff.role.update")
 	centralBank.HandleFunc("/monetary-initializations", h.InitializeMonetary).Methods("POST").Name("compliance.monetary-initializations.create")
 	centralBank.HandleFunc("/distributors", h.RegisterDistributor).Methods("POST").Name("compliance.distributors.create")
-	centralBank.HandleFunc("/issuances", h.Mint).Methods("POST").Name("compliance.issuances.create")
-	centralBank.HandleFunc("/reserve-allocations", h.AllocateReserve).Methods("POST").Name("compliance.reserve-allocations.create")
+	centralBank.HandleFunc("/issuances", h.Issue).Methods("POST").Name("compliance.issuances.create")
 	centralBank.HandleFunc("/reserve-redemptions", h.RedeemReserve).Methods("POST").Name("compliance.reserve-redemptions.create")
 
 	controlRead := compliance.NewRoute().Subrouter()
-	controlRead.Use(middleware.RequireRole(middleware.RoleBankPjp, middleware.RolePJP, middleware.RoleBankIndonesia, middleware.RoleSupervisor))
+	controlRead.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleWholesaleBank, middleware.RoleBankIndonesia, middleware.RoleAuditor))
 	controlRead.HandleFunc("/subjects/{subject_id}", h.GetSubject).Methods("GET").Name("compliance.subjects.read")
+	controlRead.HandleFunc("/supply/wholesale", h.GetWholesaleSupply).Methods("GET").Name("compliance.supply.wholesale.read")
+	controlRead.HandleFunc("/supply/retail", h.GetRetailSupply).Methods("GET").Name("compliance.supply.retail.read")
+	controlRead.HandleFunc("/supply/total", h.GetTotalSupply).Methods("GET").Name("compliance.supply.total.read")
+	controlRead.HandleFunc("/distributors/{distributor_id}/reserve", h.GetReserve).Methods("GET").Name("compliance.distributors.reserve.read")
+	controlRead.HandleFunc("/distributors/{distributor_id}/float", h.GetRetailFloat).Methods("GET").Name("compliance.distributors.float.read")
 }
 
 func (h *StudyHandler) Identity(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +141,26 @@ func (h *StudyHandler) Transfer(w http.ResponseWriter, r *http.Request) {
 	writeStudyResult(w, result)
 }
 
-func (h *StudyHandler) FundFromReserve(w http.ResponseWriter, r *http.Request) {
+func (h *StudyHandler) ConvertToRetail(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		DistributorID string `json:"distributor_id" validate:"required,notblank"`
+		Amount        string `json:"amount" validate:"required,positive_int64"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if !requireStudyIdempotencyKey(w, r) {
+		return
+	}
+	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-payments", "ConvertToRetail", req.DistributorID, req.Amount, r.Header.Get("Idempotency-Key"))
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStudyResult(w, result)
+}
+
+func (h *StudyHandler) FundWallet(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		SubjectID     string `json:"subject_id" validate:"required,notblank"`
 		DistributorID string `json:"distributor_id" validate:"required,notblank"`
@@ -144,12 +172,31 @@ func (h *StudyHandler) FundFromReserve(w http.ResponseWriter, r *http.Request) {
 	if !requireStudyIdempotencyKey(w, r) {
 		return
 	}
-	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-payments", "FundFromReserve", req.SubjectID, req.DistributorID, req.Amount, r.Header.Get("Idempotency-Key"))
+	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-payments", "FundWallet", req.SubjectID, req.DistributorID, req.Amount, r.Header.Get("Idempotency-Key"))
 	if err != nil {
 		writeServiceError(w, err)
 		return
 	}
 	writeStudyResult(w, result)
+}
+
+func (h *StudyHandler) TransferReserve(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		FromDistributorID string `json:"from_distributor_id" validate:"required,notblank"`
+		ToDistributorID   string `json:"to_distributor_id" validate:"required,notblank"`
+		Amount            string `json:"amount" validate:"required,positive_int64"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if !requireStudyIdempotencyKey(w, r) {
+		return
+	}
+	if err := h.submit(r, studyDistributorMSP, "rupiah-monetary", "TransferReserve", req.FromDistributorID, req.ToDistributorID, req.Amount, r.Header.Get("Idempotency-Key")); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "transferred")
 }
 
 func (h *StudyHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
@@ -328,35 +375,19 @@ func (h *StudyHandler) InitializeMonetary(w http.ResponseWriter, r *http.Request
 func (h *StudyHandler) RegisterDistributor(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		DistributorID string `json:"distributor_id" validate:"required,notblank"`
+		Kind          string `json:"kind" validate:"required,oneof=wholesale retail"`
 	}
 	if !decodeJSON(w, r, &req) {
 		return
 	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "RegisterDistributor", req.DistributorID); err != nil {
+	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "RegisterDistributor", req.DistributorID, req.Kind); err != nil {
 		writeServiceError(w, err)
 		return
 	}
 	writeStatus(w, "distributor_registered")
 }
 
-func (h *StudyHandler) Mint(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Amount string `json:"amount" validate:"required,positive_int64"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if !requireStudyIdempotencyKey(w, r) {
-		return
-	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "Mint", req.Amount, r.Header.Get("Idempotency-Key")); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, "minted")
-}
-
-func (h *StudyHandler) AllocateReserve(w http.ResponseWriter, r *http.Request) {
+func (h *StudyHandler) Issue(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		DistributorID string `json:"distributor_id" validate:"required,notblank"`
 		Amount        string `json:"amount" validate:"required,positive_int64"`
@@ -367,11 +398,11 @@ func (h *StudyHandler) AllocateReserve(w http.ResponseWriter, r *http.Request) {
 	if !requireStudyIdempotencyKey(w, r) {
 		return
 	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "AllocateReserve", req.DistributorID, req.Amount, r.Header.Get("Idempotency-Key")); err != nil {
+	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "Issue", req.DistributorID, req.Amount, r.Header.Get("Idempotency-Key")); err != nil {
 		writeServiceError(w, err)
 		return
 	}
-	writeStatus(w, "reserve_allocated")
+	writeStatus(w, "issued")
 }
 
 func (h *StudyHandler) RedeemReserve(w http.ResponseWriter, r *http.Request) {
@@ -420,13 +451,47 @@ func (h *StudyHandler) GetSubject(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, subject)
 }
 
+func (h *StudyHandler) GetWholesaleSupply(w http.ResponseWriter, r *http.Request) {
+	h.readAmount(w, r, "rupiah-monetary", "GetWholesaleSupply")
+}
+
+func (h *StudyHandler) GetRetailSupply(w http.ResponseWriter, r *http.Request) {
+	h.readAmount(w, r, "rupiah-monetary", "GetRetailSupply")
+}
+
+func (h *StudyHandler) GetTotalSupply(w http.ResponseWriter, r *http.Request) {
+	h.readAmount(w, r, "rupiah-monetary", "GetTotalSupply")
+}
+
+func (h *StudyHandler) GetReserve(w http.ResponseWriter, r *http.Request) {
+	h.readAmount(w, r, "rupiah-monetary", "GetReserve", mux.Vars(r)["distributor_id"])
+}
+
+func (h *StudyHandler) GetRetailFloat(w http.ResponseWriter, r *http.Request) {
+	h.readAmount(w, r, "rupiah-payments", "GetRetailFloat", mux.Vars(r)["distributor_id"])
+}
+
+func (h *StudyHandler) readAmount(w http.ResponseWriter, r *http.Request, chaincode string, transaction string, args ...string) {
+	result, err := h.evaluate(r, studyMSPForRole(middleware.GetRole(r)), chaincode, transaction, args...)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	amount, err := strconv.ParseInt(strings.TrimSpace(string(result)), 10, 64)
+	if err != nil {
+		writeServiceError(w, services.Internal("invalid study amount result", err))
+		return
+	}
+	writeStudyResult(w, []byte(strconv.Quote(strconv.FormatInt(amount, 10))))
+}
+
 func studyMSPForRole(role middleware.Role) string {
 	switch role {
-	case middleware.RolePJP, middleware.RoleBankPjp:
+	case middleware.RoleRetailBank, middleware.RoleWholesaleBank:
 		return studyDistributorMSP
 	case middleware.RoleBankIndonesia:
 		return studyCentralBankMSP
-	case middleware.RoleSupervisor:
+	case middleware.RoleAuditor:
 		return studyValidatorMSP
 	case middleware.RoleAuthenticated, middleware.RoleKycVerified, middleware.RoleMerchant:
 		return studyEndUserMSP

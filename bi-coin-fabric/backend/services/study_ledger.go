@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 
@@ -20,6 +21,11 @@ const (
 	studyControlsChaincode = "rupiah-controls"
 	studyPaymentsChaincode = "rupiah-payments"
 )
+
+type FabricContract interface {
+	SubmitTransaction(name string, args ...string) ([]byte, error)
+	EvaluateTransaction(name string, args ...string) ([]byte, error)
+}
 
 type StudyLedgerService struct {
 	identities map[string]config.FabricStudyIdentity
@@ -188,4 +194,28 @@ func (s *StudyLedgerService) Close() error {
 	}
 	s.closers = nil
 	return first
+}
+
+func gatewayTLSServerName(gatewayPeer string) string {
+	host, _, err := net.SplitHostPort(gatewayPeer)
+	if err != nil {
+		return gatewayPeer
+	}
+	return host
+}
+
+func loadIdentity(gateway config.FabricGateway) (*identity.X509Identity, error) {
+	certPEM, err := os.ReadFile(gateway.CertPath)
+	if err != nil {
+		return nil, fmt.Errorf("read cert: %w", err)
+	}
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return nil, fmt.Errorf("failed to decode cert PEM")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("parse cert: %w", err)
+	}
+	return identity.NewX509Identity(gateway.MSPID, cert)
 }

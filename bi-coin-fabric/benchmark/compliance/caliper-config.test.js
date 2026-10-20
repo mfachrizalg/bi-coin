@@ -39,7 +39,7 @@ test('Fabric network configuration creates one certificate profile for each stud
         tls_cert_path: `/tmp/${msp_id}-tls.crt`,
     }));
     try {
-        const paths = writeFabricNetworkConfig({ outputDirectory: directory, identities, channel: 'rupiah-study', chaincodes: ['rupiah-controls', 'rupiah-monetary', 'rupiah-payments'] });
+        const paths = writeFabricNetworkConfig({ outputDirectory: directory, identities, channel: 'bi-coin', chaincodes: ['rupiah-controls', 'rupiah-monetary', 'rupiah-payments'] });
         const network = JSON.parse(fs.readFileSync(paths.networkPath, 'utf8'));
         assert.equal(network.version, '2.0.0');
         assert.equal(network.organizations.length, 4);

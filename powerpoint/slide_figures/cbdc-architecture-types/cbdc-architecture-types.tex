@@ -25,7 +25,7 @@
 %==== Baris 1: Tidak Langsung (Indirect / dua jenjang) ====
 \node[lbl] at (-3.6, 2.2) {Tidak langsung\\(\textit{indirect})};
 \node[cb]  (cb1)  at (0, 2.2) {Bank\\Sentral};
-\node[mid] (int1) at (4.0, 2.2) {Perantara\\(Bank/PJP)};
+\node[mid] (int1) at (4.0, 2.2) {Perantara\\(Bank)};
 \node[usr] (u1)   at (8.0, 2.2) {Pengguna};
 \draw[ar] (cb1.east)  -- (int1.west);
 \draw[ar] (int1.east) -- (u1.west);
@@ -41,12 +41,12 @@
 %==== Baris 3: Hibrida (Hybrid) ====
 \node[lbl] at (-3.6, -2.4) {Hibrida\\(\textit{hybrid})};
 \node[cb]  (cb3)  at (0, -2.4) {Bank\\Sentral};
-\node[mid] (int3) at (4.0, -2.4) {PJP};
+\node[mid] (int3) at (4.0, -2.4) {Perantara\\(Bank)};
 \node[usr] (u3)   at (8.0, -2.4) {Pengguna};
 \draw[ar] (cb3.east)  -- (int3.west);
 \draw[ar] (int3.east) -- (u3.west);
 \draw[ard] (cb3.south) to[out=-40,in=-140] node[note,below]{klaim langsung ke bank sentral} (u3.south);
-\node[note] at (4.0, -1.3) {PJP menangani pembayaran ritel};
+\node[note] at (4.0, -1.3) {Bank perantara menangani pembayaran ritel};
 
 \end{tikzpicture}%
 

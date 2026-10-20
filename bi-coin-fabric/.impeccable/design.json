@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-09-24T15:55:00+07:00",
-  "title": "Design System: Garuda Digital Rupiah",
+  "title": "Design System: bi-coin Digital Rupiah",
   "extensions": {
     "colorMeta": {
       "reserve-navy": { "role": "primary", "displayName": "Reserve Navy", "canonical": "oklch(34.2% 0.075 251)", "tonalRamp": ["oklch(15% 0.075 251)", "oklch(25% 0.075 251)", "oklch(35% 0.075 251)", "oklch(45% 0.075 251)", "oklch(58% 0.075 251)", "oklch(72% 0.075 251)", "oklch(85% 0.030 251)", "oklch(95% 0.030 251)"] },
@@ -19,8 +19,8 @@
       "settled-green": { "role": "tertiary", "displayName": "Settled Green", "canonical": "oklch(51.1% 0.110 158)", "tonalRamp": ["oklch(15% 0.110 158)", "oklch(25% 0.110 158)", "oklch(35% 0.110 158)", "oklch(45% 0.110 158)", "oklch(58% 0.110 158)", "oklch(72% 0.110 158)", "oklch(85% 0.030 158)", "oklch(95% 0.030 158)"] },
       "caution-amber": { "role": "tertiary", "displayName": "Caution Amber", "canonical": "oklch(55.4% 0.117 75)", "tonalRamp": ["oklch(15% 0.117 75)", "oklch(25% 0.117 75)", "oklch(35% 0.117 75)", "oklch(45% 0.117 75)", "oklch(58% 0.117 75)", "oklch(72% 0.117 75)", "oklch(85% 0.030 75)", "oklch(95% 0.030 75)"] },
       "freeze-red": { "role": "tertiary", "displayName": "Freeze Red", "canonical": "oklch(50.0% 0.182 30)", "tonalRamp": ["oklch(15% 0.182 30)", "oklch(25% 0.182 30)", "oklch(35% 0.182 30)", "oklch(45% 0.182 30)", "oklch(58% 0.182 30)", "oklch(72% 0.182 30)", "oklch(85% 0.030 30)", "oklch(95% 0.030 30)"] },
-      "role-validator": { "role": "tertiary", "displayName": "Validator Bank Tint" },
-      "role-pjp": { "role": "tertiary", "displayName": "PJP Tint" },
+      "role-wholesale-bank": { "role": "tertiary", "displayName": "Wholesale Bank Tint" },
+      "role-retail-bank": { "role": "tertiary", "displayName": "Retail Bank Tint" },
       "role-observer": { "role": "tertiary", "displayName": "Observer Tint" },
       "console-night": { "role": "neutral", "displayName": "Console Night", "canonical": "oklch(24.0% 0.043 254)", "tonalRamp": ["oklch(15% 0.043 254)", "oklch(25% 0.043 254)", "oklch(35% 0.043 254)", "oklch(45% 0.043 254)", "oklch(58% 0.043 254)", "oklch(72% 0.043 254)", "oklch(85% 0.030 254)", "oklch(95% 0.030 254)"] }
     },
@@ -88,7 +88,7 @@
       "kind": "card",
       "refersTo": "card-institutional",
       "description": "Bordered sheet with an uppercase label and a tabular figure.",
-      "html": "<div class=\"ds-metric\"><span class=\"ds-metric-label\">Total supply</span><strong>Rp 1.250.000.000</strong><span class=\"ds-muted\">Issued into Treasury</span></div>",
+      "html": "<div class=\"ds-metric\"><span class=\"ds-metric-label\">Total supply</span><strong>Rp 1.250.000.000</strong><span class=\"ds-muted\">Issued to Distributor reserves</span></div>",
       "css": ".ds-metric { display: grid; padding: 16px; border: 1px solid var(--line, #d6dde6); border-radius: 8px; background: var(--surface, #fff); color: var(--ink, #172033); } .ds-metric-label { color: var(--muted, #5f6b7a); font-size: .72rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; } .ds-metric strong { margin: 8px 0 5px; font-size: 1.8rem; font-variant-numeric: tabular-nums; } .ds-muted { color: var(--muted, #5f6b7a); font-size: .84rem; }"
     },
     {
@@ -96,15 +96,15 @@
       "kind": "chip",
       "refersTo": "participant-badge",
       "description": "Role-tinted pill badges plus text-only status.",
-      "html": "<span class=\"ds-badge ds-validator\">Validator Bank</span> <span class=\"ds-badge ds-pjp\">PJP</span> <span class=\"ds-badge ds-observer\">Observer</span> <span class=\"ds-status ds-active\">Active</span> <span class=\"ds-status ds-frozen\">Frozen</span>",
-      "css": ".ds-badge, .ds-status { display: inline-flex; align-items: center; border-radius: 999px; font-size: .75rem; font-weight: 700; } .ds-badge { padding: 4px 8px; color: #fff; background: var(--navy, #173a5e); } .ds-validator { background: #285f8f; } .ds-pjp { background: #176b87; } .ds-observer { background: #667085; } .ds-status.ds-active { color: var(--success, #18794e); } .ds-status.ds-frozen { color: var(--danger, #b42318); }"
+      "html": "<span class=\"ds-badge ds-wholesale\">Wholesale Bank</span> <span class=\"ds-badge ds-retail\">Retail Bank</span> <span class=\"ds-badge ds-observer\">Observer</span> <span class=\"ds-status ds-active\">Active</span> <span class=\"ds-status ds-frozen\">Frozen</span>",
+      "css": ".ds-badge, .ds-status { display: inline-flex; align-items: center; border-radius: 999px; font-size: .75rem; font-weight: 700; } .ds-badge { padding: 4px 8px; color: #fff; background: var(--navy, #173a5e); } .ds-wholesale { background: #285f8f; } .ds-retail { background: #176b87; } .ds-observer { background: #667085; } .ds-status.ds-active { color: var(--success, #18794e); } .ds-status.ds-frozen { color: var(--danger, #b42318); }"
     },
     {
       "name": "Ledger Table",
       "kind": "custom",
       "refersTo": "table-header",
       "description": "Signature data table: soft header row, 1px rules, right-aligned tabular amounts.",
-      "html": "<table class=\"ds-table\"><thead><tr><th>Wallet ID</th><th>Custodian</th><th class=\"ds-num\">Balance</th></tr></thead><tbody><tr><td class=\"ds-id\">W-RC-0001</td><td>Validator Bank A</td><td class=\"ds-num\">Rp 1.500.000</td></tr><tr><td class=\"ds-id\">W-MC-0002</td><td>PJP B</td><td class=\"ds-num\">Rp 12.750.000</td></tr></tbody></table>",
+      "html": "<table class=\"ds-table\"><thead><tr><th>Wallet ID</th><th>Custodian</th><th class=\"ds-num\">Balance</th></tr></thead><tbody><tr><td class=\"ds-id\">W-RC-0001</td><td>Retail Bank A</td><td class=\"ds-num\">Rp 1.500.000</td></tr><tr><td class=\"ds-id\">W-MC-0002</td><td>Retail Bank B</td><td class=\"ds-num\">Rp 12.750.000</td></tr></tbody></table>",
       "css": ".ds-table { width: 100%; border-collapse: collapse; border: 1px solid var(--line, #d6dde6); background: #fff; color: var(--ink, #172033); } .ds-table th, .ds-table td { padding: 9px 10px; border-bottom: 1px solid var(--line, #d6dde6); text-align: left; font-size: .84rem; } .ds-table th { color: var(--muted, #5f6b7a); background: var(--surface-soft, #eef2f6); font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; } .ds-table tbody tr:hover { background: #f7f9fb; } .ds-num { text-align: right !important; font-variant-numeric: tabular-nums; } .ds-id { color: var(--accent, #245d8f); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }"
     },
     {
@@ -118,7 +118,7 @@
   ],
   "narrative": {
     "northStar": "The Settlement Ledger",
-    "overview": "The interface should read like a reconciled ledger page at a central-bank desk. It is quiet, ruled, and exact. Every screen is a set of bordered white sheets on a pale cool canvas. Navy carries authority, and figures sit in tabular columns so balances line up. Nothing decorates: no shadows, no gradients, no motion. Structure comes from 1px rules, tonal fills, and heavy uppercase labels.\n\nOne visual system serves two densities. The institutional shell (Bank Indonesia, Participants, Supervisor) is compact: 16px card padding, 0.84rem table text, 9–10px cells. The retail shell (Retail Customer, Merchant) uses the same tokens with more room: 24px card padding and 46px buttons. The guided-demo rail and the Prototype Lab console are the only surfaces that invert to navy or night.\n\nConfirmed anti-reference: the crypto/Web3 dashboard. That means no neon, no glowing coins, no dark trading-terminal mood, and no gradient hero panels. This is a monetary authority's utility tool, not a token exchange.",
+    "overview": "The interface should read like a reconciled ledger page at a central-bank desk. It is quiet, ruled, and exact. Every screen is a set of bordered white sheets on a pale cool canvas. Navy carries authority, and figures sit in tabular columns so balances line up. Nothing decorates: no shadows, no gradients, no motion. Structure comes from 1px rules, tonal fills, and heavy uppercase labels.\n\nOne visual system serves two densities. The institutional shell (Bank Indonesia, Participants, Auditor) is compact: 16px card padding, 0.84rem table text, 9–10px cells. The retail shell (Retail Customer, Merchant) uses the same tokens with more room: 24px card padding and 46px buttons. The guided-demo rail is the only surface that inverts to navy.\n\nConfirmed anti-reference: the crypto/Web3 dashboard. That means no neon, no glowing coins, no dark trading-terminal mood, and no gradient hero panels. This is a monetary authority's utility tool, not a token exchange.",
     "keyCharacteristics": [
       "Flat white sheets on a cool grey canvas, separated by 1px cool-grey rules.",
       "One navy voice for authority: primary actions, active navigation, and key figures.",
@@ -146,10 +146,10 @@
     "donts": [
       "Don't add box-shadow, gradients, glows, or blur.",
       "Don't drift toward a crypto/Web3 dashboard: no neon accents, glowing coin imagery, dark trading-terminal themes, or gradient heroes.",
-      "Don't hardcode hex values in components. DemoPanel.tsx currently sets inline phaseColor values (#2563eb, #16a34a, #d97706, #374151) that sit outside the palette. Replace them with tokens rather than copying them.",
+      "Don't hardcode hex values in components.",
       "Don't use saturated fills for status. Status is colored text or a tinted banner.",
       "Don't add web fonts. The system sans and system mono stacks are the typography.",
-      "Don't use dark surfaces outside the demo rail header and the Prototype Lab console."
+      "Don't use dark surfaces outside the demo rail header."
     ]
   }
 }

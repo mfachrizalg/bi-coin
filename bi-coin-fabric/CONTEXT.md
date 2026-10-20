@@ -5,31 +5,30 @@ This context defines institutional, wholesale, and retail language for a two-tie
 ## Language
 
 **Bank Indonesia**:
-The monetary authority that governs the system and is the sole issuer of retail digital rupiah.
+The monetary authority that governs the system and is the sole issuer of Digital Rupiah.
 _Avoid_: BI, Central Bank, Issuer
 
 **Participant**:
-An institution admitted in exactly one of three roles: Distributor Bank, Observer, or Payment Service Provider. Bank Indonesia, Retail Customer, and Merchant are not Participants.
+An institution admitted in exactly one of two roles: Distributor Bank or Observer. Bank Indonesia, Retail Customer, and Merchant are not Participants.
 _Avoid_: Member, Network Member, Node Operator
 
-**Distributor**:
-A Distributor Bank or Payment Service Provider Participant that receives Distribution from Bank Indonesia and holds a Distributor reserve. Distributors operate under DistributorMSP. An Observer is not a Distributor.
-
 **Distributor Bank**:
-A Participant bank that receives Distribution from Bank Indonesia and provides retail digital rupiah services. The Auditor of the compliance study is not a Distributor Bank.
+A bank that receives Issuance and holds a Distributor reserve. It comes in two kinds: Wholesale Bank and Retail Bank. The Auditor of the compliance study is not a Distributor Bank.
 _Avoid_: Bank Participant
 
+**Wholesale Bank**:
+A Distributor Bank limited to wholesale operations. It has no retail role.
+
+**Retail Bank**:
+A Distributor Bank that also performs Conversion and acts as Custodian.
+
 **Observer**:
-The Participant role held by OJK and PPATK for Supervision without authority to initiate or approve monetary operations. Observers operate under ValidatorMSP, which is read-only and outside the default endorsement policy.
+The Participant role held by OJK and PPATK for Supervision without authority to initiate or approve monetary operations. Observers are excluded from chaincode endorsement but still approve chaincode lifecycle changes.
 _Avoid_: Regulator
 
 **Auditor**:
-A human role that performs Supervision. It is read-only: it can inspect controls records but cannot submit mutations. It is distinct from the institutional Observer Participant.
+A human role of an Observer institution (OJK, PPATK) that performs Supervision. It is read-only: it can inspect controls records but cannot submit mutations.
 _Avoid_: Supervisor, Observer, OJK
-
-**Payment Service Provider (PJP)**:
-A non-bank Participant that provides retail digital rupiah payment services under the system's governance.
-_Avoid_: PSP, Payment Provider, Fintech
 
 **Retail Customer**:
 An individual end user who holds and uses retail digital rupiah through a Custodian. A Retail Customer is not a Participant.
@@ -44,39 +43,53 @@ The Retail Customer or Merchant that benefits from the value held in a Wallet, r
 _Avoid_: Account Holder, Wallet User, Customer
 
 **Custodian**:
-A Distributor that administers a Wallet on behalf of its Wallet Owner. An Observer cannot be a Custodian.
+A Retail Bank that administers a Wallet on behalf of its Wallet Owner. Only a Retail Bank can be a Custodian.
 _Avoid_: Wallet Owner, Wallet Provider, Account Provider
 
 **Wallet**:
 A retail digital rupiah holding attributed to one Wallet Owner and administered by a Custodian.
 _Avoid_: Account, Balance, Purse
 
+**w-Rupiah Digital**:
+The wholesale instrument of Digital Rupiah. It is held only in Distributor reserves.
+_Avoid_: w-CBDC, wholesale token
+
+**r-Rupiah Digital**:
+The retail instrument of Digital Rupiah. It is held only in Retail floats and Wallets.
+_Avoid_: r-CBDC
+
 **Distributor reserve**:
-Digital Rupiah held by an authorized Distributor for later wholesale use or conversion into retail holdings.
+w-Rupiah Digital held by a Distributor Bank for later wholesale use or Conversion into its Retail float.
 _Avoid_: Retail reserve, Customer balance
+
+**Retail float**:
+The r-Rupiah Digital held by a Retail Bank after Conversion. Wallet funding draws on it.
+_Avoid_: Retail balance, Wallet
 
 **Retail balance**:
 Digital Rupiah held in a customer or merchant Wallet for retail transfers and payments.
 _Avoid_: Wholesale balance, Distributor reserve
 
-**Wholesale-to-retail conversion**:
-An equal-value movement from a Distributor reserve into an approved retail balance that does not change total outstanding supply.
+**Wallet funding**:
+The movement of r-Rupiah Digital from a Retail float into a Wallet, subject to the CanPay and holdings-limit checks.
+
+**Interbank transfer**:
+The movement of w-Rupiah Digital from a Distributor reserve to any other Distributor reserve, with no change in supply.
+
+**Conversion**:
+An at-par movement of w-Rupiah Digital from a Distributor reserve into the same bank's Retail float as r-Rupiah Digital. Total supply is unchanged.
 _Avoid_: Minting, Redemption, Transfer
 
 **Issuance**:
-The creation of Digital Rupiah exclusively by Bank Indonesia into its treasury, increasing outstanding supply.
-_Avoid_: Minting, Printing, Distribution
-
-**Distribution**:
-The transfer of issued Digital Rupiah from Bank Indonesia's treasury to an authorized Distributor for onward retail use.
-_Avoid_: Circulation, Issuance, Transfer
+The creation of w-Rupiah Digital exclusively by Bank Indonesia directly into a Distributor reserve, increasing outstanding supply.
+_Avoid_: Minting, Distribution, Allocation
 
 **Redemption**:
-The retirement of issued retail digital rupiah under Bank Indonesia authorization, reducing outstanding supply.
+The retirement of w-Rupiah Digital from a Distributor reserve under Bank Indonesia authorization, reducing outstanding supply.
 _Avoid_: Refund, Withdrawal, Burn
 
 **Supervision**:
-The oversight of institutional and monetary activity without authority to create, distribute, redeem, or transfer retail digital rupiah.
+The oversight of institutional and monetary activity without authority to issue, redeem, or transfer Digital Rupiah.
 _Avoid_: Administration, Validation, Governance
 
 **Institutional Operator**:
@@ -92,7 +105,7 @@ One of the study's three manually selected codes: DTTOT, authority order, or int
 _Avoid_: Sanctions match, Screening result
 
 **Release evidence reference**:
-A SHA-256 digest reference submitted by a KYC reviewer as part of the release review for a restricted subject. Every new restriction requires a new reviewer submission; the digest may be reused and the evidence itself remains off ledger.
+A reference to the evidence, submitted by a KYC reviewer as part of the release review for a restricted subject. Every new restriction requires a new reviewer submission; a reference may be reused.
 _Avoid_: Evidence document, Evidence proof
 
 **Subject**:

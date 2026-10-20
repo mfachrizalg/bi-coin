@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 for module in controls monetary payments; do
-  MODULE_DIR="$PROJECT_DIR/study/chaincode/$module"
+  MODULE_DIR="$PROJECT_DIR/chaincode/$module"
   if [[ ! -f "$MODULE_DIR/vendor/modules.txt" ]]; then
     (cd "$MODULE_DIR" && go mod vendor)
   fi

@@ -41,7 +41,7 @@ func TestNewHTTPServerUsesConfiguredTimeouts(t *testing.T) {
 		IdleTimeout:       7 * time.Second,
 	}
 
-	server := newHTTPServer(cfg, nil, nil)
+	server := newHTTPServer(cfg, nil)
 	if server.ReadTimeout != 3*time.Second || server.ReadHeaderTimeout != 2*time.Second || server.WriteTimeout != 5*time.Second || server.IdleTimeout != 7*time.Second {
 		t.Fatalf("server timeouts = %+v", server)
 	}

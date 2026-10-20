@@ -10,8 +10,6 @@
 \usepackage{array}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
 \usepackage{url}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -19,7 +17,7 @@
 \begin{document}
 
 \title{A Retail Digital Rupiah Prototype on Hyperledger Fabric: Selected
-Controls and a Reproducible Performance Baseline}
+Controls and a Single-Host Performance Baseline}
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Muhammad Fachrizal Giffari}
 	\IEEEauthorblockA{\textit{Department of Electrical and} \\ \textit{Information Engineering} \\
@@ -44,21 +42,23 @@ Controls and a Reproducible Performance Baseline}
 
 \begin{abstract}
 Bank Indonesia's Project Garuda publicly documents wholesale central bank
-digital currency. This paper reports a retail Digital Rupiah prototype and a
-separate controls-study extension on Hyperledger Fabric 2.5. The extension uses
-four peer MSPs---CentralBankMSP, DistributorMSP, ValidatorMSP, and EndUserMSP---
-and three Go chaincodes for monetary state, customer controls, and payments.
-ValidatorMSP has read-only audit access. Server-managed X.509 identities
-distinguish the signing actor, customer subject, and wallet custodian.
+digital currency. This paper reports a retail Digital Rupiah prototype on
+Hyperledger Fabric 2.5 and a compliance study of its customer controls and
+endorsement boundaries. The study uses four peer MSPs: CentralBankMSP,
+DistributorMSP, EndUserMSP, and the Observer (MSP ID: ValidatorMSP). Three Go
+chaincodes cover monetary state, customer controls, and payments. The Observer
+has read-only audit access through an Auditor role. Server-managed X.509
+identities distinguish the signing actor, customer subject, and wallet custodian.
 
-Synthetic unit tests and a chaincode integration smoke test pass the high-risk
-KYC flow with distinct reviewer and senior approver, restriction and
-evidence-based release, reserve funding, retail payment, ValidatorMSP reads, and
-expected endorsement failures. These tests verify the selected scenarios; they
-do not establish identity authenticity, screening effectiveness, actual PPATK
-reporting, or institutional compliance.
+In run-20261014-01, reported under the earlier identifiers, the correctness record
+shows 20 of 20 synthetic scenarios, 207 of 207 authorization cells, 27 of 27
+validation cases, and 15 of 15 action outcomes; the post-rename correctness re-run
+is pending. These checks cover only the selected scenarios; they do not establish
+identity authenticity, screening effectiveness, actual PPATK reporting, or
+institutional compliance.
 
-Performance evidence is secondary and comes from a one-worker Hyperledger Caliper run on the four-organization controls-study extension. Findings are limited to synthetic functional tests and single-host performance measurements.
+The compliance study also reports throughput and latency from a one-worker
+Hyperledger Caliper run on a single host. Findings are limited to synthetic functional tests and single-host performance measurements.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -73,22 +73,25 @@ Project Garuda. Its publicly documented proof of concept targets the
 \emph{wholesale} tier, specifically a cash ledger for issuance and redemption
 among the central bank and large financial
 institutions~\cite{bi_garuda_poc,bi_whitepaper2022}. The Garuda White Paper also
-describes a retail tier in which intermediary banks and payment service
-providers (PJP) distribute Digital Rupiah to households and
-merchants~\cite{bi_whitepaper2022}. That description remains at the policy and
-architecture level, and we are not aware of an openly available, testable system
-that implements Bank Indonesia's retail money business processes end to end on a
-blockchain ledger.
+describes a retail tier in which intermediary banks distribute Digital Rupiah to
+households and merchants~\cite{bi_whitepaper2022}. That description remains at the policy and
+architecture level, and we are not aware of a publicly documented, testable
+system that implements Bank Indonesia's retail money business processes end to
+end on a blockchain ledger.
 
 Central-bank digital money involves a sequence of business processes, not a
-single ledger operation. The central bank \emph{issues} money into its Treasury
-and \emph{distributes} liquidity directly to a distributor bank or PJP custodian.
-Custodians serve customers and merchants in the retail tier. Holders
-\emph{transact}, custodians \emph{redeem} money to the central bank, and the supervisor \emph{reconciles} and audits its
-circulation. A blockchain implementation must express these processes as
-deterministic transactions that each organization can validate independently.
-It must also preserve two-tier intermediation to reduce bank
-disintermediation~\cite{Auer2020The} and give the supervisor an audit surface.
+single ledger operation. The central bank \emph{issues} wholesale Digital Rupiah
+(w-Rupiah Digital) directly into a Distributor reserve held by a wholesale or
+retail bank. A retail bank \emph{converts} reserve balances into retail Digital
+Rupiah (r-Rupiah Digital) held as a retail float, and funds customer wallets from
+that float. The retail bank is the only Custodian and serves customers and
+merchants in the retail tier. Holders \emph{transact}, redemption retires
+w-Rupiah Digital from a Distributor reserve, and an Observer institution, acting
+through a read-only Auditor role,
+audits the circulation. A blockchain implementation must express these
+processes as deterministic transactions that each organization can validate
+independently. It must also preserve two-tier intermediation to reduce bank
+disintermediation~\cite{Auer2020The} and give the Observer an audit surface.
 
 Most technical studies isolate one part of this problem: permissioned CBDC
 architecture~\cite{bhawana2021}, privacy~\cite{islam2023}, security threat
@@ -97,35 +100,37 @@ systems~\cite{Lovejoy2022A}. Deployed retail systems, including Nigeria's
 eNaira~\cite{ree2023enaira}, China's e-CNY~\cite{pboc2021ecny}, and the Bahamian
 Sand Dollar~\cite{centralbankbahamas2020sanddollar}, publish design papers but
 not reproducible performance benchmarks. The surveyed literature therefore
-provides no integrated, openly measurable retail reference for the Indonesian
+provides no integrated, measurable retail reference for the Indonesian
 two-tier model~\cite{sethaput2025,aryani2023critlit}.
 
-The primary evaluation in this work tests whether selected customer controls
-and organizational endorsement boundaries behave as designed in synthetic
-scenarios. The Caliper results provide secondary performance evidence for the controls-study extension, reported in its subsection.
+The compliance study is the main study of this paper. It tests whether selected
+customer controls and organizational endorsement boundaries behave as designed
+in synthetic scenarios. It also measures the throughput and latency of the same
+three chaincodes with a Hyperledger Caliper benchmark (Section~\ref{sec:eval}).
 
 To address this gap, we implement a Digital Rupiah prototype on a permissioned
 Hyperledger Fabric network~\cite{androulaki2018}. The prototype maps Bank
 Indonesia's business processes to chaincode transactions. This paper contributes:
 \begin{enumerate}
-	\item A separate controls-study extension with four peer MSPs and three
-	      domain chaincodes for monetary operations, customer controls, and
-	      payments. Synthetic integration scenarios exercise distinct senior
-	      approval, restriction evidence, reserve funding, read-only validation,
-	      and the combined endorsement requirements.
-	\item A two-tier Digital Rupiah chaincode that integrates hierarchical
-	      issuance and distribution, retail transfers, and supervisor-facing
-	      reconciliation. This extends the wholesale-only Garuda proof of concept
-	      with a testable retail implementation.
-	\item A deterministic transfer protocol with explicit authorization and
-	      balance checks, Fabric multi-version concurrency control (MVCC), and
-	      atomic wallet updates. The protocol lets endorsing organizations apply
-	      the same state-transition rules independently.
-\item An open, reproducible Hyperledger Caliper~\cite{hlf_caliper} benchmark for the
-		      four-organization controls-study extension. It documents the testbed, the
-		      31 workloads, and the functional checks for authorization, validation, and
-		      action outcomes. It reports read and write throughput while keeping the
-		      single-host, one-worker scope explicit.
+	\item The compliance study of the prototype on a permissioned network with
+	      four peer MSPs and three domain chaincodes for monetary operations,
+	      customer controls, and payments. Synthetic integration scenarios
+	      exercise distinct senior approval, restriction evidence, reserve
+	      conversion and wallet funding, read-only validation, and the combined endorsement
+	      requirements.
+	\item A two-tier Digital Rupiah implementation with hierarchical issuance and
+	      distribution, retail transfers, and read-only auditor access to subject
+	      records. This extends the wholesale-only Project Garuda proof of concept with a
+	      testable retail implementation.
+	\item A deterministic transfer protocol with explicit eligibility, limit, and
+	      balance checks, idempotent receipts keyed by business reference, Fabric
+	      multi-version concurrency control (MVCC), and atomic wallet updates. The
+	      protocol lets endorsing organizations apply the same state-transition
+	      rules independently.
+	\item A Hyperledger Caliper~\cite{hlf_caliper} benchmark of the compliance
+	      study. It documents the testbed, the 31 workloads, and the functional
+	      checks for authorization, validation, and action outcomes. It reports
+	      throughput and latency under a single-host, one-worker scope.
 \end{enumerate}
 
 \section{Background and Related Work}
@@ -136,8 +141,8 @@ the ultimate liability holder, while regulated intermediaries serve end users an
 operate customer-facing rails~\cite{Auer2020The,Kiff2020A}.
 This preserves the existing division of labor and limits the central bank's
 exposure to retail operations. Bank Indonesia adopts this structure for Digital
-Rupiah, with banks and PJP acting as distributors between the central bank and
-the public~\cite{bi_whitepaper2022}.
+Rupiah, with Distributor Banks acting as distributors between
+the central bank and the public~\cite{bi_whitepaper2022}.
 
 \subsection{Permissioned Blockchain and Hyperledger Fabric}
 Hyperledger Fabric is a modular, permissioned blockchain with pluggable
@@ -150,14 +155,14 @@ prototypes~\cite{bhawana2021,hanif2024meetcoin}. Hyperledger
 Caliper~\cite{hlf_caliper,hlf_metrics} measures throughput and latency under
 different workloads.
 
-\subsection{Authorization and Supervision}
+\subsection{Authorization and Oversight}
 Retail CBDC systems require explicit authorization boundaries, safe balance
-updates, and supervisory visibility. Token-based retail designs also face
+updates, and read-only audit visibility. Token-based retail designs also face
 denial-of-service and double-spend risks~\cite{ahuja2024limbocoin}, so transfer
 validation must be deterministic. Our chaincode combines organization-aware
-authorization, wallet-state checks, and supervision events, complementing
-studies that address privacy~\cite{islam2023} or security~\cite{hans2023}
-separately. The closest published prototype is Project Aurum,
+authorization, subject eligibility and limit checks, and read-only Observer
+access to subject records. This complements studies that address privacy~\cite{islam2023}
+or security~\cite{hans2023} separately. The closest published prototype is Project Aurum,
 a full-stack two-tier retail CBDC built for the Hong Kong Monetary
 Authority~\cite{bis2022aurum}, which pairs a wholesale interbank system with a
 retail e-wallet system and, like this work, keeps the two tiers
@@ -165,8 +170,8 @@ architecturally distinct. Aurum reports no reproducible throughput benchmark,
 and its source code and technical manuals are released only to BIS member
 central banks rather than publicly. What distinguishes this prototype among the
 representative systems in Table~\ref{tab:compare} is that its two-tier
-intermediation and authorization and supervision controls are realized in a
-publicly available implementation with a reproducible benchmark, rather than
+intermediation and its authorization and oversight controls are realized in an
+implementation with a measured throughput and latency baseline, rather than
 described in design documentation alone.
 
 \begin{table}[!t]
@@ -188,8 +193,8 @@ described in design documentation alone.
 	\end{tabular}
 
 	\vspace{2pt}
-	{\scriptsize Open: implementation publicly available. Bench.: open,
-		reproducible throughput/latency benchmark.
+	{\scriptsize Open: implementation publicly available. Bench.: throughput and
+		latency benchmark reported.
 		OpenCBDC is account-based and not distributed-ledger-based. Rows span
 		deployed national CBDCs and a research platform, and summarize public
 		information rather than a controlled comparison.}
@@ -197,10 +202,10 @@ described in design documentation alone.
 
 \section{Bank Indonesia Business Processes}
 \label{sec:bp}
-The system implements six processes in the circulation of central-bank digital
-money. Fig.~\ref{fig:twotier} shows the actors in each tier.
-Table~\ref{tab:processes} identifies the initiator, chaincode transaction, and
-endorsement requirement for each process.
+The system implements seven processes in the circulation of central-bank digital
+money. Fig.~\ref{fig:twotier} shows the actors in each tier, and
+Table~\ref{tab:processes} maps each process to the chaincode and transactions
+that realize it.
 
 \begin{figure}[!t]
 \centering
@@ -211,56 +216,62 @@ endorsement requirement for each process.
   ar/.style={-{Stealth}, thick}
 ]
 \node[box] (bi) {CentralBankMSP\\ (Bank Indonesia, Tier 1)};
-\node[box, right=1.7cm of bi] (bank) {DistributorMSP\\ (banks, Tier 1)};
-\node[box, below=1.2cm of bank] (pjp) {DistributorMSP\\ (PJP custodian, Tier 1)};
-\node[box, right=1.7cm of pjp] (retail) {EndUserMSP\\ (retail, merchant,\\ business users, Tier 2)};
-\node[box, above=1.2cm of retail] (val) {ValidatorMSP\\ (OJK, PPATK; supervision)};
-\draw[ar] (bi) -- node[above, font=\scriptsize]{issuance to Treasury} (bank);
-\draw[ar] (bi) to[out=-25,in=155] node[below, font=\scriptsize]{direct distribution} (pjp);
-\draw[ar] (pjp) -- node[below, font=\scriptsize]{retail funding and transfer} (retail);
+\node[box, right=1.7cm of bi] (bank) {DistributorMSP\\ (wholesale bank, Tier 1)};
+\node[box, below=1.2cm of bank] (rbank) {DistributorMSP\\ (retail bank, Tier 1)};
+\node[box, right=1.7cm of rbank] (retail) {EndUserMSP\\ (retail, merchant,\\ business users, Tier 2)};
+\node[box, above=1.2cm of retail] (val) {Observer (MSP ID: ValidatorMSP)\\ (OJK, PPATK; read-only)};
+\draw[ar] (bi) -- node[above, font=\scriptsize]{issuance} (bank);
+\draw[ar] (bi) to[out=-25,in=155] node[below, font=\scriptsize]{issuance} (rbank);
+\draw[ar] (rbank) -- node[below, font=\scriptsize]{wallet funding} (retail);
 \draw[ar, dashed] (retail.north) -- node[right, font=\scriptsize]{read-only audit} (val.south);
 \end{tikzpicture}%
 }
 \caption{Two-tier actor structure of the Digital Rupiah prototype, mapped to the four
-Fabric MSPs. CentralBankMSP (Bank Indonesia) issues Digital Rupiah into Treasury and
-distributes it directly to a distributor bank or PJP custodian (DistributorMSP), which
-serves retail, merchant, and business users (EndUserMSP). ValidatorMSP (OJK and PPATK)
-holds read-only supervisory visibility, shown as a dashed flow.}
+Fabric MSPs. CentralBankMSP (Bank Indonesia) issues w-Rupiah Digital directly into the Distributor
+reserves of the wholesale and retail banks (DistributorMSP). The retail bank converts
+reserve balances into r-Rupiah Digital and funds retail, merchant, and business
+wallets (EndUserMSP) from its retail float. The Observer (MSP ID: ValidatorMSP, for OJK and PPATK) holds read-only
+audit visibility, shown as a dashed flow.}
 \label{fig:twotier}
 \end{figure}
 
 \begin{table}[!t]
-	\caption{Bank Indonesia Business Processes and Their Chaincode Realization}
+	\caption{Business Processes and Their Chaincode Realization}
 	\label{tab:processes}
 	\centering
 	\scriptsize
 	\setlength{\tabcolsep}{3.5pt}
-	\begin{tabular}{ll>{\raggedright\arraybackslash}p{3.8cm}}
+	\begin{tabular}{l>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{3.4cm}}
 		\toprule
-		\textbf{Process} & \textbf{Initiator} & \textbf{Chaincode transaction} \\
+		\textbf{Process} & \textbf{Chaincode} & \textbf{Transactions} \\
 		\midrule
-		Issuance        & CentralBankMSP & \texttt{Mint}, \texttt{RequestIssuance} \\
-		Distribution    & CentralBankMSP & \texttt{DistributeToParticipant} \\
-		Wallet creation & DistributorMSP & \texttt{CreateWallet} \\
-		Payment         & EndUserMSP     & \texttt{Transfer} \\
-		Redemption      & DistributorMSP & \texttt{Burn}, \texttt{RequestRedemption} \\
-		Supervision     & \shortstack[l]{ValidatorMSP\\ CentralBankMSP} & \texttt{GetReconciliationReport},
-		\texttt{GetMetrics}, \texttt{GetSupervisionEvents} \\
+		Issuance                         & rupiah-monetary  & \texttt{RegisterDistributor}, \texttt{Issue} \\
+		Interbank transfer               & rupiah-monetary  & \texttt{TransferReserve} \\
+		Redemption                       & rupiah-monetary  & \texttt{RedeemReserve} \\
+			Conversion                       & rupiah-payments  & \texttt{ConvertToRetail} \\
+		Wallet funding and payment       & rupiah-payments  & \texttt{OpenWallet}, \texttt{FundWallet}, \texttt{Transfer} \\
+		Customer controls                & rupiah-controls  & \texttt{CreatePending}, \texttt{ProtectSubject}, \texttt{RecordReview}, \texttt{ApproveStandard}, \texttt{DecideHighRisk}, \texttt{SetLimits}, \texttt{SetBusinessAuthority} \\
+		Restriction and staff controls   & rupiah-controls  & \texttt{FreezeSubject}, \texttt{RequestUnfreeze}, \texttt{ApproveUnfreeze}, \texttt{CreateStaffPending}, \texttt{ProtectStaff}, \texttt{SetStaffRole} \\
 		\bottomrule
 	\end{tabular}
 
 	\vspace{2pt}
-	{\scriptsize ValidatorMSP (OJK, PPATK) has read-only audit access and is not an
-	ordinary payment endorser.}
+	{\scriptsize The Observer (ValidatorMSP) reads subject records through
+		\texttt{GetSubject} and is not an ordinary endorser of these transactions.}
 \end{table}
 
-The institutional tier contains CentralBankMSP (Bank Indonesia), distributor banks,
-and PJP custodians (DistributorMSP). These participants follow a lifecycle of submission,
-approval, freezing, unfreezing, rejection, and offboarding. Bank Indonesia mints Digital
-Rupiah only to the Treasury wallet, then distributes liquidity directly to an active bank
-or PJP through \texttt{DistributeToParticipant}. Each custodian serves customers and
-merchants (EndUserMSP) in the retail tier, where the shared transfer path applies
-ownership, wallet-status, authorization, and balance checks.
+The institutional tier contains CentralBankMSP (Bank Indonesia) and the Distributor
+Banks, which are wholesale or retail banks (DistributorMSP). Bank Indonesia registers
+each Distributor Bank with its kind through \texttt{RegisterDistributor} and issues
+w-Rupiah Digital with \texttt{Issue}, which credits the bank's Distributor reserve and
+the wholesale supply. Banks move w-Rupiah Digital between reserves through
+\texttt{TransferReserve}. Bank Indonesia retires it through \texttt{RedeemReserve}. A retail bank
+converts reserve balances into its retail float through \texttt{ConvertToRetail} and
+funds customer wallets from that float through \texttt{FundWallet}. Customers and
+merchants (EndUserMSP) then transfer value
+through \texttt{Transfer}, which checks subject eligibility, limits, and balances
+before the state changes. Customer subjects move through pending creation,
+review, a standard or high-risk decision, restriction, and release on approval.
 
 \section{System Architecture}
 Fig.~\ref{fig:sysarch} shows the four-layer architecture: client, backend API,
@@ -305,7 +316,7 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 			\draw[rounded corners=8pt, black]   (-2.8, 2.2) rectangle (14.8, 11.0);
 			\node[font=\footnotesize\bfseries, anchor=south] at (6.0, 11.0)
 			{\textbf{Hyperledger Fabric 2.5}\quad
-			(rupiah-study channel, TLS)};
+			(bi-coin channel, TLS)};
 			\draw[ar] (gw.south) -- (6.0, 11.0)
 			node[lbl, right]{\textit{endorse} + submit (gRPC)};
 			\node[ordnode] (ord) at (6.0, 9.5) {orderer.centralbank\\(Raft, 1 node)};
@@ -325,35 +336,45 @@ Fig.~\ref{fig:netarch} details the permissioned network.
 			\draw[ar] (pdist) -- (cdbdist);
 			\draw[ar] (pval)  -- (cdbval);
 			\draw[ar] (puser) -- (cdbuser);
-			\node[cabox, minimum width=4.0cm] (caord) at (6.0, 1.0) {CA ca.centralbank\\(hosted by CentralBankMSP)};
-			\draw[ar] (6.0, 2.2) -- (caord.north);
+			\node[cabox] (caa) at (1.5,  1.0) {CA\\ca.centralbank};
+			\node[cabox] (cab) at (4.5,  1.0) {CA\\ca.distributor};
+			\node[cabox] (cac) at (7.5,  1.0) {CA\\ca.validator};
+			\node[cabox] (cad) at (10.5, 1.0) {CA\\ca.enduser};
+			\draw[ar] (1.5, 2.2) -- (caa.north);
+			\draw[ar] (4.5, 2.2) -- (cab.north);
+			\draw[ar] (7.5, 2.2) -- (cac.north);
+			\draw[ar] (10.5, 2.2) -- (cad.north);
 		\end{tikzpicture}%
 	}
 \caption{Architecture of the Digital Rupiah prototype: client layer, Go REST backend with
 JWT/RBAC, off-chain PostgreSQL store, Fabric Gateway SDK, and the Hyperledger Fabric 2.5
-network of four peer organizations on the rupiah-study channel, with one CouchDB per
-organization, a single certificate authority, and a single-node Raft orderer.}
+network of four peer organizations on the bi-coin channel, with one CouchDB and one
+certificate authority per organization and a single-node Raft orderer.}
 	\label{fig:sysarch}
 \end{figure*}
 
 \subsection{Network Topology}
 The four-organization network runs one peer per organization on one application
-channel, \texttt{rupiah-study} (Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}).
-\texttt{CentralBankMSP} represents Bank Indonesia, the issuer. It also operates the
-single orderer and hosts the certificate authority \texttt{ca.centralbank}.
-\texttt{DistributorMSP} represents the banks and payment service providers (PJP)
-that distribute Digital Rupiah. \texttt{ValidatorMSP} represents the supervisors: the
-Financial Services Authority (OJK, \emph{Otoritas Jasa Keuangan}) and the Indonesian
-Financial Transaction Reports and Analysis Center (PPATK, \emph{Pusat Pelaporan dan
-Analisis Transaksi Keuangan}). It has read-only audit access and is not an ordinary
-payment endorser of the controls-study chaincodes. \texttt{EndUserMSP} represents
+channel, \texttt{bi-coin} (Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}). The
+measured run used the earlier channel name \texttt{rupiah-study}, as
+Section~\ref{sec:eval} discloses. \texttt{CentralBankMSP} represents Bank
+Indonesia, the issuer. It also operates the single orderer and hosts its
+certificate authority \texttt{ca.centralbank}. \texttt{DistributorMSP} represents
+the wholesale and retail Distributor Banks that hold Distributor reserves.
+\texttt{ValidatorMSP} is the Observer for the Financial Services Authority
+(OJK, \emph{Otoritas Jasa Keuangan}) and the Indonesian Financial Transaction
+Reports and Analysis Center (PPATK, \emph{Pusat Pelaporan dan Analisis Transaksi
+Keuangan}). It has read-only audit access through an Auditor role and is not an
+ordinary payment endorser of the three chaincodes. \texttt{EndUserMSP} represents
 retail, merchant, and business users. Each organization operates one peer with its
-own CouchDB world state and MSP. A single Raft orderer orders transactions; this
-configuration provides ordering but not crash fault tolerance, which requires at least
-three consenters. The application-channel \texttt{Endorsement} and
-\texttt{LifecycleEndorsement} policies require a majority of the four organization
-\texttt{Endorsement} policies, whereas the controls-study chaincodes use the explicit
-policies listed in Table~\ref{tab:study-chaincodes}.
+own CouchDB world state and MSP, and the current network gives each organization
+its own Fabric CA (Section~\ref{sec:eval} notes the CA setup of the measured run).
+A single Raft orderer orders transactions. This configuration provides ordering
+but not crash fault tolerance, which requires at least three consenters. The
+channel's \texttt{Endorsement} and \texttt{LifecycleEndorsement} policies require
+a majority of the four organizations. ValidatorMSP approves chaincode definitions
+under this lifecycle policy, but every chaincode endorsement policy in
+Table~\ref{tab:study-chaincodes} excludes it.
 
 \begin{figure*}[!t]
 	\centering
@@ -387,7 +408,7 @@ policies listed in Table~\ref{tab:study-chaincodes}.
 			\node[cdb] (cdbuser) at ( 9.0, -0.2) {CouchDB};
 			\node[chanbox, fit=(pcb)(pdist)(pval)(puser)(cdbcb)(cdbdist)(cdbval)(cdbuser),
 				label={[font=\footnotesize\bfseries]below:%
-		\textit{rupiah-study channel} (TLS)}] (chan) {};
+		\textit{bi-coin channel} (TLS)}] (chan) {};
 			\draw[gar] (be.south) to[out=-90,in=180] node[pathlabel,left]{\textit{endorse}} (chan.west);
 			\draw[ar] (ord.south) to[out=-110,in=80]  (pcb.north);
 			\draw[ar] (ord.south) to[out=-100,in=85]  (pdist.north);
@@ -400,7 +421,7 @@ policies listed in Table~\ref{tab:study-chaincodes}.
 		\end{tikzpicture}%
 	}
 \caption{Hyperledger Fabric topology of the four-organization network: one peer per
-organization, each with a CouchDB world state, on the rupiah-study channel under a
+organization, each with a CouchDB world state, on the bi-coin channel under a
 single-node Raft orderer. The Go backend endorses through the Fabric Gateway SDK.}
 	\label{fig:netarch}
 \end{figure*}
@@ -416,33 +437,34 @@ single-node Raft orderer. The Go backend endorses through the Fabric Gateway SDK
 		\textbf{Organization} & \textbf{Role} & \textbf{Peer} & \textbf{Host port} \\
 		\midrule
 		CentralBankMSP & Issuer; hosts orderer and CA & peer0.centralbank & 17051 \\
-		DistributorMSP & Distributor (banks, PJP) & peer0.distributor & 18051 \\
-		ValidatorMSP & Read-only audit (OJK, PPATK) & peer0.validator & 19051 \\
+		DistributorMSP & Wholesale and retail Distributor Banks & peer0.distributor & 18051 \\
+		ValidatorMSP & Observer; read-only audit (OJK, PPATK) & peer0.validator & 19051 \\
 		EndUserMSP & End users (retail, merchant, business) & peer0.enduser & 20051 \\
 		\midrule
-		\multicolumn{4}{@{}p{7.9cm}@{}}{Full peer names end in \texttt{.rupiah.study}, for example \texttt{peer0.centralbank.rupiah.study}. Peers listen on container port 7051. Orderer: \texttt{orderer.centralbank.rupiah.study} (single-node Raft, host port 17050). Certificate authority: \texttt{ca.centralbank}. One CouchDB per organization.} \\
+		\multicolumn{4}{@{}p{7.9cm}@{}}{Full peer names end in \texttt{.bi-coin}, for example \texttt{peer0.centralbank.bi-coin}. Peers listen on container port 7051. Orderer: \texttt{orderer.centralbank.bi-coin} (single-node Raft, host port 17050). Certificate authorities: \texttt{ca.centralbank}, \texttt{ca.distributor}, \texttt{ca.validator}, and \texttt{ca.enduser}, one per organization. One CouchDB per organization.} \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-\subsection{Controls-Study Extension}
-The controls-study extension runs on a fresh, isolated Fabric 2.5 network with
-one channel, \texttt{rupiah-study}, and four peer MSPs:
-\texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, and
-\texttt{EndUserMSP}. CentralBankMSP also operates the single orderer.
-ValidatorMSP provides read-only audit access and is not an ordinary payment
-endorser. The extension uses a separate PostgreSQL volume and synthetic state.
-Server-managed X.509 signers are mapped per application username; the signing
-identity, customer subject, and wallet custodian are represented separately.
-Fig.~\ref{fig:controls-study-architecture} summarizes this topology and the
-three chaincode policies.
+\subsection{Compliance Study Design}
+The compliance study runs on an isolated Fabric 2.5 network with one channel,
+\texttt{bi-coin}, and four peer MSPs: \texttt{CentralBankMSP},
+\texttt{DistributorMSP}, \texttt{ValidatorMSP}, and \texttt{EndUserMSP}.
+CentralBankMSP also operates the single orderer. ValidatorMSP, the Observer,
+provides read-only audit access and is not an ordinary payment endorser. The
+study uses a separate PostgreSQL volume and synthetic state. Server-managed
+X.509 signers are mapped per application username; the signing identity, customer
+subject, and wallet custodian are represented separately.
+Fig.~\ref{fig:controls-study-architecture} summarizes this topology and the three
+chaincode policies. Section~\ref{sec:eval} reports the measured capacity and
+latency.
 
 \begin{figure*}[!t]
 \centering
 \resizebox{\textwidth}{!}{%
-\input{../bi-coin-fabric/study/diagrams/controls-study-architecture.tikz}
+\input{../bi-coin-fabric/docs/diagrams/latex/controls-study-architecture.tikz}
 }
-\caption{Four-MSP controls-study architecture, chaincode domains, and endorsement boundaries.}
+\caption{Four-MSP compliance study architecture, chaincode domains, and endorsement boundaries.}
 \label{fig:controls-study-architecture}
 \end{figure*}
 
@@ -451,7 +473,7 @@ into three chaincodes. Table~\ref{tab:study-chaincodes} shows their default
 policies and state ownership.
 
 \begin{table*}[!t]
-\caption{Controls-study chaincode domains and endorsement policies}
+\caption{Compliance study chaincode domains and endorsement policies}
 \label{tab:study-chaincodes}
 \centering
 \scriptsize
@@ -459,25 +481,27 @@ policies and state ownership.
 \toprule
 \textbf{Chaincode} & \textbf{State owned} & \textbf{Default endorsement} \\
 \midrule
-\texttt{rupiah-monetary} & Treasury, supply, distributor reserves & \texttt{AND('CentralBankMSP.peer','DistributorMSP.peer')} \\
+\texttt{rupiah-monetary} & Wholesale and retail supply, distributor reserves & \texttt{AND('CentralBankMSP.peer','DistributorMSP.peer')} \\
 \texttt{rupiah-controls} & Pseudonymous subjects, KYC/risk status, business authority, limits, restriction evidence & \shortstack[l]{\texttt{AND('DistributorMSP.peer',}\\\texttt{OR('CentralBankMSP.peer','EndUserMSP.peer'))}} \\
-\texttt{rupiah-payments} & Wallets, payment receipts, usage limits & \texttt{AND('DistributorMSP.peer','EndUserMSP.peer')} \\
+\texttt{rupiah-payments} & Wallets, retail floats, payment receipts, usage limits & \texttt{AND('DistributorMSP.peer','EndUserMSP.peer')} \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 Effective-control keys use a state-based policy requiring CentralBankMSP and
-DistributorMSP. \texttt{FundFromReserve} invokes all three chaincodes in one
-same-channel transaction, so all three policies apply to that funding flow.
+DistributorMSP. \texttt{ConvertToRetail} invokes the monetary and payments chaincodes, and
+\texttt{FundWallet} invokes the controls and payments chaincodes, each in one
+same-channel transaction, so the endorsement policies of both chaincodes apply to
+each flow.
 These policies and distinct-staff approvals are experimental design choices;
 they are not presented as statutory endorsement rules.
 
-The compliance benchmark measures the three controls-study chaincodes with one Caliper worker on one host. In run-20261014-01, all 31 workloads are confirmed with three 30-second rounds each, with 31 of 31 preflight checks passing. Thirty of 31 workloads are bracketed by measured probes; the \texttt{fund-reserve} upper bound is unresolved because two upper-bound probes failed on fetch errors before measurement. The nearest measured failure is 0.21875 ops/s, about 19\% above the confirmed 0.183594 ops/s. All functional checks pass: 20 of 20 scenarios, 207 of 207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. Read operations sustain 272 to 296 operations per second offered, with all verifications passing; delivered load fell to 0.50 to 0.93 of target in the failing probes, so these are lower bounds on read capacity. Confirmed passing write rates (in ops/s, equal to TPS for writes) range from 0.184 to 4.75 TPS across 21 write workloads, with verified throughput at those rates of 0.200 to 4.613 TPS, the mean of three confirmation rounds per workload; 19 of 21 confirm at 0.78125 ops/s or below. In 20 of the 21 write workloads (fund-reserve excluded, since its failing probe was a fetch error), the first failing probe exceeded the drain limit: verified throughput over duration plus drain must reach 90 percent of the delivered rate, which is equivalent to a drain of at most one-ninth of the probe duration (1.1 s for 10 s probes). The median drain was 1.73 s for failing 10 s probes and 0.06 s for passing ones. The configured two-second batch timeout is a plausible source of this drain latency, but the run records no block contents, so the link is not isolated. A fresh-network run (run-20261015-01) measured read-balance at 212 ops/s, with a failing probe at 224 ops/s, and read-receipt at 236 ops/s, with a failing probe at 248 ops/s. Both are bracketed by measured probes, and the fund-reserve result is inconclusive.
-
 \subsection{On-Chain and Off-Chain Data}
-The Go chaincode in \texttt{digital\_rupiah.go} groups functions for
-participants, wallets, issuance and redemption, retail transfers, and
-supervision (Table~\ref{tab:funcs}). Account and authentication data remain in
+The three Go chaincodes group their functions by domain (Table~\ref{tab:funcs}).
+The monetary chaincode holds wholesale and retail supply and distributor reserves. The
+controls chaincode holds pseudonymous subjects, KYC and risk status, business
+authority, limits, and restriction evidence. The payments chaincode holds wallets,
+retail floats, payment receipts, and usage counters. Account and authentication data remain in
 the off-chain PostgreSQL store, while the ledger contains the wallet and
 transaction state needed for settlement and oversight.
 
@@ -487,28 +511,19 @@ transaction state needed for settlement and oversight.
 	\centering
 	\footnotesize
 	\setlength{\tabcolsep}{3.5pt}
-	\begin{tabular}{l>{\raggedright\arraybackslash}p{6.0cm}}
+	\begin{tabular}{l>{\raggedright\arraybackslash}p{5.9cm}}
 		\toprule
-		\textbf{Group} & \textbf{Representative functions} \\
+		\textbf{Chaincode} & \textbf{Functions} \\
 		\midrule
-		Participants & \texttt{SubmitParticipant}, \texttt{ApproveParticipant},
-		\texttt{Freeze/Unfreeze}, \texttt{Offboard}                              \\
-		Wallets      & \texttt{CreateWallet}, \texttt{CreateWholesaleWallet},
-		\texttt{Freeze/UnfreezeWallet}                                           \\
-		Issuance     & \texttt{Mint}, \texttt{RequestIssuance},
-		\texttt{RequestIssuanceRtgs}                                             \\
-		Redemption   & \texttt{Burn}, \texttt{RequestRedemption}                 \\
-		Distribution & \texttt{DistributeToParticipant}                          \\
-		Transfer     & \texttt{Transfer}                                         \\
-		Supervision  & \texttt{GetReconciliationReport}, \texttt{GetMetrics},
-		\texttt{GetSupervisionEvents}                                            \\
+		rupiah-monetary & \texttt{Initialize}, \texttt{RegisterDistributor}, \texttt{Issue}, \texttt{TransferReserve}, \texttt{RedeemReserve}, \texttt{DebitReserveForConversion}, \texttt{GetWholesaleSupply}, \texttt{GetRetailSupply}, \texttt{GetTotalSupply}, \texttt{GetReserve} \\
+		rupiah-controls & \texttt{GetCallerIdentity}, \texttt{CreatePending}, \texttt{CreateStaffPending}, \texttt{ProtectSubject}, \texttt{ProtectStaff}, \texttt{SetStaffRole}, \texttt{RecordReview}, \texttt{ApproveStandard}, \texttt{DecideHighRisk}, \texttt{SetLimits}, \texttt{SetBusinessAuthority}, \texttt{FreezeSubject}, \texttt{RequestUnfreeze}, \texttt{ApproveUnfreeze}, \texttt{CanPay}, \texttt{CanActFor}, \texttt{GetLimits}, \texttt{GetSubject} \\
+		rupiah-payments & \texttt{OpenWallet}, \texttt{Transfer}, \texttt{ConvertToRetail}, \texttt{FundWallet}, \texttt{GetRetailFloat}, \texttt{GetBalance}, \texttt{GetReceipt} \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-
-A Go backend enforces role-based access control over six roles, summarized in
-Table~\ref{tab:roles}, before any transaction reaches the chaincode.
+A Go backend enforces role-based access control over seven role groups, summarized
+in Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 
 \begin{table}[!t]
 	\caption{Backend Roles and Representative Permissions}
@@ -521,103 +536,114 @@ Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 		\textbf{Role} & \textbf{Representative permitted actions} \\
 		\midrule
 		Public          & Health check, login                         \\
-		Authenticated   & View own profile, list wallets              \\
-		\shortstack[l]{Bank or PJP\\(DistributorMSP)} & Create wallet, fund retail wallets \\
-		\shortstack[l]{Bank Indonesia\\(CentralBankMSP)} & Issue, redeem liquidity, approve participant \\
-		\shortstack[l]{Merchant\\(EndUserMSP)} & Initiate transfer, view balance \\
-		\shortstack[l]{Supervisor\\(ValidatorMSP)} & Reconciliation, metrics, supervision events \\
+		Authenticated   & Read own identity; submit a subject for onboarding \\
+		\shortstack[l]{Customer\\(KYC-verified or merchant, EndUserMSP)} & Open wallet, retail transfer, read own balance \\
+		\shortstack[l]{Wholesale bank\\(DistributorMSP)} & Interbank transfer \\
+			\shortstack[l]{Retail bank\\(DistributorMSP)} & Interbank transfer; conversion to retail float; wallet funding; review, limit, decide on, and restrict subjects \\
+		\shortstack[l]{Bank Indonesia\\(CentralBankMSP)} & Staff administration, monetary initialization, register distributors, issue, redeem reserve \\
+		\shortstack[l]{Auditor\\(ValidatorMSP)} & Read subject records (read-only) \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
 The two layers enforce different things, and the split matters for how the
 prototype's guarantees should be read. The backend maps JWT roles to permitted
-operations and restricts customers to their own wallets. The chaincode checks
-the caller's organization, wallet status, transfer amount, and available
-balance before it writes the state transition. Every endorsing peer re-evaluates
-these rules independently. The single backend and PostgreSQL instance remain trust
-and availability concentration points for this prototype.
+operations and restricts customers to their own wallets. The chaincode checks the
+caller's MSP, subject eligibility, limits, and available balance before it writes
+the state transition. Every endorsing peer re-evaluates these rules independently.
+The single backend and PostgreSQL instance remain trust and availability
+concentration points for this prototype.
 
 \section{Protocol and Determinism}
 \label{sec:proto}
-The transfer path applies explicit authorization and balance checks during
-endorsement. We formalize these checks and examine their behavior under
+The payments chaincode applies explicit eligibility, limit, and balance checks
+during endorsement. We formalize these checks and examine their behavior under
 concurrent transactions.
 
 \subsection{Transfer-Validity Rules}
-For a transfer of amount $a$ from sender $s$ to receiver $r$, the chaincode
-admits the transfer only if every one of the following checks passes:
+For a transfer of amount $a$ from subject $s$ to subject $r$, the payments
+chaincode admits the transfer only if every one of the following checks passes:
 \begin{itemize}
-\item the caller's organization and wallet ownership satisfy the authorization
-      rules;
-\item neither the sender's nor the receiver's wallet is frozen;
-\item $a>0$ and the required business reference is present;
-\item the sender has enough balance to cover $a$; and
-\item the sender and receiver wallet records can be updated atomically.
+\item the caller is an EndUserMSP identity that can act for $s$, as evaluated by
+      the controls chaincode (\texttt{CanActFor});
+\item $s$ and $r$ are both active and unrestricted (\texttt{CanPay});
+\item $a>0$, $s\neq r$, and a non-empty reference are present;
+\item $a$ does not exceed the per-transaction limit of $s$, and the daily and
+      monthly payment totals of $s$ are checked against its limits; and
+\item $s$ has enough balance to cover $a$, and the balance of $r$ after receipt
+      does not exceed its holdings limit.
 \end{itemize}
-If any check fails, the transfer is rejected. A successful transfer decreases
-the sender balance, increases the receiver balance, records the transaction,
-and emits the supervision event used by the read-only observer path. Treasury
-distribution accepts only active bank or PJP custodians, and a PJP
-cannot call issuance directly.
+If any check fails, the transfer is rejected. A successful transfer decreases the
+sender balance, increases the receiver balance, and writes a receipt keyed by the
+reference. A repeated call with the same reference and parameters returns the
+stored receipt. A reference reused for a different operation is rejected.
+Issuance and distributor registration require CentralBankMSP. Each bank identity
+carries its distributor identifier in a \texttt{distributor\_id} certificate
+attribute, and the chaincode rejects any debit of another bank's reserve or float.
+Conversion is limited to retail banks, so only they hold a retail float.
 
 \subsection{Determinism and Double-Spend Safety}
-Every endorsing peer evaluates the authorization and transfer rules against the
-same transaction arguments and wallet records. The state transition does not
-depend on a peer-local clock or on a peer-local cache. Each successful transfer
-updates the sender and receiver records in one transaction, so every endorser
-evaluates the same balance transition before validation.
+Every endorsing peer evaluates these checks against the same transaction arguments
+and ledger state. The chaincodes do not use a peer-local clock or random values,
+and usage windows are derived from the transaction timestamp. Each successful
+transfer updates the sender and receiver records and writes the receipt within one
+transaction, so every endorser evaluates the same balance transition before
+validation.
 
-Double-spend safety follows from Fabric's multi-version concurrency control
-(MVCC). An endorsement reads the current version of each wallet record, and
-Fabric commits the transaction only if those versions remain unchanged through
-ordering and validation. Two concurrent transfers from the same wallet may
-endorse against the same record and version, but only the first ordered
-transaction commits. The second fails MVCC validation after the first update.
-Because the balance records are the keys in the read set, one version check
-covers the state used by the transfer and prevents a stale balance update.
+Double-spend safety follows from Fabric's MVCC. An endorsement reads the current
+version of each wallet record, and Fabric commits the transaction only if those
+versions remain unchanged through ordering and validation. Two concurrent transfers
+from the same wallet may endorse against the same version, but only the first
+ordered transaction commits. The second fails MVCC validation after the first
+update. Because the wallet records are keys in the read set, one version check
+covers the balances used by the transfer and prevents a stale balance update.
 
 \begin{figure}[!t]
 \centering
 \begin{algorithmic}[1]
-\STATE \textbf{function} \textsc{Transfer}(sender, receiver, amount)
-\IF{caller unauthorized \textbf{or} either wallet is frozen}
+\STATE \textbf{function} \textsc{Transfer}(sender, receiver, amount, reference)
+\IF{caller is not EndUserMSP \textbf{or} caller cannot act for sender}
 \RETURN \textsc{reject}
 \ENDIF
-\IF{amount $\le 0$ \textbf{or} reference is missing}
+\IF{sender or receiver is inactive or restricted}
 \RETURN \textsc{reject}
 \ENDIF
-\IF{sender.balance $<$ amount}
+\IF{amount $\le 0$ \textbf{or} sender = receiver \textbf{or} reference is missing}
+\RETURN \textsc{reject}
+\ENDIF
+\IF{reference has a stored receipt}
+\RETURN stored receipt if it matches, otherwise \textsc{reject}
+\ENDIF
+\IF{amount exceeds the per-transaction, daily, or monthly limit}
+\RETURN \textsc{reject}
+\ENDIF
+\IF{sender.balance $<$ amount \textbf{or} receiver.balance + amount exceeds holdings limit}
 \RETURN \textsc{reject}
 \ENDIF
 \STATE sender.balance $\leftarrow$ sender.balance $-$ amount
 \STATE receiver.balance $\leftarrow$ receiver.balance $+$ amount
-\STATE append transaction history and emit supervision event
-\STATE \textbf{PutState} (validated by Fabric MVCC)
+\STATE \textbf{PutState} both wallets and the receipt (validated by Fabric MVCC)
 \RETURN \textsc{commit}
 \end{algorithmic}
-\caption{Authorized, atomic, and double-spend-safe transfer executed by the
+\caption{Authorized, atomic, and double-spend-safe transfer executed by the payments
 chaincode. Fabric MVCC validates the wallet versions before commit.}
 \label{alg:transfer}
 \end{figure}
-
 
 \section{Performance Evaluation}
 \label{sec:eval}
 
 \subsection{Methodology}
-The controls-study benchmark runs Hyperledger Caliper 0.6.0 with one worker on one
-host, against the four-organization network and its three chaincodes. Each workload
-is confirmed over three 30-second rounds, and its verified throughput is the mean of
-the three rounds. A probe exceeds the drain limit when verified throughput over the
-probe duration plus drain falls below 90 percent of the delivered rate. The testbed
-has four peer organizations, one peer per organization, a single-node Raft orderer,
-and one CouchDB instance per organization.
-
-The Caliper measurements in this section apply only to the four-MSP controls-study extension and its three chaincodes, reported in the Controls-Study Extension subsection.
+The compliance benchmark runs Hyperledger Caliper 0.6.0 with one worker on one
+host, against the four-organization network and its three chaincodes. Each
+workload is confirmed over three 30-second rounds, and its verified throughput is
+the mean of the three rounds. A probe exceeds the drain limit when verified
+throughput over the probe duration plus drain falls below 90 percent of the
+delivered rate. The testbed has four peer organizations, one peer per organization,
+a single-node Raft orderer, and one CouchDB instance per organization.
 
 \begin{table}[!t]
-\caption{Testbed configuration of the controls-study benchmark}
+\caption{Testbed configuration of the compliance benchmark}
 \label{tab:testbed-final}
 \centering
 \scriptsize
@@ -628,73 +654,226 @@ The Caliper measurements in this section apply only to the four-MSP controls-stu
 Host & One host; Intel Core i7-7700HQ, 4 cores, 8 threads, 2.80 GHz \\
 Memory & 15.52 GiB \\
 Isolation & Docker-in-Docker \\
-Fabric & 2.5 \\
+Fabric & 2.5 images; 2.5.16 tools bundle \\
 CouchDB & 3.3, one instance per organization \\
-Fabric CA & 1.5.9, one CA (\texttt{ca.centralbank}) \\
+Fabric CA & 1.5.9; one CA (\texttt{ca.centralbank}) in the measured run \\
 Caliper & 0.6.0; one worker; 30 s confirmation windows \\
 Chaincodes & \texttt{rupiah-monetary}, \texttt{rupiah-controls}, \texttt{rupiah-payments} \\
-Channel & \texttt{rupiah-study} \\
+Channel & \texttt{bi-coin} (\texttt{rupiah-study} in the measured run) \\
 Organizations & CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP; one peer each \\
 Ordering & Single-node Raft; batch timeout 2 s; maximum 10 messages \\
 \bottomrule
 \end{tabular}
+
+\vspace{2pt}
+{\scriptsize Figures come from run-20261014-01 under the earlier identifiers (channel
+\texttt{rupiah-study}, one Fabric CA, \texttt{ca.centralbank}). Afterwards, identifiers
+renamed to \texttt{bi-coin}; configuration and endorsement policies unchanged; identities reissued under per-org Fabric CAs; correctness re-run pending.}
 \end{table}
 
+\subsection{Results}
+In run-20261014-01 under the earlier identifiers, all 31 workloads passed their
+preflight checks. The correctness record of that run shows 20 of 20 scenarios, 207 of
+207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. The
+post-rename correctness re-run is pending.
+
+Thirty of 31 workloads are bracketed by measured probes. The fund-reserve upper
+bound is unresolved because two probes failed on fetch errors before measurement. Its
+nearest measured failure, 0.21875 ops/s, lies above the confirmed 0.183594 ops/s.
+Confirmed write rates range from 0.183594 to 4.75 TPS across the 21 write workloads,
+and 19 of 21 confirm at 0.78125 TPS or below (Table~\ref{tab:capacity}). Read
+workloads confirm at 272 to 296 ops/s. Under the earlier identifiers, every read confirmation round in run-20261014-01 passed.
+The two payments reads confirm at 272 ops/s, below the 296 ops/s of the controls and
+monetary reads. In failing read probes, delivered rate stayed below the
+offered target, so the read rates are lower bounds on read capacity.
+
+For every write workload except fund-reserve, the first failing probe completed
+transactions after its probe window and recorded no failed or timed-out
+transactions. Verified throughput over the probe duration plus drain therefore fell
+below 90 percent of the delivered rate. The configured two-second batch timeout is a
+plausible source of this drain latency, but the run records no block contents, so
+the link is not isolated.
+
+Read p50 latency is 6 to 7 ms, and read p95 latency is 7 to 10 ms
+(Table~\ref{tab:latency}). Write p50 latency ranges from 788 to 2147 ms, and write
+p95 latency ranges from 2005 to 2195 ms. The eight write workloads confirmed below
+0.5 ops/s have p50 values between 2060 and 2147 ms, close to the two-second batch
+timeout. The two highest-rate writes, create-pending and open-wallet, have p50 values
+of 1159 and 1161 ms.
+
+\begin{table}[!t]
+\caption{Confirmed capacity and nearest measured failure per workload (writes in TPS, reads in ops/s)}
+\label{tab:capacity}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Workload} & \textbf{Confirmed} & \textbf{Nearest failing} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{rupiah-monetary}} \\
+register-distributor & 0.78125 & 0.828125 \\
+issue & 0.195313 & 0.207031 \\
+interbank-transfer & TBD & TBD \\
+redeem-reserve & 0.195313 & 0.207031 \\
+read-supply & 296 & 320 \\
+read-reserve & 296 & 320 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{rupiah-controls}} \\
+create-pending & 4.75 & 5.125 \\
+protect-subject & 0.78125 & 0.828125 \\
+create-staff-pending & 0.195313 & 0.207031 \\
+protect-staff & 0.78125 & 0.828125 \\
+set-staff-role & 0.78125 & 0.828125 \\
+record-review & 0.78125 & 0.828125 \\
+approve-standard & 0.78125 & 0.828125 \\
+decide-high-risk & 0.195313 & 0.207031 \\
+set-limits & 0.78125 & 0.828125 \\
+set-business-authority & 0.78125 & 0.828125 \\
+freeze-subject & 0.78125 & 0.828125 \\
+request-unfreeze & 0.78125 & 0.828125 \\
+approve-unfreeze & 0.195313 & 0.207031 \\
+read-caller-identity & 296 & 320 \\
+can-pay & 296 & 320 \\
+read-limits & 296 & 320 \\
+can-act-for & 296 & 320 \\
+validator-read-subject & 296 & 320 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{rupiah-payments}} \\
+open-wallet & 4.625 & 5 \\
+transfer-retail & 0.78125 & 0.828125 \\
+transfer-merchant & 0.195313 & 0.207031 \\
+convert-to-retail & TBD & TBD \\
+fund-wallet & TBD & TBD \\
+read-balance & 272 & 296 \\
+read-receipt & 272 & 296 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\scriptsize Nearest failing is the nearest measured failing probe rate. TBD marks workloads
+awaiting the new benchmark run. Rows issue and read-supply carry the run-20261014-01
+values of mint and read-total-supply until then.}
+\end{table}
+
+\begin{table}[!t]
+\caption{Latency per workload at its confirmed rate (median of three rounds)}
+\label{tab:latency}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Workload} & \textbf{p50 (ms)} & \textbf{p95 (ms)} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{rupiah-monetary}} \\
+register-distributor & 802 & 2080 \\
+issue & 2069 & 2085 \\
+interbank-transfer & TBD & TBD \\
+redeem-reserve & 2066 & 2122 \\
+read-supply & 6 & 7 \\
+read-reserve & 6 & 7 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{rupiah-controls}} \\
+create-pending & 1159 & 2005 \\
+protect-subject & 852 & 2070 \\
+create-staff-pending & 2069 & 2078 \\
+protect-staff & 796 & 2070 \\
+set-staff-role & 792 & 2068 \\
+record-review & 852 & 2071 \\
+approve-standard & 874 & 2083 \\
+decide-high-risk & 2060 & 2062 \\
+set-limits & 804 & 2078 \\
+set-business-authority & 793 & 2071 \\
+freeze-subject & 788 & 2067 \\
+request-unfreeze & 798 & 2076 \\
+approve-unfreeze & 2060 & 2071 \\
+read-caller-identity & 6 & 7 \\
+can-pay & 6 & 7 \\
+read-limits & 6 & 7 \\
+can-act-for & 6 & 7 \\
+validator-read-subject & 6 & 7 \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{rupiah-payments}} \\
+open-wallet & 1161 & 2035 \\
+transfer-retail & 939 & 2113 \\
+transfer-merchant & 2101 & 2134 \\
+convert-to-retail & TBD & TBD \\
+fund-wallet & TBD & TBD \\
+read-balance & 7 & 10 \\
+read-receipt & 6 & 8 \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\scriptsize Rows issue and read-supply carry the run-20261014-01 values of mint and
+read-total-supply. TBD marks workloads awaiting the new benchmark run.}
+\end{table}
 
 \section{Limitations and Future Work}
 \label{sec:limits}
 The evaluation uses a single host with one peer per organization and no
 geographic distribution or network latency. Its Caliper results therefore apply
 only to the reported configuration and do not estimate national-scale
-performance. Each controls-study workload is confirmed with one worker over three
-30-second rounds. A distributed
-deployment and a graded-skew contention workload would be needed to
-characterize other operating conditions.
+performance. Each compliance workload is confirmed with one worker over three
+30-second rounds. A distributed deployment and a graded-skew contention workload
+would be needed to characterize other operating conditions.
 
-The shared Fabric channel
-does not provide transaction privacy, and the
-prototype does not use private data collections or privacy-preserving
-cryptography. The single orderer provides ordering but does not tolerate its
-own failure. The prototype also omits offline payment and leaves connections to
-domestic infrastructure such as BI-RTGS and BI-FAST as stubs.
+The shared Fabric channel does not provide transaction privacy, and the prototype
+does not use private data collections or privacy-preserving cryptography. The
+single orderer provides ordering but does not tolerate its own failure. The
+prototype also omits offline payment, the RTGS giro account that backs issuance,
+and any reverse path from wallet balances to a Distributor reserve. Wholesale and
+retail banks share one DistributorMSP, so bank ownership relies on the
+\texttt{distributor\_id} attribute.
 
-The authorization, validation, and action-outcome checks cover the tested paths only.
-They do not establish formal security, production readiness, or
+The authorization, validation, and action-outcome checks cover the tested paths
+only. They do not establish formal security, production readiness, or
 cross-machine reproducibility. Future work should repeat the protocol on
 distributed hosts, instrument endorsement and commit phases, expand the
-contention workload, and evaluate privacy, offline payment, and
-interoperability.
+contention workload, and evaluate privacy, offline payment, and interoperability.
 
-The controls-study extension is limited to synthetic chaincode integration
-scenarios. It does not use live identity verification or screening feeds, submit
-reports to PPATK, or establish the effectiveness of a risk model or institutional
-compliance. Its backend HTTP path is exercised by functional tests but has not been load-measured. Performance
-results for the three new chaincodes are limited to one Caliper worker on one
-host with 30-second confirmation windows. The run was interrupted by a host or power interruption and resumed under the same stamp from its last checkpoint. After the restart, the network was brought up again with existing identity material, and chaincode definitions already committed to the channel were skipped. The two payments reads measured after the restart (272 ops/s) are lower than the eight controls and monetary reads measured before it (296 ops/s). A fresh-network run without a restart also measured lower read rates (read-balance 212 ops/s, read-receipt 236 ops/s), so the difference is consistent with run-to-run variation and is not attributed to the restart. The failure classifier used in this run counted transport errors as transaction failures; the fix was made after the run and is not reflected in its results. The current harness stops a search on a transport error as inconclusive, without automatic retry.
-
+The compliance study is limited to synthetic chaincode integration scenarios. It
+does not use live identity verification or screening feeds, submit reports to
+PPATK, or establish the effectiveness of a risk model or institutional compliance.
+Its backend HTTP path is exercised by functional tests but has not been
+load-measured. Performance results for the three chaincodes are limited to one
+Caliper worker on one host with 30-second confirmation windows. The run was
+interrupted by a host or power interruption and resumed under the same stamp from
+its last checkpoint. After the restart, the network was brought up again with
+existing identity material, and chaincode definitions already committed to the
+channel were skipped. The two payments reads measured after the restart (272 ops/s)
+are lower than the eight controls and monetary reads measured before it (296 ops/s).
+The paper does not attribute this difference to the restart, and it reports no
+fresh-network comparison for the payments reads. The failure classifier used in
+this run counted transport errors as transaction failures; the fix was made after
+the run and is not reflected in its results. The current harness stops a search on
+a transport error as inconclusive, without automatic retry.
 
 \section{Conclusion}
-This paper implements Bank Indonesia's digital money business processes in a
-two-tier Digital Rupiah prototype on a four-organization Hyperledger Fabric network. The chaincode integrates hierarchical issuance and distribution,
-retail transfers, organization-aware authorization, and supervisor-facing
-reconciliation.
+This paper reports a two-tier Digital Rupiah prototype on a four-organization
+Hyperledger Fabric network. Its three chaincodes implement hierarchical issuance and
+distribution, retail transfers, organization-aware authorization, and read-only
+Observer access to subject records. The transfer protocol combines explicit
+eligibility, limit, and balance checks with Fabric MVCC.
 
-The transfer protocol combines explicit wallet-state checks with Fabric MVCC.
-Performance evidence rests on the four-organization controls-study extension.
-
-A separate four-MSP controls-study extension implements three domain chaincodes
-and passes synthetic integration scenarios for distinct senior approval,
-restriction evidence, reserve funding, retail payment, read-only ValidatorMSP
-access, and expected endorsement failures. This functional evidence does not depend on the Caliper results above.
-
+The compliance study is the main study of this paper. As reported for
+run-20261014-01 under the earlier identifiers, its synthetic integration scenarios
+passed for distinct senior approval, restriction evidence, reserve funding, retail
+payment, read-only ValidatorMSP access, and expected endorsement failures; the
+post-rename correctness re-run is pending. It also reports throughput and latency for
+the same three chaincodes on a single host. This functional evidence does not depend on the Caliper results in
+Section~\ref{sec:eval}.
 
 \section*{Artifact Availability}
-The digital-rupiah chaincode, the four-organization network definition, the Go backend,
-and the Hyperledger Caliper workloads are available at
-\url{https://github.com/mfachrizalg/bi-coin}. The controls-study chaincodes and four-MSP
-network are under \texttt{bi-coin-fabric/study} and
-\texttt{bi-coin-fabric/network/study}, and their Caliper results are reported in the
-Controls-Study Extension subsection.
+The bi-coin repository at \url{https://github.com/mfachrizalg/bi-coin} contains the
+three chaincodes (\texttt{bi-coin-fabric/chaincode/monetary}, \texttt{controls}, and
+\texttt{payments}), the four-organization network definition
+(\texttt{bi-coin-fabric/network}), the Go backend, and the Caliper workloads
+(\texttt{bi-coin-fabric/benchmark/compliance}). The results of
+compliance-run-20261014-01 are in
+\texttt{bi-coin-fabric/benchmark/results/compliance-run-20261014-01}, and Section~\ref{sec:eval}
+reports them.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

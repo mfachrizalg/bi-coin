@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by 0010
 
 ## Decision
 

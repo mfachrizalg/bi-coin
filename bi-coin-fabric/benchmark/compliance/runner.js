@@ -72,22 +72,22 @@ function finalizeManifest() {
 }
 
 function setupFreshNetwork() {
-    run('bash', ['scripts/study-network-down.sh'], 'network-down', { env: { STUDY_REMOVE_VOLUMES: 'true' } });
+    run('bash', ['scripts/network-down.sh'], 'network-down', { env: { REMOVE_VOLUMES: 'true' } });
     for (const generatedPath of ['organizations', 'channel-artifacts', 'ca-client', 'packages']) {
-        fs.rmSync(path.join(projectRoot, 'network/study', generatedPath), { recursive: true, force: true });
+        fs.rmSync(path.join(projectRoot, 'network', generatedPath), { recursive: true, force: true });
     }
-    fs.rmSync(path.join(projectRoot, 'network/study/.env.study'), { force: true });
-    run('bash', ['scripts/study-network-up.sh'], 'network-up');
-    run('bash', ['scripts/deploy-study-chaincodes.sh'], 'deploy-study-chaincodes');
+    fs.rmSync(path.join(projectRoot, 'network/.env.study'), { force: true });
+    run('bash', ['scripts/network-up.sh'], 'network-up');
+    run('bash', ['scripts/deploy-chaincodes.sh'], 'deploy-chaincodes');
 }
 
 function resumeNetwork() {
-    run('bash', ['scripts/study-network-up.sh'], 'network-resume', { append: true });
-    run('bash', ['scripts/deploy-study-chaincodes.sh'], 'chaincode-resume', { append: true });
+    run('bash', ['scripts/network-up.sh'], 'network-resume', { append: true });
+    run('bash', ['scripts/deploy-chaincodes.sh'], 'chaincode-resume', { append: true });
 }
 
 function runLedgerSmoke() {
-    const result = run(process.execPath, ['scripts/study-smoke-test.js'], 'ledger-correctness', { captureStdout: true, allowFailure: true });
+    const result = run(process.execPath, ['scripts/smoke-test.js'], 'ledger-correctness', { captureStdout: true, allowFailure: true });
     try {
         const report = JSON.parse((result.stdout || '').trim());
         report.process_exit_status = result.status;
@@ -190,8 +190,11 @@ async function correctness({ networkReady = false } = {}) {
             case_results: allCases,
             peers: ledger.peers,
             reserve: ledger.reserve,
-            supply: ledger.supply,
-            treasury: ledger.treasury,
+            supply: {
+                wholesale: ledger.wholesale_supply,
+                retail: ledger.retail_supply,
+                total: ledger.supply,
+            },
             msp_authorization_denials: ledger.msp_authorization_denials,
             nested_debit_direct_denials: ledger.nested_debit_direct_denials,
             initialization_replay_state_unchanged: ledger.initialization_replay_state_unchanged,

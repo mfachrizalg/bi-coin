@@ -59,8 +59,8 @@ Replace the 4-panel layout content with:
 3. **Masalah teknis** — penerbitan berjenjang, otorisasi organisasi,
    keselamatan transfer, dan pengawasan harus ditegakkan di lapisan
    *chaincode*, bukan hanya dijelaskan sebagai kebijakan.
-4. **Solusi** — purwarupa terintegrasi (penerbitan → distribusi →
-   transfer ritel → pengawasan) dievaluasi kinerjanya dengan Hyperledger
+4. **Solusi** — purwarupa terintegrasi (penerbitan → konversi dan pendanaan
+   dompet → transfer ritel → pengawasan) dievaluasi kinerjanya dengan Hyperledger
    Caliper.
 
 ### Slide 5 — Celah Penelitian
@@ -79,8 +79,8 @@ Replace with 2 numbered items (verbatim from thesis Ch1):
 
 1. Bagaimana merancang dan membangun sistem Rupiah Digital ritel berbasis
    Hyperledger Fabric yang mendukung model penerbitan dan distribusi
-   likuiditas berjenjang dari Bank Indonesia menuju bank, PJP, dan
-   pelanggan ritel, serta transfer ritel dan pengawasan transaksi dengan
+   likuiditas berjenjang dari Bank Indonesia menuju Wholesale Bank, Retail Bank,
+   dan pelanggan ritel, serta transfer ritel dan pengawasan transaksi dengan
    batas wewenang organisasi yang jelas?
 2. Bagaimana kinerja sistem yang dibangun dari sisi *throughput* dan latensi
    pada berbagai skenario beban transaksi yang diukur menggunakan
@@ -101,7 +101,7 @@ Replace with bullets:
 
 - Purwarupa pada jaringan tersimulasi lokal (*container*), bukan sistem
   produksi.
-- Hyperledger Fabric versi 2.5, lima organisasi peserta, konsensus Raft
+- Hyperledger Fabric versi 2.5, empat organisasi peserta, konsensus Raft
   (etcdraft).
 - Fokus pada perancangan, implementasi, dan evaluasi kinerja fungsional;
   aspek hukum dan kebijakan moneter di luar cakupan.
@@ -123,8 +123,9 @@ Replace with 5 numbered items:
 1. Rujukan teoretis perancangan CBDC ritel berbasis *permissioned
    blockchain*.
 2. Penjelasan penerapan Hyperledger Fabric untuk memisahkan peran Bank
-   Indonesia, peserta distribusi, PJP, dan pengguna ritel.
-3. Purwarupa untuk eksperimen teknis penerbitan, distribusi, transfer, dan
+   Indonesia, Wholesale Bank, Retail Bank, dan pengguna ritel.
+3. Purwarupa untuk eksperimen teknis penerbitan, konversi dan pendanaan
+   dompet, transfer, dan
    pengawasan.
 4. Dasar evaluasi kinerja awal (*throughput*, latensi, dan keberhasilan
    transaksi).
@@ -141,8 +142,8 @@ whichever matches the slide's box shape). Body text:
 
 - Wholesale vs. retail CBDC: sasaran pengguna berbeda (antarlembaga vs.
   masyarakat luas).
-- Model satu jenjang vs. dua jenjang: distribusi langsung bank sentral vs.
-  via bank/PJP perantara.
+- Model satu jenjang vs. dua jenjang: Issuance langsung dari bank sentral vs.
+  via bank perantara.
 - Account-based vs. token-based: verifikasi identitas+saldo vs. verifikasi
   objek token.
 - Arsitektur penerbitan direct/indirect/hybrid: struktur klaim CBDC
@@ -167,8 +168,9 @@ Insert image `slide_figures/two-tier-cbdc-1.png`. Body text:
 
 - Model dua jenjang dipilih agar selaras dengan desain Proyek Garuda dan
   mengurangi risiko disintermediasi perbankan.
-- Distribusi purwarupa: Treasury Bank Indonesia → bank validator/PJP sebagai
-  kustodian → pelanggan ritel. BI tidak mencetak langsung ke dompet ritel.
+- Alur purwarupa: Issuance dari Bank Indonesia ke reserve Distributor →
+  Conversion dan Wallet funding oleh Retail Bank sebagai kustodian → pelanggan
+  ritel. BI tidak mencetak langsung ke dompet ritel.
 
 ### Slide 13 — Perbandingan platform DLT dan konsensus
 Two tables — use whichever table shapes exist on this slide type, or split
@@ -200,8 +202,8 @@ permissioned yang dibandingkan.
 ### Slide 14 — Otorisasi dan Pengawasan
 Body text:
 
-- Model dua jenjang memisahkan penerbit, bank validator, PJP, dan pengguna
-  ritel.
+- Model dua jenjang memisahkan penerbit, Wholesale Bank, Retail Bank, dan
+  pengguna ritel.
 - *Backend* memeriksa JWT, peran, dan kepemilikan dompet sebelum mengirim
   transaksi.
 - *Chaincode* memeriksa MSP kustodian, status dompet, nilai transfer,
@@ -235,9 +237,9 @@ Insert image `slide_figures/system-architecture-1.png` (full stack:
 client → backend API → Fabric Gateway SDK → Fabric network) and/or
 `slide_figures/network-architecture-1.png`. Body text:
 
-- 5 organisasi peserta + 1 *orderer*: BankIndonesiaOrg (penerbit),
-  HimbaraBankOrg & CommercialBankOrg (validator), PJPOrg (PJP ritel),
-  OJKObserverOrg (*observer*, akses baca).
+- 4 organisasi peserta + 1 *orderer*: CentralBankMSP (Bank Indonesia, penerbit
+  dan *orderer*), DistributorMSP (Wholesale Bank dan Retail Bank), EndUserMSP
+  (pengguna), ValidatorMSP (*observer* OJK dan PPATK, akses baca).
 - Setiap organisasi: MSP + *peer* + CouchDB sendiri; satu *channel*
   `mychannel`, *endorsement* aplikasi dari satu MSP institusional; TLS
   antarnode. *Lifecycle* chaincode memerlukan BI dan satu peserta
@@ -270,8 +272,9 @@ Replace the tier table with a four-step flow:
 ### Slide 20 — Fungsi Chaincode Kunci
 Insert image `slide_figures/account-token-payment-1.png`. Body text:
 
-- `Mint` / `RequestIssuance`, `Burn` / `RequestRedemption`,
-  `DistributeToParticipant` — penerbitan dan distribusi berjenjang.
+- `Issue` (Issuance), `RedeemReserve` (Redemption), `TransferReserve`
+  (Interbank transfer), `ConvertToRetail` dan `FundWallet` — penerbitan,
+  penebusan, dan pendanaan berjenjang.
 - `Transfer` — satu fungsi untuk C2C dan C2M; memeriksa otorisasi, MSP
   kustodian, status dompet, nilai transfer, referensi bisnis, dan saldo.
 - `GetReconciliationReport`, `GetMetrics`, dan
@@ -295,7 +298,7 @@ instead of math. Body text:
 - Chaincode: 1 paket, memvalidasi siklus hidup peserta, pembuatan dompet,
   jalur berhasil/tolak transfer, dan pembaruan state.
 - Backend: 6 paket, memvalidasi dispatch layanan, urutan argumen,
-  kepemilikan dompet, penerbitan, penebusan, dan distribusi.
+  kepemilikan dompet, penerbitan, penebusan, konversi, dan pendanaan dompet.
 - Tampilkan pemisahan hasil uji pada slide berikutnya: backend 76 pengujian
   dan chaincode 58 pengujian, semuanya lulus.
 - Tekankan bahwa unit test mendukung verifikasi logika prototipe, bukan bukti
@@ -310,7 +313,7 @@ Table (`tab:laju`):
 |---|---|---|---|---|
 | Transfer terisolasi | 1 | 120 detik | 20 / 75 / 150 TPS | Rp100, kontensi rendah dan tinggi, lima pengulangan |
 | Kalibrasi transfer | 2 | 5×60 detik | 30 / 40 / 50 TPS | Rp1.000, transfer ritel terisolasi |
-| Pengganti distribusi | 1 | 5×120 detik | 75 TPS | Rp1.000, lima pengulangan |
+| Pengganti Issuance | 1 | 5×120 detik | 75 TPS | Rp1.000, lima pengulangan |
 | Pengganti penebusan | 1 | 5×120 detik | 20 TPS | Rp1.000, lima pengulangan |
 | Fungsional | 2 | 168 tx | 5–30 TPS | Penerbitan, transfer, moneter, pengawasan |
 | Otorisasi | 1 | 1 tx | 5 TPS | MSP pemanggil tidak cocok dengan kustodian |
@@ -420,8 +423,8 @@ Body text:
 ### Slide 31 — Kesimpulan
 Body text:
 
-1. Berhasil merancang/membangun purwarupa dua jenjang (BI, bank
-   validator, PJP, pengguna ritel) pada Hyperledger Fabric 2.5, lima
+1. Berhasil merancang/membangun purwarupa dua jenjang (BI, Wholesale
+   Bank, Retail Bank, pengguna ritel) pada Hyperledger Fabric 2.5, empat
    organisasi, backend Go, CouchDB, dan PostgreSQL.
 2. Kepemilikan pada backend dan pemeriksaan MSP pada chaincode menjaga batas
    otorisasi; jalur transfer dan pengawasan dapat dijalankan pada purwarupa.

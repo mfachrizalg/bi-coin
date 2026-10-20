@@ -36,7 +36,7 @@ const recordedRuns = JSON.parse(fs.readFileSync(path.join(root, 'metadata.json')
 if (!existingSnapshot && recordedRuns.length) {
     throw new Error('existing runs have no captured source; preserve the old study and use a new BENCHMARK_STAMP');
 }
-const sourceFiles = ['scripts', 'chaincode', 'study', 'backend', 'frontend/src', 'frontend/tests', 'benchmark/workloads', 'benchmark/observers', 'benchmark/isolated', 'benchmark/compliance', 'network', 'docs/adr']
+const sourceFiles = ['scripts', 'chaincode', 'backend', 'frontend/src', 'frontend/tests', 'benchmark/workloads', 'benchmark/observers', 'benchmark/isolated', 'benchmark/compliance', 'network', 'docs/adr']
     .flatMap(directory => filesUnder(path.join(projectRoot, directory)))
     .concat([
         'CONTEXT.md',
@@ -47,9 +47,9 @@ const sourceFiles = ['scripts', 'chaincode', 'study', 'backend', 'frontend/src',
     ].map(file => path.join(projectRoot, file)).filter(fs.existsSync))
     .filter(file => /\.(?:go|js|mjs|sh|json|ya?ml|md|ts|tsx)$|\/go\.(?:mod|sum)$|\/Dockerfile$/.test(file)
         || path.relative(projectRoot, file).split(path.sep).slice(0, 2).join(path.sep) === ['backend', 'vendor'].join(path.sep)
-        || path.relative(projectRoot, file).split(path.sep).slice(0, 4).join(path.sep) === ['study', 'chaincode', 'controls', 'vendor'].join(path.sep)
-        || path.relative(projectRoot, file).split(path.sep).slice(0, 4).join(path.sep) === ['study', 'chaincode', 'monetary', 'vendor'].join(path.sep)
-        || path.relative(projectRoot, file).split(path.sep).slice(0, 4).join(path.sep) === ['study', 'chaincode', 'payments', 'vendor'].join(path.sep));
+        || path.relative(projectRoot, file).split(path.sep).slice(0, 3).join(path.sep) === ['chaincode', 'controls', 'vendor'].join(path.sep)
+        || path.relative(projectRoot, file).split(path.sep).slice(0, 3).join(path.sep) === ['chaincode', 'monetary', 'vendor'].join(path.sep)
+        || path.relative(projectRoot, file).split(path.sep).slice(0, 3).join(path.sep) === ['chaincode', 'payments', 'vendor'].join(path.sep));
 if (existingSnapshot && filesUnder(sourceRoot).length !== sourceFiles.length) {
     throw new Error('source file set changed during study; use a new BENCHMARK_STAMP');
 }

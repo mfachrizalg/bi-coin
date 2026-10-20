@@ -1,5 +1,7 @@
 # Hyperledger Fabric Endorsement Approach for Two-Tier Retail CBDC
 
+> Historical design note (2026-10-17). It predates the four-organization bi-coin network. Its organizations (CommercialBankA/B, Regulator, PSP) and policies are not deployed; current policies are in `network/README.md` and `scripts/deploy-chaincodes.sh`. The body below is unchanged except the Issuance term in the policy table.
+
 ## Overview
 
 In Hyperledger Fabric, endorsement policies determine which organizations must approve a transaction before it can be committed.
@@ -39,7 +41,7 @@ Responsibilities:
 | Transaction | Recommended Policy | Reason |
 |---|---|---|
 | CBDC issuance | AND / threshold | Prevent unauthorized money creation |
-| CBDC distribution to banks | AND | Confirm institutional transfer |
+| CBDC Issuance to banks | AND | Confirm institutional transfer |
 | Wallet creation | OR | High-volume customer service |
 | Wallet funding | OR | Fast retail processing |
 | P2P payment | Threshold (2-of-3) | Balance security and performance |

@@ -1,5 +1,5 @@
 % Arsitektur sistem penuh Rupiah Digital: client → backend → Fabric → peers
-% Purwarupa studi empat organisasi (kanal rupiah-study)
+% Purwarupa studi empat organisasi (kanal bi-coin)
 % Di-input dari BAB III §3.1.3
 
 \begin{figure}[H]
@@ -13,9 +13,9 @@
   pgbox/.style={draw=black, fill=blue!8, rectangle, rounded corners=3pt,
     minimum width=3.8cm, minimum height=1.1cm, align=center, font=\small},
   peer/.style={draw=black, fill=white, rectangle, rounded corners=2pt,
-    minimum width=2.9cm, minimum height=1.1cm, align=center, font=\scriptsize},
+    minimum width=3.2cm, minimum height=1.1cm, align=center, font=\scriptsize},
   obsbox/.style={draw=black, dashed, fill=white, rectangle, rounded corners=2pt,
-    minimum width=2.9cm, minimum height=1.1cm, align=center, font=\scriptsize},
+    minimum width=3.2cm, minimum height=1.1cm, align=center, font=\scriptsize},
   ordnode/.style={draw=black, fill=black!8, rectangle, rounded corners=3pt,
     minimum width=3.8cm, minimum height=1.1cm, align=center, font=\scriptsize\bfseries},
   cdb/.style={draw=black, fill=gray!20, rectangle,
@@ -45,7 +45,7 @@
 \draw[rounded corners=8pt, black]   (-2.8, 2.2) rectangle (12.8, 11.0);
 \node[font=\scriptsize\bfseries, anchor=north west, align=left] at (-2.5, 10.8)
   {\textbf{Hyperledger Fabric 2.5}\\
-   kanal \textit{rupiah-study}, kontrak \textit{rupiah-monetary}, \textit{rupiah-controls}, \textit{rupiah-payments}, kebijakan endorsement per kontrak, TLS};
+   kanal \textit{bi-coin}, kontrak \textit{rupiah-monetary}, \textit{rupiah-controls}, \textit{rupiah-payments}, kebijakan endorsement per kontrak, TLS};
 
 % Panah dari Gateway ke batas atas kotak jaringan
 \draw[ar] (gw.south) -- (6.0, 11.0)
@@ -53,19 +53,19 @@
 
 %── Orderer ───────────────────────────────────────────────────────────────────
 
-\node[ordnode] (ord) at (4.5, 9.5)
-  {orderer.centralbank:7050\\Raft (satu node)};
+\node[ordnode] (ord) at (5.25, 9.5)
+  {orderer.centralbank.bi-coin:7050\\Raft (satu node)};
 
 %── Empat Peer ────────────────────────────────────────────────────────────────
 
 \node[peer]   (pcb)   at (0.0, 7.0)
-  {peer0.centralbank\\CentralBankMSP\\:17051};
-\node[peer]   (pdist) at (3.0, 7.0)
-  {peer0.distributor\\DistributorMSP\\:18051};
-\node[obsbox] (pval)  at (6.0, 7.0)
-  {peer0.validator\\ValidatorMSP (audit)\\:19051};
-\node[peer]   (pusr)  at (9.0, 7.0)
-  {peer0.enduser\\EndUserMSP\\:20051};
+  {peer0.centralbank.bi-coin\\CentralBankMSP\\:17051};
+\node[peer]   (pdist) at (3.5, 7.0)
+  {peer0.distributor.bi-coin\\DistributorMSP\\:18051};
+\node[obsbox] (pval)  at (7.0, 7.0)
+  {peer0.validator.bi-coin\\ValidatorMSP (observer)\\:19051};
+\node[peer]   (pusr)  at (10.5, 7.0)
+  {peer0.enduser.bi-coin\\EndUserMSP\\:20051};
 
 % Orderer → semua peer (pengiriman blok)
 \draw[ar] (ord.south) to[out=-110,in=80] (pcb.north);
@@ -76,23 +76,32 @@
 %── CouchDB (satu per organisasi) ─────────────────────────────────────────────
 
 \node[cdb] (ccb)   at (0.0,  5.5) {CouchDB :17584};
-\node[cdb] (cdist) at (3.0,  5.5) {CouchDB :18584};
-\node[cdb] (cval)  at (6.0,  5.5) {CouchDB :19584};
-\node[cdb] (cusr)  at (9.0,  5.5) {CouchDB :20584};
+\node[cdb] (cdist) at (3.5,  5.5) {CouchDB :18584};
+\node[cdb] (cval)  at (7.0,  5.5) {CouchDB :19584};
+\node[cdb] (cusr)  at (10.5,  5.5) {CouchDB :20584};
 
 \draw[ar] (pcb)   -- (ccb);
 \draw[ar] (pdist) -- (cdist);
 \draw[ar] (pval)  -- (cval);
 \draw[ar] (pusr)  -- (cusr);
 
-%── CA tunggal (di bawah kotak jaringan) ─────────────────────────────────────
+%── Empat CA, satu per organisasi (di bawah kotak jaringan) ───────────────────
 
-\node[cabox, minimum width=4.0cm] (ca) at (4.5, 1.0)
-  {CA ca.centralbank\\(CentralBankMSP)};
-\draw[ar] (ca.north) -- (4.5, 2.2) node[lbl, right]{identitas CentralBankMSP};
+\node[cabox] (ca1) at (0.0, 1.0)
+  {CA ca.centralbank.bi-coin\\(CentralBankMSP)};
+\node[cabox] (ca2) at (3.5, 1.0)
+  {CA ca.distributor.bi-coin\\(DistributorMSP)};
+\node[cabox] (ca3) at (7.0, 1.0)
+  {CA ca.validator.bi-coin\\(ValidatorMSP)};
+\node[cabox] (ca4) at (10.5, 1.0)
+  {CA ca.enduser.bi-coin\\(EndUserMSP)};
+\draw[ar] (ca1.north) -- (0.0, 2.2);
+\draw[ar] (ca2.north) -- (3.5, 2.2);
+\draw[ar] (ca3.north) -- (7.0, 2.2);
+\draw[ar] (ca4.north) -- (10.5, 2.2);
 
 \end{tikzpicture}%
 }
-\caption{Arsitektur purwarupa studi Rupiah Digital: lapisan \textit{client}, \textit{backend API} (Go REST + JWT/RBAC), basis data PostgreSQL luring, \textit{Fabric Gateway SDK}, serta jaringan Hyperledger Fabric 2.5 dengan empat organisasi (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP), satu CouchDB per organisasi, satu CA, dan orderer Raft satu node}
+\caption{Arsitektur purwarupa studi Rupiah Digital: lapisan \textit{client}, \textit{backend API} (Go REST + JWT/RBAC), basis data PostgreSQL luring, \textit{Fabric Gateway SDK}, serta jaringan Hyperledger Fabric 2.5 dengan empat organisasi (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP), satu CouchDB per organisasi, empat CA (satu per organisasi), dan orderer Raft satu node}
 \label{fig:arsitektur}
 \end{figure}

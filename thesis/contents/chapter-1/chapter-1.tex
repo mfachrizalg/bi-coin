@@ -45,13 +45,13 @@ yang diterbitkan oleh penyelenggara swasta dan merupakan kewajiban penerbitnya,
 CBDC menempatkan bank sentral sebagai penjamin nilai akhir. Bagi Indonesia,
 Bank Indonesia menamai inisiatif CBDC sebagai Rupiah Digital melalui Proyek
 Garuda, yang menempuh pendekatan bertahap dimulai dari Rupiah Digital
-\textit{wholesale} (w-Digital Rupiah) untuk transaksi antarlembaga, kemudian
-diperluas menuju Rupiah Digital \textit{retail} (r-Digital Rupiah) bagi
+\textit{wholesale} (\textit{w-Rupiah Digital}) untuk transaksi antarlembaga, kemudian
+diperluas menuju Rupiah Digital \textit{retail} (\textit{r-Rupiah Digital}) bagi
 masyarakat luas \cite{bi_whitepaper2022, bi_garuda_poc}. Desain Rupiah Digital
 mengadopsi model dua jenjang (\textit{two-tier}), yaitu Bank Indonesia
 menerbitkan dan mengelola Rupiah Digital pada tingkat \textit{wholesale},
 sementara distribusi kepada masyarakat dilakukan melalui pihak perantara seperti
-perbankan dan penyedia jasa pembayaran \cite{bi_consultative}.
+perbankan \cite{bi_consultative}.
 
 Salah satu pilihan teknologi yang banyak dikaji untuk menopang CBDC adalah
 \textit{Distributed Ledger Technology} (DLT) berbasis \textit{blockchain}.
@@ -85,7 +85,7 @@ Michalopoulos2025Privacy}, keamanan dan pemodelan ancaman dalam
 \cite{hans2023}, serta arsitektur jaringan dalam \cite{bhawana2021, sun2017}.
 Kelayakan sistem CBDC ritel, sebaliknya, bergantung pada keterpaduan komponen
 tersebut. Dalam korpus literatur yang digunakan pada penelitian ini, penerbitan
-dan distribusi likuiditas berjenjang, transfer ritel, serta pengawasan belum
+dan konversi likuiditas ke float ritel, transfer ritel, serta pengawasan belum
 dievaluasi sebagai satu artefak Fabric yang kinerjanya dapat diukur.
 
 Untuk konteks Indonesia, Bank Indonesia telah menetapkan arah desain Rupiah
@@ -98,7 +98,7 @@ yang terdokumentasi secara publik baru mencakup lapisan \textit{wholesale}
 merancang dan mengimplementasikan purwarupa CBDC ritel berbasis Hyperledger
 Fabric. Makalah mereka memperlihatkan pembuatan akun dan transfer aset
 antarpengguna, tetapi tidak menyajikan pengawasan multipihak atau pengujian
-Caliper yang dapat diulang. Dari sisi evaluasi kinerja, CBDC ritel yang telah
+Caliper dengan artefak yang dapat diperiksa. Dari sisi evaluasi kinerja, CBDC ritel yang telah
 diluncurkan maupun
 yang masih berupa pilot (seperti eNaira di Nigeria \cite{ree2023enaira} dan
 pilot ritel di Thailand \cite{Bhensook2025Public}) belum menyertakan tolok ukur
@@ -114,7 +114,7 @@ Atas dasar literatur dan artefak publik yang ditinjau, celah penelitian berada
 pada kebutuhan akan purwarupa CBDC ritel yang (i) mengintegrasikan penerbitan
 berjenjang dan transfer ritel, (ii) menguji kontrol KYC dan AML/CFT terpilih
 melalui batas otorisasi serta \textit{endorsement} yang dapat diamati, dan
-(iii) melaporkan kinerja dengan konfigurasi serta artefak yang dapat diulang.
+(iii) melaporkan kinerja dengan konfigurasi serta artefak yang dapat diperiksa.
 Penelitian ini menempatkan verifikasi kontrol sebagai evaluasi utama melalui
 lingkungan studi terisolasi yang menggunakan empat organisasi Fabric dan tiga
 \textit{chaincode} domain. Pengukuran Hyperledger Caliper pada ekstensi studi kontrol empat organisasi dengan satu \textit{worker} pada satu \textit{host}
@@ -161,8 +161,8 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	      dijalankan pada lingkungan jaringan tersimulasi secara lokal menggunakan
 	      \textit{container}, bukan sistem produksi.
 	\item Pengujian kontrol utama menggunakan jaringan Fabric 2.5 terisolasi pada
-	      kanal \texttt{rupiah-study}, empat MSP, satu \textit{peer} per MSP, dan
-	      satu \textit{orderer} di bawah \texttt{CentralBankMSP}. Pengukuran kinerja
+	      kanal \texttt{bi-coin}, empat MSP, satu \textit{peer} per MSP, dan
+	      satu \textit{orderer} \texttt{orderer.centralbank.bi-coin} di bawah \texttt{CentralBankMSP}. Pengukuran kinerja
 	      sekunder menggunakan Hyperledger Caliper pada ekstensi studi kontrol empat organisasi
 	      dengan satu \textit{worker} pada satu \textit{host}.
 	\item Penelitian berfokus pada kontrol KYC dan AML/CFT terpilih serta
@@ -224,10 +224,10 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 	      domestik, interoperabilitas teknis dan semantik dengan sistem yang ada maupun
 	      yang akan datang, serta interkoneksi lintas batas untuk jaringan CBDC
 	      antarnegara \cite{bi_whitepaper2022}. Purwarupa ini memenuhi prinsip tersebut
-	      hanya pada tataran internal: alur penerbitan--distribusi--pembayaran--pengawasan
+	      hanya pada tataran internal: alur penerbitan--konversi--pendanaan dompet--pembayaran--pengawasan
 	      berjalan secara terpadu dalam satu jaringan Hyperledger Fabric. Namun,
 	      integrasi eksternal dengan BI-RTGS dan BI-FAST hanya dimodelkan sebagai titik
-	      masuk (\textit{stub}) tanpa koneksi nyata, Penyimpan Digital Rupiah (KDR)
+	      masuk (\textit{stub}) tanpa koneksi nyata, Penyimpan Rupiah Digital (KDR)
 	      belum diimplementasikan, konformitas terhadap standar SNAP API nasional tidak
 	      diterapkan, dan tidak ada gerbang (\textit{gateway}) menuju IPK domestik
 	      maupun jaringan CBDC lintas batas. Pemenuhan prinsip 3i secara penuh
@@ -240,8 +240,8 @@ Tujuan yang ingin dicapai pada penelitian ini adalah sebagai berikut.
 Penelitian ini diharapkan memberikan manfaat sebagai berikut.
 \begin{enumerate}
 	\item Memberikan rujukan teoretis tentang perancangan CBDC ritel berbasis
-	      \textit{permissioned blockchain} yang mencakup penerbitan berjenjang,
-	      distribusi kepada kustodian bank atau PJP, transaksi antarpengguna, dan pengawasan oleh
+	      \textit{permissioned blockchain} yang mencakup penerbitan berjenjang kepada bank distributor,
+	      konversi ke float ritel pada bank \textit{retail}, transaksi antarpengguna, dan pengawasan oleh
 	      bank sentral.
 	\item Menjelaskan penerapan Hyperledger Fabric untuk memodelkan pemisahan
 	      peran antara \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan \texttt{EndUserMSP} tanpa

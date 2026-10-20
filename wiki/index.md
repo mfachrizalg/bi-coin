@@ -2,7 +2,7 @@
 type: meta
 title: "Wiki Index"
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-10-17
 tags:
   - "index"
 status: developing
@@ -13,7 +13,7 @@ status: developing
 ## Domains
 
 - [[Adoption Inclusion Banking and Macroeconomics]]
-- [[bi-coin-fabric]]
+- [[bi-coin-fabric]] (four-org bi-coin network; benchmark source compliance-run-20261014-01)
 - [[CBDC Design and Policy]]
 - [[Digital Rupiah and Indonesian Payments]]
 - [[DLT and Blockchain Architecture]]

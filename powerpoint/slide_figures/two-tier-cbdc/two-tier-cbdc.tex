@@ -20,18 +20,18 @@
   dar/.style={-{Stealth}, thick, dashed},
 ]
 
-%── Jenjang distribusi institusional ──────────────────────────────────────────
+%── Jenjang Issuance institusional ──────────────────────────────────────────
 
 \node[actor] (bi)         at (0,    0)    {Bank Indonesia\\(Penerbit)};
-\node[actor] (himbara)    at (6.0,  1.5)  {Himbara Bank\\(Validator)};
-\node[actor] (commercial) at (6.0, -1.5)  {Commercial Bank\\(Validator)};
+\node[actor] (wholesale)  at (6.0,  1.5)  {Wholesale Bank\\(Distributor)};
+\node[actor] (retail)     at (6.0, -1.5)  {Retail Bank\\(Distributor)};
 \node[actor] (ojk)        at (11.5, 0)    {OJK\\(Observer)};
 
-% BI Treasury → bank/PJP custodian (penerbitan dan distribusi)
+% BI → Distributor banks (Issuance langsung ke reserve)
 \draw[ar] (bi.east) to[out=15,in=175]
-  node[pl, above, sloped, pos=0.55]{Distribusi dari Treasury} (himbara.west);
+  node[pl, above, sloped, pos=0.55]{Issuance} (wholesale.west);
 \draw[ar] (bi.east) to[out=-15,in=-175]
-  node[pl, below, sloped, pos=0.55]{Distribusi dari Treasury} (commercial.west);
+  node[pl, below, sloped, pos=0.55]{Issuance} (retail.west);
 
 % Pelaporan dan akses baca pengawasan
 \draw[dar] (bi.north east) to[out=60,in=180] (6.0,2.2)
@@ -43,40 +43,37 @@
 \node[font=\scriptsize, align=center, fill=white, inner sep=1pt]
   at (6.0,-2.3) {Akses baca};
 
-% Peserta validator → OJK (pelaporan)
-\draw[dar] (himbara.east)    -- (ojk.north west);
-\draw[dar] (commercial.east) -- (ojk.south west);
+% Bank Distributor → OJK (pelaporan)
+\draw[dar] (wholesale.east) -- (ojk.north west);
+\draw[dar] (retail.east)    -- (ojk.south west);
 
 \node[zonebox,
-  fit=(bi)(himbara)(commercial)(ojk),
+  fit=(bi)(wholesale)(retail)(ojk),
   label={[font=\footnotesize\bfseries, anchor=south west]north west:%
-    Jenjang 1: Distribusi Institusional}] (j1) {};
+    Jenjang 1: Issuance Institusional}] (j1) {};
 
 %── Batas tier ────────────────────────────────────────────────────────────────
 
 \draw[dashed, thick, gray!70] (-1.0, -2.8) -- (13.5, -2.8);
 \node[font=\scriptsize, gray!70, anchor=east] at (13.5, -2.55)
-  {Batas jenjang distribusi};
+  {Batas jenjang};
 
-%── Distribusi lintas jenjang ─────────────────────────────────────────────────
+%── Konversi lintas jenjang ─────────────────────────────────────────────────
 
-\node[actor] (pjp) at (6.0, -4.5) {PJP\\(Kustodian)};
+\node[actor] (custody) at (6.0, -4.5) {Retail Bank\\(Kustodian)};
 
-\draw[ar] (bi.south) to[out=-90,in=180] (2.5,-3.7)
-  to[out=0,in=155] (pjp.north west);
-\node[font=\scriptsize, align=center, anchor=west, fill=white, inner sep=1pt]
-  at (3.0,-3.7) {Distribusi langsung\\ke kustodian};
+\draw[ar] (retail.south) -- node[font=\scriptsize, right, fill=white, inner sep=1pt]{Conversion} (custody.north);
 
 %── Jenjang 2: Retail ────────────────────────────────────────────────────────
 
 \node[wbox] (customer) at (4.0, -6.8) {Pelanggan Ritel};
 \node[wbox] (merchant) at (8.0, -6.8) {Pedagang};
 
-\draw[ar] (pjp) -- (customer);
-\draw[ar] (pjp) -- (merchant);
+\draw[ar] (custody) -- (customer);
+\draw[ar] (custody) -- (merchant);
 
 \node[zonebox,
-  fit=(pjp)(customer)(merchant),
+  fit=(custody)(customer)(merchant),
   label={[font=\footnotesize\bfseries, anchor=south west]north west:%
     Jenjang 2: Layanan Ritel}] (j2) {};
 

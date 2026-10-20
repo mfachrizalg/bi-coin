@@ -3,118 +3,140 @@
   <root>
     <mxCell id="0"/>
     <mxCell id="1" parent="0"/>
-    <mxCell id="l1" value="&lt;i&gt;&lt;b&gt;Supervisor&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
-      <mxGeometry x="0" y="0" width="900" height="500" as="geometry"/>
+    <mxCell id="l1" value="&lt;i&gt;&lt;b&gt;Staf Distributor&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="0" width="1150" height="400" as="geometry"/>
     </mxCell>
     <mxCell id="l2" value="&lt;i&gt;&lt;b&gt;Backend API&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
-      <mxGeometry x="0" y="500" width="900" height="450" as="geometry"/>
+      <mxGeometry x="0" y="400" width="1150" height="400" as="geometry"/>
     </mxCell>
     <mxCell id="l3" value="&lt;i&gt;&lt;b&gt;Blockchain&lt;/b&gt;&lt;/i&gt;" style="swimlane;horizontal=0;startSize=30;fillColor=none;strokeColor=#000000;fontStyle=3;html=1;" vertex="1" parent="1">
-      <mxGeometry x="0" y="950" width="900" height="450" as="geometry"/>
+      <mxGeometry x="0" y="800" width="1150" height="500" as="geometry"/>
     </mxCell>
+
     <mxCell id="start" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l1">
-      <mxGeometry x="435" y="10" width="30" height="30" as="geometry"/>
+      <mxGeometry x="40" y="170" width="30" height="30" as="geometry"/>
     </mxCell>
-    <mxCell id="s1" value="Inisiasi pembekuan&lt;br&gt;peserta" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l1">
-      <mxGeometry x="210" y="60" width="140" height="60" as="geometry"/>
+    <mxCell id="s1" value="Compliance Officer&lt;br&gt;menginisiasi pembatasan peserta" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l1">
+      <mxGeometry x="100" y="150" width="200" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="s2" value="Inisiasi pembukaan&lt;br&gt;blokir" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l1">
-      <mxGeometry x="210" y="360" width="140" height="60" as="geometry"/>
+    <mxCell id="s2" value="KYC Reviewer&lt;br&gt;mengajukan permintaan pembukaan pembatasan" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l1">
+      <mxGeometry x="620" y="150" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="b1" value="Terima request&lt;br&gt;pembekuan" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
-      <mxGeometry x="210" y="60" width="140" height="60" as="geometry"/>
+    <mxCell id="s3" value="Senior Approver&lt;br&gt;menyetujui pembukaan pembatasan" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l1">
+      <mxGeometry x="900" y="150" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="b2" value="Validasi otorisasi&lt;br&gt;supervisor" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
-      <mxGeometry x="380" y="60" width="140" height="60" as="geometry"/>
+
+    <mxCell id="b1" value="POST /subjects/{subject_id}/restrictions" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="100" y="70" width="200" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="d1" value="Otorisasi&lt;br&gt;valid?" style="rhombus;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
-      <mxGeometry x="380" y="150" width="140" height="80" as="geometry"/>
+    <mxCell id="b2" value="Validasi peran Distributor" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="340" y="70" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="Otorisasi valid?" style="rhombus;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="360" y="190" width="140" height="80" as="geometry"/>
     </mxCell>
     <mxCell id="b3" value="Kirim error" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
-      <mxGeometry x="570" y="270" width="140" height="60" as="geometry"/>
+      <mxGeometry x="560" y="200" width="120" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="b4" value="Terima request&lt;br&gt;pembukaan blokir" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
-      <mxGeometry x="210" y="340" width="140" height="60" as="geometry"/>
+    <mxCell id="e1" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;double=1;" vertex="1" parent="l2">
+      <mxGeometry x="700" y="220" width="30" height="30" as="geometry"/>
     </mxCell>
-    <mxCell id="c1" value="FreezeParticipant()&lt;br&gt;ubah status ke frozen" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="50" y="60" width="140" height="60" as="geometry"/>
+    <mxCell id="b4" value="POST /subjects/{subject_id}/restriction-release-requests" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="620" y="70" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="c2" value="Freeze wallet terkait&lt;br&gt;(cascade)" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="220" y="60" width="140" height="60" as="geometry"/>
+    <mxCell id="b5" value="POST /subjects/{subject_id}/restriction-release-decisions" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l2">
+      <mxGeometry x="900" y="70" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="c3" value="Catat supervision event&lt;br&gt;participant_frozen" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="390" y="60" width="140" height="60" as="geometry"/>
+
+    <mxCell id="c1" value="FreezeSubject() ubah status peserta ke dibatasi" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="100" y="70" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="d2" value="Akan di-&lt;br&gt;unfreeze?" style="rhombus;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="390" y="180" width="140" height="80" as="geometry"/>
+    <mxCell id="c2" value="Batasi subjek&lt;br&gt;(transfer ditolak selama pembatasan)" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="360" y="70" width="200" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="c4" value="UnfreezeParticipant()&lt;br&gt;status kembali active" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="30" y="300" width="150" height="60" as="geometry"/>
+    <mxCell id="c3" value="Catat pembatasan subjek" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="600" y="70" width="180" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="c5" value="Unfreeze wallet" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="210" y="300" width="140" height="60" as="geometry"/>
+    <mxCell id="d2" value="Akan dibuka pembatasannya?" style="rhombus;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="620" y="180" width="160" height="80" as="geometry"/>
     </mxCell>
-    <mxCell id="c6" value="Catat supervision event&lt;br&gt;participant_unfrozen" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
-      <mxGeometry x="380" y="300" width="150" height="60" as="geometry"/>
+    <mxCell id="e2" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;double=1;" vertex="1" parent="l3">
+      <mxGeometry x="830" y="200" width="30" height="30" as="geometry"/>
     </mxCell>
-    <mxCell id="end1" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l2">
-      <mxGeometry x="626" y="370" width="30" height="30" as="geometry"/>
+    <mxCell id="c4" value="RequestUnfreeze() catat reviewer dan referensi bukti" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="620" y="310" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="end2" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l3">
-      <mxGeometry x="640" y="200" width="30" height="30" as="geometry"/>
+    <mxCell id="c5" value="ApproveUnfreeze() status kembali ke active" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="900" y="310" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="end3" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="l3">
-      <mxGeometry x="460" y="400" width="30" height="30" as="geometry"/>
+    <mxCell id="c6" value="Buka pembatasan subjek" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="900" y="410" width="220" height="60" as="geometry"/>
     </mxCell>
-    <mxCell id="e1" edge="1" parent="1" source="start" target="s1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="c7" value="Catat pembukaan pembatasan subjek" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;whiteSpace=wrap;html=1;" vertex="1" parent="l3">
+      <mxGeometry x="600" y="410" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;double=1;" vertex="1" parent="l3">
+      <mxGeometry x="540" y="425" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="f1" edge="1" parent="1" source="start" target="s1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e2" edge="1" parent="1" source="s1" target="b1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f2" edge="1" parent="1" source="s1" target="b1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e3" edge="1" parent="1" source="b1" target="b2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f3" edge="1" parent="1" source="b1" target="b2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e4" edge="1" parent="1" source="b2" target="d1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f4" edge="1" parent="1" source="b2" target="d1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e5" value="tidak" edge="1" parent="1" source="d1" target="b3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f5" value="tidak" edge="1" parent="1" source="d1" target="b3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e6" value="ya" edge="1" parent="1" source="d1" target="c1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f6" edge="1" parent="1" source="b3" target="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e7" edge="1" parent="1" source="c1" target="c2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f7" value="ya" edge="1" parent="1" source="d1" target="c1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e8" edge="1" parent="1" source="c2" target="c3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f8" edge="1" parent="1" source="c1" target="c2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e9" edge="1" parent="1" source="b3" target="end1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f9" edge="1" parent="1" source="c2" target="c3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e10" edge="1" parent="1" source="c3" target="d2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f10" edge="1" parent="1" source="c3" target="d2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e11" value="tidak" edge="1" parent="1" source="d2" target="end2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f11" value="tidak" edge="1" parent="1" source="d2" target="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e12" value="ya" edge="1" parent="1" source="d2" target="s2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f12" value="ya" edge="1" parent="1" source="d2" target="s2" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e13" edge="1" parent="1" source="s2" target="b4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f13" edge="1" parent="1" source="s2" target="b4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e14" edge="1" parent="1" source="b4" target="c4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f14" edge="1" parent="1" source="b4" target="c4" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e15" edge="1" parent="1" source="c4" target="c5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f15" edge="1" parent="1" source="c4" target="s3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e16" edge="1" parent="1" source="c5" target="c6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f16" edge="1" parent="1" source="s3" target="b5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="e17" edge="1" parent="1" source="c6" target="end3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+    <mxCell id="f17" edge="1" parent="1" source="b5" target="c5" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f18" edge="1" parent="1" source="c5" target="c6" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f19" edge="1" parent="1" source="c6" target="c7" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f20" edge="1" parent="1" source="c7" target="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;rounded=1;">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
   </root>

@@ -29,35 +29,41 @@
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}
 \umlactor{bi}{(0,8)}{Bank\\Indonesia}
-\umlactor{dist}{(0,6)}{Distributor\\(bank dan PJP)}
+\umlactor{dist}{(0,6)}{Distributor Bank}
 \umlactor{m}{(12,8)}{Merchant}
 \umlactor{pr}{(12,6)}{Pelanggan\\Ritel}
-\umlactor{sv}{(12,4)}{Supervisor}
-\umlactor{val}{(12,2)}{Validator\\(OJK, PPATK)}
+\umlactor{obs}{(12,4)}{Observer/Auditor\\(OJK, PPATK)}
+\umlactor{kyc}{(0,4)}{KYC\\Reviewer}
+\umlactor{sa}{(0,2)}{Senior\\Approver}
+\umlactor{co}{(0,0)}{Compliance\\Officer}
 
 \node[ubox, minimum width=8cm, minimum height=8.5cm] (sys) at (6,5) {};
 \node[font=\footnotesize\bfseries] at (6,9.6) {Sistem Rupiah Digital (bi-coin-fabric)};
 
 \node[ucase] (uc1) at (6,9) {Mendaftarkan Peserta};
-\node[ucase] (uc2) at (6,8) {Menerbitkan Digital Rupiah};
-\node[ucase] (uc3) at (6,7) {Mendistribusikan Likuiditas\\ke Peserta};
+\node[ucase] (uc2) at (6,8) {Menerbitkan\\w-Rupiah Digital};
+\node[ucase] (uc3) at (6,7) {Mentransfer\\Antarbank};
+\node[ucase] (uc4) at (6,6) {Mengelola KYC\\Pelanggan};
 \node[ucase] (uc5) at (6,5) {Mentransfer Saldo};
 \node[ucase] (uc6) at (6,4) {Transfer ke Pedagang};
-\node[ucase] (uc7) at (6,2.8) {Bekukan/Cairkan Peserta};
-\node[ucase] (uc9) at (6,0.4) {Laporan \& Pengawasan};
+\node[ucase] (uc7) at (6,2.8) {Membatasi/Membuka\\Pembatasan Peserta};
+\node[ucase] (uc9) at (6,0.4) {Membaca Status Subjek};
 
 \draw[uassoc] (bi) -- (uc1);
 \draw[uassoc] (dist) to[out=70,in=188] (uc1.west);
 \draw[uassoc] (bi) -- (uc2);
-\draw[uassoc] (bi) -- (uc3);
-\draw[uassoc] (bi) -- (uc7);
-\draw[uassoc] (bi) -- (uc3);
+\draw[uassoc] (dist) -- (uc3);
+\draw[uassoc] (kyc) -- (uc7);
+\draw[uassoc] (sa) -- (uc7);
 \draw[uassoc] (m) -- (uc6);
 \draw[uassoc] (pr) -- (uc5);
 \draw[uassoc] (pr) -- (uc6);
-\draw[uassoc] (sv) -- (uc9);
 \draw[uassoc] (bi) to[out=-95,in=172] (uc9.west);
-\draw[uassoc, dashed] (val) -- (uc9) node[midway, above, sloped, font=\scriptsize]{$\langle\langle$observasi$\rangle\rangle$};
+\draw[uassoc, dashed] (obs) -- (uc9) node[midway, above, sloped, font=\scriptsize]{$\langle\langle$observasi$\rangle\rangle$};
+\draw[uassoc] (dist) -- (uc4);
+\draw[uassoc] (kyc) -- (uc4);
+\draw[uassoc] (sa) -- (uc4);
+\draw[uassoc] (co) -- (uc7);
 \end{tikzpicture}%
 }
 \caption{Diagram use case keseluruhan sistem Rupiah Digital}
@@ -68,27 +74,32 @@
 \centering
 \resizebox{0.92\textwidth}{!}{%
 \begin{tikzpicture}
-\umlactor{bi}{(0,6)}{Bank\\Indonesia}
-\umlactor{dist}{(0,3.5)}{Distributor\\(bank dan PJP)}
-\umlactor{sv}{(10,3.5)}{Supervisor}
+\umlactor{bi}{(0,6.4)}{Bank\\Indonesia}
+\umlactor{dist}{(0,4.6)}{Distributor Bank}
+\umlactor{rb}{(0,2.3)}{Retail Bank}
+\umlactor{obs}{(10,1.2)}{Observer/Auditor\\(OJK, PPATK)}
 
-\node[ubox, minimum width=6cm, minimum height=6.5cm] (sys) at (5,3.5) {};
-\node[font=\footnotesize\bfseries] at (5,7.2) {Operasi Institusional};
+\node[ubox, minimum width=6cm, minimum height=8.2cm] (sys) at (5,3.25) {};
+\node[font=\footnotesize\bfseries] at (5,7.7) {Operasi Institusional};
 
-\node[ucase] (w1) at (5,6) {Menerbitkan dan Menebus\\Digital Rupiah};
-\node[ucase] (w2) at (5,5) {Mendistribusikan Likuiditas\\ke Peserta};
-\node[ucase] (w3) at (5,4) {Mengelola Siklus Hidup\\Peserta};
-\node[ucase] (w5) at (5,2) {Mengajukan Pendaftaran\\Peserta};
-\node[ucase] (w6) at (5,1) {Membaca Laporan \& Metrik};
+\node[ucase] (w1) at (5,6.4) {Menerbitkan dan Menebus\\w-Rupiah Digital};
+\node[ucase] (w2) at (5,5.3) {Mentransfer Antarbank};
+\node[ucase] (w4) at (5,4.2) {Mengonversi ke\\r-Rupiah Digital};
+\node[ucase] (w7) at (5,3.1) {Mendanai Dompet\\Pelanggan};
+\node[ucase] (w3) at (5,2.0) {Mengelola Siklus Hidup\\Peserta};
+\node[ucase] (w5) at (5,0.9) {Mengajukan Pendaftaran\\Peserta};
+\node[ucase] (w6) at (5,-0.2) {Membaca Status Subjek};
 
-\draw[uassoc] (bi) -- (w1);
-\draw[uassoc] (bi) -- (w2);
-\draw[uassoc] (bi) -- (w3);
-\draw[uassoc] (bi) -- (w5);
-\draw[uassoc] (bi) -- (w6);
-\draw[uassoc] (bi) -- (w2);
-\draw[uassoc] (dist) -- (w5);
-\draw[uassoc] (sv) -- (w6);
+\draw[uassoc] (bi.east) -- (w1.west);
+\draw[uassoc] (dist.east) -- (w2.west);
+\draw[uassoc] (rb.east) -- (w2.west);
+\draw[uassoc] (rb.east) -- (w4.west);
+\draw[uassoc] (rb.east) -- (w7.west);
+\draw[uassoc] (bi.east) -- (w3.west);
+\draw[uassoc] (bi.east) -- (w5.west);
+\draw[uassoc] (dist.east) -- (w5.west);
+\draw[uassoc] (bi.east) -- (w6.west);
+\draw[uassoc] (obs.west) -- (w6.east);
 \end{tikzpicture}%
 }
 \caption{Diagram use case operasi institusional}

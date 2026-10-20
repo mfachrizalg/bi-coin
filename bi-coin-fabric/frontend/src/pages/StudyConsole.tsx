@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import type { Role, Tab } from '../App'
 import {
-  allocateStudyReserve,
   approveSubjectRelease,
+  convertStudyToRetail,
   createStudyStaff,
   createStudySubject,
   decideStudySubject,
@@ -12,7 +12,7 @@ import {
   getStudyIdentity,
   getStudySubject,
   initializeStudyMonetary,
-  mintStudyRupiah,
+  issueStudyRupiah,
   openStudyWallet,
   protectStudyStaff,
   protectStudySubject,
@@ -26,8 +26,9 @@ import {
   setStudyStaffRole,
   studyRestrictionReasonOptions,
   transferStudyFunds,
+  transferStudyInterbank,
 } from '../lib/api'
-import type { StudyLimitsInput, StudyRestrictionReason, StudyStaffRole, StudySubjectView } from '../lib/api'
+import type { StudyBankKind, StudyLimitsInput, StudyRestrictionReason, StudyStaffRole, StudySubjectView } from '../lib/api'
 
 function StudyAction({ label, working, disabled, onClick }: { label: string; working: boolean; disabled?: boolean; onClick: () => void }) {
   return <button className="primary-button" type="button" disabled={disabled || working} onClick={onClick}>{working ? 'Working…' : label}</button>
@@ -42,6 +43,8 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const [category, setCategory] = useState<StudySubjectView['category']>('retail')
   const [destinationID, setDestinationID] = useState('')
   const [distributorID, setDistributorID] = useState('')
+  const [recipientDistributorID, setRecipientDistributorID] = useState('')
+  const [bankKind, setBankKind] = useState<StudyBankKind>('wholesale')
   const [amount, setAmount] = useState('')
   const [riskLevel, setRiskLevel] = useState<'standard' | 'high'>('standard')
   const [pep, setPep] = useState(false)
@@ -61,7 +64,8 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
 
   const customer = role === 'authenticated' || role === 'kyc_verified' || role === 'merchant'
   const canPay = role === 'kyc_verified' || role === 'merchant'
-  const distributor = role === 'bank_pjp' || role === 'pjp'
+  const distributor = role === 'retail_bank' || role === 'wholesale_bank'
+  const retailBank = role === 'retail_bank'
   const centralBank = role === 'bank_indonesia'
   const customerIdentity = customer && section === 'study_identity'
   const customerWallet = canPay && section === 'study_wallet'
@@ -70,7 +74,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const distributorBusiness = distributor && section === 'study_business'
   const distributorRestrictions = distributor && section === 'study_restrictions'
   const distributorFunding = distributor && section === 'study_funding'
-  const validatorAudit = role === 'supervisor' && section === 'study_audit'
+  const validatorAudit = role === 'auditor' && section === 'study_audit'
   const centralMonetary = centralBank && section === 'study_monetary'
   const centralStaff = centralBank && section === 'study_staff'
   const permitted = customerIdentity || customerWallet || customerTransfer || distributorApproval || distributorBusiness || distributorRestrictions || distributorFunding || validatorAudit || centralMonetary || centralStaff
@@ -78,7 +82,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const sectionTitle: Partial<Record<Tab, string>> = {
     study_identity: 'Subject onboarding', study_wallet: 'Wallet', study_transfer: 'Transfer',
     study_approval: 'Subject approval', study_business: 'Business authority', study_restrictions: 'Restrictions',
-  study_funding: 'Wholesale conversion', study_monetary: 'Monetary operations', study_audit: 'Controls audit', study_staff: 'Staff roles',
+  study_funding: 'Reserve and float', study_monetary: 'Monetary operations', study_audit: 'Controls audit', study_staff: 'Staff roles',
   }
   const hasSubject = subjectID.trim() !== ''
   const hasAmount = /^[0-9]+$/.test(amount)
@@ -118,9 +122,9 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
     <div className="workspace-stack">
       <section className="workspace-heading">
         <div>
-          <div className="eyebrow">{organization} · rupiah-study</div>
+          <div className="eyebrow">{organization} · bi-coin</div>
           <h2>{sectionTitle[section]}</h2>
-          <p className="muted">{role === 'supervisor' ? 'Read-only access for ValidatorMSP.' : 'Organization actions use the server-managed Fabric identity for this login.'}</p>
+          <p className="muted">{role === 'auditor' ? 'Read-only access for ValidatorMSP.' : 'Organization actions use the server-managed Fabric identity for this login.'}</p>
         </div>
       </section>
 
@@ -222,11 +226,16 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
       </article>}
 
       {distributorFunding && <article className="surface-card">
-        <h3>Wholesale-to-retail conversion</h3>
-        <p className="muted">Convert Rupiah from the Distributor reserve to an approved retail wallet. The atomic conversion keeps total supply unchanged.</p>
-        <label className="app-label" htmlFor="study-distributor-id"><span>Distributor ID</span><input id="study-distributor-id" className="app-input" value={distributorID} onChange={event => setDistributorID(event.target.value)} autoComplete="off" /></label>
+        <h3>Distributor reserve and float</h3>
+        <p className="muted">Interbank transfers move w-Rupiah Digital between Distributor reserves. Retail banks also convert to retail float and fund wallets.</p>
+        <label className="app-label" htmlFor="study-distributor-id"><span>Distributor ID (own bank)</span><input id="study-distributor-id" className="app-input" value={distributorID} onChange={event => setDistributorID(event.target.value)} autoComplete="off" /></label>
+        <label className="app-label" htmlFor="study-recipient-distributor-id"><span>Recipient distributor ID</span><input id="study-recipient-distributor-id" className="app-input" value={recipientDistributorID} onChange={event => setRecipientDistributorID(event.target.value)} autoComplete="off" /></label>
         {amountField}
-        <StudyAction label="Convert to retail wallet" working={busy === 'Convert to retail wallet'} disabled={!hasSubject || !distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Convert to retail wallet', () => fundStudyWallet({ subject_id: subjectID.trim(), distributor_id: distributorID.trim(), amount }, retryKey('funding')), 'funding')} />
+        <div className="button-row">
+          <StudyAction label="Interbank transfer" working={busy === 'Interbank transfer'} disabled={!distributorID.trim() || !recipientDistributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Interbank transfer', () => transferStudyInterbank({ from_distributor_id: distributorID.trim(), to_distributor_id: recipientDistributorID.trim(), amount }, retryKey('interbank')), 'interbank')} />
+          {retailBank && <StudyAction label="Convert to retail float" working={busy === 'Convert to retail float'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Convert to retail float', () => convertStudyToRetail({ distributor_id: distributorID.trim(), amount }, retryKey('conversion')), 'conversion')} />}
+          {retailBank && <StudyAction label="Wallet funding" working={busy === 'Wallet funding'} disabled={!hasSubject || !distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Wallet funding', () => fundStudyWallet({ subject_id: subjectID.trim(), distributor_id: distributorID.trim(), amount }, retryKey('funding')), 'funding')} />}
+        </div>
       </article>}
 
       {validatorAudit && <article className="surface-card">
@@ -240,18 +249,18 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
         <p className="muted">These actions use the CentralBankMSP identity mapped to this login.</p>
         <div className="button-row"><StudyAction label="Initialize monetary state" working={busy === 'Initialize monetary state'} disabled={Boolean(busy)} onClick={() => void run('Initialize monetary state', initializeStudyMonetary)} /></div>
         <label className="app-label" htmlFor="study-central-distributor"><span>Distributor ID</span><input id="study-central-distributor" className="app-input" value={distributorID} onChange={event => setDistributorID(event.target.value)} autoComplete="off" /></label>
-        <div className="button-row"><StudyAction label="Register distributor" working={busy === 'Register distributor'} disabled={!distributorID.trim() || Boolean(busy)} onClick={() => void run('Register distributor', () => registerStudyDistributor({ distributor_id: distributorID.trim() }))} /></div>
+        <label className="app-label" htmlFor="study-bank-kind"><span>Bank kind</span><select id="study-bank-kind" className="app-input" value={bankKind} onChange={event => setBankKind(event.target.value as StudyBankKind)}><option value="wholesale">Wholesale</option><option value="retail">Retail</option></select></label>
+        <div className="button-row"><StudyAction label="Register bank" working={busy === 'Register bank'} disabled={!distributorID.trim() || Boolean(busy)} onClick={() => void run('Register bank', () => registerStudyDistributor({ distributor_id: distributorID.trim(), kind: bankKind }))} /></div>
         {amountField}
         <div className="button-row">
-          <StudyAction label="Mint" working={busy === 'Mint'} disabled={!hasAmount || Boolean(busy)} onClick={() => void run('Mint', () => mintStudyRupiah({ amount }, retryKey('mint')), 'mint')} />
-          <StudyAction label="Allocate reserve" working={busy === 'Allocate reserve'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Allocate reserve', () => allocateStudyReserve({ distributor_id: distributorID.trim(), amount }, retryKey('allocate')), 'allocate')} />
-          <StudyAction label="Redeem reserve" working={busy === 'Redeem reserve'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Redeem reserve', () => redeemStudyReserve({ distributor_id: distributorID.trim(), amount }, retryKey('redeem')), 'redeem')} />
+          <StudyAction label="Issuance" working={busy === 'Issuance'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Issuance', () => issueStudyRupiah({ distributor_id: distributorID.trim(), amount }, retryKey('issuance')), 'issuance')} />
+          <StudyAction label="Redemption" working={busy === 'Redemption'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Redemption', () => redeemStudyReserve({ distributor_id: distributorID.trim(), amount }, retryKey('redeem')), 'redeem')} />
         </div>
       </article>}
 
       {centralStaff && <article className="surface-card">
         <h3>Staff identities</h3>
-        <p className="muted">Maker-checker roles for compliance staff. Use the client ID of the staff identity, as computed by getClientID in scripts/study-smoke-test.js.</p>
+        <p className="muted">Maker-checker roles for compliance staff. Use the client ID of the staff identity, as computed by getClientID in scripts/smoke-test.js.</p>
         <label className="app-label" htmlFor="study-staff-client-id">
           <span>Staff client ID</span>
           <input id="study-staff-client-id" className="app-input" value={staffClientID} onChange={event => setStaffClientID(event.target.value)} autoComplete="off" />

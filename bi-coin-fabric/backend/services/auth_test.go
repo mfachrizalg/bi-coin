@@ -91,14 +91,14 @@ func TestAuthServiceRejectsTokenAfterRoleChange(t *testing.T) {
 		t.Fatalf("hash password: %v", err)
 	}
 	users := memoryUserStore{users: map[string]AuthUser{
-		"operator": {Username: "operator", PasswordHash: hash, Role: middleware.RolePJP, Active: true},
+		"operator": {Username: "operator", PasswordHash: hash, Role: middleware.RoleRetailBank, Active: true},
 	}}
 	auth := NewAuthService(users, "test-secret-32-bytes-long", time.Hour)
 	token, err := auth.Login(models.LoginRequest{Username: "operator", Password: "secret"})
 	if err != nil {
 		t.Fatalf("login: %v", err)
 	}
-	users.users["operator"] = AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RoleBankPjp, Active: true}
+	users.users["operator"] = AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RoleWholesaleBank, Active: true}
 	if _, err := auth.Verify(token.AccessToken); err == nil {
 		t.Fatal("expected role-changed token to be rejected")
 	}
@@ -111,7 +111,7 @@ func TestAuthServiceRejectsTokenAfterIdentityReassignment(t *testing.T) {
 	}
 	for _, field := range []string{"subject", "participant", "custodian"} {
 		t.Run(field, func(t *testing.T) {
-			user := AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RolePJP, SubjectID: "subject-1", ParticipantID: "participant-1", CustodianMSPID: "PJP-MSP", Active: true}
+			user := AuthUser{Username: "operator", PasswordHash: hash, Role: middleware.RoleRetailBank, SubjectID: "subject-1", ParticipantID: "participant-1", CustodianMSPID: "DistributorMSP", Active: true}
 			users := memoryUserStore{users: map[string]AuthUser{"operator": user}}
 			auth := NewAuthService(users, "test-secret-32-bytes-long", time.Hour)
 			token, err := auth.Login(models.LoginRequest{Username: "operator", Password: "secret"})

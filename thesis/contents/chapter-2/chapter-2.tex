@@ -51,7 +51,7 @@ Indonesia berbasis Hyperledger Fabric yang mencakup pembuatan akun, konversi
 aset, dan transfer antarpengguna. Hasil implementasi yang mereka laporkan
 memperlihatkan pembuatan akun dan transfer, disertai waktu pengiriman untuk
 satu dan 50 data. Makalah tersebut tidak menyajikan pengawasan multipihak
-ataupun tolok ukur Caliper yang dapat diulang.
+ataupun tolok ukur Caliper dengan artefak yang dapat diperiksa.
 
 Pada aspek platform dan kinerja, Androulaki dkk. \cite{androulaki2018}
 memperkenalkan Hyperledger Fabric sebagai \textit{distributed operating system}
@@ -76,18 +76,17 @@ unknown2024f, unknown2021, unknown2025i} dan desain CBDC untuk konteks
 Indonesia \cite{zams2020delphi, Syarifuddin2024OPTIMAL,
 aryani2023critlit, rohmalia2023retail, lukito2026governance}. Setiap kelompok
 menjawab sebagian persoalan. Dalam korpus yang ditinjau pada penelitian ini,
-belum ditemukan evaluasi satu artefak Fabric ritel yang memadukan distribusi
-berjenjang, transfer ritel, pengawasan, dan tolok ukur Caliper yang dapat
-diulang.
+belum ditemukan evaluasi satu artefak Fabric ritel yang memadukan penerbitan
+berjenjang, transfer ritel, pengawasan, dan tolok ukur Caliper dengan artefak yang dapat diperiksa.
 
 \textbf{Celah penelitian.} Sintesis terbatas pada sumber yang dirujuk di bab ini
 menunjukkan empat kebutuhan yang belum dipenuhi secara bersamaan. (1) Satu
 artefak perlu mengintegrasikan
-penerbitan dan distribusi likuiditas berjenjang, transfer antarpelanggan dan
+penerbitan berjenjang dan konversi ke float ritel, transfer antarpelanggan dan
 pelanggan-ke-pedagang, serta pengawasan. (2) Artefak tersebut perlu selaras
 dengan rancangan dua jenjang Rupiah Digital Bank Indonesia karena dokumentasi
 publik Proyek Garuda baru menjangkau lapisan \textit{wholesale}
-\cite{bi_garuda_poc}. (3) Tolok ukur kinerja yang dapat diulang untuk CBDC
+\cite{bi_garuda_poc}. (3) Tolok ukur kinerja dengan artefak yang dapat diperiksa untuk CBDC
 ritel di atas \textit{permissioned blockchain} masih langka pada sistem yang
 telah diterapkan maupun pada sistem percontohan \cite{ree2023enaira,
 Bhensook2025Public, Lovejoy2022A}. (4) Rancangan konseptual perlu diwujudkan
@@ -96,9 +95,9 @@ Penelitian ini menempati irisan keempat hal tersebut. Tabel~\ref{tab:tinjauan}
 merangkum posisi penelitian ini terhadap penelitian terdahulu.
 
 \textbf{Kebaruan.} Dalam batas korpus yang ditinjau, kontribusi penelitian ini
-terletak pada integrasi alur distribusi dua jenjang, transaksi ritel,
+terletak pada integrasi alur penerbitan dua jenjang, transaksi ritel,
 pengawasan, serta protokol Caliper dalam satu
-artefak Fabric yang dapat diperiksa dan diulang. Kontribusi ini bukan klaim
+artefak Fabric yang dapat diperiksa. Keterulangan hanya didukung oleh manifes konfigurasi dan artefak run-20261014-01 (lihat Bab~IV). Kontribusi ini bukan klaim
 kebaruan arsitektur CBDC secara universal maupun klaim bahwa platform yang
 digunakan Proyek Garuda adalah Fabric \cite{ree2023enaira, bi_garuda_poc}.
 Repositori artefak berada di
@@ -163,8 +162,7 @@ SyarifuddinBakhtiar2021Monetary}.
 Dalam penerapannya, sebagian besar bank sentral memilih model dua jenjang
 (\textit{two-tier}), yaitu bank sentral menerbitkan CBDC dan mengelola
 \textit{ledger} pada tingkat \textit{wholesale}, sementara distribusi kepada
-masyarakat dilakukan melalui perantara seperti bank dan penyedia jasa
-pembayaran. Model ini menjaga peran intermediasi lembaga keuangan dan mengurangi
+masyarakat dilakukan melalui perantara seperti bank. Model ini menjaga peran intermediasi lembaga keuangan dan mengurangi
 risiko \textit{disintermediation} pada sistem perbankan \cite{sethaput2025}. Di
 Indonesia, Bank Indonesia mengembangkan CBDC dengan nama Rupiah Digital melalui
 Proyek Garuda, yang menempuh pendekatan bertahap mulai dari Rupiah Digital
@@ -178,11 +176,11 @@ pengguna dan model distribusi ditunjukkan pada Gambar~\ref{fig:cbdc-taxonomy}.
 \input{contents/figures/cbdc-taxonomy}
 
 Peta jalan resmi Proyek Garuda menempatkan pengembangan Rupiah Digital dalam
-tiga fase, yaitu \textit{immediate state} untuk w-Digital Rupiah berbasis
-\textit{cash ledger}, \textit{intermediate state} untuk w-Digital Rupiah
+tiga fase, yaitu \textit{immediate state} untuk \textit{w-Rupiah Digital} berbasis
+\textit{cash ledger}, \textit{intermediate state} untuk \textit{w-Rupiah Digital}
 dengan kas dan sekuritas digital, serta \textit{end state} yang mengintegrasikan
-w-Digital Rupiah dengan r-Digital Rupiah. Pada fase \textit{end state}, use
-case r-Digital Rupiah mencakup distribusi, penagihan, dan pembayaran P2P, baik
+\textit{w-Rupiah Digital} dengan \textit{r-Rupiah Digital}. Pada fase \textit{end state}, use
+case \textit{r-Rupiah Digital} mencakup distribusi, penagihan, dan pembayaran P2P, baik
 melalui perantara maupun langsung dari bank sentral sebagaimana ditunjukkan
 pada Gambar~\ref{fig:bi-whitepaper-roadmap} \cite{bi_whitepaper2022}.
 
@@ -209,7 +207,7 @@ model ditunjukkan pada Gambar~\ref{fig:akun-token}.
 \input{contents/figures/account-token-payment}
 
 White Paper CBDC Bank Indonesia menempatkan Rupiah Digital dalam konfigurasi
-desain yang mencakup pemisahan w-Digital Rupiah dan r-Digital Rupiah, pilihan
+desain yang mencakup pemisahan \textit{w-Rupiah Digital} dan \textit{r-Rupiah Digital}, pilihan
 satu jenjang atau dua jenjang, akses berbasis token dan akun, serta
 infrastruktur DLT \textit{permissioned} sebagaimana ditunjukkan pada
 Gambar~\ref{fig:bi-whitepaper-design-configuration}. Konfigurasi tersebut
@@ -231,10 +229,10 @@ transaksi. Syarifuddin dan Bakhtiar menempatkan
 satu dimensi desain CBDC yang perlu dipertimbangkan dalam strategi kebijakan
 moneter \cite{SyarifuddinBakhtiar2021Monetary}. Dalam konteks Indonesia,
 dokumen konsultatif Rupiah Digital menyatakan bahwa akses pada
-\textit{wholesale Digital Rupiah} menggunakan verifikasi berbasis token karena
+Rupiah Digital \textit{wholesale} menggunakan verifikasi berbasis token karena
 dianggap sesuai untuk transaksi pasar keuangan yang lebih kompleks
 \cite{bi_consultative}. Namun, dokumen tersebut menempatkan Rupiah Digital
-ritel sebagai bagian dari tahap integrasi \textit{end-state}; karena itu,
+ritel sebagai bagian dari tahap integrasi \textit{end state}; karena itu,
 penelitian ini tidak mengklaim bahwa desain pembayaran Rupiah Digital ritel
 Bank Indonesia telah final sebagai berbasis akun ataupun berbasis token.
 
@@ -694,8 +692,8 @@ antara bank sentral dan perantara.
 Tabel~\ref{tab:arsitektur-tier} membandingkan model arsitektur satu
 jenjang (\textit{one-tier/direct}), di mana bank sentral mendistribusikan
 CBDC langsung kepada publik, dengan model dua jenjang (\textit{two-tier}),
-di mana distribusi dilakukan melalui bank dan penyedia jasa pembayaran
-(PJP) \cite{sethaput2025, Auer2020The, Tsareva2024Retail}.
+di mana distribusi dilakukan melalui bank
+\cite{sethaput2025, Auer2020The, Tsareva2024Retail}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -718,7 +716,7 @@ di mana distribusi dilakukan melalui bank dan penyedia jasa pembayaran
 \endlastfoot
 Distribusi CBDC &
 Bank sentral langsung ke publik &
-Bank sentral $\to$ bank/PJP $\to$ publik \\
+Bank sentral $\to$ bank $\to$ publik \\
 Risiko \textit{disintermediation} &
 Tinggi &
 Rendah \cite{sethaput2025} \\
@@ -730,18 +728,18 @@ Bergantung pada desain implementasi &
 Bergantung pada pemisahan data dan hak akses; bukan sifat otomatis dua jenjang \\
 Interoperabilitas ekosistem &
 Sulit &
-Mudah (bank/PJP sudah terintegrasi) \\
+Mudah (bank sudah terintegrasi) \\
 Contoh CBDC nyata &
 DCash (Karibia) &
 eNaira, e-CNY, Sand Dollar \cite{ree2023enaira} \\
 Keselarasan Proyek Garuda &
 Tidak &
-Ya \cite{bi_garuda_poc, bi_whitepaper2022} \\
+Mengacu pada \cite{bi_garuda_poc, bi_whitepaper2022} \\
 \end{longtable}
 \endgroup
 
 \noindent\textbf{Simpulan:} Model dua jenjang dipilih berdasarkan tiga
-pertimbangan. (1) Model ini selaras dengan desain Rupiah Digital Bank Indonesia
+pertimbangan. (1) Model ini mengacu pada desain Rupiah Digital Bank Indonesia
 dalam Proyek Garuda \cite{bi_garuda_poc}. (2) Pembagian peran antarlapis
 meminimalkan risiko \textit{disintermediation} perbankan yang menjadi
 kekhawatiran utama bank sentral \cite{sethaput2025}. (3) Volume
@@ -789,9 +787,9 @@ Tidak didemonstrasikan &
 Distribusi dua jenjang diimplementasikan pada satu buku besar bersama; pembagian
 tanggung jawab pencatatan hibrida tidak diuji \\
 Cakupan ritel dan \textit{wholesale} &
-Ritel saja &
-Dompet institusional memodelkan distribusi likuiditas, bukan instrumen atau
-buku besar \textit{wholesale} yang terpisah \\
+Sebagian &
+Instrumen w-Rupiah Digital dan r-Rupiah Digital terpisah pada satu buku besar;
+buku besar \textit{wholesale} yang terpisah tidak dimodelkan \\
 Model akun dan token &
 Sebagian &
 Implementasi berbasis akun (saldo); dimensi token dibahas namun tidak
@@ -813,8 +811,8 @@ Domestik; interkoneksi CBDC lintas batas merupakan kesenjangan prinsip 3i \\
 \endgroup
 
 \noindent\textbf{Simpulan:} purwarupa mengimplementasikan buku besar DLT,
-distribusi dua jenjang, fungsi ritel berbasis saldo, dan sifat non-remunerasi.
-Arsitektur hibrida, instrumen \textit{wholesale}, \textit{CBDC rate},
+distribusi dua jenjang, instrumen w-Rupiah Digital dan r-Rupiah Digital yang terpisah, fungsi ritel berbasis saldo, dan sifat non-remunerasi.
+Arsitektur hibrida, \textit{CBDC rate},
 anonimitas terlacak, serta interkoneksi lintas batas tidak didemonstrasikan.
 Pemisahan ini mencegah model distribusi, cakupan instrumen, dan bentuk
 arsitektur diperlakukan sebagai dimensi yang sama
@@ -829,10 +827,9 @@ interoperabilitas. Perbandingan ini menjadi rujukan konseptual untuk menempatkan
 purwarupa pada spektrum desain CBDC.
 
 Penelitian ini mengadopsi prinsip inti arsitektur tersebut, yaitu distribusi
-berjenjang melalui bank dan PJP yang dalam purwarupa direpresentasikan oleh \texttt{DistributorMSP}, namun dengan dua penyederhanaan yang
+berjenjang melalui bank yang dalam purwarupa direpresentasikan oleh \texttt{DistributorMSP}, namun dengan dua penyederhanaan yang
 disengaja sesuai cakupan purwarupa. Pertama,
-lapisan \textit{Digital Rupiah Depository} dan pemisahan
-\textit{wholesaler}/\textit{non-wholesaler} diciutkan menjadi satu organisasi distributor (\texttt{DistributorMSP})
-yang langsung menerima penerbitan dari \texttt{CentralBankMSP}. Kedua, integrasi BI-RTGS
+lapisan \textit{Digital Rupiah Depository} diciutkan menjadi satu organisasi distributor (\texttt{DistributorMSP})
+yang langsung menerima penerbitan dari \texttt{CentralBankMSP}; pemisahan \textit{wholesale} dan \textit{retail} dilakukan sebagai jenis bank di dalam organisasi tersebut. Kedua, integrasi BI-RTGS
 dan jaringan \textit{blockchain} lintas batas tidak diimplementasikan dan
 dinyatakan secara eksplisit sebagai batasan cakupan penelitian (Bab~I).

@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
-const { LEDGER_SCENARIO_IDS } = require('../../scripts/study-smoke-test');
+const { LEDGER_SCENARIO_IDS } = require('../../scripts/smoke-test');
 
 const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'case-catalog.json'), 'utf8'));
 const roles = catalog.application_roles;
@@ -12,17 +12,17 @@ const roles = catalog.application_roles;
 test('catalog covers every public study transaction and route role cell', () => {
     const methods = catalog.contract_methods;
     const methodKeys = methods.map(item => `${item.chaincode}.${item.method}`);
-    assert.equal(methods.length, 32);
+    assert.equal(methods.length, 35);
     assert.equal(new Set(methodKeys).size, methodKeys.length, 'contract method duplicated');
     assert.ok(methods.every(item => item.cases.length > 0), 'method has no correctness cases');
 
-    assert.equal(catalog.api_routes.length, 23);
+    assert.equal(catalog.api_routes.length, 29);
     const routeKeys = catalog.api_routes.map(item => `${item.method} ${item.path}`);
     assert.equal(new Set(routeKeys).size, routeKeys.length, 'API route duplicated');
-    assert.equal(catalog.api_routes.reduce((count, route) => count + route.roles.length, 0), 42);
-    assert.equal(catalog.api_routes.length * roles.length, 184);
+    assert.equal(catalog.api_routes.reduce((count, route) => count + route.roles.length, 0), 55);
+    assert.equal(catalog.api_routes.length * roles.length, 232);
 
-    const sourceRoot = path.resolve(__dirname, '../../study/chaincode');
+    const sourceRoot = path.resolve(__dirname, '../../chaincode');
     const files = {
         'rupiah-controls': ['controls', 'ControlsContract'],
         'rupiah-monetary': ['monetary', 'MonetaryContract'],
@@ -43,10 +43,10 @@ test('catalog covers every public study transaction and route role cell', () => 
     assert.deepEqual(expectedRoutes, actualRoutes, 'API catalog must match registered study routes');
 });
 
-test('performance catalog covers all 30 public performance methods in 31 workloads', () => {
-    assert.equal(catalog.performance_scenarios.length, 31);
-    assert.equal(catalog.protocol.performance_workload_count, 31);
-    assert.equal(catalog.protocol.performance_method_count, 30);
+test('performance catalog covers all 33 public performance methods in 34 workloads', () => {
+    assert.equal(catalog.performance_scenarios.length, 34);
+    assert.equal(catalog.protocol.performance_workload_count, 34);
+    assert.equal(catalog.protocol.performance_method_count, 33);
     const publicMethods = new Set(catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`));
     for (const scenario of catalog.performance_scenarios) {
         assert.ok(publicMethods.has(`${scenario.chaincode}.${scenario.transaction}`), scenario.id);
@@ -55,8 +55,8 @@ test('performance catalog covers all 30 public performance methods in 31 workloa
         assert.ok(['query', 'write'].includes(scenario.operation_kind), `${scenario.id} has no operation kind`);
     }
     const performanceMethods = new Set(catalog.performance_scenarios.map(item => `${item.chaincode}.${item.transaction}`));
-    const excluded = new Set(['rupiah-monetary.Initialize', 'rupiah-monetary.DebitReserveForFunding']);
-    assert.equal(performanceMethods.size, 30);
+    const excluded = new Set(['rupiah-monetary.Initialize', 'rupiah-monetary.DebitReserveForConversion']);
+    assert.equal(performanceMethods.size, 33);
     for (const method of catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`)) {
         assert.equal(performanceMethods.has(method), !excluded.has(method), method);
     }
@@ -84,10 +84,8 @@ test('protocol uses bounded binary search and three grouped confirmations', () =
         'freeze-subject': 32,
         'request-unfreeze': 32,
         'approve-unfreeze': 32,
-        mint: 32,
-        'allocate-reserve': 32,
+        issue: 32,
         'redeem-reserve': 32,
-        'fund-reserve': 32,
     });
 });
 

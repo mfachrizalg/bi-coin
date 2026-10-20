@@ -17,7 +17,6 @@ type openAPIDoc struct {
 
 type openAPIOperation struct {
 	Security    []map[string][]string `json:"security"`
-	Parameters  []map[string]any      `json:"parameters"`
 	RequestBody struct {
 		Content map[string]struct {
 			Schema map[string]any `json:"schema"`
@@ -35,11 +34,11 @@ func TestEmbeddedOpenAPISpecsMatchV3Contracts(t *testing.T) {
 		"openapi-public.json",
 		"openapi-authenticated.json",
 		"openapi-kyc_verified.json",
-		"openapi-bank_pjp.json",
-		"openapi-pjp.json",
+		"openapi-retail_bank.json",
+		"openapi-wholesale_bank.json",
 		"openapi-bank_indonesia.json",
 		"openapi-merchant.json",
-		"openapi-supervisor.json",
+		"openapi-auditor.json",
 	}
 
 	docs := map[string]openAPIDoc{}
@@ -62,43 +61,19 @@ func TestEmbeddedOpenAPISpecsMatchV3Contracts(t *testing.T) {
 		docs[name] = doc
 	}
 
-	bankPjp := docs["openapi-bank_pjp.json"]
-	if _, ok := bankPjp.Paths["/participants/{participant_id}/approve"]; ok {
-		t.Fatal("bank_pjp spec still exposes BI-only participant approval")
-	}
-	if _, ok := bankPjp.Paths["/issuance-requests"]; ok {
-		t.Fatal("bank_pjp spec still exposes BI-only issuance")
-	}
-
-	supervisor := docs["openapi-supervisor.json"]
-	for path, methods := range supervisor.Paths {
+	auditor := docs["openapi-auditor.json"]
+	for path, methods := range auditor.Paths {
 		for method := range methods {
 			if path == "/auth/login" {
 				if method != "post" {
-					t.Fatalf("supervisor auth/login should stay post, got %s", method)
+					t.Fatalf("auditor auth/login should stay post, got %s", method)
 				}
 				continue
 			}
 			if method != "get" {
-				t.Fatalf("supervisor path %s unexpectedly exposes %s", path, method)
+				t.Fatalf("auditor path %s unexpectedly exposes %s", path, method)
 			}
 		}
-	}
-
-	merchant := docs["openapi-merchant.json"]
-	if _, ok := merchant.Paths["/redemption-requests"]; ok {
-		t.Fatal("merchant spec still exposes BI-only redemption")
-	}
-	if _, ok := merchant.Paths["/qris/intents"]; !ok {
-		t.Fatal("merchant spec missing qris intents surface")
-	}
-
-	kycVerified := docs["openapi-kyc_verified.json"]
-	if _, ok := kycVerified.Paths["/issuance-requests"]; ok {
-		t.Fatal("kyc_verified spec still exposes BI-only issuance")
-	}
-	if _, ok := kycVerified.Paths["/qris/pay"]; !ok {
-		t.Fatal("kyc_verified spec missing qris pay")
 	}
 
 	authenticated := docs["openapi-authenticated.json"]
@@ -111,38 +86,8 @@ func TestEmbeddedOpenAPISpecsMatchV3Contracts(t *testing.T) {
 		t.Fatal("public spec missing /auth/login")
 	}
 
-	checkIdempotency(t, docs["openapi-kyc_verified.json"], "/transfers", "post")
-	checkIdempotency(t, docs["openapi-merchant.json"], "/transfers", "post")
-	checkIdempotency(t, docs["openapi-kyc_verified.json"], "/qris/pay", "post")
-	checkIdempotency(t, docs["openapi-merchant.json"], "/qris/pay", "post")
-	checkIdempotency(t, docs["openapi-bank_indonesia.json"], "/distribute", "post")
-
-	createWallet := bankPjp.Components.Schemas["CreateWalletRequestBody"]
-	props, _ := createWallet["properties"].(map[string]any)
-	if _, ok := props["owner_id"]; !ok {
-		t.Fatal("CreateWalletRequestBody missing owner_id")
-	}
-	if _, ok := props["participant_id"]; ok {
-		t.Fatal("CreateWalletRequestBody still exposes participant_id")
-	}
-
 	assertSchemaRef(t, publicDoc.Paths["/auth/login"]["post"], "200", "#/components/schemas/LoginResponse")
 	assertSchemaRef(t, authenticated.Paths["/auth/me"]["get"], "200", "#/components/schemas/MeResponse")
-	assertSchemaRef(t, kycVerified.Paths["/transfers"]["post"], "200", "#/components/schemas/TransferResult")
-	assertSchemaRef(t, merchant.Paths["/qris/pay"]["post"], "200", "#/components/schemas/QrisPayResult")
-	assertSchemaRef(t, docs["openapi-bank_indonesia.json"].Paths["/rtgs/issuance-notification"]["post"], "200", "#/components/schemas/RtgsIssuanceReceipt")
-	assertSchemaRef(t, kycVerified.Paths["/transfers"]["post"], "401", "#/components/schemas/ErrorResponse")
-}
-
-func checkIdempotency(t *testing.T, doc openAPIDoc, path, method string) {
-	t.Helper()
-	op := doc.Paths[path][method]
-	for _, parameter := range op.Parameters {
-		if name, _ := parameter["name"].(string); name == "Idempotency-Key" {
-			return
-		}
-	}
-	t.Fatalf("%s %s missing Idempotency-Key parameter", method, path)
 }
 
 func assertSchemaRef(t *testing.T, op openAPIOperation, status, want string) {

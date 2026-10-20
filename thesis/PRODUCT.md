@@ -20,21 +20,21 @@ Success: examiners can trace each requirement (FR-01..FR-05, NFR-01..NFR-05) to 
 
 ## Positioning
 
-A working two-tier retail Digital Rupiah prototype on a permissioned Hyperledger Fabric network, built against the Proyek Garuda design documents, with reproducible Caliper benchmark evidence. Scope is a research prototype, not a production or official Bank Indonesia system.
+A working two-tier retail Rupiah Digital prototype on a permissioned Hyperledger Fabric network, built against the Proyek Garuda design documents, with Caliper benchmark evidence. Scope is a research prototype, not a production or official Bank Indonesia system.
 
 ## Operating Context
 
 - Defense: projected slide deck (UGM template, built via Claude for PowerPoint from `../powerpoint/thesis-defense-deck-brief.md`) plus a live guided demo of the frontend.
 - Manuscript: LaTeX with `thesisdtetiugm.cls`, compiled to `main.pdf`. Figures are TikZ sources in `contents/figures/`, rendered to 300 dpi PNG for slides.
-- Demonstrated system: `../bi-coin-fabric/` (React/TypeScript frontend, Go backend, Go chaincode, PostgreSQL off-chain KYC, 5-org Garuda Fabric network).
+- Demonstrated system: `../bi-coin-fabric/` (React/TypeScript frontend, Go backend, Go chaincode, PostgreSQL off-chain KYC, four-org bi-coin Fabric network).
 
 ## Capabilities and Constraints
 
-- Thesis acceptance covers participant lifecycle, treasury issuance, two-tier distribution, retail transfer, participant freeze, and supervision. KYC is implementation-only and QRIS is code-only; both are excluded from acceptance criteria and must be labeled so.
-- Monetary flow: Bank Indonesia Treasury -> Distributor Bank/PJP Custodian -> Retail Customer/Merchant wallet.
-- Terminology is binding: `../bi-coin-fabric/CONTEXT.md` terms and their Avoid lists (for example, Issuance not Minting; Participant roles are Distributor Bank, Observer, and PJP).
+- Thesis acceptance covers participant lifecycle, direct issuance to distributor reserves, two-tier distribution, interbank transfer, conversion and wallet funding, retail transfer, participant restriction, and supervision. KYC is implementation-only and QRIS is code-only; both are excluded from acceptance criteria and must be labeled so.
+- Monetary flow: Bank Indonesia -> Distributor Bank reserve (w-Rupiah Digital) -> Retail Bank float (r-Rupiah Digital) -> Retail Customer/Merchant wallet.
+- Terminology is binding: `../bi-coin-fabric/CONTEXT.md` terms and their Avoid lists (for example, Issuance not Minting; Participant roles are Distributor Bank and Observer).
 - Frontend interface decisions live in `../bi-coin-fabric/docs/adr/0004-frontend-experience-boundaries.md` and `0005-frontend-language-and-interface-design.md`.
-- Benchmark numbers come only from the canonical 113543 worker-sweep run (transfer 7.8–14.5 TPS, functional 3.7–19.9 TPS, 616 tx, 0 failures). The 9.0/45.9/57.7 single-run figures are retired.
+- Benchmark numbers come only from run-20261014-01 (compliance study, one worker, one host). Earlier runs are retired and not cited.
 - Undecided: final defense date (`main.tex` still reads 8–13 Juli 2026) and examiner names.
 
 ## Brand Commitments
@@ -47,7 +47,7 @@ A working two-tier retail Digital Rupiah prototype on a permissioned Hyperledger
 
 - Manuscript: `main.pdf`, `contents/chapter-1` through `contents/chapter-5`.
 - Figures: `contents/figures/*.tex` (TikZ), `contents/figures/activity/AD*.png`, `contents/figures/reference/` (cited third-party figures; keep attribution).
-- Charts: `contents/chapter-4/generated/throughput-vs-sendrate.png`, `contents/chapter-4/generated/transfer-repeat-ci.png`.
+- Charts: none in Chapter 4. Performance evidence is reported as tables built from `../bi-coin-fabric/benchmark/results/compliance-run-20261014-01/derived-tables.json`.
 - Deck: `../powerpoint/Powerpoint Skripsi Muhammad Fachrizal Giffari.pptx`, `../powerpoint/slide_figures/`, the deck brief, and slide prompts.
 - Benchmark artifacts: `../bi-coin-fabric/benchmark/results/`.
 - Absent, never fabricate: production deployment, real users, Bank Indonesia endorsement, benchmark numbers outside the canonical run.

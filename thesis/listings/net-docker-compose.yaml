@@ -1,41 +1,47 @@
-name: bi-coin-rupiah-study
+name: bi-coin
 
 networks:
   study:
-    name: rupiah-study
+    name: bi-coin
 
 volumes:
   centralbank-peer-data:
-    name: bi-coin-rupiah-study-centralbank-peer
+    name: bi-coin-centralbank-peer
   distributor-peer-data:
-    name: bi-coin-rupiah-study-distributor-peer
+    name: bi-coin-distributor-peer
   validator-peer-data:
-    name: bi-coin-rupiah-study-validator-peer
+    name: bi-coin-validator-peer
   enduser-peer-data:
-    name: bi-coin-rupiah-study-enduser-peer
+    name: bi-coin-enduser-peer
   orderer-data:
-    name: bi-coin-rupiah-study-orderer
+    name: bi-coin-orderer
   centralbank-couch-data:
-    name: bi-coin-rupiah-study-centralbank-couch
+    name: bi-coin-centralbank-couch
   distributor-couch-data:
-    name: bi-coin-rupiah-study-distributor-couch
+    name: bi-coin-distributor-couch
   validator-couch-data:
-    name: bi-coin-rupiah-study-validator-couch
+    name: bi-coin-validator-couch
   enduser-couch-data:
-    name: bi-coin-rupiah-study-enduser-couch
+    name: bi-coin-enduser-couch
   centralbank-ca-data:
-    name: bi-coin-rupiah-study-centralbank-ca
+    name: bi-coin-centralbank-ca
+  distributor-ca-data:
+    name: bi-coin-distributor-ca
+  validator-ca-data:
+    name: bi-coin-validator-ca
+  enduser-ca-data:
+    name: bi-coin-enduser-ca
   study-postgres-data:
-    name: bi-coin-rupiah-study-postgres
+    name: bi-coin-postgres
 
 x-couchdb-environment: &couchdb-environment
-  COUCHDB_USER: ${STUDY_COUCHDB_USER}
-  COUCHDB_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
+  COUCHDB_USER: ${COUCHDB_USER}
+  COUCHDB_PASSWORD: ${COUCHDB_PASSWORD}
 
 x-peer-environment: &peer-environment
   FABRIC_LOGGING_SPEC: INFO
   CORE_VM_ENDPOINT: unix:///host/var/run/docker.sock
-  CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE: rupiah-study
+  CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE: bi-coin
   CORE_PEER_TLS_ENABLED: "true"
   CORE_PEER_PROFILE_ENABLED: "true"
   CORE_PEER_TLS_CERT_FILE: /etc/hyperledger/fabric/tls/server.crt
@@ -49,27 +55,87 @@ x-peer-environment: &peer-environment
 services:
   ca.centralbank:
     image: hyperledger/fabric-ca:1.5.9
-    container_name: study-ca-centralbank
+    container_name: bi-coin-ca-centralbank
     profiles: [ca]
     environment:
       FABRIC_CA_SERVER_CA_NAME: ca-centralbank
       FABRIC_CA_SERVER_TLS_ENABLED: "false"
       FABRIC_CA_SERVER_PORT: 7054
-      STUDY_CA_ADMIN_USER: ${STUDY_CA_ADMIN_USER}
-      STUDY_CA_ADMIN_SECRET: ${STUDY_CA_ADMIN_SECRET}
+      CA_ADMIN_USER: ${CA_ADMIN_USER}
+      CA_ADMIN_SECRET: ${CA_ADMIN_SECRET}
     command:
       - sh
       - -c
-      - fabric-ca-server start -b "$$STUDY_CA_ADMIN_USER:$$STUDY_CA_ADMIN_SECRET" -d
+      - fabric-ca-server start -b "$$CA_ADMIN_USER:$$CA_ADMIN_SECRET" -d
     volumes:
       - centralbank-ca-data:/etc/hyperledger/fabric-ca-server
     ports:
       - "127.0.0.1:17054:7054"
     networks: [study]
 
+  ca.distributor:
+    image: hyperledger/fabric-ca:1.5.9
+    container_name: bi-coin-ca-distributor
+    profiles: [ca]
+    environment:
+      FABRIC_CA_SERVER_CA_NAME: ca-distributor
+      FABRIC_CA_SERVER_TLS_ENABLED: "false"
+      FABRIC_CA_SERVER_PORT: 7054
+      CA_ADMIN_USER: ${CA_ADMIN_USER}
+      CA_ADMIN_SECRET: ${CA_ADMIN_SECRET}
+    command:
+      - sh
+      - -c
+      - fabric-ca-server start -b "$$CA_ADMIN_USER:$$CA_ADMIN_SECRET" -d
+    volumes:
+      - distributor-ca-data:/etc/hyperledger/fabric-ca-server
+    ports:
+      - "127.0.0.1:18054:7054"
+    networks: [study]
+
+  ca.validator:
+    image: hyperledger/fabric-ca:1.5.9
+    container_name: bi-coin-ca-validator
+    profiles: [ca]
+    environment:
+      FABRIC_CA_SERVER_CA_NAME: ca-validator
+      FABRIC_CA_SERVER_TLS_ENABLED: "false"
+      FABRIC_CA_SERVER_PORT: 7054
+      CA_ADMIN_USER: ${CA_ADMIN_USER}
+      CA_ADMIN_SECRET: ${CA_ADMIN_SECRET}
+    command:
+      - sh
+      - -c
+      - fabric-ca-server start -b "$$CA_ADMIN_USER:$$CA_ADMIN_SECRET" -d
+    volumes:
+      - validator-ca-data:/etc/hyperledger/fabric-ca-server
+    ports:
+      - "127.0.0.1:19054:7054"
+    networks: [study]
+
+  ca.enduser:
+    image: hyperledger/fabric-ca:1.5.9
+    container_name: bi-coin-ca-enduser
+    profiles: [ca]
+    environment:
+      FABRIC_CA_SERVER_CA_NAME: ca-enduser
+      FABRIC_CA_SERVER_TLS_ENABLED: "false"
+      FABRIC_CA_SERVER_PORT: 7054
+      CA_ADMIN_USER: ${CA_ADMIN_USER}
+      CA_ADMIN_SECRET: ${CA_ADMIN_SECRET}
+    command:
+      - sh
+      - -c
+      - fabric-ca-server start -b "$$CA_ADMIN_USER:$$CA_ADMIN_SECRET" -d
+    volumes:
+      - enduser-ca-data:/etc/hyperledger/fabric-ca-server
+    ports:
+      - "127.0.0.1:20054:7054"
+    networks: [study]
+
   study-cli:
     image: hyperledger/fabric-tools:2.5
-    container_name: study-cli
+    container_name: bi-coin-cli
     profiles: [tools]
     environment:
       FABRIC_CFG_PATH: /etc/hyperledger/fabric
@@ -79,28 +145,28 @@ services:
       - -c
       - while true; do sleep 3600; done
     volumes:
-      - ./organizations:/study/organizations:ro
-      - ../../study/chaincode:/study/chaincode:ro
-      - ./packages:/study/packages
+      - ./organizations:/network/organizations:ro
+      - ../chaincode:/chaincode:ro
+      - ./packages:/network/packages
     networks: [study]
 
   study-postgres:
     image: postgres:16-alpine
-    container_name: study-postgres
+    container_name: bi-coin-postgres
     profiles: [network]
     environment:
-      POSTGRES_USER: ${STUDY_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${STUDY_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${STUDY_POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - study-postgres-data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:15432:5432"
     networks: [study]
 
-  orderer.centralbank.rupiah.study:
+  orderer.centralbank.bi-coin:
     image: hyperledger/fabric-orderer:2.5
-    container_name: study-orderer-centralbank
+    container_name: bi-coin-orderer-centralbank
     profiles: [network]
     environment:
       FABRIC_LOGGING_SPEC: INFO
@@ -125,17 +191,17 @@ services:
       ORDERER_ADMIN_LISTENADDRESS: 0.0.0.0:7053
     command: orderer
     volumes:
-      - ./organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study/msp:/var/hyperledger/orderer/msp:ro
-      - ./organizations/ordererOrganizations/centralbank.rupiah.study/orderers/orderer.centralbank.rupiah.study/tls:/var/hyperledger/orderer/tls:ro
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/msp:/var/hyperledger/orderer/msp:ro
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls:/var/hyperledger/orderer/tls:ro
       - orderer-data:/var/hyperledger/production
     ports:
       - "17050:7050"
       - "17053:7053"
     networks: [study]
 
-  couchdb.centralbank.rupiah.study:
+  couchdb.centralbank.bi-coin:
     image: couchdb:3.3
-    container_name: study-couchdb-centralbank
+    container_name: bi-coin-couchdb-centralbank
     profiles: [network]
     environment: *couchdb-environment
     volumes:
@@ -143,34 +209,34 @@ services:
     ports: ["127.0.0.1:17584:5984"]
     networks: [study]
 
-  peer0.centralbank.rupiah.study:
+  peer0.centralbank.bi-coin:
     image: hyperledger/fabric-peer:2.5
-    container_name: study-peer0-centralbank
+    container_name: bi-coin-peer0-centralbank
     profiles: [network]
     environment:
       <<: *peer-environment
-      CORE_PEER_ID: peer0.centralbank.rupiah.study
-      CORE_PEER_ADDRESS: peer0.centralbank.rupiah.study:7051
-      CORE_PEER_CHAINCODEADDRESS: peer0.centralbank.rupiah.study:7052
-      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.centralbank.rupiah.study:7051
-      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.centralbank.rupiah.study:7051
+      CORE_PEER_ID: peer0.centralbank.bi-coin
+      CORE_PEER_ADDRESS: peer0.centralbank.bi-coin:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.centralbank.bi-coin:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.centralbank.bi-coin:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.centralbank.bi-coin:7051
       CORE_PEER_LOCALMSPID: CentralBankMSP
       CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
-      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.centralbank.rupiah.study:5984
-      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
-      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.centralbank.bi-coin:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/centralbank.rupiah.study/peers/peer0.centralbank.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
-      - ./organizations/peerOrganizations/centralbank.rupiah.study/peers/peer0.centralbank.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - ./organizations/peerOrganizations/centralbank.bi-coin/peers/peer0.centralbank.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/centralbank.bi-coin/peers/peer0.centralbank.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - centralbank-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.rupiah.study, couchdb.centralbank.rupiah.study]
+    depends_on: [orderer.centralbank.bi-coin, couchdb.centralbank.bi-coin]
     ports: ["17051:7051"]
     networks: [study]
 
-  couchdb.distributor.rupiah.study:
+  couchdb.distributor.bi-coin:
     image: couchdb:3.3
-    container_name: study-couchdb-distributor
+    container_name: bi-coin-couchdb-distributor
     profiles: [network]
     environment: *couchdb-environment
     volumes:
@@ -178,34 +244,34 @@ services:
     ports: ["127.0.0.1:18584:5984"]
     networks: [study]
 
-  peer0.distributor.rupiah.study:
+  peer0.distributor.bi-coin:
     image: hyperledger/fabric-peer:2.5
-    container_name: study-peer0-distributor
+    container_name: bi-coin-peer0-distributor
     profiles: [network]
     environment:
       <<: *peer-environment
-      CORE_PEER_ID: peer0.distributor.rupiah.study
-      CORE_PEER_ADDRESS: peer0.distributor.rupiah.study:7051
-      CORE_PEER_CHAINCODEADDRESS: peer0.distributor.rupiah.study:7052
-      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.distributor.rupiah.study:7051
-      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.distributor.rupiah.study:7051
+      CORE_PEER_ID: peer0.distributor.bi-coin
+      CORE_PEER_ADDRESS: peer0.distributor.bi-coin:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.distributor.bi-coin:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.distributor.bi-coin:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.distributor.bi-coin:7051
       CORE_PEER_LOCALMSPID: DistributorMSP
       CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
-      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.distributor.rupiah.study:5984
-      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
-      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.distributor.bi-coin:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/distributor.rupiah.study/peers/peer0.distributor.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
-      - ./organizations/peerOrganizations/distributor.rupiah.study/peers/peer0.distributor.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - ./organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - distributor-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.rupiah.study, couchdb.distributor.rupiah.study]
+    depends_on: [orderer.centralbank.bi-coin, couchdb.distributor.bi-coin]
     ports: ["18051:7051"]
     networks: [study]
 
-  couchdb.validator.rupiah.study:
+  couchdb.validator.bi-coin:
     image: couchdb:3.3
-    container_name: study-couchdb-validator
+    container_name: bi-coin-couchdb-validator
     profiles: [network]
     environment: *couchdb-environment
     volumes:
@@ -213,34 +279,34 @@ services:
     ports: ["127.0.0.1:19584:5984"]
     networks: [study]
 
-  peer0.validator.rupiah.study:
+  peer0.validator.bi-coin:
     image: hyperledger/fabric-peer:2.5
-    container_name: study-peer0-validator
+    container_name: bi-coin-peer0-validator
     profiles: [network]
     environment:
       <<: *peer-environment
-      CORE_PEER_ID: peer0.validator.rupiah.study
-      CORE_PEER_ADDRESS: peer0.validator.rupiah.study:7051
-      CORE_PEER_CHAINCODEADDRESS: peer0.validator.rupiah.study:7052
-      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.validator.rupiah.study:7051
-      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.validator.rupiah.study:7051
+      CORE_PEER_ID: peer0.validator.bi-coin
+      CORE_PEER_ADDRESS: peer0.validator.bi-coin:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.validator.bi-coin:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.validator.bi-coin:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.validator.bi-coin:7051
       CORE_PEER_LOCALMSPID: ValidatorMSP
       CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
-      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.validator.rupiah.study:5984
-      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
-      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.validator.bi-coin:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/validator.rupiah.study/peers/peer0.validator.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
-      - ./organizations/peerOrganizations/validator.rupiah.study/peers/peer0.validator.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - ./organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - validator-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.rupiah.study, couchdb.validator.rupiah.study]
+    depends_on: [orderer.centralbank.bi-coin, couchdb.validator.bi-coin]
     ports: ["19051:7051"]
     networks: [study]
 
-  couchdb.enduser.rupiah.study:
+  couchdb.enduser.bi-coin:
     image: couchdb:3.3
-    container_name: study-couchdb-enduser
+    container_name: bi-coin-couchdb-enduser
     profiles: [network]
     environment: *couchdb-environment
     volumes:
@@ -248,27 +314,27 @@ services:
     ports: ["127.0.0.1:20584:5984"]
     networks: [study]
 
-  peer0.enduser.rupiah.study:
+  peer0.enduser.bi-coin:
     image: hyperledger/fabric-peer:2.5
-    container_name: study-peer0-enduser
+    container_name: bi-coin-peer0-enduser
     profiles: [network]
     environment:
       <<: *peer-environment
-      CORE_PEER_ID: peer0.enduser.rupiah.study
-      CORE_PEER_ADDRESS: peer0.enduser.rupiah.study:7051
-      CORE_PEER_CHAINCODEADDRESS: peer0.enduser.rupiah.study:7052
-      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.enduser.rupiah.study:7051
-      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.enduser.rupiah.study:7051
+      CORE_PEER_ID: peer0.enduser.bi-coin
+      CORE_PEER_ADDRESS: peer0.enduser.bi-coin:7051
+      CORE_PEER_CHAINCODEADDRESS: peer0.enduser.bi-coin:7052
+      CORE_PEER_GOSSIP_BOOTSTRAP: peer0.enduser.bi-coin:7051
+      CORE_PEER_GOSSIP_EXTERNALENDPOINT: peer0.enduser.bi-coin:7051
       CORE_PEER_LOCALMSPID: EndUserMSP
       CORE_PEER_MSPCONFIGPATH: /etc/hyperledger/fabric/msp
-      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.enduser.rupiah.study:5984
-      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${STUDY_COUCHDB_USER}
-      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${STUDY_COUCHDB_PASSWORD}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS: couchdb.enduser.bi-coin:5984
+      CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME: ${COUCHDB_USER}
+      CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD: ${COUCHDB_PASSWORD}
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ./organizations/peerOrganizations/enduser.rupiah.study/peers/peer0.enduser.rupiah.study/msp:/etc/hyperledger/fabric/msp:ro
-      - ./organizations/peerOrganizations/enduser.rupiah.study/peers/peer0.enduser.rupiah.study/tls:/etc/hyperledger/fabric/tls:ro
+      - ./organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
+      - ./organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - enduser-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.rupiah.study, couchdb.enduser.rupiah.study]
+    depends_on: [orderer.centralbank.bi-coin, couchdb.enduser.bi-coin]
     ports: ["20051:7051"]
     networks: [study]

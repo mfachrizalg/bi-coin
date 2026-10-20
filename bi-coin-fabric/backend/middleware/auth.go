@@ -24,11 +24,11 @@ const (
 	RolePublic        Role = "public"
 	RoleAuthenticated Role = "authenticated"
 	RoleKycVerified   Role = "kyc_verified"
-	RoleBankPjp       Role = "bank_pjp"
-	RolePJP           Role = "pjp"
+	RoleRetailBank    Role = "retail_bank"
+	RoleWholesaleBank Role = "wholesale_bank"
 	RoleBankIndonesia Role = "bank_indonesia"
 	RoleMerchant      Role = "merchant"
-	RoleSupervisor    Role = "supervisor"
+	RoleAuditor       Role = "auditor"
 )
 
 type RoleSet map[Role]bool
@@ -48,8 +48,8 @@ type TokenVerifier interface {
 var (
 	AllRoles = RoleSet{
 		RolePublic: true, RoleAuthenticated: true, RoleKycVerified: true,
-		RoleBankPjp: true, RolePJP: true,
-		RoleBankIndonesia: true, RoleMerchant: true, RoleSupervisor: true,
+		RoleRetailBank: true, RoleWholesaleBank: true,
+		RoleBankIndonesia: true, RoleMerchant: true, RoleAuditor: true,
 	}
 )
 

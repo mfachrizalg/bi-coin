@@ -1,6 +1,6 @@
 # Four-organization compliance benchmark guide
 
-This guide covers the benchmark commands for the four-organization `rupiah-study` network. The channel joins CentralBankMSP (Bank Indonesia), DistributorMSP (banks and PJPs), ValidatorMSP (OJK and PPATK observers), and EndUserMSP (retail, merchant, and business end users), and runs the chaincodes `rupiah-controls`, `rupiah-monetary`, and `rupiah-payments`. Network files are in `network/study/` and the chaincode is in `study/chaincode/`.
+This guide covers the benchmark commands for the four-organization `bi-coin` network. The channel joins CentralBankMSP (Bank Indonesia), DistributorMSP (retail and wholesale banks), ValidatorMSP (OJK and PPATK observers), and EndUserMSP (retail, merchant, and business end users), and runs the chaincodes `rupiah-controls`, `rupiah-monetary`, and `rupiah-payments`. Network files are in `network/` and the chaincode is in `chaincode/`.
 
 The protocol, workload catalog, capacity search, and evidence rules are in [`compliance/README.md`](compliance/README.md). Every run needs the disposable Docker daemon described in [`isolated/README.md`](isolated/README.md). A result is local observed capacity for one worker on one host, not production capacity.
 

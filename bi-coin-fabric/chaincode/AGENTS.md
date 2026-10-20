@@ -4,11 +4,11 @@ This directory is a standalone Go module that packages the Digital Rupiah Fabric
 
 ## Integration contract
 
-- digital_rupiah.go defines the Fabric contract and exported transaction names.
-- backend/services/ledger.go submits or evaluates those names and supplies their arguments.
+- controls/controls.go, monetary/monetary.go, and payments/payments.go define the three Fabric contracts and their exported transaction names.
+- backend/services/study_ledger.go submits or evaluates those names and supplies their arguments.
 - benchmark/workloads/ invokes the same contract through Caliper identities and scenario setup.
 - network/configtx.yaml and network/ configuration define channel membership and endorsement policy. Keep network policy and chaincode authorization aligned.
-- CONTEXT.md defines participant, Custodian, Wallet Owner, issuance, distribution, redemption, and supervision.
+- CONTEXT.md defines participant, Custodian, Wallet Owner, Issuance, Conversion, Redemption, and supervision.
 
 Changing a transaction name, parameter order, return shape, state key, or authorization rule can affect the backend, workloads, seeded ledger, and thesis evidence. Search those callers and update the relevant tests before considering the change complete.
 
@@ -16,24 +16,24 @@ Changing a transaction name, parameter order, return shape, state key, or author
 
 | Domain | Main transactions and behavior |
 |---|---|
-| Participant lifecycle | SubmitParticipant, ApproveParticipant, FreezeParticipant, UnfreezeParticipant, RejectParticipant, OffboardParticipant |
-| Wallet and money | CreateWallet, CreateWholesaleWallet, Mint, Burn, Transfer, FreezeWallet, UnfreezeWallet |
-| Treasury flow | RequestIssuance(amount, reference), RequestIssuanceRtgs, RequestRedemption(participant, amount, reference), DistributeToParticipant |
-| Limits and policy | SetTierLimit, SetSystemLimit and corresponding reads |
-| KYC anchor | SubmitKycProfile, RefreshKycProfile, and profile reads; raw KYC material belongs in the off-chain store |
-| Oversight | Participant and wallet reads, GetTransactions, GetTransactionHistory, GetAuditLog, GetSupervisionEvents, GetReconciliationReport, GetMetrics, and GetTopology |
+| Subject and staff | FreezeSubject, RequestUnfreeze, ApproveUnfreeze, SetBusinessAuthority (controls, DistributorMSP staff roles); CreateStaffPending, ProtectStaff, SetStaffRole (controls, CentralBankMSP) |
+| Wallet and transfer | OpenWallet, Transfer (payments, EndUserMSP); GetBalance and GetReceipt are reads |
+| Monetary flow | Issue, RedeemReserve, TransferReserve, DebitReserveForConversion (monetary); ConvertToRetail and FundWallet (payments) |
+| Limits and policy | SetLimits and GetLimits (controls); ProtectSubject and ProtectStaff (endorsement policies) |
+| KYC anchor | CreatePending, RecordReview, ApproveStandard, DecideHighRisk, and GetSubject (controls); raw KYC material belongs in the off-chain store |
+| Oversight | Read-only queries: GetSubject, GetLimits, CanPay, and CanActFor (controls); GetReserve, GetWholesaleSupply, GetRetailSupply, and GetTotalSupply (monetary); GetBalance, GetReceipt, and GetRetailFloat (payments) |
 
-Current monetary flow: Mint credits only bi_treasury; distribution transfers from Treasury to an active institutional Custodian; Transfer supports later wallet-to-wallet movement. RequestIssuanceRtgs currently increases Treasury and records a receipt; it does not itself credit the participant wallet. Verify this behavior in source before changing descriptions or workflows.
+Current monetary flow: Issue (CentralBankMSP) credits a Distributor reserve and wholesale supply. TransferReserve (DistributorMSP) moves w-Rupiah Digital between reserves without changing supply. ConvertToRetail (DistributorMSP) moves a bank's reserve into its Retail float, and FundWallet (DistributorMSP) moves that float into the customer wallet, each in one transaction. Transfer (EndUserMSP) moves value between wallets. Verify in source before changing descriptions or workflows.
 
-QRIS is disabled: PayQris is not exported by the active Fabric contract. Its historical state and supporting code remain untouched; receipt validation and single-use dynamic-intent settlement are prerequisites for restoration. Retail low-balance automatic redemption and its policy API are retired; use BI-authorized explicit redemption.
+Retail low-balance automatic redemption and its policy API are retired; use BI-authorized explicit redemption (RedeemReserve).
 
 ## Authorization and state
 
-- requireBankIndonesia, requireInstitution, and the MSP helpers derive authority from the Fabric transaction context.
+- requireMSP, requireTopLevel, requireStaffRole, and requireProtected check the Fabric transaction context.
 - Custodian and participant checks protect wallet creation and monetary operations. The ledger remains authoritative for wallet custody and balances.
 - Use checked integer arithmetic and existing limit helpers for monetary state changes.
 - Keep raw identity/KYC documents in the private application store; chaincode stores only the approved anchor and shared status required for ledger decisions.
-- Audit entries, transaction records, idempotency receipts, and supervision events are ledger evidence. Preserve their transaction ordering and arguments when changing a mutation.
+- Operation receipts (monetary and payments) and subject and staff records (controls) are ledger evidence. Preserve their transaction ordering and arguments when changing a mutation.
 
 ## Thesis traceability
 
@@ -41,14 +41,14 @@ The complete requirement matrix is in the root [AGENTS.md](../AGENTS.md). Chainc
 
 | Thesis item | Contract responsibility | Evidence |
 |---|---|---|
-| FR-01 | Participant lifecycle and allowed state transitions | digital_rupiah_test.go, digital_rupiah_v3_test.go, authorization_test.go; thesis Chapter 4 functional results |
-| FR-02 | Treasury-only issuance and Treasury-to-Custodian distribution | digital_rupiah_v3_test.go; thesis Chapter 4 issuance/distribution result; ADR 0001 and ADR 0003 |
-| FR-03 | Transfer authorization, frozen-wallet, amount, balance, and state-update rules | digital_rupiah_test.go, authorization_test.go, digital_rupiah_v3_test.go; thesis Chapter 4 transfer result |
-| FR-04 | Transaction history, audit, reports, metrics, and supervision events | digital_rupiah_v3_test.go; thesis Chapter 4 oversight result |
-| NFR-01 | MSP policy in code must agree with channel endorsement configuration | ../network/configtx.yaml, ../network/crypto-config.yaml, and ../scripts/deploy-chaincode.test.js; thesis Chapter 3 architecture |
-| NFR-02 | Ledger audit and transaction traceability | digital_rupiah_v3_test.go, offchain_kyc_test.go; thesis Chapter 4 functional evidence |
-| NFR-03 | Contract remains the ledger boundary behind the backend gateway | Root architecture and ../backend/services/ledger.go; thesis Chapter 3 architecture |
+| FR-01 | Participant lifecycle and allowed state transitions | controls/controls_test.go; thesis Chapter 4 functional results |
+| FR-02 | Issuance into Distributor reserves and Conversion into Retail floats | monetary/monetary_test.go; thesis Chapter 4 issuance/conversion result; ADR 0001 and ADR 0003 |
+| FR-03 | Transfer authorization, frozen-wallet, amount, balance, and state-update rules | payments/payments_test.go; thesis Chapter 4 transfer result |
+| FR-04 | Read-only oversight queries over subject, limit, supply, and reserve state | controls/controls_test.go; thesis Chapter 4 oversight result |
+| NFR-01 | MSP policy in code must agree with channel endorsement configuration | ../network/configtx.yaml, and ../scripts/deploy-chaincodes.test.js; thesis Chapter 3 architecture |
+| NFR-02 | Ledger receipts and transaction traceability | payments/payments_test.go; thesis Chapter 4 functional evidence |
+| NFR-03 | Contract remains the ledger boundary behind the backend gateway | Root architecture and ../backend/services/study_ledger.go; thesis Chapter 3 architecture |
 
-Use go test ./... from this directory for chaincode checks. The files digital_rupiah_test.go, digital_rupiah_v3_test.go, authorization_test.go, offchain_kyc_test.go, and compliance_policy_test.go cover the main contract boundaries.
+Use go test ./... inside each chaincode module (controls, monetary, payments) for chaincode checks. The contract test files are controls/controls_test.go, monetary/monetary_test.go, and payments/payments_test.go.
 
 Terminology lives in [CONTEXT.md](../CONTEXT.md). Architectural decisions live in [docs/adr/](../docs/adr/).

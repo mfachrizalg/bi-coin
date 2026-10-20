@@ -5,8 +5,8 @@ const test = require('node:test');
 
 const { selectScenarios } = require('./capacity-runner');
 
-const scenarios = [{ id: 'create-pending' }, { id: 'read-balance' }, { id: 'read-receipt' }, { id: 'fund-reserve' }];
-const allIDs = ['create-pending', 'read-balance', 'read-receipt', 'fund-reserve'];
+const scenarios = [{ id: 'create-pending' }, { id: 'read-balance' }, { id: 'read-receipt' }, { id: 'fund-wallet' }];
+const allIDs = ['create-pending', 'read-balance', 'read-receipt', 'fund-wallet'];
 
 test('selects every scenario when no filter is given', () => {
     assert.deepEqual(selectScenarios(scenarios, undefined).map(item => item.id), allIDs);
@@ -14,7 +14,7 @@ test('selects every scenario when no filter is given', () => {
 });
 
 test('keeps catalog order and selects only the named scenarios', () => {
-    assert.deepEqual(selectScenarios(scenarios, 'fund-reserve, read-balance').map(item => item.id), ['read-balance', 'fund-reserve']);
+    assert.deepEqual(selectScenarios(scenarios, 'fund-wallet, read-balance').map(item => item.id), ['read-balance', 'fund-wallet']);
 });
 
 test('rejects unknown scenario names instead of silently running fewer workloads', () => {

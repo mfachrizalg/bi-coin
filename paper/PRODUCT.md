@@ -8,24 +8,24 @@ web
 
 ## Users
 
-Primary: thesis examiners (penguji) and supervisors at the DTETI FT UGM undergraduate thesis defense. They read the makalah skripsi as the short companion to the naskah. Their job: check quickly that the paper's claims, figures, and numbers match the thesis and the prototype.
+Primary: thesis examiners (penguji) and thesis advisers (pembimbing) at the DTETI FT UGM undergraduate thesis defense. They read the makalah skripsi as the short companion to the naskah. Their job: check quickly that the paper's claims, figures, and numbers match the thesis and the prototype.
 
 The paper is the DTETI makalah only. It is not currently prepared for an external IEEE venue.
 
 ## Product Purpose
 
-IEEE-format makalah for "A Retail Digital Rupiah Prototype on Hyperledger Fabric: Two-Tier Business Processes and a Reproducible Benchmark". Authors: Muhammad Fachrizal Giffari, Teguh Bharata Adji, and Guntur Dharma Putra (DTETI UGM).
+IEEE-format makalah for "A Retail Digital Rupiah Prototype on Hyperledger Fabric: Selected Controls and a Single-Host Performance Baseline". Authors: Muhammad Fachrizal Giffari, Teguh Bharata Adji, and Guntur Dharma Putra (DTETI UGM).
 
 Success: an examiner can read the paper by itself, see the two-tier model, the authorization boundaries, and the benchmark method, and find no contradiction with the thesis.
 
 ## Positioning
 
-A working retail Digital Rupiah research prototype on a permissioned Hyperledger Fabric 2.5 network. It complements the wholesale focus of Bank Indonesia's Proyek Garuda with two-tier distribution, institutional oversight, and benchmark artifacts that can be validated. It is not a production system and not an official Bank Indonesia system.
+A working retail Digital Rupiah research prototype on a permissioned Hyperledger Fabric 2.5 network. It complements the wholesale focus of Bank Indonesia's Project Garuda with two-tier distribution, institutional oversight, and a compliance study with single-host throughput and latency measurements. It is not a production system and not an official Bank Indonesia system.
 
 ## Operating Context
 
 - Source: `main.tex` with `IEEEtran.cls` (conference mode), bibliography `references.bib`, built to `main.pdf` with latexmk. The output is a printed or PDF document, not a screen UI.
-- Visual surfaces: inline TikZ diagrams (`positioning`, `arrows.meta`, `fit`, `backgrounds`), inline pgfplots charts (`compat=1.18`), booktabs tables, and float and two-column layout inside IEEEtran.
+- Visual surfaces: inline TikZ diagrams (`positioning`, `arrows.meta`, `fit`, `backgrounds`), booktabs tables, and float and two-column layout inside IEEEtran.
 - Review trail: `reviews/` (academic reviews, citation coverage, joint paper–thesis review, replacement study).
 - Companion: `../thesis/` (naskah) and `../bi-coin-fabric/` (system and benchmark artifacts).
 - Prose workflow: `AGENTS.md`. The academic-research-suite skill runs first, then humanizer, for all manuscript prose.
@@ -33,8 +33,8 @@ A working retail Digital Rupiah research prototype on a permissioned Hyperledger
 ## Capabilities and Constraints
 
 - The paper's claims must stay consistent with the thesis: same scope, same terminology, same numbers.
-- Terminology follows `../bi-coin-fabric/CONTEXT.md` (for example, Issuance not Minting; Participant roles are Distributor Bank, Observer, and PJP).
-- Monetary flow: Bank Indonesia Treasury -> Distributor Bank/PJP Custodian -> Retail Customer/Merchant wallet.
+- Terminology follows `../bi-coin-fabric/CONTEXT.md` (for example, Issuance not Minting; Participant roles are Distributor Bank and Observer).
+- Monetary flow: Bank Indonesia Issuance -> Distributor reserve (Wholesale Bank or Retail Bank) -> Conversion -> Retail float (Retail Bank) -> Wallet funding -> Retail Customer/Merchant wallet.
 - The shared Fabric channel gives no transaction privacy. The paper must keep stating this.
 - Measurements describe a single-host prototype. They do not establish production capacity or cross-machine reproducibility.
 - RESOLVED 2026-10-16: the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP) is the only architecture, so every benchmark number must come from it. The binding evidence is run-20261014-01 (one Caliper worker, one host): confirmed reads 272 to 296 ops/s and passing writes 0.184 to 4.75 TPS, as reported in `main.tex` and thesis Chapter 4.
@@ -50,7 +50,7 @@ A working retail Digital Rupiah research prototype on a permissioned Hyperledger
 ## Evidence on Hand
 
 - Manuscript: `main.tex`, `main.pdf`, `references.bib` (`references-unused.bib` is not active).
-- Benchmark artifacts: `../bi-coin-fabric/benchmark/results/` (manifests, `summary.json`, `validation.json`).
+- Benchmark artifacts: `../bi-coin-fabric/benchmark/results/` (manifests, `summary.json` as the source of the figures, `derived-tables.json`). Correctness record: `../bi-coin-fabric/benchmark/results/compliance-run-20261014-01/correctness.json`, copied from the run workspace.
 - Reviews: `reviews/*.md`.
 - Absent, never fabricate: production deployment, real users, Bank Indonesia endorsement, cross-machine results, and benchmark numbers outside the recorded studies.
 

@@ -17,6 +17,6 @@ Use the PNG files in this folder for the defense deck. They are rendered at
 | PostgreSQL off-chain ERD (optional) | `erd-offchain-1.png` |
 
 The September 10, 2026 refresh updates the blockchain, Fabric, network,
-system, and two-tier diagrams to match the current Treasury/custodian and
+system, and two-tier diagrams to match the current Issuance/custodian and
 institutional-endorsement wording. The ERD remains optional and should not be
 used to imply additional thesis scope.

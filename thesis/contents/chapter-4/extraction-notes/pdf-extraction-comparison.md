@@ -25,8 +25,8 @@ Kunci sitasi di `references.bib`:
 | Kunci sitasi | `aryani2023critlit` |
 
 ### 2. Tujuan dan Lingkup Penelitian
-- **Tujuan**: Menilai apakah desain r-Digital Rupiah yang diusulkan cocok untuk Indonesia melalui tinjauan literatur kritis komparatif terhadap *White Paper Project Garuda* (Bank Indonesia, 2022).
-- **Lingkup**: CBDC **ritel** (r-Digital Rupiah) — fokus pada desain, fitur, implikasi, dan perbandingan antarnegara.
+- **Tujuan**: Menilai apakah desain r-Rupiah Digital yang diusulkan cocok untuk Indonesia melalui tinjauan literatur kritis komparatif terhadap *White Paper Project Garuda* (Bank Indonesia, 2022).
+- **Lingkup**: CBDC **ritel** (r-Rupiah Digital) — fokus pada desain, fitur, implikasi, dan perbandingan antarnegara.
 - **Pertanyaan penelitian**:
   1. Apa kerangka desain yang diusulkan untuk CBDC Indonesia?
   2. Bagaimana membandingkannya dengan implementasi CBDC negara lain?
@@ -44,14 +44,14 @@ Kunci sitasi di `references.bib`:
 
 #### 4.1 Arsitektur Digital Rupiah (menurut White Paper 2022)
 - **Lima elemen desain**: penerbitan (issuance), distribusi & pencatatan transaksi, akses, use cases & interlinkage, infrastruktur & teknologi.
-- **Dua bentuk**: w-Digital Rupiah (grosir) + r-Digital Rupiah (ritel) — **pendekatan hybrid** yang mengintegrasikan grosir dan ritel dalam satu sistem (tidak umum secara global).
+- **Dua bentuk**: w-Rupiah Digital (grosir) + r-Rupiah Digital (ritel) — **pendekatan hybrid** yang mengintegrasikan grosir dan ritel dalam satu sistem (tidak umum secara global).
 - **Distribusi**: kombinasi *one-tier* dan *two-tier* — grosir mendapat dari BI langsung, ritel didistribusikan melalui PSP berlisensi.
-- **Akses**: *account-based* atau *token-based*; w-Digital Rupiah memakai token-based.
+- **Akses**: *account-based* atau *token-based*; w-Rupiah Digital memakai token-based.
 - **Tahap pengembangan**: 3 tahap — (1) Immediate: wRD terbatas, (2) Intermediate: ekspansi ke transaksi pasar uang (DvP, tokenisasi sekuritas), (3) End: integrasi wRD + rRD, distribusi ritel, *cross-border*.
 
 #### 4.2 Pilihan Teknologi/Infrastruktur
-- **w-Digital Rupiah**: *Permissioned DLT* dipilih untuk menjaga privasi, kontrol, dan transparansi.
-- **r-Digital Rupiah**: **mungkin menggunakan infrastruktur terpusat (centralized)** karena keterbatasan skalabilitas DLT yang dapat memengaruhi kecepatan *settlement* ritel.
+- **w-Rupiah Digital**: *Permissioned DLT* dipilih untuk menjaga privasi, kontrol, dan transparansi.
+- **r-Rupiah Digital**: **mungkin menggunakan infrastruktur terpusat (centralized)** karena keterbatasan skalabilitas DLT yang dapat memengaruhi kecepatan *settlement* ritel.
 - **Argumen kritis**: DLT ritel dianggap terlalu lambat untuk volume transaksi ritel yang tinggi.
 - **Catatan tentang Hyperledger Fabric**: Disebut sebagai platform yang dipakai eNaira (bersama Bitt Inc. DCMS), **bukan** sebagai pilihan teknologi Digital Rupiah.
 
@@ -72,7 +72,7 @@ Kunci sitasi di `references.bib`:
 |---------|----------------------|
 | **Privasi** | Trade-off anonimitas vs AML/CFT; anonimitas berjenjang untuk transaksi kecil direkomendasikan |
 | **Programmability** | Didukung melalui *smart contract*; fitur nilai tambah Digital Rupiah |
-| **Offline** | Dirancang untuk r-Digital Rupiah; e-CNY satu-satunya yang sukses menerapkan |
+| **Offline** | Dirancang untuk r-Rupiah Digital; e-CNY satu-satunya yang sukses menerapkan |
 | **Cross-border** | 3i (Integration, Interoperability, Interconnection); kerja sama IMF, BIS, World Bank |
 | **Intermediasi** | Model hybrid 1-tier + 2-tier; grosir langsung dari BI, ritel via PSP |
 | **Tiered wallets** | **Direkomendasikan** mengikuti eNaira (5 tingkat), Sand Dollar (2 tingkat), e-CNY (berjenjang) |
@@ -80,7 +80,7 @@ Kunci sitasi di `references.bib`:
 | **Tokenisasi** | Didukung; komponen kunci untuk DvP dan sekuritas digital |
 | **Legal tender** | UU Valuta 7/2011 hanya mengatur Rupiah fisik; perlu amandemen untuk CBDC |
 
-#### 4.5 Rekomendasi untuk r-Digital Rupiah
+#### 4.5 Rekomendasi untuk r-Rupiah Digital
 1. Uji purwarupa (pilot test) komprehensif sebelum implementasi penuh.
 2. Kolaborasi internasional untuk interoperabilitas *cross-border*.
 3. Privasi & keamanan data sebagai prioritas.
@@ -99,7 +99,7 @@ Kunci sitasi di `references.bib`:
 - *White paper* adalah desain awal → banyak celah dan *missing links*.
 - Tidak ada pendekatan berbasis pengguna/partisipasi publik.
 - Hanya tinjauan literatur → tidak ada validasi empiris/PoC.
-- Detail desain r-Digital Rupiah **belum dijabarkan** secara komprehensif di *white paper*.
+- Detail desain r-Rupiah Digital **belum dijabarkan** secara komprehensif di *white paper*.
 
 ### 7. Negara Pembanding yang Dianalisis
 | Negara | CBDC | Status | Platform/Teknologi |

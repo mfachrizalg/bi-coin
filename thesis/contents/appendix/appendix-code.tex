@@ -4,14 +4,14 @@
 
 \section{Source Code Otorisasi MSP \textit{Chaincode}}
 Bagian ini memuat fungsi pemeriksaan identitas organisasi untuk membatasi mutasi pada batas kepercayaan \textit{chaincode}.
-\lstinputlisting[language=Go,firstline=27,lastline=62]{../bi-coin-fabric/chaincode/digital_rupiah.go}
+\lstinputlisting[language=Go,firstline=241,lastline=254]{../bi-coin-fabric/chaincode/monetary/monetary.go}
 
-\section{Source Code Pengawasan dan Rekonsiliasi}
-Bagian ini memuat kode sumber fungsi laporan rekonsiliasi, metrik, dan emisi \textit{event} pengawasan (berkas \texttt{chaincode/digital\_rupiah.go}).
-\lstinputlisting[language=Go]{listings/cc-08-supervision.go}
+\section{Source Code Pembacaan Subjek untuk Pengawasan}
+Bagian ini memuat kode sumber fungsi \texttt{GetSubject} pada \textit{chaincode} \texttt{rupiah-controls}, yang diukur sebagai pembacaan subjek oleh ValidatorMSP (berkas \texttt{chaincode/controls/controls.go}).
+\lstinputlisting[language=Go,firstline=420,lastline=444]{../bi-coin-fabric/chaincode/controls/controls.go}
 
 \section{Konfigurasi Jaringan Caliper pada Run \texttt{run-20261014-01}}
-Bagian ini memuat konfigurasi jaringan Caliper yang dihasilkan saat run \texttt{run-20261014-01} dijalankan. Run tersebut menjadi sumber angka kinerja pada Bab~4 dan Bab~5. Konfigurasi run \texttt{run-20261015-01} identik, kecuali nilai acak per run, sehingga satu berkas mewakili kedua run.
+Bagian ini memuat konfigurasi jaringan Caliper yang dihasilkan saat run \texttt{run-20261014-01} dijalankan. Run tersebut menjadi sumber angka kinerja pada Bab~4 dan Bab~5. Identifikasi pada berkas ini adalah identifikasi sebelum penggantian nama (lihat Subbab~4.4).
 Berkas ini memuat identitas \texttt{validator\_bank}. Peran tersebut dihapus dari harness dan dari prototipe empat organisasi setelah run ini dijalankan, sehingga pembangkit konfigurasi saat ini tidak lagi menghasilkan identitas tersebut.
 \lstinputlisting{listings/cal-caliper-network-run20261014-01.json}
 

@@ -22,7 +22,7 @@ bash scripts/run-compliance-benchmark.sh new
 bash scripts/run-compliance-benchmark.sh performance
 ```
 
-The compliance runner checks the disposable daemon ID before any network reset. `new` captures source, checks correctness, and runs one Caliper readiness transaction for each workload; `performance` starts the binary search and grouped confirmations. Reuse the same stamp with `resume` after interruption; the runner verifies the source and protocol hashes and retains completed results. A new stamp resets only its own `rupiah-study` volumes inside its disposable daemon. Never remove the superseded run's containers or volumes when preparing a new study.
+The compliance runner checks the disposable daemon ID before any network reset. `new` captures source, checks correctness, and runs one Caliper readiness transaction for each workload; `performance` starts the binary search and grouped confirmations. Reuse the same stamp with `resume` after interruption; the runner verifies the source and protocol hashes and retains completed results. A new stamp resets only its own `bi-coin` volumes inside its disposable daemon. Never remove the superseded run's containers or volumes when preparing a new study.
 
 ## Predeclared replacement matrix
 

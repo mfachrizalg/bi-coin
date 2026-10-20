@@ -4,23 +4,13 @@ import test from 'node:test'
 import {
   compileFrontendModule,
   createRenderer,
-  findAll,
-  findByPlaceholder,
-  findByText,
   jsonResponse,
-  textContent,
 } from './runtime.mjs'
 
 const apiSource = fs.readFileSync(new URL('../src/lib/api.ts', import.meta.url), 'utf8')
-const transferSource = fs.readFileSync(new URL('../src/pages/Transfer.tsx', import.meta.url), 'utf8')
-const participantsSource = fs.readFileSync(new URL('../src/pages/Participants.tsx', import.meta.url), 'utf8')
 const appSource = fs.readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
-const qrisSource = fs.readFileSync(new URL('../src/pages/QrisPayments.tsx', import.meta.url), 'utf8')
 const stylesSource = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
-const contactsSource = fs.readFileSync(new URL('../src/pages/Contacts.tsx', import.meta.url), 'utf8')
 const studySource = fs.readFileSync(new URL('../src/pages/StudyConsole.tsx', import.meta.url), 'utf8')
-const walletSource = fs.readFileSync(new URL('../src/pages/WalletList.tsx', import.meta.url), 'utf8')
-const overviewSource = fs.readFileSync(new URL('../src/pages/Overview.tsx', import.meta.url), 'utf8')
 const skeletonSource = fs.readFileSync(new URL('../src/components/LoadingSkeleton.tsx', import.meta.url), 'utf8')
 globalThis.__TEST_IMPORT_META_ENV__ = {}
 
@@ -28,174 +18,6 @@ test('access tokens stay in memory and unauthorized responses clear them', () =>
   assert.match(apiSource, /let currentToken = ''/)
   assert.doesNotMatch(apiSource, /sessionStorage\.(getItem|setItem|removeItem).*access_token/)
   assert.match(apiSource, /res\.status === 401/)
-})
-
-test('transfer requests carry an idempotency key and suppress duplicate submits', () => {
-  assert.match(apiSource, /Idempotency-Key/)
-  assert.match(transferSource, /useRef/)
-  assert.match(transferSource, /disabled=\{submitting\}/)
-})
-
-test('issuance targets Treasury and distribution selects only a Custodian', () => {
-  assert.match(apiSource, /requestIssuance\(data: \{ amount: string \}, idempotencyKey: string\)/)
-  assert.match(apiSource, /requestRedemption\([\s\S]*?idempotencyKey: string/)
-  assert.match(apiSource, /submitKycProfile\(data: any, idempotencyKey: string\)/)
-  assert.match(apiSource, /receiver_participant_id: string/)
-  assert.match(apiSource, /headers: \{ 'Idempotency-Key': idempotencyKey \}/)
-  assert.doesNotMatch(participantsSource, /sender_participant_id/)
-  assert.match(participantsSource, /Bank Indonesia sends issued Digital Rupiah from Treasury to an active Distributor Bank or PJP/)
-  assert.match(participantsSource, /can\(role, 'bank_pjp', 'pjp', 'bank_indonesia'\)/)
-  assert.match(appSource, /bank_pjp/)
-  assert.match(appSource, /pjp:/)
-})
-
-test('QRIS payments carry a distinct idempotency key', () => {
-  assert.match(apiSource, /payQris\([\s\S]*?idempotencyKey: string/)
-  assert.match(qrisSource, /paymentIdempotencyKey = useRef\(crypto\.randomUUID\(\)\)/)
-  assert.match(qrisSource, /paymentIdempotencyKey\.current = crypto\.randomUUID\(\)/)
-})
-
-test('wallet creation submits owner_id without stale participant or tier fields', async () => {
-  const { moduleUrl, hooksModuleUrl } = compileFrontendModule('pages/CreateWallet.tsx')
-  const [{ default: CreateWallet }, hooksModule] = await Promise.all([
-    import(moduleUrl),
-    import(hooksModuleUrl),
-  ])
-
-  const fetchCalls = []
-  const originalFetch = global.fetch
-  global.fetch = async (url, options = {}) => {
-    fetchCalls.push({ url: String(url), options })
-    return jsonResponse({ wallet_id: 'wlt_budi', tier: 'BASIC' })
-  }
-
-  try {
-    const renderer = createRenderer(hooksModule, CreateWallet, {})
-    renderer.render()
-
-    const ownerInput = findByPlaceholder(renderer.getTree(), 'budi')
-    ownerInput.props.onChange({ target: { value: 'budi' } })
-    renderer.render()
-
-    const submitButton = findByText(renderer.getTree(), 'button', 'Create Wallet')
-    await submitButton.props.onClick()
-    renderer.render()
-
-    assert.equal(fetchCalls.length, 1)
-    assert.equal(fetchCalls[0].url, '/api/wallets')
-    assert.equal(fetchCalls[0].options.method, 'POST')
-
-    const body = JSON.parse(fetchCalls[0].options.body)
-    assert.deepEqual(body, { owner_id: 'budi' })
-    assert.equal('participant_id' in body, false)
-    assert.equal('tier' in body, false)
-  } finally {
-    global.fetch = originalFetch
-  }
-})
-
-test('QRIS switching to a different intent clears stale pay result state', async () => {
-  const { moduleUrl, hooksModuleUrl } = compileFrontendModule('pages/QrisPayments.tsx')
-  const [{ default: QrisPayments }, hooksModule] = await Promise.all([
-    import(moduleUrl),
-    import(hooksModuleUrl),
-  ])
-
-  const intents = [
-    {
-      intent_id: 'intent-1',
-      mode: 'dynamic',
-      merchant_id: 'merchant-a',
-      merchant_wallet_id: 'wlt_merchant',
-      amount: 25000,
-      status: 'active',
-      label: 'Invoice A',
-      payload: 'payload-1',
-      reference_id: 'ref-1',
-      created_at: '2026-08-10T00:00:00Z',
-      updated_at: '2026-08-10T00:00:00Z',
-    },
-    {
-      intent_id: 'intent-2',
-      mode: 'dynamic',
-      merchant_id: 'merchant-a',
-      merchant_wallet_id: 'wlt_merchant',
-      amount: 40000,
-      status: 'active',
-      label: 'Invoice B',
-      payload: 'payload-2',
-      reference_id: 'ref-2',
-      created_at: '2026-08-10T00:00:00Z',
-      updated_at: '2026-08-10T00:00:00Z',
-    },
-  ]
-
-  const originalFetch = global.fetch
-  global.fetch = async (url, options = {}) => {
-    const requestUrl = new URL(String(url), 'http://frontend.test')
-    const method = options.method ?? 'GET'
-
-    if (requestUrl.pathname === '/api/wallets' && method === 'GET') {
-      return jsonResponse([
-        {
-          wallet_id: 'wlt_merchant',
-          owner_id: 'merchant-a',
-          participant_id: 'gopay',
-          wallet_type: 'merchant',
-          tier: 'MERCHANT',
-          balance: 900000,
-          frozen: false,
-          daily_spent: 0,
-          monthly_spent: 0,
-          monthly_received: 0,
-          created_at: '2026-08-10T00:00:00Z',
-          updated_at: '2026-08-10T00:00:00Z',
-        },
-      ])
-    }
-
-    if (requestUrl.pathname === '/api/qris/intents' && method === 'GET') {
-      return jsonResponse(intents)
-    }
-
-    if (requestUrl.pathname === '/api/qris/pay' && method === 'POST') {
-      const body = JSON.parse(options.body)
-      return jsonResponse({
-        status: 'paid',
-        tx_id: body.payload === 'payload-1' ? 'tx-1' : 'tx-2',
-        intent_id: body.payload === 'payload-1' ? 'intent-1' : 'intent-2',
-        reference_id: body.payload === 'payload-1' ? 'ref-1' : 'ref-2',
-      })
-    }
-
-    throw new Error(`Unhandled fetch ${method} ${requestUrl.pathname}`)
-  }
-
-  try {
-    const renderer = createRenderer(hooksModule, QrisPayments, { role: 'merchant', selectedWallet: 'wlt_merchant' })
-    renderer.render()
-    await renderer.settle()
-
-    const firstUseButton = findAll(renderer.getTree(), node => node.type === 'button' && textContent(node) === 'Use')[0]
-    firstUseButton.props.onClick()
-    renderer.render()
-
-    const payButton = findByText(renderer.getTree(), 'button', 'Pay with QRIS')
-    await payButton.props.onClick()
-    renderer.render()
-
-    assert.match(textContent(renderer.getTree()), /Ref ref-1/)
-
-    const secondUseButton = findAll(renderer.getTree(), node => node.type === 'button' && textContent(node) === 'Use')[1]
-    secondUseButton.props.onClick()
-    renderer.render()
-
-    const pageText = textContent(renderer.getTree())
-    assert.doesNotMatch(pageText, /Tx tx-1 · Ref ref-1/)
-    assert.match(pageText, /ref-2/)
-  } finally {
-    global.fetch = originalFetch
-  }
 })
 
 test('responsive and accessibility foundations are present', () => {
@@ -221,43 +43,6 @@ test('login is a form-only surface and the old demo identity contract is gone', 
 test('data surfaces use static accessible loading placeholders', () => {
   assert.match(skeletonSource, /role="status"/)
   assert.match(skeletonSource, /kind: SkeletonKind/)
-  assert.match(overviewSource, /LoadingSkeleton kind="metrics"/)
-  assert.match(walletSource, /LoadingSkeleton kind="table"/)
-  assert.match(participantsSource, /LoadingSkeleton kind="table"/)
-})
-
-test('payment contact API keeps the selected contract', async () => {
-  const { moduleUrl } = compileFrontendModule('lib/api.ts')
-  const api = await import(moduleUrl)
-  const originalFetch = global.fetch
-  const calls = []
-  global.fetch = async (url, options = {}) => {
-    calls.push({ url: String(url), options })
-    return jsonResponse({ id: 'contact-1', label: 'Sari', wallet_id: 'wlt_sari', recipient_type: 'retail_customer' }, 201)
-  }
-  try {
-    const contact = await api.createPaymentContact({ label: 'Sari', wallet_id: 'wlt_sari', recipient_type: 'retail_customer' })
-    assert.equal(contact.wallet_id, 'wlt_sari')
-    assert.equal(calls[0].url, '/api/payment-contacts')
-    assert.equal(calls[0].options.method, 'POST')
-    assert.deepEqual(JSON.parse(calls[0].options.body), { label: 'Sari', wallet_id: 'wlt_sari', recipient_type: 'retail_customer' })
-  } finally {
-    global.fetch = originalFetch
-  }
-  assert.match(contactsSource, /Recipient Wallet ID/)
-  assert.match(contactsSource, /recipient_type/)
-})
-
-test('204 payment contact deletes do not require a JSON body', async () => {
-  const { moduleUrl } = compileFrontendModule('lib/api.ts')
-  const api = await import(moduleUrl)
-  const originalFetch = global.fetch
-  global.fetch = async () => jsonResponse(null, 204)
-  try {
-    assert.equal(await api.deletePaymentContact('contact-1'), undefined)
-  } finally {
-    global.fetch = originalFetch
-  }
 })
 
 test('API errors preserve backend text and use an English fallback', async () => {
@@ -340,49 +125,60 @@ test('organization function tabs show only the signed-in organization actions', 
     if (typeof node.type === 'function') return expandedText(node.type(node.props))
     return expandedText(node.props?.children)
   }
-  const validator = createRenderer(hooksModule, StudyConsole, { role: 'supervisor', section: 'study_audit' })
+  const validator = createRenderer(hooksModule, StudyConsole, { role: 'auditor', section: 'study_audit' })
   const validatorText = expandedText(validator.render())
   assert.match(validatorText, /ValidatorMSP/)
-  assert.doesNotMatch(validatorText, /Restrict subject|Transfer rupiah|Mint/)
+  assert.doesNotMatch(validatorText, /Restrict subject|Transfer rupiah|Issuance/)
 
   const retail = createRenderer(hooksModule, StudyConsole, { role: 'authenticated', section: 'study_identity' })
   const retailText = expandedText(retail.render())
   assert.match(retailText, /Create pending subject/)
-  assert.doesNotMatch(retailText, /Transfer rupiah|Set limits|Convert to retail wallet/)
+  assert.doesNotMatch(retailText, /Transfer rupiah|Set limits|Convert to retail float/)
   const unverifiedWallet = createRenderer(hooksModule, StudyConsole, { role: 'authenticated', section: 'study_wallet' })
   assert.match(expandedText(unverifiedWallet.render()), /cannot access this function/)
   const retailTransfer = createRenderer(hooksModule, StudyConsole, { role: 'kyc_verified', section: 'study_transfer' })
   assert.match(expandedText(retailTransfer.render()), /Transfer rupiah/)
 
-  const distributor = createRenderer(hooksModule, StudyConsole, { role: 'pjp', section: 'study_approval' })
+  const distributor = createRenderer(hooksModule, StudyConsole, { role: 'retail_bank', section: 'study_approval' })
   const approvalText = expandedText(distributor.render())
   assert.match(approvalText, /DistributorMSP/)
   assert.match(approvalText, /Record review/)
-  assert.doesNotMatch(approvalText, /Business authority|Restrict subject|Convert to retail wallet/)
-  const business = createRenderer(hooksModule, StudyConsole, { role: 'pjp', section: 'study_business' })
+  assert.doesNotMatch(approvalText, /Business authority|Restrict subject|Convert to retail float/)
+  const business = createRenderer(hooksModule, StudyConsole, { role: 'retail_bank', section: 'study_business' })
   assert.match(expandedText(business.render()), /Set business authority/)
   const centralBank = createRenderer(hooksModule, StudyConsole, { role: 'bank_indonesia', section: 'study_monetary' })
   assert.match(expandedText(centralBank.render()), /CentralBankMSP/)
-  assert.match(expandedText(centralBank.render()), /Allocate reserve/)
+  assert.match(expandedText(centralBank.render()), /Issuance/)
 
   const staff = createRenderer(hooksModule, StudyConsole, { role: 'bank_indonesia', section: 'study_staff' })
   const staffText = expandedText(staff.render())
   assert.match(staffText, /Create staff/)
   assert.match(staffText, /Protect staff/)
   assert.match(staffText, /Set role/)
-  assert.doesNotMatch(staffText, /Mint|Transfer rupiah/)
-  const restrictions = createRenderer(hooksModule, StudyConsole, { role: 'pjp', section: 'study_restrictions' })
+  assert.doesNotMatch(staffText, /Issuance|Transfer rupiah/)
+  const restrictions = createRenderer(hooksModule, StudyConsole, { role: 'retail_bank', section: 'study_restrictions' })
   assert.match(expandedText(restrictions.render()), /Restrict subject/)
+
+  const wholesaleFunding = createRenderer(hooksModule, StudyConsole, { role: 'wholesale_bank', section: 'study_funding' })
+  const wholesaleFundingText = expandedText(wholesaleFunding.render())
+  assert.match(wholesaleFundingText, /Interbank transfer/)
+  assert.doesNotMatch(wholesaleFundingText, /Convert to retail float|Wallet funding/)
+  const retailFunding = createRenderer(hooksModule, StudyConsole, { role: 'retail_bank', section: 'study_funding' })
+  const retailFundingText = expandedText(retailFunding.render())
+  assert.match(retailFundingText, /Interbank transfer/)
+  assert.match(retailFundingText, /Convert to retail float/)
+  assert.match(retailFundingText, /Wallet funding/)
 
   assert.doesNotMatch(appSource, /Controls study/)
   assert.match(appSource, /study_identity: \{ label: 'Subject onboarding' \}/)
   assert.match(appSource, /study_audit: \{ label: 'Controls audit' \}/)
   assert.match(appSource, /startsWith\('study_'/)
   assert.match(appSource, /bank_indonesia: \{ label: 'Bank Indonesia', shell: 'institutional', tabs: \['study_staff', 'study_monetary'\] \}/)
-  assert.match(appSource, /supervisor: \{ label: 'Auditor', shell: 'institutional', tabs: \['study_audit'\] \}/)
-  assert.match(appSource, /bank_pjp: \{ label: 'Participant', shell: 'institutional', tabs: \['study_approval', 'study_business', 'study_restrictions', 'study_funding'\] \}/)
+  assert.match(appSource, /auditor: \{ label: 'Auditor', shell: 'institutional', tabs: \['study_audit'\] \}/)
+  assert.match(appSource, /retail_bank: \{ label: 'Retail Bank', shell: 'institutional', tabs: \['study_approval', 'study_business', 'study_restrictions', 'study_funding'\] \}/)
+  assert.match(appSource, /wholesale_bank: \{ label: 'Wholesale Bank', shell: 'institutional', tabs: \['study_funding'\] \}/)
+  assert.match(appSource, /study_funding: \{ label: 'Reserve and float' \}/)
   assert.match(appSource, /has no workspace in the demo/)
-  assert.doesNotMatch(appSource, /tabs: \[[^\]]*'(overview|participants|wallets|create|transfer|contacts|activity|supervision|prototype)'/)
   assert.doesNotMatch(appSource, /DemoPanel|Show demo/)
   assert.doesNotMatch(appSource, /validator_bank/)
   assert.match(studySource, /server for each username/)

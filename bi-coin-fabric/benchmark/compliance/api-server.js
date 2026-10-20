@@ -14,13 +14,13 @@ function readStudyEnv(file) {
 
 function identityFiles(projectRoot, organization, username) {
     const domains = {
-        CentralBankMSP: ['centralbank', 'centralbank.rupiah.study', 17051],
-        DistributorMSP: ['distributor', 'distributor.rupiah.study', 18051],
-        ValidatorMSP: ['validator', 'validator.rupiah.study', 19051],
-        EndUserMSP: ['enduser', 'enduser.rupiah.study', 20051],
+        CentralBankMSP: ['centralbank', 'centralbank.bi-coin', 17051],
+        DistributorMSP: ['distributor', 'distributor.bi-coin', 18051],
+        ValidatorMSP: ['validator', 'validator.bi-coin', 19051],
+        EndUserMSP: ['enduser', 'enduser.bi-coin', 20051],
     };
     const [shortName, domain, port] = domains[organization];
-    const base = path.join(projectRoot, 'network/study/organizations/peerOrganizations', domain);
+    const base = path.join(projectRoot, 'network/organizations/peerOrganizations', domain);
     const userMsp = path.join(base, 'users', `${username}@${domain}`, 'msp');
     const signcerts = path.join(userMsp, 'signcerts');
     const keystore = path.join(userMsp, 'keystore');
@@ -46,20 +46,20 @@ function identityFiles(projectRoot, organization, username) {
 }
 
 function createApiConfig(projectRoot, stamp) {
-    const studyEnv = readStudyEnv(path.join(projectRoot, 'network/study/.env.study'));
+    const studyEnv = readStudyEnv(path.join(projectRoot, 'network/.env.study'));
     const suffix = crypto.createHash('sha256').update(stamp).digest('hex').slice(0, 10);
     const password = crypto.createHash('sha256').update(`compliance:${stamp}`).digest('hex');
     const principals = [
         { key: 'authenticated', role: 'authenticated', msp: 'EndUserMSP', cert: 'User5' },
         { key: 'kyc_verified', role: 'kyc_verified', msp: 'EndUserMSP', cert: 'User1' },
-        { key: 'bank_pjp', role: 'bank_pjp', msp: 'DistributorMSP', cert: 'Admin' },
-        { key: 'pjp', role: 'pjp', msp: 'DistributorMSP', cert: 'User2' },
+        { key: 'retail_bank', role: 'retail_bank', msp: 'DistributorMSP', cert: 'Admin' },
+        { key: 'wholesale_bank', role: 'wholesale_bank', msp: 'DistributorMSP', cert: 'User4' },
         { key: 'bank_indonesia', role: 'bank_indonesia', msp: 'CentralBankMSP', cert: 'Admin' },
         { key: 'merchant', role: 'merchant', msp: 'EndUserMSP', cert: 'User2' },
-        { key: 'supervisor', role: 'supervisor', msp: 'ValidatorMSP', cert: 'Admin' },
-        { key: 'reviewer', role: 'pjp', msp: 'DistributorMSP', cert: 'User1' },
-        { key: 'senior', role: 'pjp', msp: 'DistributorMSP', cert: 'User2' },
-        { key: 'compliance', role: 'pjp', msp: 'DistributorMSP', cert: 'User3' },
+        { key: 'auditor', role: 'auditor', msp: 'ValidatorMSP', cert: 'Admin' },
+        { key: 'reviewer', role: 'retail_bank', msp: 'DistributorMSP', cert: 'User1' },
+        { key: 'senior', role: 'retail_bank', msp: 'DistributorMSP', cert: 'User2' },
+        { key: 'compliance', role: 'retail_bank', msp: 'DistributorMSP', cert: 'User3' },
         { key: 'retail_two', role: 'kyc_verified', msp: 'EndUserMSP', cert: 'User5' },
         { key: 'business_rep', role: 'merchant', msp: 'EndUserMSP', cert: 'User4' },
     ];
@@ -81,16 +81,7 @@ function createApiConfig(projectRoot, stamp) {
             roleUsers[principal.role] ||= { username, password };
         }
     }
-    const bank = identities.find(identity => identity.username === roleUsers.bank_indonesia.username);
-    const gateway = [{
-        msp_id: bank.msp_id,
-        peer_endpoint: bank.peer_endpoint,
-        gateway_peer: bank.gateway_peer,
-        cert_path: bank.cert_path,
-        key_path: bank.key_path,
-        tls_cert_path: bank.tls_cert_path,
-    }];
-    const databaseURL = `postgresql://${studyEnv.STUDY_POSTGRES_USER}:${studyEnv.STUDY_POSTGRES_PASSWORD}@127.0.0.1:15432/${studyEnv.STUDY_POSTGRES_DB}?sslmode=disable`;
+    const databaseURL = `postgresql://${studyEnv.POSTGRES_USER}:${studyEnv.POSTGRES_PASSWORD}@127.0.0.1:15432/${studyEnv.POSTGRES_DB}?sslmode=disable`;
     const env = {
         ...process.env,
         PORT: process.env.COMPLIANCE_API_PORT || '18080',
@@ -98,13 +89,9 @@ function createApiConfig(projectRoot, stamp) {
         AUTH_JWT_SECRET: password,
         AUTH_TOKEN_TTL_SECONDS: '86400',
         AUTH_BOOTSTRAP_USERS_JSON: JSON.stringify(users),
-        KYC_HASH_SECRET: crypto.createHash('sha256').update(`kyc:${stamp}`).digest('hex'),
         CONTRACT_SCHEMA_VERSION: 'v3',
-        FABRIC_CHANNEL_NAME: 'rupiah-study',
-        FABRIC_CHAINCODE_NAME: 'rupiah-controls',
-        FABRIC_GATEWAYS_JSON: JSON.stringify(gateway),
-        FABRIC_STUDY_IDENTITIES_JSON: JSON.stringify(identities.map(({ shortName, ...identity }) => identity)),
-        FABRIC_STUDY_CHANNEL_NAME: 'rupiah-study',
+        FABRIC_CHANNEL_NAME: 'bi-coin',
+        FABRIC_IDENTITIES_JSON: JSON.stringify(identities.map(({ shortName, ...identity }) => identity)),
     };
     return { env, roleUsers, namedUsers, identities, port: env.PORT };
 }

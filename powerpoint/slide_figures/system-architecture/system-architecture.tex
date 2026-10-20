@@ -58,27 +58,24 @@
 %── Orderer ───────────────────────────────────────────────────────────────────
 
 \node[ordnode] (ord) at (6.0, 9.5)
-  {orderer.paynet:7050\\Raft CFT};
+  {orderer.centralbank:17050\\Raft CFT};
 
-%── Lima Peer ─────────────────────────────────────────────────────────────────
+%── Empat Peer ─────────────────────────────────────────────────────────────────
 
 \node[peer]   (pbi)  at (0.0,  7.0)
-  {peer0.bi\\BankIndonesiaOrg\\:7051};
-\node[peer]   (phim) at (3.0,  7.0)
-  {peer0.himbara\\HimbaraBankOrg\\:9051};
-\node[peer]   (pcom) at (6.0,  7.0)
-  {peer0.commercial\\CommercialBankOrg\\:11051};
-\node[peer]   (ppjp) at (9.0,  7.0)
-  {peer0.pjp\\PJPOrg\\:13051};
-\node[obsbox] (pojk) at (12.0, 7.0)
-  {peer0.ojk\\OJKObserverOrg\\:12051};
+  {peer0.centralbank\\CentralBankMSP\\:17051};
+\node[peer]   (pdist) at (3.0,  7.0)
+  {peer0.distributor\\DistributorMSP\\:18051};
+\node[peer]   (pend) at (6.0,  7.0)
+  {peer0.enduser\\EndUserMSP\\:20051};
+\node[obsbox] (pval) at (9.0,  7.0)
+  {peer0.validator\\ValidatorMSP\\:19051};
 
 % Orderer → semua peer (pengiriman blok)
 \draw[ar] (ord.south) to[out=-110,in=80] (pbi.north);
-\draw[ar] (ord.south) to[out=-100,in=80] (phim.north);
-\draw[ar] (ord.south) -- (pcom.north);
-\draw[ar] (ord.south) to[out=-80,in=100]  (ppjp.north);
-\draw[ar] (ord.south) to[out=-70,in=100]  (pojk.north);
+\draw[ar] (ord.south) to[out=-100,in=80] (pdist.north);
+\draw[ar] (ord.south) -- (pend.north);
+\draw[ar] (ord.south) to[out=-80,in=100]  (pval.north);
 
 % peer0.bi → orderer (endorsement submit)
 \draw[ar, dashed] (pbi.north) to[out=70,in=-120]
@@ -86,36 +83,32 @@
 
 %── CouchDB ───────────────────────────────────────────────────────────────────
 
-\node[cdb] (cbi)  at (0.0,  5.5) {CouchDB :5984};
-\node[cdb] (chim) at (3.0,  5.5) {CouchDB :6984};
-\node[cdb] (ccom) at (6.0,  5.5) {CouchDB :7984};
-\node[cdb] (cpjp) at (9.0,  5.5) {CouchDB :9984};
-\node[cdb] (cojk) at (12.0, 5.5) {CouchDB :8984};
+\node[cdb] (cbi)   at (0.0,  5.5) {CouchDB :17584};
+\node[cdb] (cdist) at (3.0,  5.5) {CouchDB :18584};
+\node[cdb] (cend)  at (6.0,  5.5) {CouchDB :20584};
+\node[cdb] (cval)  at (9.0,  5.5) {CouchDB :19584};
 
-\draw[ar] (pbi)  -- (cbi);
-\draw[ar] (phim) -- (chim);
-\draw[ar] (pcom) -- (ccom);
-\draw[ar] (ppjp) -- (cpjp);
-\draw[ar] (pojk) -- (cojk);
+\draw[ar] (pbi)   -- (cbi);
+\draw[ar] (pdist) -- (cdist);
+\draw[ar] (pend)  -- (cend);
+\draw[ar] (pval)  -- (cval);
 
 %── CA per Organisasi ─────────────────────────────────────────────────────────
 
-\node[cabox] (cabi)  at (0.0,  4.0) {CA\\BankIndonesia};
-\node[cabox] (cahim) at (3.0,  4.0) {CA\\HimbaraBank};
-\node[cabox] (cacom) at (6.0,  4.0) {CA\\CommercialBank};
-\node[cabox] (capjp) at (9.0,  4.0) {CA\\PJP};
-\node[cabox] (caojk) at (12.0, 4.0) {CA\\OJKObserver};
+\node[cabox] (cabi)   at (0.0,  4.0) {CA\\CentralBank};
+\node[cabox] (cadist) at (3.0,  4.0) {CA\\Distributor};
+\node[cabox] (caend)  at (6.0,  4.0) {CA\\EndUser};
+\node[cabox] (caval)  at (9.0,  4.0) {CA\\Validator};
 
-\draw[bar] (cabi)  -- (cbi);
-\draw[bar] (cahim) -- (chim);
-\draw[bar] (cacom) -- (ccom);
-\draw[bar] (capjp) -- (cpjp);
-\draw[bar] (caojk) -- (cojk);
+\draw[bar] (cabi)   -- (cbi);
+\draw[bar] (cadist) -- (cdist);
+\draw[bar] (caend)  -- (cend);
+\draw[bar] (caval)  -- (cval);
 
 %── Orderer CA (di bawah kotak jaringan) ─────────────────────────────────────
 
 \node[cabox, minimum width=4.0cm] (caord) at (6.0, 1.0)
-  {BankIndonesia Orderer CA};
+  {CentralBank Orderer CA};
 \draw[ar] (6.0, 2.2) -- (caord.north);
 
 \end{tikzpicture}%

@@ -12,6 +12,13 @@ status: seed
 
 New entries go at the TOP. Never edit past entries.
 
+## 2026-10-17 update | Consistency fix Phase 7: memory and bi-coin-fabric wiki
+
+- Scope: project memory, [[bi-coin-fabric]], [[wiki/index|Wiki Index]], and [[wiki/hot|Hot Cache]]. No benchmark rerun, and no code, thesis, or paper edits.
+- Memory: `caliper-canonical-results` rewritten. The benchmark source is `compliance-run-20261014-01` only (resolved 2026-10-16). Older numbers are retired and the correctness re-run is pending. Added `bi-coin-network-rename` and `per-org-fabric-ca`. `MEMORY.md` lists all three.
+- Pages updated: [[bi-coin-fabric]] (four-org bi-coin network, one Fabric CA per org, canonical benchmark source), [[wiki/index|Wiki Index]] (bi-coin-fabric annotation), and [[wiki/hot|Hot Cache]].
+- Open: [[thesis]] still lists the retired 9.0 / 45.9 / 57.7 TPS at `wiki/domains/thesis.md:25`. That page is outside this phase's list, so it is left for a follow-up.
+
 ## 2026-07-23 ingest | Kamus Bahasa Indonesia 2008
 
 - Source: `thesis/KBBI.pdf`

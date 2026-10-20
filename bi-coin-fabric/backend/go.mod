@@ -3,7 +3,7 @@ module github.com/mfachrizalg/bi-coin-retail-cbdc/backend
 go 1.23.0
 
 require (
-	github.com/google/uuid v1.6.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hyperledger/fabric-gateway v1.8.0
 	github.com/jackc/pgx/v5 v5.7.5
@@ -17,7 +17,6 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
