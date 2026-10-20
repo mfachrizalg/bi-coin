@@ -33,6 +33,8 @@ test('manifest preserves the executed source and remains valid after its output 
         fs.writeFileSync(path.join(project, 'backend/vendor/example/LICENSE'), 'backend vendored license\n');
         fs.writeFileSync(path.join(project, 'frontend/src/Study.tsx'), 'frontend source\n');
         fs.writeFileSync(path.join(project, 'frontend/tests/study.test.mjs'), 'frontend test\n');
+        fs.mkdirSync(path.join(project, 'docs/adr'), { recursive: true });
+        fs.writeFileSync(path.join(project, 'docs/adr/0001-example.md'), 'decision\n');
         fs.writeFileSync(path.join(project, 'benchmark/compliance/cases.json'), '{}\n');
         fs.writeFileSync(path.join(project, 'network/ca-client/fabric-ca-client-config.yaml'), 'synthetic local credential config\n');
         fs.writeFileSync(path.join(project, 'network/packages/chaincode.tar.gz'), 'generated chaincode archive\n');
@@ -52,8 +54,8 @@ test('manifest preserves the executed source and remains valid after its output 
         assert.equal(fs.readFileSync(path.join(study, 'source/chaincode/controls.go'), 'utf8'), 'contract source\n');
         assert.equal(fs.readFileSync(path.join(study, 'source/chaincode/controls/vendor/example/LICENSE'), 'utf8'), 'vendored dependency license\n');
         assert.equal(fs.readFileSync(path.join(study, 'source/backend/vendor/example/LICENSE'), 'utf8'), 'backend vendored license\n');
-        assert.equal(fs.readFileSync(path.join(study, 'source/frontend/src/Study.tsx'), 'utf8'), 'frontend source\n');
-        assert.equal(fs.readFileSync(path.join(study, 'source/frontend/tests/study.test.mjs'), 'utf8'), 'frontend test\n');
+        assert.equal(fs.existsSync(path.join(study, 'source/frontend')), false);
+        assert.equal(fs.existsSync(path.join(study, 'source/docs')), false);
         assert.equal(fs.readFileSync(path.join(study, 'source/benchmark/compliance/cases.json'), 'utf8'), '{}\n');
         assert.equal(fs.existsSync(path.join(study, 'source/network/ca-client')), false);
         assert.equal(fs.existsSync(path.join(study, 'source/network/packages')), false);
@@ -63,6 +65,11 @@ test('manifest preserves the executed source and remains valid after its output 
         const changed = spawnSync(process.execPath, [script, study, '--capture-source-only'], { cwd: project, encoding: 'utf8' });
         assert.notEqual(changed.status, 0);
         assert.match(changed.stderr, /source changed during study/);
+        fs.writeFileSync(source, 'original\n');
+        fs.writeFileSync(path.join(project, 'frontend/src/Study.tsx'), 'frontend changed after the run\n');
+        fs.writeFileSync(path.join(project, 'docs/adr/0001-example.md'), 'decision changed after the run\n');
+        const unrelatedEdit = spawnSync(process.execPath, [script, study, '--capture-source-only'], { cwd: project, encoding: 'utf8' });
+        assert.equal(unrelatedEdit.status, 0, unrelatedEdit.stderr);
     } finally {
         fs.rmSync(project, { recursive: true, force: true });
     }

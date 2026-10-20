@@ -116,7 +116,7 @@ async function runAPIAccessMatrix(subjectID, fixtureIds, initializationReplaySta
             outputPath,
         });
     } catch (error) {
-        const unresolved = { schema_version: 2, cells: 0, passed: 0, unresolved: 1, action_cells: 0, action_passed: 0, action_violations: 0, action_unresolved: 1, results: [{ classification: 'unresolved', diagnostic: error.message }] };
+        const unresolved = { schema_version: 2, cells: 0, passed: 0, unresolved: 1, validation_cells: 0, validation_passed: 0, validation_unresolved: 1, action_cells: 0, action_passed: 0, action_violations: 0, action_unresolved: 1, results: [{ classification: 'unresolved', diagnostic: error.message }] };
         fs.writeFileSync(outputPath, `${JSON.stringify(unresolved, null, 2)}\n`);
         return unresolved;
     } finally {
@@ -255,11 +255,23 @@ function recordRun(phase, artifact) {
     fs.writeFileSync(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`);
 }
 
+function requireProvenanceAndToolchain() {
+    const commit = process.env.BENCHMARK_SOURCE_COMMIT || '';
+    if (!/^[0-9a-f]{40}$/.test(commit) || process.env.BENCHMARK_SOURCE_DIRTY !== 'false') {
+        throw new Error('provenance: export BENCHMARK_SOURCE_COMMIT=<40-hex commit> and BENCHMARK_SOURCE_DIRTY=false from a clean git archive');
+    }
+    const peer = spawnSync('peer', ['version'], { encoding: 'utf8' });
+    if (peer.error || !/Version: v2\.5\.16\b/.test(peer.stdout || '')) {
+        throw new Error('toolchain: peer must report Fabric v2.5.16; check FABRIC_SAMPLES and PATH');
+    }
+}
+
 async function main() {
     const mode = process.argv[2] || 'new';
     if (!['new', 'resume', 'correctness', 'preflight', 'performance', 'all'].includes(mode)) {
         throw new Error('usage: run.js {new|resume|correctness|preflight|performance|all}');
     }
+    requireProvenanceAndToolchain();
 
     const isNew = mode === 'new' || (mode === 'all' && !fs.existsSync(resultDirectory));
     if (isNew) {
@@ -282,6 +294,9 @@ async function main() {
     }
 
     const preflightOnly = mode === 'new' || mode === 'preflight';
+    if (!preflightOnly && correctnessReport.overall_conformance_claim_allowed !== true) {
+        throw new Error('capacity search refused: correctness is incomplete; see correctness.json');
+    }
     const capacity = await runCapacity({ preflightOnly });
     recordRun(preflightOnly ? 'preflight' : 'capacity', preflightOnly ? 'preflight.json' : 'capacity.json');
     finalizeManifest();

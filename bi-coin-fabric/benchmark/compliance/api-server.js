@@ -50,7 +50,7 @@ function createApiConfig(projectRoot, stamp) {
     const suffix = crypto.createHash('sha256').update(stamp).digest('hex').slice(0, 10);
     const password = crypto.createHash('sha256').update(`compliance:${stamp}`).digest('hex');
     const principals = [
-        { key: 'authenticated', role: 'authenticated', msp: 'EndUserMSP', cert: 'User5' },
+        { key: 'authenticated', role: 'authenticated', msp: 'EndUserMSP', cert: 'User3' },
         { key: 'kyc_verified', role: 'kyc_verified', msp: 'EndUserMSP', cert: 'User1' },
         { key: 'retail_bank', role: 'retail_bank', msp: 'DistributorMSP', cert: 'Admin' },
         { key: 'wholesale_bank', role: 'wholesale_bank', msp: 'DistributorMSP', cert: 'User4' },
@@ -63,6 +63,14 @@ function createApiConfig(projectRoot, stamp) {
         { key: 'retail_two', role: 'kyc_verified', msp: 'EndUserMSP', cert: 'User5' },
         { key: 'business_rep', role: 'merchant', msp: 'EndUserMSP', cert: 'User4' },
     ];
+    const sharedIdentities = new Set();
+    for (const principal of principals) {
+        const identityKey = `${principal.msp}:${principal.cert}`;
+        if (sharedIdentities.has(identityKey)) {
+            throw new Error(`benchmark principals share Fabric identity ${identityKey}; each principal needs its own identity`);
+        }
+        sharedIdentities.add(identityKey);
+    }
     const identities = [];
     const users = [];
     const roleUsers = {};

@@ -15,7 +15,7 @@ fi
 args=(--profile ca --profile network --profile tools --project-name "$PROJECT_NAME" --file "$NETWORK_DIR/docker-compose.yaml" down --remove-orphans)
 if [[ "${REMOVE_VOLUMES:-false}" == "true" ]]; then
   args+=(-v)
-  echo "Stopping the study network and removing its ledger, CouchDB, and CA volumes."
+  echo "Stopping the study network and removing its ledger, CouchDB, CA, and PostgreSQL volumes."
 else
   echo "Stopping the study network. Persistent ledger, CouchDB, and CA volumes will remain."
 fi

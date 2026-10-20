@@ -36,16 +36,13 @@ const recordedRuns = JSON.parse(fs.readFileSync(path.join(root, 'metadata.json')
 if (!existingSnapshot && recordedRuns.length) {
     throw new Error('existing runs have no captured source; preserve the old study and use a new BENCHMARK_STAMP');
 }
-const sourceFiles = ['scripts', 'chaincode', 'backend', 'frontend/src', 'frontend/tests', 'benchmark/workloads', 'benchmark/observers', 'benchmark/isolated', 'benchmark/compliance', 'network', 'docs/adr']
+const sourceFiles = ['scripts', 'chaincode', 'backend', 'benchmark/workloads', 'benchmark/observers', 'benchmark/isolated', 'benchmark/compliance', 'network']
     .flatMap(directory => filesUnder(path.join(projectRoot, directory)))
     .concat([
-        'CONTEXT.md',
         'package.json',
         'package-lock.json',
-        'frontend/package.json',
-        'frontend/package-lock.json',
     ].map(file => path.join(projectRoot, file)).filter(fs.existsSync))
-    .filter(file => /\.(?:go|js|mjs|sh|json|ya?ml|md|ts|tsx)$|\/go\.(?:mod|sum)$|\/Dockerfile$/.test(file)
+    .filter(file => /\.(?:go|js|mjs|sh|json|ya?ml)$|\/go\.(?:mod|sum)$|\/Dockerfile$/.test(file)
         || path.relative(projectRoot, file).split(path.sep).slice(0, 2).join(path.sep) === ['backend', 'vendor'].join(path.sep)
         || path.relative(projectRoot, file).split(path.sep).slice(0, 3).join(path.sep) === ['chaincode', 'controls', 'vendor'].join(path.sep)
         || path.relative(projectRoot, file).split(path.sep).slice(0, 3).join(path.sep) === ['chaincode', 'monetary', 'vendor'].join(path.sep)
@@ -72,6 +69,14 @@ const images = [
     'prom/prometheus:v3.14.0',
     'ghcr.io/google/cadvisor:v0.60.5',
     'prom/node-exporter:v1.12.1',
+    'hyperledger/fabric-peer:2.5',
+    'hyperledger/fabric-orderer:2.5',
+    'hyperledger/fabric-tools:2.5',
+    'hyperledger/fabric-ccenv:2.5',
+    'hyperledger/fabric-baseos:2.5',
+    'hyperledger/fabric-ca:1.5.9',
+    'couchdb:3.3',
+    'postgres:16-alpine',
 ].map(image => ({ image, id: command('docker', ['image', 'inspect', '--format', '{{.Id}}', image]), digest: command('docker', ['image', 'inspect', '--format', '{{index .RepoDigests 0}}', image]) }));
 const artifacts = filesUnder(root)
     .filter(file => file !== output && path.relative(root, file) !== 'manifest-path.txt')
@@ -89,6 +94,8 @@ const manifest = {
         dockerServer: command('docker', ['version', '--format', '{{json .Server}}']),
         dockerDaemonID: command('docker', ['info', '--format', '{{.ID}}']),
         go: command('go', ['version']),
+        fabricPeer: command('peer', ['version']),
+        fabricConfigtxgen: command('configtxgen', ['--version']),
         caliper: command('node', ['-p', 'require("@hyperledger/caliper-cli/package.json").version']),
     },
     revision: {

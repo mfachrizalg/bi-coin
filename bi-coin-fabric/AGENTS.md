@@ -87,6 +87,10 @@ Evidence checkpoint for this checkout (2026-10-16):
 
 Always use Hyperledger Fabric 2.5.16 for peer, orderer, configtxgen, osnadmin, and the CA client. Set `FABRIC_SAMPLES=$HOME/fabric-tools-2.5.16` before running network scripts. Do not use the Fabric 3.1.4 tools in `~/fabric-samples`. See [ADR 0012](docs/adr/0012-fabric-2-5-16-toolchain.md).
 
+## Benchmark integrity
+
+Before any compliance benchmark run, and before changing benchmarked code, follow [ADR 0013](docs/adr/0013-benchmark-integrity-and-change-impact.md) and [the benchmark runbook](docs/benchmark-runbook.md). Only a clean, committed tree produces valid results. After a run, any edit to `scripts/`, `chaincode/`, `backend/`, `network/`, or `benchmark/{workloads,observers,isolated,compliance}/` requires a new stamp. Edits elsewhere do not.
+
 ## Checks
 
 Run commands from the owning directory:
