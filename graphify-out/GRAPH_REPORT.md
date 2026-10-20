@@ -1,11 +1,11 @@
 # Graph Report - /home/mfachrizalg/2026/Skripsi/bi-coin  (2026-10-20)
 
 ## Corpus Check
-- 133 files · ~580,872 words
+- 133 files · ~582,629 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 5089 nodes · 10770 edges · 325 communities detected
+- 5090 nodes · 10772 edges · 327 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 1289 edges (avg confidence: 0.78)
 - Token cost: 0 input · 0 output
 
@@ -335,6 +335,8 @@
 - [[_COMMUNITY_Community 322|Community 322]]
 - [[_COMMUNITY_Community 323|Community 323]]
 - [[_COMMUNITY_Community 324|Community 324]]
+- [[_COMMUNITY_Community 325|Community 325]]
+- [[_COMMUNITY_Community 326|Community 326]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Adoption Inclusion Banking and Macroeconomics` - 151 edges
@@ -382,51 +384,51 @@ Nodes (483): A. Chhangani, Adam Abdullah, Anastasia Tsareva, M. Komarov, Atlanti
 
 ### Community 2 - "Community 2"
 Cohesion: 0.01
-Nodes (180): login(), createApiConfig(), identityFiles(), readStudyEnv(), startAPI(), waitForAPI(), AuthMiddleware(), GetCustodianMSPID() (+172 more)
+Nodes (287): AML/CTF vs Privacy Tension in Australian CBDC Law, AML/KYC Compliance in Financial Institutions, APCO Privacy Concerns and Outcomes Model, Auer and Boehme (BIS), Auer & Böhme (2020) - The Technology of Retail CBDC, Auer, Frost et al. (2022) - CBDC Motives & Economic Implications, CBDC in Australia, Australia Privacy Act 1988 and CBDC (+279 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.01
-Nodes (287): AML/CTF vs Privacy Tension in Australian CBDC Law, AML/KYC Compliance in Financial Institutions, APCO Privacy Concerns and Outcomes Model, Auer and Boehme (BIS), Auer & Böhme (2020) - The Technology of Retail CBDC, Auer, Frost et al. (2022) - CBDC Motives & Economic Implications, CBDC in Australia, Australia Privacy Act 1988 and CBDC (+279 more)
+Cohesion: 0.02
+Nodes (153): login(), createApiConfig(), identityFiles(), readStudyEnv(), startAPI(), waitForAPI(), AuthMiddleware(), GetCustodianMSPID() (+145 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.02
-Nodes (69): AdversarialDoubleSpendWorkload, analyze(), classifyFailure(), flattenFailureReasons(), isTimeout(), latencySummary(), markdownTable(), mean() (+61 more)
+Nodes (30): AdversarialDoubleSpendWorkload, BoundaryPathWorkload, AdversarialDoubleSpendWorkload, createWorkloadModule(), NegativePathWorkload, actorRequest(), assertSuccessfulResponse(), RetailWorkloadBase (+22 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.01
-Nodes (189): Andreas Veneris, Johannes Sedlmeir, Nadia Pocher, Odunayo Olowookere, Panagiotis Michalopoulos, Poonam Puri, Attarde et al., Novel CBDC framework design for offline and foreign transactions based on blockchain (2025) [9], Auer and Bohme (2020) - CBDC design choices reference in CGIDE report (+181 more)
-
-### Community 6 - "Community 6"
 Cohesion: 0.02
 Nodes (156): Bank Indonesia CBDC White Paper 2022, Bank Indonesia Digital Economy Ecosystem 2025, Bank of Thailand r-CBDC Initiative, Behind the Scenes of Central Bank Digital Currency: Emerging Trends, Insights, and Policy Lessons, BI-FAST (Fast Payment System), Bank Indonesia Real-Time Gross Settlement (BI-RTGS), BI-FAST Payment System, Blockchain Application for Central Bank Digital Currencies (CBDC) (+148 more)
 
+### Community 6 - "Community 6"
+Cohesion: 0.03
+Nodes (100): analyze(), classifyFailure(), flattenFailureReasons(), isTimeout(), latencySummary(), markdownTable(), mean(), number() (+92 more)
+
 ### Community 7 - "Community 7"
+Cohesion: 0.02
+Nodes (141): Andreas Veneris, Johannes Sedlmeir, Nadia Pocher, Odunayo Olowookere, Panagiotis Michalopoulos, Poonam Puri, Attarde et al., Novel CBDC framework design for offline and foreign transactions based on blockchain (2025) [9], Minwalla et al., A Central Bank Digital Currency for Offline Payments (Bank of Canada, 2023) [27] (+133 more)
+
+### Community 8 - "Community 8"
 Cohesion: 0.02
 Nodes (97): Rationale: defense in depth, network policy plus chaincode authorization, OJK/Observer read-only, excluded from endorsement, rupiah-monetary AND(CentralBankMSP, DistributorMSP) endorsement policy (ADR 0001), KYC is implementation-only, excluded from thesis acceptance, Observers cannot be Custodians, Canonical two-tier model: BI issues only into treasury, distributes to Distributor Banks or PJP, Native hash routes, no routing dependency, bookmarkable and back/forward safe, Rationale: keep thesis-critical flows visible as primary work, KYC as demonstrable prototype only (+89 more)
 
-### Community 8 - "Community 8"
+### Community 9 - "Community 9"
 Cohesion: 0.03
 Nodes (93): Backend guide (backend/AGENTS.md), Principal-based Fabric gateway selection (by custodian MSP, no shared default signer), Rationale: role gate enforced on server, frontend role selection is presentation only, Backend request flow (main.go to middleware to principal gateway to service to chaincode), Backend route ownership table (role groups), services/study_ledger.go (chaincode call orchestration), Chaincode authorization helpers (requireMSP, requireTopLevel, requireStaffRole, requireProtected), Chaincode guide (chaincode/AGENTS.md) (+85 more)
 
-### Community 9 - "Community 9"
-Cohesion: 0.05
-Nodes (59): ErrorResponse, HealthResponse, LoginRequest, LoginResponse, MeResponse, NowUTC(), ValidationError, checkedAdd() (+51 more)
-
 ### Community 10 - "Community 10"
+Cohesion: 0.05
+Nodes (60): ErrorResponse, HealthResponse, LoginRequest, LoginResponse, MeResponse, NowUTC(), ValidationError, balance (+52 more)
+
+### Community 11 - "Community 11"
+Cohesion: 0.04
+Nodes (71): approveSubjectRelease(), convertStudyToRetail(), createStudyStaff(), createStudySubject(), decideStudySubject(), formatApiError(), fundStudyWallet(), getErrorMessage() (+63 more)
+
+### Community 12 - "Community 12"
 Cohesion: 0.05
 Nodes (88): Account-based vs Token-based Access, CBDC Adoption, Agent-Based Modelling / Simulation, AML/CFT Compliance, Bank Disintermediation, Bank Runs / Financial Fragility, Cash Substitution / Coexistence, Central Bank Liability / Footprint (+80 more)
 
-### Community 11 - "Community 11"
-Cohesion: 0.05
-Nodes (56): buildBenchmarkConfig(), writeBenchmarkConfig(), writeFabricNetworkConfig(), readJsonLines(), runCaliperRounds(), startResourceSampler(), summarizeCaliperTrace(), classifyRound() (+48 more)
-
-### Community 12 - "Community 12"
+### Community 13 - "Community 13"
 Cohesion: 0.03
 Nodes (73): AD01 Participant registration: POST /participants/{id}/approve, SubmitParticipant pending -> ApproveParticipant active -> auto wallet wlt_<participantID>, AD02 Digital Rupiah issuance: POST /issuance-requests, BI role validation (403 otherwise), RequestIssuance BI authority, Mint(bi_treasury) supply += amount, emit audit, AD03 Treasury liquidity distribution: POST /distribute; blockchain validates recipient is Distributor Bank/PJP, debits bi_treasury, credits Custodian wallet, AD04 Customer KYC onboarding: POST /kyc/profiles then RefreshKycProfile with status pending/approved/rejected, AD05 Retail balance transfer: POST /transfers, balance check, per-tx/daily/monthly limits, recipient tier BASIC/STANDARD/MERCHANT, debit/credit, legacy auto-redeem of remainder, AD08 Participant freeze: POST /participants/{id}/freeze and /unfreeze, supervisor authorization, cascading wallet freeze, supervision events participant_frozen/participant_unfrozen, AD10 Supervision reports: GET /supervision/events, /reports/reconciliation, /reports/metrics joined into a formatted report, Activity Diagrams Track A and B for AD01-AD08 (Mermaid monochrome, Luthfi thesis format) (+65 more)
-
-### Community 13 - "Community 13"
-Cohesion: 0.07
-Nodes (49): approveSubjectRelease(), convertStudyToRetail(), createStudyStaff(), createStudySubject(), decideStudySubject(), formatApiError(), fundStudyWallet(), getErrorMessage() (+41 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.21
@@ -446,187 +448,187 @@ Nodes (49): Garuda Digital Rupiah - Retail CBDC Frontend, Audit Trail / Audit Lo
 
 ### Community 18 - "Community 18"
 Cohesion: 0.06
-Nodes (44): Blok 1: prev H(Blok 0), Merkle Root C3D4, Data Tx [Transfer], Blok 2: prev H(Blok 1), Merkle Root E5F6, Data Tx [Mint, Transfer], Blok 0 (Genesis): prev hash 0x000..., Merkle Root A1B2, Data Tx [Issuance BI], Merkle Root of Transaction Data, Previous-Hash Chaining Between Blocks, Bank / PJP Intermediaries, Bank Sentral (Central Bank Issuer), CBDC (Central Bank Digital Currency) (+36 more)
+Nodes (48): Auer and Bohme (2020) - CBDC design choices reference in CGIDE report, BIS Innovation Hub and Hong Kong Monetary Authority (2022) - modular CBDC design, Bitcoin: decentralized peer-to-peer digital currency with public ledger [4], D. Chaum, blind signatures for untraceable payments (1982) [3], IMF (2022) - hybrid CBDC function distribution reference, ARC-CBDC algorithms: Setup, KeyGen, CB-Setup, CB-OpenAcc, U-OpenAcc, U-Withdrawal, Payment, Deposit, Batch, Trace, ARC-CBDC four processes: Account Generation, Coin Minting, Transactions, Tracing, ARC-CBDC security properties: Balance, Anonymity, Traceability, Indistinguishability, Collision Resistance, Accountability (+40 more)
 
 ### Community 19 - "Community 19"
+Cohesion: 0.06
+Nodes (44): Blok 1: prev H(Blok 0), Merkle Root C3D4, Data Tx [Transfer], Blok 2: prev H(Blok 1), Merkle Root E5F6, Data Tx [Mint, Transfer], Blok 0 (Genesis): prev hash 0x000..., Merkle Root A1B2, Data Tx [Issuance BI], Merkle Root of Transaction Data, Previous-Hash Chaining Between Blocks, Bank / PJP Intermediaries, Bank Sentral (Central Bank Issuer), CBDC (Central Bank Digital Currency) (+36 more)
+
+### Community 20 - "Community 20"
 Cohesion: 0.09
 Nodes (44): Catat transaksi, Debit pengirim, Decision: Dalam limit?, Decision: Saldo cukup?, Decision: Token valid?, Inisiasi transfer saldo, Kirim error 401, Kirim konfirmasi transfer (+36 more)
 
-### Community 20 - "Community 20"
+### Community 21 - "Community 21"
 Cohesion: 0.15
 Nodes (23): callerID(), cleanIDs(), contains(), controlPolicy(), ControlsContract, getJSON(), getSubject(), isOpaqueReference() (+15 more)
 
-### Community 21 - "Community 21"
+### Community 22 - "Community 22"
 Cohesion: 0.08
 Nodes (42): CBDC Requirements: Identifiable Participants, Authorized Network, High Throughput, Low Latency, Privacy/Confidentiality, Confidentiality Simulation Results, Three Distribution Channels: Wholesaler-as-Retailer, Wholesaler to Retailer to End User, BI Directly to End Users, Electronic Payment System Parties: Issuer, Buyer-Merchant, Seller, Regulator, Hyperledger Fabric as Enterprise-Grade Permissioned DLT, Modular, Go/Java/Node.js Chaincode, Ordering Service Checks CA Certificate Before Committing Block, r-Digital Rupiah (Retail, Public), Three-Organization Fabric Architecture: Central Bank, Wholesaler, Users, One Peer Each, CouchDB per Org (+34 more)
 
-### Community 22 - "Community 22"
+### Community 23 - "Community 23"
 Cohesion: 0.06
 Nodes (39): bBench benchmark, Benchmark dimensions: network, storage, resource, cost, BLOCKBENCH evaluation framework, BlockCompass benchmark, Block Level Pipelining (BLP), BPO-CBS framework, Cloud Blockchain Services (CBS) / BaaS, Consensus evaluation metrics (throughput, latency, decentralization, security) (+31 more)
 
-### Community 23 - "Community 23"
+### Community 24 - "Community 24"
 Cohesion: 0.09
 Nodes (36): AllocateReserve() validasi nominal dan referensi, Transfer atomik: debit treasury + kredit kustodian, Bank Indonesia, bi_treasury (saldo treasury BI), Catat transaksi distribusi, POST /conversions, POST /reserve-allocations, Kirim error 403 (+28 more)
 
-### Community 24 - "Community 24"
+### Community 25 - "Community 25"
 Cohesion: 0.06
 Nodes (37): 3I Connectivity, API, BI-APS, BI-FAST, Buildable Use Case (annotation), CCP Netting & Novation, Centralized Platform, Conventional Assets (+29 more)
 
-### Community 25 - "Community 25"
+### Community 26 - "Community 26"
 Cohesion: 0.07
 Nodes (37): Androulaki, Elli, Androulaki, Angelo, Artem, Barger, Bortnikov, Cachin, Christian (+29 more)
 
-### Community 26 - "Community 26"
+### Community 27 - "Community 27"
 Cohesion: 0.1
 Nodes (36): Akses dashboard supervisi, Audit visibility into supervision events, Fork: parallel report queries, Format laporan supervisi, Gabungkan hasil laporan, GetMetrics() statistik transaksi, GetReconciliationReport() total supply, issued, burned, GET /reports/metrics (+28 more)
 
-### Community 27 - "Community 27"
+### Community 28 - "Community 28"
 Cohesion: 0.07
 Nodes (35): BAB I Pendahuluan Chapter Rules, Chapter 1 Required Sections, BAB II Tinjauan Pustaka Chapter Rules, Chapter 2 Comparison Tables 2.1-2.5, CouchDB Selection Justification, BAB III Metode Penelitian Chapter Rules, Testing Metrics Formulas, SDLC Prototyping Method (+27 more)
 
-### Community 28 - "Community 28"
+### Community 29 - "Community 29"
 Cohesion: 0.1
 Nodes (34): ApproveStandard() / DecideHighRisk(), status = active (Blockchain), ApproveParticipant() status = active, Bank Indonesia, Bank/PJP (calon peserta), Buat dompet peserta, CreatePending(), status = pending (aksi chaincode, Blockchain), Keputusan: Pengajuan disetujui? (ya ke POST kiri, tidak ke POST kanan), Keputusan: Data valid? (ya ke CreatePending; tidak ke error validasi) (+26 more)
 
-### Community 29 - "Community 29"
+### Community 30 - "Community 30"
 Cohesion: 0.07
 Nodes (33): CRITICAL C1: Formal wallet-tier equation excludes high-risk subjects while chaincode/test accept them post-EDD, compliance_policy.go: chaincode accepts RiskHigh after EDD/senior approval (lines 24, 47-54), compliance_policy_test.go: passing test expects high-risk retail customer to receive TierStandard (lines 33-35), Devil's Advocate strongest counter-argument: paper shows feasibility, not architectural necessity of blockchain, Editorial Decision: Major Revision, weighted score 59.85/100, Ignored alternative explanations: throughput may be limited by CPU/disk/CouchDB/block-cutting/Docker/client, not Fabric server path, M1: No centralized/replicated-database alternative comparison establishes blockchain necessity, M2: Contention-free workload cannot test claimed double-spend rejection or concurrent limit safety (+25 more)
 
-### Community 30 - "Community 30"
+### Community 31 - "Community 31"
 Cohesion: 0.06
 Nodes (33): Chaincode digital_rupiah.go still implements KYC tiers, wallet tiers, risk levels, KYC-tier compliance removal from thesis, paper, and PPTX brief, Paper Section 2.3 Compliance, Limits, and Supervision, Thesis defense PPTX deck brief (thesis/tmp/deck-brief/), Thesis/paper/PPTX alignment session 2026-08-14, Unit test counts 57/53 (was 45/42), Stale v2 benchmark sweep (29.5 / 41.2-47.0 TPS) in abstract/intisari, Chaincode v3.0 primary benchmark result (29.5 TPS @88.25%, 58.7 TPS @28.77%) (+25 more)
 
-### Community 31 - "Community 31"
+### Community 32 - "Community 32"
 Cohesion: 0.07
 Nodes (32): Citation Depth Legend P/A/M/X, Citation Verification Gaps, Citation Coverage Ledger 59 Sources, R1 Mixed Execution Windows, R2 Fixture Confounds, R3 Unknown-Failure Parser Limitation, R4 Provenance and Method Mismatch, R5 OpenCBDC Data Model Misrepresentation (+24 more)
 
-### Community 32 - "Community 32"
+### Community 33 - "Community 33"
 Cohesion: 0.07
 Nodes (31): Atlantic Council CBDC Tracker (137 Countries, 2025), BIS Proposal for Retail CBDC Architecture (WP 1250), Rationale: Passive two-tier models lacking intermediary accountability are structurally vulnerable to low adoption, China e-CNY: Hybrid Architecture with Tiered KYC Anonymity, e-CNY Dual Offline Capabilities (NFC, SIM, Wearables), Rationale: e-CNY as strongest example of intermediary-alignment success via Alipay/WeChat Pay distribution, e-Krona (Sweden Riksbank rCBDC), Uruguay e-Peso (+23 more)
 
-### Community 33 - "Community 33"
+### Community 34 - "Community 34"
 Cohesion: 0.07
 Nodes (30): AI-based AML detection framework for CBDC, AML/CFT compliance, Cashless Economy, Central Bank Digital Currency (CBDC), CBDC PoCs for wholesale payment, Compliance-by-design approach, Digital Rupiah, Distributed Ledger Technology (DLT) (+22 more)
 
-### Community 34 - "Community 34"
+### Community 35 - "Community 35"
 Cohesion: 0.07
 Nodes (30): Hybrid GCN + GRU with Attention for Post-Transaction AML Detection, Graph Dataset Schema (Sender Id, Receiver Id, Timestamp, Transaction, Pre-Transaction Balance, Digital asset Id, Asset profile Id, Gateway Network Ids), Latency Model: Smart-Contract, Communication, Data-Processing, AI-Detection Delays, Rule-Based AML Combined with ML Detection, Secure Asset Transfer Protocol (IETF SATP Draft, Trusted Gateway), Recommendation: Keep AML Functions as Separate Systems Connected via Smart Contracts, Compliant-by-Design Offline CBDC Hardware/Software Platform, Double-Spend Detection in Offline Ledger (+22 more)
 
-### Community 35 - "Community 35"
+### Community 36 - "Community 36"
 Cohesion: 0.11
 Nodes (30): Senior Approver menyetujui pembukaan pembatasan, ApproveUnfreeze() status kembali ke active, Backend API (swimlane), Blockchain (swimlane), Compliance Officer, Akan dibuka pembatasannya?, Otorisasi valid?, End (error path) (+22 more)
 
-### Community 36 - "Community 36"
+### Community 37 - "Community 37"
 Cohesion: 0.14
 Nodes (29): amount (input parameter), Backend API (swimlane, component), Bank Indonesia (swimlane, actor), bi_treasury (Treasury account), Blockchain (swimlane, component), Catat transaksi dan audit (record transaction and audit), Kewenangan valid? (authority valid? decision), Peran valid? (role valid? decision) (+21 more)
 
-### Community 37 - "Community 37"
+### Community 38 - "Community 38"
 Cohesion: 0.12
 Nodes (28): Backend Go handlers, bi-coin skripsi project, bi-coin-fabric (domain page), Caliper benchmark, 5 CAs (Certificate Authorities), Concepts Index, CouchDB, Critical Lit Review (+20 more)
 
-### Community 38 - "Community 38"
+### Community 39 - "Community 39"
 Cohesion: 0.08
 Nodes (26): Benjamin Hemingway, K. Ueda, Chanthol Hay, Pascal Paul, Mauricio Ulate, J. Wu, S. Allen, S. Capkun, et al., U. Bindseil, Richard Senner, Cash Credit Model, Cash Usage Decline, CBDC Design Trade-offs (+18 more)
 
-### Community 39 - "Community 39"
+### Community 40 - "Community 40"
 Cohesion: 0.11
 Nodes (24): 3I: Infrastructure of Payment System & Domestic FMI/SP, 3. Access, Account (r-Digital Rupiah access), Bank Indonesia (BI), Capability (scalability, maturity, modularity), Centralized (open permissioned DLT), Cross-border interlinkage, Digital Rupiah (end-to-end W-CBDC to R-CBDC) (+16 more)
 
-### Community 40 - "Community 40"
+### Community 41 - "Community 41"
 Cohesion: 0.08
 Nodes (24): A proposal for retail CBDC architecture, Bank for International Settlements (BIS), Bank of Thailand (BOT), Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons, Blockchain open-source software comparison, Blueprint for the future monetary system, Blueprint Sistem Pembayaran Indonesia 2025, BSPI-Presentasi (+16 more)
 
-### Community 41 - "Community 41"
+### Community 42 - "Community 42"
 Cohesion: 0.09
 Nodes (24): Blockchain-Based KYC System for e-Rupee, Rationale: repeated per-institution verification and centralized KYC data stores create redundancy and breach risk, so one blockchain verification should serve all participating institutions, KYC Smart Contracts (automated document flow), Three-Role Architecture: Admin FI, Banks, Customers, Traditional KYC Procedure (manual, paper-based, redundant), Permissioned DLT Structural Limitation for National Retail Scale, Rationale: permissioned DLT proved structurally limited for national-scale retail, so four of nine countries moved to hybrid or centralized architectures, Third-Party Cooperation Drives Adoption More Than Technical Sophistication (+16 more)
 
-### Community 42 - "Community 42"
+### Community 43 - "Community 43"
 Cohesion: 0.09
 Nodes (23): ADR 0002 Public REST APIs expose explicit stable DTO projections rather than mirroring ledger records, Rupiah amounts are int64 internally and serialized as whole-rupiah decimal strings in JSON to prevent precision loss, ADR 0003 KYC is implementation-only and QRIS is code-only; both excluded from thesis acceptance criteria, Observers cannot be Custodians, Canonical two-tier model: Bank Indonesia issues retail digital rupiah only into its treasury then distributes directly to Distributor Banks or Payment Service Providers as institutional Custodians, Guided thesis demonstration uses real role handoffs and stores only non-secret progress in the browser session, Native hash routes make screens bookmarkable and preserve browser history without adding a routing dependency, Payment Contacts persisted in PostgreSQL scoped to the authenticated username; shortcuts, not a public wallet directory or authorization mechanism (+15 more)
 
-### Community 43 - "Community 43"
+### Community 44 - "Community 44"
 Cohesion: 0.1
 Nodes (22): BIS Unified Ledger Concept, CBDCs and Disruptive Effects on Traditional Financial Infrastructures, CBDC and Systemic Risk, Core Principle I: CBDC pays adjustable interest rate, Core Principle II: CBDC and reserves are distinct, not directly convertible, Core Principle III: No guaranteed convertibility of bank deposits into CBDC, Core Principle IV: CBDC issued only against eligible securities, CBDC Design Principles for Financial Stability (+14 more)
 
-### Community 44 - "Community 44"
+### Community 45 - "Community 45"
 Cohesion: 0.1
 Nodes (22): Compliance benchmark attempt ledger 2026-10-12, run-20261012-01: Caliper 0.6 rejected network schema 1.0.0 in all 31 preflights; three fixture setups HTTP 500, run-20261012-02: ledger smoke 17/17, API 207/207 and 27/27, six bodyless actions HTTP 500, preflight 28/31 with MVCC_READ_CONFLICT on reserve::pjp-demo, run-20261012-03: stopped before preflight; initialization-state assertion queried treasury before initializing monetary state, run-20261012-04: stopped before preflight; assertion queried reserve state before pjp-demo existed, run-20261012-05: correctness 20/20, API 207/207/27/27/15/15, preflight 31/31, create-pending probe 64/s delivered 641 verified, drain 2.233s, drain-adjusted 52.399/s, run-20261012-06: create-pending narrowed to 1/s passing and 1.75/s failing; confirmation aborted with ReferenceError: execute is not defined, run-20261012-07: study-network-up.sh failed during peer channel setup, TLS connection reset at localhost:17051 after ~21s (+14 more)
 
-### Community 45 - "Community 45"
+### Community 46 - "Community 46"
 Cohesion: 0.11
 Nodes (20): AuthPrivacyChain Access Control Framework, Blockchain Configuration Parameters (BCP) and Transaction Arrival Rate (TAR), Blockchain Enabled Cloud Architecture (BECA), Byzantine Fault Tolerance (BFT) Consensus, Blockchain-Cloud Latency Challenge, Analysis of Performance of Blockchain in Cloud Computing, Resource Utilization in Blockchain-Cloud Systems, Blockchain-Cloud Throughput and TPS (+12 more)
 
-### Community 46 - "Community 46"
+### Community 47 - "Community 47"
 Cohesion: 0.17
 Nodes (20): Catat supervision event participant_frozen, Catat supervision event participant_unfrozen, Decision: Akan di-unfreeze?, Decision: Otorisasi valid?, FreezeParticipant() ubah status peserta ke frozen, Freeze wallet terkait (cascade), Inisiasi pembekuan peserta, Inisiasi pembukaan blokir (+12 more)
 
-### Community 47 - "Community 47"
+### Community 48 - "Community 48"
 Cohesion: 0.17
 Nodes (20): Masukkan ke antrian prioritas, CreateQrisPaymentIntent() status = pending, Decision: Saldo cukup?, Kirim notifikasi hasil pembayaran, Swimlane: Backend API, Swimlane: Blockchain, Swimlane: Merchant, Swimlane: Pelanggan (+12 more)
 
-### Community 48 - "Community 48"
+### Community 49 - "Community 49"
 Cohesion: 0.11
 Nodes (19): bi-coin-fabric Hyperledger Fabric prototype, bi-coin-iroha abandoned parallel implementation, IEEE-style LaTeX paper, Project Scope: three deliverables, Retail CBDC role and authorization boundaries, Source files authoritative; graphify-out is generated navigation, DTETI UGM LaTeX thesis, Root wiki/ curated Obsidian knowledge base (+11 more)
 
-### Community 49 - "Community 49"
+### Community 50 - "Community 50"
 Cohesion: 0.12
 Nodes (18): M5/W1(domain): Wallet tiers and numerical limits presented without official policy traceability, Reviewer 1 — Editor-in-Chief (journal fit, contribution, claim discipline), Reviewer 3 — CBDC and Bank Indonesia Domain, W1: 'only entry' novelty claim unsupported by systematic literature search, W2: Single short run per config, 40 tx per round, no dispersion statistics, W2 (domain): BI/OJK governance boundaries and endorsement authority unexplained, W3 (domain): Only 20 unique cited works — related-work coverage too small for novelty claim breadth, W3: Reproducibility asserted but no artifact/repo/commit statement provided (+10 more)
 
-### Community 50 - "Community 50"
+### Community 51 - "Community 51"
 Cohesion: 0.16
 Nodes (18): Hanif 2024 MeetCoin Architecture Diagram, Backend, Channel, Client App, Client App, Database, Fabric Gateway, Hyperledger Fabric Network Boundary (+10 more)
 
-### Community 51 - "Community 51"
+### Community 52 - "Community 52"
 Cohesion: 0.12
 Nodes (18): Alokasikan cadangan ke distributor (allocate reserve to distributor), CentralBankMSP swimlane (Alokasikan cadangan ke distributor), DistributorMSP swimlane (review subjek, set limit, FundFromReserve, transfer idempotency), EndUserMSP swimlane (Periksa identitas terpetakan, Ajukan subjek pseudonim), FundFromReserve (atomik pada tiga chaincode), Decision: Risiko tinggi atau PEP? (high risk or PEP), Buka dompet (open wallet), Ajukan subjek pseudonim (pseudonymous subject application) (+10 more)
 
-### Community 52 - "Community 52"
+### Community 53 - "Community 53"
 Cohesion: 0.15
 Nodes (17): CA BankIndonesia, CA CommercialBank, CA HimbaraBank, CA OJKObserver, CA PJP, CouchDB :5984 (Bank Indonesia Org), CouchDB :7984 (Commercial Bank Org), CouchDB :6984 (Himbara Bank Org) (+9 more)
 
-### Community 53 - "Community 53"
+### Community 54 - "Community 54"
 Cohesion: 0.19
 Nodes (16): Digital Rupiah (core concept), Phase 1: W-Digital Rupiah Cash Ledger (Immediate State), Phase 1 Digital Asset: Digital Rupiah, Phase 1 Industry: Wholesaler designated to sharing node with (No node), Phase 1 Infrastructure: W-CBDC platform BI digital rupiah, 3i Converter with RTGS, Phase 1 Use Case: Issuance & redemption, Interbank fund transfer, Phase 2: W-Digital Rupiah Cash & Securities Ledger (Intermediate), Phase 2 Digital Asset: Digital Rupiah, Digital Securities BI (+8 more)
 
-### Community 54 - "Community 54"
+### Community 55 - "Community 55"
 Cohesion: 0.13
 Nodes (16): Dirk Niepelt, Jens Tapking, Thomas Vlassopoulos, Enea Caccia, Matthew Malloy, Francis Martinez, Mary-Frances Styczynski, A. Thorp, Bank Refinancing Cost, CBDC Liquidity Efficiency, Central Bank Reserves, Commercial Bank Deposits, Monetary Policy Implementation (+8 more)
 
-### Community 55 - "Community 55"
+### Community 56 - "Community 56"
 Cohesion: 0.21
 Nodes (16): Petugas Distributor (Actor), Atomic Cross-Chaincode Transaction (debit, credit, receipt in one channel transaction), Backend API, DebitReserveForFunding(distributor, subject, amount), Conversion Sequence Diagram (Distributor FundFromReserve to Retail Wallet), Endorsement Failure Path (no state committed), Fabric Gateway, FundFromReserve(subject, distributor, amount, reference) (+8 more)
 
-### Community 56 - "Community 56"
+### Community 57 - "Community 57"
 Cohesion: 0.2
 Nodes (16): Pengguna EndUserMSP (Actor), Atomic Commit (balance, limit, receipt in one channel transaction), Backend API, Read Sender and Recipient Balance Limits, CanActFor(sender) Authorization Check, CanPay(sender, recipient) Check, Transfer Sequence Diagram (EndUserMSP Retail Transfer), Endorsement Failure (balance and limit not committed) (+8 more)
 
-### Community 57 - "Community 57"
+### Community 58 - "Community 58"
 Cohesion: 0.13
 Nodes (16): Activity Diagram Track B.3 — Pembayaran NFC Offline, Simpan device dengan assurance mode, Swimlane: Backend API, Swimlane: Blockchain, Kirim konfirmasi sinkronisasi, Validasi counter (anti-replay), Counter valid? decision node, Device: Catat pembayaran offline lokal (+8 more)
 
-### Community 58 - "Community 58"
+### Community 59 - "Community 59"
 Cohesion: 0.25
 Nodes (16): Akses Baca (Read Access), Bank Indonesia (Penerbit / Issuer), Batas Jenjang Distribusi (Tier Boundary), Commercial Bank (Validator), Distribusi dari Treasury (Distribution from Treasury), Distribusi Langsung ke Kustodian (Direct Distribution to Custodian), Himbara Bank (Validator), Jenjang 1: Distribusi Institusional (Institutional Distribution Tier) (+8 more)
 
-### Community 59 - "Community 59"
+### Community 60 - "Community 60"
 Cohesion: 0.2
 Nodes (14): ApproveUnfreeze(subject_id) — validate evidence and approver identity, Approver senior — submits approve-unfreeze decision, Backend API — REST endpoints /subjects/{subject_id}/restrictions and /restriction-release-decisions, Kebijakan endorsement berbasis state wajib dipenuhi (state-based endorsement policy must be satisfied), authority_evidence_ref submitted as SHA-256 reference hash, Fabric Gateway — submits chaincode transactions, Four-eyes control: reviewer identity must differ from approver identity, FreezeSubject(subject_id, reason_code) — set restricted status and reason (+6 more)
 
-### Community 60 - "Community 60"
+### Community 61 - "Community 61"
 Cohesion: 0.21
 Nodes (14): Kirim error validasi, Kirim data KYC pelanggan, Kirim hasil verifikasi, Siklus KYC: pending -> approved | rejected, Operator PJP, Periksa dokumen dan risiko, POST /kyc/profiles, POST /kyc/profiles/{id}/refresh (+6 more)
 
-### Community 61 - "Community 61"
+### Community 62 - "Community 62"
 Cohesion: 0.19
 Nodes (14): CentralBankMSP (Operator), Compliance officer, Use Case Diagram Ruang Kerja per Organisasi, DistributorMSP (Operator), EndUserMSP (Pengguna), KYC reviewer, Senior approver, Audit kontrol baca-saja (+6 more)
 
-### Community 62 - "Community 62"
-Cohesion: 0.15
-Nodes (13): Carlos León, Jose Moreno, Kimmo Soramäki, Nuntapun Bhensook, Thanaporn Rattanakul, Witit Synsatayakul, Pakaporn Tohwisessuk, Agent-Based Simulation, Balance Limits, CBDC Distribution Model, Government Subsidies, Positive Remuneration Spread, Retail CBDC Pilot (+5 more)
-
 ### Community 63 - "Community 63"
 Cohesion: 0.15
-Nodes (12): Alejandro Zamora-Pérez, Eliana Coschignano, Lorena Barreiro, Adverse Economic Effects, CBDC Adoption Challenge, Consumer Adoption, NFR-04 performance and NFR-05 repeatability requirements, Policy Goals Balance, Caliper benchmark run-20261014-01 (31 workloads), Caliper benchmark run-20261015-01 (fresh network) (+4 more)
+Nodes (13): Carlos León, Jose Moreno, Kimmo Soramäki, Nuntapun Bhensook, Thanaporn Rattanakul, Witit Synsatayakul, Pakaporn Tohwisessuk, Agent-Based Simulation, Balance Limits, CBDC Distribution Model, Government Subsidies, Positive Remuneration Spread, Retail CBDC Pilot (+5 more)
 
 ### Community 64 - "Community 64"
 Cohesion: 0.17
@@ -705,12 +707,12 @@ Cohesion: 0.25
 Nodes (8): Backend API (Go REST + Gorilla Mux + JWT/RBAC), Chaincode digital-rupiah, Client (Web UI / Client App), Endorse + Submit (gRPC) Transaction Flow, Fabric Gateway SDK v1.8 (gRPC / TLS), HTTP/REST Interface, Hyperledger Fabric 2.5 Network (mychannel, kontrak digital-rupiah, endorsement institusional, TLS), PostgreSQL (Portal Authentication)
 
 ### Community 83 - "Community 83"
-Cohesion: 0.33
-Nodes (7): bi-coin Wiki: LLM Wiki (root CLAUDE.md), Vault root is bi-coin skripsi git repo; avoid destructive git commands, Issues and specs as local Markdown under .scratch/, LLM Wiki Mode B (GitHub/Repository) + E (Research), Wiki conventions (frontmatter, wikilinks, .raw/, append-only log), Wiki operations (ingest/query/lint/archive), Wiki directory structure (sources/entities/concepts/domains/comparisons/questions/meta)
-
-### Community 84 - "Community 84"
 Cohesion: 0.29
 Nodes (7): 2026-06-30 11:35:43 functionality run (duplicate of functional benchmark profiles), 2026-06-30 invalid-missing-tier-limits run (duplicate of functional benchmark profiles, flagged invalid), admin-policy round: 40 succ/0 fail, 5.2 TPS throughput, Digital Rupiah Functional Benchmark Profiles (Caliper report, 4 rounds), kyc-onboarding round: 56 succ/0 fail, 3.7 TPS throughput, tier=STANDARD, monetary-ops round: 80 succ/0 fail, 19.9 TPS throughput, 50 wallets, supervision-reads round: 80 succ/0 fail, 17.0 TPS throughput, 50 customers/10 merchants
+
+### Community 84 - "Community 84"
+Cohesion: 0.33
+Nodes (7): bi-coin Wiki: LLM Wiki (root CLAUDE.md), Vault root is bi-coin skripsi git repo; avoid destructive git commands, Issues and specs as local Markdown under .scratch/, LLM Wiki Mode B (GitHub/Repository) + E (Research), Wiki conventions (frontmatter, wikilinks, .raw/, append-only log), Wiki operations (ingest/query/lint/archive), Wiki directory structure (sources/entities/concepts/domains/comparisons/questions/meta)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.29
@@ -786,59 +788,59 @@ Nodes (6): Central Bank Digital Currencies and financial integrity: finding a ne
 
 ### Community 103 - "Community 103"
 Cohesion: 0.33
-Nodes (6): Raphael A. Auer, G. Cornelli, Jon Frost, CBDC Drivers, Digitised Economies, Informal Economy, Retail CBDC designs advance faster in digitised economies and in countries with larger informal economies because both raise the marginal benefit of a digital public payment option, Rise of the Central Bank Digital Currencies: Drivers, Approaches and Technologies
+Nodes (6): Alejandro Zamora-Pérez, Eliana Coschignano, Lorena Barreiro, Adverse Economic Effects, CBDC Adoption Challenge, Consumer Adoption, Policy Goals Balance, Ensuring Adoption of Central Bank Digital Currencies: An Easy Task or a Gordian Knot?
 
 ### Community 104 - "Community 104"
 Cohesion: 0.33
-Nodes (6): Vaibhav Dixit, A. Shailesh, Shubhasmita Mishra, Rinki Verma, Facilitating Conditions, Infrastructure Readiness, Institutional Support, Performance Expectancy, Adoption of Central Bank Digital Currency in India: A Structural Model Using ISM
+Nodes (6): Raphael A. Auer, G. Cornelli, Jon Frost, CBDC Drivers, Digitised Economies, Informal Economy, Retail CBDC designs advance faster in digitised economies and in countries with larger informal economies because both raise the marginal benefit of a digital public payment option, Rise of the Central Bank Digital Currencies: Drivers, Approaches and Technologies
 
 ### Community 105 - "Community 105"
 Cohesion: 0.33
-Nodes (6): L. Bartlett; F. Vavrus, Comparative Case Study Method, Horizontal Comparison, Transversal Comparison, Vertical Comparison, Comparative case studies: An innovative approach
+Nodes (6): Vaibhav Dixit, A. Shailesh, Shubhasmita Mishra, Rinki Verma, Facilitating Conditions, Infrastructure Readiness, Institutional Support, Performance Expectancy, Adoption of Central Bank Digital Currency in India: A Structural Model Using ISM
 
 ### Community 106 - "Community 106"
-Cohesion: 0.5
-Nodes (4): openAPIDoc, openAPIOperation, assertSchemaRef(), TestEmbeddedOpenAPISpecsMatchV3Contracts()
+Cohesion: 0.33
+Nodes (6): L. Bartlett; F. Vavrus, Comparative Case Study Method, Horizontal Comparison, Transversal Comparison, Vertical Comparison, Comparative case studies: An innovative approach
 
 ### Community 107 - "Community 107"
-Cohesion: 0.6
-Nodes (3): jsonContent(), op(), response()
+Cohesion: 0.33
+Nodes (6): NFR-04 performance and NFR-05 repeatability requirements, Caliper benchmark run-20261014-01 (31 workloads), Caliper benchmark run-20261015-01 (fresh network), fund-reserve workload inconclusive (fixture prep failed ~200 of 337 subjects, error `fetch failed`), Verified read throughput 272-296 ops/s (client-send-limited lower bound), 19 of 21 write workloads at or below 0.78125 TPS; highest write 4.75 TPS (create-pending)
 
 ### Community 108 - "Community 108"
 Cohesion: 0.5
-Nodes (5): CBDC Holding Limits Regulation, CBDC Offline Payment Settlement Mechanism, Digital Euro Regulation (European Commission Offline Requirements), PayOff: Regulated CBDC with Private Offline Payments, Rationale: Offline CBDC needs cash-like privacy guarantees
+Nodes (4): openAPIDoc, openAPIOperation, assertSchemaRef(), TestEmbeddedOpenAPISpecsMatchV3Contracts()
 
 ### Community 109 - "Community 109"
-Cohesion: 0.4
-Nodes (5): Universitas Gadjah Mada (UGM) Official Logo, Scanned thesis endorsement page sample (UGM, Electrical Engineering, 2019), Scanned plagiarism-free statement page sample (Pernyataan Bebas Plagiasi, UGM 2019), Universitas Gadjah Mada (UGM) – academic institution, UGM thesis template documents (endorsement, plagiarism statement)
+Cohesion: 0.6
+Nodes (3): jsonContent(), op(), response()
 
 ### Community 110 - "Community 110"
-Cohesion: 0.4
-Nodes (5): M3: Single orderer labeled Raft CFT although it tolerates zero orderer failure (f=0), Reviewer 4 — Security, Privacy, and Operational Resilience, W2 (security): No explicit threat model (trusted parties, compromised peers, key theft, DoS), W3 (security): Privacy is a system requirement, not future feature — all channel peers see ledger data, W4 (security): Off-chain/on-chain consistency (hashing, dual-write recovery) underspecified
+Cohesion: 0.5
+Nodes (5): CBDC Holding Limits Regulation, CBDC Offline Payment Settlement Mechanism, Digital Euro Regulation (European Commission Offline Requirements), PayOff: Regulated CBDC with Private Offline Payments, Rationale: Offline CBDC needs cash-like privacy guarantees
 
 ### Community 111 - "Community 111"
 Cohesion: 0.4
-Nodes (5): Idempotency keys and operation receipts protect mutation paths, Do not introduce JavaScript floating-point amounts or expose database records directly, QRIS routes disabled; backend code and data retained for future restoration, Role gate belongs on the server; frontend role selection is presentation only, Route families and role boundaries (/wallets, /payment-contacts, /transfers, /limits, /participants, /issuance-requests, /transactions)
+Nodes (5): Universitas Gadjah Mada (UGM) Official Logo, Scanned thesis endorsement page sample (UGM, Electrical Engineering, 2019), Scanned plagiarism-free statement page sample (Pernyataan Bebas Plagiasi, UGM 2019), Universitas Gadjah Mada (UGM) – academic institution, UGM thesis template documents (endorsement, plagiarism statement)
 
 ### Community 112 - "Community 112"
 Cohesion: 0.4
-Nodes (5): Benchmark npm commands: test:benchmarks, benchmark:compliance, benchmark:manifest, benchmark:metrics:up/down, Compliance modes: new, resume, correctness, preflight, performance, all, Required env: BENCHMARK_DISPOSABLE_DAEMON_ID, BENCHMARK_SOURCE_COMMIT, BENCHMARK_COMPLIANCE_STAMP, benchmark:analyze rewrites summary.json to zero runs on compliance dirs; benchmark:validate reports valid for zero runs; benchmark:compress fails, Result directory files: metadata.json, source/, correctness.json, preflight.json, capacity.json, progress.json, summary.json, REPORT.md, manifest.json
+Nodes (5): M3: Single orderer labeled Raft CFT although it tolerates zero orderer failure (f=0), Reviewer 4 — Security, Privacy, and Operational Resilience, W2 (security): No explicit threat model (trusted parties, compromised peers, key theft, DoS), W3 (security): Privacy is a system requirement, not future feature — all channel peers see ledger data, W4 (security): Off-chain/on-chain consistency (hashing, dual-write recovery) underspecified
 
 ### Community 113 - "Community 113"
 Cohesion: 0.4
-Nodes (5): Low-contention and deliberate shared-key contention reported separately; cross-border interoperability outside the benchmark, Offered TPS = submitted transactions / measured window; Achieved TPS = successful completions / same window, ADR 0006 Primary performance study measures direct Fabric traffic with isolated transaction types; API and PostgreSQL/KYC behavior evaluated in a separate end-to-end demonstration, A load is sustainable only when all five repetitions achieve at least 99% success with successful-transaction p95 latency at or below 2.5 seconds, Caliper worker calibration tests 1, 2, 4 and 8 workers and fixes the smallest worker count that sustains the highest passing load
+Nodes (5): Idempotency keys and operation receipts protect mutation paths, Do not introduce JavaScript floating-point amounts or expose database records directly, QRIS routes disabled; backend code and data retained for future restoration, Role gate belongs on the server; frontend role selection is presentation only, Route families and role boundaries (/wallets, /payment-contacts, /transfers, /limits, /participants, /issuance-requests, /transactions)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.4
-Nodes (5): Single-Context Domain Modeling, Local Markdown Issue Tracker, .scratch Feature Slug Layout, Wayfinder Effort Map, Canonical Triage Status Labels
+Nodes (5): Benchmark npm commands: test:benchmarks, benchmark:compliance, benchmark:manifest, benchmark:metrics:up/down, Compliance modes: new, resume, correctness, preflight, performance, all, Required env: BENCHMARK_DISPOSABLE_DAEMON_ID, BENCHMARK_SOURCE_COMMIT, BENCHMARK_COMPLIANCE_STAMP, benchmark:analyze rewrites summary.json to zero runs on compliance dirs; benchmark:validate reports valid for zero runs; benchmark:compress fails, Result directory files: metadata.json, source/, correctness.json, preflight.json, capacity.json, progress.json, summary.json, REPORT.md, manifest.json
 
 ### Community 115 - "Community 115"
 Cohesion: 0.4
-Nodes (5): Drex, Fast payment systems and central bank digital currencies- Evidence from Pix and the Drex in Brazil, Gabriel Bizama, Hyperledger in Action Central Bank Digital Currencies v2, retail cbdc scopus
+Nodes (5): Low-contention and deliberate shared-key contention reported separately; cross-border interoperability outside the benchmark, Offered TPS = submitted transactions / measured window; Achieved TPS = successful completions / same window, ADR 0006 Primary performance study measures direct Fabric traffic with isolated transaction types; API and PostgreSQL/KYC behavior evaluated in a separate end-to-end demonstration, A load is sustainable only when all five repetitions achieve at least 99% success with successful-transaction p95 latency at or below 2.5 seconds, Caliper worker calibration tests 1, 2, 4 and 8 workers and fixes the smallest worker count that sustains the highest passing load
 
 ### Community 116 - "Community 116"
 Cohesion: 0.4
-Nodes (5): Levent Gurses, Manisa Pipattanasomporn, Murat Kuzlu, Performance Analysis of a Hyperledger Fabric Blockchain Framework- Throughput, Latency and Scalability, Saifur Rahman
+Nodes (5): Single-Context Domain Modeling, Local Markdown Issue Tracker, .scratch Feature Slug Layout, Wayfinder Effort Map, Canonical Triage Status Labels
 
 ### Community 117 - "Community 117"
 Cohesion: 0.4
@@ -846,223 +848,223 @@ Nodes (5): World Bank, CBDC Integration Models, Fast Payment System, Payment Sys
 
 ### Community 118 - "Community 118"
 Cohesion: 0.4
-Nodes (5): bi-coin-fabric domain: four-org network, three chaincodes, backend Go, frontend React, Residual study-era identifiers (StudyChannelName, .env.study, study- prefix) pending rename, Pending verification: network up, chaincode deploy, correctness suite on bi-coin, Wiki master catalog (index.md), Log: full-corpus ingest checkpoints (115 PDFs, 152 entities, 36 concepts)
+Nodes (5): Drex, Fast payment systems and central bank digital currencies- Evidence from Pix and the Drex in Brazil, Gabriel Bizama, Hyperledger in Action Central Bank Digital Currencies v2, retail cbdc scopus
 
 ### Community 119 - "Community 119"
-Cohesion: 0.5
-Nodes (0): 
+Cohesion: 0.4
+Nodes (5): Levent Gurses, Manisa Pipattanasomporn, Murat Kuzlu, Performance Analysis of a Hyperledger Fabric Blockchain Framework- Throughput, Latency and Scalability, Saifur Rahman
 
 ### Community 120 - "Community 120"
-Cohesion: 0.5
-Nodes (4): Active Redundancy Availability Tactic, Architectural Considerations for Blockchain Based Systems for Financial Transactions, Encrypt Data and Identify Actors Security Tactics, Quality Attribute Workshop (QAW) and Attribute-Driven Design (ADD)
+Cohesion: 0.4
+Nodes (5): bi-coin-fabric domain: four-org network, three chaincodes, backend Go, frontend React, Residual study-era identifiers (StudyChannelName, .env.study, study- prefix) pending rename, Pending verification: network up, chaincode deploy, correctness suite on bi-coin, Wiki master catalog (index.md), Log: full-corpus ingest checkpoints (115 PDFs, 152 entities, 36 concepts)
 
 ### Community 121 - "Community 121"
 Cohesion: 0.5
-Nodes (4): Blockchain Adoption Barriers in Industry (Legal Uncertainty, Governance, Standardization), Blockchain in Operations Management and Manufacturing: Potential and Barriers, Blockchain Potential in Supply Chain Management, Smart Contracts for Operations Management Automation
+Nodes (0): 
 
 ### Community 122 - "Community 122"
 Cohesion: 0.5
-Nodes (4): BI-FAST Retail Payment System, Five Models for CBDC-FPS Integration (Coexistence to Full Convergence), CBDC-FPS Interoperability (World Bank), QRIS (Quick Response Code Indonesian Standard)
+Nodes (4): Active Redundancy Availability Tactic, Architectural Considerations for Blockchain Based Systems for Financial Transactions, Encrypt Data and Identify Actors Security Tactics, Quality Attribute Workshop (QAW) and Attribute-Driven Design (ADD)
 
 ### Community 123 - "Community 123"
 Cohesion: 0.5
-Nodes (4): Horizontal Comparison Axis (across cases at same level), Transversal Comparison Axis (across time/development phases), Vertical Comparison Axis (across institutional layers within each case), Comparative Case Studies (CCS) Three-Axis Approach
+Nodes (4): Blockchain Adoption Barriers in Industry (Legal Uncertainty, Governance, Standardization), Blockchain in Operations Management and Manufacturing: Potential and Barriers, Blockchain Potential in Supply Chain Management, Smart Contracts for Operations Management Automation
 
 ### Community 124 - "Community 124"
 Cohesion: 0.5
-Nodes (4): CBDC Democratic Values Framework, CBDC Equitable Treatment, CBDC Privacy Protection, OECD: CBDCs and Democratic Values
+Nodes (4): BI-FAST Retail Payment System, Five Models for CBDC-FPS Integration (Coexistence to Full Convergence), CBDC-FPS Interoperability (World Bank), QRIS (Quick Response Code Indonesian Standard)
 
 ### Community 125 - "Community 125"
-Cohesion: 0.83
-Nodes (4): Besu (asset transfer throughput line: ~6.8/16.5/14.2/12.1 TPS at send rates 10/20/50/100), Ethereum (asset transfer throughput line: ~7.2/10.1/14.3/16.2 TPS at send rates 10/20/50/100), Figure 8.6/Gambar 2.8: Throughput comparison of asset transfer across send rates (10-100 TPS) on Ethereum, Hyperledger Fabric, and Besu, source [54], Hyperledger Fabric (asset transfer throughput line: ~9.4/16.5/15.3/13.2 TPS at send rates 10/20/50/100)
+Cohesion: 0.5
+Nodes (4): Horizontal Comparison Axis (across cases at same level), Transversal Comparison Axis (across time/development phases), Vertical Comparison Axis (across institutional layers within each case), Comparative Case Studies (CCS) Three-Axis Approach
 
 ### Community 126 - "Community 126"
 Cohesion: 0.5
-Nodes (4): Two densities: institutional shell (16px) vs retail shell (24px, 46px buttons), Primary design audience: thesis examiners at DTETI FT UGM defense, Demonstration roles: Institutional Operator, Retail Customer, Merchant, WCAG 2.2 AA accessibility baseline, desktop-first, reflow to 390px
+Nodes (4): CBDC Democratic Values Framework, CBDC Equitable Treatment, CBDC Privacy Protection, OECD: CBDCs and Democratic Values
 
 ### Community 127 - "Community 127"
-Cohesion: 0.5
-Nodes (4): Resume verifies source snapshot and protocol match; new stamp resets only its own study volumes, Disposable Docker daemon isolation; runner shares daemon network namespace, no host socket or ports, Fabric 2.5.16 tools/config bundle via FABRIC_SAMPLES with checksum verification, BENCHMARK_IMAGE_BUNDLE from exact local Fabric 2.5, Fabric CA 1.5.9, CouchDB 3.3, PostgreSQL 16 images
+Cohesion: 0.83
+Nodes (4): Besu (asset transfer throughput line: ~6.8/16.5/14.2/12.1 TPS at send rates 10/20/50/100), Ethereum (asset transfer throughput line: ~7.2/10.1/14.3/16.2 TPS at send rates 10/20/50/100), Figure 8.6/Gambar 2.8: Throughput comparison of asset transfer across send rates (10-100 TPS) on Ethereum, Hyperledger Fabric, and Besu, source [54], Hyperledger Fabric (asset transfer throughput line: ~9.4/16.5/15.3/13.2 TPS at send rates 10/20/50/100)
 
 ### Community 128 - "Community 128"
 Cohesion: 0.5
-Nodes (4): Academic Writing Skill Workflow, Humanizer Protected Content, Prose-Only Trigger Boundary, Paper CLAUDE.md Imports AGENTS.md
+Nodes (4): Two densities: institutional shell (16px) vs retail shell (24px, 46px buttons), Primary design audience: thesis examiners at DTETI FT UGM defense, Demonstration roles: Institutional Operator, Retail Customer, Merchant, WCAG 2.2 AA accessibility baseline, desktop-first, reflow to 390px
 
 ### Community 129 - "Community 129"
-Cohesion: 0.67
-Nodes (4): Blockchain-Necessity Counter-Argument, 2026-07-02 Editorial Decision Major Revision, Review 2026-07-02 Priority 1-3 Roadmap, Wallet-Tier Equation vs Chaincode Mismatch C1
+Cohesion: 0.5
+Nodes (4): Resume verifies source snapshot and protocol match; new stamp resets only its own study volumes, Disposable Docker daemon isolation; runner shares daemon network namespace, no host socket or ports, Fabric 2.5.16 tools/config bundle via FABRIC_SAMPLES with checksum verification, BENCHMARK_IMAGE_BUNDLE from exact local Fabric 2.5, Fabric CA 1.5.9, CouchDB 3.3, PostgreSQL 16 images
 
 ### Community 130 - "Community 130"
 Cohesion: 0.5
-Nodes (4): Andrew Urquhart, Central bank digital currencies- A critical review, Lambis Dionysopoulos, Miriam Marra
+Nodes (4): Academic Writing Skill Workflow, Humanizer Protected Content, Prose-Only Trigger Boundary, Paper CLAUDE.md Imports AGENTS.md
 
 ### Community 131 - "Community 131"
-Cohesion: 0.5
-Nodes (4): Ferry Syarifuddin, Monetary Policy Strategy in the Presence of Central Bank Digital Currency, OPTIMAL CENTRAL BANK DIGITAL CURRENCY DESIGN FOR EMERGING ECONOMIES, Toni Bakhtiar
+Cohesion: 0.67
+Nodes (4): Blockchain-Necessity Counter-Argument, 2026-07-02 Editorial Decision Major Revision, Review 2026-07-02 Priority 1-3 Roadmap, Wallet-Tier Equation vs Chaincode Mismatch C1
 
 ### Community 132 - "Community 132"
 Cohesion: 0.5
-Nodes (4): Research on the Performance Analysis of Mainstream Consensus Algorithms of Consortium Blockchains, Weizhi Xiong, Xiaohong Deng, Xiu Yao
+Nodes (4): Andrew Urquhart, Central bank digital currencies- A critical review, Lambis Dionysopoulos, Miriam Marra
 
 ### Community 133 - "Community 133"
 Cohesion: 0.5
-Nodes (4): Retail CBDC: Implications for Banking and Financial Stability, Retail Central Bank Digital Currencies: Implications for Banking and Financial Stability, Sebastian Infante, Kyungmin Kim, A. Orlik, A. F. Silva, R. Tetlow, Sebastian Infante, Kyungmin Kim, Anna Orlik, A. F. Silva, R. Tetlow
+Nodes (4): Ferry Syarifuddin, Monetary Policy Strategy in the Presence of Central Bank Digital Currency, OPTIMAL CENTRAL BANK DIGITAL CURRENCY DESIGN FOR EMERGING ECONOMIES, Toni Bakhtiar
 
 ### Community 134 - "Community 134"
 Cohesion: 0.5
-Nodes (4): Central Bank Digital Currency, Credit Supply, and Financial Stability, Central Bank Digital Currency: Stability and Information, Todd Keister, Cyril Monnet, Y. S. Kim, Ohik Kwon
+Nodes (4): Research on the Performance Analysis of Mainstream Consensus Algorithms of Consortium Blockchains, Weizhi Xiong, Xiaohong Deng, Xiu Yao
 
 ### Community 135 - "Community 135"
 Cohesion: 0.5
-Nodes (4): A Simple Model of a Central Bank Digital Currency, Bineet Mishra, E. Prasad, Dirk Niepelt, Money and Banking with Reserves and CBDC
+Nodes (4): Retail CBDC: Implications for Banking and Financial Stability, Retail Central Bank Digital Currencies: Implications for Banking and Financial Stability, Sebastian Infante, Kyungmin Kim, A. Orlik, A. F. Silva, R. Tetlow, Sebastian Infante, Kyungmin Kim, Anna Orlik, A. F. Silva, R. Tetlow
 
 ### Community 136 - "Community 136"
 Cohesion: 0.5
-Nodes (4): C. Pfister, Kilian Wenker, Privacy, Retail CBDC and Beyond, Retail Central Bank Digital Currencies (CBDC), Disintermediation and Financial Privacy: The Case of the Bahamian Sand Dollar
+Nodes (4): Central Bank Digital Currency, Credit Supply, and Financial Stability, Central Bank Digital Currency: Stability and Information, Todd Keister, Cyril Monnet, Y. S. Kim, Ohik Kwon
 
 ### Community 137 - "Community 137"
 Cohesion: 0.5
-Nodes (4): Central bank digital currencies: motives, economic implications and the research frontier, Geoffrey Goodell, Hazem Danny Al-Nakib, T. Aste, Raphael A. Auer, Jon Frost, L. Gambacorta, Cyril Monnet, Tara Rice, H. Shin, Retail Central Bank Digital Currency: Motivations, Opportunities, and Mistakes
+Nodes (4): A Simple Model of a Central Bank Digital Currency, Bineet Mishra, E. Prasad, Dirk Niepelt, Money and Banking with Reserves and CBDC
 
 ### Community 138 - "Community 138"
 Cohesion: 0.5
-Nodes (4): Central bank digital currency and monetary policy, Central Bank Digital Currency and Monetary Policy Implementation, Jens Tapking, Thomas Vlassopoulos, Enea Caccia, S. Davoodalhosseini
+Nodes (4): C. Pfister, Kilian Wenker, Privacy, Retail CBDC and Beyond, Retail Central Bank Digital Currencies (CBDC), Disintermediation and Financial Privacy: The Case of the Bahamian Sand Dollar
 
 ### Community 139 - "Community 139"
+Cohesion: 0.5
+Nodes (4): Central bank digital currencies: motives, economic implications and the research frontier, Geoffrey Goodell, Hazem Danny Al-Nakib, T. Aste, Raphael A. Auer, Jon Frost, L. Gambacorta, Cyril Monnet, Tara Rice, H. Shin, Retail Central Bank Digital Currency: Motivations, Opportunities, and Mistakes
+
+### Community 140 - "Community 140"
+Cohesion: 0.5
+Nodes (4): Central bank digital currency and monetary policy, Central Bank Digital Currency and Monetary Policy Implementation, Jens Tapking, Thomas Vlassopoulos, Enea Caccia, S. Davoodalhosseini
+
+### Community 141 - "Community 141"
 Cohesion: 1.0
 Nodes (2): oracleLines(), validateAuthorizationLog()
 
-### Community 140 - "Community 140"
-Cohesion: 0.67
-Nodes (0): 
-
-### Community 141 - "Community 141"
-Cohesion: 0.67
-Nodes (0): 
-
 ### Community 142 - "Community 142"
-Cohesion: 1.0
-Nodes (3): Education as Key Driver for CBDC Adoption, CBDC Social Adaptation and Phased Introduction Strategy, Money in the Digital Age: CBDC Social Adaptation and Education
+Cohesion: 0.67
+Nodes (0): 
 
 ### Community 143 - "Community 143"
 Cohesion: 0.67
-Nodes (3): Decision-Making Methodology for CBDC Architecture (36 IT architectures), Retail CBDC Design Choices: Guide for Policymakers, Rationale: Policy objectives must be defined and prioritized before design choices
+Nodes (0): 
 
 ### Community 144 - "Community 144"
-Cohesion: 0.67
-Nodes (3): Auer & Böhme CBDC Taxonomy (Account vs Token, DLT vs Centralized), CBDC Motives, Economic Implications and Research Frontier, Finding: Developed economies prioritize payment efficiency, developing economies emphasize financial inclusion
+Cohesion: 1.0
+Nodes (3): Education as Key Driver for CBDC Adoption, CBDC Social Adaptation and Phased Introduction Strategy, Money in the Digital Age: CBDC Social Adaptation and Education
 
 ### Community 145 - "Community 145"
 Cohesion: 0.67
-Nodes (3): Blockchain-Cloud Computing Integration, Transactions Per Second (TPS) throughput, Analysis of Performance of Blockchain in Cloud Computing
+Nodes (3): Decision-Making Methodology for CBDC Architecture (36 IT architectures), Retail CBDC Design Choices: Guide for Policymakers, Rationale: Policy objectives must be defined and prioritized before design choices
 
 ### Community 146 - "Community 146"
 Cohesion: 0.67
-Nodes (3): Intelligent Device Node Mapping, PBFT-DPoS consensus algorithm, A High Performance Blockchain Platform for Intelligent Devices
+Nodes (3): Auer & Böhme CBDC Taxonomy (Account vs Token, DLT vs Centralized), CBDC Motives, Economic Implications and Research Frontier, Finding: Developed economies prioritize payment efficiency, developing economies emphasize financial inclusion
 
 ### Community 147 - "Community 147"
 Cohesion: 0.67
-Nodes (3): Adaptive transaction validation based on trust value, Data Trust Framework, Data Trust Framework Using Blockchain Technology and Adaptive Transaction Validation
+Nodes (3): Blockchain-Cloud Computing Integration, Transactions Per Second (TPS) throughput, Analysis of Performance of Blockchain in Cloud Computing
 
 ### Community 148 - "Community 148"
 Cohesion: 0.67
-Nodes (3): Autoencoder-Isolation Forest (AE-IF) anomaly detection model, Bank disintermediation risk, An Analytical Study on CBDCs and Their Disruptive Effects on Traditional Financial Infrastructures
+Nodes (3): Intelligent Device Node Mapping, PBFT-DPoS consensus algorithm, A High Performance Blockchain Platform for Intelligent Devices
 
 ### Community 149 - "Community 149"
 Cohesion: 0.67
-Nodes (3): Evaluation scenario matrix (15 functional scenarios), Scope exclusions: no custom AI training, no live Dukcapil, no biometrics, no production deployment, Framing: implementation and evaluation of selected KYC and AML/CFT controls
+Nodes (3): Adaptive transaction validation based on trust value, Data Trust Framework, Data Trust Framework Using Blockchain Technology and Adaptive Transaction Validation
 
 ### Community 150 - "Community 150"
 Cohesion: 0.67
-Nodes (3): Release evidence reference: SHA-256 digest submitted by KYC reviewer, Restriction: subject-level hold with DTTOT/authority order/internal review reason, Staff role maker-checker: KYC reviewer, senior approver, compliance officer
+Nodes (3): Autoencoder-Isolation Forest (AE-IF) anomaly detection model, Bank disintermediation risk, An Analytical Study on CBDCs and Their Disruptive Effects on Traditional Financial Infrastructures
 
 ### Community 151 - "Community 151"
 Cohesion: 0.67
-Nodes (3): Confirmation windows total 46.5 minutes (31 workloads x 3 x 30 s) excluding readiness, probes, fixtures and drain, Capacity search 0.1-4096 ops/s, 4x expansion, 10s midpoint probes until failing within 10% of passing, Confirmation: three 30s Caliper rounds, delivered load within 5% of target, drain-adjusted throughput >=90% of delivered load
+Nodes (3): Evaluation scenario matrix (15 functional scenarios), Scope exclusions: no custom AI training, no live Dukcapil, no biometrics, no production deployment, Framing: implementation and evaluation of selected KYC and AML/CFT controls
 
 ### Community 152 - "Community 152"
 Cohesion: 0.67
-Nodes (3): statistical-20260917-pilot6 manifest.json path pointer, statistical-20260917-pilot6 selected_workers=1, statistical-20260917-pilot6 pilot_knee=40, calibration_rates=30,40,50, selected_workers=1
+Nodes (3): Release evidence reference: SHA-256 digest submitted by KYC reviewer, Restriction: subject-level hold with DTTOT/authority order/internal review reason, Staff role maker-checker: KYC reviewer, senior approver, compliance officer
 
 ### Community 153 - "Community 153"
 Cohesion: 0.67
-Nodes (3): Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy, Johan Beni Maharda, Syahid Izzulhaq, Akhmad Syakir Kurnia
+Nodes (3): Confirmation windows total 46.5 minutes (31 workloads x 3 x 30 s) excluding readiness, probes, fixtures and drain, Capacity search 0.1-4096 ops/s, 4x expansion, 10s midpoint probes until failing within 10% of passing, Confirmation: three 30s Caliper rounds, delivered load within 5% of target, drain-adjusted throughput >=90% of delivered load
 
 ### Community 154 - "Community 154"
 Cohesion: 0.67
-Nodes (3): Central Bank Digital Currency What Factors Determine Its Adoption-, Novi Maryaningsih, Suahasil Nazara, Febrio N. Kacaribu, Solikin M. Juhro
+Nodes (3): statistical-20260917-pilot6 manifest.json path pointer, statistical-20260917-pilot6 selected_workers=1, statistical-20260917-pilot6 pilot_knee=40, calibration_rates=30,40,50, selected_workers=1
 
 ### Community 155 - "Community 155"
 Cohesion: 0.67
-Nodes (3): Hyperledger Blockchain Performance Metrics, Hyperledger Performance, Scale Working Group
+Nodes (3): Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy, Johan Beni Maharda, Syahid Izzulhaq, Akhmad Syakir Kurnia
 
 ### Community 156 - "Community 156"
 Cohesion: 0.67
-Nodes (3): Implementing a retail CBDC- Lessons learned and key insights, l Morales-Resendiz, Raú
+Nodes (3): Central Bank Digital Currency What Factors Determine Its Adoption-, Novi Maryaningsih, Suahasil Nazara, Febrio N. Kacaribu, Solikin M. Juhro
 
 ### Community 157 - "Community 157"
 Cohesion: 0.67
-Nodes (3): Bhawana, Permission Blockchain Network based Central Bank Digital Currency, Sushil Kumar
+Nodes (3): Hyperledger Blockchain Performance Metrics, Hyperledger Performance, Scale Working Group
 
 ### Community 158 - "Community 158"
 Cohesion: 0.67
-Nodes (3): Nancy Michail, Niloufer Selvadurai, Privacy and national security issues relating to the introduction of a central bank digital currency in Australia
+Nodes (3): Implementing a retail CBDC- Lessons learned and key insights, l Morales-Resendiz, Raú
 
 ### Community 159 - "Community 159"
 Cohesion: 0.67
-Nodes (3): ChatGPT Deep Research, Relasi Kelembagaan Kementerian Keuangan, Bank Indonesia, dan PERURI, Supporting Literature and Design Analysis for a Bank Indonesia Thesis on Blockchain-Based Digital Mo
+Nodes (3): Bhawana, Permission Blockchain Network based Central Bank Digital Currency, Sushil Kumar
 
 ### Community 160 - "Community 160"
 Cohesion: 0.67
-Nodes (3): Firman Hidayat, Raditya Sukmana, Masrizal Masrizal, Rahmat Heru Setianto, THE IMPACT OF CENTRAL BANK DIGITAL CURRENCIES NEWS ON BANK STABILITY EVIDENCE FROM ASEAN-5 COUNTRIES
+Nodes (3): Nancy Michail, Niloufer Selvadurai, Privacy and national security issues relating to the introduction of a central bank digital currency in Australia
 
 ### Community 161 - "Community 161"
 Cohesion: 0.67
-Nodes (3): Central Banks Digital Currencies: World Experience, D. Kochergin, GLOBAL EXPERIENCE IN IMPLEMENTING CENTRAL BANKS DIGITAL CURRENCIES FOR RETAIL PAYMENTS IN EMERGING MARKETS AND DEVELOPING COUNTRIES
+Nodes (3): ChatGPT Deep Research, Relasi Kelembagaan Kementerian Keuangan, Bank Indonesia, dan PERURI, Supporting Literature and Design Analysis for a Bank Indonesia Thesis on Blockchain-Based Digital Mo
 
 ### Community 162 - "Community 162"
 Cohesion: 0.67
-Nodes (3): Comparative case studies: An innovative approach, F. Vavrus, L. Bartlett
+Nodes (3): Firman Hidayat, Raditya Sukmana, Masrizal Masrizal, Rahmat Heru Setianto, THE IMPACT OF CENTRAL BANK DIGITAL CURRENCIES NEWS ON BANK STABILITY EVIDENCE FROM ASEAN-5 COUNTRIES
 
 ### Community 163 - "Community 163"
 Cohesion: 0.67
-Nodes (3): Drex and digital money, G. Ketenchian, L. Yacoubian
+Nodes (3): Central Banks Digital Currencies: World Experience, D. Kochergin, GLOBAL EXPERIENCE IN IMPLEMENTING CENTRAL BANKS DIGITAL CURRENCIES FOR RETAIL PAYMENTS IN EMERGING MARKETS AND DEVELOPING COUNTRIES
 
 ### Community 164 - "Community 164"
 Cohesion: 0.67
-Nodes (3): A. Wehrli, C. Boar, Ready, steady, go: Results of the third BIS survey on central bank digital currency
+Nodes (3): Comparative case studies: An innovative approach, F. Vavrus, L. Bartlett
 
 ### Community 165 - "Community 165"
 Cohesion: 0.67
-Nodes (3): Declining Velocity of Money (25-year trend, FRED 2021), Seven Elements of Success: Claimability, Transferability, Recognition, Anonymity, Denomination, Validity Date, Velocity of Money, Validity Date Enables Recall and Velocity Control
+Nodes (3): Drex and digital money, G. Ketenchian, L. Yacoubian
 
 ### Community 166 - "Community 166"
 Cohesion: 0.67
-Nodes (3): Fig. 2 Architecture: Client to Go REST/JWT to PostgreSQL to Fabric Gateway SDK v1.8 to Fabric 2.5, Off-Chain PostgreSQL bi_coin_study for Account and Authentication Data, Single-Node Raft Orderer: No Crash Fault Tolerance, Needs >=3 Consenters
+Nodes (3): A. Wehrli, C. Boar, Ready, steady, go: Results of the third BIS survey on central bank digital currency
 
 ### Community 167 - "Community 167"
 Cohesion: 0.67
-Nodes (3): Backend API, Blockchain, AD01 Pendaftaran Peserta (UML Activity Diagram)
+Nodes (3): Declining Velocity of Money (25-year trend, FRED 2021), Seven Elements of Success: Claimability, Transferability, Recognition, Anonymity, Denomination, Validity Date, Velocity of Money, Validity Date Enables Recall and Velocity Control
 
 ### Community 168 - "Community 168"
 Cohesion: 0.67
-Nodes (3): Backend API, Blockchain, AD03 Distribusi Likuiditas dari Treasury ke Kustodian (UML Activity Diagram)
+Nodes (3): Fig. 2 Architecture: Client to Go REST/JWT to PostgreSQL to Fabric Gateway SDK v1.8 to Fabric 2.5, Off-Chain PostgreSQL bi_coin_study for Account and Authentication Data, Single-Node Raft Orderer: No Crash Fault Tolerance, Needs >=3 Consenters
 
 ### Community 169 - "Community 169"
 Cohesion: 0.67
-Nodes (3): Backend API, Blockchain, AD04 Onboarding KYC Pelanggan (UML Activity Diagram)
+Nodes (3): Backend API, Blockchain, AD01 Pendaftaran Peserta (UML Activity Diagram)
 
 ### Community 170 - "Community 170"
 Cohesion: 0.67
-Nodes (3): Metric definitions: success rate, TPS, latency min/avg/max, resource use, Rule: no Caliper results in Chapter 3, Chapter 4 handles results, Test scenarios Skenario 1-5 (CreateWallet, Transfer, LevelDB vs CouchDB, multi-org endorsement, stability)
+Nodes (3): Backend API, Blockchain, AD03 Distribusi Likuiditas dari Treasury ke Kustodian (UML Activity Diagram)
 
 ### Community 171 - "Community 171"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (3): Backend API, Blockchain, AD04 Onboarding KYC Pelanggan (UML Activity Diagram)
 
 ### Community 172 - "Community 172"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (3): Metric definitions: success rate, TPS, latency min/avg/max, resource use, Rule: no Caliper results in Chapter 3, Chapter 4 handles results, Test scenarios Skenario 1-5 (CreateWallet, Transfer, LevelDB vs CouchDB, multi-org endorsement, stability)
 
 ### Community 173 - "Community 173"
 Cohesion: 1.0
@@ -1086,335 +1088,335 @@ Nodes (0):
 
 ### Community 178 - "Community 178"
 Cohesion: 1.0
-Nodes (2): Permissioned BFT-Family Consensus Protocols Best Suited for CBDC, Blockchain Application for Central Bank Digital Currencies (CBDC)
+Nodes (0): 
 
 ### Community 179 - "Community 179"
 Cohesion: 1.0
-Nodes (2): India e-Rupee: Two-Tier with Hyperledger Fabric (Wholesale) + UPI (Retail), Rationale: India deliberately skipped DLT for retail layer, using UPI-based APIs instead
+Nodes (0): 
 
 ### Community 180 - "Community 180"
 Cohesion: 1.0
-Nodes (2): Anti-Money Laundering (AML), CBDCs as AML Countermeasure
+Nodes (2): Permissioned BFT-Family Consensus Protocols Best Suited for CBDC, Blockchain Application for Central Bank Digital Currencies (CBDC)
 
 ### Community 181 - "Community 181"
 Cohesion: 1.0
-Nodes (2): Modeling techniques: Benchmarking, Simulation, Empirical, Analytical, Performance Evaluation of Blockchain Systems: Parameters, Criteria and Modeling Techniques
+Nodes (2): India e-Rupee: Two-Tier with Hyperledger Fabric (Wholesale) + UPI (Retail), Rationale: India deliberately skipped DLT for retail layer, using UPI-based APIs instead
 
 ### Community 182 - "Community 182"
 Cohesion: 1.0
-Nodes (2): International Monetary Fund (IMF), John Kiff (IMF)
+Nodes (2): Anti-Money Laundering (AML), CBDCs as AML Countermeasure
 
 ### Community 183 - "Community 183"
 Cohesion: 1.0
-Nodes (2): Adinova Fauri (CSIS Researcher), CSIS Indonesia
+Nodes (2): Modeling techniques: Benchmarking, Simulation, Empirical, Analytical, Performance Evaluation of Blockchain Systems: Parameters, Criteria and Modeling Techniques
 
 ### Community 184 - "Community 184"
 Cohesion: 1.0
-Nodes (2): Tier 1 Central Bank: issuance, destruction, supply, governance, oversight, Tier 2 Intermediaries: wallet services, onboarding, KYC/AML, retail payments
+Nodes (2): International Monetary Fund (IMF), John Kiff (IMF)
 
 ### Community 185 - "Community 185"
 Cohesion: 1.0
-Nodes (2): FR-04 audit and oversight reports, Supervision: oversight without authority to create, distribute, redeem, or transfer
+Nodes (2): Adinova Fauri (CSIS Researcher), CSIS Indonesia
 
 ### Community 186 - "Community 186"
 Cohesion: 1.0
-Nodes (2): Gateways selected by principal custodian MSP; no shared default signer, principalLedger resolves principal via LedgerService.ForPrincipal to a request-local Fabric contract and signer
+Nodes (2): Tier 1 Central Bank: issuance, destruction, supply, governance, oversight, Tier 2 Intermediaries: wallet services, onboarding, KYC/AML, retail payments
 
 ### Community 187 - "Community 187"
 Cohesion: 1.0
-Nodes (2): Backend thesis traceability responsibilities for FR-01..FR-05, NFR-02, NFR-03, Backend Go tests: routes_test.go, authorization_test.go, ledger_test.go, kyc_service_test.go, integration_test.go
+Nodes (2): FR-04 audit and oversight reports, Supervision: oversight without authority to create, distribute, redeem, or transfer
 
 ### Community 188 - "Community 188"
 Cohesion: 1.0
-Nodes (2): Chaincode tests: digital_rupiah_test.go, digital_rupiah_v3_test.go, authorization_test.go, offchain_kyc_test.go, compliance_policy_test.go via go test ./..., Chaincode thesis traceability: FR-01 participant lifecycle, FR-02 treasury-only issuance, FR-03 transfer rules, FR-04 oversight, NFR-01 MSP policy alignment, NFR-02 audit traceability, NFR-03 ledger boundary
+Nodes (2): Gateways selected by principal custodian MSP; no shared default signer, principalLedger resolves principal via LedgerService.ForPrincipal to a request-local Fabric contract and signer
 
 ### Community 189 - "Community 189"
 Cohesion: 1.0
-Nodes (2): No separate wholesale and retail token types or intermediate retail reserve, Rationale: an intermediate inventory would add a second ledger state and transaction without expanding the compliance evaluation; reusing the atomic reserve-funding flow keeps the test focused
+Nodes (2): Backend thesis traceability responsibilities for FR-01..FR-05, NFR-02, NFR-03, Backend Go tests: routes_test.go, authorization_test.go, ledger_test.go, kyc_service_test.go, integration_test.go
 
 ### Community 190 - "Community 190"
 Cohesion: 1.0
-Nodes (2): Retail Compliance API Routes, FABRIC_STUDY_IDENTITIES_JSON Signer Map
+Nodes (2): Chaincode tests: digital_rupiah_test.go, digital_rupiah_v3_test.go, authorization_test.go, offchain_kyc_test.go, compliance_policy_test.go via go test ./..., Chaincode thesis traceability: FR-01 participant lifecycle, FR-02 treasury-only issuance, FR-03 transfer rules, FR-04 oversight, NFR-01 MSP policy alignment, NFR-02 audit traceability, NFR-03 ledger boundary
 
 ### Community 191 - "Community 191"
 Cohesion: 1.0
-Nodes (2): Benchmark Failure Taxonomy, 99 Percent and p95 2.5s Sustainability Gate
+Nodes (2): No separate wholesale and retail token types or intermediate retail reserve, Rationale: an intermediate inventory would add a second ledger state and transaction without expanding the compliance evaluation; reusing the atomic reserve-funding flow keeps the test focused
 
 ### Community 192 - "Community 192"
 Cohesion: 1.0
-Nodes (2): Albina Gaisina, Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-
+Nodes (2): Retail Compliance API Routes, FABRIC_STUDY_IDENTITIES_JSON Signer Map
 
 ### Community 193 - "Community 193"
 Cohesion: 1.0
-Nodes (2): Central bank digital currency and bank intermediation- Medium of Exchange vs. Savings vehicle, Remo Nyffenegger
+Nodes (2): Benchmark Failure Taxonomy, 99 Percent and p95 2.5s Sustainability Gate
 
 ### Community 194 - "Community 194"
 Cohesion: 1.0
-Nodes (2): Central bank digital currency and flight to safety, Stephen D. Williamson
+Nodes (2): Albina Gaisina, Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-
 
 ### Community 195 - "Community 195"
 Cohesion: 1.0
-Nodes (2): Central bank digital currency and systemic risk, Muhammad Suhail Rizwan
+Nodes (2): Central bank digital currency and bank intermediation- Medium of Exchange vs. Savings vehicle, Remo Nyffenegger
 
 ### Community 196 - "Community 196"
 Cohesion: 1.0
-Nodes (2): Central bank digital currency- A systematic literature review using text mining approach, Yen Hai Hoang
+Nodes (2): Central bank digital currency and flight to safety, Stephen D. Williamson
 
 ### Community 197 - "Community 197"
 Cohesion: 1.0
-Nodes (2): Central bank digital currency- Payment choices and commercial bank profitability, Jaemin Son
+Nodes (2): Central bank digital currency and systemic risk, Muhammad Suhail Rizwan
 
 ### Community 198 - "Community 198"
 Cohesion: 1.0
-Nodes (2): Centralized use of decentralized technology- Tokenization of currencies and assets, Ying Zhang
+Nodes (2): Central bank digital currency- A systematic literature review using text mining approach, Yen Hai Hoang
 
 ### Community 199 - "Community 199"
 Cohesion: 1.0
-Nodes (2): Consultative-Paper-Rupiah-Digital-BI, Raafi
+Nodes (2): Central bank digital currency- Payment choices and commercial bank profitability, Jaemin Son
 
 ### Community 200 - "Community 200"
 Cohesion: 1.0
-Nodes (2): Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review, Janitra Nur Aryani
+Nodes (2): Centralized use of decentralized technology- Tokenization of currencies and assets, Ying Zhang
 
 ### Community 201 - "Community 201"
 Cohesion: 1.0
-Nodes (2): Distributed Ledger Technology DLT) and Blockchain, World Bank Group
+Nodes (2): Consultative-Paper-Rupiah-Digital-BI, Raafi
 
 ### Community 202 - "Community 202"
 Cohesion: 1.0
-Nodes (2): Faktor yang Mempengaruhi Pergi Tanpa Uang Tunai atau Cashless di Kota Pekanbaru, Windows User
+Nodes (2): Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review, Janitra Nur Aryani
 
 ### Community 203 - "Community 203"
 Cohesion: 1.0
-Nodes (2): Fasilitas Likuiditas, THI fariza
+Nodes (2): Distributed Ledger Technology DLT) and Blockchain, World Bank Group
 
 ### Community 204 - "Community 204"
 Cohesion: 1.0
-Nodes (2): How does the fintech sector react to signals from central bank digital currencies, Zhenghui Li
+Nodes (2): Faktor yang Mempengaruhi Pergi Tanpa Uang Tunai atau Cashless di Kota Pekanbaru, Windows User
 
 ### Community 205 - "Community 205"
 Cohesion: 1.0
-Nodes (2): Frédéric Tronnier, Investigating privacy concerns and trust in the digital Euro in Germany
+Nodes (2): Fasilitas Likuiditas, THI fariza
 
 ### Community 206 - "Community 206"
 Cohesion: 1.0
-Nodes (2): KYC Optimization by Blockchain Based Hyperledger Fabric Network, Nazir Ullah
+Nodes (2): How does the fintech sector react to signals from central bank digital currencies, Zhenghui Li
 
 ### Community 207 - "Community 207"
 Cohesion: 1.0
-Nodes (2): Imran Yousaf, Linkages between CBDC and cryptocurrency uncertainties, and digital payment stocks
+Nodes (2): Frédéric Tronnier, Investigating privacy concerns and trust in the digital Euro in Germany
 
 ### Community 208 - "Community 208"
 Cohesion: 1.0
-Nodes (2): Dóra Horváth, Money in the digital age- Exploring the potential of central bank digital currency with a focus on social adaptation and education
+Nodes (2): KYC Optimization by Blockchain Based Hyperledger Fabric Network, Nazir Ullah
 
 ### Community 209 - "Community 209"
 Cohesion: 1.0
-Nodes (2): J. Ree, Nigeria's eNaira, one year after
+Nodes (2): Imran Yousaf, Linkages between CBDC and cryptocurrency uncertainties, and digital payment stocks
 
 ### Community 210 - "Community 210"
 Cohesion: 1.0
-Nodes (2): P. Michalopoulos, Odunayo Olowookere, Nadia Pocher, Johannes Sedlmeir, Andreas G. Veneris, Poonam Puri, Privacy and Compliance Design Options in Offline Central Bank Digital Currencies
+Nodes (2): Dóra Horváth, Money in the digital age- Exploring the potential of central bank digital currency with a focus on social adaptation and education
 
 ### Community 211 - "Community 211"
 Cohesion: 1.0
-Nodes (2): Redesigning the eNaira central bank digital currency (CBDC) for payments and macroeconomic effectiveness, xls
+Nodes (2): J. Ree, Nigeria's eNaira, one year after
 
 ### Community 212 - "Community 212"
 Cohesion: 1.0
-Nodes (2): Retail CBDC purposes and risk transfers to the central bank, Romain Baeriswyl, Samuel Reynard, A. Swoboda
+Nodes (2): P. Michalopoulos, Odunayo Olowookere, Nadia Pocher, Johannes Sedlmeir, Andreas G. Veneris, Poonam Puri, Privacy and Compliance Design Options in Offline Central Bank Digital Currencies
 
 ### Community 213 - "Community 213"
 Cohesion: 1.0
-Nodes (2): John Kiff, Retail Central Bank Digital Currency Global Landscape (IMF Working Paper)
+Nodes (2): Redesigning the eNaira central bank digital currency (CBDC) for payments and macroeconomic effectiveness, xls
 
 ### Community 214 - "Community 214"
 Cohesion: 1.0
-Nodes (2): Anastasia Tsareva, M. Komarov, Retail Central Bank Digital Currency Design Choices- Guide for Policymakers
+Nodes (2): Retail CBDC purposes and risk transfers to the central bank, Romain Baeriswyl, Samuel Reynard, A. Swoboda
 
 ### Community 215 - "Community 215"
 Cohesion: 1.0
-Nodes (2): Jamie Morgan, Systemic stablecoin and the defensive case for Central Bank Digital Currency- A critique of the Bank of England’s framing
+Nodes (2): John Kiff, Retail Central Bank Digital Currency Global Landscape (IMF Working Paper)
 
 ### Community 216 - "Community 216"
 Cohesion: 1.0
-Nodes (2): The crowding-out effect of central bank digital currencies- A simple and generalizable payment portfolio model, Wenlong Bian
+Nodes (2): Anastasia Tsareva, M. Komarov, Retail Central Bank Digital Currency Design Choices- Guide for Policymakers
 
 ### Community 217 - "Community 217"
 Cohesion: 1.0
-Nodes (2): Abdelrahman J.K. Alfar, The determinants of issuing central bank digital currencies
+Nodes (2): Jamie Morgan, Systemic stablecoin and the defensive case for Central Bank Digital Currency- A critique of the Bank of England’s framing
 
 ### Community 218 - "Community 218"
 Cohesion: 1.0
-Nodes (2): John Barrdear, Michael Kumhof, The macroeconomics of central bank digital currencies
+Nodes (2): The crowding-out effect of central bank digital currencies- A simple and generalizable payment portfolio model, Wenlong Bian
 
 ### Community 219 - "Community 219"
 Cohesion: 1.0
-Nodes (2): Raphael A. Auer, Rainer Böhme, The technology of retail central bank digital currency
+Nodes (2): Abdelrahman J.K. Alfar, The determinants of issuing central bank digital currencies
 
 ### Community 220 - "Community 220"
 Cohesion: 1.0
-Nodes (2): Shaen Corbet, Understanding the rapid development of CBDC in emerging economies
+Nodes (2): John Barrdear, Michael Kumhof, The macroeconomics of central bank digital currencies
 
 ### Community 221 - "Community 221"
 Cohesion: 1.0
-Nodes (2): User adoption of digital currency: A systematic review and future agenda using TCCM approach, Vikrant Singh
+Nodes (2): Raphael A. Auer, Rainer Böhme, The technology of retail central bank digital currency
 
 ### Community 222 - "Community 222"
 Cohesion: 1.0
-Nodes (2): Elsafan Cris, Whitepaper IDRX
+Nodes (2): Shaen Corbet, Understanding the rapid development of CBDC in emerging economies
 
 ### Community 223 - "Community 223"
 Cohesion: 1.0
-Nodes (2): Modeling Central Bank Digital Currencies, U. Bindseil, Richard Senner
+Nodes (2): User adoption of digital currency: A systematic review and future agenda using TCCM approach, Vikrant Singh
 
 ### Community 224 - "Community 224"
 Cohesion: 1.0
-Nodes (2): Alejandro Zamora-Pérez, Eliana Coschignano, Lorena Barreiro, Ensuring Adoption of Central Bank Digital Currencies – an Easy Task or a Gordian Knot?
+Nodes (2): Elsafan Cris, Whitepaper IDRX
 
 ### Community 225 - "Community 225"
 Cohesion: 1.0
-Nodes (2): A Macroeconomic Model of Central Bank Digital Currency, Pascal Paul, Mauricio Ulate, J. Wu
+Nodes (2): Modeling Central Bank Digital Currencies, U. Bindseil, Richard Senner
 
 ### Community 226 - "Community 226"
 Cohesion: 1.0
-Nodes (2): Matthew Malloy, Francis Martinez, Mary-Frances Styczynski, A. Thorp, Retail CBDC and U.S. Monetary Policy Implementation: A Stylized Balance Sheet Analysis
+Nodes (2): Alejandro Zamora-Pérez, Eliana Coschignano, Lorena Barreiro, Ensuring Adoption of Central Bank Digital Currencies – an Easy Task or a Gordian Knot?
 
 ### Community 227 - "Community 227"
 Cohesion: 1.0
-Nodes (2): Carlos León, Jose Moreno, Kimmo Soramäki, Simulating the Adoption of a Retail CBDC
+Nodes (2): A Macroeconomic Model of Central Bank Digital Currency, Pascal Paul, Mauricio Ulate, J. Wu
 
 ### Community 228 - "Community 228"
 Cohesion: 1.0
-Nodes (2): Nuntapun Bhensook, Thanaporn Rattanakul, Witit Synsatayakul, Pakaporn Tohwisessuk, Public Use and Distribution of Retail CBDC: An Evidence from Thailand’s Retail CBDC Pilot Program
+Nodes (2): Matthew Malloy, Francis Martinez, Mary-Frances Styczynski, A. Thorp, Retail CBDC and U.S. Monetary Policy Implementation: A Stylized Balance Sheet Analysis
 
 ### Community 229 - "Community 229"
 Cohesion: 1.0
-Nodes (2): A High Performance Payment Processing System Designed for Central Bank Digital Currencies, James Lovejoy, Cory Fields, M. Virza, Tyler Frederick, David Urness, Kevin Karwaski, Anders Brownworth, Neha Narula
+Nodes (2): Carlos León, Jose Moreno, Kimmo Soramäki, Simulating the Adoption of a Retail CBDC
 
 ### Community 230 - "Community 230"
 Cohesion: 1.0
-Nodes (2): Raphael A. Auer, G. Cornelli, Jon Frost, Rise of the Central Bank Digital Currencies: Drivers, Approaches and Technologies
+Nodes (2): Nuntapun Bhensook, Thanaporn Rattanakul, Witit Synsatayakul, Pakaporn Tohwisessuk, Public Use and Distribution of Retail CBDC: An Evidence from Thailand’s Retail CBDC Pilot Program
 
 ### Community 231 - "Community 231"
 Cohesion: 1.0
-Nodes (2): CBDCs and Liquidity Risks: Evidence from the SandDollar’s Impact on Deposits and Loans in the Bahamas, Francisco Elieser Giraldo-Gordillo, Ricardo Bustillo-Mesanza
+Nodes (2): A High Performance Payment Processing System Designed for Central Bank Digital Currencies, James Lovejoy, Cory Fields, M. Virza, Tyler Frederick, David Urness, Kevin Karwaski, Anders Brownworth, Neha Narula
 
 ### Community 232 - "Community 232"
 Cohesion: 1.0
-Nodes (2): B. Tan, Central Bank Digital Currency and Financial Inclusion
+Nodes (2): Raphael A. Auer, G. Cornelli, Jon Frost, Rise of the Central Bank Digital Currencies: Drivers, Approaches and Technologies
 
 ### Community 233 - "Community 233"
 Cohesion: 1.0
-Nodes (2): Central Bank Digital Currencies: International Experience and Development Risks, Елизавета Валентиновна Оглоблина, В.В. Макарова
+Nodes (2): CBDCs and Liquidity Risks: Evidence from the SandDollar’s Impact on Deposits and Loans in the Bahamas, Francisco Elieser Giraldo-Gordillo, Ricardo Bustillo-Mesanza
 
 ### Community 234 - "Community 234"
 Cohesion: 1.0
-Nodes (2): Designing Retail Central Bank Digital Currencies: A Systematic Literature Review of Trade-Offs Between Security, Privacy, and Financial Stability, Jwa Emma Said, J. Lánský
+Nodes (2): B. Tan, Central Bank Digital Currency and Financial Inclusion
 
 ### Community 235 - "Community 235"
 Cohesion: 1.0
-Nodes (2): Gerard P. Presto, Michi Kakebayashi, Tomonori Yuyama, Masato Yamanaka, Shin’ichiro Matsuo, Retail & Wholesale Central Bank Digital Currencies: Comparison of Select Models, Use Case Analysis & Exploration of Potential Technical Features
+Nodes (2): Central Bank Digital Currencies: International Experience and Development Risks, Елизавета Валентиновна Оглоблина, В.В. Макарова
 
 ### Community 236 - "Community 236"
 Cohesion: 1.0
-Nodes (2): Central bank digital currencies: policy implications, Daniel Broby
+Nodes (2): Designing Retail Central Bank Digital Currencies: A Systematic Literature Review of Trade-Offs Between Security, Privacy, and Financial Stability, Jwa Emma Said, J. Lánský
 
 ### Community 237 - "Community 237"
 Cohesion: 1.0
-Nodes (2): Benjamin Hemingway, The Role of Central Bank Digital Currency in an Increasingly Digital Economy
+Nodes (2): Gerard P. Presto, Michi Kakebayashi, Tomonori Yuyama, Masato Yamanaka, Shin’ichiro Matsuo, Retail & Wholesale Central Bank Digital Currencies: Comparison of Select Models, Use Case Analysis & Exploration of Potential Technical Features
 
 ### Community 238 - "Community 238"
 Cohesion: 1.0
-Nodes (2): Adam Abdullah, Monetary Reform and Central Bank Digital Currencies: The Impact on Retail Banking
+Nodes (2): Central bank digital currencies: policy implications, Daniel Broby
 
 ### Community 239 - "Community 239"
 Cohesion: 1.0
-Nodes (2): Anna Iwańczuk-Kaliska, Potential Implications of Retail Central Bank Digital Currency for Banking Systems Identified in the Literature and by Central Banks
+Nodes (2): Benjamin Hemingway, The Role of Central Bank Digital Currency in an Increasingly Digital Economy
 
 ### Community 240 - "Community 240"
 Cohesion: 1.0
-Nodes (2): Adoption of Central Bank Digital Currency in India: A Structural Model Using ISM, Vaibhav Dixit, A. Shailesh, Shubhasmita Mishra, Rinki Verma
+Nodes (2): Adam Abdullah, Monetary Reform and Central Bank Digital Currencies: The Impact on Retail Banking
 
 ### Community 241 - "Community 241"
 Cohesion: 1.0
-Nodes (2): A conceptual model for point-of-sale payment with retail central bank digital currency, Lars Hupel
+Nodes (2): Anna Iwańczuk-Kaliska, Potential Implications of Retail Central Bank Digital Currency for Banking Systems Identified in the Literature and by Central Banks
 
 ### Community 242 - "Community 242"
 Cohesion: 1.0
-Nodes (2): Advancing Digital Economy and Financial Inclusion through Central Bank Digital Currencies: A Comprehensive Analysis of Policies and Legal Implications, Emily Lee
+Nodes (2): Adoption of Central Bank Digital Currency in India: A Structural Model Using ISM, Vaibhav Dixit, A. Shailesh, Shubhasmita Mishra, Rinki Verma
 
 ### Community 243 - "Community 243"
 Cohesion: 1.0
-Nodes (2): Design of a Central Bank Digital Currency in a Highly Dollarized Emerging Market Economy: The Case of Cambodia, K. Ueda, Chanthol Hay
+Nodes (2): A conceptual model for point-of-sale payment with retail central bank digital currency, Lars Hupel
 
 ### Community 244 - "Community 244"
 Cohesion: 1.0
-Nodes (2): Concept note on CBDC, Reserve Bank of India (RBI)
+Nodes (2): Advancing Digital Economy and Financial Inclusion through Central Bank Digital Currencies: A Comprehensive Analysis of Policies and Legal Implications, Emily Lee
 
 ### Community 245 - "Community 245"
 Cohesion: 1.0
-Nodes (2): Bank of Jamaica (BOJ), JAM-DEX: CBDC FAQs
+Nodes (2): Design of a Central Bank Digital Currency in a Highly Dollarized Emerging Market Economy: The Case of Cambodia, K. Ueda, Chanthol Hay
 
 ### Community 246 - "Community 246"
 Cohesion: 1.0
-Nodes (2): Central Bank of Nigeria (CBN), Design paper for eNaira
+Nodes (2): Concept note on CBDC, Reserve Bank of India (RBI)
 
 ### Community 247 - "Community 247"
 Cohesion: 1.0
-Nodes (2): CBDC adoption: Inclusive strategies for central banks and governments, T. Koonprasert et al
+Nodes (2): Bank of Jamaica (BOJ), JAM-DEX: CBDC FAQs
 
 ### Community 248 - "Community 248"
 Cohesion: 1.0
-Nodes (2): A. Chhangani, China's digital yuan
+Nodes (2): Central Bank of Nigeria (CBN), Design paper for eNaira
 
 ### Community 249 - "Community 249"
 Cohesion: 1.0
-Nodes (2): E-krona pilot Phase 4, Sveriges Riksbank
+Nodes (2): CBDC adoption: Inclusive strategies for central banks and governments, T. Koonprasert et al
 
 ### Community 250 - "Community 250"
 Cohesion: 1.0
-Nodes (2): BI-RTGS Integration, Proof-of-Authority Consensus (Garuda PoC)
+Nodes (2): A. Chhangani, China's digital yuan
 
 ### Community 251 - "Community 251"
 Cohesion: 1.0
-Nodes (2): Design Consideration: Financial Control (crypto/stablecoin risk to monetary control), Design Consideration: Technological Advancement
+Nodes (2): E-krona pilot Phase 4, Sveriges Riksbank
 
 ### Community 252 - "Community 252"
 Cohesion: 1.0
-Nodes (2): Two-Second Batch Timeout Plausible Cause of Latency Not Isolated, Reads 272-296 ops/s Offered, Write TPS 0.184-4.75, Verified 0.200-4.613 TPS
+Nodes (2): BI-RTGS Integration, Proof-of-Authority Consensus (Garuda PoC)
 
 ### Community 253 - "Community 253"
 Cohesion: 1.0
-Nodes (2): Caliper One-Worker Benchmark: 20/20 Scenarios, 207/207 Authorization Cells, 27/27 Validation Cases Pass, Limits: Tests Verify Selected Scenarios Only; No Identity Authenticity, Screening Effectiveness, PPATK Reporting, or Institutional Compliance
+Nodes (2): Design Consideration: Financial Control (crypto/stablecoin risk to monetary control), Design Consideration: Technological Advancement
 
 ### Community 254 - "Community 254"
 Cohesion: 1.0
-Nodes (2): Architecture: Merchant App, Attribute Authority App, Admin App, Fabric Network with Chaincode, BRMS Engine, Payment Gateway Case Study: Merchant, Attribute Authority, Payment Provider
+Nodes (2): Two-Second Batch Timeout Plausible Cause of Latency Not Isolated, Reads 272-296 ops/s Offered, Write TPS 0.184-4.75, Verified 0.200-4.613 TPS
 
 ### Community 255 - "Community 255"
 Cohesion: 1.0
-Nodes (1): wallet.balance -= amount / device.balance += amount
+Nodes (2): Caliper One-Worker Benchmark: 20/20 Scenarios, 207/207 Authorization Cells, 27/27 Validation Cases Pass, Limits: Tests Verify Selected Scenarios Only; No Identity Authenticity, Screening Effectiveness, PPATK Reporting, or Institutional Compliance
 
 ### Community 256 - "Community 256"
 Cohesion: 1.0
-Nodes (2): Data Tx, Merkle Root
+Nodes (2): Architecture: Merchant App, Attribute Authority App, Admin App, Fabric Network with Chaincode, BRMS Engine, Payment Gateway Case Study: Merchant, Attribute Authority, Payment Provider
 
 ### Community 257 - "Community 257"
 Cohesion: 1.0
-Nodes (2): Frontend HTML shell (frontend/index.html), Product title: bi-coin Digital Rupiah, Retail CBDC
+Nodes (1): wallet.balance -= amount / device.balance += amount
 
 ### Community 258 - "Community 258"
 Cohesion: 1.0
-Nodes (2): Chapter 3 chaincode design: CreateWallet, QueryWallet, Transfer, QueryTransactionHistory, Rule: Garuda Iroha wholesale references are architecture patterns only, not retail Fabric scope
+Nodes (2): Data Tx, Merkle Root
 
 ### Community 259 - "Community 259"
 Cohesion: 1.0
-Nodes (0): 
+Nodes (2): Frontend HTML shell (frontend/index.html), Product title: bi-coin Digital Rupiah, Retail CBDC
 
 ### Community 260 - "Community 260"
 Cohesion: 1.0
-Nodes (0): 
+Nodes (2): Chapter 3 chaincode design: CreateWallet, QueryWallet, Transfer, QueryTransactionHistory, Rule: Garuda Iroha wholesale references are architecture patterns only, not retail Fabric scope
 
 ### Community 261 - "Community 261"
 Cohesion: 1.0
@@ -1542,133 +1544,141 @@ Nodes (0):
 
 ### Community 292 - "Community 292"
 Cohesion: 1.0
-Nodes (1): Implementing a Retail CBDC: Lessons Learned and Key Insights
+Nodes (0): 
 
 ### Community 293 - "Community 293"
 Cohesion: 1.0
-Nodes (1): paper_deren.pdf (Style Exemplar)
+Nodes (0): 
 
 ### Community 294 - "Community 294"
 Cohesion: 1.0
-Nodes (1): paper_grandiv.pdf (Style Exemplar)
+Nodes (1): Implementing a Retail CBDC: Lessons Learned and Key Insights
 
 ### Community 295 - "Community 295"
 Cohesion: 1.0
-Nodes (1): IEEE Conference Paper Template
+Nodes (1): paper_deren.pdf (Style Exemplar)
 
 ### Community 296 - "Community 296"
 Cohesion: 1.0
-Nodes (1): Account-Based CBDC
+Nodes (1): paper_grandiv.pdf (Style Exemplar)
 
 ### Community 297 - "Community 297"
 Cohesion: 1.0
-Nodes (1): Bank Deposit
+Nodes (1): IEEE Conference Paper Template
 
 ### Community 298 - "Community 298"
 Cohesion: 1.0
-Nodes (1): UGM University Logo
+Nodes (1): Account-Based CBDC
 
 ### Community 299 - "Community 299"
 Cohesion: 1.0
-Nodes (1): Scanned Endorsement Document
+Nodes (1): Bank Deposit
 
 ### Community 300 - "Community 300"
 Cohesion: 1.0
-Nodes (1): Scanned Statement Document
+Nodes (1): UGM University Logo
 
 ### Community 301 - "Community 301"
 Cohesion: 1.0
-Nodes (1): Garuda Digital Rupiah — Retail CBDC frontend entry (index.html)
+Nodes (1): Scanned Endorsement Document
 
 ### Community 302 - "Community 302"
 Cohesion: 1.0
-Nodes (1): Domain template
+Nodes (1): Scanned Statement Document
 
 ### Community 303 - "Community 303"
 Cohesion: 1.0
-Nodes (1): Source template
+Nodes (1): Garuda Digital Rupiah — Retail CBDC frontend entry (index.html)
 
 ### Community 304 - "Community 304"
 Cohesion: 1.0
-Nodes (1): Concept template
+Nodes (1): Domain template
 
 ### Community 305 - "Community 305"
 Cohesion: 1.0
-Nodes (1): Entity template
+Nodes (1): Source template
 
 ### Community 306 - "Community 306"
 Cohesion: 1.0
-Nodes (1): True red/green/refactor TDD preference
+Nodes (1): Concept template
 
 ### Community 307 - "Community 307"
 Cohesion: 1.0
-Nodes (1): RTK Rust Token Killer token-optimized CLI proxy
+Nodes (1): Entity template
 
 ### Community 308 - "Community 308"
 Cohesion: 1.0
-Nodes (1): NFR-02 auditability and traceability
+Nodes (1): True red/green/refactor TDD preference
 
 ### Community 309 - "Community 309"
 Cohesion: 1.0
-Nodes (1): NFR-03 separated system layers
+Nodes (1): RTK Rust Token Killer token-optimized CLI proxy
 
 ### Community 310 - "Community 310"
 Cohesion: 1.0
-Nodes (1): Browser login smoke test not run: backend against configured localhost:5433 PostgreSQL endpoint failed because the port refused the connection
+Nodes (1): NFR-02 auditability and traceability
 
 ### Community 311 - "Community 311"
 Cohesion: 1.0
-Nodes (1): Sources Index
+Nodes (1): NFR-03 separated system layers
 
 ### Community 312 - "Community 312"
 Cohesion: 1.0
-Nodes (1): Jon Frost
+Nodes (1): Browser login smoke test not run: backend against configured localhost:5433 PostgreSQL endpoint failed because the port refused the connection
 
 ### Community 313 - "Community 313"
 Cohesion: 1.0
-Nodes (1): L. Gambacorta
+Nodes (1): Sources Index
 
 ### Community 314 - "Community 314"
 Cohesion: 1.0
-Nodes (1): Cyril Monnet
+Nodes (1): Jon Frost
 
 ### Community 315 - "Community 315"
 Cohesion: 1.0
-Nodes (1): Tara Rice
+Nodes (1): L. Gambacorta
 
 ### Community 316 - "Community 316"
 Cohesion: 1.0
-Nodes (1): H. Shin
+Nodes (1): Cyril Monnet
 
 ### Community 317 - "Community 317"
 Cohesion: 1.0
-Nodes (1): Chaum 1982 blind-signature anonymous e-cash
+Nodes (1): Tara Rice
 
 ### Community 318 - "Community 318"
 Cohesion: 1.0
-Nodes (1): Offline Functionality
+Nodes (1): H. Shin
 
 ### Community 319 - "Community 319"
 Cohesion: 1.0
-Nodes (1): Post-Quantum Cryptography (future direction)
+Nodes (1): Chaum 1982 blind-signature anonymous e-cash
 
 ### Community 320 - "Community 320"
 Cohesion: 1.0
-Nodes (1): Bank Intermediation Concern
+Nodes (1): Offline Functionality
 
 ### Community 321 - "Community 321"
 Cohesion: 1.0
-Nodes (1): Latency: Mutual Auth 1652/1656 ms (V.1/V.2), Transactions ~4.8 s / 3.9 s
+Nodes (1): Post-Quantum Cryptography (future direction)
 
 ### Community 322 - "Community 322"
 Cohesion: 1.0
-Nodes (1): QRIS payment intent lifecycle (pending to settled/queued)
+Nodes (1): Bank Intermediation Concern
 
 ### Community 323 - "Community 323"
 Cohesion: 1.0
-Nodes (1): REST API role-based access: public, authenticated, kyc_verified, bank_pjp, bank_indonesia, merchant, auditor
+Nodes (1): Latency: Mutual Auth 1652/1656 ms (V.1/V.2), Transactions ~4.8 s / 3.9 s
 
 ### Community 324 - "Community 324"
+Cohesion: 1.0
+Nodes (1): QRIS payment intent lifecycle (pending to settled/queued)
+
+### Community 325 - "Community 325"
+Cohesion: 1.0
+Nodes (1): REST API role-based access: public, authenticated, kyc_verified, bank_pjp, bank_indonesia, merchant, auditor
+
+### Community 326 - "Community 326"
 Cohesion: 1.0
 Nodes (1): Log 2026-07-23: Kamus Bahasa Indonesia 2008 ingest
 
@@ -1719,313 +1729,313 @@ Nodes (1): Log 2026-07-23: Kamus Bahasa Indonesia 2008 ingest
 ## Knowledge Gaps
 - **1861 isolated node(s):** `transferReceipt`, `monetaryReceipt`, `subjectRecord`, `LimitProfile`, `SubjectView` (+1856 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 171`** (2 nodes): `validate-negative-path-log.test.js`, `validLog()`
+- **Thin community `Community 173`** (2 nodes): `validate-negative-path-log.test.js`, `validLog()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 172`** (2 nodes): `validate-negative-path-log.js`, `validateNegativePathLog()`
+- **Thin community `Community 174`** (2 nodes): `validate-negative-path-log.js`, `validateNegativePathLog()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 173`** (2 nodes): `validate-boundary-log.js`, `validateBoundaryLog()`
+- **Thin community `Community 175`** (2 nodes): `validate-boundary-log.js`, `validateBoundaryLog()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 174`** (2 nodes): `validate-caliper-report.test.js`, `table()`
+- **Thin community `Community 176`** (2 nodes): `validate-caliper-report.test.js`, `table()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 175`** (2 nodes): `row()`, `analyze-benchmark-results.test.js`
+- **Thin community `Community 177`** (2 nodes): `row()`, `analyze-benchmark-results.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 176`** (2 nodes): `outcome-analysis.test.js`, `events()`
+- **Thin community `Community 178`** (2 nodes): `outcome-analysis.test.js`, `events()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 177`** (2 nodes): `resource-analysis.test.js`, `sample()`
+- **Thin community `Community 179`** (2 nodes): `resource-analysis.test.js`, `sample()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 178`** (2 nodes): `Permissioned BFT-Family Consensus Protocols Best Suited for CBDC`, `Blockchain Application for Central Bank Digital Currencies (CBDC)`
+- **Thin community `Community 180`** (2 nodes): `Permissioned BFT-Family Consensus Protocols Best Suited for CBDC`, `Blockchain Application for Central Bank Digital Currencies (CBDC)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 179`** (2 nodes): `India e-Rupee: Two-Tier with Hyperledger Fabric (Wholesale) + UPI (Retail)`, `Rationale: India deliberately skipped DLT for retail layer, using UPI-based APIs instead`
+- **Thin community `Community 181`** (2 nodes): `India e-Rupee: Two-Tier with Hyperledger Fabric (Wholesale) + UPI (Retail)`, `Rationale: India deliberately skipped DLT for retail layer, using UPI-based APIs instead`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 180`** (2 nodes): `Anti-Money Laundering (AML)`, `CBDCs as AML Countermeasure`
+- **Thin community `Community 182`** (2 nodes): `Anti-Money Laundering (AML)`, `CBDCs as AML Countermeasure`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 181`** (2 nodes): `Modeling techniques: Benchmarking, Simulation, Empirical, Analytical`, `Performance Evaluation of Blockchain Systems: Parameters, Criteria and Modeling Techniques`
+- **Thin community `Community 183`** (2 nodes): `Modeling techniques: Benchmarking, Simulation, Empirical, Analytical`, `Performance Evaluation of Blockchain Systems: Parameters, Criteria and Modeling Techniques`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 182`** (2 nodes): `International Monetary Fund (IMF)`, `John Kiff (IMF)`
+- **Thin community `Community 184`** (2 nodes): `International Monetary Fund (IMF)`, `John Kiff (IMF)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 183`** (2 nodes): `Adinova Fauri (CSIS Researcher)`, `CSIS Indonesia`
+- **Thin community `Community 185`** (2 nodes): `Adinova Fauri (CSIS Researcher)`, `CSIS Indonesia`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 184`** (2 nodes): `Tier 1 Central Bank: issuance, destruction, supply, governance, oversight`, `Tier 2 Intermediaries: wallet services, onboarding, KYC/AML, retail payments`
+- **Thin community `Community 186`** (2 nodes): `Tier 1 Central Bank: issuance, destruction, supply, governance, oversight`, `Tier 2 Intermediaries: wallet services, onboarding, KYC/AML, retail payments`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 185`** (2 nodes): `FR-04 audit and oversight reports`, `Supervision: oversight without authority to create, distribute, redeem, or transfer`
+- **Thin community `Community 187`** (2 nodes): `FR-04 audit and oversight reports`, `Supervision: oversight without authority to create, distribute, redeem, or transfer`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 186`** (2 nodes): `Gateways selected by principal custodian MSP; no shared default signer`, `principalLedger resolves principal via LedgerService.ForPrincipal to a request-local Fabric contract and signer`
+- **Thin community `Community 188`** (2 nodes): `Gateways selected by principal custodian MSP; no shared default signer`, `principalLedger resolves principal via LedgerService.ForPrincipal to a request-local Fabric contract and signer`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 187`** (2 nodes): `Backend thesis traceability responsibilities for FR-01..FR-05, NFR-02, NFR-03`, `Backend Go tests: routes_test.go, authorization_test.go, ledger_test.go, kyc_service_test.go, integration_test.go`
+- **Thin community `Community 189`** (2 nodes): `Backend thesis traceability responsibilities for FR-01..FR-05, NFR-02, NFR-03`, `Backend Go tests: routes_test.go, authorization_test.go, ledger_test.go, kyc_service_test.go, integration_test.go`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 188`** (2 nodes): `Chaincode tests: digital_rupiah_test.go, digital_rupiah_v3_test.go, authorization_test.go, offchain_kyc_test.go, compliance_policy_test.go via go test ./...`, `Chaincode thesis traceability: FR-01 participant lifecycle, FR-02 treasury-only issuance, FR-03 transfer rules, FR-04 oversight, NFR-01 MSP policy alignment, NFR-02 audit traceability, NFR-03 ledger boundary`
+- **Thin community `Community 190`** (2 nodes): `Chaincode tests: digital_rupiah_test.go, digital_rupiah_v3_test.go, authorization_test.go, offchain_kyc_test.go, compliance_policy_test.go via go test ./...`, `Chaincode thesis traceability: FR-01 participant lifecycle, FR-02 treasury-only issuance, FR-03 transfer rules, FR-04 oversight, NFR-01 MSP policy alignment, NFR-02 audit traceability, NFR-03 ledger boundary`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 189`** (2 nodes): `No separate wholesale and retail token types or intermediate retail reserve`, `Rationale: an intermediate inventory would add a second ledger state and transaction without expanding the compliance evaluation; reusing the atomic reserve-funding flow keeps the test focused`
+- **Thin community `Community 191`** (2 nodes): `No separate wholesale and retail token types or intermediate retail reserve`, `Rationale: an intermediate inventory would add a second ledger state and transaction without expanding the compliance evaluation; reusing the atomic reserve-funding flow keeps the test focused`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 190`** (2 nodes): `Retail Compliance API Routes`, `FABRIC_STUDY_IDENTITIES_JSON Signer Map`
+- **Thin community `Community 192`** (2 nodes): `Retail Compliance API Routes`, `FABRIC_STUDY_IDENTITIES_JSON Signer Map`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 191`** (2 nodes): `Benchmark Failure Taxonomy`, `99 Percent and p95 2.5s Sustainability Gate`
+- **Thin community `Community 193`** (2 nodes): `Benchmark Failure Taxonomy`, `99 Percent and p95 2.5s Sustainability Gate`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 192`** (2 nodes): `Albina Gaisina`, `Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-`
+- **Thin community `Community 194`** (2 nodes): `Albina Gaisina`, `Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 193`** (2 nodes): `Central bank digital currency and bank intermediation- Medium of Exchange vs. Savings vehicle`, `Remo Nyffenegger`
+- **Thin community `Community 195`** (2 nodes): `Central bank digital currency and bank intermediation- Medium of Exchange vs. Savings vehicle`, `Remo Nyffenegger`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 194`** (2 nodes): `Central bank digital currency and flight to safety`, `Stephen D. Williamson`
+- **Thin community `Community 196`** (2 nodes): `Central bank digital currency and flight to safety`, `Stephen D. Williamson`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 195`** (2 nodes): `Central bank digital currency and systemic risk`, `Muhammad Suhail Rizwan`
+- **Thin community `Community 197`** (2 nodes): `Central bank digital currency and systemic risk`, `Muhammad Suhail Rizwan`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 196`** (2 nodes): `Central bank digital currency- A systematic literature review using text mining approach`, `Yen Hai Hoang`
+- **Thin community `Community 198`** (2 nodes): `Central bank digital currency- A systematic literature review using text mining approach`, `Yen Hai Hoang`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 197`** (2 nodes): `Central bank digital currency- Payment choices and commercial bank profitability`, `Jaemin Son`
+- **Thin community `Community 199`** (2 nodes): `Central bank digital currency- Payment choices and commercial bank profitability`, `Jaemin Son`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 198`** (2 nodes): `Centralized use of decentralized technology- Tokenization of currencies and assets`, `Ying Zhang`
+- **Thin community `Community 200`** (2 nodes): `Centralized use of decentralized technology- Tokenization of currencies and assets`, `Ying Zhang`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 199`** (2 nodes): `Consultative-Paper-Rupiah-Digital-BI`, `Raafi`
+- **Thin community `Community 201`** (2 nodes): `Consultative-Paper-Rupiah-Digital-BI`, `Raafi`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 200`** (2 nodes): `Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review`, `Janitra Nur Aryani`
+- **Thin community `Community 202`** (2 nodes): `Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review`, `Janitra Nur Aryani`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 201`** (2 nodes): `Distributed Ledger Technology DLT) and Blockchain`, `World Bank Group`
+- **Thin community `Community 203`** (2 nodes): `Distributed Ledger Technology DLT) and Blockchain`, `World Bank Group`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 202`** (2 nodes): `Faktor yang Mempengaruhi Pergi Tanpa Uang Tunai atau Cashless di Kota Pekanbaru`, `Windows User`
+- **Thin community `Community 204`** (2 nodes): `Faktor yang Mempengaruhi Pergi Tanpa Uang Tunai atau Cashless di Kota Pekanbaru`, `Windows User`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 203`** (2 nodes): `Fasilitas Likuiditas`, `THI fariza`
+- **Thin community `Community 205`** (2 nodes): `Fasilitas Likuiditas`, `THI fariza`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 204`** (2 nodes): `How does the fintech sector react to signals from central bank digital currencies`, `Zhenghui Li`
+- **Thin community `Community 206`** (2 nodes): `How does the fintech sector react to signals from central bank digital currencies`, `Zhenghui Li`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 205`** (2 nodes): `Frédéric Tronnier`, `Investigating privacy concerns and trust in the digital Euro in Germany`
+- **Thin community `Community 207`** (2 nodes): `Frédéric Tronnier`, `Investigating privacy concerns and trust in the digital Euro in Germany`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 206`** (2 nodes): `KYC Optimization by Blockchain Based Hyperledger Fabric Network`, `Nazir Ullah`
+- **Thin community `Community 208`** (2 nodes): `KYC Optimization by Blockchain Based Hyperledger Fabric Network`, `Nazir Ullah`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 207`** (2 nodes): `Imran Yousaf`, `Linkages between CBDC and cryptocurrency uncertainties, and digital payment stocks`
+- **Thin community `Community 209`** (2 nodes): `Imran Yousaf`, `Linkages between CBDC and cryptocurrency uncertainties, and digital payment stocks`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 208`** (2 nodes): `Dóra Horváth`, `Money in the digital age- Exploring the potential of central bank digital currency with a focus on social adaptation and education`
+- **Thin community `Community 210`** (2 nodes): `Dóra Horváth`, `Money in the digital age- Exploring the potential of central bank digital currency with a focus on social adaptation and education`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 209`** (2 nodes): `J. Ree`, `Nigeria's eNaira, one year after`
+- **Thin community `Community 211`** (2 nodes): `J. Ree`, `Nigeria's eNaira, one year after`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 210`** (2 nodes): `P. Michalopoulos, Odunayo Olowookere, Nadia Pocher, Johannes Sedlmeir, Andreas G. Veneris, Poonam Puri`, `Privacy and Compliance Design Options in Offline Central Bank Digital Currencies`
+- **Thin community `Community 212`** (2 nodes): `P. Michalopoulos, Odunayo Olowookere, Nadia Pocher, Johannes Sedlmeir, Andreas G. Veneris, Poonam Puri`, `Privacy and Compliance Design Options in Offline Central Bank Digital Currencies`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 211`** (2 nodes): `Redesigning the eNaira central bank digital currency (CBDC) for payments and macroeconomic effectiveness`, `xls`
+- **Thin community `Community 213`** (2 nodes): `Redesigning the eNaira central bank digital currency (CBDC) for payments and macroeconomic effectiveness`, `xls`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 212`** (2 nodes): `Retail CBDC purposes and risk transfers to the central bank`, `Romain Baeriswyl, Samuel Reynard, A. Swoboda`
+- **Thin community `Community 214`** (2 nodes): `Retail CBDC purposes and risk transfers to the central bank`, `Romain Baeriswyl, Samuel Reynard, A. Swoboda`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 213`** (2 nodes): `John Kiff`, `Retail Central Bank Digital Currency Global Landscape (IMF Working Paper)`
+- **Thin community `Community 215`** (2 nodes): `John Kiff`, `Retail Central Bank Digital Currency Global Landscape (IMF Working Paper)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 214`** (2 nodes): `Anastasia Tsareva, M. Komarov`, `Retail Central Bank Digital Currency Design Choices- Guide for Policymakers`
+- **Thin community `Community 216`** (2 nodes): `Anastasia Tsareva, M. Komarov`, `Retail Central Bank Digital Currency Design Choices- Guide for Policymakers`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 215`** (2 nodes): `Jamie Morgan`, `Systemic stablecoin and the defensive case for Central Bank Digital Currency- A critique of the Bank of England’s framing`
+- **Thin community `Community 217`** (2 nodes): `Jamie Morgan`, `Systemic stablecoin and the defensive case for Central Bank Digital Currency- A critique of the Bank of England’s framing`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 216`** (2 nodes): `The crowding-out effect of central bank digital currencies- A simple and generalizable payment portfolio model`, `Wenlong Bian`
+- **Thin community `Community 218`** (2 nodes): `The crowding-out effect of central bank digital currencies- A simple and generalizable payment portfolio model`, `Wenlong Bian`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 217`** (2 nodes): `Abdelrahman J.K. Alfar`, `The determinants of issuing central bank digital currencies`
+- **Thin community `Community 219`** (2 nodes): `Abdelrahman J.K. Alfar`, `The determinants of issuing central bank digital currencies`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 218`** (2 nodes): `John Barrdear, Michael Kumhof`, `The macroeconomics of central bank digital currencies`
+- **Thin community `Community 220`** (2 nodes): `John Barrdear, Michael Kumhof`, `The macroeconomics of central bank digital currencies`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 219`** (2 nodes): `Raphael A. Auer, Rainer Böhme`, `The technology of retail central bank digital currency`
+- **Thin community `Community 221`** (2 nodes): `Raphael A. Auer, Rainer Böhme`, `The technology of retail central bank digital currency`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 220`** (2 nodes): `Shaen Corbet`, `Understanding the rapid development of CBDC in emerging economies`
+- **Thin community `Community 222`** (2 nodes): `Shaen Corbet`, `Understanding the rapid development of CBDC in emerging economies`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 221`** (2 nodes): `User adoption of digital currency: A systematic review and future agenda using TCCM approach`, `Vikrant Singh`
+- **Thin community `Community 223`** (2 nodes): `User adoption of digital currency: A systematic review and future agenda using TCCM approach`, `Vikrant Singh`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 222`** (2 nodes): `Elsafan Cris`, `Whitepaper IDRX`
+- **Thin community `Community 224`** (2 nodes): `Elsafan Cris`, `Whitepaper IDRX`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 223`** (2 nodes): `Modeling Central Bank Digital Currencies`, `U. Bindseil, Richard Senner`
+- **Thin community `Community 225`** (2 nodes): `Modeling Central Bank Digital Currencies`, `U. Bindseil, Richard Senner`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 224`** (2 nodes): `Alejandro Zamora-Pérez, Eliana Coschignano, Lorena Barreiro`, `Ensuring Adoption of Central Bank Digital Currencies – an Easy Task or a Gordian Knot?`
+- **Thin community `Community 226`** (2 nodes): `Alejandro Zamora-Pérez, Eliana Coschignano, Lorena Barreiro`, `Ensuring Adoption of Central Bank Digital Currencies – an Easy Task or a Gordian Knot?`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 225`** (2 nodes): `A Macroeconomic Model of Central Bank Digital Currency`, `Pascal Paul, Mauricio Ulate, J. Wu`
+- **Thin community `Community 227`** (2 nodes): `A Macroeconomic Model of Central Bank Digital Currency`, `Pascal Paul, Mauricio Ulate, J. Wu`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 226`** (2 nodes): `Matthew Malloy, Francis Martinez, Mary-Frances Styczynski, A. Thorp`, `Retail CBDC and U.S. Monetary Policy Implementation: A Stylized Balance Sheet Analysis`
+- **Thin community `Community 228`** (2 nodes): `Matthew Malloy, Francis Martinez, Mary-Frances Styczynski, A. Thorp`, `Retail CBDC and U.S. Monetary Policy Implementation: A Stylized Balance Sheet Analysis`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 227`** (2 nodes): `Carlos León, Jose Moreno, Kimmo Soramäki`, `Simulating the Adoption of a Retail CBDC`
+- **Thin community `Community 229`** (2 nodes): `Carlos León, Jose Moreno, Kimmo Soramäki`, `Simulating the Adoption of a Retail CBDC`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 228`** (2 nodes): `Nuntapun Bhensook, Thanaporn Rattanakul, Witit Synsatayakul, Pakaporn Tohwisessuk`, `Public Use and Distribution of Retail CBDC: An Evidence from Thailand’s Retail CBDC Pilot Program`
+- **Thin community `Community 230`** (2 nodes): `Nuntapun Bhensook, Thanaporn Rattanakul, Witit Synsatayakul, Pakaporn Tohwisessuk`, `Public Use and Distribution of Retail CBDC: An Evidence from Thailand’s Retail CBDC Pilot Program`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 229`** (2 nodes): `A High Performance Payment Processing System Designed for Central Bank Digital Currencies`, `James Lovejoy, Cory Fields, M. Virza, Tyler Frederick, David Urness, Kevin Karwaski, Anders Brownworth, Neha Narula`
+- **Thin community `Community 231`** (2 nodes): `A High Performance Payment Processing System Designed for Central Bank Digital Currencies`, `James Lovejoy, Cory Fields, M. Virza, Tyler Frederick, David Urness, Kevin Karwaski, Anders Brownworth, Neha Narula`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 230`** (2 nodes): `Raphael A. Auer, G. Cornelli, Jon Frost`, `Rise of the Central Bank Digital Currencies: Drivers, Approaches and Technologies`
+- **Thin community `Community 232`** (2 nodes): `Raphael A. Auer, G. Cornelli, Jon Frost`, `Rise of the Central Bank Digital Currencies: Drivers, Approaches and Technologies`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 231`** (2 nodes): `CBDCs and Liquidity Risks: Evidence from the SandDollar’s Impact on Deposits and Loans in the Bahamas`, `Francisco Elieser Giraldo-Gordillo, Ricardo Bustillo-Mesanza`
+- **Thin community `Community 233`** (2 nodes): `CBDCs and Liquidity Risks: Evidence from the SandDollar’s Impact on Deposits and Loans in the Bahamas`, `Francisco Elieser Giraldo-Gordillo, Ricardo Bustillo-Mesanza`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 232`** (2 nodes): `B. Tan`, `Central Bank Digital Currency and Financial Inclusion`
+- **Thin community `Community 234`** (2 nodes): `B. Tan`, `Central Bank Digital Currency and Financial Inclusion`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 233`** (2 nodes): `Central Bank Digital Currencies: International Experience and Development Risks`, `Елизавета Валентиновна Оглоблина, В.В. Макарова`
+- **Thin community `Community 235`** (2 nodes): `Central Bank Digital Currencies: International Experience and Development Risks`, `Елизавета Валентиновна Оглоблина, В.В. Макарова`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 234`** (2 nodes): `Designing Retail Central Bank Digital Currencies: A Systematic Literature Review of Trade-Offs Between Security, Privacy, and Financial Stability`, `Jwa Emma Said, J. Lánský`
+- **Thin community `Community 236`** (2 nodes): `Designing Retail Central Bank Digital Currencies: A Systematic Literature Review of Trade-Offs Between Security, Privacy, and Financial Stability`, `Jwa Emma Said, J. Lánský`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 235`** (2 nodes): `Gerard P. Presto, Michi Kakebayashi, Tomonori Yuyama, Masato Yamanaka, Shin’ichiro Matsuo`, `Retail & Wholesale Central Bank Digital Currencies: Comparison of Select Models, Use Case Analysis & Exploration of Potential Technical Features`
+- **Thin community `Community 237`** (2 nodes): `Gerard P. Presto, Michi Kakebayashi, Tomonori Yuyama, Masato Yamanaka, Shin’ichiro Matsuo`, `Retail & Wholesale Central Bank Digital Currencies: Comparison of Select Models, Use Case Analysis & Exploration of Potential Technical Features`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 236`** (2 nodes): `Central bank digital currencies: policy implications`, `Daniel Broby`
+- **Thin community `Community 238`** (2 nodes): `Central bank digital currencies: policy implications`, `Daniel Broby`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 237`** (2 nodes): `Benjamin Hemingway`, `The Role of Central Bank Digital Currency in an Increasingly Digital Economy`
+- **Thin community `Community 239`** (2 nodes): `Benjamin Hemingway`, `The Role of Central Bank Digital Currency in an Increasingly Digital Economy`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 238`** (2 nodes): `Adam Abdullah`, `Monetary Reform and Central Bank Digital Currencies: The Impact on Retail Banking`
+- **Thin community `Community 240`** (2 nodes): `Adam Abdullah`, `Monetary Reform and Central Bank Digital Currencies: The Impact on Retail Banking`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 239`** (2 nodes): `Anna Iwańczuk-Kaliska`, `Potential Implications of Retail Central Bank Digital Currency for Banking Systems Identified in the Literature and by Central Banks`
+- **Thin community `Community 241`** (2 nodes): `Anna Iwańczuk-Kaliska`, `Potential Implications of Retail Central Bank Digital Currency for Banking Systems Identified in the Literature and by Central Banks`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 240`** (2 nodes): `Adoption of Central Bank Digital Currency in India: A Structural Model Using ISM`, `Vaibhav Dixit, A. Shailesh, Shubhasmita Mishra, Rinki Verma`
+- **Thin community `Community 242`** (2 nodes): `Adoption of Central Bank Digital Currency in India: A Structural Model Using ISM`, `Vaibhav Dixit, A. Shailesh, Shubhasmita Mishra, Rinki Verma`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 241`** (2 nodes): `A conceptual model for point-of-sale payment with retail central bank digital currency`, `Lars Hupel`
+- **Thin community `Community 243`** (2 nodes): `A conceptual model for point-of-sale payment with retail central bank digital currency`, `Lars Hupel`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 242`** (2 nodes): `Advancing Digital Economy and Financial Inclusion through Central Bank Digital Currencies: A Comprehensive Analysis of Policies and Legal Implications`, `Emily Lee`
+- **Thin community `Community 244`** (2 nodes): `Advancing Digital Economy and Financial Inclusion through Central Bank Digital Currencies: A Comprehensive Analysis of Policies and Legal Implications`, `Emily Lee`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 243`** (2 nodes): `Design of a Central Bank Digital Currency in a Highly Dollarized Emerging Market Economy: The Case of Cambodia`, `K. Ueda, Chanthol Hay`
+- **Thin community `Community 245`** (2 nodes): `Design of a Central Bank Digital Currency in a Highly Dollarized Emerging Market Economy: The Case of Cambodia`, `K. Ueda, Chanthol Hay`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 244`** (2 nodes): `Concept note on CBDC`, `Reserve Bank of India (RBI)`
+- **Thin community `Community 246`** (2 nodes): `Concept note on CBDC`, `Reserve Bank of India (RBI)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 245`** (2 nodes): `Bank of Jamaica (BOJ)`, `JAM-DEX: CBDC FAQs`
+- **Thin community `Community 247`** (2 nodes): `Bank of Jamaica (BOJ)`, `JAM-DEX: CBDC FAQs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 246`** (2 nodes): `Central Bank of Nigeria (CBN)`, `Design paper for eNaira`
+- **Thin community `Community 248`** (2 nodes): `Central Bank of Nigeria (CBN)`, `Design paper for eNaira`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 247`** (2 nodes): `CBDC adoption: Inclusive strategies for central banks and governments`, `T. Koonprasert et al`
+- **Thin community `Community 249`** (2 nodes): `CBDC adoption: Inclusive strategies for central banks and governments`, `T. Koonprasert et al`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 248`** (2 nodes): `A. Chhangani`, `China's digital yuan`
+- **Thin community `Community 250`** (2 nodes): `A. Chhangani`, `China's digital yuan`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 249`** (2 nodes): `E-krona pilot Phase 4`, `Sveriges Riksbank`
+- **Thin community `Community 251`** (2 nodes): `E-krona pilot Phase 4`, `Sveriges Riksbank`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 250`** (2 nodes): `BI-RTGS Integration`, `Proof-of-Authority Consensus (Garuda PoC)`
+- **Thin community `Community 252`** (2 nodes): `BI-RTGS Integration`, `Proof-of-Authority Consensus (Garuda PoC)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 251`** (2 nodes): `Design Consideration: Financial Control (crypto/stablecoin risk to monetary control)`, `Design Consideration: Technological Advancement`
+- **Thin community `Community 253`** (2 nodes): `Design Consideration: Financial Control (crypto/stablecoin risk to monetary control)`, `Design Consideration: Technological Advancement`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 252`** (2 nodes): `Two-Second Batch Timeout Plausible Cause of Latency Not Isolated`, `Reads 272-296 ops/s Offered, Write TPS 0.184-4.75, Verified 0.200-4.613 TPS`
+- **Thin community `Community 254`** (2 nodes): `Two-Second Batch Timeout Plausible Cause of Latency Not Isolated`, `Reads 272-296 ops/s Offered, Write TPS 0.184-4.75, Verified 0.200-4.613 TPS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 253`** (2 nodes): `Caliper One-Worker Benchmark: 20/20 Scenarios, 207/207 Authorization Cells, 27/27 Validation Cases Pass`, `Limits: Tests Verify Selected Scenarios Only; No Identity Authenticity, Screening Effectiveness, PPATK Reporting, or Institutional Compliance`
+- **Thin community `Community 255`** (2 nodes): `Caliper One-Worker Benchmark: 20/20 Scenarios, 207/207 Authorization Cells, 27/27 Validation Cases Pass`, `Limits: Tests Verify Selected Scenarios Only; No Identity Authenticity, Screening Effectiveness, PPATK Reporting, or Institutional Compliance`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 254`** (2 nodes): `Architecture: Merchant App, Attribute Authority App, Admin App, Fabric Network with Chaincode, BRMS Engine`, `Payment Gateway Case Study: Merchant, Attribute Authority, Payment Provider`
+- **Thin community `Community 256`** (2 nodes): `Architecture: Merchant App, Attribute Authority App, Admin App, Fabric Network with Chaincode, BRMS Engine`, `Payment Gateway Case Study: Merchant, Attribute Authority, Payment Provider`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 255`** (2 nodes): `wallet.balance -= amount / device.balance += amount`, `POST /offline/devices/{id}/load LoadOfflineDevice()`
+- **Thin community `Community 257`** (2 nodes): `wallet.balance -= amount / device.balance += amount`, `POST /offline/devices/{id}/load LoadOfflineDevice()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 256`** (2 nodes): `Data Tx`, `Merkle Root`
+- **Thin community `Community 258`** (2 nodes): `Data Tx`, `Merkle Root`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 257`** (2 nodes): `Frontend HTML shell (frontend/index.html)`, `Product title: bi-coin Digital Rupiah, Retail CBDC`
+- **Thin community `Community 259`** (2 nodes): `Frontend HTML shell (frontend/index.html)`, `Product title: bi-coin Digital Rupiah, Retail CBDC`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 258`** (2 nodes): `Chapter 3 chaincode design: CreateWallet, QueryWallet, Transfer, QueryTransactionHistory`, `Rule: Garuda Iroha wholesale references are architecture patterns only, not retail Fabric scope`
+- **Thin community `Community 260`** (2 nodes): `Chapter 3 chaincode design: CreateWallet, QueryWallet, Transfer, QueryTransactionHistory`, `Rule: Garuda Iroha wholesale references are architecture patterns only, not retail Fabric scope`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 259`** (1 nodes): `docsembed.go`
+- **Thin community `Community 261`** (1 nodes): `docsembed.go`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 260`** (1 nodes): `vite.config.ts`
+- **Thin community `Community 262`** (1 nodes): `vite.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 261`** (1 nodes): `playwright.config.ts`
+- **Thin community `Community 263`** (1 nodes): `playwright.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 262`** (1 nodes): `vite-env.d.ts`
+- **Thin community `Community 264`** (1 nodes): `vite-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 263`** (1 nodes): `main.tsx`
+- **Thin community `Community 265`** (1 nodes): `main.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 264`** (1 nodes): `LoadingSkeleton.tsx`
+- **Thin community `Community 266`** (1 nodes): `LoadingSkeleton.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 265`** (1 nodes): `RequirementRail.tsx`
+- **Thin community `Community 267`** (1 nodes): `RequirementRail.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 266`** (1 nodes): `backend.spec.ts`
+- **Thin community `Community 268`** (1 nodes): `backend.spec.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 267`** (1 nodes): `validate-authorization-log.test.js`
+- **Thin community `Community 269`** (1 nodes): `validate-authorization-log.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 268`** (1 nodes): `validate-boundary-log.test.js`
+- **Thin community `Community 270`** (1 nodes): `validate-boundary-log.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 269`** (1 nodes): `validate-study-artifacts.test.js`
+- **Thin community `Community 271`** (1 nodes): `validate-study-artifacts.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 270`** (1 nodes): `compress-study-metrics.js`
+- **Thin community `Community 272`** (1 nodes): `compress-study-metrics.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 271`** (1 nodes): `study-control.test.js`
+- **Thin community `Community 273`** (1 nodes): `study-control.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 272`** (1 nodes): `write-study-manifest.test.js`
+- **Thin community `Community 274`** (1 nodes): `deploy-chaincodes.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 273`** (1 nodes): `deploy-chaincodes.test.js`
+- **Thin community `Community 275`** (1 nodes): `write-study-manifest.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 274`** (1 nodes): `retail-base.test.js`
+- **Thin community `Community 276`** (1 nodes): `retail-base.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 275`** (1 nodes): `jsonl-transaction-observer.test.js`
+- **Thin community `Community 277`** (1 nodes): `jsonl-transaction-observer.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 276`** (1 nodes): `load-common.test.js`
+- **Thin community `Community 278`** (1 nodes): `load-common.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 277`** (1 nodes): `capacity-search.test.js`
+- **Thin community `Community 279`** (1 nodes): `capacity-search.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 278`** (1 nodes): `failure-classifier.test.js`
+- **Thin community `Community 280`** (1 nodes): `failure-classifier.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 279`** (1 nodes): `signer-map.test.js`
+- **Thin community `Community 281`** (1 nodes): `signer-map.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 280`** (1 nodes): `run.js`
+- **Thin community `Community 282`** (1 nodes): `run.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 281`** (1 nodes): `write-report.test.js`
+- **Thin community `Community 283`** (1 nodes): `write-report.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 282`** (1 nodes): `caliper-workload.test.js`
+- **Thin community `Community 284`** (1 nodes): `caliper-workload.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 283`** (1 nodes): `caliper-runner.test.js`
+- **Thin community `Community 285`** (1 nodes): `caliper-runner.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 284`** (1 nodes): `caliper-config.test.js`
+- **Thin community `Community 286`** (1 nodes): `caliper-config.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 285`** (1 nodes): `http-access-matrix.test.js`
+- **Thin community `Community 287`** (1 nodes): `http-access-matrix.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 286`** (1 nodes): `capacity-runner.test.js`
+- **Thin community `Community 288`** (1 nodes): `capacity-runner.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 287`** (1 nodes): `case-catalog.test.js`
+- **Thin community `Community 289`** (1 nodes): `case-catalog.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 288`** (1 nodes): `prepare-fixtures.test.js`
+- **Thin community `Community 290`** (1 nodes): `prepare-fixtures.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 289`** (1 nodes): `methodology.test.js`
+- **Thin community `Community 291`** (1 nodes): `methodology.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 290`** (1 nodes): `main.toc`
+- **Thin community `Community 292`** (1 nodes): `main.toc`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 291`** (1 nodes): `sample-code.m`
+- **Thin community `Community 293`** (1 nodes): `sample-code.m`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 292`** (1 nodes): `Implementing a Retail CBDC: Lessons Learned and Key Insights`
+- **Thin community `Community 294`** (1 nodes): `Implementing a Retail CBDC: Lessons Learned and Key Insights`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 293`** (1 nodes): `paper_deren.pdf (Style Exemplar)`
+- **Thin community `Community 295`** (1 nodes): `paper_deren.pdf (Style Exemplar)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 294`** (1 nodes): `paper_grandiv.pdf (Style Exemplar)`
+- **Thin community `Community 296`** (1 nodes): `paper_grandiv.pdf (Style Exemplar)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 295`** (1 nodes): `IEEE Conference Paper Template`
+- **Thin community `Community 297`** (1 nodes): `IEEE Conference Paper Template`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 296`** (1 nodes): `Account-Based CBDC`
+- **Thin community `Community 298`** (1 nodes): `Account-Based CBDC`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 297`** (1 nodes): `Bank Deposit`
+- **Thin community `Community 299`** (1 nodes): `Bank Deposit`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 298`** (1 nodes): `UGM University Logo`
+- **Thin community `Community 300`** (1 nodes): `UGM University Logo`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 299`** (1 nodes): `Scanned Endorsement Document`
+- **Thin community `Community 301`** (1 nodes): `Scanned Endorsement Document`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 300`** (1 nodes): `Scanned Statement Document`
+- **Thin community `Community 302`** (1 nodes): `Scanned Statement Document`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 301`** (1 nodes): `Garuda Digital Rupiah — Retail CBDC frontend entry (index.html)`
+- **Thin community `Community 303`** (1 nodes): `Garuda Digital Rupiah — Retail CBDC frontend entry (index.html)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 302`** (1 nodes): `Domain template`
+- **Thin community `Community 304`** (1 nodes): `Domain template`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 303`** (1 nodes): `Source template`
+- **Thin community `Community 305`** (1 nodes): `Source template`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 304`** (1 nodes): `Concept template`
+- **Thin community `Community 306`** (1 nodes): `Concept template`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 305`** (1 nodes): `Entity template`
+- **Thin community `Community 307`** (1 nodes): `Entity template`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 306`** (1 nodes): `True red/green/refactor TDD preference`
+- **Thin community `Community 308`** (1 nodes): `True red/green/refactor TDD preference`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 307`** (1 nodes): `RTK Rust Token Killer token-optimized CLI proxy`
+- **Thin community `Community 309`** (1 nodes): `RTK Rust Token Killer token-optimized CLI proxy`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 308`** (1 nodes): `NFR-02 auditability and traceability`
+- **Thin community `Community 310`** (1 nodes): `NFR-02 auditability and traceability`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 309`** (1 nodes): `NFR-03 separated system layers`
+- **Thin community `Community 311`** (1 nodes): `NFR-03 separated system layers`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 310`** (1 nodes): `Browser login smoke test not run: backend against configured localhost:5433 PostgreSQL endpoint failed because the port refused the connection`
+- **Thin community `Community 312`** (1 nodes): `Browser login smoke test not run: backend against configured localhost:5433 PostgreSQL endpoint failed because the port refused the connection`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 311`** (1 nodes): `Sources Index`
+- **Thin community `Community 313`** (1 nodes): `Sources Index`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 312`** (1 nodes): `Jon Frost`
+- **Thin community `Community 314`** (1 nodes): `Jon Frost`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 313`** (1 nodes): `L. Gambacorta`
+- **Thin community `Community 315`** (1 nodes): `L. Gambacorta`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 314`** (1 nodes): `Cyril Monnet`
+- **Thin community `Community 316`** (1 nodes): `Cyril Monnet`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 315`** (1 nodes): `Tara Rice`
+- **Thin community `Community 317`** (1 nodes): `Tara Rice`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 316`** (1 nodes): `H. Shin`
+- **Thin community `Community 318`** (1 nodes): `H. Shin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 317`** (1 nodes): `Chaum 1982 blind-signature anonymous e-cash`
+- **Thin community `Community 319`** (1 nodes): `Chaum 1982 blind-signature anonymous e-cash`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 318`** (1 nodes): `Offline Functionality`
+- **Thin community `Community 320`** (1 nodes): `Offline Functionality`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 319`** (1 nodes): `Post-Quantum Cryptography (future direction)`
+- **Thin community `Community 321`** (1 nodes): `Post-Quantum Cryptography (future direction)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 320`** (1 nodes): `Bank Intermediation Concern`
+- **Thin community `Community 322`** (1 nodes): `Bank Intermediation Concern`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 321`** (1 nodes): `Latency: Mutual Auth 1652/1656 ms (V.1/V.2), Transactions ~4.8 s / 3.9 s`
+- **Thin community `Community 323`** (1 nodes): `Latency: Mutual Auth 1652/1656 ms (V.1/V.2), Transactions ~4.8 s / 3.9 s`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 322`** (1 nodes): `QRIS payment intent lifecycle (pending to settled/queued)`
+- **Thin community `Community 324`** (1 nodes): `QRIS payment intent lifecycle (pending to settled/queued)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 323`** (1 nodes): `REST API role-based access: public, authenticated, kyc_verified, bank_pjp, bank_indonesia, merchant, auditor`
+- **Thin community `Community 325`** (1 nodes): `REST API role-based access: public, authenticated, kyc_verified, bank_pjp, bank_indonesia, merchant, auditor`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 324`** (1 nodes): `Log 2026-07-23: Kamus Bahasa Indonesia 2008 ingest`
+- **Thin community `Community 326`** (1 nodes): `Log 2026-07-23: Kamus Bahasa Indonesia 2008 ingest`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
