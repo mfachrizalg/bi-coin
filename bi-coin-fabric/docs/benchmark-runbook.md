@@ -145,3 +145,4 @@ Edits outside those paths (frontend, docs, ADRs, thesis, paper, wiki, graph outp
 12. **Volume deletion.** Filter by exact name, check the count, check each container's state, and only then delete. A guard that matches nothing must not default to deleting.
 13. **Hook-generated graph output.** The graphify hook rewrites `graphify-out/graph.json` after commits. Do not hand-edit it. Check `git status` after each commit.
 14. **Surface drift.** Edits to benchmarked code after a run invalidate it. Use section 6 before citing any number.
+15. **Stale chaincode package.** `deploy-chaincodes.sh` reused any existing `network/packages/<name>.tar.gz`, so a host deploy after a code change installed the old chaincode. It now repackages when the chaincode source hash differs from `<name>.source-sha256`. A fresh `git archive` workspace has no packages.

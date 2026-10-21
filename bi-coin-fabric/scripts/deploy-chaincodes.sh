@@ -55,8 +55,10 @@ peer_cli() {
 }
 
 package_chaincode() {
-  local name="$1" source="$2" label="$3"
-  if [[ -f "$PACKAGE_DIR/$name.tar.gz" ]]; then
+  local name="$1" source="$2" label="$3" digest
+  # Reuse a package only if the source is unchanged; a stale package would deploy old chaincode.
+  digest="$(cd "$CHAINCODE_DIR/$source" && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)"
+  if [[ -f "$PACKAGE_DIR/$name.tar.gz" && "$(cat "$PACKAGE_DIR/$name.source-sha256" 2>/dev/null)" == "$digest" ]]; then
     return
   fi
   peer lifecycle chaincode package \
@@ -64,6 +66,7 @@ package_chaincode() {
     --path "$CHAINCODE_DIR/$source" \
     --lang golang \
     --label "$label"
+  printf '%s\n' "$digest" > "$PACKAGE_DIR/$name.source-sha256"
 }
 
 deploy_one() {

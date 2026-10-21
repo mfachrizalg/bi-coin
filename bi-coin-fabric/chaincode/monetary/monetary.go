@@ -80,7 +80,7 @@ type transferReceipt struct {
 	Amount    int64  `json:"amount"`
 	Status    string `json:"status"`
 	MakerID   string `json:"maker_id"`
-	CheckerID string `json:"checker_id,omitempty"`
+	CheckerID string `json:"checker_id,omitempty" metadata:",optional"`
 }
 
 type thresholdProposal struct {
