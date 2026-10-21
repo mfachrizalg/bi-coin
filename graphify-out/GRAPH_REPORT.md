@@ -1,7 +1,7 @@
 # Graph Report - /home/mfachrizalg/2026/Skripsi/bi-coin  (2026-10-21)
 
 ## Corpus Check
-- 133 files · ~588,693 words
+- 133 files · ~588,786 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
