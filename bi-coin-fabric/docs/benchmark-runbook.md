@@ -68,6 +68,8 @@ test ! -e .git && test ! -e backend/.env && test ! -e network/.env.study && echo
 
 Start it under a new explicit project name. Then verify its daemon ID differs from the host's. Verify that neither service mounts the host socket.
 
+Then check that the Fabric binaries run inside the runner: `docker compose -p "bi-coin-bench-$STAMP" -f compose.yaml exec -T runner sh -c 'fabric-ca-client version; peer version'` must print v1.5.9 and v2.5.16.
+
 ```sh
 cd "$REPO/bi-coin-fabric/benchmark/isolated"
 BENCHMARK_WORKSPACE="$W/bi-coin-fabric" BENCHMARK_IMAGE_BUNDLE="$HOME/bi-coin-runs/images.tar" FABRIC_SAMPLES="$FABRIC_SAMPLES" \
@@ -77,7 +79,12 @@ export DAEMON_ID=$(docker compose -p "bi-coin-bench-$STAMP" -f compose.yaml exec
 test "$DAEMON_ID" != "$(docker info --format '{{.ID}}')" && echo "daemon isolated"
 ```
 
-After the daemon loads the bundle, compare its image IDs with `~/bi-coin-runs/images.json`. Any mismatch stops the run.
+After the daemon loads the bundle, compare each image's layer digests (`RootFS.Layers`) with the host's. Any mismatch stops the run. Do not compare image IDs: the host and the disposable daemon can use different image stores, so the same content gets different IDs.
+
+```sh
+docker compose -p "bi-coin-bench-$STAMP" -f compose.yaml exec -T runner sh -c 'docker load --input /image-bundle.tar --quiet >/dev/null; for t in $(docker images --format "{{.Repository}}:{{.Tag}}"); do echo "$t $(docker image inspect "$t" --format "{{json .RootFS.Layers}}" | sha256sum | cut -c1-16)"; done' > daemon-layers.txt
+jq -r '.images[].tag' ~/bi-coin-runs/images.json | while read -r t; do h=$(docker image inspect "$t" --format '{{json .RootFS.Layers}}' | sha256sum | cut -c1-16); [ "$h" = "$(/usr/bin/grep "^$t " daemon-layers.txt | cut -d' ' -f2)" ] && echo "OK $t" || echo "MISMATCH $t"; done
+```
 
 ## 4. Run inside the runner
 
@@ -146,3 +153,5 @@ Edits outside those paths (frontend, docs, ADRs, thesis, paper, wiki, graph outp
 13. **Hook-generated graph output.** The graphify hook rewrites `graphify-out/graph.json` after commits. Do not hand-edit it. Check `git status` after each commit.
 14. **Surface drift.** Edits to benchmarked code after a run invalidate it. Use section 6 before citing any number.
 15. **Stale chaincode package.** `deploy-chaincodes.sh` reused any existing `network/packages/<name>.tar.gz`, so a host deploy after a code change installed the old chaincode. It now repackages when the chaincode source hash differs from `<name>.source-sha256`. A fresh `git archive` workspace has no packages.
+16. **Image ID comparison.** The image IDs recorded from the host never matched the disposable daemon's, although every layer was identical: the two daemons use different image stores. Compare `RootFS.Layers` (section 3).
+17. **musl runner image.** The Alpine runner ran `peer` under `gcompat`, but the glibc `fabric-ca-client` 1.5.9 failed with `fcntl64: symbol not found`, and bootstrap hid the error. The runner is now Debian. After building it, run `fabric-ca-client version` and `peer version` inside the runner before `new`.
