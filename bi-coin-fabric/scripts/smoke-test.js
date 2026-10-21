@@ -9,6 +9,8 @@ const LEDGER_SCENARIO_IDS = catalog.correctness_scenarios.filter(item => item.ex
 let caseResults = [];
 
 const channel = 'bi-coin';
+// SetTransferLimit needs a positive value; this one never binds in the smoke run.
+const NO_TRANSFER_LIMIT = String(Number.MAX_SAFE_INTEGER);
 const cliContainer = 'bi-coin-cli';
 const ordererHost = 'orderer.centralbank.bi-coin';
 const ordererTls = '/network/organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls/ca.crt';
@@ -207,6 +209,54 @@ function approveSubject(subjectID, category, ownerUser, riskLevel, pep, limits =
     }
 }
 
+function admissionRef(distributorID) {
+    return crypto.createHash('sha256').update(`bi-admission:${distributorID}`).digest('hex');
+}
+
+// PBI No. 10 Tahun 2025 Pasal 81-82: suspended blocks only outgoing activity, frozen blocks all,
+// closing needs settled obligations and is final.
+function runParticipantStatusCases(runID) {
+    const monetary = ['centralbank', 'distributor'];
+    const setStatus = (bank, status, reason) => invoke('centralbank', 'Admin', 'rupiah-monetary', 'SetParticipantStatus', [bank, status, reason], monetary);
+    const rejected = (org, user, chaincode, fn, args, endorsers, expected) => {
+        const before = ledgerSnapshot();
+        expectChaincodeRejection(org, user, chaincode, fn, args, endorsers, expected);
+        assertStateUnchanged(before, ledgerSnapshot());
+    };
+
+    setStatus('retail-bank', 'suspended', 'administrative_sanction');
+    rejected('distributor', 'User1', 'rupiah-payments', 'ConvertToRetail', ['retail-bank', '1', `suspended-convert-${runID}`], ['centralbank', 'distributor', 'enduser'], 'does not allow send');
+    rejected('distributor', 'User1', 'rupiah-payments', 'FundWallet', [`suspended-${runID}`, 'retail-bank', '1', `suspended-fund-${runID}`], ['distributor', 'enduser'], 'participant status does not allow funding');
+    rejected('distributor', 'User1', 'rupiah-monetary', 'TransferReserve', ['retail-bank', 'wholesale-bank', '1', `suspended-send-${runID}`], monetary, 'does not allow send');
+    const suspendedReserve = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['retail-bank']);
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'Issue', ['retail-bank', '1', `suspended-issue-${runID}`], monetary);
+    invoke('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '1', `suspended-receive-${runID}`], monetary);
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'RedeemReserve', ['retail-bank', '2', `suspended-redeem-${runID}`], monetary);
+    const suspendedIncomingAllowed = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['retail-bank']) === suspendedReserve;
+
+    setStatus('retail-bank', 'frozen', 'authority_request');
+    rejected('centralbank', 'Admin', 'rupiah-monetary', 'Issue', ['retail-bank', '1', `frozen-issue-${runID}`], monetary, 'does not allow issue');
+    rejected('centralbank', 'Admin', 'rupiah-monetary', 'RedeemReserve', ['retail-bank', '1', `frozen-redeem-${runID}`], monetary, 'does not allow redeem');
+    rejected('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '1', `frozen-receive-${runID}`], monetary, 'does not allow receive');
+    expectChaincodeRejection('centralbank', 'Admin', 'rupiah-monetary', 'SetParticipantStatus', ['retail-bank', 'paused', 'participation_policy'], monetary, 'unsupported participant status');
+    expectChaincodeRejection('centralbank', 'Admin', 'rupiah-monetary', 'SetParticipantStatus', ['retail-bank', 'active', 'other'], monetary, 'unsupported status reason code');
+    setStatus('retail-bank', 'active', 'participation_policy');
+    const reactivated = query('centralbank', 'Admin', 'rupiah-monetary', 'GetParticipant', ['retail-bank']);
+    recordCase('participant-status-matrix', suspendedIncomingAllowed && reactivated.status === 'active' && reactivated.status_reason === 'participation_policy',
+        { suspended_outgoing_denied: 3, suspended_incoming_allowed: suspendedIncomingAllowed, frozen_denied: 3, unknown_codes_denied: 2, reactivated: true });
+
+    const closing = `closing-${runID}`;
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'RegisterDistributor', [closing, 'retail', admissionRef(closing)], monetary);
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'Issue', [closing, '10', `closing-issue-${runID}`], monetary);
+    expectChaincodeRejection('centralbank', 'Admin', 'rupiah-monetary', 'SetParticipantStatus', [closing, 'closed', 'participant_request'], monetary, 'participant must settle its reserve before closing');
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'RedeemReserve', [closing, '10', `closing-redeem-${runID}`], monetary);
+    setStatus(closing, 'closed', 'participant_request');
+    expectChaincodeRejection('centralbank', 'Admin', 'rupiah-monetary', 'SetParticipantStatus', [closing, 'active', 'participation_policy'], monetary, 'a closed participant cannot change status');
+    rejected('centralbank', 'Admin', 'rupiah-monetary', 'Issue', [closing, '1', `closed-issue-${runID}`], monetary, 'does not allow issue');
+    recordCase('participant-closure', query('centralbank', 'Admin', 'rupiah-monetary', 'GetParticipant', [closing]).status === 'closed',
+        { unsettled_close_denied: true, settled_close_allowed: true, reopen_denied: true, closed_issue_denied: true });
+}
+
 function convertAndFund(subjectID, amount, reference) {
     invoke('distributor', 'User1', 'rupiah-payments', 'ConvertToRetail', ['retail-bank', amount, `convert-${reference}`], ['centralbank', 'distributor', 'enduser']);
     invoke('distributor', 'User1', 'rupiah-payments', 'FundWallet', [subjectID, 'retail-bank', amount, `fund-${reference}`], ['distributor', 'enduser']);
@@ -252,10 +302,16 @@ function main() {
         ['rupiah-controls', 'RequestUnfreeze', [`msp-${runID}`, crypto.createHash('sha256').update(runID).digest('hex')], 'DistributorMSP', ['centralbank', 'distributor']],
         ['rupiah-controls', 'ApproveUnfreeze', [`msp-${runID}`], 'DistributorMSP', ['centralbank', 'distributor']],
         ['rupiah-monetary', 'Initialize', [], 'CentralBankMSP', ['centralbank', 'distributor']],
-        ['rupiah-monetary', 'RegisterDistributor', [`msp-${runID}`, 'retail'], 'CentralBankMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'RegisterDistributor', [`msp-${runID}`, 'retail', admissionRef(`msp-${runID}`)], 'CentralBankMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'SetParticipantStatus', [`msp-${runID}`, 'active', 'participation_policy'], 'CentralBankMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'SetTransferLimit', ['1'], 'CentralBankMSP', ['centralbank', 'distributor']],
         ['rupiah-monetary', 'Issue', [`msp-${runID}`, '1', `msp-${runID}`], 'CentralBankMSP', ['centralbank', 'distributor']],
         ['rupiah-monetary', 'RedeemReserve', ['wholesale-bank', '1', `msp-${runID}`], 'CentralBankMSP', ['centralbank', 'distributor']],
         ['rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '1', `msp-${runID}`], 'DistributorMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'ApproveTransfer', [`msp-${runID}`], 'DistributorMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'RejectTransfer', [`msp-${runID}`], 'DistributorMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'ProposeApprovalThreshold', ['wholesale-bank', '1'], 'DistributorMSP', ['centralbank', 'distributor']],
+        ['rupiah-monetary', 'ApproveApprovalThreshold', ['wholesale-bank', '1'], 'DistributorMSP', ['centralbank', 'distributor']],
         ['rupiah-payments', 'OpenWallet', [`msp-${runID}`], 'EndUserMSP', ['distributor', 'enduser']],
         ['rupiah-payments', 'Transfer', [`msp-${runID}`, `other-${runID}`, '1', `msp-${runID}`], 'EndUserMSP', ['distributor', 'enduser']],
         ['rupiah-payments', 'ConvertToRetail', ['retail-bank', '1', `msp-${runID}`], 'DistributorMSP', ['centralbank', 'distributor', 'enduser']],
@@ -279,19 +335,73 @@ function main() {
     const initializationReplayStateUnchanged = initializationReplay === null
         && JSON.stringify(initializationReplayBefore) === JSON.stringify(initializationReplayAfter);
     if (!initializationReplayStateUnchanged) fail('repeated monetary initialization changed ledger state');
-    invokeAllowError('centralbank', 'Admin', 'rupiah-monetary', 'RegisterDistributor', ['wholesale-bank', 'wholesale'], ['centralbank', 'distributor'], 'already registered');
-    invokeAllowError('centralbank', 'Admin', 'rupiah-monetary', 'RegisterDistributor', ['retail-bank', 'retail'], ['centralbank', 'distributor'], 'already registered');
+    invokeAllowError('centralbank', 'Admin', 'rupiah-monetary', 'RegisterDistributor', ['wholesale-bank', 'wholesale', admissionRef('wholesale-bank')], ['centralbank', 'distributor'], 'already registered');
+    invokeAllowError('centralbank', 'Admin', 'rupiah-monetary', 'RegisterDistributor', ['retail-bank', 'retail', admissionRef('retail-bank')], ['centralbank', 'distributor'], 'already registered');
+    // An earlier failed run may have left a bank suspended or a low transfer limit.
+    for (const bank of ['wholesale-bank', 'retail-bank']) {
+        invoke('centralbank', 'Admin', 'rupiah-monetary', 'SetParticipantStatus', [bank, 'active', 'participation_policy'], ['centralbank', 'distributor']);
+    }
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'SetTransferLimit', [NO_TRANSFER_LIMIT], ['centralbank', 'distributor']);
     invoke('centralbank', 'Admin', 'rupiah-monetary', 'Issue', ['wholesale-bank', '1000000', 'issue-demo-001'], ['centralbank', 'distributor']);
+
+    const beforeMissingAdmission = ledgerSnapshot();
+    expectChaincodeRejection('centralbank', 'Admin', 'rupiah-monetary', 'RegisterDistributor', [`no-admission-${runID}`, 'retail', 'approval-letter'], ['centralbank', 'distributor'], 'admission_ref must be a SHA-256 reference');
+    assertStateUnchanged(beforeMissingAdmission, ledgerSnapshot());
+    expectQueryRejection('centralbank', 'Admin', 'rupiah-monetary', 'GetParticipant', [`no-admission-${runID}`], 'not found');
+    const admittedBanks = ['wholesale-bank', 'retail-bank'].map(bank => query('centralbank', 'Admin', 'rupiah-monetary', 'GetParticipant', [bank]));
+    recordCase('participant-admission-evidence', admittedBanks.every(bank => /^[0-9a-f]{64}$/.test(bank.admission_ref) && bank.status === 'active'),
+        { missing_evidence_rejected: true, state_unchanged: true, admitted_banks_have_evidence: admittedBanks.length });
+
+    // Four-eyes: the sender's approval threshold decides whether a transfer waits for a second officer.
+    expectChaincodeRejection('distributor', 'User1', 'rupiah-monetary', 'ProposeApprovalThreshold', ['wholesale-bank', '5000'], ['centralbank', 'distributor'], 'access denied for distributor wholesale-bank');
+    invoke('distributor', 'User4', 'rupiah-monetary', 'ProposeApprovalThreshold', ['wholesale-bank', '5000'], ['centralbank', 'distributor']);
+    expectChaincodeRejection('distributor', 'User4', 'rupiah-monetary', 'ApproveApprovalThreshold', ['wholesale-bank', '5000'], ['centralbank', 'distributor'], 'the proposer cannot approve their own threshold change');
+    expectChaincodeRejection('distributor', 'User5', 'rupiah-monetary', 'ApproveApprovalThreshold', ['wholesale-bank', '4000'], ['centralbank', 'distributor'], 'amount does not match the pending proposal');
+    invoke('distributor', 'User5', 'rupiah-monetary', 'ApproveApprovalThreshold', ['wholesale-bank', '5000'], ['centralbank', 'distributor']);
+    const thresholdApplied = query('centralbank', 'Admin', 'rupiah-monetary', 'GetParticipant', ['wholesale-bank']).approval_threshold === 5000;
+    const beforeSmallTransfer = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['wholesale-bank']);
+    invoke('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '5000', `reserve-small-${runID}`], ['centralbank', 'distributor']);
+    const smallTransferExecuted = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['wholesale-bank']) === beforeSmallTransfer - 5000;
+    recordCase('approval-threshold-dual-control', thresholdApplied && smallTransferExecuted,
+        { other_bank_denied: true, proposer_self_approval_denied: true, amount_mismatch_denied: true, applied_threshold: 5000, transfer_at_threshold_executed: smallTransferExecuted });
+
     const reservesBeforeTransfer = {
         wholesale: query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['wholesale-bank']),
         retail: query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['retail-bank']),
     };
-    invoke('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '10000', `reserve-${runID}`], ['centralbank', 'distributor']);
+    const pendingReference = `reserve-${runID}`;
+    invoke('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '10000', pendingReference], ['centralbank', 'distributor']);
+    const beforeApproval = ledgerSnapshot();
+    const pendingLeftReservesUnchanged = beforeApproval.retailReserve === reservesBeforeTransfer.retail
+        && query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['wholesale-bank']) === reservesBeforeTransfer.wholesale;
+    expectChaincodeRejection('distributor', 'User4', 'rupiah-monetary', 'ApproveTransfer', [pendingReference], ['centralbank', 'distributor'], 'the maker cannot approve their own transfer');
+    expectChaincodeRejection('distributor', 'User1', 'rupiah-monetary', 'ApproveTransfer', [pendingReference], ['centralbank', 'distributor'], 'access denied for distributor wholesale-bank');
+    assertStateUnchanged(beforeApproval, ledgerSnapshot());
+    invoke('distributor', 'User5', 'rupiah-monetary', 'ApproveTransfer', [pendingReference], ['centralbank', 'distributor']);
     const retailReserveAfterTransfer = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['retail-bank']);
     if (query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['wholesale-bank']) !== reservesBeforeTransfer.wholesale - 10000
         || retailReserveAfterTransfer !== reservesBeforeTransfer.retail + 10000) {
-        fail('interbank transfer did not move the reserve between banks');
+        fail('approved interbank transfer did not move the reserve between banks');
     }
+    expectChaincodeRejection('distributor', 'User5', 'rupiah-monetary', 'ApproveTransfer', [pendingReference], ['centralbank', 'distributor'], 'transfer is not awaiting approval');
+    const rejectedReference = `reserve-rejected-${runID}`;
+    invoke('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '10000', rejectedReference], ['centralbank', 'distributor']);
+    const beforeRejection = ledgerSnapshot();
+    invoke('distributor', 'User5', 'rupiah-monetary', 'RejectTransfer', [rejectedReference], ['centralbank', 'distributor']);
+    expectChaincodeRejection('distributor', 'User5', 'rupiah-monetary', 'ApproveTransfer', [rejectedReference], ['centralbank', 'distributor'], 'transfer is not awaiting approval');
+    assertStateUnchanged(beforeRejection, ledgerSnapshot());
+    recordCase('four-eyes-transfer', pendingLeftReservesUnchanged,
+        { pending_until_second_officer: true, maker_self_approval_denied: true, other_bank_approval_denied: true, approved_amount: 10000, rejected_transfer_unchanged: true });
+
+    const beforeLimitBreach = ledgerSnapshot();
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'SetTransferLimit', ['50000'], ['centralbank', 'distributor']);
+    expectChaincodeRejection('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '50001', `limit-breach-${runID}`], ['centralbank', 'distributor'], "amount exceeds Bank Indonesia's transfer limit");
+    assertStateUnchanged(beforeLimitBreach, ledgerSnapshot());
+    expectChaincodeRejection('centralbank', 'Admin', 'rupiah-monetary', 'SetTransferLimit', ['0'], ['centralbank', 'distributor'], 'transfer limit must be positive');
+    const appliedLimit = query('centralbank', 'Admin', 'rupiah-monetary', 'GetTransferLimit');
+    invoke('centralbank', 'Admin', 'rupiah-monetary', 'SetTransferLimit', [NO_TRANSFER_LIMIT], ['centralbank', 'distributor']);
+    recordCase('transfer-limit', appliedLimit === 50000, { limit: 50000, rejected_amount: 50001, state_unchanged: true, nonpositive_limit_rejected: true });
+
     const wholesaleReserveBeforeShortfall = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['wholesale-bank']);
     const beforeTransferShortfall = ledgerSnapshot();
     expectChaincodeRejection('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', String(wholesaleReserveBeforeShortfall + 1), `transfer-too-large-${runID}`], ['centralbank', 'distributor'], 'distributor reserve');
@@ -641,6 +751,9 @@ function main() {
     recordCase('initialization-and-nested-debit', readMSPs.length === 4 && mspAuthorizationCells > 0
         && initializationReplayStateUnchanged,
     { initialization_checked: true, initialization_replay_state_unchanged: initializationReplayStateUnchanged, direct_internal_debit_denied_for_msps: readMSPs.length });
+
+    // Runs last: it changes bank statuses and reserves that the checks above compare.
+    runParticipantStatusCases(runID);
 
     const missingScenarios = LEDGER_SCENARIO_IDS.filter(id => !caseResults.some(item => item.id === id));
     const report = {

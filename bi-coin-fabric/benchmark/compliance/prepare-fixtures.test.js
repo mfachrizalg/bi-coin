@@ -41,11 +41,11 @@ test('every Caliper workload maps to its exact chaincode method and signer MSP',
         assert.ok(Array.isArray(fixture.ledger.args), scenario.id);
         assert.equal(fixture.ledger.msp_id, userMSPs[scenario.actor], scenario.id);
         assert.equal(fixture.ledger.read_only, scenario.operation_kind === 'query', scenario.id);
-        if (['issue', 'redeem-reserve', 'interbank-transfer', 'convert-to-retail', 'fund-wallet', 'transfer-retail', 'transfer-merchant'].includes(scenario.id)) {
+        if (['issue', 'redeem-reserve', 'interbank-transfer', 'interbank-transfer-pending', 'convert-to-retail', 'fund-wallet', 'transfer-retail', 'transfer-merchant'].includes(scenario.id)) {
             assert.ok(fixture.ledger.args.at(-1), `${scenario.id} requires a ledger reference`);
         }
     }
-    assert.equal(catalog.performance_scenarios.length, 34);
+    assert.equal(catalog.performance_scenarios.length, 43);
 });
 
 test('reserve-backed fixture setup serializes debits to the shared distributor reserve', async t => {
@@ -55,7 +55,7 @@ test('reserve-backed fixture setup serializes debits to the shared distributor r
     const mspByUser = {
         bank_indonesia: 'CentralBankMSP', kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP',
         reviewer: 'DistributorMSP', senior: 'DistributorMSP', compliance: 'DistributorMSP', retail_bank: 'DistributorMSP',
-        merchant: 'EndUserMSP',
+        merchant: 'EndUserMSP', wholesale_bank: 'DistributorMSP', wholesale_two: 'DistributorMSP',
     };
     const api = {
         baseURL: 'http://api.test',
@@ -108,14 +108,20 @@ test('API action checks receive fresh subject and staff fixtures per authorized 
             const { username } = JSON.parse(init.body);
             return { ok: true, status: 200, json: async () => ({ access_token: `token-${username}` }) };
         }
-        requests.push({ method: init.method, path: url.pathname, body: init.body && JSON.parse(init.body) });
+        requests.push({
+            method: init.method,
+            path: url.pathname,
+            body: init.body && JSON.parse(init.body),
+            user: init.headers?.Authorization?.replace('Bearer token-', ''),
+            reference: init.headers?.['Idempotency-Key'],
+        });
         return { ok: true, status: 200, text: async () => '' };
     };
 
     try {
         const api = {
             baseURL: 'http://api.test',
-            namedUsers: Object.fromEntries(['kyc_verified', 'reviewer', 'senior', 'compliance', 'bank_indonesia']
+            namedUsers: Object.fromEntries(['kyc_verified', 'reviewer', 'senior', 'compliance', 'bank_indonesia', 'retail_bank', 'wholesale_bank', 'wholesale_two']
                 .map(username => [username, { username, password: 'test' }])),
         };
         const fixtures = await prepareAccessMatrixFixtures(api, 'retail-subject', 'test-stamp');
@@ -129,6 +135,55 @@ test('API action checks receive fresh subject and staff fixtures per authorized 
         assert.equal(requests.filter(request => request.method === 'POST' && request.path === '/subjects').length, 2);
         assert.equal(requests.filter(request => request.path.endsWith('/restriction-release-requests')).length, 1);
         assert.equal(requests.filter(request => request.method === 'POST' && request.path === '/staff').length, 1);
+
+        // Four-eyes routes: each approving role gets its own pending transfer, made by another officer of the same bank.
+        const pending = requests.filter(request => request.path === '/interbank-transfers');
+        assert.equal(pending.length, 4);
+        assert.equal(new Set(pending.map(request => request.reference)).size, 4);
+        for (const action of ['approval', 'rejection']) {
+            const byRole = fixtures.pendingTransferByRoute[`/interbank-transfers/{reference}/${action}`];
+            const maker = role => pending.find(request => request.reference === byRole[role]).user;
+            assert.equal(maker('retail_bank'), 'reviewer');
+            assert.equal(maker('wholesale_bank'), 'wholesale_two');
+        }
+        assert.ok(requests.some(request => request.path === '/distributors/wholesale-bank/approval-threshold-approvals' && request.user === 'wholesale_two'));
+    } finally {
+        global.fetch = originalFetch;
+    }
+});
+
+test('approve-transfer fixtures are pending transfers made by another officer of the same bank', async () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pending-transfer-fixtures-'));
+    const users = ['bank_indonesia', 'retail_bank', 'reviewer', 'wholesale_bank', 'wholesale_two'];
+    const mspByUser = { bank_indonesia: 'CentralBankMSP', retail_bank: 'DistributorMSP', reviewer: 'DistributorMSP', wholesale_bank: 'DistributorMSP', wholesale_two: 'DistributorMSP' };
+    const api = {
+        baseURL: 'http://api.test',
+        namedUsers: Object.fromEntries(users.map(username => [username, { username, password: 'test' }])),
+        identities: Object.entries(mspByUser).map(([username, msp_id]) => ({ username, msp_id })),
+        fixtureIds: {},
+    };
+    const transfers = [];
+    const originalFetch = global.fetch;
+    global.fetch = async (input, init = {}) => {
+        const url = new URL(input);
+        if (url.pathname === '/auth/login') {
+            const { username } = JSON.parse(init.body);
+            return { ok: true, status: 200, json: async () => ({ access_token: `token-${username}` }) };
+        }
+        if (url.pathname === '/interbank-transfers') {
+            transfers.push({ user: init.headers.Authorization.replace('Bearer token-', ''), reference: init.headers['Idempotency-Key'] });
+        }
+        return { ok: true, status: 200, text: async () => '' };
+    };
+    try {
+        const catalogScenario = catalog.performance_scenarios.find(scenario => scenario.id === 'approve-transfer');
+        const fixtures = await prepareFixturePool({
+            api, catalogScenario, count: 2, stamp: 'test-stamp', outputPath: path.join(directory, 'approve.json'), phase: 'preflight',
+        });
+        assert.equal(transfers.length, 2);
+        assert.ok(transfers.every(transfer => transfer.user === 'retail_bank'));
+        assert.deepEqual(fixtures.ledger.items.map(item => item.args[0]).sort(), transfers.map(transfer => transfer.reference).sort());
+        assert.ok(fixtures.ledger.items.every(item => item.identity === 'reviewer' && item.transaction === 'ApproveTransfer'));
     } finally {
         global.fetch = originalFetch;
     }

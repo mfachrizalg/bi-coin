@@ -1,6 +1,6 @@
 FROM node:22.23.2-alpine
 
-RUN apk add --no-cache bash docker-cli docker-cli-compose git go build-base python3 coreutils openssl
+RUN apk add --no-cache bash docker-cli docker-cli-compose git go build-base python3 coreutils openssl curl
 RUN apk add --no-cache gcompat
 
 ENV FABRIC_SAMPLES=/opt/fabric-samples

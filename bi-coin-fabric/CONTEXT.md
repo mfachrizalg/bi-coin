@@ -74,7 +74,31 @@ _Avoid_: Wholesale balance, Distributor reserve
 The movement of r-Rupiah Digital from a Retail float into a Wallet, subject to the CanPay and holdings-limit checks.
 
 **Interbank transfer**:
-The movement of w-Rupiah Digital from a Distributor reserve to any other Distributor reserve, with no change in supply.
+The movement of w-Rupiah Digital from a Distributor reserve to any other Distributor reserve, with no change in supply. Above the sender's Approval threshold it becomes a Pending transfer.
+
+**Approval threshold**:
+The value, set by a Distributor Bank for itself, above which its Interbank transfers need Four-eyes approval. A new Distributor Bank starts at zero.
+_Avoid_: Transfer limit, Ceiling
+
+**Pending transfer**:
+An Interbank transfer above the Approval threshold that moves nothing until another officer of the same bank approves it. Any officer of the sending bank can reject it.
+_Avoid_: Queued transfer, Draft
+
+**Four-eyes approval**:
+The rule that a Pending transfer or an Approval threshold change takes effect only after a second, different officer of the same Distributor Bank confirms it.
+_Avoid_: Dual signature, Multi-signature
+
+**Transfer limit**:
+Bank Indonesia's maximum value for one Interbank transfer.
+_Avoid_: Approval threshold, Payment limit
+
+**Admission evidence reference**:
+A SHA-256 reference to Bank Indonesia's approval record, required when a Distributor Bank is admitted.
+_Avoid_: License, Approval letter
+
+**Participant status**:
+The state of a Distributor Bank's participation, set by Bank Indonesia: active, suspended, frozen, or closed. A suspended bank can receive but not send, a frozen bank cannot transact, and a closed bank cannot return.
+_Avoid_: Restriction, Account status
 
 **Conversion**:
 An at-par movement of w-Rupiah Digital from a Distributor reserve into the same bank's Retail float as r-Rupiah Digital. Total supply is unchanged.
@@ -112,12 +136,12 @@ _Avoid_: Evidence document, Evidence proof
 The party under customer due diligence, in the category retail, merchant, or business.
 
 **Restriction**:
-A subject-level hold, recorded with a Restriction reason. It is lifted only by an approved release backed by a Release evidence reference.
+A subject-level hold, recorded with a Restriction reason. An internal-review hold lapses after 5 days and an authority-order hold after 30 days; a DTTOT hold lasts until an approved release backed by a Release evidence reference.
 _Avoid_: Freeze
 
 **Freeze**:
-A legacy hold on a wallet or participant. Subjects are restricted, not frozen.
-_Avoid_: Restriction
+Setting a Participant status to frozen. Subjects are restricted, not frozen.
+_Avoid_: Restriction, Suspension
 
 **Staff role**:
 A maker-checker role in the compliance study: KYC reviewer, senior approver, or compliance officer. A KYC reviewer and a senior approver must be different people.

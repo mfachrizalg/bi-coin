@@ -4,21 +4,21 @@ This benchmark evaluates the four-MSP `bi-coin` channel and its three chaincodes
 
 ## Workloads and correctness
 
-The catalog covers 33 capacity-measured methods in 34 workloads; `Initialize` and the nested-only `DebitReserveForConversion` receive correctness checks only. `Transfer` has separate retail and merchant recipient variants. Reads report verified operations per second; writes report verified TPS.
+The catalog covers 41 capacity-measured methods in 43 workloads. `Initialize`, the nested-only `DebitReserveForConversion`, and `ApproveApprovalThreshold` receive correctness checks only; each threshold approval needs a fresh proposal from another officer, so it has no repeatable load. `Transfer` has separate retail and merchant recipient variants, and `TransferReserve` has variants at or below and above the sender's approval threshold. Reads report verified operations per second; writes report verified TPS.
 
-The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers KYC review and risk/PEP decisions, distinct staff roles, business representatives, all restriction reasons, fresh release evidence, MSP and endorsement boundaries, transfer categories and replay, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, interbank and cross-bank denials, holdings and reserve limits, redemption replay, and supply conservation. The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 232 route-role authorization cells, 22 malformed-JSON validation cases, and 33 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
+The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers KYC review and risk/PEP decisions, distinct staff roles, business representatives, all restriction reasons, fresh release evidence, MSP and endorsement boundaries, transfer categories and replay, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, interbank and cross-bank denials, holdings and reserve limits, redemption replay, supply conservation, participant admission evidence, participant status (suspended, frozen, closed), the interbank transfer limit, four-eyes transfers, and dual-control threshold changes (ADR 0014). The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 296 route-role authorization cells, 28 malformed-JSON validation cases, and 45 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
 
 `correctness.json` lists the observed outcomes. It allows an overall conformance claim only when every catalogued executable correctness scenario passes and every API authorization, validation, and action check is resolved and correct. The method-level `cases` inventory remains a coverage reference and is never counted as executed test evidence.
 
 ## Capacity search
 
-Each of the 34 workloads first runs one Caliper transaction as a readiness check. Caliper round initialization establishes the connection. There is no separate timed warmup.
+Each of the 43 workloads first runs one Caliper transaction as a readiness check. Caliper round initialization establishes the connection. There is no separate timed warmup.
 
 Search spans 0.1–4096 operations per second. Matching historical direct-ledger results provide starting hints for 12 workloads; all other workloads start at 32. The old rates are hints only and are never merged into new measurements. An unbounded passing or failing rate expands by a factor of four. Once a passing and failing rate bracket exists, 10-second midpoint probes continue until the failing rate is within 10% of the passing rate.
 
 The highest passing probe is confirmed with three separate 30-second Caliper rounds grouped in one benchmark configuration. Every confirmation must have verified outcomes, zero unexpected failures, zero timeouts, zero unresolved results, delivered load within 5% of target (allowing one-request rounding), and drain-adjusted verified throughput at least 90% of delivered load. If all confirmation rounds fail, the candidate is lowered and confirmed again. Mixed outcomes at the same candidate are reported as an unstable boundary. A passing ceiling is reported as “at least this measured capacity.”
 
-The confirmation windows total 51 minutes (34 workloads × 3 × 30 seconds), excluding readiness checks, search probes, initialization, fixtures, and drain. Runtime depends on fixture preparation.
+The confirmation windows total 64.5 minutes (43 workloads × 3 × 30 seconds), excluding readiness checks, search probes, initialization, fixtures, and drain. Runtime depends on fixture preparation.
 
 ## Evidence and checkpoints
 

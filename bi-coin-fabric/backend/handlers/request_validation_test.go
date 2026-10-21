@@ -28,7 +28,7 @@ func TestDecodeJSONValidatesStudyRequestFields(t *testing.T) {
 				Approved *bool `json:"approved" validate:"required"`
 			}
 			response := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/decisions", strings.NewReader(test.body))
+			req := httptest.NewRequest("POST", "/decisions", strings.NewReader(test.body))
 			if got := decodeJSON(response, req, &request); got != test.want {
 				t.Fatalf("decodeJSON() = %t, want %t; response=%s", got, test.want, response.Body.String())
 			}
@@ -61,7 +61,37 @@ func TestStudyRequestValidationTags(t *testing.T) {
 				Amount string `json:"amount" validate:"required,positive_int64"`
 			}
 			response := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/issuances", strings.NewReader(test.body))
+			req := httptest.NewRequest("POST", "/issuances", strings.NewReader(test.body))
+			if got := decodeJSON(response, req, &request); got != test.valid {
+				t.Fatalf("decodeJSON() = %t, want %t; response=%s", got, test.valid, response.Body.String())
+			}
+		})
+	}
+}
+
+func TestNonNegativeInt64Validation(t *testing.T) {
+	tests := []struct {
+		name  string
+		body  string
+		valid bool
+	}{
+		{name: "zero", body: `{"amount":"0"}`, valid: true},
+		{name: "positive integer", body: `{"amount":"10"}`, valid: true},
+		{name: "max int64", body: `{"amount":"9223372036854775807"}`, valid: true},
+		{name: "empty", body: `{"amount":""}`},
+		{name: "missing", body: `{}`},
+		{name: "negative", body: `{"amount":"-1"}`},
+		{name: "decimal", body: `{"amount":"1.5"}`},
+		{name: "overflow", body: `{"amount":"9223372036854775808"}`},
+		{name: "leading sign", body: `{"amount":"+1"}`},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var request struct {
+				Amount string `json:"amount" validate:"required,nonnegative_int64"`
+			}
+			response := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", "/approval-threshold-proposals", strings.NewReader(test.body))
 			if got := decodeJSON(response, req, &request); got != test.valid {
 				t.Fatalf("decodeJSON() = %t, want %t; response=%s", got, test.valid, response.Body.String())
 			}

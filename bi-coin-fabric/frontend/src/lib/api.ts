@@ -178,7 +178,7 @@ export function initializeStudyMonetary() {
   return studyPost<{ status: string }>('/monetary-initializations')
 }
 export type StudyBankKind = 'wholesale' | 'retail'
-export function registerStudyDistributor(data: { distributor_id: string; kind: StudyBankKind }) {
+export function registerStudyDistributor(data: { distributor_id: string; kind: StudyBankKind; admission_ref: string }) {
   return studyPost<{ status: string }>('/distributors', data)
 }
 export function issueStudyRupiah(data: { distributor_id: string; amount: string }, idempotencyKey: string) {

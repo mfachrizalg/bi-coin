@@ -45,6 +45,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const [distributorID, setDistributorID] = useState('')
   const [recipientDistributorID, setRecipientDistributorID] = useState('')
   const [bankKind, setBankKind] = useState<StudyBankKind>('wholesale')
+  const [admissionRef, setAdmissionRef] = useState('')
   const [amount, setAmount] = useState('')
   const [riskLevel, setRiskLevel] = useState<'standard' | 'high'>('standard')
   const [pep, setPep] = useState(false)
@@ -250,7 +251,8 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
         <div className="button-row"><StudyAction label="Initialize monetary state" working={busy === 'Initialize monetary state'} disabled={Boolean(busy)} onClick={() => void run('Initialize monetary state', initializeStudyMonetary)} /></div>
         <label className="app-label" htmlFor="study-central-distributor"><span>Distributor ID</span><input id="study-central-distributor" className="app-input" value={distributorID} onChange={event => setDistributorID(event.target.value)} autoComplete="off" /></label>
         <label className="app-label" htmlFor="study-bank-kind"><span>Bank kind</span><select id="study-bank-kind" className="app-input" value={bankKind} onChange={event => setBankKind(event.target.value as StudyBankKind)}><option value="wholesale">Wholesale</option><option value="retail">Retail</option></select></label>
-        <div className="button-row"><StudyAction label="Register bank" working={busy === 'Register bank'} disabled={!distributorID.trim() || Boolean(busy)} onClick={() => void run('Register bank', () => registerStudyDistributor({ distributor_id: distributorID.trim(), kind: bankKind }))} /></div>
+        <label className="app-label" htmlFor="study-admission-ref"><span>Admission evidence reference (SHA-256)</span><input id="study-admission-ref" className="app-input" value={admissionRef} onChange={event => setAdmissionRef(event.target.value)} autoComplete="off" /></label>
+        <div className="button-row"><StudyAction label="Register bank" working={busy === 'Register bank'} disabled={!distributorID.trim() || !admissionRef.trim() || Boolean(busy)} onClick={() => void run('Register bank', () => registerStudyDistributor({ distributor_id: distributorID.trim(), kind: bankKind, admission_ref: admissionRef.trim() }))} /></div>
         {amountField}
         <div className="button-row">
           <StudyAction label="Issuance" working={busy === 'Issuance'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Issuance', () => issueStudyRupiah({ distributor_id: distributorID.trim(), amount }, retryKey('issuance')), 'issuance')} />

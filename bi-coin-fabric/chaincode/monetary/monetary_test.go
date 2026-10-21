@@ -68,3 +68,39 @@ func TestRequireDistributorMatchesAttribute(t *testing.T) {
 		t.Fatal("identity without distributor_id must be rejected")
 	}
 }
+
+func TestParticipantStatusMatrix(t *testing.T) {
+	// PBI No. 10 Tahun 2025 Pasal 81: suspended blocks only outgoing activity; frozen and closed block all.
+	want := map[string]map[string]bool{
+		participantActive:    {opIssue: true, opRedeem: true, opSend: true, opReceive: true},
+		participantSuspended: {opIssue: true, opRedeem: true, opSend: false, opReceive: true},
+		participantFrozen:    {},
+		participantClosed:    {},
+		"":                   {},
+	}
+	for status, operations := range want {
+		for _, operation := range []string{opIssue, opRedeem, opSend, opReceive} {
+			allowed := requireParticipant(balance{Status: status}, operation) == nil
+			if allowed != operations[operation] {
+				t.Errorf("status %q operation %s: allowed = %t, want %t", status, operation, allowed, operations[operation])
+			}
+		}
+	}
+}
+
+func TestAdmissionReferenceMustBeSHA256(t *testing.T) {
+	if !isSHA256Reference("a3f1c2d4e5b6a7980912a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8") {
+		t.Fatal("64-hex reference rejected")
+	}
+	for _, value := range []string{"", "approval-letter", "a3f1"} {
+		if isSHA256Reference(value) {
+			t.Errorf("isSHA256Reference(%q) = true", value)
+		}
+	}
+}
+
+func TestStatusReasonsCoverPasal81Grounds(t *testing.T) {
+	if len(statusReasons) != 6 {
+		t.Fatalf("got %d status reasons, want the six grounds of Pasal 81 ayat (2)", len(statusReasons))
+	}
+}

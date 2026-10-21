@@ -9,7 +9,7 @@ FABRIC_CA_CLIENT="$FABRIC_SAMPLES/bin/fabric-ca-client"
 
 case "$ORG" in
   centralbank) CA_PORT=17054; USER_COUNT=2 ;;
-  distributor) CA_PORT=18054; USER_COUNT=4 ;;
+  distributor) CA_PORT=18054; USER_COUNT=5 ;;
   validator) CA_PORT=19054; USER_COUNT=1 ;;
   enduser) CA_PORT=20054; USER_COUNT=8 ;;
   *) echo "unknown org: $ORG" >&2; exit 2 ;;
@@ -64,7 +64,8 @@ register_enroll() {
   secret="$(identity_secret "$name:$type")"
   # Each Distributor identity names the bank it acts for; chaincode checks this attribute.
   case "$ORG:$name" in
-    distributor:user4) attrs="distributor_id=wholesale-bank:ecert" ;;
+    # Two officers per bank, so a second officer can approve four-eyes transfers.
+    distributor:user4 | distributor:user5) attrs="distributor_id=wholesale-bank:ecert" ;;
     distributor:*) attrs="distributor_id=retail-bank:ecert" ;;
   esac
   if ! output="$("$FABRIC_CA_CLIENT" register \

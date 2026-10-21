@@ -20,8 +20,8 @@
     "delivered_load_tolerance_percent": 5,
     "drain_adjusted_throughput_floor": 0.9,
     "resource_sample_interval_ms": 1000,
-    "performance_method_count": 33,
-    "performance_workload_count": 34,
+    "performance_method_count": 41,
+    "performance_workload_count": 43,
     "search_hint_source": "compliance-20261010-controls-v16 direct-ledger sweep; hints only",
     "search_hints_ops_per_second": {
       "create-pending": 64,
@@ -57,10 +57,28 @@
     {"chaincode": "rupiah-controls", "method": "CanActFor", "cases": ["individual owner", "merchant owner", "business representative", "unlisted representative", "replaced representative"]},
     {"chaincode": "rupiah-controls", "method": "GetSubject", "cases": ["CentralBank read", "Distributor read", "Validator read", "EndUser denied; observe response-schema error"]},
     {"chaincode": "rupiah-monetary", "method": "Initialize", "cases": ["initialize empty ledger", "repeat initialization"]},
-    {"chaincode": "rupiah-monetary", "method": "RegisterDistributor", "cases": ["register wholesale bank", "register retail bank", "duplicate distributor", "wrong MSP"]},
+    {"chaincode": "rupiah-monetary", "method": "RegisterDistributor", "cases": ["register wholesale bank", "register retail bank", "duplicate distributor", "missing admission evidence", "wrong MSP"]},
     {"chaincode": "rupiah-monetary", "method": "Issue", "cases": ["positive issuance", "nonpositive amount", "reference replay", "reference payload conflict", "insufficient endorsement"]},
     {"chaincode": "rupiah-monetary", "method": "RedeemReserve", "cases": ["redeem reserve and supply equally", "nonpositive amount", "insufficient reserve", "reference replay", "reference payload conflict", "wrong MSP"]},
-    {"chaincode": "rupiah-monetary", "method": "TransferReserve", "cases": ["wholesale to retail transfer", "cross-bank debit denied", "nonpositive amount", "insufficient reserve", "reference replay", "wrong MSP"]},
+    {"chaincode": "rupiah-monetary", "method": "TransferReserve", "cases": ["transfer at or below the approval threshold executes", "transfer above the approval threshold stays pending", "cross-bank debit denied", "nonpositive amount", "insufficient reserve", "transfer limit exceeded", "suspended sender denied", "frozen recipient denied", "reference replay", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "ApproveTransfer", "cases": ["second officer executes pending transfer", "maker self-approval denied", "other bank denied", "already decided transfer denied", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "RejectTransfer", "cases": ["pending transfer rejected without reserve change", "rejected transfer cannot be approved", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "ProposeApprovalThreshold", "cases": ["own bank proposal", "other bank denied", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "ApproveApprovalThreshold", "cases": ["second officer applies proposal", "proposer self-approval denied", "amount mismatch denied", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "SetParticipantStatus", "cases": ["suspend blocks outgoing only", "freeze blocks all transactions", "reactivate", "close after settlement", "close with reserve denied", "closed participant cannot reopen", "unknown status or reason denied", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "SetTransferLimit", "cases": ["limit rejects larger transfer", "nonpositive limit denied", "wrong MSP"]},
+
+    {"chaincode": "rupiah-monetary", "method": "GetParticipant", "cases": ["admission evidence and status", "applied approval threshold", "unknown participant"]},
+
+    {"chaincode": "rupiah-monetary", "method": "CanSend", "cases": ["active participant", "suspended participant used by wallet funding"]},
+
+    {"chaincode": "rupiah-monetary", "method": "GetTransferLimit", "cases": ["applied limit"]},
     {"chaincode": "rupiah-monetary", "method": "DebitReserveForConversion", "cases": ["nested call from ConvertToRetail", "direct invocation denied", "unauthorized MSP"]},
     {"chaincode": "rupiah-monetary", "method": "GetWholesaleSupply", "cases": ["supply after issuance", "supply after conversion"]},
     {"chaincode": "rupiah-monetary", "method": "GetRetailSupply", "cases": ["supply after conversion"]},
@@ -69,7 +87,7 @@
     {"chaincode": "rupiah-payments", "method": "OpenWallet", "cases": ["open eligible wallet", "duplicate wallet", "ineligible subject", "unauthorized owner", "insufficient endorsement"]},
     {"chaincode": "rupiah-payments", "method": "Transfer", "cases": ["all nine sender and recipient category pairs", "per-transaction limit exact and one-unit excess", "daily limit exact and one-unit excess", "monthly limit exact and one-unit excess", "recipient holdings exact and one-unit excess", "insufficient balance", "restricted sender", "restricted recipient", "unauthorized business representative", "UTC day and month rollover", "concurrent shared-balance conflict", "same-reference replay", "same-reference payload conflict"]},
     {"chaincode": "rupiah-payments", "method": "ConvertToRetail", "cases": ["atomic reserve-to-float conversion", "wholesale bank denied", "insufficient reserve", "same-reference replay", "same-reference payload conflict", "insufficient cross-chaincode endorsement"]},
-    {"chaincode": "rupiah-payments", "method": "FundWallet", "cases": ["atomic float-to-wallet funding", "ineligible recipient", "holdings limit", "insufficient float", "same-reference replay", "same-reference payload conflict"]},
+    {"chaincode": "rupiah-payments", "method": "FundWallet", "cases": ["atomic float-to-wallet funding", "suspended distributor denied", "ineligible recipient", "holdings limit", "insufficient float", "same-reference replay", "same-reference payload conflict"]},
     {"chaincode": "rupiah-payments", "method": "GetRetailFloat", "cases": ["float after conversion", "float after wallet funding"]},
     {"chaincode": "rupiah-payments", "method": "GetBalance", "cases": ["owner read", "business representative read", "unauthorized subject read", "active and restricted state"]},
     {"chaincode": "rupiah-payments", "method": "GetReceipt", "cases": ["transfer receipt", "funding receipt", "unknown reference", "unrelated caller read behavior"]}
@@ -97,6 +115,22 @@
     {"method": "POST", "path": "/issuances", "roles": ["bank_indonesia"], "json": true},
     {"method": "POST", "path": "/reserve-redemptions", "roles": ["bank_indonesia"], "json": true},
     {"method": "POST", "path": "/interbank-transfers", "roles": ["retail_bank", "wholesale_bank"], "json": true},
+
+    {"method": "POST", "path": "/interbank-transfers/{reference}/approval", "roles": ["retail_bank", "wholesale_bank"]},
+
+    {"method": "POST", "path": "/interbank-transfers/{reference}/rejection", "roles": ["retail_bank", "wholesale_bank"]},
+
+    {"method": "POST", "path": "/distributors/{distributor_id}/approval-threshold-proposals", "roles": ["retail_bank", "wholesale_bank"], "json": true},
+
+    {"method": "POST", "path": "/distributors/{distributor_id}/approval-threshold-approvals", "roles": ["retail_bank", "wholesale_bank"], "json": true},
+
+    {"method": "PUT", "path": "/distributors/{distributor_id}/status", "roles": ["bank_indonesia"], "json": true},
+
+    {"method": "PUT", "path": "/transfer-limit", "roles": ["bank_indonesia"], "json": true},
+
+    {"method": "GET", "path": "/distributors/{distributor_id}", "roles": ["retail_bank", "wholesale_bank", "bank_indonesia", "auditor"]},
+
+    {"method": "GET", "path": "/transfer-limit", "roles": ["retail_bank", "wholesale_bank", "bank_indonesia", "auditor"]},
     {"method": "POST", "path": "/wallet-fundings", "roles": ["retail_bank"], "json": true},
     {"method": "GET", "path": "/subjects/{subject_id}", "roles": ["retail_bank", "wholesale_bank", "bank_indonesia", "auditor"]},
     {"method": "GET", "path": "/supply/wholesale", "roles": ["retail_bank", "wholesale_bank", "bank_indonesia", "auditor"]},
@@ -126,12 +160,21 @@
     {"id":"validator-read-subject","chaincode":"rupiah-controls","transaction":"GetSubject","api":"GET /subjects/{subject_id}","family":"reads","actor":"auditor","fixture_profile":"reuse-active-subject","operation_kind":"query"},
     {"id":"register-distributor","chaincode":"rupiah-monetary","transaction":"RegisterDistributor","api":"POST /distributors","family":"monetary","actor":"bank_indonesia","fixture_profile":"fresh-distributor","operation_kind":"write"},
     {"id":"issue","chaincode":"rupiah-monetary","transaction":"Issue","api":"POST /issuances","family":"monetary","actor":"bank_indonesia","fixture_profile":"monetary","operation_kind":"write"},
-    {"id":"interbank-transfer","chaincode":"rupiah-monetary","transaction":"TransferReserve","api":"POST /interbank-transfers","family":"monetary","actor":"wholesale_bank","fixture_profile":"monetary","operation_kind":"write"},
+    {"id":"interbank-transfer","chaincode":"rupiah-monetary","transaction":"TransferReserve","api":"POST /interbank-transfers","family":"monetary","actor":"wholesale_bank","fixture_profile":"monetary","operation_kind":"write","variant":"at-or-below-approval-threshold"},
+    {"id":"interbank-transfer-pending","chaincode":"rupiah-monetary","transaction":"TransferReserve","api":"POST /interbank-transfers","family":"monetary","actor":"retail_bank","fixture_profile":"monetary","operation_kind":"write","variant":"above-approval-threshold"},
+    {"id":"approve-transfer","chaincode":"rupiah-monetary","transaction":"ApproveTransfer","api":"POST /interbank-transfers/{reference}/approval","family":"monetary","actor":"reviewer","fixture_profile":"pending-transfer","operation_kind":"write"},
+    {"id":"reject-transfer","chaincode":"rupiah-monetary","transaction":"RejectTransfer","api":"POST /interbank-transfers/{reference}/rejection","family":"monetary","actor":"reviewer","fixture_profile":"pending-transfer","operation_kind":"write"},
+    {"id":"propose-approval-threshold","chaincode":"rupiah-monetary","transaction":"ProposeApprovalThreshold","api":"POST /distributors/{distributor_id}/approval-threshold-proposals","family":"participation","actor":"wholesale_bank","fixture_profile":"monetary","operation_kind":"write"},
+    {"id":"set-participant-status","chaincode":"rupiah-monetary","transaction":"SetParticipantStatus","api":"PUT /distributors/{distributor_id}/status","family":"participation","actor":"bank_indonesia","fixture_profile":"monetary","operation_kind":"write"},
+    {"id":"set-transfer-limit","chaincode":"rupiah-monetary","transaction":"SetTransferLimit","api":"PUT /transfer-limit","family":"participation","actor":"bank_indonesia","fixture_profile":"monetary","operation_kind":"write"},
     {"id":"redeem-reserve","chaincode":"rupiah-monetary","transaction":"RedeemReserve","api":"POST /reserve-redemptions","family":"monetary","actor":"bank_indonesia","fixture_profile":"monetary","operation_kind":"write"},
     {"id":"read-supply","chaincode":"rupiah-monetary","transaction":"GetTotalSupply","api":"GET /supply/total","family":"reads","actor":"bank_indonesia","fixture_profile":"none","operation_kind":"query"},
     {"id":"read-wholesale-supply","chaincode":"rupiah-monetary","transaction":"GetWholesaleSupply","api":"GET /supply/wholesale","family":"reads","actor":"bank_indonesia","fixture_profile":"none","operation_kind":"query"},
     {"id":"read-retail-supply","chaincode":"rupiah-monetary","transaction":"GetRetailSupply","api":"GET /supply/retail","family":"reads","actor":"bank_indonesia","fixture_profile":"none","operation_kind":"query"},
     {"id":"read-reserve","chaincode":"rupiah-monetary","transaction":"GetReserve","api":"GET /distributors/{distributor_id}/reserve","family":"reads","actor":"bank_indonesia","fixture_profile":"monetary","operation_kind":"query"},
+    {"id":"read-participant","chaincode":"rupiah-monetary","transaction":"GetParticipant","api":"GET /distributors/{distributor_id}","family":"reads","actor":"auditor","fixture_profile":"monetary","operation_kind":"query"},
+    {"id":"can-send","chaincode":"rupiah-monetary","transaction":"CanSend","api":"GET /distributors/{distributor_id}/send-eligibility","family":"reads","actor":"retail_bank","fixture_profile":"monetary","operation_kind":"query"},
+    {"id":"read-transfer-limit","chaincode":"rupiah-monetary","transaction":"GetTransferLimit","api":"GET /transfer-limit","family":"reads","actor":"auditor","fixture_profile":"none","operation_kind":"query"},
     {"id":"open-wallet","chaincode":"rupiah-payments","transaction":"OpenWallet","api":"POST /customer-wallets","family":"onboarding","actor":"kyc_verified","fixture_profile":"active-subject","operation_kind":"write"},
     {"id":"transfer-retail","chaincode":"rupiah-payments","transaction":"Transfer","api":"POST /retail-transfers","family":"payments","actor":"kyc_verified","fixture_profile":"retail-transfer-pair","operation_kind":"write","variant":"retail-to-retail"},
     {"id":"transfer-merchant","chaincode":"rupiah-payments","transaction":"Transfer","api":"POST /retail-transfers","family":"payments","actor":"kyc_verified","fixture_profile":"merchant-transfer-pair","operation_kind":"write","variant":"retail-to-merchant"},
@@ -163,6 +206,12 @@
     {"id":"insufficient-float","executor":"ledger-smoke","assertion":"wallet funding rejects insufficient float without changing float or wallet"},
     {"id":"cross-bank-debit-denied","executor":"ledger-smoke","assertion":"a bank identity cannot debit another bank's reserve"},
     {"id":"wholesale-conversion-denied","executor":"ledger-smoke","assertion":"a wholesale bank cannot convert reserve to retail float"},
+    {"id":"participant-admission-evidence","executor":"ledger-smoke","assertion":"registration requires a SHA-256 reference to Bank Indonesia's approval and starts the participant as active"},
+    {"id":"participant-status-matrix","executor":"ledger-smoke","assertion":"a suspended participant cannot send but can receive, a frozen participant cannot transact, and reactivation restores access"},
+    {"id":"participant-closure","executor":"ledger-smoke","assertion":"closing requires a settled reserve and float and cannot be reversed"},
+    {"id":"transfer-limit","executor":"ledger-smoke","assertion":"Bank Indonesia's per-transfer limit rejects a larger interbank transfer without state change"},
+    {"id":"four-eyes-transfer","executor":"ledger-smoke","assertion":"a transfer above the sender's threshold waits for a second officer of the same bank and a rejected transfer moves nothing"},
+    {"id":"approval-threshold-dual-control","executor":"ledger-smoke","assertion":"a bank's approval threshold changes only after a second officer confirms the proposed amount"},
     {"id":"api-route-authorization-matrix","executor":"api-access-matrix","assertion":"every route and application-role cell reaches or is denied at the expected authorization boundary"},
     {"id":"api-request-validation-matrix","executor":"api-access-matrix","assertion":"permitted mutation routes reject malformed requests at validation before ledger effects"},
     {"id":"api-route-action-outcomes","executor":"api-access-matrix","assertion":"bodyless API actions succeed or produce a verified expected denial with unchanged ledger state"}

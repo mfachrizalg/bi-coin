@@ -57,6 +57,10 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	bank := compliance.NewRoute().Subrouter()
 	bank.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleWholesaleBank))
 	bank.HandleFunc("/interbank-transfers", h.TransferReserve).Methods("POST").Name("compliance.interbank-transfers.create")
+	bank.HandleFunc("/interbank-transfers/{reference}/approval", h.ApproveTransfer).Methods("POST").Name("compliance.interbank-transfers.approval.create")
+	bank.HandleFunc("/interbank-transfers/{reference}/rejection", h.RejectTransfer).Methods("POST").Name("compliance.interbank-transfers.rejection.create")
+	bank.HandleFunc("/distributors/{distributor_id}/approval-threshold-proposals", h.ProposeApprovalThreshold).Methods("POST").Name("compliance.distributors.approval-threshold-proposals.create")
+	bank.HandleFunc("/distributors/{distributor_id}/approval-threshold-approvals", h.ApproveApprovalThreshold).Methods("POST").Name("compliance.distributors.approval-threshold-approvals.create")
 
 	centralBank := compliance.NewRoute().Subrouter()
 	centralBank.Use(middleware.RequireRole(middleware.RoleBankIndonesia))
@@ -67,6 +71,8 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	centralBank.HandleFunc("/distributors", h.RegisterDistributor).Methods("POST").Name("compliance.distributors.create")
 	centralBank.HandleFunc("/issuances", h.Issue).Methods("POST").Name("compliance.issuances.create")
 	centralBank.HandleFunc("/reserve-redemptions", h.RedeemReserve).Methods("POST").Name("compliance.reserve-redemptions.create")
+	centralBank.HandleFunc("/distributors/{distributor_id}/status", h.SetParticipantStatus).Methods("PUT").Name("compliance.distributors.status.update")
+	centralBank.HandleFunc("/transfer-limit", h.SetTransferLimit).Methods("PUT").Name("compliance.transfer-limit.update")
 
 	controlRead := compliance.NewRoute().Subrouter()
 	controlRead.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleWholesaleBank, middleware.RoleBankIndonesia, middleware.RoleAuditor))
@@ -76,6 +82,8 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	controlRead.HandleFunc("/supply/total", h.GetTotalSupply).Methods("GET").Name("compliance.supply.total.read")
 	controlRead.HandleFunc("/distributors/{distributor_id}/reserve", h.GetReserve).Methods("GET").Name("compliance.distributors.reserve.read")
 	controlRead.HandleFunc("/distributors/{distributor_id}/float", h.GetRetailFloat).Methods("GET").Name("compliance.distributors.float.read")
+	controlRead.HandleFunc("/distributors/{distributor_id}", h.GetParticipant).Methods("GET").Name("compliance.distributors.read")
+	controlRead.HandleFunc("/transfer-limit", h.GetTransferLimit).Methods("GET").Name("compliance.transfer-limit.read")
 }
 
 func (h *StudyHandler) Identity(w http.ResponseWriter, r *http.Request) {
@@ -192,11 +200,51 @@ func (h *StudyHandler) TransferReserve(w http.ResponseWriter, r *http.Request) {
 	if !requireStudyIdempotencyKey(w, r) {
 		return
 	}
-	if err := h.submit(r, studyDistributorMSP, "rupiah-monetary", "TransferReserve", req.FromDistributorID, req.ToDistributorID, req.Amount, r.Header.Get("Idempotency-Key")); err != nil {
+	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-monetary", "TransferReserve", req.FromDistributorID, req.ToDistributorID, req.Amount, r.Header.Get("Idempotency-Key"))
+	if err != nil {
 		writeServiceError(w, err)
 		return
 	}
-	writeStatus(w, "transferred")
+	writeStudyResult(w, result)
+}
+
+func (h *StudyHandler) ApproveTransfer(w http.ResponseWriter, r *http.Request) {
+	h.transferDecision(w, r, "ApproveTransfer")
+}
+
+func (h *StudyHandler) RejectTransfer(w http.ResponseWriter, r *http.Request) {
+	h.transferDecision(w, r, "RejectTransfer")
+}
+
+func (h *StudyHandler) transferDecision(w http.ResponseWriter, r *http.Request, transaction string) {
+	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-monetary", transaction, mux.Vars(r)["reference"])
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStudyResult(w, result)
+}
+
+func (h *StudyHandler) ProposeApprovalThreshold(w http.ResponseWriter, r *http.Request) {
+	h.approvalThreshold(w, r, "ProposeApprovalThreshold", "threshold_proposed")
+}
+
+func (h *StudyHandler) ApproveApprovalThreshold(w http.ResponseWriter, r *http.Request) {
+	h.approvalThreshold(w, r, "ApproveApprovalThreshold", "threshold_approved")
+}
+
+func (h *StudyHandler) approvalThreshold(w http.ResponseWriter, r *http.Request, transaction string, status string) {
+	var req struct {
+		Amount string `json:"amount" validate:"required,nonnegative_int64"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submit(r, studyDistributorMSP, "rupiah-monetary", transaction, mux.Vars(r)["distributor_id"], req.Amount); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, status)
 }
 
 func (h *StudyHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
@@ -376,15 +424,45 @@ func (h *StudyHandler) RegisterDistributor(w http.ResponseWriter, r *http.Reques
 	var req struct {
 		DistributorID string `json:"distributor_id" validate:"required,notblank"`
 		Kind          string `json:"kind" validate:"required,oneof=wholesale retail"`
+		AdmissionRef  string `json:"admission_ref" validate:"required,len=64,hexadecimal"`
 	}
 	if !decodeJSON(w, r, &req) {
 		return
 	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "RegisterDistributor", req.DistributorID, req.Kind); err != nil {
+	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "RegisterDistributor", req.DistributorID, req.Kind, req.AdmissionRef); err != nil {
 		writeServiceError(w, err)
 		return
 	}
 	writeStatus(w, "distributor_registered")
+}
+
+func (h *StudyHandler) SetParticipantStatus(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Status string `json:"status" validate:"required,oneof=active suspended frozen closed"`
+		Reason string `json:"reason_code" validate:"required,oneof=tikmi_assessment administrative_sanction authority_request participant_request participation_policy payment_system_continuity"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "SetParticipantStatus", mux.Vars(r)["distributor_id"], req.Status, req.Reason); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "status_updated")
+}
+
+func (h *StudyHandler) SetTransferLimit(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Amount string `json:"amount" validate:"required,positive_int64"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "SetTransferLimit", req.Amount); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "transfer_limit_set")
 }
 
 func (h *StudyHandler) Issue(w http.ResponseWriter, r *http.Request) {
@@ -469,6 +547,31 @@ func (h *StudyHandler) GetReserve(w http.ResponseWriter, r *http.Request) {
 
 func (h *StudyHandler) GetRetailFloat(w http.ResponseWriter, r *http.Request) {
 	h.readAmount(w, r, "rupiah-payments", "GetRetailFloat", mux.Vars(r)["distributor_id"])
+}
+
+func (h *StudyHandler) GetParticipant(w http.ResponseWriter, r *http.Request) {
+	result, err := h.evaluate(r, studyMSPForRole(middleware.GetRole(r)), "rupiah-monetary", "GetParticipant", mux.Vars(r)["distributor_id"])
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	decoder := json.NewDecoder(strings.NewReader(string(result)))
+	decoder.UseNumber()
+	var participant map[string]any
+	if err := decoder.Decode(&participant); err != nil {
+		writeServiceError(w, services.Internal("invalid study participant result", err))
+		return
+	}
+	for _, key := range []string{"approval_threshold", "reserve"} {
+		if amount, ok := participant[key].(json.Number); ok {
+			participant[key] = amount.String()
+		}
+	}
+	writeJSON(w, http.StatusOK, participant)
+}
+
+func (h *StudyHandler) GetTransferLimit(w http.ResponseWriter, r *http.Request) {
+	h.readAmount(w, r, "rupiah-monetary", "GetTransferLimit")
 }
 
 func (h *StudyHandler) readAmount(w http.ResponseWriter, r *http.Request, chaincode string, transaction string, args ...string) {

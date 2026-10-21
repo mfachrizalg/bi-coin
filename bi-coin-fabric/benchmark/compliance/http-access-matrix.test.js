@@ -22,6 +22,10 @@ test('API matrix separates route authorization from JSON validation and selects 
         releaseDecisionByRole: { retail_bank: 'release-bank' },
         pendingStaffClientID: 'pending-staff-client',
         initializationReplayStateUnchanged: true,
+        pendingTransferByRoute: {
+            '/interbank-transfers/{reference}/approval': { retail_bank: 'approve-retail', wholesale_bank: 'approve-wholesale' },
+            '/interbank-transfers/{reference}/rejection': { retail_bank: 'reject-retail', wholesale_bank: 'reject-wholesale' },
+        },
     };
     const subjectStates = new Map([
         ['protect-bank', { status: 'pending', protected: false }],
@@ -54,7 +58,8 @@ test('API matrix separates route authorization from JSON validation and selects 
                             : 'retail-subject')
                 .replace('{client_id}', candidate.path === '/staff/{client_id}/endorsement-policies'
                     ? apiFixtures.pendingStaffClientID : 'missing-staff-fixture')
-                .replace('{distributor_id}', 'retail-bank') === url.pathname);
+                .replace('{distributor_id}', 'retail-bank')
+                .replace('{reference}', apiFixtures.pendingTransferByRoute[candidate.path]?.[role] || 'missing-transfer-fixture') === url.pathname);
         assert.ok(route, `unexpected request ${init.method} ${url.pathname}`);
         const allowed = route.roles.includes(role);
         const subjectID = decodeURIComponent(url.pathname.split('/')[2] || '');
@@ -65,6 +70,10 @@ test('API matrix separates route authorization from JSON validation and selects 
             subjectStates.get(subjectID).protected = true;
         }
         requests.push({ route, role, url, init });
+        if (allowed && route.path.startsWith('/interbank-transfers/{reference}/')) {
+            const decided = route.path.endsWith('/approval') ? 'executed' : 'rejected';
+            return { ok: true, status: 200, json: async () => ({ status: decided, maker_id: 'maker', checker_id: 'checker' }) };
+        }
         return { ok: status < 400, status, text: async () => 'validation error' };
     };
 
@@ -91,6 +100,10 @@ test('API matrix separates route authorization from JSON validation and selects 
         assert.equal(summary.action_unresolved, 0);
         assert.ok(requests.filter(request => !request.route.json).every(request => request.init.body === undefined));
         assert.ok(requests.filter(request => request.route.json).every(request => request.init.body === '{}'));
+
+        const approval = requests.find(request => request.role === 'wholesale_bank'
+            && request.route.path === '/interbank-transfers/{reference}/approval');
+        assert.equal(approval.url.pathname, '/interbank-transfers/approve-wholesale/approval');
 
         const merchantBalance = requests.find(request => request.role === 'merchant'
             && request.route.path === '/customer-wallets/{subject_id}/balance');

@@ -54,6 +54,7 @@ function createApiConfig(projectRoot, stamp) {
         { key: 'kyc_verified', role: 'kyc_verified', msp: 'EndUserMSP', cert: 'User1' },
         { key: 'retail_bank', role: 'retail_bank', msp: 'DistributorMSP', cert: 'Admin' },
         { key: 'wholesale_bank', role: 'wholesale_bank', msp: 'DistributorMSP', cert: 'User4' },
+        { key: 'wholesale_two', role: 'wholesale_bank', msp: 'DistributorMSP', cert: 'User5' },
         { key: 'bank_indonesia', role: 'bank_indonesia', msp: 'CentralBankMSP', cert: 'Admin' },
         { key: 'merchant', role: 'merchant', msp: 'EndUserMSP', cert: 'User2' },
         { key: 'auditor', role: 'auditor', msp: 'ValidatorMSP', cert: 'Admin' },

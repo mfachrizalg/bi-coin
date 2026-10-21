@@ -32,16 +32,16 @@ $FABRIC_SAMPLES/bin/peer version | grep Version               # Version: v2.5.16
 $FABRIC_SAMPLES/bin/fabric-ca-client version | grep Version   # Version: v1.5.9
 ```
 
-Catalog counts. Expected: `34 34 33 33`.
+Catalog counts. Expected: `43 43 41 41`.
 
 ```sh
 node -e 'const c=require("./benchmark/compliance/case-catalog.json"); console.log(c.performance_scenarios.length, c.protocol.performance_workload_count, new Set(c.performance_scenarios.map(p=>p.chaincode+":"+p.transaction)).size, c.protocol.performance_method_count)'
 ```
 
-Identity attributes. Expected: `User1`–`User3` and `Admin` are `retail-bank`; `User4` is `wholesale-bank`.
+Identity attributes. Expected: `User1`–`User3` and `Admin` are `retail-bank`; `User4` and `User5` are `wholesale-bank`. Four-eyes approval needs two officers per bank (ADR 0014).
 
 ```sh
-for u in User1 User2 User3 User4 Admin; do openssl x509 -in "network/organizations/peerOrganizations/distributor.bi-coin/users/$u@distributor.bi-coin/msp/signcerts/cert.pem" -outform DER | strings | /usr/bin/grep -o 'distributor_id.\{0,28\}'; done
+for u in User1 User2 User3 User4 User5 Admin; do openssl x509 -in "network/organizations/peerOrganizations/distributor.bi-coin/users/$u@distributor.bi-coin/msp/signcerts/cert.pem" -outform DER | strings | /usr/bin/grep -o 'distributor_id.\{0,28\}'; done
 ```
 
 Repeat this check inside the runner after `new` brings the network up. The network material is regenerated there.
@@ -104,11 +104,15 @@ docker compose -p "bi-coin-bench-$STAMP" -f compose.yaml exec $RUNNER_ENV runner
 
 1. Copy `benchmark/results/compliance-<stamp>` out of the workspace into the repository's `benchmark/results/`.
 2. Recompute the SHA-256 of every artifact and compare it with `manifest.json`.
-3. Check the source snapshot against the commit. Every line must print `OK`:
+3. Check the source snapshot against the commit. Every tracked file must print `OK`. `UNTRACKED` is allowed only under `*/vendor/`: `go mod vendor` generates those files from the committed `go.mod` and `go.sum`, which must themselves print `OK`. Any `MISMATCH`, or any `UNTRACKED` outside `vendor/`, stops the procedure.
 
 ```sh
 cd "$REPO/bi-coin-fabric/benchmark/results/compliance-$STAMP/source"
-find . -type f | while read -r f; do p=${f#./}; [ "$(git -C "$REPO" show "$COMMIT:bi-coin-fabric/$p" | sha256sum | cut -d' ' -f1)" = "$(sha256sum "$f" | cut -d' ' -f1)" ] && echo "OK $p" || echo "MISMATCH $p"; done
+find . -type f | while read -r f; do p=${f#./}
+  if git -C "$REPO" cat-file -e "$COMMIT:bi-coin-fabric/$p" 2>/dev/null; then
+    [ "$(git -C "$REPO" show "$COMMIT:bi-coin-fabric/$p" | sha256sum | cut -d' ' -f1)" = "$(sha256sum "$f" | cut -d' ' -f1)" ] && echo "OK $p" || echo "MISMATCH $p"
+  else echo "UNTRACKED $p"; fi
+done | /usr/bin/grep -v -E '^OK |^UNTRACKED .*/vendor/'   # must print nothing
 ```
 
 4. Only then remove the disposable project's containers: `docker compose -p "bi-coin-bench-$STAMP" -f compose.yaml down`. Keep its volumes until the results are verified.

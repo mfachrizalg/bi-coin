@@ -18,12 +18,13 @@ Changing a transaction name, parameter order, return shape, state key, or author
 |---|---|
 | Subject and staff | FreezeSubject, RequestUnfreeze, ApproveUnfreeze, SetBusinessAuthority (controls, DistributorMSP staff roles); CreateStaffPending, ProtectStaff, SetStaffRole (controls, CentralBankMSP) |
 | Wallet and transfer | OpenWallet, Transfer (payments, EndUserMSP); GetBalance and GetReceipt are reads |
-| Monetary flow | Issue, RedeemReserve, TransferReserve, DebitReserveForConversion (monetary); ConvertToRetail and FundWallet (payments) |
+| Monetary flow | Issue, RedeemReserve, TransferReserve, ApproveTransfer, RejectTransfer, DebitReserveForConversion (monetary); ConvertToRetail and FundWallet (payments) |
+| Wholesale participation | RegisterDistributor with admission evidence, SetParticipantStatus, SetTransferLimit (monetary, CentralBankMSP); ProposeApprovalThreshold and ApproveApprovalThreshold (monetary, two officers of the same bank). See ADR 0014 |
 | Limits and policy | SetLimits and GetLimits (controls); ProtectSubject and ProtectStaff (endorsement policies) |
 | KYC anchor | CreatePending, RecordReview, ApproveStandard, DecideHighRisk, and GetSubject (controls); raw KYC material belongs in the off-chain store |
-| Oversight | Read-only queries: GetSubject, GetLimits, CanPay, and CanActFor (controls); GetReserve, GetWholesaleSupply, GetRetailSupply, and GetTotalSupply (monetary); GetBalance, GetReceipt, and GetRetailFloat (payments) |
+| Oversight | Read-only queries: GetSubject, GetLimits, CanPay, and CanActFor (controls); GetReserve, GetParticipant, CanSend, GetTransferLimit, GetWholesaleSupply, GetRetailSupply, and GetTotalSupply (monetary); GetBalance, GetReceipt, and GetRetailFloat (payments) |
 
-Current monetary flow: Issue (CentralBankMSP) credits a Distributor reserve and wholesale supply. TransferReserve (DistributorMSP) moves w-Rupiah Digital between reserves without changing supply. ConvertToRetail (DistributorMSP) moves a bank's reserve into its Retail float, and FundWallet (DistributorMSP) moves that float into the customer wallet, each in one transaction. Transfer (EndUserMSP) moves value between wallets. Verify in source before changing descriptions or workflows.
+Current monetary flow: Issue (CentralBankMSP) credits a Distributor reserve and wholesale supply. TransferReserve (DistributorMSP) moves w-Rupiah Digital between reserves without changing supply; above the sender's approval threshold it stays pending until another officer of the same bank calls ApproveTransfer. A participant's status decides which of these operations it may make (ADR 0014). ConvertToRetail (DistributorMSP) moves a bank's reserve into its Retail float, and FundWallet (DistributorMSP) moves that float into the customer wallet, each in one transaction. Transfer (EndUserMSP) moves value between wallets. Verify in source before changing descriptions or workflows.
 
 Retail low-balance automatic redemption and its policy API are retired; use BI-authorized explicit redemption (RedeemReserve).
 

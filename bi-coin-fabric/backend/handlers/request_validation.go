@@ -30,22 +30,31 @@ func newRequestValidator() *validator.Validate {
 		return strings.TrimSpace(field.Field().String()) != ""
 	})
 	_ = validate.RegisterValidation("positive_int64", func(field validator.FieldLevel) bool {
-		value := field.Field().String()
-		if value == "" {
-			return false
-		}
-		for _, digit := range value {
-			if digit < '0' || digit > '9' {
-				return false
-			}
-		}
-		amount, err := strconv.ParseInt(value, 10, 64)
-		return err == nil && amount > 0
+		amount, ok := parseDecimalInt64(field.Field().String())
+		return ok && amount > 0
+	})
+	_ = validate.RegisterValidation("nonnegative_int64", func(field validator.FieldLevel) bool {
+		_, ok := parseDecimalInt64(field.Field().String())
+		return ok
 	})
 	_ = validate.RegisterValidation("restriction_reason", func(field validator.FieldLevel) bool {
 		return models.StudyRestrictionReason(field.Field().String()).Valid()
 	})
 	return validate
+}
+
+// parseDecimalInt64 accepts only unsigned decimal digits that fit in int64.
+func parseDecimalInt64(value string) (int64, bool) {
+	if value == "" {
+		return 0, false
+	}
+	for _, digit := range value {
+		if digit < '0' || digit > '9' {
+			return 0, false
+		}
+	}
+	amount, err := strconv.ParseInt(value, 10, 64)
+	return amount, err == nil
 }
 
 func validateRequest(target interface{}) error {
@@ -135,6 +144,8 @@ func writeRequestValidationErrors(w http.ResponseWriter, err error) {
 			message = "reason_code must be dttot, authority_order, or internal_review"
 		case "positive_int64":
 			message = field.Field() + " must be a positive whole-rupiah integer"
+		case "nonnegative_int64":
+			message = field.Field() + " must be a non-negative whole-rupiah integer"
 		case "hexadecimal", "len":
 			message = field.Field() + " must be a 64-character SHA-256 reference"
 		case "min":

@@ -27,10 +27,12 @@ function routePath(route, subjectID, fixtureIds, apiFixtures, role) {
     const clientID = route.path === '/staff/{client_id}/endorsement-policies'
         ? apiFixtures.pendingStaffClientID || 'missing-staff-fixture'
         : 'missing-staff-fixture';
+    const transferReference = apiFixtures.pendingTransferByRoute?.[route.path]?.[role] || 'missing-transfer-fixture';
     return route.path
         .replace('{subject_id}', encodeURIComponent(routeSubjectID))
         .replace('{client_id}', encodeURIComponent(clientID))
-        .replace('{distributor_id}', 'retail-bank');
+        .replace('{distributor_id}', 'retail-bank')
+        .replace('{reference}', encodeURIComponent(transferReference));
 }
 
 async function readSubjectState(baseURL, token, subjectID) {
@@ -132,6 +134,15 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
                         actionClassification = protectedStaff ? 'pass' : 'violation';
                         actionStateEffect = protectedStaff ? 'staff-protection-verified' : 'staff-protection-unverified';
                         actionEvidence = { verification_status: verificationStatus };
+                    } else if (route.path.startsWith('/interbank-transfers/{reference}/')) {
+                        const expectedStatus = route.path.endsWith('/approval') ? 'executed' : 'rejected';
+                        const receipt = response.ok ? await response.json() : {};
+                        const decided = response.ok && receipt.status === expectedStatus
+                            && Boolean(receipt.checker_id) && receipt.checker_id !== receipt.maker_id;
+                        actionExpected = `a second officer leaves the pending transfer ${expectedStatus}`;
+                        actionClassification = decided ? 'pass' : 'violation';
+                        actionStateEffect = decided ? `transfer-${expectedStatus}` : 'transfer-decision-unverified';
+                        actionEvidence = { status: receipt.status, distinct_officers: decided };
                     } else if (route.path === '/monetary-initializations') {
                         const unchanged = apiFixtures.initializationReplayStateUnchanged === true;
                         const duplicateDeniedWithoutMutation = response.status === 500 && unchanged;

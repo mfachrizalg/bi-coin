@@ -12,15 +12,15 @@ const roles = catalog.application_roles;
 test('catalog covers every public study transaction and route role cell', () => {
     const methods = catalog.contract_methods;
     const methodKeys = methods.map(item => `${item.chaincode}.${item.method}`);
-    assert.equal(methods.length, 35);
+    assert.equal(methods.length, 44);
     assert.equal(new Set(methodKeys).size, methodKeys.length, 'contract method duplicated');
     assert.ok(methods.every(item => item.cases.length > 0), 'method has no correctness cases');
 
-    assert.equal(catalog.api_routes.length, 29);
+    assert.equal(catalog.api_routes.length, 37);
     const routeKeys = catalog.api_routes.map(item => `${item.method} ${item.path}`);
     assert.equal(new Set(routeKeys).size, routeKeys.length, 'API route duplicated');
-    assert.equal(catalog.api_routes.reduce((count, route) => count + route.roles.length, 0), 55);
-    assert.equal(catalog.api_routes.length * roles.length, 232);
+    assert.equal(catalog.api_routes.reduce((count, route) => count + route.roles.length, 0), 73);
+    assert.equal(catalog.api_routes.length * roles.length, 296);
 
     const sourceRoot = path.resolve(__dirname, '../../chaincode');
     const files = {
@@ -43,10 +43,10 @@ test('catalog covers every public study transaction and route role cell', () => 
     assert.deepEqual(expectedRoutes, actualRoutes, 'API catalog must match registered study routes');
 });
 
-test('performance catalog covers all 33 public performance methods in 34 workloads', () => {
-    assert.equal(catalog.performance_scenarios.length, 34);
-    assert.equal(catalog.protocol.performance_workload_count, 34);
-    assert.equal(catalog.protocol.performance_method_count, 33);
+test('performance catalog covers all 41 public performance methods in 43 workloads', () => {
+    assert.equal(catalog.performance_scenarios.length, 43);
+    assert.equal(catalog.protocol.performance_workload_count, 43);
+    assert.equal(catalog.protocol.performance_method_count, 41);
     const publicMethods = new Set(catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`));
     for (const scenario of catalog.performance_scenarios) {
         assert.ok(publicMethods.has(`${scenario.chaincode}.${scenario.transaction}`), scenario.id);
@@ -55,12 +55,14 @@ test('performance catalog covers all 33 public performance methods in 34 workloa
         assert.ok(['query', 'write'].includes(scenario.operation_kind), `${scenario.id} has no operation kind`);
     }
     const performanceMethods = new Set(catalog.performance_scenarios.map(item => `${item.chaincode}.${item.transaction}`));
-    const excluded = new Set(['rupiah-monetary.Initialize', 'rupiah-monetary.DebitReserveForConversion']);
-    assert.equal(performanceMethods.size, 33);
+    // ApproveApprovalThreshold needs a fresh proposal from another officer before each call, so it has no repeatable load.
+    const excluded = new Set(['rupiah-monetary.Initialize', 'rupiah-monetary.DebitReserveForConversion', 'rupiah-monetary.ApproveApprovalThreshold']);
+    assert.equal(performanceMethods.size, 41);
     for (const method of catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`)) {
         assert.equal(performanceMethods.has(method), !excluded.has(method), method);
     }
     assert.equal(catalog.performance_scenarios.filter(item => item.transaction === 'Transfer').length, 2);
+    assert.equal(catalog.performance_scenarios.filter(item => item.transaction === 'TransferReserve').length, 2);
 });
 
 test('protocol uses bounded binary search and three grouped confirmations', () => {

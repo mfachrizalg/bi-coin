@@ -9,7 +9,7 @@ Peer MSPs:
 - Observer (MSP ID: ValidatorMSP) peer (OJK, PPATK) for read-only audit and reports.
 - `EndUserMSP` contains eight generated client identities for retail, merchant, and company representatives.
 
-The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for `retail-bank`, and `User4` acts for `wholesale-bank`. Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1`, `User2`, and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer`, `senior_approver`, and `compliance_officer` before running KYC flows. CentralBank identities also include a peer, orderer, administrator, and two client identities, all under `CentralBankMSP`.
+The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for `retail-bank`, and `User4` and `User5` act for `wholesale-bank`. Two officers per bank let a second officer approve four-eyes transfers (ADR 0014). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1`, `User2`, and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer`, `senior_approver`, and `compliance_officer` before running KYC flows. CentralBank identities also include a peer, orderer, administrator, and two client identities, all under `CentralBankMSP`.
 
 The first start creates a private, ignored `.env.study` file with random local CA, CouchDB, and PostgreSQL credentials. Keep that file for later restarts.
 
@@ -49,6 +49,6 @@ Each entry has this shape:
 }
 ```
 
-Use separate usernames and certificate paths for `retail-bank` (`User1`) and `wholesale-bank` (`User4`). Customer users map to separate `EndUserMSP` identities. `AUTH_BOOTSTRAP_USERS_JSON` assigns application roles such as `retail_bank`, `wholesale_bank`, `bank_indonesia`, and `auditor`; it does not assign chaincode staff roles. A CentralBank user provisions each staff certificate's hashed client ID and chaincode role through `POST /staff` and `PUT /staff/{client_id}/role`. The service rejects an identity whose configured MSP does not match the route's required role.
+Use separate usernames and certificate paths for `retail-bank` (`User1`) and `wholesale-bank` (`User4`, with `User5` as its second officer). Customer users map to separate `EndUserMSP` identities. `AUTH_BOOTSTRAP_USERS_JSON` assigns application roles such as `retail_bank`, `wholesale_bank`, `bank_indonesia`, and `auditor`; it does not assign chaincode staff roles. A CentralBank user provisions each staff certificate's hashed client ID and chaincode role through `POST /staff` and `PUT /staff/{client_id}/role`. The service rejects an identity whose configured MSP does not match the route's required role.
 
 The API uses unversioned resource routes, including `/subjects`, `/customer-wallets`, `/retail-transfers`, `/distributors`, `/issuances`, `/reserve-redemptions`, `/interbank-transfers`, `/conversions`, and `/wallet-fundings`. `/conversions` moves a retail bank's reserve into its retail float, and `/wallet-fundings` moves that float into an approved retail wallet. Each call is atomic. These paths avoid the legacy `/wallets` and `/transfers` routes. Without `FABRIC_IDENTITIES_JSON`, these compliance routes are not registered.

@@ -63,18 +63,18 @@ node scripts/smoke-test.js
 | `GET /identities/me`, `POST /subjects` | Authenticated, KYC-verified customer, or merchant |
 | `POST /customer-wallets`, `POST /retail-transfers`, `GET /customer-wallets/{subject_id}/balance` | KYC-verified customer or merchant |
 | `POST /conversions` | DistributorMSP (Retail Bank, Conversion) |
-| `POST /interbank-transfers` | DistributorMSP (Wholesale Bank, Retail Bank) |
+| `POST /interbank-transfers`, `POST /interbank-transfers/{reference}/approval`, `/rejection`; `POST /distributors/{distributor_id}/approval-threshold-proposals`, `/approval-threshold-approvals` | DistributorMSP (Wholesale Bank, Retail Bank) |
 | `POST /wallet-fundings` | DistributorMSP (Retail Bank) |
 | `POST /subjects/{subject_id}/endorsement-policies`, `/reviews`, `/decisions`, `/restrictions`, `/restriction-release-requests`, `/restriction-release-decisions`; `PUT /subjects/{subject_id}/limits`, `/business-authority` | DistributorMSP |
 | `GET /subjects/{subject_id}` | DistributorMSP, CentralBankMSP, Auditor |
 | `POST /staff`, `POST /staff/{client_id}/endorsement-policies`, `PUT /staff/{client_id}/role` | CentralBankMSP |
-| `POST /monetary-initializations`, `/distributors`, `/issuances`, `/reserve-redemptions` | CentralBankMSP |
+| `POST /monetary-initializations`, `/distributors`, `/issuances`, `/reserve-redemptions`; `PUT /distributors/{distributor_id}/status`, `PUT /transfer-limit` | CentralBankMSP |
 
 ## Chaincode Functions
 
 | Chaincode | Exported transactions (caller) |
 |-----------|--------------------------------|
-| `rupiah-monetary` | `Initialize`, `RegisterDistributor`, `Issue`, `RedeemReserve` (CentralBankMSP); `TransferReserve` (DistributorMSP); `DebitReserveForConversion` (nested call from `rupiah-payments`); reads `GetReserve`, `GetWholesaleSupply`, `GetRetailSupply`, `GetTotalSupply` |
+| `rupiah-monetary` | `Initialize`, `RegisterDistributor`, `Issue`, `RedeemReserve`, `SetParticipantStatus`, `SetTransferLimit` (CentralBankMSP); `TransferReserve`, `ApproveTransfer`, `RejectTransfer`, `ProposeApprovalThreshold`, `ApproveApprovalThreshold` (DistributorMSP); `DebitReserveForConversion` (nested call from `rupiah-payments`); reads `GetReserve`, `GetParticipant`, `CanSend`, `GetTransferLimit`, `GetWholesaleSupply`, `GetRetailSupply`, `GetTotalSupply` |
 | `rupiah-controls` | `CreatePending` (EndUserMSP); `ProtectSubject` (DistributorMSP); `CreateStaffPending`, `ProtectStaff`, `SetStaffRole` (CentralBankMSP); `RecordReview`, `ApproveStandard`, `DecideHighRisk`, `SetLimits`, `SetBusinessAuthority`, `FreezeSubject`, `RequestUnfreeze`, `ApproveUnfreeze` (staff roles on DistributorMSP); reads `GetCallerIdentity`, `CanPay`, `GetLimits`, `CanActFor`; `GetSubject` (CentralBankMSP, DistributorMSP, ValidatorMSP) |
 | `rupiah-payments` | `OpenWallet`, `Transfer` (EndUserMSP); `ConvertToRetail`, `FundWallet` (DistributorMSP); reads `GetBalance`, `GetReceipt`, `GetRetailFloat` |
 

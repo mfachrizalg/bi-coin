@@ -218,6 +218,13 @@ func (c *PaymentsContract) FundWallet(ctx contractapi.TransactionContextInterfac
 		}
 		return paymentReceipt{}, err
 	}
+	canSend, err := invokeBool(ctx, monetaryChaincode, "CanSend", distributorID)
+	if err != nil {
+		return paymentReceipt{}, err
+	}
+	if !canSend {
+		return paymentReceipt{}, fmt.Errorf("distributor participant status does not allow funding")
+	}
 	eligible, err := invokeBool(ctx, controlsChaincode, "CanPay", subjectID)
 	if err != nil {
 		return paymentReceipt{}, err

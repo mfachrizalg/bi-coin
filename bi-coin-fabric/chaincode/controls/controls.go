@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/statebased"
 	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
@@ -27,6 +28,16 @@ const (
 	RestrictionReasonInternalReview = "internal_review"
 )
 
+// Maximum restriction periods. UU No. 8 Tahun 2010 allows an internal hold of
+// at most 5 working days (Pasal 26 ayat (1)) and an authority-ordered block of
+// at most 30 working days (Pasal 71 ayat (3)). A DTTOT restriction lasts until
+// it is lifted (UU No. 9 Tahun 2013 Pasal 28).
+// ponytail: calendar days, always within the working-day maximum; a holiday calendar would allow the full period.
+var restrictionPeriods = map[string]time.Duration{
+	RestrictionReasonInternalReview: 5 * 24 * time.Hour,
+	RestrictionReasonAuthorityOrder: 30 * 24 * time.Hour,
+}
+
 type subjectRecord struct {
 	SubjectID            string       `json:"subject_id"`
 	Category             string       `json:"category"`
@@ -39,6 +50,7 @@ type subjectRecord struct {
 	Status               string       `json:"status"`
 	Restricted           bool         `json:"restricted"`
 	RestrictionReason    string       `json:"restriction_reason,omitempty"`
+	RestrictedUntil      int64        `json:"restricted_until,omitempty"`
 	UnfreezeReviewerID   string       `json:"unfreeze_reviewer_id,omitempty"`
 	AuthorityEvidenceRef string       `json:"authority_evidence_ref,omitempty"`
 	Representatives      []string     `json:"representatives,omitempty"`
@@ -63,6 +75,7 @@ type SubjectView struct {
 	Protected            bool         `json:"protected"`
 	Restricted           bool         `json:"restricted"`
 	RestrictionReason    string       `json:"restriction_reason"`
+	RestrictedUntil      int64        `json:"restricted_until"`
 	ReviewerID           string       `json:"reviewer_id"`
 	SeniorID             string       `json:"senior_id"`
 	AuthorityEvidenceRef string       `json:"authority_evidence_ref"`
@@ -330,8 +343,16 @@ func (c *ControlsContract) FreezeSubject(ctx contractapi.TransactionContextInter
 	if err != nil {
 		return err
 	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return err
+	}
 	record.Restricted = true
 	record.RestrictionReason = reason
+	record.RestrictedUntil = 0
+	if period, limited := restrictionPeriods[reason]; limited {
+		record.RestrictedUntil = now.Add(period).Unix()
+	}
 	record.UnfreezeReviewerID = ""
 	record.AuthorityEvidenceRef = ""
 	return putJSON(ctx.GetStub(), key, record)
@@ -379,6 +400,7 @@ func (c *ControlsContract) ApproveUnfreeze(ctx contractapi.TransactionContextInt
 	}
 	record.Restricted = false
 	record.RestrictionReason = ""
+	record.RestrictedUntil = 0
 	record.SeniorID = seniorID
 	return putJSON(ctx.GetStub(), key, record)
 }
@@ -388,7 +410,11 @@ func (c *ControlsContract) CanPay(ctx contractapi.TransactionContextInterface, s
 	if err != nil {
 		return false, err
 	}
-	return record.Status == "active" && !record.Restricted, nil
+	restricted, err := restrictionActive(ctx, record)
+	if err != nil {
+		return false, err
+	}
+	return record.Status == "active" && !restricted, nil
 }
 
 func (c *ControlsContract) GetLimits(ctx contractapi.TransactionContextInterface, subjectID string) (LimitProfile, error) {
@@ -396,7 +422,11 @@ func (c *ControlsContract) GetLimits(ctx contractapi.TransactionContextInterface
 	if err != nil {
 		return LimitProfile{}, err
 	}
-	if record.Status != "active" || record.Restricted || !record.LimitsSet {
+	restricted, err := restrictionActive(ctx, record)
+	if err != nil {
+		return LimitProfile{}, err
+	}
+	if record.Status != "active" || restricted || !record.LimitsSet {
 		return LimitProfile{}, fmt.Errorf("subject has no active payment limits")
 	}
 	return record.Limits, nil
@@ -433,10 +463,14 @@ func (c *ControlsContract) GetSubject(ctx contractapi.TransactionContextInterfac
 	if owners == nil {
 		owners = []string{}
 	}
+	restricted, err := restrictionActive(ctx, record)
+	if err != nil {
+		return SubjectView{}, err
+	}
 	return SubjectView{
 		SubjectID: record.SubjectID, Category: record.Category, Status: record.Status,
 		RiskLevel: record.RiskLevel, PEP: record.PEP, Protected: record.Protected,
-		Restricted: record.Restricted, RestrictionReason: record.RestrictionReason,
+		Restricted: restricted, RestrictionReason: record.RestrictionReason, RestrictedUntil: record.RestrictedUntil,
 		ReviewerID: record.ReviewerID, SeniorID: record.SeniorID,
 		AuthorityEvidenceRef: record.AuthorityEvidenceRef, Limits: record.Limits,
 		Representatives: representatives, BeneficialOwnerRefs: owners,
@@ -583,6 +617,30 @@ func contains(values []string, value string) bool {
 		}
 	}
 	return false
+}
+
+// restrictionActive treats a time-limited restriction as lifted once its period ends.
+func restrictionActive(ctx contractapi.TransactionContextInterface, record subjectRecord) (bool, error) {
+	if !record.Restricted || record.RestrictedUntil == 0 {
+		return record.Restricted, nil
+	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return false, err
+	}
+	return restrictedAt(record, now), nil
+}
+
+func restrictedAt(record subjectRecord, now time.Time) bool {
+	return record.Restricted && (record.RestrictedUntil == 0 || now.Unix() < record.RestrictedUntil)
+}
+
+func txTime(ctx contractapi.TransactionContextInterface) (time.Time, error) {
+	timestamp, err := ctx.GetStub().GetTxTimestamp()
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Unix(timestamp.Seconds, int64(timestamp.Nanos)).UTC(), nil
 }
 
 func isOpaqueReference(value string) bool {
