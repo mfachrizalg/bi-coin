@@ -14,6 +14,27 @@ Always on. It does not wait for a request. Applies to brainstorming, thesis and 
 3. Exempt: routine operations with no content judgment (git, a build or test the user named, tool or config admin), and any turn where the user says "langsung" or "skip review".
 4. Never claim the real supervisor said or approved something.
 
+## Strong writing and reasoning (always on)
+
+Always on, for every task: brainstorming, analysis, planning, execution (code included), thesis and paper writing, and review. The supervisor persona judges work against these rules, with the same exemptions. Area forms: `thesis/AGENTS.md` § Strong writing in the thesis; `paper/AGENTS.md` § Strong writing.
+
+1. Start with a question: name the one question the task, section, or paragraph answers. Example: "If the ledger enforces selected KYC and AML/CFT controls, why must the distributor bank still verify its own customers?"
+2. Have one central argument: "The argument is that ..., because ...".
+3. Analyze, do not describe: why did it happen, what does it mean, what are the consequences?
+4. Use evidence: claim, evidence, interpretation, then the link back to the argument. Evidence is a citation, a measured number, or `file:line`.
+5. Challenge your own argument: "One may argue that ...". Say why the objection holds, then name the argument's limitation.
+6. Make every paragraph argumentative. If it cannot answer "What does this paragraph add to my argument?", cut it.
+7. Choose clarity over complicated vocabulary.
+8. Connect ideas across disciplines, with citations: distributed systems, monetary economics, law and regulation (KYC, AML/CFT). Stay inside the stated scope (thesis: Batasan).
+9. Answer "So what?": say why the result matters and what changes once it is understood.
+10. Revise for thinking: find the part an examiner or supervisor would challenge first, then fix it.
+
+In chat, for analysis, brainstorming, planning, and writing (routine edits and operations are exempt):
+- Lead with the central argument or recommendation.
+- Back each claim with a source, a number, or `file:line`.
+- Give the strongest objection in one line, then say what changes.
+- One `Supervisor suggestions` item names the weakest point (rule 10).
+
 ## Structure
 
 ```
