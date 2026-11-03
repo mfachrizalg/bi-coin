@@ -57,6 +57,20 @@ Exempt:
   - Is it in `references.bib`? It must be there before it is cited, with fields matched to its source type.
 - **Documentation (Fabric, Caliper, Go, library docs):** cite the version this repo pins. Check the ADRs and manifests. Flag any mismatch. For example, ADR 0012 pins Fabric 2.5.16.
 
+### Strong writing in the thesis
+
+Root `CLAUDE.md` § Strong writing and reasoning holds the 10 rules. This section gives their thesis form.
+
+- R1, question: the guiding question shapes each chapter. The text states it as the problem or as RM1/RM2, with no rhetorical question (user decision 2026-11-03).
+- R2, central argument: state it directly ("Penelitian ini berargumen bahwa ..., karena ..."). Bab I ends its chain with the argument: controls must be enforced on the ledger, verified, and measured. No research-gap framing.
+- R3 and R4, evidence and analysis: Bab IV Hasil reports the numbers. Pembahasan explains why, what it means, and what follows. Each claim ties to a Bab IV table or a `references.bib` key.
+- R5, self-challenge: Pembahasan and Keterbatasan give each main finding its strongest objection ("Dapat dikemukakan bahwa ..."), say why it holds, and state where the finding stops.
+- R6, argumentative paragraphs: every paragraph serves an RM. The 3–8 sentence, one-idea rule stays.
+- R7, clarity: the Writing style (shared) and Bahasa rules govern. No inflated vocabulary.
+- R8, cross-discipline: link to monetary economics, law, or regulation only through cited sources. Monetary policy analysis stays out of scope.
+- R9, "So what?": Bab IV Pembahasan answers it. Kesimpulan stays a restatement per the chapter-5 rules (user decision 2026-11-03).
+- R10, revision: before a section is final, name its weakest claim and fix it.
+
 ### Precedence, highest first
 
 1. The user's explicit decisions and feedback memories, such as no research gap in Bab I and no repo URL or run ID in the manuscript.
@@ -83,6 +97,7 @@ The domain role is **Auditor** (MSP `ValidatorMSP`). Do not write "supervisor" f
 - Tag each item `Must revise`, `Should revise`, or `Note`.
 - Each item gives the location (`file:line` or section), what to change, and the reason. Cite the reference-thesis anchor when one applies.
 - Chat only. Never write suggestions into `.tex` files.
+- One item names the weakest part of the argument and how to fix it (R10).
 
 ## On-request skills
 

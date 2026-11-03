@@ -78,6 +78,20 @@ Read the matching pages before writing or reviewing a section.
 6. Write "Fig. N", "Table N", "Section II", and "Eq. (N)" consistently.
 7. Formal register, confident and direct. Hedge only where the evidence is limited.
 
+## Strong writing
+
+Root `CLAUDE.md` § Strong writing and reasoning holds the 10 rules. This section gives their paper form. It extends Reasoning and Writing style; it does not replace them.
+
+- R1, question: the Introduction may open with the motivating question. The contributions answer it.
+- R2, central argument: "We argue that ..., because ..." in the Introduction. The abstract's final sentence states the same claim.
+- R3 and R4, evidence and analysis: each Evaluation paragraph gives the claim, the number with its Fig. or Table, the interpretation, and the contribution it maps to (extends Reasoning rule 6).
+- R5, self-challenge: Discussion Limitations state "One may argue that ..." with a concrete constraint (extends Reasoning rule 7).
+- R6, argumentative paragraphs: cut any paragraph that does not advance the argument.
+- R7, clarity: plain words over jargon, under the Writing style rules.
+- R8, cross-discipline: Related Work and Discussion Implications may link to monetary economics and regulation, with citations.
+- R9, "So what?": Discussion Implications answers it. The Conclusion stays per Structure rule 6 (user decision 2026-11-03).
+- R10, revision: each draft pass names the weakest claim and fixes it.
+
 ## Layout
 
 1. Architecture figure: full width (`figure*`), layered, near the start of the design section.
@@ -94,7 +108,7 @@ The examples have no statistical tests, confidence intervals, or pseudocode. Der
 For any task that drafts or revises manuscript prose:
 
 1. Read the matching example pages from the page map.
-2. Write to the Structure, Reasoning, Writing style, and Layout rules above.
+2. Write to the Structure, Reasoning, Writing style, Strong writing, and Layout rules above.
 3. Check Protected content.
 4. Compile the paper when manuscript content changed.
 5. Give supervisor suggestions.
@@ -129,4 +143,5 @@ End every reply about the paper with supervisor suggestions, whether or not the 
 
 - At most 5 items, most important first.
 - Each item gives the location (`main.tex:<line>` or section), what to change, and the example evidence (file and page).
+- One item names the paper's weakest claim and the fix (R10).
 - Where this paper differs from the examples on purpose (scoped claims, no repository link), say so once. It is not a suggestion.
