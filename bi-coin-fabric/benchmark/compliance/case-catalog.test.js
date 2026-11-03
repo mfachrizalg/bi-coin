@@ -105,3 +105,13 @@ test('each functional correctness scenario has one executable runner', () => {
         scenarios.filter(item => item.executor === 'ledger-smoke').map(item => item.id).sort(),
     );
 });
+
+test('protocol sets the drain cap and a load curve over catalogued write and query workloads', () => {
+    assert.equal(catalog.protocol.max_drain_seconds, 3);
+    assert.equal(catalog.protocol.drain_adjusted_throughput_floor, undefined);
+    const curve = catalog.protocol.load_curve;
+    assert.deepEqual(curve.levels, [0.25, 0.5, 0.75, 1, 1.25, 1.5]);
+    assert.equal(curve.duration_seconds, 60);
+    const ids = new Set(catalog.performance_scenarios.map(item => item.id));
+    assert.ok(curve.workloads.every(id => ids.has(id)), 'every curve workload is a catalogued performance scenario');
+});

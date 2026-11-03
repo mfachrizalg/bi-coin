@@ -1,20 +1,13 @@
-Penelitian ini mengimplementasikan dan menguji kontrol KYC dan AML/CFT terpilih
-pada purwarupa Rupiah Digital ritel berbasis Hyperledger Fabric 2.5. Lingkungan
+Penelitian ini bertujuan membangun purwarupa Rupiah Digital ritel berbasis Hyperledger Fabric yang menegakkan kontrol kepatuhan KYC dan AML/CFT terpilih, serta memverifikasi kontrol tersebut secara fungsional. Penelitian ini juga mengukur kinerja purwarupa tersebut menggunakan Hyperledger Caliper. Lingkungan
 studi kontrol menggunakan jaringan terisolasi dengan empat MSP:
 \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
 \texttt{EndUserMSP}. Tiga \textit{chaincode} Go memisahkan operasi moneter,
 kontrol pelanggan, dan pembayaran. Identitas X.509 yang dikelola \textit{backend}
 memisahkan penanda tangan, subjek pelanggan, dan kustodian dompet.
 
-Pada run-20261014-01, yang dijalankan di bawah identifikasi sebelum penggantian nama, pemeriksaan kebenaran lulus pada seluruh 20 skenario sintetis untuk keputusan KYC
-berisiko tinggi dengan peninjau dan pejabat senior yang berbeda, pembatasan dan
-pembukaan pembatasan berbukti, pendanaan cadangan, pembayaran ritel, pembacaan
-oleh \texttt{ValidatorMSP}, serta penolakan transaksi dengan \textit{endorsement}
-yang tidak mencukupi. Pemeriksaan ulang setelah penggantian nama masih menunggu, dan uji unit tidak termasuk dalam catatan run tersebut. Hasil ini hanya menunjukkan perilaku pada skenario sintetis
-yang diuji; penelitian tidak membuktikan keaslian identitas, efektivitas
-penyaringan, pengiriman laporan kepada PPATK, atau kepatuhan institusional.
+Pemeriksaan kebenaran lulus pada seluruh 30 skenario fungsional sintetis, 296 sel peran-rute, 28 kasus validasi permintaan, dan 45 pemeriksaan hasil aksi. Skenario tersebut mencakup keputusan KYC berisiko tinggi dengan peninjau dan pejabat senior yang berbeda, pembatasan dan pembukaan pembatasan berbukti, pendanaan cadangan, pembayaran ritel, pembacaan oleh \texttt{ValidatorMSP}, serta penolakan transaksi dengan \textit{endorsement} yang tidak mencukupi. Uji unit tidak termasuk dalam pemeriksaan ini. Hasil ini hanya menunjukkan perilaku pada skenario sintetis yang diuji; penelitian tidak membuktikan keaslian identitas, efektivitas penyaringan, pengiriman laporan kepada PPATK, atau kepatuhan institusional.
 
-Sebagai bukti kinerja sekunder, Hyperledger Caliper mengukur jaringan kontrol empat organisasi dengan satu \textit{worker} pada satu \textit{host}. Pengukuran tersebut tidak menetapkan kapasitas produksi atau reproduktibilitas lintas mesin.
+Sebagai bukti kinerja sekunder, pengukuran dengan Hyperledger Caliper pada jaringan kontrol empat organisasi, dengan satu \textit{worker} pada satu \textit{host}, masih TBD. Setelah tersedia, pengukuran tersebut tidak menetapkan kapasitas produksi atau reproduktibilitas lintas mesin.
 
 \vspace{0.5cm}
 

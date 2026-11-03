@@ -2,7 +2,10 @@
 
 const { isDeepStrictEqual } = require('node:util');
 
-function evaluateWindow({ rate, duration_seconds: durationSeconds, operation_kind: operationKind, events, window_start_ms: startMs = 0, resource_complete: resourceComplete = true, trace_complete: traceComplete = true }) {
+// Drain cap: the last commit must land within this many seconds after the window (orderer BatchTimeout 2 s + 1 s).
+const DEFAULT_MAX_DRAIN_SECONDS = 3;
+
+function evaluateWindow({ rate, duration_seconds: durationSeconds, operation_kind: operationKind, events, window_start_ms: startMs = 0, resource_complete: resourceComplete = true, trace_complete: traceComplete = true, max_drain_seconds: maxDrainSeconds = DEFAULT_MAX_DRAIN_SECONDS }) {
     if (!Number.isFinite(rate) || rate <= 0 || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
         throw new Error('rate and duration must be positive');
     }
@@ -30,14 +33,18 @@ function evaluateWindow({ rate, duration_seconds: durationSeconds, operation_kin
     const drainAdjustedRate = verifiedCount / (durationSeconds + drainSeconds);
     const latencies = completed.map(event => Math.max(0, event.completed_at_ms - event.started_at_ms));
     const latency = summarizeLatencies(latencies);
-    const throughputPass = drainAdjustedRate >= deliveredRate * 0.9;
+    const drainPass = drainSeconds <= maxDrainSeconds;
+    const shortOfTarget = delivered < targetCount - allowedCountDifference;
     const noFailures = unexpectedFailures.length === 0 && timeouts.length === 0 && unresolved.length === 0;
     const traceUnresolved = traceComplete ? 0 : 1;
     const unresolvedCount = unresolved.length + traceUnresolved;
     const complete = resourceComplete && traceComplete;
+    // client-bound: the ledger kept up (no failures, drain within cap) but the client delivered less than the target.
     const classification = !complete || unresolvedCount > 0
         ? 'inconclusive'
-        : (offeredLoadWithinTolerance && noFailures && throughputPass ? 'pass' : 'fail');
+        : (!noFailures || !drainPass ? 'fail'
+            : offeredLoadWithinTolerance ? 'pass'
+                : shortOfTarget ? 'client-bound' : 'fail');
 
     return {
         classification,
@@ -57,7 +64,8 @@ function evaluateWindow({ rate, duration_seconds: durationSeconds, operation_kin
             ? { verified_query_rate: drainAdjustedRate }
             : { verified_achieved_tps: drainAdjustedRate }),
         offered_load_within_tolerance: offeredLoadWithinTolerance,
-        drain_throughput_pass: throughputPass,
+        drain_throughput_pass: drainPass,
+        max_drain_seconds: maxDrainSeconds,
         resource_complete: resourceComplete,
         caliper_trace_complete: traceComplete,
         latency_ms: latency,
@@ -90,8 +98,9 @@ function verifySemanticValue({ expected, actual }) {
 
 function summarizeLatencies(values) {
     const sorted = values.filter(Number.isFinite).sort((left, right) => left - right);
-    if (!sorted.length) return { median: null, p95: null, maximum: null, sample_count: 0 };
+    if (!sorted.length) return { minimum: null, median: null, p95: null, maximum: null, sample_count: 0 };
     return {
+        minimum: sorted[0],
         median: percentile(sorted, 0.5),
         p95: percentile(sorted, 0.95),
         maximum: sorted.at(-1),

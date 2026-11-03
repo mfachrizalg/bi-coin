@@ -34,7 +34,7 @@ A working two-tier retail Rupiah Digital prototype on a permissioned Hyperledger
 - Monetary flow: Bank Indonesia -> Distributor Bank reserve (w-Rupiah Digital) -> Retail Bank float (r-Rupiah Digital) -> Retail Customer/Merchant wallet.
 - Terminology is binding: `../bi-coin-fabric/CONTEXT.md` terms and their Avoid lists (for example, Issuance not Minting; Participant roles are Distributor Bank and Observer).
 - Frontend interface decisions live in `../bi-coin-fabric/docs/adr/0004-frontend-experience-boundaries.md` and `0005-frontend-language-and-interface-design.md`.
-- Benchmark numbers come only from run-20261014-01 (compliance study, one worker, one host). Earlier runs are retired and not cited.
+- Correctness numbers come only from the 2026-10-21 correctness run. Performance numbers stay TBD until the performance run lands. Earlier runs are retired and not cited.
 - Undecided: final defense date (`main.tex` still reads 8–13 Juli 2026) and examiner names.
 
 ## Brand Commitments
@@ -46,8 +46,8 @@ A working two-tier retail Rupiah Digital prototype on a permissioned Hyperledger
 ## Evidence on Hand
 
 - Manuscript: `main.pdf`, `contents/chapter-1` through `contents/chapter-5`.
-- Figures: `contents/figures/*.tex` (TikZ), `contents/figures/activity/AD*.png`, `contents/figures/reference/` (cited third-party figures; keep attribution).
-- Charts: none in Chapter 4. Performance evidence is reported as tables built from `../bi-coin-fabric/benchmark/results/compliance-run-20261014-01/derived-tables.json`.
+- Figures: `contents/figures/*.tex` (TikZ, including `activity-*.tex` for activity diagrams), `contents/figures/reference/` (cited third-party figures; keep attribution).
+- Charts: none in Chapter 4. Performance tables stay `TBD` until the performance run lands; correctness tables come from the 2026-10-21 correctness run.
 - Deck: `../powerpoint/Powerpoint Skripsi Muhammad Fachrizal Giffari.pptx`, `../powerpoint/slide_figures/`, the deck brief, and slide prompts.
 - Benchmark artifacts: `../bi-coin-fabric/benchmark/results/`.
 - Absent, never fabricate: production deployment, real users, Bank Indonesia endorsement, benchmark numbers outside the canonical run.

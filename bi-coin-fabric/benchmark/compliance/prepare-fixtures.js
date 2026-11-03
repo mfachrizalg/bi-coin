@@ -97,16 +97,6 @@ async function prepareSubject(client, id, owner, { category = 'retail', risk = '
     return id;
 }
 
-async function openAndFund(client, subject, owner, stamp, attempt, scenario, pathName, index) {
-  await client.request(owner, 'POST', '/customer-wallets', { subject_id: subject });
-  await client.request('reviewer', 'POST', '/conversions', {
-        distributor_id: 'retail-bank', amount: '1000',
-    }, reference(stamp, attempt, scenario, pathName, index, 'prepare-convert'));
-  await client.request('reviewer', 'POST', '/wallet-fundings', {
-        subject_id: subject, distributor_id: 'retail-bank', amount: '1000',
-    }, reference(stamp, attempt, scenario, pathName, index, 'prepare-fund'));
-}
-
 async function prepareAccessMatrixFixtures(api, subjectID, stamp) {
     const client = await createApiClient(api);
     const fixtureID = purpose => `matrix-${crypto.createHash('sha256').update(`${stamp}:${subjectID}:${purpose}`).digest('hex').slice(0, 24)}`;
@@ -340,6 +330,143 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
     };
 }
 
+// Pooled profiles create subjects once per run and reuse them across rounds. A round uses pool entries [0, count) in
+// order, so its entries are distinct; the next round reuses them only after the previous round has ended, so a
+// transaction in flight never shares a key with the next round.
+const POOLED_PROFILES = new Set(['retail-transfer-pair', 'merchant-transfer-pair', 'float-subject']);
+const TOPUP_PROFILES = new Set(['monetary', 'pending-transfer', 'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair']);
+const SETUP_CONCURRENCY = 64;
+const FUNDING_BATCH = 1024;
+const SENDER_FUNDING = 200; // units per sender; each measured transfer moves 1 unit
+const BANK_REFILL_MINIMUM = 10000000; // stays far below the 1e9 holdings and daily-usage limits
+const FLOAT_PREFILL = 10000000;
+
+const pools = new Map();
+const runTopUps = new Set();
+const runFloats = new Set();
+
+async function topUpOnce(api, stamp) {
+    if (runTopUps.has(stamp)) return;
+    await topUpReserve(api, stamp);
+    runTopUps.add(stamp);
+}
+
+function poolState(stamp, profile) {
+    const key = `${stamp}:${profile}`;
+    if (!pools.has(key)) pools.set(key, { token: crypto.randomBytes(3).toString('hex'), entries: [], bank: null });
+    return pools.get(key);
+}
+
+async function mapLimit(items, limit, task) {
+    const results = new Array(items.length);
+    let next = 0;
+    await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
+        while (next < items.length) {
+            const index = next;
+            next += 1;
+            results[index] = await task(items[index], index);
+        }
+    }));
+    return results;
+}
+
+function subtreeSize(index, count) {
+    if (index >= count) return 0;
+    return 1 + subtreeSize(2 * index + 1, count) + subtreeSize(2 * index + 2, count);
+}
+
+// Heap-shaped funding tree over one batch of senders. Each level lists parent groups; a parent sends to its two children
+// one after the other (same key), and the groups of one level run in parallel (distinct keys).
+// A child receives SENDER_FUNDING units for every sender in its subtree, so each sender keeps SENDER_FUNDING of its own.
+function fundingSchedule(count) {
+    const levels = [];
+    for (let start = 0, depth = 0; start < count; start += 2 ** depth, depth += 1) {
+        const level = [];
+        for (let parent = start; parent < Math.min(count, start + 2 ** depth); parent += 1) {
+            const children = [2 * parent + 1, 2 * parent + 2]
+                .filter(child => child < count)
+                .map(child => ({ child, units: SENDER_FUNDING * subtreeSize(child, count) }));
+            if (children.length) level.push({ parent, children });
+        }
+        if (level.length) levels.push(level);
+    }
+    return levels;
+}
+
+async function fundBank(client, state, stamp, units) {
+    if (!state.bank) {
+        const id = `pool-bank-${state.token}`;
+        await prepareSubject(client, id, 'kyc_verified', { active: true });
+        await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: id });
+        state.bank = { id, balance: 0, refills: 0 };
+    }
+    if (state.bank.balance < units) {
+        const amount = Math.max(BANK_REFILL_MINIMUM, units);
+        if (amount > 500000000) throw new Error('pool funding batch exceeds the holdings limit; reduce the pool batch size');
+        const tag = `${stamp}-${state.token}-${state.bank.refills}`;
+        await client.request('reviewer', 'POST', '/conversions', { distributor_id: 'retail-bank', amount: String(amount) }, `pool-convert-${tag}`);
+        await client.request('reviewer', 'POST', '/wallet-fundings', { subject_id: state.bank.id, distributor_id: 'retail-bank', amount: String(amount) }, `pool-fund-${tag}`);
+        state.bank.balance += amount;
+        state.bank.refills += 1;
+    }
+    state.bank.balance -= units;
+    return state.bank.id;
+}
+
+async function fundBatch(client, state, stamp, senders, batchTag) {
+    const schedule = fundingSchedule(senders.length);
+    const bankId = await fundBank(client, state, stamp, SENDER_FUNDING * senders.length);
+    await client.request('kyc_verified', 'POST', '/retail-transfers', { from: bankId, to: senders[0], amount: String(SENDER_FUNDING * senders.length) }, `pool-root-${state.token}-${batchTag}`);
+    for (const level of schedule) {
+        await mapLimit(level, SETUP_CONCURRENCY, async group => {
+            for (const edge of group.children) {
+                await client.request('kyc_verified', 'POST', '/retail-transfers', { from: senders[group.parent], to: senders[edge.child], amount: String(edge.units) }, `pool-tree-${state.token}-${batchTag}-${group.parent}-${edge.child}`);
+            }
+        });
+    }
+}
+
+async function createPoolEntries(client, profile, state, indices) {
+    return mapLimit(indices, SETUP_CONCURRENCY, async index => {
+        const base = `pool-${profile}-${state.token}-${index}`;
+        if (profile === 'float-subject') {
+            const subject = `${base}-f`;
+            await prepareSubject(client, subject, 'kyc_verified', { active: true });
+            await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: subject });
+            return { subject, sender: subject, receiver: subject };
+        }
+        const sender = `${base}-s`;
+        const receiver = `${base}-r`;
+        const receiverOwner = profile === 'retail-transfer-pair' ? 'retail_two' : 'merchant';
+        await prepareSubject(client, sender, 'kyc_verified', { active: true });
+        await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: sender });
+        await prepareSubject(client, receiver, receiverOwner, { active: true });
+        await client.request(receiverOwner, 'POST', '/customer-wallets', { subject_id: receiver });
+        return { subject: sender, sender, receiver };
+    });
+}
+
+async function ensurePool(client, profile, count, stamp) {
+    const state = poolState(stamp, profile);
+    const start = state.entries.length;
+    if (start >= count) return state;
+    const created = await createPoolEntries(client, profile, state, Array.from({ length: count - start }, (_, offset) => start + offset));
+    if (profile !== 'float-subject') {
+        for (let batch = 0; batch < created.length; batch += FUNDING_BATCH) {
+            const senders = created.slice(batch, batch + FUNDING_BATCH).map(entry => entry.sender);
+            await fundBatch(client, state, stamp, senders, `${start + batch}`);
+        }
+    }
+    state.entries.push(...created);
+    return state;
+}
+
+async function ensureFloat(client, stamp) {
+    if (runFloats.has(stamp)) return;
+    await client.request('reviewer', 'POST', '/conversions', { distributor_id: 'retail-bank', amount: String(FLOAT_PREFILL) }, `pool-float-${stamp}`);
+    runFloats.add(stamp);
+}
+
 async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPath, phase, pathName = 'caliper', onProgress = () => {} }) {
     if (!Number.isInteger(count) || count < 1) throw new Error('fixture count must be a positive integer');
     if (fs.existsSync(outputPath)) {
@@ -364,18 +491,21 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
         apiItems.push(fixture.api);
         ledgerItems.push(fixture.ledger);
     } else {
-        if (['monetary', 'pending-transfer', 'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair'].includes(fixtureProfile)) {
-            await topUpReserve(api, stamp);
-        }
+        if (TOPUP_PROFILES.has(fixtureProfile)) await topUpOnce(api, stamp);
+        if (fixtureProfile === 'float-subject') await ensureFloat(client, stamp);
+        if (POOLED_PROFILES.has(fixtureProfile)) await ensurePool(client, fixtureProfile, count, stamp);
         const independentSubjectSetup = [
             'protected-pending-subject', 'standard-review-subject', 'high-risk-review-subject',
             'active-subject', 'active-business-subject', 'restricted-subject', 'release-requested-subject',
             'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-staff', 'protected-staff',
-            'pending-transfer',
         ].includes(fixtureProfile);
-        const sharesReserveKey = ['float-subject', 'retail-transfer-pair', 'merchant-transfer-pair'].includes(fixtureProfile);
-        const preparationConcurrency = independentSubjectSetup && !sharesReserveKey ? 8 : 1;
+        const sharesReserveKey = ['float-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-transfer'].includes(fixtureProfile);
+        const preparationConcurrency = independentSubjectSetup && !sharesReserveKey ? SETUP_CONCURRENCY : 1;
         const prepareOne = async index => {
+            if (POOLED_PROFILES.has(fixtureProfile)) {
+                const entry = poolState(stamp, fixtureProfile).entries[index];
+                return operationFixture({ api, scenario: catalogScenario, id: entry.subject, index, stamp, attempt, owner: 'kyc_verified', from: entry.sender, to: entry.receiver });
+            }
             const id = subjectID(stamp, attempt, catalogScenario.id, pathName, index, 'primary');
             let from;
             let to;
@@ -390,12 +520,6 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
                 await prepareSubject(client, id, 'kyc_verified', { risk: 'high' });
             } else if (fixtureProfile === 'active-subject') {
                 await prepareSubject(client, id, 'kyc_verified', { active: true });
-            } else if (fixtureProfile === 'float-subject') {
-                await prepareSubject(client, id, 'kyc_verified', { active: true });
-                await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: id });
-                await client.request('reviewer', 'POST', '/conversions', {
-                    distributor_id: 'retail-bank', amount: '1000',
-                }, reference(stamp, attempt, catalogScenario.id, pathName, index, 'prepare-convert'));
             } else if (fixtureProfile === 'active-business-subject') {
                 await prepareSubject(client, id, 'kyc_verified', { category: 'business', active: true });
             } else if (fixtureProfile === 'restricted-subject' || fixtureProfile === 'release-requested-subject') {
@@ -409,14 +533,6 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
                 if (fixtureProfile === 'protected-staff') {
                     await client.request('bank_indonesia', 'POST', `/staff/${encodeURIComponent(id)}/endorsement-policies`);
                 }
-            } else if (fixtureProfile === 'retail-transfer-pair' || fixtureProfile === 'merchant-transfer-pair') {
-                await prepareSubject(client, id, 'kyc_verified', { active: true });
-                await openAndFund(client, id, 'kyc_verified', stamp, attempt, catalogScenario.id, pathName, index);
-                const receiverOwner = fixtureProfile === 'retail-transfer-pair' ? 'retail_two' : 'merchant';
-                to = subjectID(stamp, attempt, catalogScenario.id, pathName, index, 'receiver');
-                await prepareSubject(client, to, receiverOwner, { active: true });
-                await openAndFund(client, to, receiverOwner, stamp, attempt, catalogScenario.id, pathName, index + count);
-                from = id;
             } else if (fixtureProfile === 'pending-transfer') {
                 // The measured actor (reviewer) is a different retail-bank officer from this maker.
                 await client.request('retail_bank', 'POST', '/interbank-transfers', {
@@ -463,4 +579,4 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
     return document.fixtures;
 }
 
-module.exports = { operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, topUpReserve };
+module.exports = { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, SENDER_FUNDING, topUpReserve };

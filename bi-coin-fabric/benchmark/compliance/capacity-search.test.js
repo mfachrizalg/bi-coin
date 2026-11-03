@@ -62,3 +62,14 @@ test('classifier failure outcomes map to probe outcomes instead of aborting the 
         ['inconclusive', 'unresolved'],
     ]);
 });
+
+test('a client-bound probe is a lower bound at its delivered rate and stops the search', () => {
+    const { createSearch, recordProbe, nextProbeRate } = require('./capacity-search');
+    const search = createSearch({ hint: 128 });
+    recordProbe(search, { rate: 128, classification: 'pass', offered_ops_per_second: 128 });
+    recordProbe(search, { rate: 512, classification: 'client-bound', offered_ops_per_second: 296.3 });
+    assert.equal(search.stop_reason, 'client-bound');
+    assert.equal(search.boundary, 'client-bound');
+    assert.equal(search.passing_rate, 296.3);
+    assert.equal(nextProbeRate(search), null);
+});

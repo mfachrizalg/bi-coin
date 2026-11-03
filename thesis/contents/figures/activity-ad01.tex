@@ -1,0 +1,52 @@
+% AD01: pendaftaran peserta (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+% Jalur (swimlane) dan judul jalur
+\draw[lanebody] (0,-0.9) rectangle (2.98,-11.1);
+\draw[lanebody] (2.98,-0.9) rectangle (5.96,-11.1);
+\draw[lanebody] (5.96,-0.9) rectangle (8.94,-11.1);
+\draw[lanebody] (8.94,-0.9) rectangle (11.92,-11.1);
+\draw[lanebody] (11.92,-0.9) rectangle (14.9,-11.1);
+\node[lane] at (1.49,-0.45) {Pengguna\\(EndUserMSP)};
+\node[lane] at (4.47,-0.45) {Sistem\\(backend dan chaincode)};
+\node[lane] at (7.45,-0.45) {Distributor\\(DistributorMSP)};
+\node[lane] at (10.43,-0.45) {KYC Reviewer\\(\scriptsize\texttt{kyc\_reviewer})};
+\node[lane] at (13.41,-0.45) {Senior Approver\\(\scriptsize\texttt{senior\_approver})};
+
+% Simpul
+\node[start] (s0) at (1.49,-1.45) {};
+\node[action] (a1) at (1.49,-2.3) {Ajukan subjek\\[1pt]{\scriptsize\texttt{POST /subjects}}};
+\node[decision, minimum width=1.9cm, minimum height=0.9cm] (d1) at (4.47,-3.3) {Data\\valid?};
+\node[final] (f1) at (1.49,-3.3) {};
+\node[font=\scriptsize, align=center] at (1.49,-3.85) {Permintaan\\ditolak};
+\node[action] (a2) at (4.47,-4.7) {{\scriptsize\texttt{CreatePending()}}\\[1pt]status: pending};
+\node[action] (a3) at (7.45,-4.7) {{\scriptsize\texttt{ProtectSubject()}}\\[1pt]endorsement policy};
+\node[action] (a4) at (10.43,-4.7) {{\scriptsize\texttt{RecordReview()}}\\[1pt]risiko dan PEP};
+\node[action] (a5) at (13.41,-4.7) {{\scriptsize\texttt{SetLimits()}}\\[1pt]batas transaksi};
+\node[decision, minimum width=2.0cm, minimum height=1.0cm] (d2) at (4.47,-6.4) {Risiko tinggi\\atau PEP?};
+\node[action] (a6) at (13.41,-7.4) {{\scriptsize\texttt{DecideHighRisk()}}\\[1pt]pihak berbeda dari reviewer};
+\node[action] (a7) at (10.43,-7.4) {{\scriptsize\texttt{ApproveStandard}}\\[1pt]reviewer yang sama};
+\node[merge] (m1) at (7.45,-8.4) {};
+\node[decision, minimum width=1.9cm, minimum height=0.9cm] (d3) at (4.47,-8.4) {Disetujui?};
+\node[final] (f3) at (1.49,-8.4) {};
+\node[font=\scriptsize, align=center] at (1.49,-8.9) {Subjek\\ditolak};
+\node[action] (a8) at (4.47,-9.8) {Status: active};
+\node[final] (f2) at (4.47,-10.7) {};
+
+% Alur kendali
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -| (d1.north);
+\draw[flow] (d1.west) -- node[guard, above] {[tidak]} (f1.east);
+\draw[flow] (d1.south) -- node[guard, left] {[ya]} (a2.north);
+\draw[flow] (a2.east) -- (a3.west);
+\draw[flow] (a3.east) -- (a4.west);
+\draw[flow] (a4.east) -- (a5.west);
+\draw[flow] (a5.south) -- (13.41,-5.55) -- (4.47,-5.55) -- (d2.north);
+\draw[flow] (d2.east) -- node[guard, above] {[ya]} (13.41,-6.4) -- (a6.north);
+\draw[flow] (d2.south) -- node[guard, right] {[tidak]} (4.47,-7.4) -- (a7.west);
+\draw[flow] (a6.south) -- (13.41,-8.4) -- (m1.east);
+\draw[flow] (a7.south) -- (10.43,-7.95) -- (7.45,-7.95) -- (m1.north);
+\draw[flow] (m1.west) -- (d3.east);
+\draw[flow] (d3.south) -- node[guard, right] {[ya]} (a8.north);
+\draw[flow] (a8.south) -- (f2.north);
+\draw[flow] (d3.west) -- node[guard, above] {[tidak]} (f3.east);
+\end{tikzpicture}

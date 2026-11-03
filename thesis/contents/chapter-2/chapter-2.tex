@@ -7,143 +7,136 @@ mencakup beragam fokus. Bagian ini meninjau penelitian terdahulu yang relevan
 dengan rancang bangun sistem Rupiah Digital ritel berbasis Hyperledger Fabric,
 meliputi arsitektur, transfer ritel, pengawasan, dan evaluasi kinerja.
 
-\subsection{Penelitian Terdahulu tentang Desain dan Keamanan CBDC}
+\subsection{Penelitian Terdahulu tentang Desain dan Privasi CBDC}
 
 Sethaput dan Innet \cite{sethaput2025} menyusun \textit{systematization of
-knowledge} (SoK) mengenai aplikasi \textit{blockchain} pada CBDC dan
-mengidentifikasi bahwa pilihan antara \textit{token-based} dan
-\textit{account-based}, model satu jenjang versus dua jenjang, serta tingkat
-privasi merupakan dimensi desain yang paling menentukan. Bhawana dan Kumar
-\cite{bhawana2021} membangun jaringan CBDC berbasis \textit{permissioned
-blockchain} dan menegaskan bahwa keanggotaan terbatas memberikan kendali tata
-kelola yang dibutuhkan bank sentral tanpa mengorbankan transparansi. Sun dkk.
-\cite{sun2017} mengusulkan model \textit{multi-blockchain} untuk memisahkan
-beban transaksi antarwilayah, sedangkan Islam dan In \cite{islam2023}
-menggunakan \textit{consortium blockchain} dengan model \textit{unspent
-transaction output} (UTXO) untuk menjaga privasi sekaligus auditabilitas.
+knowledge} (SoK) mengenai aplikasi \textit{blockchain} pada CBDC. Studi tersebut
+mengidentifikasi pilihan antara \textit{token-based} dan \textit{account-based},
+model satu jenjang dan dua jenjang, serta tingkat privasi sebagai dimensi desain
+yang paling menentukan. Lukito dkk. \cite{lukito2026governance} membandingkan
+sembilan program CBDC berdasarkan dokumen publik dan menguraikan perbedaan peran
+perantara dalam distribusi dua jenjang.
 
-Kajian lain merumuskan model audit CBDC berbasis \textit{blockchain} dari
-pengalaman \textit{Digital Currency Electronic Payment} (DCEP) Tiongkok
-\cite{unknown2022c}.
-Hans dkk. \cite{hans2023} menerapkan pemodelan ancaman STRIDE untuk
-mengidentifikasi risiko keamanan pada sistem CBDC berbasis \textit{blockchain},
-menegaskan perlunya analisis keamanan sejak tahap perancangan. Block-PAD
-\cite{unknown2026a} menawarkan kerangka transaksi CBDC yang tangguh dan
-fleksibel dengan memanfaatkan identitas digital.
+Bhawana dan Kumar \cite{bhawana2021} membangun jaringan CBDC berbasis
+\textit{permissioned blockchain}. Menurut studi tersebut, keanggotaan terbatas
+memberikan kendali tata kelola yang dibutuhkan bank sentral tanpa mengorbankan
+transparansi. Islam dan In \cite{islam2023} menggunakan \textit{consortium
+blockchain} dengan model \textit{unspent transaction output} (UTXO) untuk menjaga
+privasi sekaligus auditabilitas. Pocher dan Veneris \cite{Pocher2022Privacy}
+membahas privasi dan transparansi CBDC melalui skema \textit{anti-money
+laundering} dan \textit{countering the financing of terrorism} (AML/CFT) berbasis
+regulasi-oleh-desain. Ketiga studi tersebut tidak berfokus pada Rupiah Digital.
 
-Lukito dkk. \cite{lukito2026governance} membandingkan sembilan program CBDC
-berdasarkan dokumen publik dan menguraikan perbedaan peran perantara dalam
-distribusi dua jenjang. Rancangan Rupiah Digital dalam penelitian ini merujuk
-pada dokumen Bank Indonesia
-\cite{bi_whitepaper2022, bi_garuda_poc}.
-
-Pada sisi ketahanan layanan, Project Polaris dari \textit{BIS Innovation Hub}
-menunjukkan bahwa dukungan
-pembayaran tanpa konektivitas memerlukan desain perangkat aman dan kontrol
-kriptografis khusus \cite{polaris_handbook, polaris_security}; kemampuan ini
-diposisikan sebagai keterbatasan dan arah pengembangan lanjutan pada penelitian
-ini.
+Aryani \cite{aryani2023critlit} melakukan tinjauan literatur kritis terhadap desain
+CBDC Indonesia dan mengusulkan arsitektur dua jenjang Digital Rupiah. Arsitektur
+tersebut memuat lapisan \textit{Digital Rupiah Depository} sebagai perantara antara
+Bank Indonesia dan peserta jaringan, serta koneksi ke BI-RTGS dan jaringan
+\textit{blockchain} lintas batas. Penelitian ini mengadopsi prinsip distribusi
+berjenjang tersebut dengan dua penyederhanaan yang disengaja sesuai cakupan
+purwarupa. Pertama, lapisan \textit{Digital Rupiah Depository} diciutkan menjadi
+satu organisasi distributor (\texttt{DistributorMSP}) yang menerima penerbitan
+langsung dari \texttt{CentralBankMSP}; pemisahan \textit{wholesale} dan
+\textit{retail} dilakukan sebagai jenis bank di dalam organisasi tersebut. Kedua,
+integrasi BI-RTGS dan jaringan lintas batas tidak diimplementasikan dan dinyatakan
+sebagai batasan cakupan penelitian (Bab~I).
 
 \subsection{Penelitian Terdahulu Berbasis Hyperledger Fabric}
 
-Rohmalia dan Nugraha \cite{rohmalia2023retail} menyusun model CBDC ritel
-Indonesia berbasis Hyperledger Fabric yang mencakup pembuatan akun, konversi
-aset, dan transfer antarpengguna. Hasil implementasi yang mereka laporkan
-memperlihatkan pembuatan akun dan transfer, disertai waktu pengiriman untuk
-satu dan 50 data. Makalah tersebut tidak menyajikan pengawasan multipihak
-ataupun tolok ukur Caliper dengan artefak yang dapat diperiksa.
+Rohmalia dan Nugraha \cite{rohmalia2023retail} menyusun model CBDC ritel Indonesia
+berbasis Hyperledger Fabric yang mencakup pembuatan akun, konversi aset, dan
+transfer antarpengguna. Hasil implementasi yang mereka laporkan memperlihatkan
+pembuatan akun dan transfer, disertai waktu pengiriman untuk satu dan 50 data.
+Makalah tersebut tidak menyajikan pengawasan multipihak ataupun tolok ukur Caliper
+dengan artefak yang dapat diperiksa.
 
-Pada aspek platform dan kinerja, Androulaki dkk. \cite{androulaki2018}
-memperkenalkan Hyperledger Fabric sebagai \textit{distributed operating system}
-untuk \textit{permissioned blockchain} dengan arsitektur
-\textit{execute-order-validate}. Evaluasi kinerja Fabric mencakup pemodelan
-latensi \cite{unknown2024f}, evaluasi kerangka berbasis Fabric
-\cite{unknown2021}, serta perbandingan
-\textit{throughput} antara \textit{blockchain} \textit{permissioned} dan
-\textit{permissionless} \cite{unknown2025i}. Literatur tersebut menjadi dasar
-pemilihan Fabric dan perancangan pengujian Caliper, tetapi angka kinerjanya
-tidak dibandingkan langsung karena versi, topologi, dan beban kerja berbeda.
+Kuzlu dkk. \cite{fabric_perf2023} menganalisis kinerja kerangka Hyperledger Fabric
+pada aspek \textit{throughput}, latensi, dan skalabilitas. Studi tersebut berfokus
+pada kerangka Fabric secara umum, sedangkan skenario CBDC ritel tidak menjadi
+fokusnya. Angka kinerjanya tidak dibandingkan langsung dengan penelitian ini karena
+versi, topologi, dan beban kerja berbeda.
 
 \subsection{Posisi dan Celah Penelitian}
 
-Penelitian terdahulu dapat dikelompokkan menurut fokusnya. Arsitektur dan tata
-kelola jaringan dibahas dalam \cite{bhawana2021, sun2017}, privasi dan
-auditabilitas dalam \cite{islam2023, Pocher2022Privacy,
-Michalopoulos2025Privacy}, serta keamanan dan audit dalam
-\cite{hans2023, unknown2022c}. Kelompok lain membahas
-kinerja Hyperledger Fabric \cite{androulaki2018, fabric_perf2023,
-unknown2024f, unknown2021, unknown2025i} dan desain CBDC untuk konteks
-Indonesia \cite{zams2020delphi, Syarifuddin2024OPTIMAL,
-aryani2023critlit, rohmalia2023retail, lukito2026governance}. Setiap kelompok
-menjawab sebagian persoalan. Dalam korpus yang ditinjau pada penelitian ini,
-belum ditemukan evaluasi satu artefak Fabric ritel yang memadukan penerbitan
-berjenjang, transfer ritel, pengawasan, dan tolok ukur Caliper dengan artefak yang dapat diperiksa.
+Tabel~\ref{tab:ch2-tinjauan} merangkum posisi kedelapan penelitian tersebut
+terhadap penelitian ini.
 
-\textbf{Celah penelitian.} Sintesis terbatas pada sumber yang dirujuk di bab ini
-menunjukkan empat kebutuhan yang belum dipenuhi secara bersamaan. (1) Satu
-artefak perlu mengintegrasikan
-penerbitan berjenjang dan konversi ke float ritel, transfer antarpelanggan dan
-pelanggan-ke-pedagang, serta pengawasan. (2) Artefak tersebut perlu selaras
-dengan rancangan dua jenjang Rupiah Digital Bank Indonesia karena dokumentasi
-publik Proyek Garuda baru menjangkau lapisan \textit{wholesale}
-\cite{bi_garuda_poc}. (3) Tolok ukur kinerja dengan artefak yang dapat diperiksa untuk CBDC
-ritel di atas \textit{permissioned blockchain} masih langka pada sistem yang
-telah diterapkan maupun pada sistem percontohan \cite{ree2023enaira,
-Bhensook2025Public, Lovejoy2022A}. (4) Rancangan konseptual perlu diwujudkan
-sebagai demonstrasi yang dapat diuji secara empiris.
-Penelitian ini menempati irisan keempat hal tersebut. Tabel~\ref{tab:tinjauan}
-merangkum posisi penelitian ini terhadap penelitian terdahulu.
+\begin{table}[htbp]
+  \caption{Perbandingan penelitian terdahulu dengan penelitian ini.}
+  \vspace{0.5em}
+  \centering
+  \begingroup
+  \renewcommand{\arraystretch}{1.25}
+  \setlength{\tabcolsep}{3pt}
+  \small
+  \begin{tabular}{>{\RaggedRight\arraybackslash}p{0.16\textwidth}
+                  >{\RaggedRight\arraybackslash}p{0.23\textwidth}
+                  >{\RaggedRight\arraybackslash}p{0.29\textwidth}
+                  >{\RaggedRight\arraybackslash}p{0.25\textwidth}}
+    \toprule
+    \textbf{Penulis/Tahun} & \textbf{Metode} & \textbf{Kontribusi} & \textbf{Keterbatasan} \\
+    \midrule
+    Sethaput dan Innet (2025)~\cite{sethaput2025} &
+    SoK (\textit{systematization of knowledge}) &
+    Dimensi desain CBDC berbasis \textit{blockchain}: \textit{token-based} dan \textit{account-based}, satu dan dua jenjang, serta privasi &
+    Sistematisasi literatur tanpa pengujian purwarupa \\
+    Lukito dkk. (2026)~\cite{lukito2026governance} &
+    Perbandingan sembilan program CBDC berdasarkan dokumen publik &
+    Perbedaan peran perantara pada distribusi dua jenjang &
+    Bergantung pada dokumen publik; tidak menguji implementasi \\
+    Bhawana dan Kumar (2021)~\cite{bhawana2021} &
+    Rancangan jaringan CBDC pada \textit{permissioned blockchain} &
+    Kendali tata kelola bank sentral tanpa mengorbankan transparansi &
+    Fitur ritel tidak terintegrasi; tolok ukur kinerja terbatas \\
+    Rohmalia dan Nugraha (2023)~\cite{rohmalia2023retail} &
+    Model CBDC ritel dan implementasi pada Hyperledger Fabric &
+    Pembuatan akun, konversi aset, dan transfer antarpengguna &
+    Tanpa pengawasan multipihak dan tolok ukur Caliper yang dapat diperiksa \\
+    Aryani (2023)~\cite{aryani2023critlit} &
+    Tinjauan literatur kritis &
+    Arsitektur dua jenjang Digital Rupiah dengan \textit{Digital Rupiah Depository} &
+    Bersifat konseptual tanpa purwarupa \\
+    Islam dan In (2023)~\cite{islam2023} &
+    Rancangan CBDC pada \textit{consortium blockchain} dengan model UTXO &
+    Privasi sekaligus auditabilitas &
+    Tidak mencakup fitur ritel; tanpa tolok ukur kinerja \\
+    Pocher dan Veneris (2022)~\cite{Pocher2022Privacy} &
+    Skema AML/CFT berbasis regulasi-oleh-desain &
+    Privasi dan transparansi CBDC melalui skema AML/CFT &
+    Tidak berfokus pada Rupiah Digital maupun Proyek Garuda \\
+    Kuzlu dkk. (2019)~\cite{fabric_perf2023} &
+    Analisis kinerja kerangka \textit{Hyperledger Fabric} &
+    \textit{Throughput}, latensi, dan skalabilitas sebagai rujukan kinerja Fabric &
+    Berfokus pada kerangka Fabric secara umum, bukan skenario CBDC ritel \\
+    \midrule
+    \textbf{Penelitian ini} &
+    Purwarupa Fabric dengan pengujian fungsional dan Caliper &
+    Penerbitan dua jenjang, transfer ritel, pengawasan, dan protokol Caliper dalam satu artefak &
+    Privasi transaksi, arsitektur hibrida, dan interkoneksi lintas batas tidak diimplementasikan; satu \textit{application channel} dan satu \textit{orderer} \\
+    \bottomrule
+  \end{tabular}
+  \endgroup
+  \label{tab:ch2-tinjauan}
+\end{table}
 
 \textbf{Kebaruan.} Dalam batas korpus yang ditinjau, kontribusi penelitian ini
-terletak pada integrasi alur penerbitan dua jenjang, transaksi ritel,
-pengawasan, serta protokol Caliper dalam satu
-artefak Fabric yang dapat diperiksa. Keterulangan hanya didukung oleh manifes konfigurasi dan artefak run-20261014-01 (lihat Bab~IV). Kontribusi ini bukan klaim
-kebaruan arsitektur CBDC secara universal maupun klaim bahwa platform yang
-digunakan Proyek Garuda adalah Fabric \cite{ree2023enaira, bi_garuda_poc}.
-Repositori artefak berada di
-\url{https://github.com/mfachrizalg/bi-coin}; manifes setiap batch benchmark
-mencatat commit dan hash masukan agar konfigurasi hasil dapat dilacak.
+terletak pada integrasi alur penerbitan dua jenjang, transaksi ritel, pengawasan,
+serta protokol Caliper dalam satu artefak Fabric yang dapat diperiksa. Kontribusi
+ini bukan klaim kebaruan arsitektur CBDC secara universal maupun klaim bahwa
+platform yang digunakan Proyek Garuda adalah Fabric \cite{ree2023enaira,
+bi_garuda_poc}. Keterulangan didukung oleh manifes yang mencatat commit dan hash
+masukan untuk setiap batch benchmark.
 
-\begingroup
-\renewcommand{\arraystretch}{1.3}
-\small
-\begin{longtable}{>{\RaggedRight\arraybackslash}p{3.0cm}
-                  >{\RaggedRight\arraybackslash}p{1.8cm}
-                  >{\RaggedRight\arraybackslash}p{2.6cm}
-                  >{\RaggedRight\arraybackslash}p{1.7cm}
-                  >{\RaggedRight\arraybackslash}p{2.2cm}}
-\caption{Perbandingan penelitian terdahulu dengan penelitian ini}\label{tab:tinjauan}\\
-\toprule
-\textbf{Penelitian} & \textbf{Platform} & \textbf{Fokus utama} &
-\textbf{Integrasi fitur ritel} & \textbf{Tolok ukur kinerja} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Penelitian} & \textbf{Platform} & \textbf{Fokus utama} &
-\textbf{Integrasi fitur ritel} & \textbf{Tolok ukur kinerja} \\
-\midrule
-\endhead
-\bottomrule
-\endlastfoot
-Bhawana \& Kumar \cite{bhawana2021} & Permis\allowbreak sioned & Arsitektur CBDC & Tidak &
-Terbatas \\
-Rohmalia \& Nugraha \cite{rohmalia2023retail} & Hyper\allowbreak ledger Fabric &
-Purwarupa transfer ritel & Sebagian (akun, transfer) & Waktu pengiriman \\
-Islam \& In \cite{islam2023} & Con\allowbreak sortium & Privasi (UTXO) & Tidak & Tidak \\
-Hans dkk. \cite{hans2023} & Umum & Keamanan (STRIDE) & Tidak & Tidak \\
-Auer \& Böhme; Tsareva \& Komarov \cite{Auer2020The, Tsareva2024Retail} &
-Agnostik & Taksonomi desain & Tidak (konsep.) & Tidak \\
-PayOff \cite{payoff} & Blockchain & Pembayaran tanpa konektivitas & Sebagian & Tidak \\
-Block-PAD \cite{unknown2026a} & Blockchain & Identitas digital & Sebagian &
-Terbatas \\
-Lovejoy dkk. (OpenCBDC) \cite{Lovejoy2022A} & Account-based (non-DLT) & Kinerja
-tinggi & Sebagian & Ya (non-blockchain) \\
-eNaira \cite{ree2023enaira} & Hyper\allowbreak ledger Fabric & CBDC ritel terdeploy & Ya &
-Tidak publik \\
-\textbf{Penelitian ini} & \textbf{Hyper\allowbreak ledger Fabric} & \textbf{CBDC ritel
-multipihak} & \textbf{Ya} & \textbf{Caliper} \\
-\end{longtable}
-\endgroup
+\textbf{Celah penelitian.} Dalam korpus yang ditinjau, dokumentasi publik Proyek
+Garuda baru menjangkau lapisan \textit{wholesale} \cite{bi_garuda_poc}, sedangkan
+Rupiah Digital ritel ditempatkan sebagai tahap lanjutan dalam peta jalan dan
+dokumen konsultatif \cite{bi_whitepaper2022, bi_consultative}. Tidak ada rancangan
+publik dalam korpus tersebut yang memperlihatkan kontrol \textit{know your customer}
+(KYC) dan AML/CFT ritel yang ditegakkan dan dapat diverifikasi pada buku besar.
+Penelitian ini menjawab celah tersebut melalui dua pertanyaan penelitian. Pertama,
+bagaimana purwarupa Rupiah Digital ritel di atas Hyperledger Fabric dirancang dan
+dibangun dengan kontrol KYC dan AML/CFT terpilih, serta bagaimana kontrol tersebut
+diverifikasi secara fungsional? Kedua, bagaimana kinerja purwarupa tersebut diukur
+dengan Hyperledger Caliper?
 
 \section{Dasar Teori}
 
@@ -449,70 +442,12 @@ bersamaan.
 
 \section{Analisis Perbandingan Metode}
 
-Empat keputusan desain utama penelitian ini dibandingkan secara sistematis:
-pilihan antara DLT dan sistem terpusat, pemilihan platform DLT, pemilihan
-algoritme konsensus, dan pemilihan model arsitektur CBDC. Tabel perbandingan
+Dua keputusan desain utama penelitian ini dibandingkan secara sistematis, yaitu
+pemilihan platform DLT dan pemilihan alat pengujian kinerja. Tabel perbandingan
 memperlihatkan perbedaan antar-alternatif secara eksplisit sebagai dasar
 pertanggungjawaban ilmiah.
 
 \subsection{Perbandingan Hyperledger Fabric dengan Kerangka Kerja Blockchain Lain}
-\paragraph{DLT versus Sistem Terpusat.}
-Tabel~\ref{tab:dlt-vs-nondlt} membandingkan tiga pendekatan infrastruktur
-untuk sistem pembayaran CBDC: sistem terpusat tradisional (non-DLT),
-\textit{permissionless blockchain} (publik), dan \textit{permissioned
-blockchain} (DLT berizin). Sistem terpusat menawarkan \textit{throughput}
-sangat tinggi tetapi bergantung pada otoritas tunggal dan tidak memiliki
-auditabilitas multipartit secara inheren. \textit{Permissionless blockchain}
-menyediakan transparansi tetapi \textit{throughput}-nya rendah akibat mekanisme
-konsensus berbasis \textit{proof-of-work} \cite{sethaput2025, unknown2025i}.
-DLT \textit{permissioned} menggabungkan auditabilitas multipartit, kendali
-tata kelola yang dapat dikonfigurasi, dan \textit{throughput} tinggi tanpa
-konsumsi energi besar \cite{androulaki2018}.
-
-\begingroup
-\renewcommand{\arraystretch}{1.3}
-\small
-\begin{table}[H]
-\caption{Perbandingan sistem terpusat, \textit{permissionless blockchain},
-dan \textit{permissioned blockchain} untuk CBDC}
-\label{tab:dlt-vs-nondlt}
-\centering
-\begin{tabular}{p{3.0cm} p{3.1cm} p{3.0cm} p{3.1cm}}
-\toprule
-\textbf{Kriteria} &
-\textbf{Sistem Terpusat (non-DLT)} &
-\textbf{Permissionless Blockchain} &
-\textbf{Permissioned Blockchain} \\
-\midrule
-Kekebalan data &
-Tidak (admin dapat ubah) & Ya & Ya \\
-Auditabilitas multipartit &
-Terbatas (otoritas tunggal) & Ya (publik) & Ya (terkontrol) \\
-Kendali tata kelola &
-Penuh terpusat & Tidak ada & Dapat dikonfigurasi \\
-\textit{Throughput} &
-$>$50.000 TPS (indikatif) & 7--50 TPS (indikatif) & $>$3.500 TPS \cite{androulaki2018} \\
-Konsumsi energi &
-Rendah & Sangat tinggi (PoW) & Rendah \\
-\textit{Smart contract} &
-Opsional & Ya & Ya \\
-Kapabilitas pemisahan data &
-Ya & Tidak (publik) & Tersedia melalui \textit{channel}/data privat \\
-Contoh artefak CBDC yang dilaporkan &
-OpenCBDC \cite{Lovejoy2022A} &
-Tidak direkomen\allowbreak dasikan &
-eNaira \cite{ree2023enaira} \\
-\bottomrule
-\end{tabular}
-\end{table}
-\endgroup
-
-\noindent\textbf{Simpulan:} \textit{Permissioned blockchain} dipilih karena
-menyeimbangkan auditabilitas multipartit yang tidak dapat diperoleh dari
-sistem terpusat, kendali tata kelola bank sentral yang tidak dimiliki
-\textit{permissionless blockchain}, dan \textit{throughput} tinggi yang
-dibutuhkan sistem pembayaran \cite{sethaput2025, unknown2025i}.
-
 \paragraph{Perbandingan Platform DLT.}
 Tabel~\ref{tab:platform-dlt} membandingkan empat platform DLT
 \textit{permissioned} yang lazim digunakan dalam sistem keuangan dan CBDC:
@@ -570,7 +505,7 @@ ${\sim}$170 TPS \cite{compendium_blockchain} &
 ${\sim}$300 TPS (indikatif) &
 ${\sim}$1.000 TPS (indikatif) \\
 Penerapan CBDC yang dilaporkan &
-eNaira \cite{ree2023enaira} &
+Tidak dilaporkan &
 PoC Proyek Garuda \cite{bi_garuda_poc} &
 PoC Proyek Garuda \cite{bi_garuda_poc} &
 Tidak \\
@@ -588,72 +523,6 @@ merupakan kapabilitas platform, tetapi purwarupa penelitian memakai satu
 dan ritel. PoC Proyek Garuda menggunakan Corda dan Hyperledger Besu; laporan itu
 menjadi pembanding kebutuhan Indonesia, bukan bukti penerapan Fabric
 \cite{bi_garuda_poc}.
-
-Sebagai pembanding eksternal, Urbančok membandingkan kinerja transfer aset pada
-Ethereum, Hyperledger Fabric, dan Besu menggunakan skenario \textit{send rate}
-10, 20, 50, dan 100 TPS \cite{urbancok2019blockchain}. Hasil pada
-Gambar~\ref{fig:urbancok-asset-transfer-throughput} menunjukkan bahwa Fabric
-kompetitif untuk beban transfer aset dan unggul pada beberapa titik uji, tetapi
-angka tersebut tidak digunakan sebagai hasil evaluasi purwarupa penelitian ini
-karena konfigurasi jaringan, versi perangkat lunak, dan beban kerja berbeda.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{contents/figures/reference/urbancok2019-asset-transfer-throughput.png}
-    \caption{Perbandingan \textit{throughput} transfer aset pada Ethereum, Hyperledger Fabric, dan Besu. Sumber: \cite{urbancok2019blockchain}.}
-    \label{fig:urbancok-asset-transfer-throughput}
-\end{figure}
-
-\subsection{Pemilihan Algoritme Konsensus Hyperledger Fabric}
-Tabel~\ref{tab:konsensus} membandingkan algoritme konsensus yang relevan
-untuk jaringan \textit{blockchain permissioned}. Identitas peserta mendukung
-autentikasi dan atribusi tindakan, tetapi tidak menghilangkan perilaku
-\textit{Byzantine} dari simpul yang terkompromi. Finalisasi deterministik tetap
-diperlukan karena sistem keuangan tidak dapat mentoleransi ketidakpastian \textit{fork}
-\cite{consensusanalysis, androulaki2018}.
-
-\begingroup
-\renewcommand{\arraystretch}{1.3}
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{table}[H]
-\caption{Perbandingan algoritme konsensus untuk \textit{blockchain permissioned}}
-\label{tab:konsensus}
-\centering
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{>{\RaggedRight\arraybackslash}p{2.6cm}
-                >{\RaggedRight\arraybackslash}p{2.8cm}
-                >{\RaggedRight\arraybackslash}p{3.2cm}
-                >{\RaggedRight\arraybackslash}p{2.5cm}
-                >{\RaggedRight\arraybackslash}p{2.5cm}
-                >{\RaggedRight\arraybackslash}p{3.2cm}}
-\toprule
-\textbf{\shortstack{Algorit\\me}} &
-\textbf{Toleransi kesalahan} &
-\textbf{\shortstack{Kompleksitas\\pesan}} &
-\textbf{\shortstack{Through\\put}} &
-\textbf{Latensi} &
-\textbf{Finalisasi} \\
-\midrule
-Raft & CFT & $O(n)$ & Tinggi & Rendah & Deter\-ministik \\
-PBFT & BFT & $O(n^2)$ & Menengah & Menengah & Deter\-ministik \\
-HotStuff & BFT & $O(n)$ & Menengah & Rendah & Deter\-ministik \\
-PoW & --- & $O(n)$ & Sangat rendah & Sangat tinggi & Proba\-bilistik \\
-PoS/PoA & BFT/CFT & $O(n)$ & Menengah & Menengah & Semi-deter\-ministik \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-\endgroup
-
-\noindent\textbf{Simpulan:} Raft (\textit{etcdraft}) dipilih karena didukung
-secara \textit{native} oleh Hyperledger Fabric dan memberi finalisasi
-deterministik dalam model \textit{crash fault} \cite{androulaki2018}. Identitas
-MSP menyediakan autentikasi dan atribusi, tetapi tidak mencegah perilaku
-\textit{Byzantine} dari simpul yang terkompromi. Selain itu, purwarupa hanya
-memakai satu \textit{consenter}; konfigurasi ini tidak menoleransi satu pun
-kegagalan \textit{orderer}. Penelitian karena itu mengevaluasi pilihan
-\textit{ordering} purwarupa, bukan mendemonstrasikan toleransi kegagalan.
 
 \subsection{Pemilihan Alat Pengujian Blockchain}
 Hyperledger Caliper dan BlockBench sama-sama dapat mengevaluasi jaringan
@@ -684,152 +553,3 @@ Tabel~\ref{tab:caliper-blockbench}.
 \noindent\textbf{Simpulan:} Hyperledger Caliper dipilih karena tujuan penelitian
 adalah mengukur perilaku \textit{chaincode} CBDC ritel aktual pada satu jaringan
 Fabric, bukan membandingkan implementasi internal beberapa platform.
-
-\subsection{Pemilihan Arsitektur CBDC Dua Jenjang}
-Istilah ``dua jenjang'' pada bagian ini menyatakan pembagian peran distribusi
-antara bank sentral dan perantara.
-
-Tabel~\ref{tab:arsitektur-tier} membandingkan model arsitektur satu
-jenjang (\textit{one-tier/direct}), di mana bank sentral mendistribusikan
-CBDC langsung kepada publik, dengan model dua jenjang (\textit{two-tier}),
-di mana distribusi dilakukan melalui bank
-\cite{sethaput2025, Auer2020The, Tsareva2024Retail}.
-
-\begingroup
-\renewcommand{\arraystretch}{1.3}
-\small
-\begin{longtable}{p{3.5cm} p{4.8cm} p{4.8cm}}
-\caption{Perbandingan arsitektur CBDC satu jenjang dan dua jenjang}\label{tab:arsitektur-tier}\\
-\toprule
-\textbf{Kriteria} &
-\textbf{Satu Jenjang (\textit{Direct})} &
-\textbf{Dua Jenjang (\textit{Two-Tier})} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Kriteria} &
-\textbf{Satu Jenjang (\textit{Direct})} &
-\textbf{Dua Jenjang (\textit{Two-Tier})} \\
-\midrule
-\endhead
-\bottomrule
-\endlastfoot
-Distribusi CBDC &
-Bank sentral langsung ke publik &
-Bank sentral $\to$ bank $\to$ publik \\
-Risiko \textit{disintermediation} &
-Tinggi &
-Rendah \cite{sethaput2025} \\
-Beban infrastruktur bank sentral &
-Sangat tinggi &
-Dibagi ke perantara \\
-Privasi pengguna dari bank sentral &
-Bergantung pada desain implementasi &
-Bergantung pada pemisahan data dan hak akses; bukan sifat otomatis dua jenjang \\
-Interoperabilitas ekosistem &
-Sulit &
-Mudah (bank sudah terintegrasi) \\
-Contoh CBDC nyata &
-DCash (Karibia) &
-eNaira, e-CNY, Sand Dollar \cite{ree2023enaira} \\
-Keselarasan Proyek Garuda &
-Tidak &
-Mengacu pada \cite{bi_garuda_poc, bi_whitepaper2022} \\
-\end{longtable}
-\endgroup
-
-\noindent\textbf{Simpulan:} Model dua jenjang dipilih berdasarkan tiga
-pertimbangan. (1) Model ini mengacu pada desain Rupiah Digital Bank Indonesia
-dalam Proyek Garuda \cite{bi_garuda_poc}. (2) Pembagian peran antarlapis
-meminimalkan risiko \textit{disintermediation} perbankan yang menjadi
-kekhawatiran utama bank sentral \cite{sethaput2025}. (3) Volume
-transaksi \textit{retail} skala masif tidak membebani \textit{ledger}
-\textit{wholesale} \cite{Auer2020The, Tsareva2024Retail}.
-
-\subsection{Pemetaan Purwarupa terhadap Dimensi Desain CBDC Optimal}
-Syarifuddin dan Bakhtiar merumuskan desain CBDC optimal pendukung strategi
-kebijakan moneter ke dalam beberapa dimensi: cakupan ritel dan
-\textit{wholesale}; remunerasi berbunga (\textit{wholesale}) dan tanpa bunga
-(ritel); model pembayaran berbasis akun dan token; derajat anonimitas yang
-terlacak; arsitektur hibrida; sistem buku besar berbasis DLT; serta cakupan
-domestik dan lintas batas \cite{SyarifuddinBakhtiar2021Monetary,
-Syarifuddin2024OPTIMAL}. Karena penelitian ini berfokus pada perancangan,
-implementasi, dan evaluasi kinerja fungsional, dimensi yang bersifat
-makroekonomi dan kebijakan moneter berada di luar cakupan; Tabel
-\ref{tab:pemetaan-optimal} memetakan pemenuhan tiap dimensi pada purwarupa
-beserta justifikasinya.
-
-\begingroup
-\renewcommand{\arraystretch}{1.3}
-\small
-\begin{longtable}{p{4.2cm} p{2.6cm} p{6.4cm}}
-\caption{Pemetaan purwarupa terhadap dimensi desain CBDC optimal
-\cite{SyarifuddinBakhtiar2021Monetary}}\label{tab:pemetaan-optimal}\\
-\toprule
-\textbf{Dimensi desain optimal} &
-\textbf{Status purwarupa} &
-\textbf{Keterangan} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Dimensi desain optimal} &
-\textbf{Status purwarupa} &
-\textbf{Keterangan} \\
-\midrule
-\endhead
-\bottomrule
-\endlastfoot
-Sistem buku besar DLT &
-Terpenuhi &
-Hyperledger Fabric 2.5 sebagai buku besar terdistribusi \textit{permissioned} \\
-Arsitektur hibrida &
-Tidak didemonstrasikan &
-Distribusi dua jenjang diimplementasikan pada satu buku besar bersama; pembagian
-tanggung jawab pencatatan hibrida tidak diuji \\
-Cakupan ritel dan \textit{wholesale} &
-Sebagian &
-Instrumen w-Rupiah Digital dan r-Rupiah Digital terpisah pada satu buku besar;
-buku besar \textit{wholesale} yang terpisah tidak dimodelkan \\
-Model akun dan token &
-Sebagian &
-Implementasi berbasis akun (saldo); dimensi token dibahas namun tidak
-diklaim final (lihat Subbab Model Pembayaran Berbasis Akun dan Token) \\
-Remunerasi ritel tanpa bunga &
-Konsisten &
-Rupiah Digital ritel purwarupa bersifat non-remunerasi, selaras dengan
-rekomendasi CBDC ritel optimal \cite{SyarifuddinBakhtiar2021Monetary} \\
-Remunerasi \textit{wholesale} berbunga / \textit{CBDC rate} &
-Di luar cakupan &
-Instrumen kebijakan moneter; tidak dimodelkan pada purwarupa fungsional \\
-Anonimitas terlacak &
-Di luar cakupan &
-Privasi transaksi tidak diimplementasikan; lihat batasan privasi pada Bab~I \\
-Cakupan domestik dan lintas batas &
-Sebagian &
-Domestik; interkoneksi CBDC lintas batas merupakan kesenjangan prinsip 3i \\
-\end{longtable}
-\endgroup
-
-\noindent\textbf{Simpulan:} purwarupa mengimplementasikan buku besar DLT,
-distribusi dua jenjang, instrumen w-Rupiah Digital dan r-Rupiah Digital yang terpisah, fungsi ritel berbasis saldo, dan sifat non-remunerasi.
-Arsitektur hibrida, \textit{CBDC rate},
-anonimitas terlacak, serta interkoneksi lintas batas tidak didemonstrasikan.
-Pemisahan ini mencegah model distribusi, cakupan instrumen, dan bentuk
-arsitektur diperlakukan sebagai dimensi yang sama
-\cite{SyarifuddinBakhtiar2021Monetary, Syarifuddin2024OPTIMAL}.
-
-Aryani \cite{aryani2023critlit} mengusulkan arsitektur dua jenjang Digital
-Rupiah dengan lapisan tambahan berupa \textit{Digital Rupiah Depository}
-sebagai entitas perantara antara Bank Indonesia dan peserta jaringan,
-pemisahan \textit{wholesaler} dan \textit{non-wholesaler} di jenjang atas,
-serta koneksi ke BI-RTGS dan jaringan \textit{blockchain} lintas batas untuk
-interoperabilitas. Perbandingan ini menjadi rujukan konseptual untuk menempatkan
-purwarupa pada spektrum desain CBDC.
-
-Penelitian ini mengadopsi prinsip inti arsitektur tersebut, yaitu distribusi
-berjenjang melalui bank yang dalam purwarupa direpresentasikan oleh \texttt{DistributorMSP}, namun dengan dua penyederhanaan yang
-disengaja sesuai cakupan purwarupa. Pertama,
-lapisan \textit{Digital Rupiah Depository} diciutkan menjadi satu organisasi distributor (\texttt{DistributorMSP})
-yang langsung menerima penerbitan dari \texttt{CentralBankMSP}; pemisahan \textit{wholesale} dan \textit{retail} dilakukan sebagai jenis bank di dalam organisasi tersebut. Kedua, integrasi BI-RTGS
-dan jaringan \textit{blockchain} lintas batas tidak diimplementasikan dan
-dinyatakan secara eksplisit sebagai batasan cakupan penelitian (Bab~I).

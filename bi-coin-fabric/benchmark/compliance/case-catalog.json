@@ -18,7 +18,13 @@
     "confirmation_repetitions": 3,
     "confirmation_duration_seconds": 30,
     "delivered_load_tolerance_percent": 5,
-    "drain_adjusted_throughput_floor": 0.9,
+    "max_drain_seconds": 3,
+    "load_curve": {
+      "workloads": ["create-pending", "transfer-retail", "transfer-merchant", "issue", "fund-wallet", "read-balance"],
+      "levels": [0.25, 0.5, 0.75, 1, 1.25, 1.5],
+      "duration_seconds": 60,
+      "reference": "confirmed passing rate, or client-bound delivered rate"
+    },
     "resource_sample_interval_ms": 1000,
     "performance_method_count": 41,
     "performance_workload_count": 43,
@@ -182,7 +188,7 @@
     {"id":"fund-wallet","chaincode":"rupiah-payments","transaction":"FundWallet","api":"POST /wallet-fundings","family":"payments","actor":"retail_bank","fixture_profile":"float-subject","operation_kind":"write"},
     {"id":"read-retail-float","chaincode":"rupiah-payments","transaction":"GetRetailFloat","api":"GET /distributors/{distributor_id}/float","family":"reads","actor":"retail_bank","fixture_profile":"none","operation_kind":"query"},
     {"id":"read-balance","chaincode":"rupiah-payments","transaction":"GetBalance","api":"GET /customer-wallets/{subject_id}/balance","family":"reads","actor":"kyc_verified","fixture_profile":"reuse-active-subject","operation_kind":"query"},
-    {"id":"read-receipt","chaincode":"rupiah-payments","transaction":"GetReceipt","api":"GET /receipts/{reference}","family":"reads","actor":"kyc_verified","fixture_profile":"reuse-payment-receipt","operation_kind":"query"}
+    {"id":"read-receipt","chaincode":"rupiah-payments","transaction":"GetReceipt","api":"GET /receipts/{reference}","family":"reads","actor":"auditor","fixture_profile":"reuse-payment-receipt","operation_kind":"query"}
   ],
   "correctness_scenarios": [
     {"id":"kyc-risk-pep","executor":"ledger-smoke","assertion":"risk and PEP review decisions preserve the intended subject state"},
@@ -214,6 +220,8 @@
     {"id":"approval-threshold-dual-control","executor":"ledger-smoke","assertion":"a bank's approval threshold changes only after a second officer confirms the proposed amount"},
     {"id":"api-route-authorization-matrix","executor":"api-access-matrix","assertion":"every route and application-role cell reaches or is denied at the expected authorization boundary"},
     {"id":"api-request-validation-matrix","executor":"api-access-matrix","assertion":"permitted mutation routes reject malformed requests at validation before ledger effects"},
-    {"id":"api-route-action-outcomes","executor":"api-access-matrix","assertion":"bodyless API actions succeed or produce a verified expected denial with unchanged ledger state"}
+    {"id":"api-route-action-outcomes","executor":"api-access-matrix","assertion":"bodyless API actions succeed or produce a verified expected denial with unchanged ledger state"},
+    {"id":"receipt-read-authorization","executor":"ledger-smoke","assertion":"a payment receipt is readable only by ValidatorMSP and by a party to it; other callers are denied"},
+    {"id":"maker-cannot-reject-transfer","executor":"ledger-smoke","assertion":"the maker of a pending interbank transfer cannot reject it; a second officer of the same bank can"}
   ]
 }

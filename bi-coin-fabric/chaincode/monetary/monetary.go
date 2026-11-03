@@ -300,6 +300,9 @@ func (c *MonetaryContract) RejectTransfer(ctx contractapi.TransactionContextInte
 	if err != nil {
 		return transferReceipt{}, err
 	}
+	if checkerID == receipt.MakerID {
+		return transferReceipt{}, fmt.Errorf("the maker cannot reject their own transfer")
+	}
 	receipt.Status = "rejected"
 	receipt.CheckerID = checkerID
 	return receipt, putJSON(ctx.GetStub(), "transfer::"+reference, receipt)

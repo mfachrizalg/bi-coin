@@ -28,7 +28,7 @@ telah dibatasi, tetapi kapabilitas yang diminta belum diimplementasikan. Status
 | M7 | Selesai melalui pembatasan klaim | Limit dan aturan risiko disebut parameter kebijakan purwarupa yang terinspirasi pendekatan berbasis risiko. Naskah tidak lagi menyetarakan tingkatan KYC dengan kepatuhan APU/PPT menyeluruh. |
 | M8 | Selesai melalui pembatasan klaim | Pemisahan identitas mentah di PostgreSQL dari jangkar *on-chain* disebut pemisahan data, bukan privasi transaksi. Naskah menyatakan metadata dan graf transaksi terlihat bagi peserta berwenang pada kanal bersama. |
 | M9 | Sebagian | Supervisor/OJK dibuat hanya-baca dan rute BI dibatasi. Kolom `senior_approval` tetap merupakan status yang dipasok penyedia; identitas pemberi persetujuan dan alur empat mata belum diimplementasikan. Klaim naskah telah dibatasi sesuai fakta tersebut. |
-| M10 | Selesai | Klaim kebaruan dibatasi pada korpus yang ditinjau dan integrasi artefak penelitian. Lokator publik ditambahkan: `https://github.com/mfachrizalg/bi-coin`. Manifes benchmark mengikat hasil ke commit dan hash masukan. |
+| M10 | Selesai | Klaim kebaruan dibatasi pada korpus yang ditinjau dan integrasi artefak penelitian. Manifes benchmark mengikat hasil ke commit dan hash masukan. |
 | M11 | Selesai melalui pembatasan lingkup | Bab I, Bab II, dan Bab V menyatakan bahwa HA, RTO/RPO, rotasi sertifikat/kunci, pemutakhiran, respons insiden, pemulihan bencana, hasil inklusi, tata kelola produksi, dan pembayaran luring belum dievaluasi. |
 
 ## Format dan Administrasi

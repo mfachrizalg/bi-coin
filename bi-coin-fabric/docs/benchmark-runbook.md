@@ -110,7 +110,7 @@ docker compose -p "bi-coin-bench-$STAMP" -f compose.yaml exec $RUNNER_ENV runner
 ## 5. After the run
 
 1. Copy `benchmark/results/compliance-<stamp>` out of the workspace into the repository's `benchmark/results/`.
-2. Recompute the SHA-256 of every artifact and compare it with `manifest.json`.
+2. Recompute the SHA-256 of every artifact and compare it with `manifest.json`. Exclude `manifest.log`: it is written after the manifest is sealed and holds only the manifest path (its recorded hash is the empty-file hash). Any other mismatch stops the procedure. The `backend-api` folder is root-owned (mode 700): run the check from a read-only root container, or it cannot be read.
 3. Check the source snapshot against the commit. Every tracked file must print `OK`. `UNTRACKED` is allowed only under `*/vendor/`: `go mod vendor` generates those files from the committed `go.mod` and `go.sum`, which must themselves print `OK`. Any `MISMATCH`, or any `UNTRACKED` outside `vendor/`, stops the procedure.
 
 ```sh
@@ -155,3 +155,6 @@ Edits outside those paths (frontend, docs, ADRs, thesis, paper, wiki, graph outp
 15. **Stale chaincode package.** `deploy-chaincodes.sh` reused any existing `network/packages/<name>.tar.gz`, so a host deploy after a code change installed the old chaincode. It now repackages when the chaincode source hash differs from `<name>.source-sha256`. A fresh `git archive` workspace has no packages.
 16. **Image ID comparison.** The image IDs recorded from the host never matched the disposable daemon's, although every layer was identical: the two daemons use different image stores. Compare `RootFS.Layers` (section 3).
 17. **musl runner image.** The Alpine runner ran `peer` under `gcompat`, but the glibc `fabric-ca-client` 1.5.9 failed with `fcntl64: symbol not found`, and bootstrap hid the error. The runner is now Debian. After building it, run `fabric-ca-client version` and `peer version` inside the runner before `new`.
+18. **Pass rule on 10 s probes.** The drain test (≥ 90% of delivered throughput) rejected fully verified write rounds whenever the last commit landed more than 1.1 s after the window; the 14 Oct write ceilings were artifacts. Since ADR 0015 the test is drain ≤ 3 s, and a client-bound class separates the single client's limit from ledger failures. Re-derive any number that used the old rule.
+19. **Opaque diagnostics.** Fabric SDK errors have no message, so `String(error)` stored `[object Object]` and hid the MVCC or endorsement cause. `describeError` now serializes the details. Check a pilot's `failures` for `[object Object]` before the evidence run.
+20. **Shared-key workloads.** Operations that write one balance key (issue, redeem, transfers, conversions, fund-wallet, admin status and limits, thresholds) commit about one per block. A high offered rate on them fails with MVCC conflicts, which is a finding for RQ2, not a harness fault. Do not tune their rates to hide it.

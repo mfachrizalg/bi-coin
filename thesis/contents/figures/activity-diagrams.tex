@@ -1,57 +1,53 @@
-% Activity diagram sistem Rupiah Digital.
-% Keenam gambar di-render dari blok bernama pada berkas PlantUML:
-%   bi-coin-fabric/docs/diagrams/plantuml/activity-diagrams.puml
-% Untuk merender:
-%   cd /path/to/bi-coin && rtk python render-activity-diagrams.py
-% Di-input dari BAB III §3.2.4.
+% Activity diagram sistem Rupiah Digital (UML 2, TikZ).
+% Setiap gambar memuat satu tikzpicture pada berkas activity-adNN.tex.
+% Di-input dari BAB III §3.2 Perancangan Activity Diagram.
+\input{contents/figures/activity-style}
 
-\newcommand{\actfig}[3]{%
-  \begin{figure}[H]\centering
-  \IfFileExists{contents/figures/activity/#1.png}{%
-    \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]%
-      {contents/figures/activity/#1.png}%
-  }{%
-    \fbox{\parbox{0.9\textwidth}{\centering\small
-      \textit{[Gambar belum di-render. Jalankan:
-      \texttt{rtk python render-activity-diagrams.py}]}\\
-      \texttt{#1.png}}}%
-  }%
-  \caption{#2}
-  \label{#3}
-  \end{figure}
-}
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad01}}
+\caption{Activity diagram pendaftaran peserta: pengajuan subjek, pemeriksaan data, penetapan status pending, peninjauan, dan keputusan KYC}
+\label{fig:ch3-ad-01}
+\end{figure}
 
-\newcommand{\actfiglandscape}[3]{%
-  \begin{figure}[H]\centering
-  \IfFileExists{contents/figures/activity/#1.png}{%
-    \rotatebox{90}{\includegraphics[width=0.72\textheight]%
-      {contents/figures/activity/#1.png}}%
-  }{%
-    \fbox{\parbox{0.9\textwidth}{\centering\small
-      \textit{[Gambar belum di-render. Jalankan:
-      \texttt{rtk python render-activity-diagrams.py}]}\\
-      \texttt{#1.png}}}%
-  }%
-  \caption{#2}
-  \label{#3}
-  \end{figure}
-}
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad02}}
+\caption{Activity diagram penerbitan w-Rupiah Digital ke reserve distributor}
+\label{fig:ch3-ad-02}
+\end{figure}
 
-\actfiglandscape{AD01-Pendaftaran-Peserta}%
-  {Activity diagram pendaftaran peserta}{fig:ad01}
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad03a}}
+\caption{Activity diagram transfer antarbank dengan mekanisme maker-checker}
+\label{fig:ch3-ad-03a}
+\end{figure}
 
-\actfig{AD02-Penerbitan-Digital-Rupiah}%
-  {Activity diagram penerbitan w-Rupiah Digital langsung ke reserve Distributor Bank}{fig:ad02}
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad03b}}
+\caption{Activity diagram konversi ke float ritel dan pendanaan dompet}
+\label{fig:ch3-ad-03b}
+\end{figure}
 
-\actfig{AD03-Transfer-Konversi-Pendanaan}%
-  {Activity diagram transfer antarbank, konversi, dan pendanaan dompet}{fig:ad03}
+\begin{figure}[p]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad04}}
+\caption{Activity diagram transfer saldo ritel antarsubjek}
+\label{fig:ch3-ad-04}
+\end{figure}
 
-\actfig{AD05-Transfer-Saldo-Ritel}%
-  {Activity diagram transfer saldo ritel}{fig:ad05}
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad05}}
+\caption{Activity diagram pembekuan dan pembukaan pembatasan subjek oleh Compliance Officer, KYC Reviewer, dan Senior Approver}
+\label{fig:ch3-ad-05}
+\end{figure}
 
-
-\actfig{AD08-Pembekuan-Peserta}%
-  {Activity diagram pembatasan dan pembukaan pembatasan peserta oleh staf Distributor (Compliance Officer, KYC Reviewer, Senior Approver)}{fig:ad08}
-
-\actfiglandscape{AD10-Laporan-Supervisi}%
-  {Activity diagram pembacaan status subjek oleh Auditor}{fig:ad10}
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{contents/figures/activity-ad06}}
+\caption{Activity diagram pembacaan status subjek oleh Auditor}
+\label{fig:ch3-ad-06}
+\end{figure}

@@ -34,3 +34,11 @@ test('every catalogued query workload has a response check', () => {
     }
     assert.equal(verifyQuery('GetParticipant', '{"kind":"retail"}'), false);
 });
+
+test('describeError keeps Fabric error details instead of [object Object]', () => {
+    const { describeError, validationCode } = require('./caliper-workload');
+    assert.equal(describeError(new Error('boom')), 'boom');
+    const detail = describeError({ details: [{ message: 'transaction invalid with validation code MVCC_READ_CONFLICT' }] });
+    assert.notEqual(detail, '[object Object]');
+    assert.equal(validationCode(detail), 'MVCC_READ_CONFLICT');
+});

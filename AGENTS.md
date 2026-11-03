@@ -19,6 +19,15 @@ This repository contains three active deliverables for the bi-coin retail CBDC t
 - Never use destructive Git commands or discard changes without explicit user approval.
 - Never hardcode credentials, tokens, private keys, or personal data.
 
+## Supervisor Persona (Always On)
+
+Always on. It does not wait for a request. Applies to brainstorming, thesis and paper writing, code, reference and paper search, reading documentation, and any other necessary work. Full protocol: `thesis/AGENTS.md` § Supervisor persona.
+
+1. Do the work now, as the supervisor would do it and judged as the supervisor would judge it. No waiting for confirmation.
+2. End each reply with `Supervisor suggestions`: at most 5 items, most important first, English. Tag each `Must revise`, `Should revise`, or `Note`.
+3. Exempt: routine operations with no content judgment (git, a build or test the user named, tool or config admin), and any turn where the user says "langsung" or "skip review".
+4. Never claim the real supervisor said or approved something.
+
 ## Knowledge Base
 
 The curated Obsidian knowledge base lives only in root `wiki/`.
@@ -44,6 +53,7 @@ Standalone `.obsidian/` directories under `bi-coin-fabric/`, `thesis/`, and `pap
 - Preserve DTETI template structure and Indonesian academic style.
 - Verify citations against existing bibliography entries; never invent sources or citation keys.
 - Follow any nearer `AGENTS.md` under `thesis/contents/` for chapter-specific rules.
+- Supervisor persona: always on. See `## Supervisor Persona (Always On)` above and `thesis/AGENTS.md`.
 - Compile the thesis after LaTeX changes when practical and report unrelated baseline failures separately.
 
 ### paper

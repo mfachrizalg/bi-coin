@@ -1,0 +1,59 @@
+% AD07: alur studi kontrol, dari onboarding subjek sampai transfer dan pembacaan validator (UML 2, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (3.725,-20.8);
+\draw[lanebody] (3.725,-0.9) rectangle (7.45,-20.8);
+\draw[lanebody] (7.45,-0.9) rectangle (11.175,-20.8);
+\draw[lanebody] (11.175,-0.9) rectangle (14.9,-20.8);
+\node[lane] at (1.863,-0.45) {Pengguna\\(EndUserMSP)};
+\node[lane] at (5.588,-0.45) {Sistem\\(backend, chaincode)};
+\node[lane] at (9.313,-0.45) {Distributor\\(DistributorMSP)};
+\node[lane] at (13.038,-0.45) {Auditor\\(\scriptsize\texttt{ValidatorMSP})};
+
+\node[start] (s0) at (1.863,-1.2) {};
+\node[action, text width=3.2cm] (a1) at (1.863,-2.2) {Ajukan subjek\\pseudonim\\[1pt]{\scriptsize POST /subjects}};
+\node[action, text width=3.2cm] (a2) at (5.588,-2.2) {{\scriptsize\texttt{CreatePending()}}\\status pending};
+\node[action, text width=3.2cm] (a3) at (9.313,-2.2) {{\scriptsize\texttt{ProtectSubject()}}\\endorsement policy};
+\node[action, text width=3.2cm] (a4) at (9.313,-3.6) {{\scriptsize\texttt{RecordReview()}}\\oleh KYC Reviewer};
+\node[action, text width=3.2cm] (a5) at (9.313,-5.0) {{\scriptsize\texttt{SetLimits()}}\\oleh Senior Approver};
+\node[decision, minimum width=2.4cm, minimum height=1.0cm] (dR) at (5.588,-6.6) {Risiko\\tinggi/PEP?};
+\node[action, text width=3.0cm] (a6) at (9.313,-6.6) {{\scriptsize\texttt{DecideHighRisk()}}\\oleh Senior Approver};
+\node[action, text width=3.2cm] (a7) at (9.313,-7.9) {{\scriptsize\texttt{ApproveStandard}}\\oleh KYC Reviewer};
+\node[merge] (m1) at (9.313,-9.1) {};
+\node[decision, minimum width=2.2cm, minimum height=1.0cm] (dO) at (9.313,-10.5) {Disetujui?};
+\node[action, text width=3.2cm] (aA) at (5.588,-10.5) {Status: \texttt{active}};
+\node[action, text width=3.2cm] (a8) at (1.863,-10.5) {{\scriptsize\texttt{OpenWallet()}}\\[1pt]{\scriptsize POST /customer-wallets}};
+\node[final] (fR) at (9.313,-12.0) {};
+\node[font=\scriptsize, align=center] at (10.7,-12.0) {Subjek\\ditolak};
+\node[action, text width=3.2cm] (a9) at (9.313,-13.2) {{\scriptsize\texttt{ConvertToRetail()}}\\[1pt]{\scriptsize POST /conversions}};
+\node[action, text width=3.2cm] (a10) at (9.313,-14.6) {{\scriptsize\texttt{FundWallet()}}\\[1pt]{\scriptsize POST /wallet-fundings}};
+\node[action, text width=3.2cm] (a11) at (1.863,-16.0) {{\scriptsize\texttt{Transfer()}}\\[1pt]{\scriptsize POST /retail-transfers}};
+\node[decision, minimum width=2.4cm, minimum height=1.0cm] (dT) at (5.588,-17.4) {Kelayakan\\dan saldo?};
+\node[final] (fT) at (1.863,-17.4) {};
+\node[font=\scriptsize] at (1.863,-17.95) {Ditolak};
+\node[action, text width=3.2cm] (a12) at (5.588,-19.0) {Debit dan kredit;\\catat kuitansi};
+\node[action, text width=3.2cm] (a13) at (13.038,-19.0) {{\scriptsize\texttt{GetSubject()}}\\baca-saja};
+\node[final] (fEnd) at (13.038,-20.4) {};
+
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -- (a2.west);
+\draw[flow] (a2.east) -- (a3.west);
+\draw[flow] (a3.south) -- (a4.north);
+\draw[flow] (a4.south) -- (a5.north);
+\draw[flow] (a5.west) -- (5.588,-5.0) -- (dR.north);
+\draw[flow] (dR.east) -- node[guard, above] {[ya]} (a6.west);
+\draw[flow] (dR.south) -- node[guard, right] {[tidak]} (5.588,-7.9) -- (a7.west);
+\draw[flow] (a6.east) -- (11.05,-6.6) -- (11.05,-9.1) -- (m1.east);
+\draw[flow] (a7.south) -- (m1.north);
+\draw[flow] (m1.south) -- (dO.north);
+\draw[flow] (dO.west) -- node[guard, above] {[ya]} (aA.east);
+\draw[flow] (dO.south) -- node[guard, right] {[tidak]} (fR.north);
+\draw[flow] (aA.west) -- (a8.east);
+\draw[flow] (a8.south) -- (1.863,-13.2) -- (a9.west);
+\draw[flow] (a9.south) -- (a10.north);
+\draw[flow] (a10.west) -- (1.863,-14.6) -- (a11.north);
+\draw[flow] (a11.east) -| (dT.north);
+\draw[flow] (dT.west) -- node[guard, above] {[tidak]} (fT.east);
+\draw[flow] (dT.south) -- node[guard, right] {[ya]} (a12.north);
+\draw[flow] (a12.east) -- (a13.west);
+\draw[flow] (a13.south) -- (fEnd.north);
+\end{tikzpicture}

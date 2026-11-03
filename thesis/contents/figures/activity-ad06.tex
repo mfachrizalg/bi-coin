@@ -1,0 +1,36 @@
+% AD06: pembacaan status subjek oleh Auditor (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (4.967,-12.2);
+\draw[lanebody] (4.967,-0.9) rectangle (9.933,-12.2);
+\draw[lanebody] (9.933,-0.9) rectangle (14.9,-12.2);
+\node[lane, text width=4.5cm] at (2.483,-0.45) {Auditor\\(\scriptsize\texttt{ValidatorMSP})};
+\node[lane, text width=4.5cm] at (7.45,-0.45) {Backend API};
+\node[lane, text width=4.5cm] at (12.417,-0.45) {Chaincode\\(\scriptsize\texttt{rupiah-controls})};
+
+\node[start] (s0) at (2.483,-1.45) {};
+\node[action, text width=3.6cm] (a1) at (2.483,-2.4) {Kirim permintaan\\[1pt]{\scriptsize GET /subjects/\allowbreak\{subject\_id\}}};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dP) at (7.45,-3.7) {Peran\\diizinkan?};
+\node[final] (fP) at (2.483,-3.7) {};
+\node[font=\scriptsize, align=center] at (2.483,-4.25) {Ditolak\\(401/403)};
+\node[action, text width=3.6cm] (aM) at (7.45,-5.8) {{\scriptsize\texttt{studyMSPForRole()}}\\peran auditor memakai ValidatorMSP};
+\node[action, text width=3.6cm] (aG) at (12.417,-7.1) {{\scriptsize\texttt{GetSubject()}}\\(baca-saja)};
+\node[decision, minimum width=2.4cm, minimum height=1.0cm] (dA) at (12.417,-8.9) {MSP\\diizinkan?};
+\node[final] (fA) at (14.55,-8.9) {};
+\node[font=\scriptsize] at (14.55,-9.45) {Ditolak};
+\node[action, text width=3.6cm] (aR) at (12.417,-10.6) {Susun SubjectView:\\status, risiko, batas};
+\node[action, text width=3.2cm] (aS) at (7.45,-10.6) {Ubah batas ke string;\\kirim respons 200};
+\node[action, text width=3.6cm] (aT) at (2.483,-10.6) {Terima status subjek\\(JSON)};
+\node[final] (fE) at (2.483,-11.7) {};
+
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -| (dP.north);
+\draw[flow] (dP.west) -- node[guard, above] {[tidak]} (fP.east);
+\draw[flow] (dP.south) -- node[guard, right] {[ya]} (aM.north);
+\draw[flow] (aM.east) -| (aG.north);
+\draw[flow] (aG.south) -- (dA.north);
+\draw[flow] (dA.east) -- node[guard, above] {[tidak]} (fA.west);
+\draw[flow] (dA.south) -- node[guard, right] {[ya]} (aR.north);
+\draw[flow] (aR.west) -- (aS.east);
+\draw[flow] (aS.west) -- (aT.east);
+\draw[flow] (aT.south) -- (fE.north);
+\end{tikzpicture}

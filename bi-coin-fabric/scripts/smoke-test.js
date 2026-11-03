@@ -387,9 +387,13 @@ function main() {
     const rejectedReference = `reserve-rejected-${runID}`;
     invoke('distributor', 'User4', 'rupiah-monetary', 'TransferReserve', ['wholesale-bank', 'retail-bank', '10000', rejectedReference], ['centralbank', 'distributor']);
     const beforeRejection = ledgerSnapshot();
+    expectChaincodeRejection('distributor', 'User4', 'rupiah-monetary', 'RejectTransfer', [rejectedReference], ['centralbank', 'distributor'], 'the maker cannot reject their own transfer');
+    assertStateUnchanged(beforeRejection, ledgerSnapshot());
     invoke('distributor', 'User5', 'rupiah-monetary', 'RejectTransfer', [rejectedReference], ['centralbank', 'distributor']);
     expectChaincodeRejection('distributor', 'User5', 'rupiah-monetary', 'ApproveTransfer', [rejectedReference], ['centralbank', 'distributor'], 'transfer is not awaiting approval');
     assertStateUnchanged(beforeRejection, ledgerSnapshot());
+    recordCase('maker-cannot-reject-transfer', true,
+        { maker_reject_denied: true, maker_reject_state_unchanged: true, checker_reject_accepted: true, transaction_id: rejectedReference });
     recordCase('four-eyes-transfer', pendingLeftReservesUnchanged,
         { pending_until_second_officer: true, maker_self_approval_denied: true, other_bank_approval_denied: true, approved_amount: 10000, rejected_transfer_unchanged: true });
 
@@ -497,7 +501,7 @@ function main() {
     if (receipt.amount !== 100 || receipt.from !== retailSubject || receipt.to !== merchantSubject || receipt.kind !== 'transfer') {
         fail('transfer receipt did not match the committed transfer');
     }
-    const unrelatedReceipt = query('enduser', 'User6', 'rupiah-payments', 'GetReceipt', [initialPayment[3]]);
+    const unrelatedReceiptDenied = Boolean(expectQueryRejection('enduser', 'User6', 'rupiah-payments', 'GetReceipt', [initialPayment[3]], 'caller is not a party to receipt'));
     recordCase('transfer-replay-conflict', paymentAfterFirst.balances[retailSubject] === paymentBefore.balances[retailSubject] - 100
         && paymentAfterFirst.balances[merchantSubject] === paymentBefore.balances[merchantSubject] + 100
         && receipt.amount === 100 && receipt.reference === initialPayment[3],
@@ -719,6 +723,7 @@ function main() {
     { reserve_delta: -1000, wholesale_supply_delta: -1000, supply_delta: -1000, retail_supply: retailSupply });
     const readMSPs = Object.keys(orgs);
     const callerIDs = new Set();
+    let validatorReceiptVisible = false;
     let enduserAdminGetSubjectProjectionError;
     for (const orgName of readMSPs) {
         const callerID = getClientID(orgName, 'Admin');
@@ -741,13 +746,20 @@ function main() {
             fail(`${orgs[orgName].msp} monetary read projection disagreed`);
         }
         expectQueryRejection(orgName, 'Admin', 'rupiah-payments', 'GetBalance', [retailSubject], 'caller cannot view this wallet');
-        const visibleReceipt = query(orgName, 'Admin', 'rupiah-payments', 'GetReceipt', [initialPayment[3]]);
-        if (visibleReceipt.reference !== initialPayment[3]) fail(`${orgs[orgName].msp} GetReceipt returned a different reference`);
+        if (orgName === 'validator') {
+            const visibleReceipt = query(orgName, 'Admin', 'rupiah-payments', 'GetReceipt', [initialPayment[3]]);
+            if (visibleReceipt.reference !== initialPayment[3]) fail(`${orgs[orgName].msp} GetReceipt returned a different reference`);
+            validatorReceiptVisible = true;
+        } else {
+            expectQueryRejection(orgName, 'Admin', 'rupiah-payments', 'GetReceipt', [initialPayment[3]], 'caller is not a party to receipt');
+        }
     }
     if (callerIDs.size !== 4) fail('GetCallerIdentity did not distinguish all four MSP admin certificates');
-    recordCase('msp-read-authorization', callerIDs.size === 4 && unrelatedReceipt.reference === initialPayment[3]
+    recordCase('receipt-read-authorization', receipt.reference === initialPayment[3] && unrelatedReceiptDenied && validatorReceiptVisible,
+    { party_read: true, unrelated_party_denied: true, validator_supervision_read: true, non_validator_denied: true });
+    recordCase('msp-read-authorization', callerIDs.size === 4 && unrelatedReceiptDenied
         && enduserGetSubjectDenial.length > 0 && readMSPs.length === 4,
-    { msp_read_matrix_cells: readMSPs.length * 10, unrelated_receipt_read: true, enduser_get_subject_denied: true });
+    { msp_read_matrix_cells: readMSPs.length * 10, unrelated_receipt_denied: true, enduser_get_subject_denied: true });
     recordCase('initialization-and-nested-debit', readMSPs.length === 4 && mspAuthorizationCells > 0
         && initializationReplayStateUnchanged,
     { initialization_checked: true, initialization_replay_state_unchanged: initializationReplayStateUnchanged, direct_internal_debit_denied_for_msps: readMSPs.length });

@@ -106,17 +106,11 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
 
 \subsubsection{Perancangan Activity Diagram}
 
-Setiap proses utama dimodelkan dengan activity diagram bergaya
-\textit{swimlane} tiga jalur, yaitu jalur aktor, jalur \textit{backend API}, dan
-jalur \textit{blockchain} (\textit{chaincode}). Diagram tersebut mencakup
-pendaftaran peserta (Gambar~\ref{fig:ad01}), penerbitan \textit{w-Rupiah Digital}
-(Gambar~\ref{fig:ad02}), transfer antarbank dan konversi ke float ritel
-(Gambar~\ref{fig:ad03}). Proses lainnya meliputi transfer saldo ritel
-(Gambar~\ref{fig:ad05}), pembatasan dan pembukaan pembatasan peserta
-(Gambar~\ref{fig:ad08}), serta laporan dan pengawasan
-(Gambar~\ref{fig:ad10}).
+Setiap proses utama dimodelkan dengan \textit{activity diagram} UML 2 yang digambar menggunakan TikZ. Jumlah jalur (\textit{swimlane}) pada setiap diagram mengikuti aktor atau komponen yang terlibat, yaitu tiga hingga lima jalur. Pendaftaran peserta (Gambar~\ref{fig:ch3-ad-01}) melibatkan lima jalur, yaitu pengguna, sistem, distributor, KYC Reviewer, dan Senior Approver. Penerbitan \textit{w-Rupiah Digital} (Gambar~\ref{fig:ch3-ad-02}) dan pembacaan status oleh auditor (Gambar~\ref{fig:ch3-ad-06}) masing-masing memiliki tiga jalur. Transfer antarbank dengan mekanisme \textit{maker-checker} dibagi menjadi dua diagram agar setiap diagram tetap terbaca pada satu halaman. Gambar~\ref{fig:ch3-ad-03a} memuat transfer antarbank dengan tiga jalur, sedangkan Gambar~\ref{fig:ch3-ad-03b} memuat konversi ke float ritel dan pendanaan dompet dengan empat jalur. Transfer saldo ritel (Gambar~\ref{fig:ch3-ad-04}) dan pembekuan serta pembukaan pembatasan (Gambar~\ref{fig:ch3-ad-05}) masing-masing memiliki empat jalur. Alur studi kontrol yang merangkai onboarding, persetujuan, pendanaan, dan transfer ditunjukkan pada Gambar~\ref{fig:ch3-ad-07} dengan empat jalur.
 
 \input{contents/figures/activity-diagrams}
+
+Setiap simpul keputusan (\textit{decision}) memiliki dua alur keluar dengan penjaga (\textit{guard}) berupa [ya] atau [tidak]. Simpul penggabung (\textit{merge}) menyatukan kembali alur yang sebelumnya bercabang. Empat keputusan berikut menentukan perilaku sistem. Pemeriksaan token dan peran pada gerbang akses menentukan apakah permintaan diteruskan ke \textit{handler}. Pada pendaftaran peserta, keputusan risiko tinggi atau PEP menentukan jalur persetujuan. Subjek dengan risiko standar disetujui oleh KYC Reviewer yang sama dengan peninjau, sedangkan subjek dengan risiko tinggi atau PEP hanya dapat diputuskan oleh Senior Approver yang berbeda dari peninjau. Pada transfer antarbank, jumlah transfer dibandingkan dengan ambang persetujuan pengirim. Transfer yang tidak melampaui ambang langsung dieksekusi, sedangkan transfer lainnya menunggu persetujuan checker yang identitasnya berbeda dari maker. Pada transfer saldo ritel, kelayakan subjek dan batas transaksi diperiksa lebih dahulu. Saldo pengirim, batas harian dan bulanan, serta batas saldo penerima juga harus terpenuhi sebelum debit dan kredit dilakukan.
 
 \subsubsection{Perancangan Arsitektur Sistem Blockchain}
 
@@ -454,23 +448,23 @@ serta matriks otorisasi dan validasi API. Skenario tersebut memeriksa status
 transaksi dan dampak yang diharapkan pada ledger. Penolakan hanya dinilai benar
 jika keadaan ledger sebelum dan sesudah transaksi tetap sama.
 
-Pengujian kinerja mengukur 30 metode kontrak publik dengan Hyperledger Caliper
+% TBD: hasil kinerja menunggu pengujian
+Pengujian kinerja mengukur TBD metode kontrak publik dengan Hyperledger Caliper
 dan konektor Fabric. Metode \texttt{Initialize} dan
 \texttt{DebitReserveForConversion} hanya diperiksa secara fungsional karena
 \texttt{DebitReserveForConversion} dipanggil secara internal oleh konversi. Metode
 \texttt{Transfer} diuji dengan variasi penerima ritel dan pedagang sehingga
-terdapat 31 beban kerja kinerja. Operasi baca dilaporkan sebagai operasi
+terdapat TBD beban kerja kinerja. Operasi baca dilaporkan sebagai operasi
 terverifikasi per detik, sedangkan transaksi tulis dilaporkan sebagai TPS
 terverifikasi. Semua panggilan kinerja diarahkan langsung ke \textit{chaincode};
 latensi pemrosesan API, PostgreSQL, dan KYC tidak digabungkan ke hasil Fabric.
 
 Seluruh pengujian kinerja memakai satu \textit{worker} lokal. Inisialisasi ronde
 Caliper menyiapkan koneksi; tidak ada ronde pemanasan bertimer. Matriks API
-pada run-20261014-01 merupakan pemeriksaan kebenaran yang terpisah: 207 sel peran-rute untuk
-otorisasi, 27 kasus validasi permintaan JSON, dan 15 pemeriksaan hasil aksi
-tanpa badan permintaan.
+merupakan pemeriksaan kebenaran yang terpisah: 296 sel peran-rute untuk
+otorisasi, 28 kasus validasi permintaan JSON, dan 45 pemeriksaan hasil aksi.
 
-Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port pada host luar, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan throughput terverifikasi terhadap durasi ditambah drain mencapai 90 persen laju terkirim, setara dengan drain paling lama sepersembilan durasi probe. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sembilan hingga sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Run run-20261014-01 dijalankan sebelum perbaikan ini dan mencatat galat tersebut sebagai kegagalan transaksi, sebagaimana dilaporkan pada Bab~4. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
+Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port pada host luar, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan throughput terverifikasi terhadap durasi ditambah drain mencapai 90 persen laju terkirim, setara dengan drain paling lama sepersembilan durasi probe. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sembilan hingga sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -486,7 +480,7 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 	Braket & Gunakan hasil terdahulu hanya sebagai petunjuk laju awal; bila tidak tersedia, mulai pada 32 operasi/detik. Tetapkan rentang 0,1--4.096 operasi/detik. Jika laju awal lulus tetapi belum ada batas gagal, kalikan laju dengan empat; jika laju awal gagal tetapi belum ada batas lulus, bagi laju dengan empat sampai braket terbentuk. \\
 	Pencarian biner & Uji titik tengah braket dalam ronde 10 detik sampai selisih relatif laju gagal terhadap laju lulus paling besar 10\%. Kesalahan konfigurasi atau data uji menghentikan pencarian beban kerja tersebut untuk diagnosis. \\
 	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. Galat penyiapan fixture tidak dihitung sebagai kegagalan konfirmasi; percobaan tersebut diarsipkan dan pencarian beban kerja diulang. \\
-	Interpretasi & Kelulusan pada batas atas rentang pencarian, 4.096 operasi/detik, dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh 31 beban kerja adalah 46,5 menit, di luar penyiapan, pencarian, dan verifikasi. \\
+	Interpretasi & Kelulusan pada batas atas rentang pencarian, 4.096 operasi/detik, dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh TBD beban kerja adalah TBD menit, di luar penyiapan, pencarian, dan verifikasi. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -495,17 +489,19 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Cakupan 20 skenario fungsional pada run-20261014-01 dan assertion yang dijalankan}
+	\caption{Cakupan 30 skenario fungsional dan assertion yang dijalankan}
 	\label{tab:uji-fungsional}
 	\centering
+	\footnotesize
+	\raggedright
 	\begin{tabular}{p{3.1cm} p{9.6cm}}
 	\toprule
 	\textbf{Kelompok skenario} & \textbf{Skenario katalog dan hasil yang diperiksa} \\
 	\midrule
-	KYC dan pemisahan kewenangan & \texttt{kyc-risk-pep}, \texttt{staff-separation}, \texttt{business-authority}, \texttt{restriction-reasons}, dan \texttt{fresh-release-evidence}; hasil izin/penolakan dan bukti pelepasan diperiksa terhadap keadaan subjek pada ledger. \\
-	Otorisasi dan transfer & \texttt{authorization-endorsement}, \texttt{transaction-limits}, \texttt{transfer-category-matrix}, dan \texttt{transfer-replay-conflict}; identitas pemanggil, kebijakan endorsement, batas, kategori transfer, referensi ulang, serta dampak ledger diperiksa. \\
-	Konversi dan penebusan & \texttt{conversion-replay-conflict}, \texttt{conversion-insufficient-reserve}, \texttt{conversion-holdings-limit}, \texttt{conversion-failure-atomicity}, \texttt{redemption-replay-conflict}, dan \texttt{redemption-conservation}; konflik/replay, saldo reserve, batas kepemilikan, atomisitas kegagalan, dan konservasi nilai diverifikasi. \\
-	Akses baca, inisialisasi, dan API & \texttt{msp-read-authorization}, \texttt{initialization-and-nested-debit}, \texttt{api-route-authorization-matrix}, \texttt{api-request-validation-matrix}, dan \texttt{api-route-action-outcomes}; hasil ledger, validasi, otorisasi, dan dampak aksi diperiksa secara terpisah. \\
+	KYC, peserta, dan kewenangan & \texttt{participant-admission-evidence}, \allowbreak\texttt{kyc-risk-pep}, \allowbreak\texttt{staff-separation}, \allowbreak\texttt{business-authority}, \allowbreak\texttt{restriction-reasons}, \allowbreak\texttt{fresh-release-evidence}, \allowbreak\texttt{participant-status-matrix}, dan \texttt{participant-closure}; pendaftaran peserta tanpa bukti, keputusan KYC untuk subjek berisiko tinggi dan PEP, pemisahan peninjau, pejabat senior, dan petugas kepatuhan, pergantian perwakilan badan usaha, alasan pembatasan, pelepasan dengan bukti baru, status peserta, serta penutupan peserta diperiksa terhadap keadaan ledger. \\
+	Persetujuan, transfer, dan batas & \texttt{approval-threshold-dual-control}, \allowbreak\texttt{four-eyes-transfer}, \allowbreak\texttt{transfer-limit}, \allowbreak\texttt{insufficient-reserve}, \allowbreak\texttt{cross-bank-debit-denied}, \allowbreak\texttt{transfer-replay-conflict}, \allowbreak\texttt{authorization-endorsement}, \allowbreak\texttt{transfer-category-matrix}, dan \texttt{transaction-limits}; persetujuan ganda di atas ambang batas, transfer empat mata, batas transfer dan kepemilikan, cadangan yang tidak cukup, debit lintas bank, replay dan konflik payload, endorsement, serta kategori pengirim dan penerima diperiksa terhadap keadaan ledger. \\
+	Konversi, dana, dan penebusan & \texttt{wholesale-conversion-denied}, \allowbreak\texttt{conversion-replay-conflict}, \allowbreak\texttt{conversion-insufficient-reserve}, \allowbreak\texttt{insufficient-float},\newline\texttt{wallet-funding-holdings-limit}, \allowbreak\texttt{conversion-failure-atomicity}, \allowbreak\texttt{redemption-replay-conflict}, dan \texttt{redemption-conservation}; konversi wholesale yang tidak diizinkan, replay dan konflik pada konversi serta penebusan, cadangan atau float yang tidak cukup, batas kepemilikan dompet, atomisitas saat gagal, dan konservasi nilai penebusan diperiksa. \\
+	Akses baca, inisialisasi, dan API & \texttt{msp-read-authorization}, \allowbreak\texttt{initialization-and-nested-debit}, \allowbreak\texttt{api-route-authorization-matrix}, \allowbreak\texttt{api-request-validation-matrix}, dan \texttt{api-route-action-outcomes}; otorisasi baca lintas MSP, inisialisasi ulang, dan debit bersarang diperiksa, bersama 296 sel peran-rute, 28 kasus validasi permintaan, dan 45 hasil aksi rute API. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -748,7 +744,7 @@ kepemilikan dompet ritel ditegakkan sebelum permintaan transfer diteruskan ke
 tidak cocok dengan pemilik dompet pengirim.
 
 Verifikasi lengkap kedua lapisan dijalankan melalui \texttt{go test ./...}
-pada masing-masing modul. Hasil \textit{unit test} tersebut tidak termasuk dalam artefak run-20261014-01 dan tidak dilaporkan sebagai hasil lulus pada Bab~IV.
+pada masing-masing modul. Hasil \textit{unit test} tersebut tidak termasuk dalam catatan pemeriksaan kebenaran dan tidak dilaporkan sebagai hasil lulus pada Bab~IV.
 
 \subsubsection{Konfigurasi Hyperledger Caliper}
 
@@ -779,7 +775,7 @@ Inang & Satu mesin lokal dengan \textit{container} Docker 29.6.2; satu \textit{w
 CPU & Intel Core i7-7700HQ @ 2,80 GHz (4 inti, 8 utas) \\
 Memori (RAM) & 16 GB \\
 Sistem operasi & Fedora Linux 44 (\textit{Workstation Edition}), x86\_64 \\
-Hyperledger Fabric & 2.5 (tag image \texttt{hyperledger/fabric-peer:2.5}; patch tidak tercatat di artefak run) \\
+Hyperledger Fabric & 2.5 (tag image \texttt{hyperledger/\allowbreak{}fabric-peer:\allowbreak{}2.5}; patch tidak tercatat dalam pengujian ini) \\
 Topologi & Empat MSP, satu \textit{peer} per MSP, kanal \texttt{bi-coin} \\
 \textit{Chaincode} & \texttt{rupiah-controls}, \texttt{rupiah-monetary}, dan \texttt{rupiah-payments} \\
 Hyperledger Caliper & 0.6.0 \\
@@ -838,7 +834,7 @@ pengiriman laporan PPATK, atau efektivitas deteksi pada data nyata.
 
 Struktur kelas, fungsi setiap organisasi, dan aktivitas utama pada lingkungan
 studi dirangkum melalui diagram kelas (Gambar~\ref{fig:ch3-study-class}),
-activity diagram (Gambar~\ref{fig:ch3-study-activity}), dan diagram use case
+activity diagram (Gambar~\ref{fig:ch3-ad-07}), dan diagram use case
 (Gambar~\ref{fig:ch3-study-use-case}). Urutan pesan untuk pelepasan
 pembatasan, konversi ke float ritel, dan transfer ritel ditunjukkan pada
 Gambar~\ref{fig:ch3-study-sequence-release},

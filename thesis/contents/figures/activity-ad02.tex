@@ -1,0 +1,40 @@
+% AD02: penerbitan w-Rupiah Digital (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (4.967,-13.1);
+\draw[lanebody] (4.967,-0.9) rectangle (9.933,-13.1);
+\draw[lanebody] (9.933,-0.9) rectangle (14.9,-13.1);
+\node[lane, text width=4.5cm] at (2.483,-0.45) {Staf Bank Indonesia\\(CentralBankMSP)};
+\node[lane, text width=4.5cm] at (7.45,-0.45) {Backend API\\(\scriptsize\texttt{StudyHandler})};
+\node[lane, text width=4.5cm] at (12.417,-0.45) {Chaincode\\(\scriptsize\texttt{rupiah-monetary})};
+
+\node[start] (s0) at (2.483,-1.45) {};
+\node[action, text width=3.6cm] (a1) at (2.483,-2.4) {Kirim permintaan\\[1pt]{\scriptsize\texttt{POST /issuances}}};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dR) at (7.45,-3.5) {Peran\\BI?};
+\node[final] (fR) at (2.483,-3.5) {};
+\node[font=\scriptsize, align=center] at (2.483,-4.05) {Ditolak\\(403)};
+\node[action, text width=3.6cm] (aV) at (7.45,-5.1) {Validasi body dan\\Idempotency-Key};
+\node[action, text width=3.6cm] (aS) at (7.45,-6.5) {Panggil {\scriptsize\texttt{Issue()}}\\dengan identitas BI};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dA) at (12.417,-6.5) {Identitas\\MSP BI?};
+\node[final] (fA) at (14.55,-6.5) {};
+\node[font=\scriptsize] at (14.55,-7.05) {Ditolak};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dS) at (12.417,-8.4) {Status\\aktif?};
+\node[final] (fS) at (14.55,-8.4) {};
+\node[font=\scriptsize] at (14.55,-8.95) {Ditolak};
+\node[action, text width=3.6cm] (aC) at (12.417,-10.0) {Tambah reserve\\distributor dan supply};
+\node[action, text width=3.6cm] (aR) at (12.417,-11.4) {Simpan kuitansi\\{\scriptsize\texttt{issue}}};
+\node[final] (fO) at (12.417,-12.7) {};
+\node[font=\scriptsize, align=center] at (10.6,-12.7) {Status:\\issued};
+
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -| (dR.north);
+\draw[flow] (dR.west) -- node[guard, above] {[tidak]} (fR.east);
+\draw[flow] (dR.south) -- node[guard, right] {[ya]} (aV.north);
+\draw[flow] (aV.south) -- (aS.north);
+\draw[flow] (aS.east) -- (dA.west);
+\draw[flow] (dA.east) -- node[guard, above] {[tidak]} (fA.west);
+\draw[flow] (dA.south) -- node[guard, right] {[ya]} (dS.north);
+\draw[flow] (dS.east) -- node[guard, above] {[tidak]} (fS.west);
+\draw[flow] (dS.south) -- node[guard, right] {[ya]} (aC.north);
+\draw[flow] (aC.south) -- (aR.north);
+\draw[flow] (aR.south) -- (fO.north);
+\end{tikzpicture}

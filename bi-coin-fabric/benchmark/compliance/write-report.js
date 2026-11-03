@@ -50,7 +50,7 @@ function summarizeMeasurement(workload, row, phase, rateUnit) {
         unresolved_count: row.unresolved_count ?? row.counts?.unresolved ?? 0,
         backlog_at_cutoff: row.backlog_at_cutoff ?? 0,
         late_completions: row.late_completions ?? 0,
-        latency_ms: row.latency_ms || { median: null, p95: null, maximum: null, sample_count: 0 },
+        latency_ms: row.latency_ms || { minimum: null, median: null, p95: null, maximum: null, sample_count: 0 },
         resources: row.resource || { complete: false, sample_count: 0, components: {} },
         caliper_trace: row.caliper_trace || { consistent: false, submitted_count: 0, finished_count: 0 },
         failures: row.failures || [],
@@ -74,7 +74,16 @@ function capacityBoundary(workload) {
     if (workload.capacity_boundary === 'unstable') return 'unstable boundary';
     if (workload.capacity_boundary === 'at-least-ceiling') return 'at least 4096';
     if (workload.capacity_boundary === 'bracketed') return 'bracketed';
+    if (workload.capacity_boundary === 'client-bound') return 'client-bound (lower bound: single client)';
     return workload.capacity_boundary || 'not established';
+}
+
+function curveRows(capacity) {
+    return (capacity.workloads || []).filter(item => item.load_curve?.levels?.length).flatMap(item => item.load_curve.levels.map(level => ({
+        workload: item.id,
+        reference: item.load_curve.reference_ops_per_second,
+        ...level,
+    })));
 }
 
 function resourceRows(measurements) {
@@ -102,6 +111,10 @@ function makeReport(directory) {
     const workloads = summarizeWorkloads(capacity);
     const measurements = measurementRows(workloads);
     const resources = resourceRows(measurements);
+    const curves = curveRows(capacity);
+    const curveTable = curves.length
+        ? ['| Workload | Level | Reference ops/s | Offered ops/s | Delivered | Verified ops/s | Classification | Failed / timeout / unresolved | Backlog | Drain s | Min / median / p95 / max ms (n) |', '|---|---:|---:|---:|---:|---:|---|---|---:|---:|---|', ...curves.map(row => `| ${row.workload} | ${row.level} | ${format(row.reference)} | ${format(row.rate_ops_per_second)} | ${row.delivered_count} | ${format(row.verified_throughput_ops_per_second)} | ${row.classification} | ${row.failed_count}/${row.timeout_count}/${row.unresolved_count} | ${row.backlog_at_cutoff} | ${format(row.drain_seconds)} | ${format(row.latency_ms?.minimum)}/${format(row.latency_ms?.median)}/${format(row.latency_ms?.p95)}/${format(row.latency_ms?.maximum)} (${row.latency_ms?.sample_count ?? 0}) |`)]
+        : 'No load curves were run.';
     const failures = measurements.flatMap(row => row.failures.map(failure => ({
         workload: row.workload,
         rate: row.target_rate_ops_per_second,
@@ -152,7 +165,7 @@ function makeReport(directory) {
         ? ['| Workload | Method | Kind | Highest confirmed pass | First failing rate | Remaining interval | Boundary | Confirmation |', '|---|---|---|---:|---:|---:|---|---|', ...workloads.map(row => `| ${row.id} | ${row.chaincode}.${row.transaction} | ${row.operation_kind} | ${row.highest_confirmed_passing_rate_ops_per_second ?? 'n/a'} | ${row.first_failing_rate_ops_per_second ?? 'n/a'} | ${row.remaining_interval_ops_per_second ?? 'n/a'} | ${capacityBoundary(row)} | ${row.confirmation_classification || 'not confirmed'} |`)].join('\n')
         : 'Capacity measurements are not present yet.';
     const measurementTable = measurements.length
-        ? ['| Workload | Phase | Target | Delivered | Verified | Correct / failed / timeout / unresolved | Caliper submitted / finished | Backlog | Late | Median / p95 / max ms (n) | Resource samples |', '|---|---|---:|---:|---:|---|---|---:|---:|---|---:|', ...measurements.map(row => `| ${row.workload} | ${row.phase} | ${row.target_rate_ops_per_second ?? 'n/a'} | ${format(row.delivered_rate_ops_per_second)} | ${format(row.verified_rate_ops_per_second)} ${row.rate_unit} | ${row.verified_count}/${row.failed_count}/${row.timeout_count}/${row.unresolved_count} | ${row.caliper_trace.submitted_count}/${row.caliper_trace.finished_count}${row.caliper_trace.consistent ? '' : ' mismatch'} | ${row.backlog_at_cutoff} | ${row.late_completions} | ${format(row.latency_ms.median)}/${format(row.latency_ms.p95)}/${format(row.latency_ms.maximum)} (${row.latency_ms.sample_count}) | ${row.resources.sample_count}${row.resources.complete ? '' : ' incomplete'} |`)].join('\n')
+        ? ['| Workload | Phase | Target | Delivered | Verified | Correct / failed / timeout / unresolved | Caliper submitted / finished | Backlog | Late | Min / median / p95 / max ms (n) | Resource samples |', '|---|---|---:|---:|---:|---|---|---:|---:|---|---:|', ...measurements.map(row => `| ${row.workload} | ${row.phase} | ${row.target_rate_ops_per_second ?? 'n/a'} | ${format(row.delivered_rate_ops_per_second)} | ${format(row.verified_rate_ops_per_second)} ${row.rate_unit} | ${row.verified_count}/${row.failed_count}/${row.timeout_count}/${row.unresolved_count} | ${row.caliper_trace.submitted_count}/${row.caliper_trace.finished_count}${row.caliper_trace.consistent ? '' : ' mismatch'} | ${row.backlog_at_cutoff} | ${row.late_completions} | ${format(row.latency_ms.minimum)}/${format(row.latency_ms.median)}/${format(row.latency_ms.p95)}/${format(row.latency_ms.maximum)} (${row.latency_ms.sample_count}) | ${row.resources.sample_count}${row.resources.complete ? '' : ' incomplete'} |`)].join('\n')
         : 'No probes completed yet.';
     const resourceTable = resources.length
         ? ['| Workload | Rate | Phase | Component | CPU mean / peak % | Memory mean / peak bytes | Network RX / TX delta bytes | Disk read / write delta bytes | Samples |', '|---|---:|---|---|---:|---:|---:|---:|---:|', ...resources.map(row => `| ${row.workload} | ${row.rate} | ${row.phase} | ${row.component} | ${format(row.cpu_mean_percent)}/${format(row.cpu_peak_percent)} | ${format(row.memory_mean_bytes, 0)}/${format(row.memory_peak_bytes, 0)} | ${row.net_rx_delta_bytes ?? 'n/a'}/${row.net_tx_delta_bytes ?? 'n/a'} | ${row.block_read_delta_bytes ?? 'n/a'}/${row.block_write_delta_bytes ?? 'n/a'} | ${row.sample_count}${row.sample_complete ? '' : ' incomplete'} |`)].join('\n')
@@ -185,6 +198,12 @@ function makeReport(directory) {
         measurementTable,
         '',
         'Read-only methods report verified operations per second. Write methods report verified achieved TPS. Latencies include median, p95, maximum, and sample count. Backlog and late completions are reported separately.',
+        '',
+        '## Load curves',
+        '',
+        curveTable,
+        '',
+        'Each level runs 60 seconds at a fixed rate relative to the confirmed reference. Levels are descriptive: they show where delivered load, verified throughput, and latency depart from offered load. A plateau in delivered load with zero failures is the single client limit (client-bound); failures or drain above the cap are ledger limits.',
         '',
         '## Per-component resources',
         '',

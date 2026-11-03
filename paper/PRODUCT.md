@@ -37,7 +37,7 @@ A working retail Digital Rupiah research prototype on a permissioned Hyperledger
 - Monetary flow: Bank Indonesia Issuance -> Distributor reserve (Wholesale Bank or Retail Bank) -> Conversion -> Retail float (Retail Bank) -> Wallet funding -> Retail Customer/Merchant wallet.
 - The shared Fabric channel gives no transaction privacy. The paper must keep stating this.
 - Measurements describe a single-host prototype. They do not establish production capacity or cross-machine reproducibility.
-- RESOLVED 2026-10-16: the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP) is the only architecture, so every benchmark number must come from it. The binding evidence is run-20261014-01 (one Caliper worker, one host): confirmed reads 272 to 296 ops/s and passing writes 0.184 to 4.75 TPS, as reported in `main.tex` and thesis Chapter 4.
+- RESOLVED 2026-10-16: the four-organization network (CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP) is the only architecture, so every benchmark number must come from it. The binding correctness evidence is the 2026-10-21 correctness run (one Caliper worker, one host). Performance values stay `TBD` in `main.tex` and thesis Chapter 4 until the performance run lands.
   - Superseded, do not cite: the September statistical study (`../bi-coin-fabric/benchmark/results/statistical-*`, including the Rp100 paired control and `reviews/replacement-study-2026-09-21.md`), the 113543 worker-sweep run, and the 9.0/45.9/57.7 single-run figures. They ran on the earlier five-organization network.
   - Do not add, change, or restyle benchmark numbers in figures or tables without a new four-organization run.
 
@@ -50,7 +50,7 @@ A working retail Digital Rupiah research prototype on a permissioned Hyperledger
 ## Evidence on Hand
 
 - Manuscript: `main.tex`, `main.pdf`, `references.bib` (`references-unused.bib` is not active).
-- Benchmark artifacts: `../bi-coin-fabric/benchmark/results/` (manifests, `summary.json` as the source of the figures, `derived-tables.json`). Correctness record: `../bi-coin-fabric/benchmark/results/compliance-run-20261014-01/correctness.json`, copied from the run workspace.
+- Benchmark artifacts: `../bi-coin-fabric/benchmark/results/` (manifests, `summary.json` as the source of the figures, `derived-tables.json`). Correctness record: the 2026-10-21 correctness run (`correctness.json`). Copy into the repo pending.
 - Reviews: `reviews/*.md`.
 - Absent, never fabricate: production deployment, real users, Bank Indonesia endorsement, cross-machine results, and benchmark numbers outside the recorded studies.
 

@@ -1,0 +1,45 @@
+% AD03a: transfer antarbank dengan maker-checker (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (4.967,-14.6);
+\draw[lanebody] (4.967,-0.9) rectangle (9.933,-14.6);
+\draw[lanebody] (9.933,-0.9) rectangle (14.9,-14.6);
+\node[lane, text width=4.5cm] at (2.483,-0.45) {Maker\\(DistributorMSP)};
+\node[lane, text width=4.5cm] at (7.45,-0.45) {Sistem\\(backend, chaincode)};
+\node[lane, text width=4.5cm] at (12.417,-0.45) {Checker\\(DistributorMSP)};
+
+\node[start] (s0) at (2.483,-1.45) {};
+\node[action, text width=3.6cm] (a1) at (2.483,-2.4) {Ajukan transfer\\[1pt]{\scriptsize\texttt{POST /interbank-transfers}}};
+\node[decision, minimum width=2.4cm, minimum height=1.0cm] (dO) at (7.45,-3.5) {Pengirim\\sesuai?};
+\node[final] (fO) at (2.483,-3.5) {};
+\node[font=\scriptsize] at (2.483,-4.05) {Ditolak};
+\node[action, text width=3.6cm] (aT) at (7.45,-5.1) {{\scriptsize\texttt{TransferReserve()}}\\simpan maker dan status awal};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dT) at (7.45,-6.7) {Jumlah $\leq$\\ambang?};
+\node[action, text width=3.6cm] (aE) at (7.45,-8.4) {Pindahkan reserve\\status \texttt{executed}};
+\node[final] (fE) at (7.45,-9.6) {};
+\node[action, text width=3.6cm] (aV) at (12.417,-6.7) {Tinjau transfer pending\\(checker berbeda dari maker)};
+\node[decision, minimum width=2.2cm, minimum height=0.9cm] (dK) at (12.417,-8.2) {Setujui?};
+\node[final] (fK) at (10.4,-8.2) {};
+\node[font=\scriptsize] at (10.4,-8.7) {Ditolak};
+\node[action, text width=3.6cm] (aA) at (12.417,-9.7) {{\scriptsize\texttt{ApproveTransfer()}}\\(checker)};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dM) at (12.417,-11.4) {Checker\\bukan maker?};
+\node[final] (fM) at (10.4,-11.4) {};
+\node[font=\scriptsize] at (10.4,-11.95) {Ditolak};
+\node[action, text width=3.6cm] (aM) at (12.417,-13.0) {Pindahkan reserve\\status \texttt{executed}};
+\node[final] (fD) at (12.417,-14.3) {};
+
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -| (dO.north);
+\draw[flow] (dO.west) -- node[guard, above] {[tidak]} (fO.east);
+\draw[flow] (dO.south) -- node[guard, right] {[ya]} (aT.north);
+\draw[flow] (aT.south) -- (dT.north);
+\draw[flow] (dT.south) -- node[guard, right] {[ya]} (aE.north);
+\draw[flow] (aE.south) -- (fE.north);
+\draw[flow] (dT.east) -- node[guard, above] {[tidak]} (aV.west);
+\draw[flow] (aV.south) -- (dK.north);
+\draw[flow] (dK.west) -- node[guard, above] {[tidak]} (fK.east);
+\draw[flow] (dK.south) -- node[guard, right] {[ya]} (aA.north);
+\draw[flow] (aA.south) -- (dM.north);
+\draw[flow] (dM.west) -- node[guard, above] {[tidak]} (fM.east);
+\draw[flow] (dM.south) -- node[guard, right] {[ya]} (aM.north);
+\draw[flow] (aM.south) -- (fD.north);
+\end{tikzpicture}

@@ -1,235 +1,76 @@
 # AGENTS.md: BAB I: Pendahuluan
 
-## Chapter Identity
+## Chapter identity
 
 - **Chapter:** BAB I: Pendahuluan
 - **File:** `contents/chapter-1/chapter-1.tex`
-- **Purpose:** Establish research context, problem, objectives, scope, benefits
-- **Position:** First content chapter; sets up entire thesis
+- **Purpose:** Tell the thesis's reasoning as one chain (Bitcoin, CBDC, Project Garuda, compliance problem), then set out Rumusan Masalah, Tujuan, Batasan, Manfaat, and Sistematika.
+- **Position:** First content chapter. It sets up the whole thesis.
+
+Shared rules, Bahasa policy, and the supervisor persona: `../../AGENTS.md`.
 
 ---
 
-## DTETI Template Rules
+## Current structure
 
-Primary guides: `contents/appendix/appendix-latex.tex` and
-`contents/appendix/appendix-penulisan-referensi.tex`. Template behavior remains
-defined by `thesisdtetiugm.cls`.
+`chapter-1.tex`, in order:
+1. `\section{Latar Belakang}`: four-step chain. Labels: `tab:ch1-indikator` (indicator table, with source line), `fig:ch1-alur-latar` (Garuda flow).
+2. `\section{Rumusan Masalah}`: RM1, RM2.
+3. `\section{Tujuan Penelitian}`: T1, T2.
+4. `\section{Batasan Penelitian}`: four items, no citations.
+5. `\section{Manfaat Penelitian}`: five items.
+6. `\section{Sistematika Penulisan}`: one `\noindent` paragraph per chapter.
 
-- Chapter title: `\chapter{Pendahuluan}`; the class generates "BAB I PENDAHULUAN".
-- Use `\section{}` and `\subsection{}` directly; do not add `\textbf{}` inside them.
-- Let the class control paragraph spacing, font, margins, and chapter pagination.
-- Do not add `\clearpage` inside the chapter body.
+## Chapter rules
 
-### Figures
+Latar Belakang is one chain, one paragraph per step:
+1. Origin: Bitcoin as peer-to-peer electronic money on a blockchain, then DLT as the wider ledger concept.
+2. Implementation: CBDC as a direct central-bank liability on a permissioned blockchain such as Hyperledger Fabric, which keeps network governance with the central bank.
+3. Project Garuda: Bank Indonesia's phases (w-Rupiah Digital wholesale first, then r-Rupiah Digital retail), with Tabel 1.1.
+4. Compliance problem: on the retail tier, intermediaries that deal with end users must meet KYC and AML/CFT rules. End with: controls must be enforced on the ledger and verified, and their performance measured. RM1 and RM2 follow.
 
-```latex
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=10cm]{contents/chapter-1/filename}
-  \caption{Full caption.}
-  \label{fig:ch1-unique-label}
-\end{figure}
-```
+- No research gap, no "belum" or "celah" framing. Bab I explains why the problem matters.
+- No global CBDC survey (e-Krona, Sand Dollar, e-CNY). The chain goes straight from CBDC to Garuda.
+- Cite a source where its claim first appears. Do not repeat a key in every sentence.
+- Keep Tabel 1.1 with its source line. Keep Gambar 1.1 in the same order as the text.
 
-- Use `[htbp]` so LaTeX can prevent clipping; use `[p]` for a full-page figure.
-- Keep captions below figures and within page margins.
-- Use unique lowercase labels with prefix `fig:ch1-`.
-- Refer in prose with `Gambar \ref{fig:ch1-label}`.
-- Cite an external figure source with `\cite{key}` in the caption or adjacent prose.
+RM and Tujuan map 1:1:
+- RM1: how to build and verify functionally a Fabric-based Rupiah Digital ritel prototype that enforces selected KYC and AML/CFT controls.
+- RM2: how the prototype performs when measured with Hyperledger Caliper.
+- T1: build the prototype and verify its selected KYC and AML/CFT controls functionally.
+- T2: measure the prototype's performance with Hyperledger Caliper.
+- Format: `\begin{enumerate} \item[RM1] ... \item[RM2] ... \end{enumerate}`, and the same with `T1` and `T2`.
 
-### Tables
+Batasan, four items, no citations:
+- Prototype: Hyperledger Fabric 2.5, four organizations, one peer each, on a locally simulated container network, not production.
+- Controls: selected KYC and AML/CFT controls only. No institutional compliance judgement and no real-world risk-model effectiveness.
+- Performance: Caliper with one worker on one host and synthetic data. Results do not generalize to production hardware or topology.
+- Out of scope: offline payments, privacy on the shared channel, ordering-service fault tolerance, BI-RTGS and BI-FAST integration, monetary policy analysis.
 
-```latex
-\begin{table}[htbp]
-  \caption{Caption above table.}
-  \vspace{0.5em}
-  \centering
-  \begin{tabular}{...}
-  ...
-  \end{tabular}
-  \label{tab:ch1-unique-label}
-\end{table}
-```
+Manfaat, five items. Each stays within the prototype's scope. No claims of inclusion impact or production readiness:
+1. Theoretical reference for retail CBDC design on a permissioned blockchain: tiered issuance to distributor banks, conversion to retail float, user-to-user transfer, and central-bank oversight.
+2. How Hyperledger Fabric separates the roles of central bank, distributor bank, *pengawas*, and end user, with portal data kept off the ledger. Wording matches `chapter-1.tex`; see checks.
+3. Prototype for technical experiments on issuance, transfer, authorization, and recording of oversight events.
+4. Initial performance baseline from limited load tests: throughput, latency, and transaction success, within prototype scope.
+5. Technical input to the Rupiah Digital ritel discussion, stating the prototype's limits: topology expansion, transaction privacy, advanced security testing.
 
-- Use `table` + `tabular` for a table that fits one page.
-- Use `longtable` only when the table must continue across pages; define repeated
-  headers and keep the caption above the first segment.
-- Use unique lowercase labels with prefix `tab:ch1-` and refer with
-  `Tabel \ref{tab:ch1-label}`.
-- Never allow a table to extend beyond the text width.
+Sistematika: one opening sentence (five chapters), then one `\noindent` paragraph per chapter.
 
-### Equations, Lists, and Algorithms
+## Supervisor checks
 
-- Use `equation` for numbered display equations and `$...$` for inline equations.
-- Use `\mathit{...}` for multi-letter mathematical expressions that must not be
-  spaced as separate variables.
-- Use `align`/`align*` for equation sequences; `\allowdisplaybreaks` permits a long
-  sequence to continue across pages.
-- Use `enumerate` for ordered items and `itemize` for unordered items.
-- Split a multipage algorithm with `\algstore{name}` and `\algrestore{name}`.
-  Put `\caption` and `\label` only on the first algorithm block.
-
-### Citations
-
-- Use numeric IEEE citations through `\cite{key}` or `\cite{key1,key2}`.
-- `main.tex` uses `\bibliography{references}` and `thesisdtetiugm.cls` uses
-  `IEEEtran`; `references.bib` is the only active bibliography database.
-- Never invent a citation key or cite an entry absent from `references.bib`.
-- Manage sources in Mendeley when practical, export as BibTeX, then verify the
-  exported fields before committing them.
-- Match entry fields to source type: books need publisher/year; conference papers
-  need booktitle/year/pages and DOI when available; online sources need a canonical
-  public URL; theses need degree type, department, institution, location, and year.
-- Never store institutional proxy URLs. Prefer a verified DOI; otherwise use the
-  publisher, institution, or project canonical URL.
-- Preserve corporate authors with braces, for example `author = {{Bank Indonesia}}`.
-
-### Verification
-
-- Build bibliography changes with `rtk pdflatex`, `rtk bibtex main`, then two more
-  `rtk pdflatex` passes.
-- Reject undefined citations/references, `??`, overfull boxes, clipped figures or
-  tables, overlapping text, and warning text embedded in images.
-- Render and inspect affected PDF pages; a successful compile alone is insufficient.
-
-### Language
-
-- `babel[english,bahasa]`: bahasa primary
-- English technical terms: `\textit{term}` on first occurrence only, roman after
-- Example: `\textit{blockchain}`, `\textit{Central Bank Digital Currency} (CBDC)`: first use only
-- Full term on first use: "Mata Uang Digital Bank Sentral (CBDC)"
-- Abbreviations defined at first use, then used consistently
-
----
-
-## Writing Style
-
-Referenced from `thesis/Skripsi Luthfi Izzudin.pdf` (format/tone model, different topic).
-
-- Passive voice for descriptions: "sistem dirancang", "penelitian dilakukan"
-- Active voice for findings: "hasil menunjukkan"
-- No first-person: use "penelitian ini" not "penulis"
-- Decimal separator: **comma**: "50,3" not "50.3"
-- Thousands separator: **period**: "1.000" not "1,000"
-- Section transitions: one sentence linking previous section to next
-- Formal academic Bahasa Indonesia throughout
-
----
-
-## Hyphenation
-
-Globally handled in `main.tex` lines 56–59:
-
-```latex
-\tolerance=1
-\emergencystretch=\maxdimen
-\hyphenpenalty=10000
-\hbadness=10000
-```
-
-No per-chapter hyphenation action needed.
-
----
-
-## Sections
-
-Sections must match `chapter-1.tex` exactly. Do NOT change section title strings: TOC auto-generates.
-
-### 1. `\section{Latar Belakang}`
-
-Retail CBDC context:
-
-- Digital Rupiah policy under Bank Indonesia Project Garuda
-- Financial inclusion challenges in Indonesia (unbanked population, geographic barriers)
-- Limitations of current digital payment and settlement systems
-- Global CBDC trends: e-Krona (Sweden), Sand Dollar (Bahamas), e-CNY (China)
-- Rationale for blockchain-based Retail CBDC vs centralized alternatives
-- Prior CBDC research gap in Indonesian context
-
-**Remove all template example boxes** (`\fbox{}` blocks with TE/TB/TIF examples). Write original content.
-
-### 2. `\section{Rumusan Masalah}`
-
-Numbered problem statements (3–4 questions):
-
-- Format: `\begin{enumerate} \item ... \item ... \end{enumerate}`
-- Must map 1:1 to Tujuan Penelitian (next section)
-- Focus: Retail CBDC design feasibility, chaincode implementation, performance under load, KYC/AML integration
-- Each statement: clear, specific, answerable by Ch4 results
-- No template example boxes: write original content
-
-### 3. `\section{Tujuan Penelitian}`
-
-Objectives mapped 1:1 to Rumusan Masalah:
-
-- Format: `\begin{enumerate} \item ... \item ... \end{enumerate}`
-- Each objective: measurable, achievable within thesis scope
-- Examples: "Merancang arsitektur Retail CBDC berbasis Hyperledger Fabric", "Mengukur throughput dan latency sistem CBDC dengan Hyperledger Caliper"
-- Remove all template examples (TE/TB/TIF boxes)
-
-### 4. `\section{Batasan Penelitian}`
-
-Scope limits:
-
-- Platform: Hyperledger Fabric only (not Iroha, not Ethereum)
-- CBDC type: Retail (individual wallets) not Wholesale (interbank)
-- Geographic: Indonesia regulatory context
-- Testing: simulated workload, not production deployment
-- Wallet tiers: KYC-based limits as defined in chaincode
-- Remove commented-out template examples
-
-### 5. `\section{Manfaat Penelitian}`
-
-Academic contribution + practical impact:
-
-- Reference model for Indonesian Retail CBDC architecture
-- Empirical performance data for Fabric-based CBDC
-- Input for Bank Indonesia Digital Rupiah development
-- Framework for KYC-tiered wallet limits in DLT context
-
-### 6. `\section{Sistematika Penulisan}`
-
-One paragraph per chapter (Bab I–V) summarizing content:
-
-- `\textbf{Bab I Pendahuluan}`: (this chapter summary)
-- `\textbf{Bab II Tinjauan Pustaka dan Dasar Teori}`: prior works, framework comparisons, CBDC/blockchain theory
-- `\textbf{Bab III Metode Penelitian}`: tools, SDLC approach, system design, testing plan
-- `\textbf{Bab IV Hasil dan Pembahasan}`: implementation results, performance evaluation, comparison
-- `\textbf{Bab V Kesimpulan dan Saran}`: conclusions, recommendations
-
----
-
-## Knowledge Graph
-
-**Authoritative communities from `graphify-out/`:**
-
-| Community | Nodes | Relevance |
-|-----------|-------|-----------|
-| CBDC Adoption Research | 117 | Adoption factors, CBDC papers, global trends |
-| Indonesia Central Bank Policy | 70 | BI white paper, BI-RTGS, BI-FAST, Digital Rupiah |
-
-**Key nodes for Ch1 context:**
-
-- `SmartContract` (83 edges): core DLT concept for CBDC
-- CBDC design concepts: token-based vs account-based models
-- Financial inclusion metrics in Indonesian context
-
----
+From `thesis_deren.pdf` and `thesis_grandiv.pdf`, Bab I:
+- Latar Belakang narrows from broad context to the specific problem.
+- RM and Tujuan are numbered and map 1:1. State the correspondence in text.
+- Each Tujuan opens with a verb.
+- Each Batasan item carries a concrete limit: a number, a scope, or a reason.
+- Manfaat may group items as Akademis and Praktis.
+- Both references write RM as statements, not questions. Raise this only as a `Note`. The RM1/RM2 spec here stands.
+- The no-research-gap rule overrides `thesis_grandiv.pdf`, which states a gap in Bab I.
+- Manfaat item 2 says *pengawas*. The domain role is Auditor (see the persona's naming rule). Flag it for a `.tex` edit; do not edit `.tex` without the user.
 
 ## Constraints
 
-- Do NOT invent `\cite{key}` keys: only keys from `references.bib`
-- Do NOT change `\section{}` title strings
-- Do NOT reference MeetCoin: irrelevant
-- Do NOT reference Iroha/Garuda prototype: that is wholesale CBDC, different scope
-- Do NOT make claims about graphify communities without reading actual node data
-- Remove ALL template example boxes (`\fbox{}`, TE/TB/TIF examples)
-- Remove ALL `\textcolor{red}{...}` instructional comments
-- Chapter 6 referenced in `main.tex` line 154 but does not exist: ignore; Ch1-5 is complete scope
-- Cross-chapter references: use "Bab II" format, never section filenames or section numbers from other chapters
-
----
-
-## Bahasa Indonesia
-
-Follow the canonical thesis-wide Bahasa Indonesia authority, grammar, and project-style policy in `../../AGENTS.md`. This chapter defines no local language override; apply only the chapter-specific rules above in addition to the parent policy.
+- Cite only keys in `references.bib`. Never invent one.
+- Iroha/Garuda is not a design basis. It may appear only to state the scope boundary.
+- Cross-chapter references use the "Bab II" style.
+- Do not change section title strings.

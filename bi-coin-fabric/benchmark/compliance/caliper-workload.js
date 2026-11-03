@@ -48,6 +48,7 @@ class ComplianceWorkload extends WorkloadModuleBase {
             for (const result of transactionResults(response)) this.recordResult(result, fixture, fixtureIndex, submittedAt);
             return response;
         } catch (error) {
+            const diagnostic = describeError(error);
             this.writeEvent({
                 operation_id: this.roundArguments.operationId,
                 fixture_index: fixtureIndex,
@@ -58,12 +59,12 @@ class ComplianceWorkload extends WorkloadModuleBase {
                 reference: fixture.reference || null,
                 started_at_ms: submittedAt,
                 completed_at_ms: Date.now(),
-                status: /timeout|deadline/i.test(error.message || '') ? 'timeout' : 'failed',
+                status: /timeout|deadline/i.test(diagnostic) ? 'timeout' : 'failed',
                 verified: false,
                 failure_class: classifyFailure(error),
                 failure_confidence: failureConfidence(error),
-                diagnostic: error.message || String(error),
-                validation_code: validationCode(error.message || String(error)),
+                diagnostic,
+                validation_code: validationCode(diagnostic),
             });
             throw error;
         }
@@ -137,6 +138,26 @@ function verifyQuery(transaction, payload) {
     return false;
 }
 
+// Fabric SDK errors often carry no message; their details or fields hold the cause (a bare String(error) gives "[object Object]").
+function describeError(error) {
+    if (error === null || error === undefined) return String(error);
+    if (typeof error === 'string') return error;
+    const parts = [];
+    if (error.message) parts.push(String(error.message));
+    if (error.code !== undefined) parts.push(`code=${error.code}`);
+    if (Array.isArray(error.details)) {
+        for (const detail of error.details) parts.push(typeof detail === 'string' ? detail : JSON.stringify(detail));
+    }
+    if (!parts.length) {
+        try {
+            parts.push(JSON.stringify(error));
+        } catch {
+            parts.push(String(error));
+        }
+    }
+    return parts.join(' ').slice(0, 2000);
+}
+
 function validationCode(message) {
     const text = String(message || '');
     const known = text.match(/\b(MVCC_READ_CONFLICT|PHANTOM_READ_CONFLICT|ENDORSEMENT_POLICY_FAILURE|INVALID_ENDORSER_TRANSACTION|DUPLICATE_TXID|BAD_RWSET|MARSHAL_TX_ERROR)\b/i);
@@ -161,4 +182,4 @@ function createWorkloadModule() {
     return new ComplianceWorkload();
 }
 
-module.exports = { ComplianceWorkload, createWorkloadModule, epochMilliseconds, readTime, validationCode, verifyQuery };
+module.exports = { ComplianceWorkload, createWorkloadModule, describeError, epochMilliseconds, readTime, validationCode, verifyQuery };

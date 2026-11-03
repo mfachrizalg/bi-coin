@@ -50,15 +50,14 @@ chaincodes cover monetary state, customer controls, and payments. The Observer
 has read-only audit access through an Auditor role. Server-managed X.509
 identities distinguish the signing actor, customer subject, and wallet custodian.
 
-In run-20261014-01, reported under the earlier identifiers, the correctness record
-shows 20 of 20 synthetic scenarios, 207 of 207 authorization cells, 27 of 27
-validation cases, and 15 of 15 action outcomes; the post-rename correctness re-run
-is pending. These checks cover only the selected scenarios; they do not establish
+The correctness record shows 30 of 30 functional scenarios, 296 of 296 API
+route-role cells, 28 of 28 validation cells, and 45 of 45 action cells. All checks pass. The prototype conforms to its specified behavior on
+these checks. These checks cover only the selected scenarios; they do not establish
 identity authenticity, screening effectiveness, actual PPATK reporting, or
 institutional compliance.
 
-The compliance study also reports throughput and latency from a one-worker
-Hyperledger Caliper run on a single host. Findings are limited to synthetic functional tests and single-host performance measurements.
+Performance results from a one-worker Hyperledger Caliper run on a single host
+are pending. Findings are limited to synthetic functional tests and single-host performance measurements.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -128,9 +127,8 @@ Indonesia's business processes to chaincode transactions. This paper contributes
 	      protocol lets endorsing organizations apply the same state-transition
 	      rules independently.
 	\item A Hyperledger Caliper~\cite{hlf_caliper} benchmark of the compliance
-	      study. It documents the testbed, the 31 workloads, and the functional
-	      checks for authorization, validation, and action outcomes. It reports
-	      throughput and latency under a single-host, one-worker scope.
+	      study. It documents the testbed, the workload catalog, and the functional
+	      checks for authorization, validation, and action outcomes. Its throughput and latency results are pending under a single-host, one-worker scope.
 \end{enumerate}
 
 \section{Background and Related Work}
@@ -171,7 +169,7 @@ and its source code and technical manuals are released only to BIS member
 central banks rather than publicly. What distinguishes this prototype among the
 representative systems in Table~\ref{tab:compare} is that its two-tier
 intermediation and its authorization and oversight controls are realized in an
-implementation with a measured throughput and latency baseline, rather than
+implementation with a throughput and latency benchmark, rather than
 described in design documentation alone.
 
 \begin{table}[!t]
@@ -188,7 +186,7 @@ described in design documentation alone.
 		eNaira~\cite{ree2023enaira}                         & Fabric       & $\checkmark$ & $\times$     & $\times$     \\
 		Sand Dollar~\cite{centralbankbahamas2020sanddollar} & Permissioned & $\checkmark$ & $\times$     & $\times$     \\
 		OpenCBDC~\cite{Lovejoy2022A}                        & Account      & $\times$     & $\checkmark$ & $\checkmark$ \\
-		\textbf{This work}                                  & Fabric 2.5   & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+		\textbf{This work}                                  & Fabric 2.5   & $\checkmark$ & $\checkmark$ & TBD \\
 		\bottomrule
 	\end{tabular}
 
@@ -355,9 +353,7 @@ certificate authority per organization and a single-node Raft orderer.}
 
 \subsection{Network Topology}
 The four-organization network runs one peer per organization on one application
-channel, \texttt{bi-coin} (Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}). The
-measured run used the earlier channel name \texttt{rupiah-study}, as
-Section~\ref{sec:eval} discloses. \texttt{CentralBankMSP} represents Bank
+channel, \texttt{bi-coin} (Fig.~\ref{fig:netarch}, Table~\ref{tab:topology}). \texttt{CentralBankMSP} represents Bank
 Indonesia, the issuer. It also operates the single orderer and hosts its
 certificate authority \texttt{ca.centralbank}. \texttt{DistributorMSP} represents
 the wholesale and retail Distributor Banks that hold Distributor reserves.
@@ -368,7 +364,7 @@ Keuangan}). It has read-only audit access through an Auditor role and is not an
 ordinary payment endorser of the three chaincodes. \texttt{EndUserMSP} represents
 retail, merchant, and business users. Each organization operates one peer with its
 own CouchDB world state and MSP, and the current network gives each organization
-its own Fabric CA (Section~\ref{sec:eval} notes the CA setup of the measured run).
+its own Fabric CA.
 A single Raft orderer orders transactions. This configuration provides ordering
 but not crash fault tolerance, which requires at least three consenters. The
 channel's \texttt{Endorsement} and \texttt{LifecycleEndorsement} policies require
@@ -456,8 +452,7 @@ study uses a separate PostgreSQL volume and synthetic state. Server-managed
 X.509 signers are mapped per application username; the signing identity, customer
 subject, and wallet custodian are represented separately.
 Fig.~\ref{fig:controls-study-architecture} summarizes this topology and the three
-chaincode policies. Section~\ref{sec:eval} reports the measured capacity and
-latency.
+chaincode policies. Section~\ref{sec:eval} describes the capacity and latency benchmark.
 
 \begin{figure*}[!t]
 \centering
@@ -531,17 +526,17 @@ in Table~\ref{tab:roles}, before any transaction reaches the chaincode.
 	\centering
 	\footnotesize
 	\setlength{\tabcolsep}{3.5pt}
-	\begin{tabular}{l>{\raggedright\arraybackslash}p{5.7cm}}
+	\begin{tabular}{>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{5.4cm}}
 		\toprule
 		\textbf{Role} & \textbf{Representative permitted actions} \\
 		\midrule
 		Public          & Health check, login                         \\
 		Authenticated   & Read own identity; submit a subject for onboarding \\
-		\shortstack[l]{Customer\\(KYC-verified or merchant, EndUserMSP)} & Open wallet, retail transfer, read own balance \\
-		\shortstack[l]{Wholesale bank\\(DistributorMSP)} & Interbank transfer \\
-			\shortstack[l]{Retail bank\\(DistributorMSP)} & Interbank transfer; conversion to retail float; wallet funding; review, limit, decide on, and restrict subjects \\
-		\shortstack[l]{Bank Indonesia\\(CentralBankMSP)} & Staff administration, monetary initialization, register distributors, issue, redeem reserve \\
-		\shortstack[l]{Auditor\\(ValidatorMSP)} & Read subject records (read-only) \\
+		Customer (KYC-verified or merchant, EndUserMSP) & Open wallet, retail transfer, read own balance \\
+		Wholesale bank (DistributorMSP) & Interbank transfer \\
+			Retail bank (DistributorMSP) & Interbank transfer; conversion to retail float; wallet funding; review, limit, decide on, and restrict subjects \\
+		Bank Indonesia (CentralBankMSP) & Staff administration, monetary initialization, register distributors, issue, redeem reserve \\
+		Auditor (ValidatorMSP) & Read subject records (read-only) \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -656,50 +651,23 @@ Memory & 15.52 GiB \\
 Isolation & Docker-in-Docker \\
 Fabric & 2.5 images; 2.5.16 tools bundle \\
 CouchDB & 3.3, one instance per organization \\
-Fabric CA & 1.5.9; one CA (\texttt{ca.centralbank}) in the measured run \\
+Fabric CA & 1.5.9; one CA per organization \\
 Caliper & 0.6.0; one worker; 30 s confirmation windows \\
 Chaincodes & \texttt{rupiah-monetary}, \texttt{rupiah-controls}, \texttt{rupiah-payments} \\
-Channel & \texttt{bi-coin} (\texttt{rupiah-study} in the measured run) \\
+Channel & \texttt{bi-coin} \\
 Organizations & CentralBankMSP, DistributorMSP, ValidatorMSP, EndUserMSP; one peer each \\
 Ordering & Single-node Raft; batch timeout 2 s; maximum 10 messages \\
 \bottomrule
 \end{tabular}
 
-\vspace{2pt}
-{\scriptsize Figures come from run-20261014-01 under the earlier identifiers (channel
-\texttt{rupiah-study}, one Fabric CA, \texttt{ca.centralbank}). Afterwards, identifiers
-renamed to \texttt{bi-coin}; configuration and endorsement policies unchanged; identities reissued under per-org Fabric CAs; correctness re-run pending.}
 \end{table}
 
 \subsection{Results}
-In run-20261014-01 under the earlier identifiers, all 31 workloads passed their
-preflight checks. The correctness record of that run shows 20 of 20 scenarios, 207 of
-207 authorization cells, 27 of 27 validation cases, and 15 of 15 action outcomes. The
-post-rename correctness re-run is pending.
+The correctness record shows 30 of 30 functional scenarios, 296 of 296 API
+route-role cells, 28 of 28 validation cells, and 45 of 45 action cells. All checks pass. The prototype conforms to its specified behavior on
+these checks.
 
-Thirty of 31 workloads are bracketed by measured probes. The fund-reserve upper
-bound is unresolved because two probes failed on fetch errors before measurement. Its
-nearest measured failure, 0.21875 ops/s, lies above the confirmed 0.183594 ops/s.
-Confirmed write rates range from 0.183594 to 4.75 TPS across the 21 write workloads,
-and 19 of 21 confirm at 0.78125 TPS or below (Table~\ref{tab:capacity}). Read
-workloads confirm at 272 to 296 ops/s. Under the earlier identifiers, every read confirmation round in run-20261014-01 passed.
-The two payments reads confirm at 272 ops/s, below the 296 ops/s of the controls and
-monetary reads. In failing read probes, delivered rate stayed below the
-offered target, so the read rates are lower bounds on read capacity.
-
-For every write workload except fund-reserve, the first failing probe completed
-transactions after its probe window and recorded no failed or timed-out
-transactions. Verified throughput over the probe duration plus drain therefore fell
-below 90 percent of the delivered rate. The configured two-second batch timeout is a
-plausible source of this drain latency, but the run records no block contents, so
-the link is not isolated.
-
-Read p50 latency is 6 to 7 ms, and read p95 latency is 7 to 10 ms
-(Table~\ref{tab:latency}). Write p50 latency ranges from 788 to 2147 ms, and write
-p95 latency ranges from 2005 to 2195 ms. The eight write workloads confirmed below
-0.5 ops/s have p50 values between 2060 and 2147 ms, close to the two-second batch
-timeout. The two highest-rate writes, create-pending and open-wallet, have p50 values
-of 1159 and 1161 ms.
+Performance results pending.
 
 \begin{table}[!t]
 \caption{Confirmed capacity and nearest measured failure per workload (writes in TPS, reads in ops/s)}
@@ -712,48 +680,59 @@ of 1159 and 1161 ms.
 \textbf{Workload} & \textbf{Confirmed} & \textbf{Nearest failing} \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{rupiah-monetary}} \\
-register-distributor & 0.78125 & 0.828125 \\
-issue & 0.195313 & 0.207031 \\
+register-distributor & TBD & TBD \\
+issue & TBD & TBD \\
 interbank-transfer & TBD & TBD \\
-redeem-reserve & 0.195313 & 0.207031 \\
-read-supply & 296 & 320 \\
-read-reserve & 296 & 320 \\
+interbank-transfer-pending & TBD & TBD \\
+approve-transfer & TBD & TBD \\
+reject-transfer & TBD & TBD \\
+propose-approval-threshold & TBD & TBD \\
+set-participant-status & TBD & TBD \\
+set-transfer-limit & TBD & TBD \\
+redeem-reserve & TBD & TBD \\
+read-supply & TBD & TBD \\
+read-wholesale-supply & TBD & TBD \\
+read-retail-supply & TBD & TBD \\
+read-reserve & TBD & TBD \\
+read-participant & TBD & TBD \\
+can-send & TBD & TBD \\
+read-transfer-limit & TBD & TBD \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{rupiah-controls}} \\
-create-pending & 4.75 & 5.125 \\
-protect-subject & 0.78125 & 0.828125 \\
-create-staff-pending & 0.195313 & 0.207031 \\
-protect-staff & 0.78125 & 0.828125 \\
-set-staff-role & 0.78125 & 0.828125 \\
-record-review & 0.78125 & 0.828125 \\
-approve-standard & 0.78125 & 0.828125 \\
-decide-high-risk & 0.195313 & 0.207031 \\
-set-limits & 0.78125 & 0.828125 \\
-set-business-authority & 0.78125 & 0.828125 \\
-freeze-subject & 0.78125 & 0.828125 \\
-request-unfreeze & 0.78125 & 0.828125 \\
-approve-unfreeze & 0.195313 & 0.207031 \\
-read-caller-identity & 296 & 320 \\
-can-pay & 296 & 320 \\
-read-limits & 296 & 320 \\
-can-act-for & 296 & 320 \\
-validator-read-subject & 296 & 320 \\
+create-pending & TBD & TBD \\
+protect-subject & TBD & TBD \\
+create-staff-pending & TBD & TBD \\
+protect-staff & TBD & TBD \\
+set-staff-role & TBD & TBD \\
+record-review & TBD & TBD \\
+approve-standard & TBD & TBD \\
+decide-high-risk & TBD & TBD \\
+set-limits & TBD & TBD \\
+set-business-authority & TBD & TBD \\
+freeze-subject & TBD & TBD \\
+request-unfreeze & TBD & TBD \\
+approve-unfreeze & TBD & TBD \\
+read-caller-identity & TBD & TBD \\
+can-pay & TBD & TBD \\
+read-limits & TBD & TBD \\
+can-act-for & TBD & TBD \\
+validator-read-subject & TBD & TBD \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{rupiah-payments}} \\
-open-wallet & 4.625 & 5 \\
-transfer-retail & 0.78125 & 0.828125 \\
-transfer-merchant & 0.195313 & 0.207031 \\
+open-wallet & TBD & TBD \\
+transfer-retail & TBD & TBD \\
+transfer-merchant & TBD & TBD \\
 convert-to-retail & TBD & TBD \\
 fund-wallet & TBD & TBD \\
-read-balance & 272 & 296 \\
-read-receipt & 272 & 296 \\
+read-retail-float & TBD & TBD \\
+read-balance & TBD & TBD \\
+read-receipt & TBD & TBD \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
 {\scriptsize Nearest failing is the nearest measured failing probe rate. TBD marks workloads
-awaiting the new benchmark run. Rows issue and read-supply carry the run-20261014-01
-values of mint and read-total-supply until then.}
+awaiting the new benchmark run.}
 \end{table}
 
 \begin{table}[!t]
@@ -767,47 +746,58 @@ values of mint and read-total-supply until then.}
 \textbf{Workload} & \textbf{p50 (ms)} & \textbf{p95 (ms)} \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{rupiah-monetary}} \\
-register-distributor & 802 & 2080 \\
-issue & 2069 & 2085 \\
+register-distributor & TBD & TBD \\
+issue & TBD & TBD \\
 interbank-transfer & TBD & TBD \\
-redeem-reserve & 2066 & 2122 \\
-read-supply & 6 & 7 \\
-read-reserve & 6 & 7 \\
+interbank-transfer-pending & TBD & TBD \\
+approve-transfer & TBD & TBD \\
+reject-transfer & TBD & TBD \\
+propose-approval-threshold & TBD & TBD \\
+set-participant-status & TBD & TBD \\
+set-transfer-limit & TBD & TBD \\
+redeem-reserve & TBD & TBD \\
+read-supply & TBD & TBD \\
+read-wholesale-supply & TBD & TBD \\
+read-retail-supply & TBD & TBD \\
+read-reserve & TBD & TBD \\
+read-participant & TBD & TBD \\
+can-send & TBD & TBD \\
+read-transfer-limit & TBD & TBD \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{rupiah-controls}} \\
-create-pending & 1159 & 2005 \\
-protect-subject & 852 & 2070 \\
-create-staff-pending & 2069 & 2078 \\
-protect-staff & 796 & 2070 \\
-set-staff-role & 792 & 2068 \\
-record-review & 852 & 2071 \\
-approve-standard & 874 & 2083 \\
-decide-high-risk & 2060 & 2062 \\
-set-limits & 804 & 2078 \\
-set-business-authority & 793 & 2071 \\
-freeze-subject & 788 & 2067 \\
-request-unfreeze & 798 & 2076 \\
-approve-unfreeze & 2060 & 2071 \\
-read-caller-identity & 6 & 7 \\
-can-pay & 6 & 7 \\
-read-limits & 6 & 7 \\
-can-act-for & 6 & 7 \\
-validator-read-subject & 6 & 7 \\
+create-pending & TBD & TBD \\
+protect-subject & TBD & TBD \\
+create-staff-pending & TBD & TBD \\
+protect-staff & TBD & TBD \\
+set-staff-role & TBD & TBD \\
+record-review & TBD & TBD \\
+approve-standard & TBD & TBD \\
+decide-high-risk & TBD & TBD \\
+set-limits & TBD & TBD \\
+set-business-authority & TBD & TBD \\
+freeze-subject & TBD & TBD \\
+request-unfreeze & TBD & TBD \\
+approve-unfreeze & TBD & TBD \\
+read-caller-identity & TBD & TBD \\
+can-pay & TBD & TBD \\
+read-limits & TBD & TBD \\
+can-act-for & TBD & TBD \\
+validator-read-subject & TBD & TBD \\
 \midrule
 \multicolumn{3}{@{}l}{\textit{rupiah-payments}} \\
-open-wallet & 1161 & 2035 \\
-transfer-retail & 939 & 2113 \\
-transfer-merchant & 2101 & 2134 \\
+open-wallet & TBD & TBD \\
+transfer-retail & TBD & TBD \\
+transfer-merchant & TBD & TBD \\
 convert-to-retail & TBD & TBD \\
 fund-wallet & TBD & TBD \\
-read-balance & 7 & 10 \\
-read-receipt & 6 & 8 \\
+read-retail-float & TBD & TBD \\
+read-balance & TBD & TBD \\
+read-receipt & TBD & TBD \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
-{\scriptsize Rows issue and read-supply carry the run-20261014-01 values of mint and
-read-total-supply. TBD marks workloads awaiting the new benchmark run.}
+{\scriptsize TBD marks workloads awaiting the new benchmark run.}
 \end{table}
 
 \section{Limitations and Future Work}
@@ -838,17 +828,8 @@ does not use live identity verification or screening feeds, submit reports to
 PPATK, or establish the effectiveness of a risk model or institutional compliance.
 Its backend HTTP path is exercised by functional tests but has not been
 load-measured. Performance results for the three chaincodes are limited to one
-Caliper worker on one host with 30-second confirmation windows. The run was
-interrupted by a host or power interruption and resumed under the same stamp from
-its last checkpoint. After the restart, the network was brought up again with
-existing identity material, and chaincode definitions already committed to the
-channel were skipped. The two payments reads measured after the restart (272 ops/s)
-are lower than the eight controls and monetary reads measured before it (296 ops/s).
-The paper does not attribute this difference to the restart, and it reports no
-fresh-network comparison for the payments reads. The failure classifier used in
-this run counted transport errors as transaction failures; the fix was made after
-the run and is not reflected in its results. The current harness stops a search on
-a transport error as inconclusive, without automatic retry.
+Caliper worker on one host with 30-second confirmation windows. The current harness
+stops a search on a transport error as inconclusive, without automatic retry.
 
 \section{Conclusion}
 This paper reports a two-tier Digital Rupiah prototype on a four-organization
@@ -857,23 +838,12 @@ distribution, retail transfers, organization-aware authorization, and read-only
 Observer access to subject records. The transfer protocol combines explicit
 eligibility, limit, and balance checks with Fabric MVCC.
 
-The compliance study is the main study of this paper. As reported for
-run-20261014-01 under the earlier identifiers, its synthetic integration scenarios
-passed for distinct senior approval, restriction evidence, reserve funding, retail
-payment, read-only ValidatorMSP access, and expected endorsement failures; the
-post-rename correctness re-run is pending. It also reports throughput and latency for
-the same three chaincodes on a single host. This functional evidence does not depend on the Caliper results in
+The compliance study is the main study of this paper. Its synthetic integration
+scenarios passed for distinct senior approval, restriction evidence, reserve funding,
+retail payment, read-only ValidatorMSP access, and expected endorsement failures. Its
+throughput and latency results for the same three chaincodes on a single host are
+pending. This functional evidence does not depend on the Caliper results in
 Section~\ref{sec:eval}.
-
-\section*{Artifact Availability}
-The bi-coin repository at \url{https://github.com/mfachrizalg/bi-coin} contains the
-three chaincodes (\texttt{bi-coin-fabric/chaincode/monetary}, \texttt{controls}, and
-\texttt{payments}), the four-organization network definition
-(\texttt{bi-coin-fabric/network}), the Go backend, and the Caliper workloads
-(\texttt{bi-coin-fabric/benchmark/compliance}). The results of
-compliance-run-20261014-01 are in
-\texttt{bi-coin-fabric/benchmark/results/compliance-run-20261014-01}, and Section~\ref{sec:eval}
-reports them.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

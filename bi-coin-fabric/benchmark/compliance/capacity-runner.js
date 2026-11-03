@@ -155,8 +155,15 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
     const preflightByID = new Map(preflight.workloads.map(item => [item.id, item]));
     for (const scenario of scenarios) {
         let workload = report.workloads.find(item => item.id === scenario.id);
+        if (workload?.search?.complete && curveRequested(scenario) && !workload.load_curve) {
+            // Resume: the search is complete but the load curve was not finished.
+            workload.load_curve = await runLoadCurve({ scenario, reference: workload.highest_confirmed_passing_rate_ops_per_second, resultDirectory, projectRoot, stamp, fixtureIds, startAPI, networkConfigPath, identityMapPath, checkpoint });
+            saveReport();
+            continue;
+        }
         if (workload?.search?.complete || workload?.confirmation?.classification === 'pass'
-            || workload?.confirmation?.classification === 'unstable-boundary') continue;
+            || workload?.confirmation?.classification === 'unstable-boundary'
+            || workload?.confirmation?.classification === 'client-bound') continue;
         if (!workload) {
             const hint = catalog.protocol.search_hints_ops_per_second[scenario.id]
                 || catalog.protocol.initial_rate_ops_per_second;
@@ -214,7 +221,8 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
             search.boundary = 'bracketed';
         }
         workload.search = snapshotSearch(search);
-        if (search.stop_reason || search.passing_rate === null) {
+        // A client-bound stop still confirms its delivered rate; only other stops end the workload here.
+        if ((search.stop_reason && search.stop_reason !== 'client-bound') || search.passing_rate === null) {
             workload.search.complete = true;
             workload.search.classification = search.stop_reason || 'no-passing-rate';
             workload.confirmation = null;
@@ -246,7 +254,7 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
             workload.confirmation = confirmation;
             saveReport();
             checkpoint('confirmation', scenario, candidate);
-            if (['pass', 'unstable-boundary', 'inconclusive', 'configuration-error', 'fixture-error'].includes(confirmation.classification)) break;
+            if (['pass', 'client-bound', 'unstable-boundary', 'inconclusive', 'configuration-error', 'fixture-error'].includes(confirmation.classification)) break;
 
             search.failing_rate = Math.min(search.failing_rate ?? candidate, candidate);
             const lowerPass = search.probes.filter(item => item.classification === 'pass' && item.rate < candidate)
@@ -280,7 +288,13 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
 
         workload.search = snapshotSearch(search);
         workload.search.complete = true;
-        if (confirmation?.classification === 'pass') {
+        if (confirmation?.classification === 'client-bound') {
+            // Lower bound: the single client's delivered rate, the lowest across confirmation rounds.
+            workload.highest_confirmed_passing_rate_ops_per_second = Math.min(...confirmation.rounds.map(item => item.offered_ops_per_second));
+            workload.first_failing_rate_ops_per_second = null;
+            workload.remaining_interval_ops_per_second = null;
+            workload.capacity_boundary = 'client-bound';
+        } else if (confirmation?.classification === 'pass') {
             workload.highest_confirmed_passing_rate_ops_per_second = candidate;
             workload.first_failing_rate_ops_per_second = search.failing_rate;
             workload.remaining_interval_ops_per_second = search.failing_rate === null ? null : search.failing_rate - candidate;
@@ -291,6 +305,9 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
             workload.capacity_boundary = confirmation.classification;
         } else if (candidate === null) {
             workload.capacity_boundary = search.boundary || 'no-passing-rate';
+        }
+        if (curveRequested(scenario) && !workload.load_curve) {
+            workload.load_curve = await runLoadCurve({ scenario, reference: workload.highest_confirmed_passing_rate_ops_per_second, resultDirectory, projectRoot, stamp, fixtureIds, startAPI, networkConfigPath, identityMapPath, checkpoint });
         }
         saveReport();
         checkpoint('workload-complete', scenario, candidate);
@@ -305,6 +322,88 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
         report.updated_at = new Date().toISOString();
         fs.writeFileSync(capacityPath, `${JSON.stringify(report, null, 2)}\n`);
     }
+}
+
+function curveRequested(scenario) {
+    return catalog.protocol.load_curve?.workloads?.includes(scenario.id) === true;
+}
+
+// Load curve: fixed-rate levels around the confirmed reference, one Caliper launch, descriptive (no pass/fail).
+async function runLoadCurve({ scenario, reference, resultDirectory, projectRoot, stamp, fixtureIds, startAPI, networkConfigPath, identityMapPath, checkpoint }) {
+    const curve = catalog.protocol.load_curve;
+    if (!Number.isFinite(reference) || reference <= 0) {
+        return { status: 'skipped', reason: 'no confirmed reference rate', levels: [] };
+    }
+    const durationSeconds = curve.duration_seconds;
+    const rounds = curve.levels.map(level => {
+        const rate = Number((reference * level).toPrecision(6));
+        return {
+            label: `curve-${level}`,
+            level,
+            rate,
+            durationSeconds,
+            fixturePath: path.join(resultDirectory, 'fixtures', scenario.id, 'curve', `level-${level}.json`),
+        };
+    });
+    const api = await startAPI(projectRoot, resultDirectory, stamp);
+    api.fixtureIds = fixtureIds;
+    try {
+        for (const round of rounds) {
+            const count = scenario.operation_kind === 'query'
+                ? 1
+                : Math.ceil(round.rate * durationSeconds * 1.05) + 1;
+            await prepareFixturePool({
+                api,
+                catalogScenario: scenario,
+                count,
+                stamp,
+                outputPath: round.fixturePath,
+                phase: 'curve',
+                pathName: 'caliper',
+                onProgress: value => checkpoint('fixture-preparation', scenario, round.rate, value),
+            });
+        }
+    } finally {
+        await api.close();
+    }
+    checkpoint('load-curve', scenario, reference, { prepared: rounds.length, requested: rounds.length });
+    const run = await runCaliperRounds({
+        projectRoot,
+        resultDirectory,
+        networkConfigPath,
+        identityMapPath,
+        scenario,
+        phase: 'curve',
+        rounds,
+    });
+    const levels = run.rounds.map(round => {
+        const meta = rounds.find(item => item.label === round.label);
+        const measured = classifyRound({ scenario, rate: meta.rate, durationSeconds, run, round });
+        return {
+            level: meta.level,
+            rate_ops_per_second: meta.rate,
+            classification: measured.classification,
+            offered_ops_per_second: measured.offered_ops_per_second,
+            delivered_count: measured.delivered_count,
+            verified_count: measured.verified_count,
+            verified_throughput_ops_per_second: measured.verified_achieved_tps ?? measured.verified_query_rate ?? null,
+            failed_count: measured.failed_count,
+            timeout_count: measured.timeout_count,
+            unresolved_count: measured.unresolved_count,
+            backlog_at_cutoff: measured.backlog_at_cutoff,
+            late_completions: measured.late_completions,
+            drain_seconds: measured.drain_seconds,
+            latency_ms: measured.latency_ms,
+            failure_classes: [...new Set((measured.failures || []).map(item => item.failure_class))],
+        };
+    });
+    return {
+        status: 'complete',
+        reference_ops_per_second: reference,
+        duration_seconds: durationSeconds,
+        levels,
+        run_directory: path.relative(resultDirectory, run.runDirectory),
+    };
 }
 
 async function confirmCandidate({ scenario, candidate, resultDirectory, protocol, projectRoot, stamp, fixtureIds, startAPI, networkConfigPath, identityMapPath, checkpoint }) {
@@ -391,6 +490,7 @@ function classifyRound({ scenario, rate, durationSeconds, run, round }) {
                 window_start_ms: round.window_start_ms,
                 resource_complete: round.resource?.complete === true,
                 trace_complete: round.caliper_trace?.consistent === true,
+                max_drain_seconds: catalog.protocol.max_drain_seconds,
             }),
             rate,
             classification: blockedClass,
@@ -408,6 +508,7 @@ function classifyRound({ scenario, rate, durationSeconds, run, round }) {
             window_start_ms: round.window_start_ms,
             resource_complete: round.resource?.complete === true,
             trace_complete: round.caliper_trace?.consistent === true,
+            max_drain_seconds: catalog.protocol.max_drain_seconds,
         });
     if (run.error || (run.exit_status !== 0 && outcome.failed_count === 0 && outcome.timeout_count === 0)) {
         outcome.classification = 'configuration-error';

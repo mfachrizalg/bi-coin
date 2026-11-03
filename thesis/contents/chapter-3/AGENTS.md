@@ -1,288 +1,61 @@
 # AGENTS.md: BAB III: Metode Penelitian
 
-## Chapter Identity
+## Chapter identity
 
 - **Chapter:** BAB III: Metode Penelitian
 - **File:** `contents/chapter-3/chapter-3.tex`
-- **Purpose:** Research methodology: tools, approach, system design, testing plan
-- **Position:** Bridge chapter: connects theory (Ch2) to implementation results (Ch4)
+- **Purpose:** Method: prototyping approach, requirements (SRS), architecture and design, implementation toolchain, and the test plan with metric definitions.
+- **Position:** Bridge between theory (Ch2) and results (Ch4).
+
+Shared rules, Bahasa policy, and the supervisor persona: `../../AGENTS.md`.
 
 ---
 
-## DTETI Template Rules
-
-Primary guides: `contents/appendix/appendix-latex.tex` and
-`contents/appendix/appendix-penulisan-referensi.tex`. Template behavior remains
-defined by `thesisdtetiugm.cls`.
-
-- Chapter title: `\chapter{Metode Penelitian}`.
-- Use `\section{}` and `\subsection{}` directly; do not add `\textbf{}` inside them.
-- Let the class control paragraph spacing, font, margins, and chapter pagination.
-- Do not add `\clearpage` inside the chapter body.
-
-### Figures
-
-```latex
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=10cm]{contents/chapter-3/filename}
-  \caption{Full caption.}
-  \label{fig:ch3-unique-label}
-\end{figure}
-```
-
-- Use `[htbp]` so LaTeX can prevent clipping; use `[p]` for a full-page figure.
-- Keep captions below figures and within page margins.
-- Use unique lowercase labels with prefix `fig:ch3-`.
-- Refer in prose with `Gambar \ref{fig:ch3-label}`.
-- Cite an external figure source with `\cite{key}` in the caption or adjacent prose.
-- System architecture diagrams, flowcharts, UML diagrams are primary figure types here
-- Use `draw.io` or `mermaid` for diagrams; render to PNG for inclusion
-
-### Tables
-
-```latex
-\begin{table}[htbp]
-  \caption{Caption above table.}
-  \vspace{0.5em}
-  \centering
-  \begin{tabular}{...}
-  ...
-  \end{tabular}
-  \label{tab:ch3-unique-label}
-\end{table}
-```
-
-- Use `table` + `tabular` for a table that fits one page.
-- Use `longtable` only when the table must continue across pages; define repeated
-  headers and keep the caption above the first segment.
-- Use unique lowercase labels with prefix `tab:ch3-` and refer with
-  `Tabel \ref{tab:ch3-label}`.
-- Never allow a table to extend beyond the text width.
-- Spec tables: hardware spec, software spec, test scenario matrices
-
-### Equations, Lists, and Algorithms
-
-- Use `equation` for numbered display equations and `$...$` for inline equations.
-- Use `\mathit{...}` for multi-letter mathematical expressions that must not be
-  spaced as separate variables.
-- Use `align`/`align*` for equation sequences; `\allowdisplaybreaks` permits a long
-  sequence to continue across pages.
-- Use `enumerate` for ordered items and `itemize` for unordered items.
-- Split a multipage algorithm with `\algstore{name}` and `\algrestore{name}`.
-  Put `\caption` and `\label` only on the first algorithm block.
-
-### Citations
-
-- Use numeric IEEE citations through `\cite{key}` or `\cite{key1,key2}`.
-- `main.tex` uses `\bibliography{references}` and `thesisdtetiugm.cls` uses
-  `IEEEtran`; `references.bib` is the only active bibliography database.
-- Never invent a citation key or cite an entry absent from `references.bib`.
-- Manage sources in Mendeley when practical, export as BibTeX, then verify the
-  exported fields before committing them.
-- Match entry fields to source type: books need publisher/year; conference papers
-  need booktitle/year/pages and DOI when available; online sources need a canonical
-  public URL; theses need degree type, department, institution, location, and year.
-- Never store institutional proxy URLs. Prefer a verified DOI; otherwise use the
-  publisher, institution, or project canonical URL.
-- Preserve corporate authors with braces, for example `author = {{Bank Indonesia}}`.
-- Cite tool/framework documentation where relevant (Fabric docs, Caliper docs)
-
-### Verification
-
-- Build bibliography changes with `rtk pdflatex`, `rtk bibtex main`, then two more
-  `rtk pdflatex` passes.
-- Reject undefined citations/references, `??`, overfull boxes, clipped figures or
-  tables, overlapping text, and warning text embedded in images.
-- Render and inspect affected PDF pages; a successful compile alone is insufficient.
-
-### Language
-
-- `babel[english,bahasa]`: bahasa primary
-- English technical terms: `\textit{term}` on first occurrence only, roman after
-- Examples: `\textit{Hyperledger Fabric}`, `\textit{Hyperledger Caliper}`, `\textit{chaincode}`, `\textit{Docker}`, `\textit{throughput}`, `\textit{latency}`, `\textit{Go}`, `\textit{REST API}`
-- Full term on first use, abbreviation consistently after
-
----
-
-## Writing Style
-
-Referenced from `thesis/Skripsi Luthfi Izzudin.pdf` (format/tone model, different topic).
-
-- Passive voice for methodology: "sistem dirancang menggunakan", "pengujian dilakukan dengan"
-- Procedural tone: "tahap pertama adalah", "selanjutnya dilakukan"
-- No first-person: use "penelitian ini" not "penulis"
-- Decimal separator: **comma**: "50,3" not "50.3"
-- Thousands separator: **period**: "1.000" not "1,000"
-- Technical specifications: include minimum and actual specs used
-- Flowchart descriptions: explain each node/decision after diagram
-- Testing methodology: define metrics with formulas before presenting results
-
----
-
-## Hyphenation
-
-Globally handled in `main.tex` lines 56–59:
-
-```latex
-\tolerance=1
-\emergencystretch=\maxdimen
-\hyphenpenalty=10000
-\hbadness=10000
-```
-
-No per-chapter hyphenation action needed.
-
----
-
-## Sections
-
-### 1. `\section{Alat dan Bahan Tugas Akhir (Opsional)}`
-
-Hardware and software specifications. Two subsections:
-
-#### `\subsection{Alat Tugas Akhir}`
-
-**Hardware:**
-
-- Development machine: OS, CPU, RAM, storage specs (minimum and actual)
-- If multi-node Fabric network: separate node specs or VM specs
-
-**Software:**
-
-- Hyperledger Fabric version, Docker/Docker Compose version
-- Go version for chaincode development
-- Node.js/React version for frontend
-- Hyperledger Caliper version for benchmarking
-- Any additional tools (VS Code, Postman, Git)
-
-#### `\subsection{Bahan Tugas Akhir}`
-
-- Fabric network topology specification (peer/orderer/CA count and roles)
-- Test datasets: transaction payload templates, simulated user accounts
-- Reference standards: BI regulatory documents, ISO 20022 (if applicable)
-
-**Remove template examples** (notebook/stencyl/construct2/coreldraw). Replace with CBDC-specific specs.
-
-### 2. `\section{Alur Tugas Akhir}`
-
-SDLC approach with flowchart figure required:
-
-- **Figure required:** flowchart showing research phases (Gambar 3.1)
-- Phases: Studi Literatur → Analisis Kebutuhan → Perancangan Sistem → Implementasi → Pengujian → Analisis Hasil → Penulisan Laporan
-- Explain each phase in dedicated subsection or paragraph after diagram
-- Timing/schedule: approximate duration per phase (optional table)
-- Flowchart reference: `\textcolor{blue}{http://ugm.id/flowcharttutorial}`
-
-### 3. `\section{Metode yang Digunakan}`
-
-Three method categories:
-
-1. **Metode Perancangan**: system design approach (architectural patterns, design decisions)
-2. **Metode Implementasi**: development approach (Agile/Waterfall, toolchain, version control)
-3. **Metode Pengujian**: testing approach (unit tests, integration tests, performance benchmarks)
-
-Explain how data will be analyzed: comparing Caliper metrics against baseline, comparing Fabric configurations, comparing KYC-tier performance.
-
-### 4. `\section{Perancangan Sistem Retail CBDC}`
-
-System architecture subsections. **Multiple figures required:**
-
-#### `\subsection{Arsitektur Jaringan Blockchain}`
-
-- Fabric network topology: peer orgs, orderer org, CA, channel configuration
-- Node roles and counts
-- Figure: network architecture diagram (Gambar 3.2)
-
-#### `\subsection{Perancangan Chaincode}`
-
-- Smart contract design: data structures (wallet, transaction, KYC record)
-- Chaincode functions: `CreateWallet`, `QueryWallet`, `Transfer`, `QueryTransactionHistory`
-- Endorsement policy definition
-- KYC tier logic: BASIC (Rp 1M max), STANDARD (Rp 50M), MERCHANT (Rp 200M)
-- Per-wallet limits: per-tx, daily, monthly caps
-- Figure: chaincode class/sequence diagram (Gambar 3.3)
-
-#### `\subsection{Perancangan API Gateway}`
-
-- REST API architecture (Go + gorilla/mux)
-- Role-based access: public, authenticated, kyc_verified, retail_bank, wholesale_bank, bank_indonesia, merchant, auditor
-- API endpoint design (table format)
-- Middleware: auth, rate limiting
-- Figure: API gateway architecture diagram (Gambar 3.4)
-
-#### `\subsection{Perancangan Manajemen Pengguna}`
-
-- Wallet lifecycle: creation, KYC verification, tier upgrade
-- Role hierarchy and access control
-- Audit trail design
-
-### 5. `\section{Pengujian Sistem}`
-
-Testing methodology and scenarios:
-
-#### Metrics definition (with formulas):
-
-- **Success rate:** `(successful_tx / total_tx) × 100%`
-- **Throughput (TPS):** transactions per second
-- **Latency:** min / avg / max (in seconds)
-- **Resource consumption:** CPU %, memory MB
-
-#### Test scenarios:
-
-- **Skenario 1:** CreateWallet throughput (varying concurrent users)
-- **Skenario 2:** Transfer throughput (varying transaction sizes)
-- **Skenario 3:** Query performance (LevelDB vs CouchDB comparison)
-- **Skenario 4:** Multi-org endorsement latency
-- **Skenario 5:** System stability under sustained load
-
-Present as table: Skenario | Function | Concurrent Users | Duration | Metrics Collected
-
-#### Caliper configuration:
-
-- Benchmark config file structure
-- Workload module design (Go chaincode interaction via Fabric SDK)
-- Network configuration (connection profile)
-
----
-
-## Knowledge Graph
-
-**Authoritative communities from `graphify-out/`:**
-
-| Community | Nodes | Relevance |
-|-----------|-------|-----------|
-| Chaincode Smart Contracts | varies | Chaincode design patterns, data structures |
-| Blockchain Performance Research | 34 | Benchmarking methodology, Caliper config |
-| Garuda Iroha Backend | varies | Architecture patterns (back-reference only: NOT to be confused with Retail CBDC scope) |
-
-**Key nodes for Ch3 context:**
-
-- `SmartContract` (83 edges): chaincode architecture reference
-- `GarudaWorkflowService` (66 edges): architecture pattern reference only (Iroha/wholesale, different scope)
-- `InMemorySimulationRepository` (67 edges): simulation methodology pattern
-
-**Important:** Garuda Iroha nodes are Wholesale CBDC references. This thesis is Retail CBDC (Fabric). Use only architectural/design patterns, not Iroha-specific implementation details.
-
----
+## Current structure
+
+`chapter-3.tex`, in order:
+1. `\section{Metode yang Digunakan}`
+   - Metode Perancangan: Analisis Kebutuhan with SRS tables (`tab:srs-fungsional`, `tab:srs-nonfungsional`, `tab:srs-verifikasi`); Activity Diagram AD 01–07 (`fig:ch3-ad-01` to `fig:ch3-ad-07`); Arsitektur Sistem Blockchain (`fig:arsitektur-dua-jenjang` and related figures; `tab:jaringan`); Perancangan Basis Data Luring (`fig:ch3-erd-offchain`, `tab:model-data`).
+   - Metode Implementasi: SDLC (`fig:sdlc-proto`); Fabric 2.5, Raft, CouchDB (`tab:state-database`); PostgreSQL rationale (`tab:ch3-db-comparison`); Go; Basis Data Luring.
+   - Metode Pengujian: capacity protocol, metrics, equations `eq:benchmark-offered`, `eq:benchmark-throughput`, `eq:benchmark-latency`; justification paragraphs.
+2. `\section{Alur Tugas Akhir}` (`fig:alur-penelitian`)
+   - Mempelajari Proses Bisnis & Sistem Blockchain
+   - Melakukan Studi Literatur
+   - Menentukan Metode Penelitian
+   - Pengembangan Sistem Blockchain bi-coin: installation, configuration, chaincode deploy, gateway, backend.
+   - Pengujian Sistem Blockchain bi-coin: unit test, Caliper configuration, running Caliper, control experiments (`tab:uji-fungsional`, `tab:skenario`).
+
+Other labels: `tab:ch3-chaincode-fungsi`, `tab:lingkungan-uji`, `lst:routes`, `fig:ch3-study-controls`.
+
+## Chapter rules
+
+Code facts the chapter must match. Read them from the source, not from older specs:
+- Three chaincodes, deployed as `rupiah-monetary`, `rupiah-controls`, `rupiah-payments`. Function names in `tab:ch3-chaincode-fungsi` must match `bi-coin-fabric/chaincode/{monetary,controls,payments}`.
+- Four MSPs: CentralBankMSP, DistributorMSP, ValidatorMSP (human role: Auditor), EndUserMSP. Channel `bi-coin`. Orderer: etcdraft with one consenter. State database: CouchDB.
+- No KYC tiers. Limits are set per subject via `SetLimits` (per_transaction, daily, monthly, holdings). Risk is standard or high, plus a PEP flag.
+- Backend: Go 1.23, gorilla/mux. Role names come from `backend/middleware/auth.go`. Routes have no `/api` prefix.
+- Caliper 0.6.0 with one worker. 43 performance workloads in `bi-coin-fabric/benchmark/compliance/case-catalog.json`. The capacity protocol follows ADR 0015.
+- Metrics need a formula or an explicit start and end point. Ch4 refers back to these definitions.
+- Do not include Caliper results. Ch4 holds them.
+- Never copy `network/.env.study` values into the thesis or appendix. It holds plaintext credentials.
+
+## Supervisor checks
+
+From `thesis_deren.pdf` (Bab III) and `thesis_grandiv.pdf` (Bab III, §3.2–3.4):
+- The opening paragraph ties the chapter to the RM and Tujuan it serves. Present.
+- Alat and Bahan with exact versions. There is no such section now. `tab:lingkungan-uji` has hardware and Docker, but Fabric is "2.5 (patch not recorded)" and Go has no version. ADR 0012 pins Fabric 2.5.16; record it. Record Go 1.22 (chaincode) and 1.23 (backend).
+- Every metric has a formula or an explicit start and end point. Throughput, offered rate, and latency have equations. Sent count, failures, timeouts, and CPU and memory peaks do not. Define them or cut them.
+- Parameter values carry a justification. Examples: capacity search bounds, 10 s probes, 3 × 30 s confirmation runs, the 25–150% load curve.
+- Add an RM ↔ Tujuan ↔ evaluation dimension ↔ result-location table (`thesis_grandiv.pdf`, Tabel 3.10). Missing today.
+- Split "Arsitektur Sistem Blockchain". It currently covers two-tier issuance, access control, the account model, network, use cases, and ledger objects.
+- Two headings cover offline storage: "Perancangan Basis Data Luring" and "Basis Data Luring". Merge them or differentiate them.
+- Scenario count: the thesis says 30 functional scenarios (`tab:uji-fungsional`). `case-catalog.json` lists 32 correctness scenarios. Reconcile before Ch3 or Ch4 cites either.
+- Prototype limitations go to Bab IV (Keterbatasan), as in `thesis_grandiv.pdf` §4.5.2. The chapter spec removed the optional Bab III section, and that stays removed.
 
 ## Constraints
 
-- Do NOT invent `\cite{key}` keys: only keys from `references.bib`
-- Do NOT change `\section{}` title strings
-- Remove ALL template examples: notebook/stencyl/construct2/coreldraw specs, TE/TB/TIF examples
-- Remove `\textcolor{red}{...}` and `\textcolor{blue}{...}` instructional comments (keep `http://ugm.id/flowcharttutorial` if useful)
-- Remove or repurpose `\section{Etika, Masalah, dan Keterbatasan Penelitian (Opsional)}`: not needed for this engineering thesis unless human subjects involved
-- This is Retail CBDC on **Fabric**, not Wholesale CBDC on Iroha: do not reference Iroha/Garuda implementation
-- Chaincode functions: use actual names from `bi-coin-fabric/chaincode/{monetary,controls,payments}`
-- API endpoints: use actual routes from `bi-coin-fabric/backend/`
-- Do NOT include Caliper results: Ch4 handles results
-- All diagrams: use `\includegraphics` from `contents/chapter-3/` directory
-- Cross-chapter references: use "Bab II" or "Bab IV" format
-- Metrics formulas: define here, reference in Ch4 when presenting results
-
----
-
-## Bahasa Indonesia
-
-Follow the canonical thesis-wide Bahasa Indonesia authority, grammar, and project-style policy in `../../AGENTS.md`. This chapter defines no local language override; apply only the chapter-specific rules above in addition to the parent policy.
+- Cite only keys in `references.bib`. Never invent one.
+- Chaincode and API names come from the source. No `CreateWallet`, `QueryWallet`, or `QueryTransactionHistory`; those do not exist.
+- Diagrams: TikZ sources sit in this chapter; `fig:ch3-study-controls` is adapted from `bi-coin-fabric/docs/diagrams/latex/`. Cite the source.
+- Cross-chapter references use the "Bab II" or "Bab IV" style.
+- No Iroha or Garuda implementation detail.

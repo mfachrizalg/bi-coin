@@ -14,6 +14,7 @@ import (
 const (
 	distributorMSP    = "DistributorMSP"
 	endUserMSP        = "EndUserMSP"
+	validatorMSP      = "ValidatorMSP"
 	controlsChaincode = "rupiah-controls"
 	monetaryChaincode = "rupiah-monetary"
 	channelName       = "bi-coin"
@@ -290,7 +291,26 @@ func (c *PaymentsContract) GetReceipt(ctx contractapi.TransactionContextInterfac
 	if err := getJSON(ctx.GetStub(), receiptKey(reference), &receipt); err != nil {
 		return paymentReceipt{}, err
 	}
+	if err := requireReceiptReader(ctx, receipt); err != nil {
+		return paymentReceipt{}, err
+	}
 	return receipt, nil
+}
+
+// requireReceiptReader lets ValidatorMSP supervise; otherwise only a party to the receipt may read it.
+func requireReceiptReader(ctx contractapi.TransactionContextInterface, receipt paymentReceipt) error {
+	if requireMSP(ctx, validatorMSP) == nil {
+		return nil
+	}
+	for _, party := range []string{receipt.From, receipt.To} {
+		if requireDistributor(ctx, party) == nil {
+			return nil
+		}
+		if canAct, err := invokeBool(ctx, controlsChaincode, "CanActFor", party); err == nil && canAct {
+			return nil
+		}
+	}
+	return fmt.Errorf("caller is not a party to receipt %s", receipt.Reference)
 }
 
 func invokeBool(ctx contractapi.TransactionContextInterface, chaincode string, function string, args ...string) (bool, error) {

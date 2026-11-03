@@ -1,0 +1,47 @@
+% AD03b: konversi ke float ritel dan pendanaan dompet (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (3.725,-14.5);
+\draw[lanebody] (3.725,-0.9) rectangle (7.45,-14.5);
+\draw[lanebody] (7.45,-0.9) rectangle (11.175,-14.5);
+\draw[lanebody] (11.175,-0.9) rectangle (14.9,-14.5);
+\node[lane] at (1.863,-0.45) {Distributor retail\\(DistributorMSP)};
+\node[lane] at (5.588,-0.45) {Backend API};
+\node[lane] at (9.313,-0.45) {Chaincode\\(\scriptsize\texttt{rupiah-payments})};
+\node[lane] at (13.038,-0.45) {Chaincode\\(\scriptsize\texttt{rupiah-monetary})};
+
+% Konversi ke float ritel
+\node[start] (s0) at (1.863,-1.45) {};
+\node[action, text width=3.2cm] (a1) at (1.863,-2.4) {Kirim konversi\\[1pt]{\scriptsize\texttt{POST /conversions}}};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (dC) at (5.588,-3.5) {Permintaan\\valid?};
+\node[final] (fC) at (1.863,-3.5) {};
+\node[font=\scriptsize] at (1.863,-4.05) {Ditolak};
+\node[action, text width=3.2cm] (aP) at (9.313,-5.0) {{\scriptsize\texttt{ConvertToRetail()}}\\requireDistributor};
+\node[action, text width=3.2cm] (aD) at (13.038,-6.4) {{\scriptsize\texttt{DebitReserve}}\\{\scriptsize\texttt{ForConversion()}}\\reserve dan supply};
+\node[action, text width=3.2cm] (aF) at (9.313,-7.4) {Tambah float\\distributor (retail)};
+
+% Pendanaan dompet
+\node[action, text width=3.2cm] (a7) at (1.863,-9.6) {Kirim pendanaan\\[1pt]{\scriptsize\texttt{POST /wallet-fundings}}};
+\node[action, text width=3.2cm] (a8) at (5.588,-9.6) {Validasi body dan\\Idempotency-Key};
+\node[action, text width=3.2cm] (a9) at (9.313,-9.6) {{\scriptsize\texttt{FundWallet()}}\\requireDistributor};
+\node[action, text width=3.2cm] (a10) at (13.038,-9.6) {{\scriptsize\texttt{CanSend()}}, {\scriptsize\texttt{CanPay()}}\\[1pt]{\scriptsize\texttt{GetLimits()}}\\(controls)};
+\node[decision, minimum width=2.6cm, minimum height=1.0cm] (d4) at (9.313,-11.2) {Kelayakan\\dan batas?};
+\node[final] (f4) at (5.588,-11.2) {};
+\node[font=\scriptsize] at (5.588,-11.75) {Ditolak};
+\node[action, text width=3.2cm] (a11) at (9.313,-12.9) {Kurangi float,\\tambah saldo dompet};
+\node[final] (f5) at (9.313,-14.1) {};
+
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -| (dC.north);
+\draw[flow] (dC.west) -- node[guard, above] {[tidak]} (fC.east);
+\draw[flow] (dC.east) -- node[guard, above] {[ya]} (9.313,-3.5) -- (aP.north);
+\draw[flow] (aP.east) -| (aD.north);
+\draw[flow] (aD.south) |- (aF.east);
+\draw[flow] (aF.south) -- (9.313,-8.6) -- (1.863,-8.6) -- (a7.north);
+\draw[flow] (a7.east) -- (a8.west);
+\draw[flow] (a8.east) -- (a9.west);
+\draw[flow] (a9.east) -- (a10.west);
+\draw[flow] (a10.south) -- (13.038,-11.2) -- (d4.east);
+\draw[flow] (d4.west) -- node[guard, above] {[tidak]} (f4.east);
+\draw[flow] (d4.south) -- node[guard, right] {[ya]} (a11.north);
+\draw[flow] (a11.south) -- (f5.north);
+\end{tikzpicture}

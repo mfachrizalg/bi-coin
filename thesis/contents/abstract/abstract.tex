@@ -1,6 +1,6 @@
 \textit{
-This thesis implements and tests selected KYC and AML/CFT controls in a retail
-Digital Rupiah prototype using Hyperledger Fabric 2.5. Its controls-study
+This thesis aims to build a retail
+Digital Rupiah prototype on Hyperledger Fabric 2.5 that enforces selected KYC and AML/CFT compliance controls, to verify these controls functionally, and to measure the prototype's performance using Hyperledger Caliper. Its controls-study
 extension uses a fresh four-organization network (CentralBankMSP, DistributorMSP,
 ValidatorMSP, and EndUserMSP) and three Go chaincodes for monetary operations,
 customer controls, and payments. Server-managed X.509 identities distinguish
@@ -8,17 +8,17 @@ the signing actor, customer subject, and wallet custodian.
 }
 
 \textit{
-In run-20261014-01, executed under the earlier identifiers before the rename, the correctness check passed all 20 synthetic scenarios covering high-risk KYC
+The correctness check passed all 30 functional scenarios, 296 API route-role cells, 28 request-validation cells, and 45 action-outcome cells, with no unresolved checks, and the overall classification is pass. The synthetic scenarios cover high-risk KYC
 decisions with distinct reviewer and senior approver, restriction and
 evidence-based release, reserve funding, retail payment, read-only ValidatorMSP
-access, and expected endorsement failures. The re-run after the rename is pending, and unit-test results are not part of that record. These results establish behavior
+access, and expected endorsement failures. Unit-test results are not part of this record. These results establish behavior
 only for the tested synthetic scenarios; they do not establish identity
 authenticity, screening effectiveness, actual PPATK reporting, or institutional
 compliance.
 }
 
 \textit{
-As secondary performance evidence, Hyperledger Caliper measures the four-organization controls-study extension with one worker on one host. Those measurements do not establish production capacity or cross-machine reproducibility.
+As secondary performance evidence, Hyperledger Caliper measurements of the four-organization controls-study extension with one worker on one host remain TBD. Once available, those measurements will not establish production capacity or cross-machine reproducibility.
 }
 
 \vspace{0.5cm}

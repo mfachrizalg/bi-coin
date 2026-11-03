@@ -2,11 +2,25 @@
 
 This benchmark evaluates the four-MSP `bi-coin` channel and its three chaincodes with Hyperledger Caliper's Fabric connector. It measures local observed capacity for the captured host and synthetic workload; it does not establish production capacity or institution-wide compliance.
 
+## Capacity and load test ("uji kapasitas dan beban")
+
+RQ2 uses this test on one Caliper worker and one host (ADR 0015).
+
+- **Capacity boundary.** Search every catalogued workload: 10 s probes, then three 30 s confirmation rounds at the highest passing rate.
+- **Load curve.** Six levels (25–150% of the confirmed reference, 60 s each) on six representative workloads: where delivered load, verified throughput, and latency depart from offered load.
+
+Terms:
+- **Drain:** seconds from the window end to the last commit. A rate passes only if drain ≤ 3 s (orderer BatchTimeout 2 s plus 1 s).
+- **Verified throughput:** verified transactions ÷ (window + drain). Writes are TPS; reads are ops/s.
+- **Client-bound:** no failures and drain within the cap, but the single client delivered less than the target. A lower bound, not a ledger limit.
+- **Fixture pool:** subjects and wallets created once per run and reused across rounds.
+- **Shared-key operation:** writes one balance key (for example `supply::*` or `reserve::<bank>`). Such operations commit about one per block and are reported as measured.
+
 ## Workloads and correctness
 
 The catalog covers 41 capacity-measured methods in 43 workloads. `Initialize`, the nested-only `DebitReserveForConversion`, and `ApproveApprovalThreshold` receive correctness checks only; each threshold approval needs a fresh proposal from another officer, so it has no repeatable load. `Transfer` has separate retail and merchant recipient variants, and `TransferReserve` has variants at or below and above the sender's approval threshold. Reads report verified operations per second; writes report verified TPS.
 
-The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers KYC review and risk/PEP decisions, distinct staff roles, business representatives, all restriction reasons, fresh release evidence, MSP and endorsement boundaries, transfer categories and replay, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, interbank and cross-bank denials, holdings and reserve limits, redemption replay, supply conservation, participant admission evidence, participant status (suspended, frozen, closed), the interbank transfer limit, four-eyes transfers, and dual-control threshold changes (ADR 0014). The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 296 route-role authorization cells, 28 malformed-JSON validation cases, and 45 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
+The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers KYC review and risk/PEP decisions, distinct staff roles, business representatives, all restriction reasons, fresh release evidence, MSP and endorsement boundaries, transfer categories and replay, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, interbank and cross-bank denials, holdings and reserve limits, redemption replay, supply conservation, participant admission evidence, participant status (suspended, frozen, closed), the interbank transfer limit, four-eyes transfers, and dual-control threshold changes (ADR 0014), receipt read authorization, and maker-checker rejection. The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 296 route-role authorization cells, 28 malformed-JSON validation cases, and 45 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
 
 `correctness.json` lists the observed outcomes. It allows an overall conformance claim only when every catalogued executable correctness scenario passes and every API authorization, validation, and action check is resolved and correct. The method-level `cases` inventory remains a coverage reference and is never counted as executed test evidence.
 

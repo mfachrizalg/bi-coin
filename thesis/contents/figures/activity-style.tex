@@ -1,0 +1,20 @@
+% Gaya diagram aktivitas UML 2 (TikZ). Hanya berisi \tikzset.
+% Di-input sekali di awal activity-diagrams.tex dan study-controls-activity.tex.
+\tikzset{
+  lane/.style={draw=black, fill=gray!10, rectangle, align=center,
+    font=\footnotesize, minimum height=0.9cm, text width=2.8cm, inner sep=2pt},
+  lanebody/.style={draw=black, rectangle, line width=0.4pt},
+  action/.style={draw=black, fill=white, rectangle, rounded corners=3pt,
+    align=center, font=\footnotesize, inner sep=2pt, text width=2.72cm,
+    minimum height=0.9cm},
+  decision/.style={draw=black, fill=white, diamond, align=center,
+    font=\scriptsize, inner sep=1pt},
+  merge/.style={draw=black, fill=white, diamond, inner sep=0pt,
+    minimum width=0.3cm, minimum height=0.3cm},
+  start/.style={circle, fill=black, inner sep=0pt, minimum size=0.28cm},
+  final/.style={circle, draw=black, fill=white, inner sep=0pt,
+    minimum size=0.42cm,
+    path picture={\fill[black] (path picture bounding box.center) circle (0.12cm);}},
+  flow/.style={-{Stealth}, thick},
+  guard/.style={font=\scriptsize, inner sep=1pt, fill=white},
+}

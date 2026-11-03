@@ -36,7 +36,7 @@ function recordProbe(search, probe) {
     if (FAILURE_PROBE_OUTCOMES[probe.classification]) {
         probe = { ...probe, classification: FAILURE_PROBE_OUTCOMES[probe.classification], failure_class: probe.classification };
     }
-    if (!['pass', 'fail', 'configuration-error', 'fixture-error', 'inconclusive'].includes(probe.classification)) {
+    if (!['pass', 'fail', 'client-bound', 'configuration-error', 'fixture-error', 'inconclusive'].includes(probe.classification)) {
         throw new Error(`unknown probe classification: ${probe.classification}`);
     }
 
@@ -51,6 +51,12 @@ function recordProbe(search, probe) {
         search.stop_reason = probe.classification;
     } else if (probe.classification === 'pass') {
         search.passing_rate = Math.max(search.passing_rate ?? search.range.minimum - 1, probe.rate);
+    } else if (probe.classification === 'client-bound') {
+        // The ledger kept up; the single client's delivered rate is the lower bound and no higher rate is searched.
+        const delivered = Number(probe.offered_ops_per_second);
+        search.passing_rate = Math.max(search.passing_rate ?? search.range.minimum - 1, delivered);
+        search.stop_reason = 'client-bound';
+        search.boundary = 'client-bound';
     } else {
         search.failing_rate = Math.min(search.failing_rate ?? search.range.maximum + 1, probe.rate);
     }
