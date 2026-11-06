@@ -585,10 +585,10 @@ function main() {
     const dailyReceiver = `limits-${runID}-daily-receiver`;
     const holdingSender = `limits-${runID}-holding-sender`;
     const holdingReceiver = `limits-${runID}-holding-receiver`;
-    approveSubject(limitSender, 'retail', 'User5', 'standard', false, ['10', '20', '100', '1000']);
-    approveSubject(dailyReceiver, 'retail', 'User6', 'standard', false, ['100', '100', '100', '1000']);
-    approveSubject(holdingSender, 'retail', 'User7', 'standard', false, ['10', '100', '100', '1000']);
-    approveSubject(holdingReceiver, 'retail', 'User8', 'standard', false, ['10', '100', '100', '10']);
+    approveSubject(limitSender, 'retail', 'User5', ['10', '20', '100', '1000']);
+    approveSubject(dailyReceiver, 'retail', 'User6', ['100', '100', '100', '1000']);
+    approveSubject(holdingSender, 'retail', 'User7', ['10', '100', '100', '1000']);
+    approveSubject(holdingReceiver, 'retail', 'User8', ['10', '100', '100', '10']);
     for (const [subjectID, user] of [[limitSender, 'User5'], [dailyReceiver, 'User6'], [holdingSender, 'User7'], [holdingReceiver, 'User8']]) {
         invoke('enduser', user, 'rupiah-payments', 'OpenWallet', [subjectID], ['distributor', 'enduser']);
     }
@@ -615,7 +615,7 @@ function main() {
     { per_transaction_exact: true, per_transaction_excess_unchanged: true, daily_exact: true, daily_excess_unchanged: true, holdings_exact: true, holdings_excess_unchanged: true });
 
     const conversionSubject = `conversion-${runID}`;
-    approveSubject(conversionSubject, 'retail', 'User5', 'standard', false, ['100', '1000', '1000', '1000']);
+    approveSubject(conversionSubject, 'retail', 'User5', ['100', '1000', '1000', '1000']);
     invoke('enduser', 'User5', 'rupiah-payments', 'OpenWallet', [conversionSubject], ['distributor', 'enduser']);
     const conversionReference = `conversion-replay-${runID}`;
     const convertRef = `convert-${conversionReference}`;
@@ -642,7 +642,7 @@ function main() {
     const reserveForFailure = query('centralbank', 'Admin', 'rupiah-monetary', 'GetReserve', ['retail-bank']);
     const beyondReserve = reserveForFailure + 1;
     const largeLimits = [String(beyondReserve + 1), String(beyondReserve + 1), String(beyondReserve + 1), String(beyondReserve + 1)];
-    approveSubject(reserveFailureSubject, 'retail', 'User6', 'standard', false, largeLimits);
+    approveSubject(reserveFailureSubject, 'retail', 'User6', largeLimits);
     invoke('enduser', 'User6', 'rupiah-payments', 'OpenWallet', [reserveFailureSubject], ['distributor', 'enduser']);
     const insufficientBefore = ledgerSnapshot([['enduser', 'User6', reserveFailureSubject]]);
     expectChaincodeRejection('distributor', 'User1', 'rupiah-payments', 'ConvertToRetail', ['retail-bank', String(beyondReserve), `insufficient-reserve-${runID}`], ['centralbank', 'distributor', 'enduser'], 'distributor reserve');
@@ -657,7 +657,7 @@ function main() {
     recordCase('insufficient-float', true, { rejected_amount: 1, float_and_wallet_unchanged: true });
 
     const holdingsSubject = `conversion-holdings-${runID}`;
-    approveSubject(holdingsSubject, 'retail', 'User8', 'standard', false, ['100', '100', '100', '100']);
+    approveSubject(holdingsSubject, 'retail', 'User8', ['100', '100', '100', '100']);
     invoke('enduser', 'User8', 'rupiah-payments', 'OpenWallet', [holdingsSubject], ['distributor', 'enduser']);
     convertAndFund(holdingsSubject, '100', `holdings-exact-${runID}`);
     const holdingsAtLimit = ledgerSnapshot([['enduser', 'User8', holdingsSubject]]);
