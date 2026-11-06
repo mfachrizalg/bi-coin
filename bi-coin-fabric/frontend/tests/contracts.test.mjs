@@ -102,7 +102,7 @@ test('staff API encodes client IDs and sends the selected role', async () => {
   try {
     await api.createStudyStaff('x509::client/1')
     await api.protectStudyStaff('x509::client/1')
-    await api.setStudyStaffRole('x509::client/1', 'senior_approver')
+    await api.setStudyStaffRole('x509::client/1', 'compliance_officer')
   } finally {
     api.setAccessToken('')
     global.fetch = originalFetch
@@ -112,7 +112,7 @@ test('staff API encodes client IDs and sends the selected role', async () => {
   assert.equal(calls[1].url, '/api/staff/x509%3A%3Aclient%2F1/endorsement-policies')
   assert.equal(calls[2].url, '/api/staff/x509%3A%3Aclient%2F1/role')
   assert.equal(calls[2].options.method, 'PUT')
-  assert.deepEqual(JSON.parse(calls[2].options.body), { role: 'senior_approver' })
+  assert.deepEqual(JSON.parse(calls[2].options.body), { role: 'compliance_officer' })
 })
 
 test('organization function tabs show only the signed-in organization actions', async () => {

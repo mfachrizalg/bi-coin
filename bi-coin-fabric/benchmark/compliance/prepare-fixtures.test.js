@@ -10,7 +10,7 @@ const { operationFixture, prepareAccessMatrixFixtures, prepareFixturePool } = re
 
 test('every Caliper workload maps to its exact chaincode method and signer MSP', () => {
     const userMSPs = {
-        kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP', reviewer: 'DistributorMSP', senior: 'DistributorMSP',
+        kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP', reviewer: 'DistributorMSP',
         compliance: 'DistributorMSP', bank_indonesia: 'CentralBankMSP', merchant: 'EndUserMSP', auditor: 'ValidatorMSP',
         business_rep: 'EndUserMSP', retail_bank: 'DistributorMSP', wholesale_bank: 'DistributorMSP',
     };
@@ -45,7 +45,7 @@ test('every Caliper workload maps to its exact chaincode method and signer MSP',
             assert.ok(fixture.ledger.args.at(-1), `${scenario.id} requires a ledger reference`);
         }
     }
-    assert.equal(catalog.performance_scenarios.length, 43);
+    assert.equal(catalog.performance_scenarios.length, 42);
 });
 
 test('reserve-backed fixture setup serializes debits to the shared distributor reserve', async t => {
@@ -54,7 +54,7 @@ test('reserve-backed fixture setup serializes debits to the shared distributor r
 
     const mspByUser = {
         bank_indonesia: 'CentralBankMSP', kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP',
-        reviewer: 'DistributorMSP', senior: 'DistributorMSP', compliance: 'DistributorMSP', retail_bank: 'DistributorMSP',
+        reviewer: 'DistributorMSP', compliance: 'DistributorMSP', retail_bank: 'DistributorMSP',
         merchant: 'EndUserMSP', wholesale_bank: 'DistributorMSP', wholesale_two: 'DistributorMSP',
     };
     const api = {
@@ -121,7 +121,7 @@ test('API action checks receive fresh subject and staff fixtures per authorized 
     try {
         const api = {
             baseURL: 'http://api.test',
-            namedUsers: Object.fromEntries(['kyc_verified', 'reviewer', 'senior', 'compliance', 'bank_indonesia', 'retail_bank', 'wholesale_bank', 'wholesale_two']
+            namedUsers: Object.fromEntries(['kyc_verified', 'reviewer', 'compliance', 'bank_indonesia', 'retail_bank', 'wholesale_bank', 'wholesale_two']
                 .map(username => [username, { username, password: 'test' }])),
         };
         const fixtures = await prepareAccessMatrixFixtures(api, 'retail-subject', 'test-stamp');
@@ -225,7 +225,7 @@ test('pooled transfer fixtures are created once per run, keep each round distinc
         return { ok: true, status: 200, text: async () => '' };
     };
     try {
-        const users = ['bank_indonesia', 'reviewer', 'senior', 'compliance', 'retail_bank', 'retail_two', 'kyc_verified', 'merchant', 'wholesale_bank', 'wholesale_two'];
+        const users = ['bank_indonesia', 'reviewer', 'compliance', 'retail_bank', 'retail_two', 'kyc_verified', 'merchant', 'wholesale_bank', 'wholesale_two'];
         const api = {
             baseURL: 'http://api.test',
             namedUsers: Object.fromEntries(users.map(username => [username, { username, password: 'test' }])),

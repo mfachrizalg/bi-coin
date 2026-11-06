@@ -25,7 +25,6 @@
 \node[actor] (bi) at (0,8) {Bank\\Indonesia};
 \node[actor] (db) at (0,5.5) {Distributor Bank};
 \node[actor] (kyc) at (0,3) {KYC\\Reviewer};
-\node[actor] (sa) at (0,1) {Senior\\Approver};
 \node[actor] (co) at (0,-1) {Compliance\\Officer};
 \node[actor] (m) at (12,8) {Merchant};
 \node[actor] (pr) at (12,6) {Pelanggan\\Ritel};
@@ -46,11 +45,9 @@
 \draw[association] (bi) -- (uc2);
 \draw[association] (db) -- (uc3);
 \draw[association] (kyc) -- (uc8);
-\draw[association] (sa) -- (uc8);
 \draw[association] (db) -- (uc1);
 \draw[association] (db) -- (uc4);
 \draw[association] (kyc) -- (uc4);
-\draw[association] (sa) -- (uc4);
 \draw[association] (co) -- (uc8);
 \draw[association] (m) -- (uc6);
 \draw[association] (pr) -- (uc5);
@@ -111,7 +108,6 @@
 \node[actor] (pr) at (0,6) {Pelanggan\\Ritel};
 \node[actor] (m) at (12,6) {Merchant};
 \node[actor] (kyc) at (0,2) {KYC\\Reviewer};
-\node[actor] (sa) at (0,0) {Senior\\Approver};
 \node[actor] (co) at (0,-2) {Compliance\\Officer};
 
 \node[system, label=above:{\textbf{Operasi Retail}}] (sys) at (6,4) {};
@@ -126,7 +122,6 @@
 \draw[association] (pr) -- (uc4);
 \draw[association] (m) -- (uc3);
 \draw[association] (kyc) -- (uc1);
-\draw[association] (sa) -- (uc1);
 
 \draw[dependency] (uc4) -- (uc3) node[midway, above, sloped] {\texttt{<<include>>}};
 

@@ -29,7 +29,7 @@ test('API matrix separates route authorization from JSON validation and selects 
     };
     const subjectStates = new Map([
         ['protect-bank', { status: 'pending', protected: false }],
-        ['release-bank', { status: 'active', protected: true, restricted: true, senior_id: '' }],
+        ['release-bank', { status: 'active', protected: true, restricted: true, unfreeze_approver_id: '' }],
     ]);
     const originalFetch = global.fetch;
     global.fetch = async (input, init = {}) => {

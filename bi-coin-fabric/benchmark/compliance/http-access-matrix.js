@@ -121,8 +121,8 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
                             actionClassification = deniedWithoutMutation ? 'pass' : 'violation';
                             actionStateEffect = deniedWithoutMutation ? 'expected-denial-state-unchanged' : 'denial-state-unverified';
                         } else {
-                            const released = response.ok && stateBefore.restricted && !stateAfter.restricted && Boolean(stateAfter.senior_id);
-                            actionExpected = 'authorized senior releases requested restriction';
+                            const released = response.ok && stateBefore.restricted && !stateAfter.restricted && Boolean(stateAfter.unfreeze_approver_id);
+                            actionExpected = 'authorized compliance officer releases requested restriction';
                             actionClassification = released ? 'pass' : 'violation';
                             actionStateEffect = released ? 'restriction-released' : 'release-effect-unverified';
                         }

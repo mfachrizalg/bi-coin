@@ -37,13 +37,13 @@ if (Pengajuan disetujui?) then (ya)
   |Backend API|
   :POST /subjects/{subject_id}/decisions;
   |Blockchain|
-  :ApproveStandard() / DecideHighRisk()
+  :ApproveSubject()
   status = active;
 else (tidak)
   |Backend API|
   :POST /subjects/{subject_id}/decisions;
   |Blockchain|
-  :ApproveStandard() / DecideHighRisk()
+  :ApproveSubject()
   status = rejected;
 endif
 
@@ -231,7 +231,7 @@ status = pending;
 
 |Blockchain|
 :RefreshKycProfile();
-:Periksa dokumen dan risiko;
+:Periksa dokumen;
 if (Verifikasi disetujui?) then (ya)
   :Ubah status menjadi approved;
 else (tidak)
@@ -344,8 +344,8 @@ endif
 |Blockchain|
 :RequestUnfreeze() catat reviewer dan referensi bukti;
 
-|Staf Distributor|
-:Senior Approver menyetujui pembukaan pembatasan;
+|Compliance Officer|
+:Compliance Officer menyetujui pembukaan pembatasan;
 
 |Backend API|
 :POST /subjects/{subject_id}/restriction-release-decisions;

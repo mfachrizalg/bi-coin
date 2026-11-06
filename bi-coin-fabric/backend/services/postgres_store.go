@@ -97,9 +97,6 @@ CREATE TABLE IF NOT EXISTS kyc_profiles (
 	document_number TEXT,
 	document_hashes JSONB NOT NULL DEFAULT '[]',
 	status TEXT NOT NULL,
-	risk_level TEXT NOT NULL,
-	due_diligence_level TEXT NOT NULL DEFAULT 'simplified',
-	senior_approval BOOLEAN NOT NULL DEFAULT FALSE,
 	rejection_reason TEXT,
 	expires_at TEXT,
 	ledger_anchored BOOLEAN NOT NULL DEFAULT FALSE,
@@ -112,9 +109,6 @@ CREATE TABLE IF NOT EXISTS kyc_provider_checks (
 	profile_id TEXT NOT NULL REFERENCES kyc_profiles(profile_id) ON DELETE CASCADE,
 	provider_case_id TEXT,
 	status TEXT NOT NULL,
-	risk_level TEXT NOT NULL,
-	due_diligence_level TEXT NOT NULL DEFAULT 'simplified',
-	senior_approval BOOLEAN NOT NULL DEFAULT FALSE,
 	checks JSONB NOT NULL DEFAULT '{}',
 	document_hashes JSONB NOT NULL DEFAULT '[]',
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -143,10 +137,6 @@ CREATE TABLE IF NOT EXISTS operation_journal (
 	PRIMARY KEY (principal_scope, principal_id, idempotency_key)
 );
 
-ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS due_diligence_level TEXT NOT NULL DEFAULT 'simplified';
-ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS senior_approval BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE kyc_provider_checks ADD COLUMN IF NOT EXISTS due_diligence_level TEXT NOT NULL DEFAULT 'simplified';
-ALTER TABLE kyc_provider_checks ADD COLUMN IF NOT EXISTS senior_approval BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS subject_id TEXT NOT NULL DEFAULT '';
 ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS participant_id TEXT NOT NULL DEFAULT '';
 ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS custodian_msp_id TEXT NOT NULL DEFAULT '';

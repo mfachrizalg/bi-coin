@@ -266,14 +266,7 @@ func (h *StudyHandler) ProtectSubject(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *StudyHandler) RecordReview(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		RiskLevel string `json:"risk_level" validate:"required,oneof=standard high"`
-		PEP       *bool  `json:"pep" validate:"required"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	h.subjectMutation(w, r, "RecordReview", req.RiskLevel, strconv.FormatBool(*req.PEP))
+	h.subjectMutation(w, r, "RecordReview")
 }
 
 func (h *StudyHandler) SetLimits(w http.ResponseWriter, r *http.Request) {
@@ -307,24 +300,7 @@ func (h *StudyHandler) DecideSubject(w http.ResponseWriter, r *http.Request) {
 	}
 	subjectID := mux.Vars(r)["subject_id"]
 	username := middleware.GetUsername(r)
-	recordJSON, err := h.evaluate(r, studyDistributorMSP, "rupiah-controls", "GetSubject", subjectID)
-	if err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	var risk struct {
-		RiskLevel string `json:"risk_level"`
-		PEP       bool   `json:"pep"`
-	}
-	if err := json.Unmarshal(recordJSON, &risk); err != nil {
-		writeServiceError(w, services.Internal("invalid study control record", err))
-		return
-	}
-	transaction := "ApproveStandard"
-	if risk.RiskLevel == "high" || risk.PEP {
-		transaction = "DecideHighRisk"
-	}
-	if _, err := h.svc.Submit(username, studyDistributorMSP, "rupiah-controls", transaction, subjectID, strconv.FormatBool(*req.Approved)); err != nil {
+	if _, err := h.svc.Submit(username, studyDistributorMSP, "rupiah-controls", "ApproveSubject", subjectID, strconv.FormatBool(*req.Approved)); err != nil {
 		writeServiceError(w, err)
 		return
 	}
@@ -400,7 +376,7 @@ func (h *StudyHandler) ProtectStaff(w http.ResponseWriter, r *http.Request) {
 
 func (h *StudyHandler) SetStaffRole(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		Role string `json:"role" validate:"required,oneof=kyc_reviewer senior_approver compliance_officer"`
+		Role string `json:"role" validate:"required,oneof=kyc_reviewer compliance_officer"`
 	}
 	if !decodeJSON(w, r, &req) {
 		return

@@ -39,13 +39,10 @@ export interface StudySubjectView {
   subject_id: string
   category: 'retail' | 'merchant' | 'business'
   status: string
-  risk_level: string
-  pep: boolean
   protected: boolean
   restricted: boolean
   restriction_reason: string
   reviewer_id: string
-  senior_id: string
   authority_evidence_ref: string
   limits: { per_transaction: string; daily: string; monthly: string; holdings: string }
   representatives: string[]
@@ -131,8 +128,8 @@ export function getStudySubject(subjectID: string) {
 export function protectStudySubject(subjectID: string) {
   return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/endorsement-policies')
 }
-export function recordStudyReview(subjectID: string, data: { risk_level: 'standard' | 'high'; pep: boolean }) {
-  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/reviews', data)
+export function recordStudyReview(subjectID: string) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/reviews')
 }
 export function setStudyLimits(subjectID: string, data: StudyLimitsInput) {
   return request<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/limits', {
@@ -156,7 +153,7 @@ export function requestSubjectRelease(subjectID: string, authority_evidence_ref:
 export function approveSubjectRelease(subjectID: string) {
   return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/restriction-release-decisions')
 }
-export type StudyStaffRole = 'kyc_reviewer' | 'senior_approver' | 'compliance_officer'
+export type StudyStaffRole = 'kyc_reviewer' | 'compliance_officer'
 export function createStudyStaff(clientID: string) {
   return studyPost<{ status: string }>('/staff', { client_id: clientID })
 }

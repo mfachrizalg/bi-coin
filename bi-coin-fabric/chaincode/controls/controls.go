@@ -43,15 +43,13 @@ type subjectRecord struct {
 	Category             string       `json:"category"`
 	ApplicantID          string       `json:"applicant_id"`
 	Protected            bool         `json:"protected"`
-	RiskLevel            string       `json:"risk_level,omitempty"`
-	PEP                  bool         `json:"pep"`
 	ReviewerID           string       `json:"reviewer_id,omitempty"`
-	SeniorID             string       `json:"senior_id,omitempty"`
 	Status               string       `json:"status"`
 	Restricted           bool         `json:"restricted"`
 	RestrictionReason    string       `json:"restriction_reason,omitempty"`
 	RestrictedUntil      int64        `json:"restricted_until,omitempty"`
 	UnfreezeReviewerID   string       `json:"unfreeze_reviewer_id,omitempty"`
+	UnfreezeApproverID   string       `json:"unfreeze_approver_id,omitempty"`
 	AuthorityEvidenceRef string       `json:"authority_evidence_ref,omitempty"`
 	Representatives      []string     `json:"representatives,omitempty"`
 	BeneficialOwnerRefs  []string     `json:"beneficial_owner_refs,omitempty"`
@@ -70,14 +68,12 @@ type SubjectView struct {
 	SubjectID            string       `json:"subject_id"`
 	Category             string       `json:"category"`
 	Status               string       `json:"status"`
-	RiskLevel            string       `json:"risk_level"`
-	PEP                  bool         `json:"pep"`
 	Protected            bool         `json:"protected"`
 	Restricted           bool         `json:"restricted"`
 	RestrictionReason    string       `json:"restriction_reason"`
 	RestrictedUntil      int64        `json:"restricted_until"`
 	ReviewerID           string       `json:"reviewer_id"`
-	SeniorID             string       `json:"senior_id"`
+	UnfreezeApproverID   string       `json:"unfreeze_approver_id"`
 	AuthorityEvidenceRef string       `json:"authority_evidence_ref"`
 	Limits               LimitProfile `json:"limits"`
 	Representatives      []string     `json:"representatives"`
@@ -185,7 +181,7 @@ func (c *ControlsContract) SetStaffRole(ctx contractapi.TransactionContextInterf
 	if err := requireMSP(ctx, centralBankMSP); err != nil {
 		return err
 	}
-	if !oneOf(role, "kyc_reviewer", "senior_approver", "compliance_officer") {
+	if !oneOf(role, "kyc_reviewer", "compliance_officer") {
 		return fmt.Errorf("unsupported staff role")
 	}
 	key := staffKey(ctx.GetStub(), clientID)
@@ -200,13 +196,10 @@ func (c *ControlsContract) SetStaffRole(ctx contractapi.TransactionContextInterf
 	return putJSON(ctx.GetStub(), key, staff)
 }
 
-func (c *ControlsContract) RecordReview(ctx contractapi.TransactionContextInterface, subjectID string, riskLevel string, pep bool) error {
+func (c *ControlsContract) RecordReview(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
 	if err != nil {
 		return err
-	}
-	if !oneOf(riskLevel, "standard", "high") {
-		return fmt.Errorf("risk_level must be standard or high")
 	}
 	key := subjectKey(ctx.GetStub(), subjectID)
 	if err := requireProtected(ctx.GetStub(), key); err != nil {
@@ -219,13 +212,11 @@ func (c *ControlsContract) RecordReview(ctx contractapi.TransactionContextInterf
 	if record.Status != "pending" || record.ReviewerID != "" {
 		return fmt.Errorf("subject is not awaiting review")
 	}
-	record.RiskLevel = riskLevel
-	record.PEP = pep
 	record.ReviewerID = reviewerID
 	return putJSON(ctx.GetStub(), key, record)
 }
 
-func (c *ControlsContract) ApproveStandard(ctx contractapi.TransactionContextInterface, subjectID string, approved bool) error {
+func (c *ControlsContract) ApproveSubject(ctx contractapi.TransactionContextInterface, subjectID string, approved bool) error {
 	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
 	if err != nil {
 		return err
@@ -238,34 +229,9 @@ func (c *ControlsContract) ApproveStandard(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return err
 	}
-	if record.Status != "pending" || record.ReviewerID != reviewerID || record.RiskLevel != "standard" || record.PEP || !record.LimitsSet {
-		return fmt.Errorf("subject is not eligible for standard approval")
+	if record.Status != "pending" || record.ReviewerID != reviewerID || !record.LimitsSet {
+		return fmt.Errorf("subject is not eligible for approval")
 	}
-	if approved {
-		record.Status = "active"
-	} else {
-		record.Status = "rejected"
-	}
-	return putJSON(ctx.GetStub(), key, record)
-}
-
-func (c *ControlsContract) DecideHighRisk(ctx contractapi.TransactionContextInterface, subjectID string, approved bool) error {
-	seniorID, err := requireStaffRole(ctx, "senior_approver")
-	if err != nil {
-		return err
-	}
-	key := subjectKey(ctx.GetStub(), subjectID)
-	if err := requireProtected(ctx.GetStub(), key); err != nil {
-		return err
-	}
-	record, err := getSubject(ctx, key)
-	if err != nil {
-		return err
-	}
-	if record.Status != "pending" || record.ReviewerID == "" || record.ReviewerID == seniorID || (record.RiskLevel != "high" && !record.PEP) || !record.LimitsSet {
-		return fmt.Errorf("subject is not eligible for senior decision")
-	}
-	record.SeniorID = seniorID
 	if approved {
 		record.Status = "active"
 	} else {
@@ -275,7 +241,7 @@ func (c *ControlsContract) DecideHighRisk(ctx contractapi.TransactionContextInte
 }
 
 func (c *ControlsContract) SetLimits(ctx contractapi.TransactionContextInterface, subjectID string, perTransaction int64, daily int64, monthly int64, holdings int64) error {
-	if _, err := requireStaffRole(ctx, "senior_approver"); err != nil {
+	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
 		return err
 	}
 	if !validLimits(perTransaction, daily, monthly, holdings) {
@@ -298,7 +264,7 @@ func (c *ControlsContract) SetLimits(ctx contractapi.TransactionContextInterface
 }
 
 func (c *ControlsContract) SetBusinessAuthority(ctx contractapi.TransactionContextInterface, subjectID string, representativesJSON string, beneficialOwnerRefsJSON string) error {
-	if _, err := requireStaffRole(ctx, "senior_approver"); err != nil {
+	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
 		return err
 	}
 	var representatives []string
@@ -383,7 +349,7 @@ func (c *ControlsContract) RequestUnfreeze(ctx contractapi.TransactionContextInt
 }
 
 func (c *ControlsContract) ApproveUnfreeze(ctx contractapi.TransactionContextInterface, subjectID string) error {
-	seniorID, err := requireStaffRole(ctx, "senior_approver")
+	complianceID, err := requireStaffRole(ctx, "compliance_officer")
 	if err != nil {
 		return err
 	}
@@ -395,13 +361,13 @@ func (c *ControlsContract) ApproveUnfreeze(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return err
 	}
-	if !record.Restricted || record.AuthorityEvidenceRef == "" || record.UnfreezeReviewerID == "" || record.UnfreezeReviewerID == seniorID {
+	if !record.Restricted || record.AuthorityEvidenceRef == "" || record.UnfreezeReviewerID == "" || record.UnfreezeReviewerID == complianceID {
 		return fmt.Errorf("unfreeze requires authority evidence and two distinct approvers")
 	}
 	record.Restricted = false
 	record.RestrictionReason = ""
 	record.RestrictedUntil = 0
-	record.SeniorID = seniorID
+	record.UnfreezeApproverID = complianceID
 	return putJSON(ctx.GetStub(), key, record)
 }
 
@@ -469,9 +435,9 @@ func (c *ControlsContract) GetSubject(ctx contractapi.TransactionContextInterfac
 	}
 	return SubjectView{
 		SubjectID: record.SubjectID, Category: record.Category, Status: record.Status,
-		RiskLevel: record.RiskLevel, PEP: record.PEP, Protected: record.Protected,
+		Protected:  record.Protected,
 		Restricted: restricted, RestrictionReason: record.RestrictionReason, RestrictedUntil: record.RestrictedUntil,
-		ReviewerID: record.ReviewerID, SeniorID: record.SeniorID,
+		ReviewerID: record.ReviewerID, UnfreezeApproverID: record.UnfreezeApproverID,
 		AuthorityEvidenceRef: record.AuthorityEvidenceRef, Limits: record.Limits,
 		Representatives: representatives, BeneficialOwnerRefs: owners,
 	}, nil

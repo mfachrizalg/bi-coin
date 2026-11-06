@@ -47,8 +47,6 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const [bankKind, setBankKind] = useState<StudyBankKind>('wholesale')
   const [admissionRef, setAdmissionRef] = useState('')
   const [amount, setAmount] = useState('')
-  const [riskLevel, setRiskLevel] = useState<'standard' | 'high'>('standard')
-  const [pep, setPep] = useState(false)
   const [approved, setApproved] = useState(true)
   const [limits, setLimits] = useState<StudyLimitsInput>({ per_transaction: '', daily: '', monthly: '', holdings: '' })
   const [representatives, setRepresentatives] = useState('')
@@ -177,18 +175,11 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
 
       {distributorApproval && <article className="surface-card">
         <h3>Distributor approval</h3>
-        <p className="muted">Reviewer and senior approver actions require separate server-mapped staff identities.</p>
+        <p className="muted">Reviewer and compliance officer actions require separate server-mapped staff identities.</p>
         <StudyAction label="Read subject" working={busy === 'Read subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Read subject', () => getStudySubject(subjectID.trim()))} />
         <StudyAction label="Protect subject" working={busy === 'Protect subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Protect subject', () => protectStudySubject(subjectID.trim()))} />
-        <label className="app-label" htmlFor="study-risk-level">
-          <span>Risk level</span>
-          <select id="study-risk-level" className="app-input" value={riskLevel} onChange={event => setRiskLevel(event.target.value as 'standard' | 'high')}>
-            <option value="standard">Standard</option><option value="high">High</option>
-          </select>
-        </label>
-        <label className="app-label" htmlFor="study-pep"><span><input id="study-pep" type="checkbox" checked={pep} onChange={event => setPep(event.target.checked)} /> Politically exposed person</span></label>
         <div className="button-row">
-          <StudyAction label="Record review" working={busy === 'Record review'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Record review', () => recordStudyReview(subjectID.trim(), { risk_level: riskLevel, pep }))} />
+          <StudyAction label="Record review" working={busy === 'Record review'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Record review', () => recordStudyReview(subjectID.trim()))} />
           <label className="app-label" htmlFor="study-decision"><span>Decision</span><select id="study-decision" className="app-input" value={approved ? 'approve' : 'reject'} onChange={event => setApproved(event.target.value === 'approve')}><option value="approve">Approve</option><option value="reject">Reject</option></select></label>
           <StudyAction label="Apply decision" working={busy === 'Apply decision'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Apply decision', () => decideStudySubject(subjectID.trim(), approved))} />
         </div>
@@ -206,7 +197,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
 
       {distributorBusiness && <article className="surface-card">
         <h3>Business authority</h3>
-        <p className="muted">For active business/company subjects. Use pseudonymous IDs and SHA-256 references; a senior approver identity is required.</p>
+        <p className="muted">For active business/company subjects. Use pseudonymous IDs and SHA-256 references.</p>
         <label className="app-label" htmlFor="study-representatives"><span>Representative IDs (comma-separated)</span><textarea id="study-representatives" className="app-textarea" value={representatives} onChange={event => setRepresentatives(event.target.value)} autoComplete="off" /></label>
         <label className="app-label" htmlFor="study-beneficial-owners"><span>Beneficial-owner references (comma-separated)</span><textarea id="study-beneficial-owners" className="app-textarea" value={beneficialOwners} onChange={event => setBeneficialOwners(event.target.value)} autoComplete="off" /></label>
         <StudyAction label="Set business authority" working={busy === 'Set business authority'} disabled={!hasSubject || !representatives.split(',').some(value => value.trim()) || Boolean(busy)} onClick={() => void run('Set business authority', () => setStudyBusinessAuthority(subjectID.trim(), {
@@ -271,7 +262,6 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
           <span>Role</span>
           <select id="study-staff-role" className="app-input" value={staffRole} onChange={event => setStaffRole(event.target.value as StudyStaffRole)}>
             <option value="kyc_reviewer">KYC reviewer</option>
-            <option value="senior_approver">Senior approver</option>
             <option value="compliance_officer">Compliance officer</option>
           </select>
         </label>

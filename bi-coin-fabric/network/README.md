@@ -9,7 +9,7 @@ Peer MSPs:
 - Observer (MSP ID: ValidatorMSP) peer (OJK, PPATK) for read-only audit and reports.
 - `EndUserMSP` contains eight generated client identities for retail, merchant, and company representatives.
 
-The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for `retail-bank`, and `User4` and `User5` act for `wholesale-bank`. Two officers per bank let a second officer approve four-eyes transfers (ADR 0014). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1`, `User2`, and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer`, `senior_approver`, and `compliance_officer` before running KYC flows. CentralBank identities also include a peer, orderer, administrator, and two client identities, all under `CentralBankMSP`.
+The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for `retail-bank`, and `User4` and `User5` act for `wholesale-bank`. Two officers per bank let a second officer approve four-eyes transfers (ADR 0014). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1` and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer` and `compliance_officer` before running KYC flows. CentralBank identities also include a peer, orderer, administrator, and two client identities, all under `CentralBankMSP`.
 
 The first start creates a private, ignored `.env.study` file with random local CA, CouchDB, and PostgreSQL credentials. Keep that file for later restarts.
 

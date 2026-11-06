@@ -17,7 +17,6 @@ actor "DistributorMSP\nOperator" as Distributor
 actor "CentralBankMSP\nOperator" as CentralBank
 actor "Observer/Auditor (OJK, PPATK)\nValidatorMSP" as Validator
 actor "KYC Reviewer" as KycReviewer
-actor "Senior Approver" as SeniorApprover
 actor "Compliance Officer" as ComplianceOfficer
 
 rectangle "Ruang kerja masing-masing organisasi\nkanal bi-coin" {
@@ -33,9 +32,7 @@ Distributor -- DistributorUC
 CentralBank -- CentralBankUC
 Validator -- ValidatorUC
 KycReviewer -- DistributorUC
-SeniorApprover -- DistributorUC
 KycReviewer -- RestrictionUC
-SeniorApprover -- RestrictionUC
 ComplianceOfficer -- RestrictionUC
 
 @enduml

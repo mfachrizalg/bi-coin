@@ -196,17 +196,12 @@ function setupStaff(clientID, role) {
     invoke('centralbank', 'Admin', 'rupiah-controls', 'SetStaffRole', [clientID, role], ['centralbank', 'distributor']);
 }
 
-function approveSubject(subjectID, category, ownerUser, riskLevel, pep, limits = ['1000', '5000', '20000', '5000']) {
+function approveSubject(subjectID, category, ownerUser, limits = ['1000', '5000', '20000', '5000']) {
     invoke('enduser', ownerUser, 'rupiah-controls', 'CreatePending', [subjectID, category], ['distributor', 'enduser']);
     invoke('distributor', 'User1', 'rupiah-controls', 'ProtectSubject', [subjectID], ['centralbank', 'distributor']);
-    invoke('distributor', 'User2', 'rupiah-controls', 'SetLimits', [subjectID, ...limits], ['centralbank', 'distributor']);
-    invoke('distributor', 'User1', 'rupiah-controls', 'RecordReview', [subjectID, riskLevel, String(pep)], ['centralbank', 'distributor']);
-    if (riskLevel === 'high' || pep) {
-        expectRejected('distributor', 'User1', 'rupiah-controls', 'DecideHighRisk', [subjectID, 'true'], ['centralbank', 'distributor']);
-        invoke('distributor', 'User2', 'rupiah-controls', 'DecideHighRisk', [subjectID, 'true'], ['centralbank', 'distributor']);
-    } else {
-        invoke('distributor', 'User1', 'rupiah-controls', 'ApproveStandard', [subjectID, 'true'], ['centralbank', 'distributor']);
-    }
+    invoke('distributor', 'User1', 'rupiah-controls', 'SetLimits', [subjectID, ...limits], ['centralbank', 'distributor']);
+    invoke('distributor', 'User1', 'rupiah-controls', 'RecordReview', [subjectID], ['centralbank', 'distributor']);
+    invoke('distributor', 'User1', 'rupiah-controls', 'ApproveSubject', [subjectID, 'true'], ['centralbank', 'distributor']);
 }
 
 function admissionRef(distributorID) {
@@ -272,19 +267,15 @@ function main() {
     const secondMerchantSubject = `merchant-${runID}-002`;
     const secondBusinessSubject = `business-${runID}-002`;
     const rejectedSubject = `rejected-${runID}-001`;
-    const highRiskSubject = `high-risk-${runID}-001`;
-    const pepSubject = `pep-${runID}-001`;
     const reviewer = getClientID('distributor', 'User1');
-    const senior = getClientID('distributor', 'User2');
     const compliance = getClientID('distributor', 'User3');
     const centralBankClient = getClientID('centralbank', 'Admin');
     const validatorClient = getClientID('validator', 'Admin');
-    if (reviewer === senior || reviewer === compliance || senior === compliance) fail('synthetic staff certificates must be distinct');
-    if ([reviewer, senior, compliance].includes(centralBankClient) || [reviewer, senior, compliance, centralBankClient].includes(validatorClient)) {
+    if (reviewer === compliance) fail('synthetic staff certificates must be distinct');
+    if ([reviewer, compliance].includes(centralBankClient) || [reviewer, compliance, centralBankClient].includes(validatorClient)) {
         fail('study MSP client identities must be distinct');
     }
     setupStaff(reviewer, 'kyc_reviewer');
-    setupStaff(senior, 'senior_approver');
     setupStaff(compliance, 'compliance_officer');
 
     const authorizationChecks = [
@@ -293,9 +284,8 @@ function main() {
         ['rupiah-controls', 'CreateStaffPending', [`msp-${runID}`], 'CentralBankMSP', ['centralbank', 'distributor']],
         ['rupiah-controls', 'ProtectStaff', [`msp-${runID}`], 'CentralBankMSP', ['centralbank', 'distributor']],
         ['rupiah-controls', 'SetStaffRole', [`msp-${runID}`, 'kyc_reviewer'], 'CentralBankMSP', ['centralbank', 'distributor']],
-        ['rupiah-controls', 'RecordReview', [`msp-${runID}`, 'standard', 'false'], 'DistributorMSP', ['centralbank', 'distributor']],
-        ['rupiah-controls', 'ApproveStandard', [`msp-${runID}`, 'true'], 'DistributorMSP', ['centralbank', 'distributor']],
-        ['rupiah-controls', 'DecideHighRisk', [`msp-${runID}`, 'true'], 'DistributorMSP', ['centralbank', 'distributor']],
+        ['rupiah-controls', 'RecordReview', [`msp-${runID}`], 'DistributorMSP', ['centralbank', 'distributor']],
+        ['rupiah-controls', 'ApproveSubject', [`msp-${runID}`, 'true'], 'DistributorMSP', ['centralbank', 'distributor']],
         ['rupiah-controls', 'SetLimits', [`msp-${runID}`, '1', '1', '1', '1'], 'DistributorMSP', ['centralbank', 'distributor']],
         ['rupiah-controls', 'SetBusinessAuthority', [`msp-${runID}`, '[]', '[]'], 'DistributorMSP', ['centralbank', 'distributor']],
         ['rupiah-controls', 'FreezeSubject', [`msp-${runID}`, 'dttot'], 'DistributorMSP', ['centralbank', 'distributor']],
@@ -420,38 +410,30 @@ function main() {
     assertStateUnchanged(beforeWholesaleConversion, ledgerSnapshot());
     recordCase('wholesale-conversion-denied', true, { wholesale_conversion_denied: true, state_unchanged: true });
 
-    approveSubject(retailSubject, 'retail', 'User1', 'high', true);
-    approveSubject(merchantSubject, 'merchant', 'User2', 'standard', false);
-    approveSubject(businessSubject, 'business', 'User3', 'standard', false);
-    approveSubject(secondRetailSubject, 'retail', 'User5', 'standard', false);
-    approveSubject(secondMerchantSubject, 'merchant', 'User6', 'standard', false);
-    approveSubject(secondBusinessSubject, 'business', 'User7', 'standard', false);
-    approveSubject(highRiskSubject, 'retail', 'User1', 'high', false);
-    approveSubject(pepSubject, 'retail', 'User1', 'standard', true);
+    approveSubject(retailSubject, 'retail', 'User1');
+    approveSubject(merchantSubject, 'merchant', 'User2');
+    approveSubject(businessSubject, 'business', 'User3');
+    approveSubject(secondRetailSubject, 'retail', 'User5');
+    approveSubject(secondMerchantSubject, 'merchant', 'User6');
+    approveSubject(secondBusinessSubject, 'business', 'User7');
     invoke('enduser', 'User1', 'rupiah-controls', 'CreatePending', [rejectedSubject, 'retail'], ['distributor', 'enduser']);
     invoke('distributor', 'User1', 'rupiah-controls', 'ProtectSubject', [rejectedSubject], ['centralbank', 'distributor']);
-    invoke('distributor', 'User2', 'rupiah-controls', 'SetLimits', [rejectedSubject, '1000', '5000', '20000', '5000'], ['centralbank', 'distributor']);
-    invoke('distributor', 'User1', 'rupiah-controls', 'RecordReview', [rejectedSubject, 'standard', 'false'], ['centralbank', 'distributor']);
-    invoke('distributor', 'User1', 'rupiah-controls', 'ApproveStandard', [rejectedSubject, 'false'], ['centralbank', 'distributor']);
+    invoke('distributor', 'User1', 'rupiah-controls', 'SetLimits', [rejectedSubject, '1000', '5000', '20000', '5000'], ['centralbank', 'distributor']);
+    invoke('distributor', 'User1', 'rupiah-controls', 'RecordReview', [rejectedSubject], ['centralbank', 'distributor']);
+    invoke('distributor', 'User1', 'rupiah-controls', 'ApproveSubject', [rejectedSubject, 'false'], ['centralbank', 'distributor']);
     if (query('validator', 'Admin', 'rupiah-controls', 'GetSubject', [rejectedSubject]).status !== 'rejected') {
         fail('explicit false decision did not reject the pending subject');
     }
-    const highRiskView = query('validator', 'Admin', 'rupiah-controls', 'GetSubject', [highRiskSubject]);
-    const pepView = query('validator', 'Admin', 'rupiah-controls', 'GetSubject', [pepSubject]);
-    recordCase('kyc-risk-pep', highRiskView.status === 'active' && pepView.status === 'active'
-        && query('validator', 'Admin', 'rupiah-controls', 'CanPay', [highRiskSubject]) === true
-        && query('validator', 'Admin', 'rupiah-controls', 'CanPay', [pepSubject]) === true,
-    { high_risk: highRiskView.status, pep: pepView.status, explicit_rejection: 'rejected' });
-    recordCase('staff-separation', reviewer !== senior && reviewer !== compliance && senior !== compliance
-        && query('distributor', 'User1', 'rupiah-controls', 'GetCallerIdentity') !== query('distributor', 'User2', 'rupiah-controls', 'GetCallerIdentity'),
-    { reviewer: 'User1', senior: 'User2', compliance: 'User3' });
+    recordCase('staff-separation', reviewer !== compliance
+        && query('distributor', 'User1', 'rupiah-controls', 'GetCallerIdentity') !== query('distributor', 'User3', 'rupiah-controls', 'GetCallerIdentity'),
+    { reviewer: 'User1', compliance: 'User3' });
     expectChaincodeRejection('enduser', 'User1', 'rupiah-controls', 'CreatePending', [`invalid-${runID}`, 'other'], ['distributor', 'enduser'], 'subject_id and a supported category are required');
     const representative = getClientID('enduser', 'User4');
-    invoke('distributor', 'User2', 'rupiah-controls', 'SetBusinessAuthority', [
+    invoke('distributor', 'User1', 'rupiah-controls', 'SetBusinessAuthority', [
         businessSubject, JSON.stringify([representative]), JSON.stringify([crypto.createHash('sha256').update(runID).digest('hex')]),
     ], ['centralbank', 'distributor']);
     const secondRepresentative = getClientID('enduser', 'User8');
-    invoke('distributor', 'User2', 'rupiah-controls', 'SetBusinessAuthority', [
+    invoke('distributor', 'User1', 'rupiah-controls', 'SetBusinessAuthority', [
         secondBusinessSubject, JSON.stringify([secondRepresentative]), JSON.stringify([crypto.createHash('sha256').update(`second-${runID}`).digest('hex')]),
     ], ['centralbank', 'distributor']);
     if (query('enduser', 'User4', 'rupiah-controls', 'CanActFor', [businessSubject]) !== true
@@ -459,7 +441,7 @@ function main() {
         || query('enduser', 'User8', 'rupiah-controls', 'CanActFor', [secondBusinessSubject]) !== true) {
         fail('business representative authorization did not match the configured representative list');
     }
-    invoke('distributor', 'User2', 'rupiah-controls', 'SetBusinessAuthority', [
+    invoke('distributor', 'User1', 'rupiah-controls', 'SetBusinessAuthority', [
         businessSubject, JSON.stringify([getClientID('enduser', 'User5')]), JSON.stringify([crypto.createHash('sha256').update(`replacement-${runID}`).digest('hex')]),
     ], ['centralbank', 'distributor']);
     if (query('enduser', 'User4', 'rupiah-controls', 'CanActFor', [businessSubject]) !== false
@@ -547,7 +529,7 @@ function main() {
     const releaseEvidence = crypto.createHash('sha256').update(`authority-${runID}`).digest('hex');
     invoke('distributor', 'User1', 'rupiah-controls', 'RequestUnfreeze', [retailSubject, releaseEvidence], ['centralbank', 'distributor']);
     expectRejected('distributor', 'User1', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject], ['centralbank', 'distributor']);
-    invoke('distributor', 'User2', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject], ['centralbank', 'distributor']);
+    invoke('distributor', 'User3', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject], ['centralbank', 'distributor']);
     if (query('enduser', 'User1', 'rupiah-controls', 'CanPay', [retailSubject]) !== true) fail('released subject is not eligible');
 
     for (const [reason, label] of [
@@ -562,14 +544,14 @@ function main() {
             fail(`${label} reblock retained prior release evidence`);
         }
         expectChaincodeRejection(
-            'distributor', 'User2', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject],
+            'distributor', 'User3', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject],
             ['centralbank', 'distributor'], 'unfreeze requires authority evidence',
         );
         if (query('enduser', 'User1', 'rupiah-controls', 'CanPay', [retailSubject]) !== false) {
             fail(`${label} reblock became eligible without a new reviewer request`);
         }
         invoke('distributor', 'User1', 'rupiah-controls', 'RequestUnfreeze', [retailSubject, releaseEvidence], ['centralbank', 'distributor']);
-        invoke('distributor', 'User2', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject], ['centralbank', 'distributor']);
+        invoke('distributor', 'User3', 'rupiah-controls', 'ApproveUnfreeze', [retailSubject], ['centralbank', 'distributor']);
         if (query('enduser', 'User1', 'rupiah-controls', 'CanPay', [retailSubject]) !== true) {
             fail(`${label} reblock could not be released after a fresh reviewer request`);
         }
@@ -783,7 +765,7 @@ function main() {
         policies: { monetary: 'CentralBankMSP+DistributorMSP', controls: 'CentralBankMSP+DistributorMSP for writes', payments: 'DistributorMSP+EndUserMSP', funding: 'all three' },
         fixtures: {
             retailSubject, merchantSubject, businessSubject, secondRetailSubject, secondMerchantSubject, secondBusinessSubject,
-            rejectedSubject, highRiskSubject, pepSubject, businessRepresentative: representative, receiptReference: initialPayment[3],
+            rejectedSubject, businessRepresentative: representative, receiptReference: initialPayment[3],
         },
         receipt_read_by_unrelated_end_user: unrelatedReceipt.reference === initialPayment[3],
         retailBalance,

@@ -144,4 +144,4 @@ Setting a Participant status to frozen. Subjects are restricted, not frozen.
 _Avoid_: Restriction, Suspension
 
 **Staff role**:
-A maker-checker role in the compliance study: KYC reviewer, senior approver, or compliance officer. A KYC reviewer and a senior approver must be different people.
+A maker-checker role in the compliance study: KYC reviewer or compliance officer. A KYC reviewer and a compliance officer must be different people.

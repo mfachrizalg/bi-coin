@@ -33,7 +33,7 @@ Why `validator_bank` has no study tabs: `studyMSPForRole` (`study_handlers.go:42
 ## Facts checked (2026-10-14)
 
 - **F1** `GET /identities/me` and `POST /subjects` allow only `authenticated`, `kyc_verified`, `merchant` (`study_handlers.go:34-36`). BI and both banks cannot read their own client ID there. → OQ2.
-- **F2** Client `checks` are stored unvalidated and never reach the ledger. The UI sends hardcoded passes (`CreateWallet.tsx:117`, via `refreshKycProfile`, `api.ts:247`). `validateKycDecision` (`backend/services/ledger.go:1097`) checks status, risk, due diligence and approval rules, not `Checks`. `PostgresStore.RefreshKycProfile` (`postgres_store.go:330`; body read from the benchmark copy, live body not read) writes `req.Checks` into `kyc_provider_checks`. The chaincode call (`ledger.go:1084-1085`) sends profile, status, risk, due diligence, senior approval, hashes and expiry only. → OQ3.
+- **F2** Client `checks` are stored unvalidated and never reach the ledger. The UI sends hardcoded passes (`CreateWallet.tsx:117`, via `refreshKycProfile`, `api.ts:247`). `validateKycDecision` (`backend/services/ledger.go:1097`) checks status and approval rules, not `Checks`. `PostgresStore.RefreshKycProfile` (`postgres_store.go:330`; body read from the benchmark copy, live body not read) writes `req.Checks` into `kyc_provider_checks`. The chaincode call (`ledger.go:1084-1085`) sends profile, status, hashes and expiry only. → OQ3.
 - **F3** Hiding nav does not block routes. The hashchange handler (`App.tsx:149-156`) sets any tab from `tabFromHash` with no `ROLES[role].tabs` check. As BI, `#/institutional/kyc` renders `CreateWallet`. Login and role switch (`App.tsx:172-173, 196-197`) do check. Backend RBAC still enforces access.
 - **F4** Unverified: whether `decodeJSON` (`handlers.go:29`) rejects unknown fields. It checks JSON shape and duplicate keys (`validateJSONShape`). Affects contract tests only.
 - **F5** Unverified: thesis build command. `latexmk` is assumed.
@@ -54,7 +54,7 @@ Follow `frontend/AGENTS.md`: change roles, routes, screen selection and contract
    - Remove `DemoPanel` render (:301) and import.
 2. `lib/api.ts`
    - Rename `freezeStudySubject` → `restrictSubject`, `requestStudyUnfreeze` → `requestSubjectRelease`, `approveStudyUnfreeze` → `approveSubjectRelease`.
-   - Add `createStudyStaff(client_id)` → `POST /staff`; `protectStudyStaff(client_id)` → `POST /staff/{client_id}/endorsement-policies`; `setStudyStaffRole(client_id, role)` → `PUT /staff/{client_id}/role`. Roles: `kyc_reviewer | senior_approver | compliance_officer`. Reuse `studyPost` / `request`.
+   - Add `createStudyStaff(client_id)` → `POST /staff`; `protectStudyStaff(client_id)` → `POST /staff/{client_id}/endorsement-policies`; `setStudyStaffRole(client_id, role)` → `PUT /staff/{client_id}/role`. Roles: `kyc_reviewer | compliance_officer`. Reuse `studyPost` / `request`.
 3. `pages/StudyConsole.tsx`
    - Labels: Freeze subject → Restrict subject; Request unfreeze → Request release; Approve unfreeze → Approve release.
    - New `study_staff` section (BI only): client ID input (source per OQ2), role select, buttons Create staff, Protect staff, Set role. Add to `permitted` (:66-70).
@@ -71,7 +71,7 @@ Follow `frontend/AGENTS.md`: change roles, routes, screen selection and contract
 - Add **Restriction**: subject-level hold with a Restriction reason; lifted only by an approved release with a Release evidence reference. _Avoid_: Freeze.
 - Add **Freeze**: legacy wallet/participant hold. _Avoid_: Restriction.
 - Add **Auditor** (scope per OQ1): read-only actor in the compliance study, ValidatorMSP identity.
-- Add **Staff role**: KYC reviewer, senior approver, compliance officer. Reviewer and senior approver must be different people.
+- Add **Staff role**: KYC reviewer or compliance officer. Reviewer and compliance officer must be different people.
 - Add **Control** (per OQ4).
 - Observer `_Avoid_`: remove "Auditor".
 - Validator Bank note: not the ValidatorMSP audit identity.
@@ -82,7 +82,7 @@ Follow `frontend/AGENTS.md`: change roles, routes, screen selection and contract
 
 ### Demo prep (no code)
 - Before any Fabric call, check benchmark run `20261014-01`. Last recorded running at 10:12 WIB. Do not touch the study network while it runs.
-- Run backend with `FABRIC_IDENTITIES_JSON` and `AUTH_BOOTSTRAP_USERS_JSON`. Map reviewer, senior and compliance users to `User1`, `User2`, `User3` (`network/README.md:36-52`).
+- Run backend with `FABRIC_IDENTITIES_JSON` and `AUTH_BOOTSTRAP_USERS_JSON`. Map reviewer and compliance users to `User1` and `User3` (`network/README.md:36-52`).
 - Seed staff via `scripts/smoke-test.js` (`setupStaff`, :202-244), or the Staff roles tab.
 
 ## Verification
@@ -90,12 +90,11 @@ Follow `frontend/AGENTS.md`: change roles, routes, screen selection and contract
 2. `rtk npm run test:e2e`: login smoke; update nav expectations that name legacy tabs.
 3. Manual study flow:
    1. BI: Staff roles → create, protect, set role for each client ID.
-   2. Reviewer: record high-risk review, apply decision. Expect rejection.
-   3. Senior: approve.
-   4. Compliance officer: Restrict subject with `dttot`.
-   5. Reviewer: Request release with 64-hex reference.
-   6. Senior: Approve release.
-   7. Auditor: Controls audit reads subject.
+   2. Reviewer: record review, set limits, apply decision.
+   3. Compliance officer: Restrict subject with `dttot`.
+   4. Reviewer: Request release with 64-hex reference.
+   5. Compliance officer: Approve release.
+   6. Auditor: Controls audit reads subject.
 4. Thesis build: confirm command first (F5), then 0 undefined references.
 
 Estimate: about 1.5–2 h frontend; 15 min glossary and thesis line.

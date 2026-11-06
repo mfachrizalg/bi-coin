@@ -77,14 +77,13 @@ async function topUpReserve(api, stamp) {
     await configureParticipants(request);
 }
 
-async function prepareSubject(client, id, owner, { category = 'retail', risk = 'standard', pep = false, active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
+async function prepareSubject(client, id, owner, { category = 'retail', active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
     await client.request(owner, 'POST', '/subjects', { subject_id: id, category });
     await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/endorsement-policies`);
-    await client.request('senior', 'PUT', `/subjects/${encodeURIComponent(id)}/limits`, LIMITS);
-    if (recordReview) await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/reviews`, { risk_level: risk, pep });
+    await client.request('reviewer', 'PUT', `/subjects/${encodeURIComponent(id)}/limits`, LIMITS);
+    if (recordReview) await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/reviews`, {});
     if (active) {
-        const decider = risk === 'high' || pep ? 'senior' : 'reviewer';
-        await client.request(decider, 'POST', `/subjects/${encodeURIComponent(id)}/decisions`, { approved: true });
+        await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/decisions`, { approved: true });
     }
     if (restricted) {
         await client.request('compliance', 'POST', `/subjects/${encodeURIComponent(id)}/restrictions`, { reason_code: 'internal_review' });
@@ -172,15 +171,10 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             break;
         case 'record-review':
             route = `/subjects/${encodeURIComponent(id)}/reviews`;
-            body = { risk_level: 'standard', pep: false };
-            args = [id, 'standard', 'false'];
+            body = {};
+            args = [id];
             break;
-        case 'approve-standard':
-            route = `/subjects/${encodeURIComponent(id)}/decisions`;
-            body = { approved: true };
-            args = [id, 'true'];
-            break;
-        case 'decide-high-risk':
+        case 'approve-subject':
             route = `/subjects/${encodeURIComponent(id)}/decisions`;
             body = { approved: true };
             args = [id, 'true'];
@@ -495,7 +489,7 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
         if (fixtureProfile === 'float-subject') await ensureFloat(client, stamp);
         if (POOLED_PROFILES.has(fixtureProfile)) await ensurePool(client, fixtureProfile, count, stamp);
         const independentSubjectSetup = [
-            'protected-pending-subject', 'standard-review-subject', 'high-risk-review-subject',
+            'protected-pending-subject', 'standard-review-subject',
             'active-subject', 'active-business-subject', 'restricted-subject', 'release-requested-subject',
             'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-staff', 'protected-staff',
         ].includes(fixtureProfile);
@@ -516,8 +510,6 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
                 await prepareSubject(client, id, 'kyc_verified', { recordReview: false });
             } else if (fixtureProfile === 'standard-review-subject') {
                 await prepareSubject(client, id, 'kyc_verified');
-            } else if (fixtureProfile === 'high-risk-review-subject') {
-                await prepareSubject(client, id, 'kyc_verified', { risk: 'high' });
             } else if (fixtureProfile === 'active-subject') {
                 await prepareSubject(client, id, 'kyc_verified', { active: true });
             } else if (fixtureProfile === 'active-business-subject') {

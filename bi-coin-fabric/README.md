@@ -75,7 +75,7 @@ node scripts/smoke-test.js
 | Chaincode | Exported transactions (caller) |
 |-----------|--------------------------------|
 | `rupiah-monetary` | `Initialize`, `RegisterDistributor`, `Issue`, `RedeemReserve`, `SetParticipantStatus`, `SetTransferLimit` (CentralBankMSP); `TransferReserve`, `ApproveTransfer`, `RejectTransfer`, `ProposeApprovalThreshold`, `ApproveApprovalThreshold` (DistributorMSP); `DebitReserveForConversion` (nested call from `rupiah-payments`); reads `GetReserve`, `GetParticipant`, `CanSend`, `GetTransferLimit`, `GetWholesaleSupply`, `GetRetailSupply`, `GetTotalSupply` |
-| `rupiah-controls` | `CreatePending` (EndUserMSP); `ProtectSubject` (DistributorMSP); `CreateStaffPending`, `ProtectStaff`, `SetStaffRole` (CentralBankMSP); `RecordReview`, `ApproveStandard`, `DecideHighRisk`, `SetLimits`, `SetBusinessAuthority`, `FreezeSubject`, `RequestUnfreeze`, `ApproveUnfreeze` (staff roles on DistributorMSP); reads `GetCallerIdentity`, `CanPay`, `GetLimits`, `CanActFor`; `GetSubject` (CentralBankMSP, DistributorMSP, ValidatorMSP) |
+| `rupiah-controls` | `CreatePending` (EndUserMSP); `ProtectSubject` (DistributorMSP); `CreateStaffPending`, `ProtectStaff`, `SetStaffRole` (CentralBankMSP); `RecordReview`, `ApproveSubject`, `SetLimits`, `SetBusinessAuthority`, `FreezeSubject`, `RequestUnfreeze`, `ApproveUnfreeze` (staff roles on DistributorMSP); reads `GetCallerIdentity`, `CanPay`, `GetLimits`, `CanActFor`; `GetSubject` (CentralBankMSP, DistributorMSP, ValidatorMSP) |
 | `rupiah-payments` | `OpenWallet`, `Transfer` (EndUserMSP); `ConvertToRetail`, `FundWallet` (DistributorMSP); reads `GetBalance`, `GetReceipt`, `GetRetailFloat` |
 
 ## Environment Variables

@@ -12,7 +12,7 @@ const roles = catalog.application_roles;
 test('catalog covers every public study transaction and route role cell', () => {
     const methods = catalog.contract_methods;
     const methodKeys = methods.map(item => `${item.chaincode}.${item.method}`);
-    assert.equal(methods.length, 44);
+    assert.equal(methods.length, 43);
     assert.equal(new Set(methodKeys).size, methodKeys.length, 'contract method duplicated');
     assert.ok(methods.every(item => item.cases.length > 0), 'method has no correctness cases');
 
@@ -43,10 +43,10 @@ test('catalog covers every public study transaction and route role cell', () => 
     assert.deepEqual(expectedRoutes, actualRoutes, 'API catalog must match registered study routes');
 });
 
-test('performance catalog covers all 41 public performance methods in 43 workloads', () => {
-    assert.equal(catalog.performance_scenarios.length, 43);
-    assert.equal(catalog.protocol.performance_workload_count, 43);
-    assert.equal(catalog.protocol.performance_method_count, 41);
+test('performance catalog covers all 40 public performance methods in 42 workloads', () => {
+    assert.equal(catalog.performance_scenarios.length, 42);
+    assert.equal(catalog.protocol.performance_workload_count, 42);
+    assert.equal(catalog.protocol.performance_method_count, 40);
     const publicMethods = new Set(catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`));
     for (const scenario of catalog.performance_scenarios) {
         assert.ok(publicMethods.has(`${scenario.chaincode}.${scenario.transaction}`), scenario.id);
@@ -57,7 +57,7 @@ test('performance catalog covers all 41 public performance methods in 43 workloa
     const performanceMethods = new Set(catalog.performance_scenarios.map(item => `${item.chaincode}.${item.transaction}`));
     // ApproveApprovalThreshold needs a fresh proposal from another officer before each call, so it has no repeatable load.
     const excluded = new Set(['rupiah-monetary.Initialize', 'rupiah-monetary.DebitReserveForConversion', 'rupiah-monetary.ApproveApprovalThreshold']);
-    assert.equal(performanceMethods.size, 41);
+    assert.equal(performanceMethods.size, 40);
     for (const method of catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`)) {
         assert.equal(performanceMethods.has(method), !excluded.has(method), method);
     }
@@ -80,8 +80,7 @@ test('protocol uses bounded binary search and three grouped confirmations', () =
     assert.deepEqual(catalog.protocol.search_hints_ops_per_second, {
         'create-pending': 64,
         'record-review': 32,
-        'approve-standard': 32,
-        'decide-high-risk': 32,
+        'approve-subject': 32,
         'open-wallet': 128,
         'freeze-subject': 32,
         'request-unfreeze': 32,

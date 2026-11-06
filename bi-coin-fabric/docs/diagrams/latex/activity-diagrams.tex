@@ -33,9 +33,9 @@ Kirim data pendaftaran peserta & $\rightarrow$ & & \\
 & $\bullet\times$ Selesai & & $\downarrow$ \\
 & & & $\diamond$ Pengajuan disetujui? \\
 & [ya] \texttt{POST /subjects/\{subject\_id\}/decisions} & $\rightarrow$ & \\
-& & \texttt{ApproveStandard() / DecideHighRisk()} \newline \texttt{status = active} & \\
+& & \texttt{ApproveSubject()} \newline \texttt{status = active} & \\
 & [tidak] \texttt{POST /subjects/\{subject\_id\}/decisions} & $\rightarrow$ & \\
-& & \texttt{ApproveStandard() / DecideHighRisk()} \newline \texttt{status = rejected} & \\
+& & \texttt{ApproveSubject()} \newline \texttt{status = rejected} & \\
 & Kirim hasil pendaftaran & & \\
 & $\downarrow$ & & \\
 & $\bullet\times$ Selesai & & \\
@@ -262,7 +262,7 @@ Inisiasi transfer & $\rightarrow$ & \\
 \node[startnode] (start) at (-5,-0.8) {};
 \node[action] (s1) at (-3,-2) {Compliance Officer\\menginisiasi pembatasan peserta};
 \node[action] (s2) at (2.5,-2) {KYC Reviewer\\mengajukan permintaan\\pembukaan pembatasan};
-\node[action] (s3) at (6,-2) {Senior Approver\\menyetujui pembukaan\\pembatasan};
+\node[action] (s3) at (6,-2) {Compliance Officer\\menyetujui pembukaan\\pembatasan};
 
 \node[action] (b1) at (-3,-6.3) {POST\\subjects/\{subject\_id\}/restrictions};
 \node[action] (b2) at (0,-6.3) {Validasi peran\\Distributor};

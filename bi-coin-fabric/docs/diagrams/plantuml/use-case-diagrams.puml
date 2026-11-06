@@ -19,7 +19,6 @@ actor "Merchant" as M
 actor "Pelanggan\nRitel" as PR
 actor "Observer/Auditor\n(OJK, PPATK)" as OBS
 actor "KYC Reviewer" as KYC
-actor "Senior Approver" as SA
 actor "Compliance Officer" as CO
 
 rectangle "Sistem bi-coin-fabric" {
@@ -43,9 +42,7 @@ PR --> UC5
 PR --> UC6
 OBS --> UC10
 KYC --> UC4
-SA --> UC4
 KYC --> UC8
-SA --> UC8
 CO --> UC8
 
 UC1 ..> UC4 : <<include>>
@@ -110,7 +107,6 @@ title <<UC03>> Operasi Retail (Retail Operations)
 actor "Pelanggan\nRitel" as PR
 actor "Merchant" as M
 actor "KYC Reviewer" as KYC
-actor "Senior Approver" as SA
 actor "Compliance Officer" as CO
 
 rectangle "Operasi Retail" {
@@ -125,7 +121,6 @@ PR --> UC2
 PR --> UC4
 M --> UC3
 KYC --> UC1
-SA --> UC1
 
 UC4 ..> UC3 : <<include>>
 

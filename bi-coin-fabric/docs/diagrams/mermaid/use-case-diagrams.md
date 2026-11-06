@@ -16,7 +16,6 @@ flowchart LR
     PR[👤 Pelanggan Ritel]
     OBS["👤 Observer/Auditor (OJK, PPATK)"]
     KYC[👤 KYC Reviewer]
-    SA[👤 Senior Approver]
     CO[👤 Compliance Officer]
 
     subgraph SYS["Sistem bi-coin-fabric"]
@@ -39,9 +38,7 @@ flowchart LR
     PR --> UC5
     PR --> UC6
     KYC --> UC4
-    SA --> UC4
     KYC --> UC7
-    SA --> UC7
     CO --> UC7
     OBS --> UC9
 
@@ -93,7 +90,6 @@ flowchart LR
     PR[👤 Pelanggan Ritel]
     M[👤 Merchant]
     KYC[👤 KYC Reviewer]
-    SA[👤 Senior Approver]
     CO[👤 Compliance Officer]
 
     subgraph RET["Operasi Retail"]
@@ -108,7 +104,6 @@ flowchart LR
     PR --> UC4
     M --> UC3
     KYC --> UC1
-    SA --> UC1
 
     UC4 -.->|include| UC3
 ```

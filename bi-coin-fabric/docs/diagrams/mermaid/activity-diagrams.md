@@ -37,8 +37,8 @@ flowchart TD
 
   subgraph lane_c [Blockchain]
     A8["CreatePending()<br>status = pending"]:::action
-    A9["ApproveStandard() / DecideHighRisk()<br>status = active"]:::action
-    A10["ApproveStandard() / DecideHighRisk()<br>status = rejected"]:::action
+    A9["ApproveSubject()<br>status = active"]:::action
+    A10["ApproveSubject()<br>status = rejected"]:::action
   end
 
   subgraph lane_d [Staf Distributor]
@@ -247,7 +247,7 @@ flowchart TD
 
   subgraph lane_c [Blockchain]
     D7a["SubmitKycProfile()<br>→ status = pending"]:::action
-    D10a["RefreshKycProfile()<br>Periksa dokumen & risiko"]:::action
+    D10a["RefreshKycProfile()<br>Periksa dokumen"]:::action
     D7{"[hasil verifikasi?]"}:::decision
     D11["status = approved"]:::action
     D12["status = rejected"]:::action
@@ -355,7 +355,7 @@ flowchart TD
     subgraph L1["🏊 Staf Distributor"]
         S([Start]) --> S1["Compliance Officer menginisiasi pembatasan peserta"]
         S2["KYC Reviewer mengajukan permintaan pembukaan pembatasan"]
-        S3["Senior Approver menyetujui pembukaan pembatasan"]
+        S3["Compliance Officer menyetujui pembukaan pembatasan"]
     end
     subgraph L2["🏊 Backend API"]
         B1["POST /subjects/{subject_id}/restrictions"] --> B2["Validasi peran Distributor"]
