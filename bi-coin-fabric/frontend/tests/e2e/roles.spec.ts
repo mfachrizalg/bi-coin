@@ -26,14 +26,6 @@ const workspaces = [
     landingHeading: 'Subject approval',
   },
   {
-    role: 'wholesale_bank',
-    roleLabel: 'Wholesale Bank',
-    nav: 'Wholesale Bank workspace navigation',
-    tabs: ['Reserve and float'],
-    landingHash: '#/institutional/study-funding',
-    landingHeading: 'Reserve and float',
-  },
-  {
     role: 'authenticated',
     roleLabel: 'Retail Customer',
     nav: 'Retail Customer workspace navigation',

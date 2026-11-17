@@ -15,7 +15,8 @@ interface Credentials {
 const enabled = process.env.E2E_STUDY === '1'
 const actors = JSON.parse(process.env.E2E_STUDY_USERS ?? '{}') as Record<Actor, Credentials>
 const staffIDs = JSON.parse(process.env.E2E_STAFF_IDS ?? '{}') as Record<'reviewer' | 'compliance', string>
-const subjectID = `e2e-${Date.now()}`
+// Set by test 1: the backend generates the subject ID, so the form value is not used.
+let subjectID = ''
 const releaseEvidenceRef = 'ab'.repeat(32)
 const limits = { per_transaction: '1000', daily: '5000', monthly: '20000', holdings: '5000' }
 const slow = { timeout: 60_000 }
@@ -52,15 +53,22 @@ async function fillLimits(page: Page) {
   }
 }
 
+// 1x1 PNG: the onboarding form requires a PNG or JPEG identity document.
+const identityPNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+
 test.describe('compliance study flow', () => {
   test.skip(!enabled, 'set E2E_STUDY=1 with the study network up')
   test.describe.configure({ mode: 'serial', timeout: 180_000 })
 
   test('customer creates a pending subject', async ({ browser }) => {
     await asActor(browser, 'customer', async page => {
-      await page.locator('#study-subject-id').fill(subjectID)
       await page.locator('#study-category').selectOption('retail')
+      await page.locator('#study-legal-name').fill('Synthetic Customer')
+      await page.locator('#study-document-number').fill(`e2e-doc-${Date.now()}`)
+      await page.locator('#study-document').setInputFiles({ name: 'identity.png', mimeType: 'image/png', buffer: identityPNG })
       await act(page, 'Create pending subject', 'Create pending subject completed.')
+      subjectID = await page.locator('#study-subject-id').inputValue()
+      expect(subjectID).toMatch(/^[0-9a-f]+$/)
     })
   })
 
