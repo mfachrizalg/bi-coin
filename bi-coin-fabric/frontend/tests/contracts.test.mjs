@@ -159,13 +159,9 @@ test('organization function tabs show only the signed-in organization actions', 
   const restrictions = createRenderer(hooksModule, StudyConsole, { role: 'retail_bank', section: 'study_restrictions' })
   assert.match(expandedText(restrictions.render()), /Restrict subject/)
 
-  const wholesaleFunding = createRenderer(hooksModule, StudyConsole, { role: 'wholesale_bank', section: 'study_funding' })
-  const wholesaleFundingText = expandedText(wholesaleFunding.render())
-  assert.match(wholesaleFundingText, /Interbank transfer/)
-  assert.doesNotMatch(wholesaleFundingText, /Convert to retail float|Wallet funding/)
   const retailFunding = createRenderer(hooksModule, StudyConsole, { role: 'retail_bank', section: 'study_funding' })
   const retailFundingText = expandedText(retailFunding.render())
-  assert.match(retailFundingText, /Interbank transfer/)
+  assert.doesNotMatch(retailFundingText, /Interbank transfer/)
   assert.match(retailFundingText, /Convert to retail float/)
   assert.match(retailFundingText, /Wallet funding/)
 
@@ -176,7 +172,7 @@ test('organization function tabs show only the signed-in organization actions', 
   assert.match(appSource, /bank_indonesia: \{ label: 'Bank Indonesia', shell: 'institutional', tabs: \['study_staff', 'study_monetary'\] \}/)
   assert.match(appSource, /auditor: \{ label: 'Auditor', shell: 'institutional', tabs: \['study_audit'\] \}/)
   assert.match(appSource, /retail_bank: \{ label: 'Retail Bank', shell: 'institutional', tabs: \['study_approval', 'study_business', 'study_restrictions', 'study_funding'\] \}/)
-  assert.match(appSource, /wholesale_bank: \{ label: 'Wholesale Bank', shell: 'institutional', tabs: \['study_funding'\] \}/)
+  assert.doesNotMatch(appSource, /wholesale_bank|Wholesale Bank/)
   assert.match(appSource, /study_funding: \{ label: 'Reserve and float' \}/)
   assert.match(appSource, /has no workspace in the demo/)
   assert.doesNotMatch(appSource, /DemoPanel|Show demo/)

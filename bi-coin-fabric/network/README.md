@@ -4,12 +4,12 @@ This is a fresh four-peer study network with its own PostgreSQL database. Its ch
 
 Peer MSPs:
 
-- `CentralBankMSP` runs the issuer peer and the single ordering node.
-- `DistributorMSP` represents the two Distributor Banks, `wholesale-bank` and `retail-bank`.
+- `CentralBankMSP` runs the issuer peer and three ordering nodes, `orderer0`, `orderer1`, and `orderer2`, all on this host (ADR 0017).
+- `DistributorMSP` represents one non-bank Distributor (ADR 0017).
 - Observer (MSP ID: ValidatorMSP) peer (OJK, PPATK) for read-only audit and reports.
 - `EndUserMSP` contains eight generated client identities for retail, merchant, and company representatives.
 
-The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for `retail-bank`, and `User4` and `User5` act for `wholesale-bank`. Two officers per bank let a second officer approve four-eyes transfers (ADR 0014). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1` and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer` and `compliance_officer` before running KYC flows. CentralBank identities also include a peer, orderer, administrator, and two client identities, all under `CentralBankMSP`.
+The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for the Distributor. The second-bank identities were removed with the interbank features (ADR 0017). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1` and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer` and `compliance_officer` before running KYC flows. CentralBank identities also include three orderer identities (`orderer0`, `orderer1`, `orderer2`), a peer, an administrator, and two client identities, all under `CentralBankMSP`.
 
 The first start creates a private, ignored `.env.study` file with random local CA, CouchDB, and PostgreSQL credentials. Keep that file for later restarts.
 
@@ -18,9 +18,9 @@ bash scripts/network-up.sh
 bash scripts/deploy-chaincodes.sh
 ```
 
-The monetary policy requires CentralBankMSP and DistributorMSP. Payments require DistributorMSP and EndUserMSP. Controls use `AND('DistributorMSP.peer',OR('CentralBankMSP.peer','EndUserMSP.peer'))` for cross-chaincode reads; protected effective-control keys require CentralBankMSP and DistributorMSP.
+Monetary requires `AND('CentralBankMSP.peer','DistributorMSP.peer')`. Controls and payments require `AND('DistributorMSP.peer','CentralBankMSP.peer')` (ADR 0017). The subject collection `cddCollection` has members DistributorMSP, CentralBankMSP, and ValidatorMSP, and its definition is `network/collections/rupiah-controls.json` (ADR 0018). The subject record's state-based policy, set by `ProtectSubject`, uses the same AND policy.
 
-`ConvertToRetail` is the only route to the monetary conversion debit (`DebitReserveForConversion`). It invokes that debit and credits the same bank's retail float in one same-channel transaction. A failure in either chaincode aborts the complete transaction. `REMOVE_VOLUMES=true bash scripts/network-down.sh` removes only this study network's ledger, CouchDB, CA, and PostgreSQL volumes. It also moves the generated `organizations` and `ca-client` folders out of the repo into `~/bi-coin-backups/wipe-<timestamp>/`, with a `REASON.md` that says why. The bootstrap skips any org whose material already exists, so those folders must not survive a wipe. Decision and history: `docs/adr/0011-network-reset-archive-and-orphan-volumes.md`.
+`ConvertToRetail` is the only route to the monetary conversion debit (`DebitReserveForConversion`). It invokes that debit and credits the same Distributor's retail float in one same-channel transaction. A failure in either chaincode aborts the complete transaction. `REMOVE_VOLUMES=true bash scripts/network-down.sh` removes only this study network's ledger, CouchDB, CA, and PostgreSQL volumes. It also moves the generated `organizations` and `ca-client` folders out of the repo into `~/bi-coin-backups/wipe-<timestamp>/`, with a `REASON.md` that says why. The bootstrap skips any org whose material already exists, so those folders must not survive a wipe. Decision and history: `docs/adr/0011-network-reset-archive-and-orphan-volumes.md`. Moving from one orderer to three requires this reset, because the three-orderer genesis block cannot be applied to an existing ledger (ADR 0017).
 
 PostgreSQL is exposed only on `127.0.0.1:15432` and stores backend study data in `bi_coin_study`. To use its generated credentials from the repository root:
 
@@ -39,7 +39,7 @@ Each entry has this shape:
 
 ```json
 {
-  "username": "retail-bank",
+  "username": "distributor",
   "msp_id": "DistributorMSP",
   "peer_endpoint": "localhost:18051",
   "gateway_peer": "peer0.distributor.bi-coin:7051",
@@ -49,6 +49,6 @@ Each entry has this shape:
 }
 ```
 
-Use separate usernames and certificate paths for `retail-bank` (`User1`) and `wholesale-bank` (`User4`, with `User5` as its second officer). Customer users map to separate `EndUserMSP` identities. `AUTH_BOOTSTRAP_USERS_JSON` assigns application roles such as `retail_bank`, `wholesale_bank`, `bank_indonesia`, and `auditor`; it does not assign chaincode staff roles. A CentralBank user provisions each staff certificate's hashed client ID and chaincode role through `POST /staff` and `PUT /staff/{client_id}/role`. The service rejects an identity whose configured MSP does not match the route's required role.
+Map the Distributor identity `User1` to its own username. Customer users map to separate `EndUserMSP` identities. `AUTH_BOOTSTRAP_USERS_JSON` assigns application roles such as `retail_bank`, `bank_indonesia`, and `auditor`; it does not assign chaincode staff roles. A CentralBank user provisions each staff certificate's hashed client ID and chaincode role through `POST /staff` and `PUT /staff/{client_id}/role`. The service rejects an identity whose configured MSP does not match the route's required role.
 
-The API uses unversioned resource routes, including `/subjects`, `/customer-wallets`, `/retail-transfers`, `/distributors`, `/issuances`, `/reserve-redemptions`, `/interbank-transfers`, `/conversions`, and `/wallet-fundings`. `/conversions` moves a retail bank's reserve into its retail float, and `/wallet-fundings` moves that float into an approved retail wallet. Each call is atomic. These paths avoid the legacy `/wallets` and `/transfers` routes. Without `FABRIC_IDENTITIES_JSON`, these compliance routes are not registered.
+The API uses unversioned resource routes, including `/subjects`, `/customer-wallets`, `/retail-transfers`, `/distributors`, `/issuances`, `/reserve-redemptions`, `/conversions`, and `/wallet-fundings`. `/conversions` moves a Distributor's reserve into its retail float, and `/wallet-fundings` moves that float into an approved retail wallet. Each call is atomic. These paths avoid the legacy `/wallets` and `/transfers` routes. Without `FABRIC_IDENTITIES_JSON`, these compliance routes are not registered.

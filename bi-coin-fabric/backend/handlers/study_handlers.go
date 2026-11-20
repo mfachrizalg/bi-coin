@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -20,14 +23,16 @@ const (
 )
 
 type StudyHandler struct {
-	svc *services.StudyLedgerService
+	svc         *services.StudyLedgerService
+	store       *services.PostgresStore
+	documentDir string
 }
 
-func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
+func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService, store *services.PostgresStore, documentDir string) {
 	if svc == nil {
 		return
 	}
-	h := &StudyHandler{svc: svc}
+	h := &StudyHandler{svc: svc, store: store, documentDir: documentDir}
 	compliance := r.NewRoute().Subrouter()
 
 	user := compliance.NewRoute().Subrouter()
@@ -54,14 +59,6 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	distributor.HandleFunc("/subjects/{subject_id}/restriction-release-requests", h.RequestUnfreeze).Methods("POST").Name("compliance.subjects.restriction-release-requests.create")
 	distributor.HandleFunc("/subjects/{subject_id}/restriction-release-decisions", h.ApproveUnfreeze).Methods("POST").Name("compliance.subjects.restriction-release-decisions.create")
 
-	bank := compliance.NewRoute().Subrouter()
-	bank.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleWholesaleBank))
-	bank.HandleFunc("/interbank-transfers", h.TransferReserve).Methods("POST").Name("compliance.interbank-transfers.create")
-	bank.HandleFunc("/interbank-transfers/{reference}/approval", h.ApproveTransfer).Methods("POST").Name("compliance.interbank-transfers.approval.create")
-	bank.HandleFunc("/interbank-transfers/{reference}/rejection", h.RejectTransfer).Methods("POST").Name("compliance.interbank-transfers.rejection.create")
-	bank.HandleFunc("/distributors/{distributor_id}/approval-threshold-proposals", h.ProposeApprovalThreshold).Methods("POST").Name("compliance.distributors.approval-threshold-proposals.create")
-	bank.HandleFunc("/distributors/{distributor_id}/approval-threshold-approvals", h.ApproveApprovalThreshold).Methods("POST").Name("compliance.distributors.approval-threshold-approvals.create")
-
 	centralBank := compliance.NewRoute().Subrouter()
 	centralBank.Use(middleware.RequireRole(middleware.RoleBankIndonesia))
 	centralBank.HandleFunc("/staff", h.CreateStaff).Methods("POST").Name("compliance.staff.create")
@@ -71,11 +68,9 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	centralBank.HandleFunc("/distributors", h.RegisterDistributor).Methods("POST").Name("compliance.distributors.create")
 	centralBank.HandleFunc("/issuances", h.Issue).Methods("POST").Name("compliance.issuances.create")
 	centralBank.HandleFunc("/reserve-redemptions", h.RedeemReserve).Methods("POST").Name("compliance.reserve-redemptions.create")
-	centralBank.HandleFunc("/distributors/{distributor_id}/status", h.SetParticipantStatus).Methods("PUT").Name("compliance.distributors.status.update")
-	centralBank.HandleFunc("/transfer-limit", h.SetTransferLimit).Methods("PUT").Name("compliance.transfer-limit.update")
 
 	controlRead := compliance.NewRoute().Subrouter()
-	controlRead.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleWholesaleBank, middleware.RoleBankIndonesia, middleware.RoleAuditor))
+	controlRead.Use(middleware.RequireRole(middleware.RoleRetailBank, middleware.RoleBankIndonesia, middleware.RoleAuditor))
 	controlRead.HandleFunc("/subjects/{subject_id}", h.GetSubject).Methods("GET").Name("compliance.subjects.read")
 	controlRead.HandleFunc("/supply/wholesale", h.GetWholesaleSupply).Methods("GET").Name("compliance.supply.wholesale.read")
 	controlRead.HandleFunc("/supply/retail", h.GetRetailSupply).Methods("GET").Name("compliance.supply.retail.read")
@@ -83,7 +78,6 @@ func RegisterStudyRoutes(r *mux.Router, svc *services.StudyLedgerService) {
 	controlRead.HandleFunc("/distributors/{distributor_id}/reserve", h.GetReserve).Methods("GET").Name("compliance.distributors.reserve.read")
 	controlRead.HandleFunc("/distributors/{distributor_id}/float", h.GetRetailFloat).Methods("GET").Name("compliance.distributors.float.read")
 	controlRead.HandleFunc("/distributors/{distributor_id}", h.GetParticipant).Methods("GET").Name("compliance.distributors.read")
-	controlRead.HandleFunc("/transfer-limit", h.GetTransferLimit).Methods("GET").Name("compliance.transfer-limit.read")
 }
 
 func (h *StudyHandler) Identity(w http.ResponseWriter, r *http.Request) {
@@ -98,21 +92,6 @@ func (h *StudyHandler) Identity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeStudyResult(w, result)
-}
-
-func (h *StudyHandler) CreateSubject(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		SubjectID string `json:"subject_id" validate:"required,notblank"`
-		Category  string `json:"category" validate:"required,oneof=retail merchant business"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if err := h.submit(r, studyEndUserMSP, "rupiah-controls", "CreatePending", req.SubjectID, req.Category); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, "pending")
 }
 
 func (h *StudyHandler) OpenWallet(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +120,17 @@ func (h *StudyHandler) Transfer(w http.ResponseWriter, r *http.Request) {
 	if !requireStudyIdempotencyKey(w, r) {
 		return
 	}
-	result, err := h.submitResult(r, studyEndUserMSP, "rupiah-payments", "Transfer", req.From, req.To, req.Amount, r.Header.Get("Idempotency-Key"))
+	distributor, err := h.svc.DistributorUsername()
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	payee, err := h.svc.Evaluate(distributor, studyDistributorMSP, "rupiah-controls", "GetSubjectRecord", req.To)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	result, err := h.svc.SubmitWithTransient(middleware.GetUsername(r), studyEndUserMSP, "rupiah-payments", "Transfer", map[string][]byte{"payee_record": payee}, req.From, req.To, req.Amount, r.Header.Get("Idempotency-Key"))
 	if err != nil {
 		writeServiceError(w, err)
 		return
@@ -188,65 +177,6 @@ func (h *StudyHandler) FundWallet(w http.ResponseWriter, r *http.Request) {
 	writeStudyResult(w, result)
 }
 
-func (h *StudyHandler) TransferReserve(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		FromDistributorID string `json:"from_distributor_id" validate:"required,notblank"`
-		ToDistributorID   string `json:"to_distributor_id" validate:"required,notblank"`
-		Amount            string `json:"amount" validate:"required,positive_int64"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if !requireStudyIdempotencyKey(w, r) {
-		return
-	}
-	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-monetary", "TransferReserve", req.FromDistributorID, req.ToDistributorID, req.Amount, r.Header.Get("Idempotency-Key"))
-	if err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStudyResult(w, result)
-}
-
-func (h *StudyHandler) ApproveTransfer(w http.ResponseWriter, r *http.Request) {
-	h.transferDecision(w, r, "ApproveTransfer")
-}
-
-func (h *StudyHandler) RejectTransfer(w http.ResponseWriter, r *http.Request) {
-	h.transferDecision(w, r, "RejectTransfer")
-}
-
-func (h *StudyHandler) transferDecision(w http.ResponseWriter, r *http.Request, transaction string) {
-	result, err := h.submitResult(r, studyDistributorMSP, "rupiah-monetary", transaction, mux.Vars(r)["reference"])
-	if err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStudyResult(w, result)
-}
-
-func (h *StudyHandler) ProposeApprovalThreshold(w http.ResponseWriter, r *http.Request) {
-	h.approvalThreshold(w, r, "ProposeApprovalThreshold", "threshold_proposed")
-}
-
-func (h *StudyHandler) ApproveApprovalThreshold(w http.ResponseWriter, r *http.Request) {
-	h.approvalThreshold(w, r, "ApproveApprovalThreshold", "threshold_approved")
-}
-
-func (h *StudyHandler) approvalThreshold(w http.ResponseWriter, r *http.Request, transaction string, status string) {
-	var req struct {
-		Amount string `json:"amount" validate:"required,nonnegative_int64"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if err := h.submit(r, studyDistributorMSP, "rupiah-monetary", transaction, mux.Vars(r)["distributor_id"], req.Amount); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, status)
-}
-
 func (h *StudyHandler) GetBalance(w http.ResponseWriter, r *http.Request) {
 	result, err := h.evaluate(r, studyEndUserMSP, "rupiah-payments", "GetBalance", mux.Vars(r)["subject_id"])
 	if err != nil {
@@ -267,85 +197,6 @@ func (h *StudyHandler) ProtectSubject(w http.ResponseWriter, r *http.Request) {
 
 func (h *StudyHandler) RecordReview(w http.ResponseWriter, r *http.Request) {
 	h.subjectMutation(w, r, "RecordReview")
-}
-
-func (h *StudyHandler) SetLimits(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		PerTransaction string `json:"per_transaction" validate:"required,positive_int64"`
-		Daily          string `json:"daily" validate:"required,positive_int64"`
-		Monthly        string `json:"monthly" validate:"required,positive_int64"`
-		Holdings       string `json:"holdings" validate:"required,positive_int64"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	args := make([]string, 0, 4)
-	for _, value := range []string{req.PerTransaction, req.Daily, req.Monthly, req.Holdings} {
-		limit, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			writeValidationError(w, "limits must be decimal integer strings")
-			return
-		}
-		args = append(args, strconv.FormatInt(limit, 10))
-	}
-	h.subjectMutation(w, r, "SetLimits", args...)
-}
-
-func (h *StudyHandler) DecideSubject(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Approved *bool `json:"approved" validate:"required"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	subjectID := mux.Vars(r)["subject_id"]
-	username := middleware.GetUsername(r)
-	if _, err := h.svc.Submit(username, studyDistributorMSP, "rupiah-controls", "ApproveSubject", subjectID, strconv.FormatBool(*req.Approved)); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, "decided")
-}
-
-func (h *StudyHandler) SetBusinessAuthority(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Representatives     []string `json:"representatives" validate:"required,min=1,dive,required,notblank"`
-		BeneficialOwnerRefs []string `json:"beneficial_owner_refs" validate:"omitempty,dive,notblank"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	representatives, err := json.Marshal(req.Representatives)
-	if err != nil {
-		writeValidationError(w, "invalid representatives")
-		return
-	}
-	owners, err := json.Marshal(req.BeneficialOwnerRefs)
-	if err != nil {
-		writeValidationError(w, "invalid beneficial owner references")
-		return
-	}
-	h.subjectMutation(w, r, "SetBusinessAuthority", string(representatives), string(owners))
-}
-
-func (h *StudyHandler) FreezeSubject(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Reason models.StudyRestrictionReason `json:"reason_code" validate:"required,restriction_reason"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	h.subjectMutation(w, r, "FreezeSubject", string(req.Reason))
-}
-
-func (h *StudyHandler) RequestUnfreeze(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		AuthorityEvidenceRef string `json:"authority_evidence_ref" validate:"required,len=64,hexadecimal"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	h.subjectMutation(w, r, "RequestUnfreeze", req.AuthorityEvidenceRef)
 }
 
 func (h *StudyHandler) ApproveUnfreeze(w http.ResponseWriter, r *http.Request) {
@@ -394,51 +245,6 @@ func (h *StudyHandler) InitializeMonetary(w http.ResponseWriter, r *http.Request
 		return
 	}
 	writeStatus(w, "initialized")
-}
-
-func (h *StudyHandler) RegisterDistributor(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		DistributorID string `json:"distributor_id" validate:"required,notblank"`
-		Kind          string `json:"kind" validate:"required,oneof=wholesale retail"`
-		AdmissionRef  string `json:"admission_ref" validate:"required,len=64,hexadecimal"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "RegisterDistributor", req.DistributorID, req.Kind, req.AdmissionRef); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, "distributor_registered")
-}
-
-func (h *StudyHandler) SetParticipantStatus(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Status string `json:"status" validate:"required,oneof=active suspended frozen closed"`
-		Reason string `json:"reason_code" validate:"required,oneof=tikmi_assessment administrative_sanction authority_request participant_request participation_policy payment_system_continuity"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "SetParticipantStatus", mux.Vars(r)["distributor_id"], req.Status, req.Reason); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, "status_updated")
-}
-
-func (h *StudyHandler) SetTransferLimit(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Amount string `json:"amount" validate:"required,positive_int64"`
-	}
-	if !decodeJSON(w, r, &req) {
-		return
-	}
-	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "SetTransferLimit", req.Amount); err != nil {
-		writeServiceError(w, err)
-		return
-	}
-	writeStatus(w, "transfer_limit_set")
 }
 
 func (h *StudyHandler) Issue(w http.ResponseWriter, r *http.Request) {
@@ -538,16 +344,12 @@ func (h *StudyHandler) GetParticipant(w http.ResponseWriter, r *http.Request) {
 		writeServiceError(w, services.Internal("invalid study participant result", err))
 		return
 	}
-	for _, key := range []string{"approval_threshold", "reserve"} {
+	for _, key := range []string{"reserve"} {
 		if amount, ok := participant[key].(json.Number); ok {
 			participant[key] = amount.String()
 		}
 	}
 	writeJSON(w, http.StatusOK, participant)
-}
-
-func (h *StudyHandler) GetTransferLimit(w http.ResponseWriter, r *http.Request) {
-	h.readAmount(w, r, "rupiah-monetary", "GetTransferLimit")
 }
 
 func (h *StudyHandler) readAmount(w http.ResponseWriter, r *http.Request, chaincode string, transaction string, args ...string) {
@@ -566,7 +368,7 @@ func (h *StudyHandler) readAmount(w http.ResponseWriter, r *http.Request, chainc
 
 func studyMSPForRole(role middleware.Role) string {
 	switch role {
-	case middleware.RoleRetailBank, middleware.RoleWholesaleBank:
+	case middleware.RoleRetailBank:
 		return studyDistributorMSP
 	case middleware.RoleBankIndonesia:
 		return studyCentralBankMSP
@@ -621,4 +423,188 @@ func writeStudyResult(w http.ResponseWriter, result []byte) {
 
 func writeStatus(w http.ResponseWriter, status string) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": status})
+}
+
+const studyFormOverheadBytes = 64 << 10
+
+// CreateSubject takes the onboarding form and a PNG or JPEG identity document. The server generates the
+// subject ID and salt, stores the document by SHA-256, and writes the profile before CreatePending.
+func (h *StudyHandler) CreateSubject(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, services.MaxDocumentBytes+studyFormOverheadBytes)
+	if err := r.ParseMultipartForm(services.MaxDocumentBytes); err != nil {
+		writeValidationError(w, "multipart form with a document of at most 2 MB is required")
+		return
+	}
+	category := strings.TrimSpace(r.FormValue("category"))
+	legalName := strings.TrimSpace(r.FormValue("legal_name"))
+	documentType := strings.TrimSpace(r.FormValue("document_type"))
+	documentNumber := strings.TrimSpace(r.FormValue("document_number"))
+	if !slices.Contains([]string{"retail", "merchant", "business"}, category) || legalName == "" || documentType == "" || documentNumber == "" {
+		writeValidationError(w, "category, legal_name, document_type, and document_number are required")
+		return
+	}
+	file, _, err := r.FormFile("document")
+	if err != nil {
+		writeValidationError(w, "document is required")
+		return
+	}
+	defer file.Close()
+	data, err := io.ReadAll(io.LimitReader(file, services.MaxDocumentBytes+1))
+	if err != nil {
+		writeValidationError(w, "document could not be read")
+		return
+	}
+	if err := services.ValidateDocument(data); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	documentRef, err := services.StoreDocument(h.documentDir, data)
+	if err != nil {
+		writeServiceError(w, services.Internal("store identity document", err))
+		return
+	}
+	subjectID, err := services.NewRandomHex(16)
+	if err != nil {
+		writeServiceError(w, services.Internal("generate subject ID", err))
+		return
+	}
+	salt, err := services.NewRandomHex(32)
+	if err != nil {
+		writeServiceError(w, services.Internal("generate subject salt", err))
+		return
+	}
+	profileID, err := services.NewRandomHex(16)
+	if err != nil {
+		writeServiceError(w, services.Internal("generate profile ID", err))
+		return
+	}
+	if err := h.store.CreateKYCProfile(r.Context(), services.KYCProfile{
+		ProfileID: profileID, SubjectType: category, SubjectID: subjectID, LegalName: legalName,
+		DocumentType: documentType, DocumentNumber: documentNumber, DocumentHash: documentRef,
+	}); err != nil {
+		writeServiceError(w, services.Internal("store KYC profile", err))
+		return
+	}
+	payload, err := json.Marshal(map[string]string{"category": category, "salt": salt, "documentRef": documentRef})
+	if err != nil {
+		writeServiceError(w, services.Internal("encode CDD payload", err))
+		return
+	}
+	// A failed ledger call leaves the profile pending. PostgreSQL never authorizes a ledger effect (ADR 0007).
+	if _, err := h.svc.SubmitWithTransient(middleware.GetUsername(r), studyEndUserMSP, "rupiah-controls", "CreatePending", map[string][]byte{"payload": payload}, subjectID); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	if err := h.store.MarkKYCLedgerAnchored(r.Context(), subjectID); err != nil {
+		log.Printf("mark KYC profile %s ledger-anchored: %v", profileID, err)
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "pending", "subject_id": subjectID})
+}
+
+// submitSubjectPayload sends CDD contents in the transient map, so they stay out of the proposal arguments (D8).
+func (h *StudyHandler) submitSubjectPayload(r *http.Request, transaction string, subjectID string, contents any) error {
+	payload, err := json.Marshal(contents)
+	if err != nil {
+		return services.Internal("encode CDD payload", err)
+	}
+	_, err = h.svc.SubmitWithTransient(middleware.GetUsername(r), studyDistributorMSP, "rupiah-controls", transaction, map[string][]byte{"payload": payload}, subjectID)
+	return err
+}
+
+func (h *StudyHandler) SetLimits(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		PerTransaction string `json:"per_transaction" validate:"required,positive_int64"`
+		Daily          string `json:"daily" validate:"required,positive_int64"`
+		Monthly        string `json:"monthly" validate:"required,positive_int64"`
+		Holdings       string `json:"holdings" validate:"required,positive_int64"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	limits := make(map[string]int64, 4)
+	for key, value := range map[string]string{"per_transaction": req.PerTransaction, "daily": req.Daily, "monthly": req.Monthly, "holdings": req.Holdings} {
+		limit, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			writeValidationError(w, "limits must be decimal integer strings")
+			return
+		}
+		limits[key] = limit
+	}
+	if err := h.submitSubjectPayload(r, "SetLimits", mux.Vars(r)["subject_id"], limits); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "updated")
+}
+
+func (h *StudyHandler) DecideSubject(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Approved *bool `json:"approved" validate:"required"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submitSubjectPayload(r, "ApproveSubject", mux.Vars(r)["subject_id"], map[string]bool{"approved": *req.Approved}); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "decided")
+}
+
+func (h *StudyHandler) SetBusinessAuthority(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Representatives     []string `json:"representatives" validate:"required,min=1,dive,required,notblank"`
+		BeneficialOwnerRefs []string `json:"beneficial_owner_refs" validate:"omitempty,dive,notblank"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	contents := map[string][]string{"representatives": req.Representatives, "beneficial_owner_refs": req.BeneficialOwnerRefs}
+	if err := h.submitSubjectPayload(r, "SetBusinessAuthority", mux.Vars(r)["subject_id"], contents); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "updated")
+}
+
+func (h *StudyHandler) FreezeSubject(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Reason models.StudyRestrictionReason `json:"reason_code" validate:"required,restriction_reason"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submitSubjectPayload(r, "FreezeSubject", mux.Vars(r)["subject_id"], map[string]string{"reason": string(req.Reason)}); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "updated")
+}
+
+func (h *StudyHandler) RequestUnfreeze(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		AuthorityEvidenceRef string `json:"authority_evidence_ref" validate:"required,len=64,hexadecimal"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submitSubjectPayload(r, "RequestUnfreeze", mux.Vars(r)["subject_id"], map[string]string{"authority_evidence_ref": req.AuthorityEvidenceRef}); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "updated")
+}
+
+func (h *StudyHandler) RegisterDistributor(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		DistributorID string `json:"distributor_id" validate:"required,notblank"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+	if err := h.submit(r, studyCentralBankMSP, "rupiah-monetary", "RegisterDistributor", req.DistributorID); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeStatus(w, "distributor_registered")
 }

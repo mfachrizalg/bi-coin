@@ -6,7 +6,7 @@ import LoadingSkeleton from './components/LoadingSkeleton'
 import RequirementRail from './components/RequirementRail'
 
 export type Tab = 'study_identity' | 'study_wallet' | 'study_transfer' | 'study_approval' | 'study_business' | 'study_restrictions' | 'study_funding' | 'study_monetary' | 'study_audit' | 'study_staff'
-export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'retail_bank' | 'wholesale_bank' | 'bank_indonesia' | 'merchant' | 'auditor'
+export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'retail_bank' | 'bank_indonesia' | 'merchant' | 'auditor'
 
 type Shell = 'institutional' | 'retail'
 
@@ -21,7 +21,6 @@ export const ROLES: Record<Role, RoleConfig> = {
   authenticated: { label: 'Retail Customer', shell: 'retail', tabs: ['study_identity'] },
   kyc_verified: { label: 'Retail Customer', shell: 'retail', tabs: ['study_identity', 'study_wallet', 'study_transfer'] },
   retail_bank: { label: 'Retail Bank', shell: 'institutional', tabs: ['study_approval', 'study_business', 'study_restrictions', 'study_funding'] },
-  wholesale_bank: { label: 'Wholesale Bank', shell: 'institutional', tabs: ['study_funding'] },
   bank_indonesia: { label: 'Bank Indonesia', shell: 'institutional', tabs: ['study_staff', 'study_monetary'] },
   merchant: { label: 'Merchant', shell: 'retail', tabs: ['study_identity', 'study_wallet', 'study_transfer'] },
   auditor: { label: 'Auditor', shell: 'institutional', tabs: ['study_audit'] },

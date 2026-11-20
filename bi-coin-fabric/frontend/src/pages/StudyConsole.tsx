@@ -26,9 +26,8 @@ import {
   setStudyStaffRole,
   studyRestrictionReasonOptions,
   transferStudyFunds,
-  transferStudyInterbank,
 } from '../lib/api'
-import type { StudyBankKind, StudyLimitsInput, StudyRestrictionReason, StudyStaffRole, StudySubjectView } from '../lib/api'
+import type { StudyLimitsInput, StudyRestrictionReason, StudyStaffRole, StudySubjectView } from '../lib/api'
 
 function StudyAction({ label, working, disabled, onClick }: { label: string; working: boolean; disabled?: boolean; onClick: () => void }) {
   return <button className="primary-button" type="button" disabled={disabled || working} onClick={onClick}>{working ? 'Working…' : label}</button>
@@ -43,9 +42,10 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const [category, setCategory] = useState<StudySubjectView['category']>('retail')
   const [destinationID, setDestinationID] = useState('')
   const [distributorID, setDistributorID] = useState('')
-  const [recipientDistributorID, setRecipientDistributorID] = useState('')
-  const [bankKind, setBankKind] = useState<StudyBankKind>('wholesale')
-  const [admissionRef, setAdmissionRef] = useState('')
+  const [legalName, setLegalName] = useState('')
+  const [documentType, setDocumentType] = useState('ktp')
+  const [documentNumber, setDocumentNumber] = useState('')
+  const [documentFile, setDocumentFile] = useState<File | null>(null)
   const [amount, setAmount] = useState('')
   const [approved, setApproved] = useState(true)
   const [limits, setLimits] = useState<StudyLimitsInput>({ per_transaction: '', daily: '', monthly: '', holdings: '' })
@@ -63,7 +63,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
 
   const customer = role === 'authenticated' || role === 'kyc_verified' || role === 'merchant'
   const canPay = role === 'kyc_verified' || role === 'merchant'
-  const distributor = role === 'retail_bank' || role === 'wholesale_bank'
+  const distributor = role === 'retail_bank'
   const retailBank = role === 'retail_bank'
   const centralBank = role === 'bank_indonesia'
   const customerIdentity = customer && section === 'study_identity'
@@ -147,9 +147,13 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
             <option value="business">Business/company</option>
           </select>
         </label>
+        <label className="app-label" htmlFor="study-legal-name"><span>Legal name</span><input id="study-legal-name" className="app-input" value={legalName} onChange={event => setLegalName(event.target.value)} autoComplete="off" /></label>
+        <label className="app-label" htmlFor="study-document-type"><span>Document type</span><select id="study-document-type" className="app-input" value={documentType} onChange={event => setDocumentType(event.target.value)}><option value="ktp">KTP</option><option value="passport">Passport</option></select></label>
+        <label className="app-label" htmlFor="study-document-number"><span>Document number</span><input id="study-document-number" className="app-input" value={documentNumber} onChange={event => setDocumentNumber(event.target.value)} autoComplete="off" /></label>
+        <label className="app-label" htmlFor="study-document"><span>Identity document (PNG or JPEG, at most 2 MB)</span><input id="study-document" className="app-input" type="file" accept="image/png,image/jpeg" onChange={event => setDocumentFile(event.target.files?.[0] ?? null)} /></label>
         <div className="button-row">
           <StudyAction label="Check mapped identity" working={busy === 'Check mapped identity'} disabled={Boolean(busy)} onClick={() => void run('Check mapped identity', getStudyIdentity)} />
-          <StudyAction label="Create pending subject" working={busy === 'Create pending subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Create pending subject', () => createStudySubject({ subject_id: subjectID.trim(), category }))} />
+          <StudyAction label="Create pending subject" working={busy === 'Create pending subject'} disabled={!legalName.trim() || !documentNumber.trim() || !documentFile || Boolean(busy)} onClick={() => void run('Create pending subject', async () => { if (!documentFile) throw new Error('Choose a PNG or JPEG document first.'); const response = await createStudySubject({ category, legal_name: legalName.trim(), document_type: documentType, document_number: documentNumber.trim(), document: documentFile }); setSubjectID(response.subject_id); return response })} />
         </div>
       </article>}
 
@@ -219,12 +223,10 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
 
       {distributorFunding && <article className="surface-card">
         <h3>Distributor reserve and float</h3>
-        <p className="muted">Interbank transfers move w-Rupiah Digital between Distributor reserves. Retail banks also convert to retail float and fund wallets.</p>
+        <p className="muted">Retail banks convert Distributor reserve to retail float and fund wallets.</p>
         <label className="app-label" htmlFor="study-distributor-id"><span>Distributor ID (own bank)</span><input id="study-distributor-id" className="app-input" value={distributorID} onChange={event => setDistributorID(event.target.value)} autoComplete="off" /></label>
-        <label className="app-label" htmlFor="study-recipient-distributor-id"><span>Recipient distributor ID</span><input id="study-recipient-distributor-id" className="app-input" value={recipientDistributorID} onChange={event => setRecipientDistributorID(event.target.value)} autoComplete="off" /></label>
         {amountField}
         <div className="button-row">
-          <StudyAction label="Interbank transfer" working={busy === 'Interbank transfer'} disabled={!distributorID.trim() || !recipientDistributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Interbank transfer', () => transferStudyInterbank({ from_distributor_id: distributorID.trim(), to_distributor_id: recipientDistributorID.trim(), amount }, retryKey('interbank')), 'interbank')} />
           {retailBank && <StudyAction label="Convert to retail float" working={busy === 'Convert to retail float'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Convert to retail float', () => convertStudyToRetail({ distributor_id: distributorID.trim(), amount }, retryKey('conversion')), 'conversion')} />}
           {retailBank && <StudyAction label="Wallet funding" working={busy === 'Wallet funding'} disabled={!hasSubject || !distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Wallet funding', () => fundStudyWallet({ subject_id: subjectID.trim(), distributor_id: distributorID.trim(), amount }, retryKey('funding')), 'funding')} />}
         </div>
@@ -241,9 +243,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
         <p className="muted">These actions use the CentralBankMSP identity mapped to this login.</p>
         <div className="button-row"><StudyAction label="Initialize monetary state" working={busy === 'Initialize monetary state'} disabled={Boolean(busy)} onClick={() => void run('Initialize monetary state', initializeStudyMonetary)} /></div>
         <label className="app-label" htmlFor="study-central-distributor"><span>Distributor ID</span><input id="study-central-distributor" className="app-input" value={distributorID} onChange={event => setDistributorID(event.target.value)} autoComplete="off" /></label>
-        <label className="app-label" htmlFor="study-bank-kind"><span>Bank kind</span><select id="study-bank-kind" className="app-input" value={bankKind} onChange={event => setBankKind(event.target.value as StudyBankKind)}><option value="wholesale">Wholesale</option><option value="retail">Retail</option></select></label>
-        <label className="app-label" htmlFor="study-admission-ref"><span>Admission evidence reference (SHA-256)</span><input id="study-admission-ref" className="app-input" value={admissionRef} onChange={event => setAdmissionRef(event.target.value)} autoComplete="off" /></label>
-        <div className="button-row"><StudyAction label="Register bank" working={busy === 'Register bank'} disabled={!distributorID.trim() || !admissionRef.trim() || Boolean(busy)} onClick={() => void run('Register bank', () => registerStudyDistributor({ distributor_id: distributorID.trim(), kind: bankKind, admission_ref: admissionRef.trim() }))} /></div>
+        <div className="button-row"><StudyAction label="Register Distributor" working={busy === 'Register Distributor'} disabled={!distributorID.trim() || Boolean(busy)} onClick={() => void run('Register Distributor', () => registerStudyDistributor({ distributor_id: distributorID.trim() }))} /></div>
         {amountField}
         <div className="button-row">
           <StudyAction label="Issuance" working={busy === 'Issuance'} disabled={!distributorID.trim() || !hasAmount || Boolean(busy)} onClick={() => void run('Issuance', () => issueStudyRupiah({ distributor_id: distributorID.trim(), amount }, retryKey('issuance')), 'issuance')} />

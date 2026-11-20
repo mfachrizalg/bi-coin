@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -100,20 +103,14 @@ func (c *PaymentsContract) Transfer(ctx contractapi.TransactionContextInterface,
 	if !canAct {
 		return paymentReceipt{}, fmt.Errorf("caller cannot act for sender")
 	}
-	for _, subject := range []string{from, to} {
-		eligible, err := invokeBool(ctx, controlsChaincode, "CanPay", subject)
-		if err != nil {
-			return paymentReceipt{}, err
-		}
-		if !eligible {
-			return paymentReceipt{}, fmt.Errorf("subject %s is not eligible to pay or receive", subject)
-		}
-	}
-	senderLimits, err := invokeLimits(ctx, from)
+	eligible, err := invokeBool(ctx, controlsChaincode, "CanPay", from)
 	if err != nil {
 		return paymentReceipt{}, err
 	}
-	receiverLimits, err := invokeLimits(ctx, to)
+	if !eligible {
+		return paymentReceipt{}, fmt.Errorf("subject %s is not eligible to pay", from)
+	}
+	senderLimits, err := invokeLimits(ctx, from)
 	if err != nil {
 		return paymentReceipt{}, err
 	}
@@ -137,8 +134,8 @@ func (c *PaymentsContract) Transfer(ctx contractapi.TransactionContextInterface,
 	if err != nil {
 		return paymentReceipt{}, err
 	}
-	if receiver.Balance > receiverLimits.Holdings {
-		return paymentReceipt{}, fmt.Errorf("recipient holdings limit exceeded")
+	if err := checkPayee(ctx, to, receiver.Balance); err != nil {
+		return paymentReceipt{}, err
 	}
 	if err := addUsage(ctx, from, amount, senderLimits); err != nil {
 		return paymentReceipt{}, err
@@ -218,13 +215,6 @@ func (c *PaymentsContract) FundWallet(ctx contractapi.TransactionContextInterfac
 			return paymentReceipt{}, fmt.Errorf("reference was used for another operation")
 		}
 		return paymentReceipt{}, err
-	}
-	canSend, err := invokeBool(ctx, monetaryChaincode, "CanSend", distributorID)
-	if err != nil {
-		return paymentReceipt{}, err
-	}
-	if !canSend {
-		return paymentReceipt{}, fmt.Errorf("distributor participant status does not allow funding")
 	}
 	eligible, err := invokeBool(ctx, controlsChaincode, "CanPay", subjectID)
 	if err != nil {
@@ -339,6 +329,79 @@ func invokeLimits(ctx contractapi.TransactionContextInterface, subjectID string)
 		return limitProfile{}, fmt.Errorf("decode control limits: %w", err)
 	}
 	return limits, nil
+}
+
+func invokeString(ctx contractapi.TransactionContextInterface, chaincode string, transaction string, subjectID string) (string, error) {
+	response := ctx.GetStub().InvokeChaincode(chaincode, [][]byte{[]byte(transaction), []byte(subjectID)}, channelName)
+	if response.Status != shim.OK {
+		return "", fmt.Errorf("%s.%s failed: %s", chaincode, transaction, response.Message)
+	}
+	return string(response.Payload), nil
+}
+
+// checkPayee verifies the payee record supplied in the transient map against the
+// public hash, then applies the payee rules to the receiver's balance after the credit.
+func checkPayee(ctx contractapi.TransactionContextInterface, payeeID string, balanceAfter int64) error {
+	transient, err := ctx.GetStub().GetTransient()
+	if err != nil {
+		return err
+	}
+	raw, ok := transient["payee_record"]
+	if !ok {
+		return fmt.Errorf("payee record is required in transient data")
+	}
+	expected, err := invokeString(ctx, controlsChaincode, "GetSubjectHash", payeeID)
+	if err != nil {
+		return err
+	}
+	timestamp, err := ctx.GetStub().GetTxTimestamp()
+	if err != nil {
+		return err
+	}
+	return verifyPayee(raw, expected, timestamp.Seconds, balanceAfter, payeeID)
+}
+
+// canonicalJSON re-encodes JSON with sorted keys and no extra whitespace. The contract API
+// re-encodes string results this way, so the commitment is checked against this form.
+func canonicalJSON(raw []byte) ([]byte, error) {
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
+	var value interface{}
+	if err := dec.Decode(&value); err != nil {
+		return nil, err
+	}
+	return json.Marshal(value)
+}
+
+// verifyPayee accepts a payee record only when it matches the expected hash and the
+// subject is active, not restricted at now, has limits set, and stays within holdings.
+func verifyPayee(raw []byte, expectedHash string, now int64, balanceAfter int64, payeeID string) error {
+	canonical, err := canonicalJSON(raw)
+	if err != nil {
+		return fmt.Errorf("decode payee record: %w", err)
+	}
+	sum := sha256.Sum256(canonical)
+	if hex.EncodeToString(sum[:]) != expectedHash {
+		return fmt.Errorf("payee record does not match the ledger hash")
+	}
+	var payee struct {
+		Status          string       `json:"status"`
+		Restricted      bool         `json:"restricted"`
+		RestrictedUntil int64        `json:"restricted_until"`
+		LimitsSet       bool         `json:"limits_set"`
+		Limits          limitProfile `json:"limits"`
+	}
+	if err := json.Unmarshal(raw, &payee); err != nil {
+		return fmt.Errorf("decode payee record: %w", err)
+	}
+	restricted := payee.Restricted && (payee.RestrictedUntil == 0 || now < payee.RestrictedUntil)
+	if payee.Status != "active" || restricted || !payee.LimitsSet {
+		return fmt.Errorf("subject %s is not eligible to receive", payeeID)
+	}
+	if balanceAfter > payee.Limits.Holdings {
+		return fmt.Errorf("recipient holdings limit exceeded")
+	}
+	return nil
 }
 
 func addUsage(ctx contractapi.TransactionContextInterface, subjectID string, amount int64, limits limitProfile) error {

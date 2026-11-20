@@ -16,7 +16,7 @@ type roleInfo struct {
 
 var roleOrder = []string{
 	"public", "authenticated", "kyc_verified",
-	"retail_bank", "wholesale_bank", "bank_indonesia", "merchant", "auditor",
+	"retail_bank", "bank_indonesia", "merchant", "auditor",
 }
 
 // DocsSpecs holds the embedded OpenAPI JSON bytes keyed by role name.
@@ -26,7 +26,6 @@ type DocsSpecs struct {
 	Authenticated []byte
 	KycVerified   []byte
 	RetailBank    []byte
-	WholesaleBank []byte
 	BankIndonesia []byte
 	Merchant      []byte
 	Auditor       []byte
@@ -43,7 +42,6 @@ func NewDocsHandler(specs DocsSpecs) *DocsHandler {
 			"authenticated":  {Label: "Authenticated", Spec: specs.Authenticated, TagLine: "Health, JWT login, and principal profile"},
 			"kyc_verified":   {Label: "KYC Verified", Spec: specs.KycVerified, TagLine: "Health, JWT login, and principal profile"},
 			"retail_bank":    {Label: "Retail Bank", Spec: specs.RetailBank, TagLine: "Health, JWT login, and principal profile"},
-			"wholesale_bank": {Label: "Wholesale Bank", Spec: specs.WholesaleBank, TagLine: "Health, JWT login, and principal profile"},
 			"bank_indonesia": {Label: "Bank Indonesia", Spec: specs.BankIndonesia, TagLine: "Health, JWT login, and principal profile"},
 			"merchant":       {Label: "Merchant", Spec: specs.Merchant, TagLine: "Health, JWT login, and principal profile"},
 			"auditor":        {Label: "Auditor", Spec: specs.Auditor, TagLine: "Health, JWT login, and principal profile"},

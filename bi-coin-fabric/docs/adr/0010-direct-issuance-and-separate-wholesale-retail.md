@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Amended by ADR 0017 (2026-11-09): the interbank and wholesale-transfer parts are removed. Issuance into the Distributor reserve and the Retail float flow stay.
 
 ## Decision
 

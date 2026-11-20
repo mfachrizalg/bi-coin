@@ -14,9 +14,6 @@ var specKycVerified []byte
 //go:embed docs/api/openapi-retail_bank.json
 var specRetailBank []byte
 
-//go:embed docs/api/openapi-wholesale_bank.json
-var specWholesaleBank []byte
-
 //go:embed docs/api/openapi-bank_indonesia.json
 var specBankIndonesia []byte
 

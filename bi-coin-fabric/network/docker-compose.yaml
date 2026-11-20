@@ -15,6 +15,10 @@ volumes:
     name: bi-coin-enduser-peer
   orderer-data:
     name: bi-coin-orderer
+  orderer1-data:
+    name: bi-coin-orderer1
+  orderer2-data:
+    name: bi-coin-orderer2
   centralbank-couch-data:
     name: bi-coin-centralbank-couch
   distributor-couch-data:
@@ -148,6 +152,7 @@ services:
       - ./organizations:/network/organizations:ro
       - ../chaincode:/chaincode:ro
       - ./packages:/network/packages
+      - ./collections:/network/collections:ro
     networks: [study]
 
   study-postgres:
@@ -164,9 +169,9 @@ services:
       - "127.0.0.1:15432:5432"
     networks: [study]
 
-  orderer.centralbank.bi-coin:
+  orderer0.centralbank.bi-coin:
     image: hyperledger/fabric-orderer:2.5
-    container_name: bi-coin-orderer-centralbank
+    container_name: bi-coin-orderer0-centralbank
     profiles: [network]
     environment:
       FABRIC_LOGGING_SPEC: INFO
@@ -191,12 +196,82 @@ services:
       ORDERER_ADMIN_LISTENADDRESS: 0.0.0.0:7053
     command: orderer
     volumes:
-      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/msp:/var/hyperledger/orderer/msp:ro
-      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls:/var/hyperledger/orderer/tls:ro
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer0.centralbank.bi-coin/msp:/var/hyperledger/orderer/msp:ro
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer0.centralbank.bi-coin/tls:/var/hyperledger/orderer/tls:ro
       - orderer-data:/var/hyperledger/production
     ports:
       - "17050:7050"
       - "17053:7053"
+    networks: [study]
+
+  orderer1.centralbank.bi-coin:
+    image: hyperledger/fabric-orderer:2.5
+    container_name: bi-coin-orderer1-centralbank
+    profiles: [network]
+    environment:
+      FABRIC_LOGGING_SPEC: INFO
+      ORDERER_GENERAL_LISTENADDRESS: 0.0.0.0
+      ORDERER_GENERAL_LISTENPORT: 7050
+      ORDERER_GENERAL_LOCALMSPID: CentralBankMSP
+      ORDERER_GENERAL_LOCALMSPDIR: /var/hyperledger/orderer/msp
+      ORDERER_GENERAL_TLS_ENABLED: "true"
+      ORDERER_GENERAL_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_CLUSTER_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_BOOTSTRAPMETHOD: none
+      ORDERER_CHANNELPARTICIPATION_ENABLED: "true"
+      ORDERER_ADMIN_TLS_ENABLED: "true"
+      ORDERER_ADMIN_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_ADMIN_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_ADMIN_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_TLS_CLIENTROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_LISTENADDRESS: 0.0.0.0:7053
+    command: orderer
+    volumes:
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer1.centralbank.bi-coin/msp:/var/hyperledger/orderer/msp:ro
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer1.centralbank.bi-coin/tls:/var/hyperledger/orderer/tls:ro
+      - orderer1-data:/var/hyperledger/production
+    ports:
+      - "17060:7050"
+      - "17063:7053"
+    networks: [study]
+
+  orderer2.centralbank.bi-coin:
+    image: hyperledger/fabric-orderer:2.5
+    container_name: bi-coin-orderer2-centralbank
+    profiles: [network]
+    environment:
+      FABRIC_LOGGING_SPEC: INFO
+      ORDERER_GENERAL_LISTENADDRESS: 0.0.0.0
+      ORDERER_GENERAL_LISTENPORT: 7050
+      ORDERER_GENERAL_LOCALMSPID: CentralBankMSP
+      ORDERER_GENERAL_LOCALMSPDIR: /var/hyperledger/orderer/msp
+      ORDERER_GENERAL_TLS_ENABLED: "true"
+      ORDERER_GENERAL_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_GENERAL_CLUSTER_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_GENERAL_BOOTSTRAPMETHOD: none
+      ORDERER_CHANNELPARTICIPATION_ENABLED: "true"
+      ORDERER_ADMIN_TLS_ENABLED: "true"
+      ORDERER_ADMIN_TLS_CERTIFICATE: /var/hyperledger/orderer/tls/server.crt
+      ORDERER_ADMIN_TLS_PRIVATEKEY: /var/hyperledger/orderer/tls/server.key
+      ORDERER_ADMIN_TLS_ROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_TLS_CLIENTROOTCAS: '[/var/hyperledger/orderer/tls/ca.crt]'
+      ORDERER_ADMIN_LISTENADDRESS: 0.0.0.0:7053
+    command: orderer
+    volumes:
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer2.centralbank.bi-coin/msp:/var/hyperledger/orderer/msp:ro
+      - ./organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer2.centralbank.bi-coin/tls:/var/hyperledger/orderer/tls:ro
+      - orderer2-data:/var/hyperledger/production
+    ports:
+      - "17070:7050"
+      - "17073:7053"
     networks: [study]
 
   couchdb.centralbank.bi-coin:
@@ -230,7 +305,7 @@ services:
       - ./organizations/peerOrganizations/centralbank.bi-coin/peers/peer0.centralbank.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
       - ./organizations/peerOrganizations/centralbank.bi-coin/peers/peer0.centralbank.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - centralbank-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.bi-coin, couchdb.centralbank.bi-coin]
+    depends_on: [orderer0.centralbank.bi-coin, couchdb.centralbank.bi-coin]
     ports: ["17051:7051"]
     networks: [study]
 
@@ -265,7 +340,7 @@ services:
       - ./organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
       - ./organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - distributor-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.bi-coin, couchdb.distributor.bi-coin]
+    depends_on: [orderer0.centralbank.bi-coin, couchdb.distributor.bi-coin]
     ports: ["18051:7051"]
     networks: [study]
 
@@ -300,7 +375,7 @@ services:
       - ./organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
       - ./organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - validator-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.bi-coin, couchdb.validator.bi-coin]
+    depends_on: [orderer0.centralbank.bi-coin, couchdb.validator.bi-coin]
     ports: ["19051:7051"]
     networks: [study]
 
@@ -335,6 +410,6 @@ services:
       - ./organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/msp:/etc/hyperledger/fabric/msp:ro
       - ./organizations/peerOrganizations/enduser.bi-coin/peers/peer0.enduser.bi-coin/tls:/etc/hyperledger/fabric/tls:ro
       - enduser-peer-data:/var/hyperledger/production
-    depends_on: [orderer.centralbank.bi-coin, couchdb.enduser.bi-coin]
+    depends_on: [orderer0.centralbank.bi-coin, couchdb.enduser.bi-coin]
     ports: ["20051:7051"]
     networks: [study]

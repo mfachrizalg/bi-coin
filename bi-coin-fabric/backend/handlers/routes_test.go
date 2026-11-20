@@ -20,15 +20,14 @@ func studyRequest(method, path, body string, role middleware.Role) *http.Request
 	return req.WithContext(ctx)
 }
 
-func TestWholesaleControlRoutesEnforceRoles(t *testing.T) {
+func TestControlRoutesEnforceRoles(t *testing.T) {
 	router := mux.NewRouter()
-	RegisterStudyRoutes(router, &services.StudyLedgerService{})
+	RegisterStudyRoutes(router, &services.StudyLedgerService{}, nil, "")
 
-	bank := []middleware.Role{middleware.RoleRetailBank, middleware.RoleWholesaleBank}
 	centralBank := []middleware.Role{middleware.RoleBankIndonesia}
-	read := []middleware.Role{middleware.RoleRetailBank, middleware.RoleWholesaleBank, middleware.RoleBankIndonesia, middleware.RoleAuditor}
+	read := []middleware.Role{middleware.RoleRetailBank, middleware.RoleBankIndonesia, middleware.RoleAuditor}
 	allRoles := []middleware.Role{
-		middleware.RoleAuthenticated, middleware.RoleKycVerified, middleware.RoleRetailBank, middleware.RoleWholesaleBank,
+		middleware.RoleAuthenticated, middleware.RoleKycVerified, middleware.RoleRetailBank,
 		middleware.RoleBankIndonesia, middleware.RoleMerchant, middleware.RoleAuditor,
 	}
 	routes := []struct {
@@ -38,16 +37,8 @@ func TestWholesaleControlRoutesEnforceRoles(t *testing.T) {
 		path     string
 		allowed  []middleware.Role
 	}{
-		{"compliance.interbank-transfers.create", "POST", "/interbank-transfers", "/interbank-transfers", bank},
-		{"compliance.interbank-transfers.approval.create", "POST", "/interbank-transfers/{reference}/approval", "/interbank-transfers/ref-1/approval", bank},
-		{"compliance.interbank-transfers.rejection.create", "POST", "/interbank-transfers/{reference}/rejection", "/interbank-transfers/ref-1/rejection", bank},
-		{"compliance.distributors.approval-threshold-proposals.create", "POST", "/distributors/{distributor_id}/approval-threshold-proposals", "/distributors/wholesale-bank/approval-threshold-proposals", bank},
-		{"compliance.distributors.approval-threshold-approvals.create", "POST", "/distributors/{distributor_id}/approval-threshold-approvals", "/distributors/wholesale-bank/approval-threshold-approvals", bank},
 		{"compliance.distributors.create", "POST", "/distributors", "/distributors", centralBank},
-		{"compliance.distributors.status.update", "PUT", "/distributors/{distributor_id}/status", "/distributors/wholesale-bank/status", centralBank},
-		{"compliance.transfer-limit.update", "PUT", "/transfer-limit", "/transfer-limit", centralBank},
-		{"compliance.distributors.read", "GET", "/distributors/{distributor_id}", "/distributors/wholesale-bank", read},
-		{"compliance.transfer-limit.read", "GET", "/transfer-limit", "/transfer-limit", read},
+		{"compliance.distributors.read", "GET", "/distributors/{distributor_id}", "/distributors/distributor-1", read},
 	}
 	for _, route := range routes {
 		t.Run(route.name, func(t *testing.T) {
@@ -74,15 +65,26 @@ func TestWholesaleControlRoutesEnforceRoles(t *testing.T) {
 			}
 		})
 	}
+	for _, removed := range []string{
+		"compliance.interbank-transfers.create",
+		"compliance.distributors.approval-threshold-proposals.create",
+		"compliance.distributors.status.update",
+		"compliance.transfer-limit.update",
+		"compliance.transfer-limit.read",
+	} {
+		if router.Get(removed) != nil {
+			t.Fatalf("removed route %s is still registered", removed)
+		}
+	}
 }
 
-func TestRegisterDistributorRequiresAdmissionRef(t *testing.T) {
+func TestRegisterDistributorRequiresDistributorID(t *testing.T) {
 	router := mux.NewRouter()
-	RegisterStudyRoutes(router, &services.StudyLedgerService{})
+	RegisterStudyRoutes(router, &services.StudyLedgerService{}, nil, "")
 	response := httptest.NewRecorder()
-	router.ServeHTTP(response, studyRequest("POST", "/distributors", `{"distributor_id":"wholesale-bank","kind":"wholesale"}`, middleware.RoleBankIndonesia))
-	if response.Code != http.StatusUnprocessableEntity || !strings.Contains(response.Body.String(), "admission_ref") {
-		t.Fatalf("missing admission_ref: status %d body %s", response.Code, response.Body.String())
+	router.ServeHTTP(response, studyRequest("POST", "/distributors", `{}`, middleware.RoleBankIndonesia))
+	if response.Code != http.StatusUnprocessableEntity || !strings.Contains(response.Body.String(), "distributor_id") {
+		t.Fatalf("missing distributor_id: status %d body %s", response.Code, response.Body.String())
 	}
 }
 

@@ -17,7 +17,9 @@ Organizations:
         Type: Signature
         Rule: "OR('CentralBankMSP.peer')"
     OrdererEndpoints:
-      - "orderer.centralbank.bi-coin:7050"
+      - "orderer0.centralbank.bi-coin:7050"
+      - "orderer1.centralbank.bi-coin:7050"
+      - "orderer2.centralbank.bi-coin:7050"
     AnchorPeers:
       - Host: peer0.centralbank.bi-coin
         Port: 7051
@@ -116,13 +118,23 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-    - orderer.centralbank.bi-coin:7050
+    - orderer0.centralbank.bi-coin:7050
+    - orderer1.centralbank.bi-coin:7050
+    - orderer2.centralbank.bi-coin:7050
   EtcdRaft:
     Consenters:
-      - Host: orderer.centralbank.bi-coin
+      - Host: orderer0.centralbank.bi-coin
         Port: 7050
-        ClientTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls/server.crt
-        ServerTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin/tls/server.crt
+        ClientTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer0.centralbank.bi-coin/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer0.centralbank.bi-coin/tls/server.crt
+      - Host: orderer1.centralbank.bi-coin
+        Port: 7050
+        ClientTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer1.centralbank.bi-coin/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer1.centralbank.bi-coin/tls/server.crt
+      - Host: orderer2.centralbank.bi-coin
+        Port: 7050
+        ClientTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer2.centralbank.bi-coin/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer2.centralbank.bi-coin/tls/server.crt
   BatchTimeout: 2s
   BatchSize:
     MaxMessageCount: 10

@@ -7,7 +7,7 @@ NETWORK_DIR="$PROJECT_DIR/network"
 FABRIC_SAMPLES="${FABRIC_SAMPLES:-$HOME/fabric-samples}"
 CHANNEL_NAME="${FABRIC_CHANNEL_NAME:-bi-coin}"
 PROJECT_NAME="bi-coin"
-ORDERER_HOST="orderer.centralbank.bi-coin"
+ORDERER_HOST="orderer0.centralbank.bi-coin"
 ORDERER_TLS="$NETWORK_DIR/organizations/ordererOrganizations/centralbank.bi-coin/orderers/$ORDERER_HOST/tls"
 
 source "$NETWORK_DIR/network-env.sh"
@@ -57,34 +57,40 @@ configtxgen -profile BiCoinChannel -channelID "$CHANNEL_NAME" -outputBlock "$BLO
 echo "Starting isolated study peers and orderer..."
 compose --profile network up -d
 
-orderer_ready=false
-for _ in $(seq 1 30); do
-  if osnadmin channel list -o localhost:17053 \
-      --ca-file "$ORDERER_TLS/ca.crt" \
-      --client-cert "$ORDERER_TLS/server.crt" \
-      --client-key "$ORDERER_TLS/server.key" >/dev/null 2>&1; then
-    orderer_ready=true
-    break
+ORDERER_ADMIN_PORTS=(17053 17063 17073)
+for i in 0 1 2; do
+  node="orderer$i.centralbank.bi-coin"
+  tls="$NETWORK_DIR/organizations/ordererOrganizations/centralbank.bi-coin/orderers/$node/tls"
+  port="${ORDERER_ADMIN_PORTS[$i]}"
+  orderer_ready=false
+  for _ in $(seq 1 30); do
+    if osnadmin channel list -o "localhost:$port" \
+        --ca-file "$tls/ca.crt" \
+        --client-cert "$tls/server.crt" \
+        --client-key "$tls/server.key" >/dev/null 2>&1; then
+      orderer_ready=true
+      break
+    fi
+    sleep 2
+  done
+  if [[ "$orderer_ready" != true ]]; then
+    echo "$node admin endpoint did not become ready" >&2
+    exit 1
   fi
-  sleep 2
+  if osnadmin channel list -o "localhost:$port" \
+      --ca-file "$tls/ca.crt" \
+      --client-cert "$tls/server.crt" \
+      --client-key "$tls/server.key" 2>/dev/null | grep -q "$CHANNEL_NAME"; then
+    echo "$node already joined $CHANNEL_NAME."
+  else
+    osnadmin channel join --channelID "$CHANNEL_NAME" --config-block "$BLOCK" \
+      -o "localhost:$port" \
+      --ca-file "$tls/ca.crt" \
+      --client-cert "$tls/server.crt" \
+      --client-key "$tls/server.key"
+    echo "$node joined $CHANNEL_NAME."
+  fi
 done
-if [[ "$orderer_ready" != true ]]; then
-  echo "study orderer admin endpoint did not become ready" >&2
-  exit 1
-fi
-
-if osnadmin channel list -o localhost:17053 \
-    --ca-file "$ORDERER_TLS/ca.crt" \
-    --client-cert "$ORDERER_TLS/server.crt" \
-    --client-key "$ORDERER_TLS/server.key" 2>/dev/null | grep -q "$CHANNEL_NAME"; then
-  echo "Orderer already joined $CHANNEL_NAME."
-else
-  osnadmin channel join --channelID "$CHANNEL_NAME" --config-block "$BLOCK" \
-    -o localhost:17053 \
-    --ca-file "$ORDERER_TLS/ca.crt" \
-    --client-cert "$ORDERER_TLS/server.crt" \
-    --client-key "$ORDERER_TLS/server.key"
-fi
 
 export FABRIC_CFG_PATH="$FABRIC_SAMPLES/config"
 export CORE_PEER_TLS_ENABLED=true

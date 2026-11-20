@@ -9,7 +9,7 @@ FABRIC_CA_CLIENT="$FABRIC_SAMPLES/bin/fabric-ca-client"
 
 case "$ORG" in
   centralbank) CA_PORT=17054; USER_COUNT=2 ;;
-  distributor) CA_PORT=18054; USER_COUNT=5 ;;
+  distributor) CA_PORT=18054; USER_COUNT=3 ;;
   validator) CA_PORT=19054; USER_COUNT=1 ;;
   enduser) CA_PORT=20054; USER_COUNT=8 ;;
   *) echo "unknown org: $ORG" >&2; exit 2 ;;
@@ -18,7 +18,7 @@ DOMAIN="$ORG.bi-coin"
 CA_ENDPOINT="127.0.0.1:$CA_PORT"
 CA_NAME="ca-$ORG"
 ORG_DIR="$NETWORK_DIR/organizations/peerOrganizations/$DOMAIN"
-ORDERER_DIR="$NETWORK_DIR/organizations/ordererOrganizations/centralbank.bi-coin/orderers/orderer.centralbank.bi-coin"
+ORDERERS_DIR="$NETWORK_DIR/organizations/ordererOrganizations/centralbank.bi-coin/orderers"
 CLIENT_DIR="$NETWORK_DIR/ca-client/$ORG"
 
 : "${CA_ADMIN_USER:?set CA_ADMIN_USER for the local $ORG CA}"
@@ -64,8 +64,6 @@ register_enroll() {
   secret="$(identity_secret "$name:$type")"
   # Each Distributor identity names the bank it acts for; chaincode checks this attribute.
   case "$ORG:$name" in
-    # Two officers per bank, so a second officer can approve four-eyes transfers.
-    distributor:user4 | distributor:user5) attrs="distributor_id=wholesale-bank:ecert" ;;
     distributor:*) attrs="distributor_id=retail-bank:ecert" ;;
   esac
   if ! output="$("$FABRIC_CA_CLIENT" register \
@@ -125,8 +123,10 @@ register_node() {
 
 register_node peer0 peer "$ORG_DIR/peers/peer0.$DOMAIN" "peer0.$DOMAIN,localhost,127.0.0.1"
 if [[ "$ORG" == centralbank ]]; then
-  mkdir -p "$ORDERER_DIR"
-  register_node orderer orderer "$ORDERER_DIR" "orderer.$DOMAIN,localhost,127.0.0.1"
+  for i in 0 1 2; do
+    mkdir -p "$ORDERERS_DIR/orderer$i.$DOMAIN"
+    register_node "orderer$i" orderer "$ORDERERS_DIR/orderer$i.$DOMAIN" "orderer$i.$DOMAIN,localhost,127.0.0.1"
+  done
 fi
 
 CA_CERT="$(find "$ORG_DIR/users/Admin@$DOMAIN/msp/cacerts" -type f -print -quit)"
@@ -164,7 +164,9 @@ for i in $(seq 1 "$USER_COUNT"); do
   local_msps+=("$ORG_DIR/users/User$i@$DOMAIN/msp")
 done
 if [[ "$ORG" == centralbank ]]; then
-  local_msps+=("$ORDERER_DIR/msp")
+  for i in 0 1 2; do
+    local_msps+=("$ORDERERS_DIR/orderer$i.$DOMAIN/msp")
+  done
 fi
 
 write_msp_config "$ORG_DIR/msp"

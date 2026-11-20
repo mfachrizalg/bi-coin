@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,6 +15,7 @@ import (
 )
 
 const (
+	cddCollection  = "cddCollection"
 	centralBankMSP = "CentralBankMSP"
 	distributorMSP = "DistributorMSP"
 	endUserMSP     = "EndUserMSP"
@@ -55,6 +57,8 @@ type subjectRecord struct {
 	BeneficialOwnerRefs  []string     `json:"beneficial_owner_refs,omitempty"`
 	Limits               LimitProfile `json:"limits"`
 	LimitsSet            bool         `json:"limits_set"`
+	Salt                 string       `json:"salt"`
+	DocumentRef          string       `json:"document_ref"`
 }
 
 type LimitProfile struct {
@@ -91,10 +95,22 @@ func (c *ControlsContract) GetCallerIdentity(ctx contractapi.TransactionContextI
 }
 
 // CreatePending stores only a pseudonymous subject identifier and a denied-by-default status.
-func (c *ControlsContract) CreatePending(ctx contractapi.TransactionContextInterface, subjectID string, category string) error {
+func (c *ControlsContract) CreatePending(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	if err := requireMSP(ctx, endUserMSP); err != nil {
 		return err
 	}
+	var payload struct {
+		Category    string `json:"category"`
+		Salt        string `json:"salt"`
+		DocumentRef string `json:"documentRef"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	if err := validCreatePayload(payload.Category, payload.Salt, payload.DocumentRef); err != nil {
+		return err
+	}
+	category, salt, documentRef := payload.Category, payload.Salt, payload.DocumentRef
 	if strings.TrimSpace(subjectID) == "" || !oneOf(category, "retail", "merchant", "business") {
 		return fmt.Errorf("subject_id and a supported category are required")
 	}
@@ -102,7 +118,7 @@ func (c *ControlsContract) CreatePending(ctx contractapi.TransactionContextInter
 	if key == "" {
 		return fmt.Errorf("cannot create subject key")
 	}
-	if current, err := ctx.GetStub().GetState(key); err != nil {
+	if current, err := ctx.GetStub().GetPrivateData(cddCollection, key); err != nil {
 		return err
 	} else if current != nil {
 		return fmt.Errorf("subject %s already exists", subjectID)
@@ -111,7 +127,7 @@ func (c *ControlsContract) CreatePending(ctx contractapi.TransactionContextInter
 	if err != nil {
 		return err
 	}
-	return putJSON(ctx.GetStub(), key, subjectRecord{SubjectID: subjectID, Category: category, ApplicantID: id, Status: "pending"})
+	return putSubject(ctx.GetStub(), key, subjectRecord{SubjectID: subjectID, Category: category, ApplicantID: id, Status: "pending", Salt: salt, DocumentRef: documentRef})
 }
 
 // ProtectSubject installs the fixed CentralBankMSP + DistributorMSP policy without activating the subject.
@@ -131,11 +147,11 @@ func (c *ControlsContract) ProtectSubject(ctx contractapi.TransactionContextInte
 	if err != nil {
 		return err
 	}
-	if err := ctx.GetStub().SetStateValidationParameter(key, policy); err != nil {
+	if err := ctx.GetStub().SetPrivateDataValidationParameter(cddCollection, key, policy); err != nil {
 		return err
 	}
 	record.Protected = true
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
 func (c *ControlsContract) CreateStaffPending(ctx contractapi.TransactionContextInterface, clientID string) error {
@@ -185,8 +201,10 @@ func (c *ControlsContract) SetStaffRole(ctx contractapi.TransactionContextInterf
 		return fmt.Errorf("unsupported staff role")
 	}
 	key := staffKey(ctx.GetStub(), clientID)
-	if err := requireProtected(ctx.GetStub(), key); err != nil {
+	if policy, err := ctx.GetStub().GetStateValidationParameter(key); err != nil {
 		return err
+	} else if len(policy) == 0 {
+		return fmt.Errorf("staff identity is not protected")
 	}
 	var staff staffRecord
 	if err := getJSON(ctx.GetStub(), key, &staff); err != nil {
@@ -213,14 +231,21 @@ func (c *ControlsContract) RecordReview(ctx contractapi.TransactionContextInterf
 		return fmt.Errorf("subject is not awaiting review")
 	}
 	record.ReviewerID = reviewerID
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
-func (c *ControlsContract) ApproveSubject(ctx contractapi.TransactionContextInterface, subjectID string, approved bool) error {
+func (c *ControlsContract) ApproveSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
 	if err != nil {
 		return err
 	}
+	var payload struct {
+		Approved bool `json:"approved"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	approved := payload.Approved
 	key := subjectKey(ctx.GetStub(), subjectID)
 	if err := requireProtected(ctx.GetStub(), key); err != nil {
 		return err
@@ -237,13 +262,23 @@ func (c *ControlsContract) ApproveSubject(ctx contractapi.TransactionContextInte
 	} else {
 		record.Status = "rejected"
 	}
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
-func (c *ControlsContract) SetLimits(ctx contractapi.TransactionContextInterface, subjectID string, perTransaction int64, daily int64, monthly int64, holdings int64) error {
+func (c *ControlsContract) SetLimits(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
 		return err
 	}
+	var payload struct {
+		PerTransaction int64 `json:"per_transaction"`
+		Daily          int64 `json:"daily"`
+		Monthly        int64 `json:"monthly"`
+		Holdings       int64 `json:"holdings"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	perTransaction, daily, monthly, holdings := payload.PerTransaction, payload.Daily, payload.Monthly, payload.Holdings
 	if !validLimits(perTransaction, daily, monthly, holdings) {
 		return fmt.Errorf("limits must be positive and ordered per-transaction <= daily <= monthly")
 	}
@@ -260,21 +295,21 @@ func (c *ControlsContract) SetLimits(ctx contractapi.TransactionContextInterface
 	}
 	record.Limits = LimitProfile{PerTransaction: perTransaction, Daily: daily, Monthly: monthly, Holdings: holdings}
 	record.LimitsSet = true
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
-func (c *ControlsContract) SetBusinessAuthority(ctx contractapi.TransactionContextInterface, subjectID string, representativesJSON string, beneficialOwnerRefsJSON string) error {
+func (c *ControlsContract) SetBusinessAuthority(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
 		return err
 	}
-	var representatives []string
-	var owners []string
-	if err := json.Unmarshal([]byte(representativesJSON), &representatives); err != nil {
-		return fmt.Errorf("representatives: %w", err)
+	var payload struct {
+		Representatives     []string `json:"representatives"`
+		BeneficialOwnerRefs []string `json:"beneficial_owner_refs"`
 	}
-	if err := json.Unmarshal([]byte(beneficialOwnerRefsJSON), &owners); err != nil {
-		return fmt.Errorf("beneficial_owner_refs: %w", err)
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
 	}
+	representatives, owners := payload.Representatives, payload.BeneficialOwnerRefs
 	if len(representatives) == 0 {
 		return fmt.Errorf("at least one representative is required")
 	}
@@ -291,13 +326,20 @@ func (c *ControlsContract) SetBusinessAuthority(ctx contractapi.TransactionConte
 	}
 	record.Representatives = cleanIDs(representatives)
 	record.BeneficialOwnerRefs = cleanIDs(owners)
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
-func (c *ControlsContract) FreezeSubject(ctx contractapi.TransactionContextInterface, subjectID string, reason string) error {
+func (c *ControlsContract) FreezeSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	if _, err := requireStaffRole(ctx, "compliance_officer"); err != nil {
 		return err
 	}
+	var payload struct {
+		Reason string `json:"reason"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	reason := payload.Reason
 	if !oneOf(reason, RestrictionReasonDTTOT, RestrictionReasonAuthorityOrder, RestrictionReasonInternalReview) {
 		return fmt.Errorf("unsupported restriction reason code")
 	}
@@ -321,14 +363,21 @@ func (c *ControlsContract) FreezeSubject(ctx contractapi.TransactionContextInter
 	}
 	record.UnfreezeReviewerID = ""
 	record.AuthorityEvidenceRef = ""
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
-func (c *ControlsContract) RequestUnfreeze(ctx contractapi.TransactionContextInterface, subjectID string, authorityEvidenceRef string) error {
+func (c *ControlsContract) RequestUnfreeze(ctx contractapi.TransactionContextInterface, subjectID string) error {
 	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
 	if err != nil {
 		return err
 	}
+	var payload struct {
+		AuthorityEvidenceRef string `json:"authority_evidence_ref"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	authorityEvidenceRef := payload.AuthorityEvidenceRef
 	if !isOpaqueReference(authorityEvidenceRef) {
 		return fmt.Errorf("authority release evidence must be a SHA-256 reference")
 	}
@@ -345,7 +394,7 @@ func (c *ControlsContract) RequestUnfreeze(ctx contractapi.TransactionContextInt
 	}
 	record.UnfreezeReviewerID = reviewerID
 	record.AuthorityEvidenceRef = authorityEvidenceRef
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
 func (c *ControlsContract) ApproveUnfreeze(ctx contractapi.TransactionContextInterface, subjectID string) error {
@@ -368,10 +417,13 @@ func (c *ControlsContract) ApproveUnfreeze(ctx contractapi.TransactionContextInt
 	record.RestrictionReason = ""
 	record.RestrictedUntil = 0
 	record.UnfreezeApproverID = complianceID
-	return putJSON(ctx.GetStub(), key, record)
+	return putSubject(ctx.GetStub(), key, record)
 }
 
 func (c *ControlsContract) CanPay(ctx contractapi.TransactionContextInterface, subjectID string) (bool, error) {
+	if err := requireCounterpartyAccess(ctx, subjectID); err != nil {
+		return false, err
+	}
 	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
 	if err != nil {
 		return false, err
@@ -384,6 +436,9 @@ func (c *ControlsContract) CanPay(ctx contractapi.TransactionContextInterface, s
 }
 
 func (c *ControlsContract) GetLimits(ctx contractapi.TransactionContextInterface, subjectID string) (LimitProfile, error) {
+	if err := requireCounterpartyAccess(ctx, subjectID); err != nil {
+		return LimitProfile{}, err
+	}
 	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
 	if err != nil {
 		return LimitProfile{}, err
@@ -413,13 +468,19 @@ func (c *ControlsContract) CanActFor(ctx contractapi.TransactionContextInterface
 	return contains(record.Representatives, id), nil
 }
 
+// subjectFailure returns err with empty lists. The contract API serializes the first
+// return value before it checks err, so nil lists would replace err with a schema error.
+func subjectFailure(err error) (SubjectView, error) {
+	return SubjectView{Representatives: []string{}, BeneficialOwnerRefs: []string{}}, err
+}
+
 func (c *ControlsContract) GetSubject(ctx contractapi.TransactionContextInterface, subjectID string) (SubjectView, error) {
-	if err := requireMSP(ctx, centralBankMSP, distributorMSP, validatorMSP); err != nil {
-		return SubjectView{}, err
+	if err := requireMemberOrActor(ctx, subjectID); err != nil {
+		return subjectFailure(err)
 	}
 	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
 	if err != nil {
-		return SubjectView{}, err
+		return subjectFailure(err)
 	}
 	representatives := record.Representatives
 	if representatives == nil {
@@ -431,7 +492,7 @@ func (c *ControlsContract) GetSubject(ctx contractapi.TransactionContextInterfac
 	}
 	restricted, err := restrictionActive(ctx, record)
 	if err != nil {
-		return SubjectView{}, err
+		return subjectFailure(err)
 	}
 	return SubjectView{
 		SubjectID: record.SubjectID, Category: record.Category, Status: record.Status,
@@ -503,7 +564,7 @@ func controlPolicy() ([]byte, error) {
 }
 
 func requireProtected(stub shim.ChaincodeStubInterface, key string) error {
-	policy, err := stub.GetStateValidationParameter(key)
+	policy, err := stub.GetPrivateDataValidationParameter(cddCollection, key)
 	if err != nil {
 		return err
 	}
@@ -527,14 +588,6 @@ func staffKey(stub shim.ChaincodeStubInterface, clientID string) string {
 		return ""
 	}
 	return key
-}
-
-func getSubject(ctx contractapi.TransactionContextInterface, key string) (subjectRecord, error) {
-	var record subjectRecord
-	if err := getJSON(ctx.GetStub(), key, &record); err != nil {
-		return subjectRecord{}, err
-	}
-	return record, nil
 }
 
 func getJSON(stub shim.ChaincodeStubInterface, key string, target any) error {
@@ -616,4 +669,134 @@ func isOpaqueReference(value string) bool {
 
 func validLimits(perTransaction int64, daily int64, monthly int64, holdings int64) bool {
 	return perTransaction > 0 && daily >= perTransaction && monthly >= daily && holdings > 0
+}
+
+// readPayload decodes CDD contents from the transient map under "payload" (D8).
+func readPayload(ctx contractapi.TransactionContextInterface, target any) error {
+	transient, err := ctx.GetStub().GetTransient()
+	if err != nil {
+		return err
+	}
+	data, found := transient["payload"]
+	if !found {
+		return fmt.Errorf("transient payload is required")
+	}
+	if err := json.Unmarshal(data, target); err != nil {
+		return fmt.Errorf("decode transient payload: %w", err)
+	}
+	return nil
+}
+
+func validCreatePayload(category string, salt string, documentRef string) error {
+	if !oneOf(category, "retail", "merchant", "business") {
+		return fmt.Errorf("a supported category is required")
+	}
+	if !isOpaqueReference(salt) {
+		return fmt.Errorf("salt must be 32 random bytes in hex")
+	}
+	if !isOpaqueReference(documentRef) {
+		return fmt.Errorf("document_ref must be a SHA-256 reference")
+	}
+	return nil
+}
+
+func putSubject(stub shim.ChaincodeStubInterface, key string, record subjectRecord) error {
+	data, err := json.Marshal(record)
+	if err != nil {
+		return err
+	}
+	if err := stub.PutPrivateData(cddCollection, key, data); err != nil {
+		return err
+	}
+	// Public commitment: SHA-256 of the canonical JSON of the record. Transfers check payee records against it.
+	canonical, err := canonicalJSON(data)
+	if err != nil {
+		return err
+	}
+	sum := sha256.Sum256(canonical)
+	return stub.PutState(commitmentKey(stub, record.SubjectID), []byte(hex.EncodeToString(sum[:])))
+}
+
+// canonicalJSON re-encodes JSON with sorted keys and no extra whitespace. The contract API
+// re-encodes string results this way, so the commitment must hash this form.
+func canonicalJSON(raw []byte) ([]byte, error) {
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
+	var value interface{}
+	if err := dec.Decode(&value); err != nil {
+		return nil, err
+	}
+	return json.Marshal(value)
+}
+
+func commitmentKey(stub shim.ChaincodeStubInterface, subjectID string) string {
+	key, err := stub.CreateCompositeKey("commitment", []string{subjectID})
+	if err != nil {
+		return ""
+	}
+	return key
+}
+
+func getSubject(ctx contractapi.TransactionContextInterface, key string) (subjectRecord, error) {
+	data, err := ctx.GetStub().GetPrivateData(cddCollection, key)
+	if err != nil {
+		return subjectRecord{}, err
+	}
+	if data == nil {
+		return subjectRecord{}, fmt.Errorf("subject not found")
+	}
+	var record subjectRecord
+	if err := json.Unmarshal(data, &record); err != nil {
+		return subjectRecord{}, err
+	}
+	return record, nil
+}
+
+// requireMemberOrActor admits member MSPs and the caller who acts for the subject.
+func requireMemberOrActor(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if requireMSP(ctx, centralBankMSP, distributorMSP, validatorMSP) == nil {
+		return nil
+	}
+	actor, err := (&ControlsContract{}).CanActFor(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+	if !actor {
+		return fmt.Errorf("access denied for subject %s", subjectID)
+	}
+	return nil
+}
+
+// requireCounterpartyAccess guards the payment-limit reads.
+// ponytail: follows requireMemberOrActor until the user decides how payments' internal calls pass. See contract.md.
+func requireCounterpartyAccess(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	return requireMemberOrActor(ctx, subjectID)
+}
+
+// GetSubjectRecord returns the stored record bytes to member peers only. Payments
+// verifies them against GetSubjectHash before using them for a transfer.
+func (c *ControlsContract) GetSubjectRecord(ctx contractapi.TransactionContextInterface, subjectID string) (string, error) {
+	if err := requireMSP(ctx, centralBankMSP, distributorMSP, validatorMSP); err != nil {
+		return "", err
+	}
+	data, err := ctx.GetStub().GetPrivateData(cddCollection, subjectKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return "", err
+	}
+	if data == nil {
+		return "", fmt.Errorf("subject not found")
+	}
+	return string(data), nil
+}
+
+// GetSubjectHash returns the public hash of a subject record, readable by any caller (D8).
+func (c *ControlsContract) GetSubjectHash(ctx contractapi.TransactionContextInterface, subjectID string) (string, error) {
+	commitment, err := ctx.GetStub().GetState(commitmentKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return "", err
+	}
+	if commitment == nil {
+		return "", fmt.Errorf("subject not found")
+	}
+	return string(commitment), nil
 }

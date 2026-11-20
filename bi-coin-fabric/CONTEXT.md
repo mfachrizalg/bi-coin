@@ -9,18 +9,12 @@ The monetary authority that governs the system and is the sole issuer of Digital
 _Avoid_: BI, Central Bank, Issuer
 
 **Participant**:
-An institution admitted in exactly one of two roles: Distributor Bank or Observer. Bank Indonesia, Retail Customer, and Merchant are not Participants.
+An institution admitted by Bank Indonesia in exactly one of two roles: Distributor or Observer. Bank Indonesia, Retail Customer, and Merchant are not Participants.
 _Avoid_: Member, Network Member, Node Operator
 
-**Distributor Bank**:
-A bank that receives Issuance and holds a Distributor reserve. It comes in two kinds: Wholesale Bank and Retail Bank. The Auditor of the compliance study is not a Distributor Bank.
-_Avoid_: Bank Participant
-
-**Wholesale Bank**:
-A Distributor Bank limited to wholesale operations. It has no retail role.
-
-**Retail Bank**:
-A Distributor Bank that also performs Conversion and acts as Custodian.
+**Distributor**:
+A PJSP, bank or non-bank, that Bank Indonesia admits as a Participant. It receives Issuance, holds a Distributor reserve, performs Conversion, and acts as Custodian. The prototype runs one non-bank Distributor. The Auditor of the compliance study is not a Distributor.
+_Avoid_: Distributor Bank, Retail Bank, Wholesale Bank, Bank Participant
 
 **Observer**:
 The Participant role held by OJK and PPATK for Supervision without authority to initiate or approve monetary operations. Observers are excluded from chaincode endorsement but still approve chaincode lifecycle changes.
@@ -43,7 +37,7 @@ The Retail Customer or Merchant that benefits from the value held in a Wallet, r
 _Avoid_: Account Holder, Wallet User, Customer
 
 **Custodian**:
-A Retail Bank that administers a Wallet on behalf of its Wallet Owner. Only a Retail Bank can be a Custodian.
+A Distributor that administers a Wallet on behalf of its Wallet Owner. Only a Distributor can be a Custodian.
 _Avoid_: Wallet Owner, Wallet Provider, Account Provider
 
 **Wallet**:
@@ -59,11 +53,11 @@ The retail instrument of Digital Rupiah. It is held only in Retail floats and Wa
 _Avoid_: r-CBDC
 
 **Distributor reserve**:
-w-Rupiah Digital held by a Distributor Bank for later wholesale use or Conversion into its Retail float.
+w-Rupiah Digital held by a Distributor for later Conversion into its Retail float.
 _Avoid_: Retail reserve, Customer balance
 
 **Retail float**:
-The r-Rupiah Digital held by a Retail Bank after Conversion. Wallet funding draws on it.
+The r-Rupiah Digital held by a Distributor after Conversion. Wallet funding draws on it.
 _Avoid_: Retail balance, Wallet
 
 **Retail balance**:
@@ -73,35 +67,8 @@ _Avoid_: Wholesale balance, Distributor reserve
 **Wallet funding**:
 The movement of r-Rupiah Digital from a Retail float into a Wallet, subject to the CanPay and holdings-limit checks.
 
-**Interbank transfer**:
-The movement of w-Rupiah Digital from a Distributor reserve to any other Distributor reserve, with no change in supply. Above the sender's Approval threshold it becomes a Pending transfer.
-
-**Approval threshold**:
-The value, set by a Distributor Bank for itself, above which its Interbank transfers need Four-eyes approval. A new Distributor Bank starts at zero.
-_Avoid_: Transfer limit, Ceiling
-
-**Pending transfer**:
-An Interbank transfer above the Approval threshold that moves nothing until another officer of the same bank approves it. Any officer of the sending bank can reject it.
-_Avoid_: Queued transfer, Draft
-
-**Four-eyes approval**:
-The rule that a Pending transfer or an Approval threshold change takes effect only after a second, different officer of the same Distributor Bank confirms it.
-_Avoid_: Dual signature, Multi-signature
-
-**Transfer limit**:
-Bank Indonesia's maximum value for one Interbank transfer.
-_Avoid_: Approval threshold, Payment limit
-
-**Admission evidence reference**:
-A SHA-256 reference to Bank Indonesia's approval record, required when a Distributor Bank is admitted.
-_Avoid_: License, Approval letter
-
-**Participant status**:
-The state of a Distributor Bank's participation, set by Bank Indonesia: active, suspended, frozen, or closed. A suspended bank can receive but not send, a frozen bank cannot transact, and a closed bank cannot return.
-_Avoid_: Restriction, Account status
-
 **Conversion**:
-An at-par movement of w-Rupiah Digital from a Distributor reserve into the same bank's Retail float as r-Rupiah Digital. Total supply is unchanged.
+An at-par movement of w-Rupiah Digital from a Distributor reserve into the same Distributor's Retail float as r-Rupiah Digital. Total supply is unchanged.
 _Avoid_: Minting, Redemption, Transfer
 
 **Issuance**:
@@ -135,13 +102,21 @@ _Avoid_: Evidence document, Evidence proof
 **Subject**:
 The party under customer due diligence, in the category retail, merchant, or business.
 
+**Subject ID**:
+A random pseudonym that identifies a Subject on the ledger. It is never the NIK.
+_Avoid_: NIK, Customer number, Identity number
+
+**Subject record**:
+The CDD record of a Subject. The Distributor, Bank Indonesia, and the Auditor can read it. Other Participants see only its hash.
+_Avoid_: Customer file, KYC profile
+
+**Document reference**:
+The SHA-256 of an identity document file, stored off chain under that name and recorded in the Subject record.
+_Avoid_: Document link, File path
+
 **Restriction**:
 A subject-level hold, recorded with a Restriction reason. An internal-review hold lapses after 5 days and an authority-order hold after 30 days; a DTTOT hold lasts until an approved release backed by a Release evidence reference.
 _Avoid_: Freeze
-
-**Freeze**:
-Setting a Participant status to frozen. Subjects are restricted, not frozen.
-_Avoid_: Restriction, Suspension
 
 **Staff role**:
 A maker-checker role in the compliance study: KYC reviewer or compliance officer. A KYC reviewer and a compliance officer must be different people.

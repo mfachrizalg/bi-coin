@@ -35,7 +35,6 @@ func TestEmbeddedOpenAPISpecsMatchV3Contracts(t *testing.T) {
 		"openapi-authenticated.json",
 		"openapi-kyc_verified.json",
 		"openapi-retail_bank.json",
-		"openapi-wholesale_bank.json",
 		"openapi-bank_indonesia.json",
 		"openapi-merchant.json",
 		"openapi-auditor.json",

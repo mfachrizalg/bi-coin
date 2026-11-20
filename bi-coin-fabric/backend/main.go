@@ -34,14 +34,14 @@ func main() {
 	}
 	authSvc := services.NewAuthService(store, cfg.AuthJWTSecret, cfg.AuthTokenTTL)
 
-	server := newHTTPServer(cfg, authSvc)
+	server := newHTTPServer(cfg, authSvc, store)
 	log.Printf("bi-coin Digital Rupiah API Gateway starting on :%s", cfg.Port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("server: %v", err)
 	}
 }
 
-func newHTTPServer(cfg *config.Config, authSvc *services.AuthService) *http.Server {
+func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, store *services.PostgresStore) *http.Server {
 	h := handlers.New(authSvc)
 
 	r := mux.NewRouter()
@@ -54,7 +54,7 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService) *http.Serv
 		log.Fatalf("study ledger service: %v", err)
 	}
 	if studySvc != nil {
-		handlers.RegisterStudyRoutes(r, studySvc)
+		handlers.RegisterStudyRoutes(r, studySvc, store, cfg.DocumentStoreDir)
 	}
 
 	docs := handlers.NewDocsHandler(handlers.DocsSpecs{
@@ -62,7 +62,6 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService) *http.Serv
 		Authenticated: specAuthenticated,
 		KycVerified:   specKycVerified,
 		RetailBank:    specRetailBank,
-		WholesaleBank: specWholesaleBank,
 		BankIndonesia: specBankIndonesia,
 		Merchant:      specMerchant,
 		Auditor:       specAuditor,

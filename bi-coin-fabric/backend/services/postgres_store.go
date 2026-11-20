@@ -75,17 +75,6 @@ CREATE TABLE IF NOT EXISTS payment_contacts (
 
 CREATE INDEX IF NOT EXISTS payment_contacts_owner_idx ON payment_contacts(owner_username);
 
-CREATE TABLE IF NOT EXISTS retail_customers (
-	customer_id TEXT PRIMARY KEY,
-	legal_name TEXT NOT NULL,
-	identity_hash TEXT NOT NULL,
-	wallet_account_id TEXT NOT NULL,
-	kyc_profile_id TEXT,
-	custodian_msp_id TEXT NOT NULL DEFAULT '',
-	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 CREATE TABLE IF NOT EXISTS kyc_profiles (
 	profile_id TEXT PRIMARY KEY,
 	subject_type TEXT NOT NULL,
@@ -102,16 +91,6 @@ CREATE TABLE IF NOT EXISTS kyc_profiles (
 	ledger_anchored BOOLEAN NOT NULL DEFAULT FALSE,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS kyc_provider_checks (
-	check_id TEXT PRIMARY KEY,
-	profile_id TEXT NOT NULL REFERENCES kyc_profiles(profile_id) ON DELETE CASCADE,
-	provider_case_id TEXT,
-	status TEXT NOT NULL,
-	checks JSONB NOT NULL DEFAULT '{}',
-	document_hashes JSONB NOT NULL DEFAULT '[]',
-	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS kyc_audit_events (
@@ -140,7 +119,6 @@ CREATE TABLE IF NOT EXISTS operation_journal (
 ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS subject_id TEXT NOT NULL DEFAULT '';
 ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS participant_id TEXT NOT NULL DEFAULT '';
 ALTER TABLE auth_users ADD COLUMN IF NOT EXISTS custodian_msp_id TEXT NOT NULL DEFAULT '';
-ALTER TABLE retail_customers ADD COLUMN IF NOT EXISTS custodian_msp_id TEXT NOT NULL DEFAULT '';
 	ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS custodian_msp_id TEXT NOT NULL DEFAULT '';
 	ALTER TABLE kyc_profiles ADD COLUMN IF NOT EXISTS ledger_anchored BOOLEAN NOT NULL DEFAULT FALSE;
 `)
@@ -196,4 +174,52 @@ func (s *PostgresStore) FindAuthUser(username string) (*AuthUser, error) {
 	}
 	user.Role = middleware.Role(role)
 	return &user, nil
+}
+
+// KYCProfile is one onboarding record. Identity data stays off-ledger (D14, D16).
+type KYCProfile struct {
+	ProfileID      string
+	SubjectType    string
+	SubjectID      string
+	LegalName      string
+	DocumentType   string
+	DocumentNumber string
+	DocumentHash   string
+}
+
+// CreateKYCProfile writes the profile and its audit event in one transaction. It runs before
+// CreatePending, and PostgreSQL never authorizes a ledger effect (ADR 0007).
+func (s *PostgresStore) CreateKYCProfile(ctx context.Context, profile KYCProfile) error {
+	eventID, err := NewRandomHex(16)
+	if err != nil {
+		return err
+	}
+	hashes, err := json.Marshal([]string{profile.DocumentHash})
+	if err != nil {
+		return err
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	if _, err := tx.ExecContext(ctx, `
+INSERT INTO kyc_profiles (profile_id, subject_type, subject_id, legal_name, document_type, document_number, document_hashes, status)
+VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
+`, profile.ProfileID, profile.SubjectType, profile.SubjectID, profile.LegalName, profile.DocumentType, profile.DocumentNumber, string(hashes)); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `
+INSERT INTO kyc_audit_events (event_id, profile_id, action, details)
+VALUES ($1, $2, 'profile_created', 'identity document stored; ledger submission pending')
+`, eventID, profile.ProfileID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// MarkKYCLedgerAnchored records that CreatePending committed for the subject.
+func (s *PostgresStore) MarkKYCLedgerAnchored(ctx context.Context, subjectID string) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE kyc_profiles SET ledger_anchored = TRUE, updated_at = now() WHERE subject_id = $1`, subjectID)
+	return err
 }

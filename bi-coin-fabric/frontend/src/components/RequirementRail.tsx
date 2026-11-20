@@ -12,7 +12,7 @@ interface Requirement {
 // Empty tabs = evidence-only (inspection or benchmark, no live action).
 const REQUIREMENTS: Requirement[] = [
   { id: 'FR-01', title: 'Subject lifecycle', evidence: 'Partial: termination not tested', tabs: ['study_identity', 'study_approval'], covered: false },
-  { id: 'FR-02', title: 'Issuance and interbank transfer', evidence: 'Limited: pending re-run on the direct-issuance model', tabs: ['study_monetary', 'study_funding'], covered: true },
+  { id: 'FR-02', title: 'Issuance and reserve redemption', evidence: 'Limited: pending re-run on the direct-issuance model', tabs: ['study_monetary', 'study_funding'], covered: true },
   { id: 'FR-03', title: 'Transfer authorization', evidence: 'Integration test, run-20261014-01', tabs: ['study_transfer'], covered: true },
   { id: 'FR-04', title: 'Reconciliation and monitoring', evidence: 'Partial: reports not tested on study network', tabs: ['study_audit'], covered: false },
   { id: 'FR-05', title: 'API role separation', evidence: 'Role-route matrix, run-20261014-01', tabs: ['study_audit'], covered: true },

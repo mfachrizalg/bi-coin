@@ -19,13 +19,12 @@ The route groups below are registered in handlers/handlers.go and handlers/study
 | Capability | Route family | Main role boundary |
 |---|---|---|
 | Health and session | /health, /auth/login, /auth/me | Health and login are entry points; /auth/me returns the authenticated principal |
-| Identity and subject intake | GET /identities/me, POST /subjects | Authenticated, KYC-verified, and Merchant roles |
+| Identity and subject intake | GET /identities/me, POST /subjects (multipart: form fields and a PNG or JPEG `document`; returns the server-generated `subject_id`) | Authenticated, KYC-verified, and Merchant roles |
 | Retail wallets and transfers | POST /customer-wallets, GET /customer-wallets/{subject_id}/balance, POST /retail-transfers | KYC-verified and Merchant roles |
 | Retail bank operations | POST /conversions, POST /wallet-fundings; POST /subjects/{subject_id}/endorsement-policies, /reviews, /decisions, /restrictions, /restriction-release-requests, /restriction-release-decisions; PUT /subjects/{subject_id}/limits, /business-authority | Retail Bank role (`retail_bank`) |
-| Staff, distributor, and issuance operations | POST /staff, POST /staff/{client_id}/endorsement-policies, PUT /staff/{client_id}/role, POST /monetary-initializations, POST /distributors, POST /issuances, POST /reserve-redemptions, PUT /distributors/{distributor_id}/status, PUT /transfer-limit | Bank Indonesia (`bank_indonesia`) |
-| Interbank transfers and four-eyes | POST /interbank-transfers, POST /interbank-transfers/{reference}/approval, POST /interbank-transfers/{reference}/rejection, POST /distributors/{distributor_id}/approval-threshold-proposals, POST /distributors/{distributor_id}/approval-threshold-approvals | Retail Bank and Wholesale Bank roles (`retail_bank`, `wholesale_bank`) |
-| Supply, reserve, and float reads | GET /supply/wholesale, GET /supply/retail, GET /supply/total, GET /distributors/{distributor_id}/reserve, GET /distributors/{distributor_id}/float, GET /distributors/{distributor_id}, GET /transfer-limit | Retail Bank and Wholesale Bank roles, Bank Indonesia, and Auditor (`auditor`) |
-| Subject read | GET /subjects/{subject_id} | Retail Bank and Wholesale Bank roles, Bank Indonesia, and Auditor (`auditor`) |
+| Staff, distributor, and issuance operations | POST /staff, POST /staff/{client_id}/endorsement-policies, PUT /staff/{client_id}/role, POST /monetary-initializations, POST /distributors, POST /issuances, POST /reserve-redemptions | Bank Indonesia (`bank_indonesia`) |
+| Supply, reserve, and float reads | GET /supply/wholesale, GET /supply/retail, GET /supply/total, GET /distributors/{distributor_id}/reserve, GET /distributors/{distributor_id}/float, GET /distributors/{distributor_id} | Retail Bank role, Bank Indonesia, and Auditor (`auditor`) |
+| Subject read | GET /subjects/{subject_id} | Retail Bank role, Bank Indonesia, and Auditor (`auditor`) |
 
 The role gate belongs on the server. Frontend role selection controls presentation only. Retail wallet ownership is checked against the authenticated subject on protected actions.
 
@@ -36,7 +35,7 @@ The role gate belongs on the server. Frontend role selection controls presentati
 - services/ and models/ own PostgreSQL-backed application data, including authentication, off-chain KYC, and operation receipts.
 - handlers/ owns HTTP routing, request parsing, role grouping, and response writing. middleware/ owns authenticated role and subject context.
 - Keep public JSON models stable and follow the money parser/serializer used by existing models. Do not introduce JavaScript floating-point amounts or expose database records directly.
-- KYC documents remain off chain; chaincode receives the required hashes and status anchor.
+- Identity documents are stored off chain under their SHA-256 name in DOCUMENT_STORE_DIR, and KYC profiles stay in PostgreSQL. CDD contents reach chaincode only through the transient `payload` key, and the ledger keeps the record hash.
 - Idempotency keys and operation receipts protect supported mutation paths. Check the handler and service together before changing a mutation's replay behavior.
 
 ## Thesis traceability

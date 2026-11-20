@@ -57,7 +57,7 @@ export interface StudyLimitsInput {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const headers: Record<string, string> = options?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }
   if (currentToken) headers['Authorization'] = `Bearer ${currentToken}`
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -110,8 +110,14 @@ function studyPost<T>(path: string, data?: unknown, idempotencyKey?: string) {
 }
 
 export function getStudyIdentity() { return request<string>('/identities/me') }
-export function createStudySubject(data: { subject_id: string; category: StudySubjectView['category'] }) {
-  return studyPost<{ status: string }>('/subjects', data)
+export function createStudySubject(data: { category: StudySubjectView['category']; legal_name: string; document_type: string; document_number: string; document: File }) {
+  const form = new FormData()
+  form.append('category', data.category)
+  form.append('legal_name', data.legal_name)
+  form.append('document_type', data.document_type)
+  form.append('document_number', data.document_number)
+  form.append('document', data.document)
+  return request<{ status: string; subject_id: string }>('/subjects', { method: 'POST', body: form })
 }
 export function openStudyWallet(data: { subject_id: string }) {
   return studyPost<{ status: string }>('/customer-wallets', data)
@@ -174,15 +180,11 @@ export function fundStudyWallet(data: { subject_id: string; distributor_id: stri
 export function initializeStudyMonetary() {
   return studyPost<{ status: string }>('/monetary-initializations')
 }
-export type StudyBankKind = 'wholesale' | 'retail'
-export function registerStudyDistributor(data: { distributor_id: string; kind: StudyBankKind; admission_ref: string }) {
+export function registerStudyDistributor(data: { distributor_id: string }) {
   return studyPost<{ status: string }>('/distributors', data)
 }
 export function issueStudyRupiah(data: { distributor_id: string; amount: string }, idempotencyKey: string) {
   return studyPost<{ status: string }>('/issuances', data, idempotencyKey)
-}
-export function transferStudyInterbank(data: { from_distributor_id: string; to_distributor_id: string; amount: string }, idempotencyKey: string) {
-  return studyPost<unknown>('/interbank-transfers', data, idempotencyKey)
 }
 export function redeemStudyReserve(data: { distributor_id: string; amount: string }, idempotencyKey: string) {
   return studyPost<{ status: string }>('/reserve-redemptions', data, idempotencyKey)

@@ -25,7 +25,6 @@ const (
 	RoleAuthenticated Role = "authenticated"
 	RoleKycVerified   Role = "kyc_verified"
 	RoleRetailBank    Role = "retail_bank"
-	RoleWholesaleBank Role = "wholesale_bank"
 	RoleBankIndonesia Role = "bank_indonesia"
 	RoleMerchant      Role = "merchant"
 	RoleAuditor       Role = "auditor"
@@ -48,7 +47,7 @@ type TokenVerifier interface {
 var (
 	AllRoles = RoleSet{
 		RolePublic: true, RoleAuthenticated: true, RoleKycVerified: true,
-		RoleRetailBank: true, RoleWholesaleBank: true,
+		RoleRetailBank:    true,
 		RoleBankIndonesia: true, RoleMerchant: true, RoleAuditor: true,
 	}
 )

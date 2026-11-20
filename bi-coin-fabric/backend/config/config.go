@@ -37,6 +37,7 @@ type Config struct {
 	AuthBootstrapUsersJSON    string
 	FabricStudyIdentitiesJSON string
 	StudyChannelName          string
+	DocumentStoreDir          string
 	ContractSchemaVersion     string
 	MaxBodyBytes              int64
 	ReadTimeout               time.Duration
@@ -55,8 +56,9 @@ func Load() *Config {
 		AuthBootstrapUsersJSON:    getEnv("AUTH_BOOTSTRAP_USERS_JSON", ""),
 		FabricStudyIdentitiesJSON: getEnv("FABRIC_IDENTITIES_JSON", ""),
 		StudyChannelName:          getEnv("FABRIC_CHANNEL_NAME", "bi-coin"),
+		DocumentStoreDir:          getEnv("DOCUMENT_STORE_DIR", "backend/data/documents"),
 		ContractSchemaVersion:     getEnv("CONTRACT_SCHEMA_VERSION", ""),
-		MaxBodyBytes:              int64(getEnvInt("HTTP_MAX_BODY_BYTES", 1<<20)),
+		MaxBodyBytes:              int64(getEnvInt("HTTP_MAX_BODY_BYTES", 3<<20)),
 		ReadTimeout:               time.Duration(getEnvInt("HTTP_READ_TIMEOUT_SECONDS", 15)) * time.Second,
 		ReadHeaderTimeout:         time.Duration(getEnvInt("HTTP_READ_HEADER_TIMEOUT_SECONDS", 5)) * time.Second,
 		WriteTimeout:              time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT_SECONDS", 30)) * time.Second,

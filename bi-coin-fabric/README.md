@@ -60,22 +60,21 @@ node scripts/smoke-test.js
 |-------|--------|
 | `GET /health`, `POST /auth/login` | Public |
 | `GET /auth/me` | Authenticated application roles |
-| `GET /identities/me`, `POST /subjects` | Authenticated, KYC-verified customer, or merchant |
+| `GET /identities/me`, `POST /subjects` (multipart: form fields and a PNG or JPEG `document`) | Authenticated, KYC-verified customer, or merchant |
 | `POST /customer-wallets`, `POST /retail-transfers`, `GET /customer-wallets/{subject_id}/balance` | KYC-verified customer or merchant |
-| `POST /conversions` | DistributorMSP (Retail Bank, Conversion) |
-| `POST /interbank-transfers`, `POST /interbank-transfers/{reference}/approval`, `/rejection`; `POST /distributors/{distributor_id}/approval-threshold-proposals`, `/approval-threshold-approvals` | DistributorMSP (Wholesale Bank, Retail Bank) |
-| `POST /wallet-fundings` | DistributorMSP (Retail Bank) |
+| `POST /conversions` | DistributorMSP (Distributor, Conversion) |
+| `POST /wallet-fundings` | DistributorMSP (Distributor) |
 | `POST /subjects/{subject_id}/endorsement-policies`, `/reviews`, `/decisions`, `/restrictions`, `/restriction-release-requests`, `/restriction-release-decisions`; `PUT /subjects/{subject_id}/limits`, `/business-authority` | DistributorMSP |
 | `GET /subjects/{subject_id}` | DistributorMSP, CentralBankMSP, Auditor |
 | `POST /staff`, `POST /staff/{client_id}/endorsement-policies`, `PUT /staff/{client_id}/role` | CentralBankMSP |
-| `POST /monetary-initializations`, `/distributors`, `/issuances`, `/reserve-redemptions`; `PUT /distributors/{distributor_id}/status`, `PUT /transfer-limit` | CentralBankMSP |
+| `POST /monetary-initializations`, `/distributors`, `/issuances`, `/reserve-redemptions` | CentralBankMSP |
 
 ## Chaincode Functions
 
 | Chaincode | Exported transactions (caller) |
 |-----------|--------------------------------|
-| `rupiah-monetary` | `Initialize`, `RegisterDistributor`, `Issue`, `RedeemReserve`, `SetParticipantStatus`, `SetTransferLimit` (CentralBankMSP); `TransferReserve`, `ApproveTransfer`, `RejectTransfer`, `ProposeApprovalThreshold`, `ApproveApprovalThreshold` (DistributorMSP); `DebitReserveForConversion` (nested call from `rupiah-payments`); reads `GetReserve`, `GetParticipant`, `CanSend`, `GetTransferLimit`, `GetWholesaleSupply`, `GetRetailSupply`, `GetTotalSupply` |
-| `rupiah-controls` | `CreatePending` (EndUserMSP); `ProtectSubject` (DistributorMSP); `CreateStaffPending`, `ProtectStaff`, `SetStaffRole` (CentralBankMSP); `RecordReview`, `ApproveSubject`, `SetLimits`, `SetBusinessAuthority`, `FreezeSubject`, `RequestUnfreeze`, `ApproveUnfreeze` (staff roles on DistributorMSP); reads `GetCallerIdentity`, `CanPay`, `GetLimits`, `CanActFor`; `GetSubject` (CentralBankMSP, DistributorMSP, ValidatorMSP) |
+| `rupiah-monetary` | `Initialize`, `RegisterDistributor`, `Issue`, `RedeemReserve` (CentralBankMSP); `DebitReserveForConversion` (nested call from `rupiah-payments`); reads `GetReserve`, `GetParticipant`, `GetWholesaleSupply`, `GetRetailSupply`, `GetTotalSupply` |
+| `rupiah-controls` | `CreatePending` (EndUserMSP; CDD contents in transient `payload`); `ProtectSubject` (DistributorMSP); `CreateStaffPending`, `ProtectStaff`, `SetStaffRole` (CentralBankMSP); `RecordReview`, `ApproveSubject`, `SetLimits`, `SetBusinessAuthority`, `FreezeSubject`, `RequestUnfreeze`, `ApproveUnfreeze` (staff roles on DistributorMSP; contents in transient `payload`); reads `GetCallerIdentity`, `CanActFor`, `GetSubjectHash`, `CanPay` and `GetLimits` (access rule pending a decision), `GetSubject` (member MSPs or the subject's actor) |
 | `rupiah-payments` | `OpenWallet`, `Transfer` (EndUserMSP); `ConvertToRetail`, `FundWallet` (DistributorMSP); reads `GetBalance`, `GetReceipt`, `GetRetailFloat` |
 
 ## Environment Variables

@@ -9,7 +9,7 @@ This repository is a local Hyperledger Fabric prototype for a two-tier retail Di
 | frontend/ | React and TypeScript experiences for institutional operators, Retail Customers, and Merchants | Vite serves port 5173 and proxies /api to the Go API on port 8080. |
 | backend/ | Go REST API, authentication, role checks, request-scoped Fabric access, and off-chain services | Reads PostgreSQL for application data and uses Fabric Gateway to submit or evaluate chaincode transactions. |
 | chaincode/ | Go Fabric contract and authoritative ledger rules | Runs on Fabric peers; checks caller MSP and ledger state for protected operations. |
-| network/, scripts/ | Local four-organization network (CentralBankMSP with the orderer, DistributorMSP, Observer (MSP ID: ValidatorMSP), EndUserMSP), channel, chaincode deployment, and smoke workflows | start.sh starts PostgreSQL, backend, and frontend; scripts/network-up.sh and scripts/deploy-chaincodes.sh set up the network and chaincodes. |
+| network/, scripts/ | Local four-organization network (CentralBankMSP with three orderers, DistributorMSP, Observer (MSP ID: ValidatorMSP), EndUserMSP), channel, chaincode deployment, and smoke workflows | start.sh starts PostgreSQL, backend, and frontend; scripts/network-up.sh and scripts/deploy-chaincodes.sh set up the network and chaincodes. |
 | benchmark/ | Caliper workloads, observers, and the compliance benchmark for the four-organization bi-coin network (network/, chaincode/) | Measures direct Fabric workloads. The Go/PostgreSQL/KYC demonstration is a separate end-to-end path. |
 
 The main request path is:
@@ -40,7 +40,7 @@ Keep the diff focused. Reuse existing patterns, inspect callers and tests before
 
 ## Product and thesis boundaries
 
-- The thesis acceptance path centers on participant lifecycle, Issuance to Distributor Banks, Conversion and Wallet funding by the Retail Bank Custodian, retail transfer, and supervision.
+- The thesis acceptance path centers on Issuance to the Distributor, Conversion and Wallet funding by the Distributor as Custodian, retail transfer, and supervision.
 - KYC is implementation-only and is not a thesis acceptance criterion. It still has real API, database, and chaincode contracts.
 - This is a local prototype. Do not describe local benchmark results as production capacity or generalize them beyond the measured host, network, workload, and run conditions.
 - Use CONTEXT.md for canonical institutional and wallet terms. Use existing ADRs for architectural decisions: Fabric trust and endorsement, public API projections and money, thesis scope, frontend boundaries, and benchmark measurement.
@@ -53,7 +53,7 @@ Requirement IDs and descriptions come from the thesis Chapter 3 SRS table. Chapt
 | Thesis item | Repository implementation | Verification or evidence |
 |---|---|---|
 | FR-01 participant lifecycle | chaincode/controls/controls.go; backend/handlers/handlers.go; backend/services/study_ledger.go | chaincode/controls/controls_test.go, backend/handlers/routes_test.go; thesis Chapter 4 functional results |
-| FR-02 Issuance and interbank transfer | Chaincode Issue and TransferReserve (monetary) and ConvertToRetail (payments); backend issuance, transfer and conversion routes/services | chaincode/monetary/monetary_test.go; thesis Chapter 4 issuance/conversion result |
+| FR-02 Issuance and interbank transfer | Chaincode Issue (monetary) and ConvertToRetail (payments); backend issuance and conversion routes/services | chaincode/monetary/monetary_test.go; thesis Chapter 4 issuance/conversion result |
 | FR-03 authorized, valid, atomic transfer | Chaincode Transfer (payments); backend transfer handler and service; authenticated wallet ownership checks | chaincode/payments/payments_test.go; thesis Chapter 4 transfer result |
 | FR-04 audit and oversight reports | Chaincode read-only oversight queries (controls GetSubject and GetLimits; monetary GetReserve, GetWholesaleSupply, GetRetailSupply, and GetTotalSupply); backend read routes | chaincode/controls/controls_test.go, backend/handlers/routes_test.go; thesis Chapter 4 oversight result |
 | FR-05 API role separation | backend/middleware/, backend/handlers/handlers.go route groups, frontend/src/App.tsx | backend/handlers/routes_test.go, frontend/tests/contracts.test.mjs; thesis Chapter 4 access-control result |
@@ -87,9 +87,9 @@ Evidence checkpoint for this checkout (2026-10-16):
 
 Always use Hyperledger Fabric 2.5.16 for peer, orderer, configtxgen, osnadmin, and the CA client. Set `FABRIC_SAMPLES=$HOME/fabric-tools-2.5.16` before running network scripts. Do not use the Fabric 3.1.4 tools in `~/fabric-samples`. See [ADR 0012](docs/adr/0012-fabric-2-5-16-toolchain.md).
 
-## Wholesale and restriction controls
+## Restriction periods
 
-Participant status, the transfer limit, admission evidence, Four-eyes approval, and retail restriction periods follow [ADR 0014](docs/adr/0014-wholesale-participation-controls.md). They are modelled on Bank Indonesia's payment-infrastructure participation rules (PBI No. 10 Tahun 2025) and APU-PPT law. Do not describe them as implementing a Rupiah Digital regulation; none was found.
+Restriction periods are set in `chaincode/controls` (`restrictionPeriods`): 5 days for internal review, 30 days for authority order, and until an approved release for DTTOT. ADR 0014 defined them, and ADR 0017 superseded it. No ADR records the periods yet. This is an open item for the thesis Batasan and for Plan 2.
 
 ## Benchmark integrity
 
@@ -105,6 +105,6 @@ Run commands from the owning directory:
 | Backend | go test ./... |
 | Chaincode | go test ./... |
 | Benchmark scripts | npm run test:benchmarks; read benchmark/compliance/README.md before starting a live Fabric benchmark |
-| Full local smoke flow | bash scripts/network-up.sh, then bash scripts/deploy-chaincodes.sh, then node scripts/smoke-test.js. ./start.sh separately starts PostgreSQL, backend, and frontend and keeps them running |
+| Full local smoke flow | bash scripts/network-up.sh, then bash scripts/deploy-chaincodes.sh, then node scripts/smoke-test.js (fails until Plan 2 removes its interbank calls). ./start.sh separately starts PostgreSQL, backend, and frontend and keeps them running |
 
 For benchmark interpretation and operational preconditions, read benchmark/compliance/README.md. For terminology, read CONTEXT.md; for architecture decisions, read docs/adr/.

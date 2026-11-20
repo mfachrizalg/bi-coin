@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
@@ -23,7 +24,7 @@ const (
 )
 
 type FabricContract interface {
-	SubmitTransaction(name string, args ...string) ([]byte, error)
+	Submit(transactionName string, options ...client.ProposalOption) ([]byte, error)
 	EvaluateTransaction(name string, args ...string) ([]byte, error)
 }
 
@@ -131,6 +132,22 @@ func loadStudySigner(keyPath string) (identity.Sign, error) {
 	return identity.NewPrivateKeySign(signer)
 }
 
+// DistributorUsername picks the configured Distributor identity that reads payee
+// records for transfers. The lowest username wins when several are configured.
+func (s *StudyLedgerService) DistributorUsername() (string, error) {
+	var names []string
+	for username, studyIdentity := range s.identities {
+		if studyIdentity.MSPID == "DistributorMSP" {
+			names = append(names, username)
+		}
+	}
+	if len(names) == 0 {
+		return "", Forbidden("study Distributor identity is not configured")
+	}
+	sort.Strings(names)
+	return names[0], nil
+}
+
 func (s *StudyLedgerService) IdentityMSP(username string) (string, error) {
 	identity, ok := s.identities[username]
 	if !ok {
@@ -140,11 +157,20 @@ func (s *StudyLedgerService) IdentityMSP(username string) (string, error) {
 }
 
 func (s *StudyLedgerService) Submit(username string, expectedMSP string, chaincode string, transaction string, args ...string) ([]byte, error) {
+	return s.SubmitWithTransient(username, expectedMSP, chaincode, transaction, nil, args...)
+}
+
+// SubmitWithTransient sends CDD contents in the transient map, so they stay out of the proposal arguments (D8).
+func (s *StudyLedgerService) SubmitWithTransient(username string, expectedMSP string, chaincode string, transaction string, transient map[string][]byte, args ...string) ([]byte, error) {
 	contract, err := s.resolveContract(username, expectedMSP, chaincode)
 	if err != nil {
 		return nil, err
 	}
-	result, err := contract.SubmitTransaction(transaction, args...)
+	options := []client.ProposalOption{client.WithArguments(args...)}
+	if transient != nil {
+		options = append(options, client.WithTransient(transient))
+	}
+	result, err := contract.Submit(transaction, options...)
 	if err != nil {
 		return nil, Internal("study ledger transaction failed", err)
 	}
