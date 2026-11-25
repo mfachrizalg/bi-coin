@@ -5,7 +5,7 @@ const workspaces = [
     role: 'bank_indonesia',
     roleLabel: 'Bank Indonesia',
     nav: 'Bank Indonesia workspace navigation',
-    tabs: ['Staff roles', 'Monetary operations'],
+    tabs: ['Staff roles', 'CDD ceilings', 'Monetary operations', 'Compliance'],
     landingHash: '#/institutional/study-staff',
     landingHeading: 'Staff roles',
   },
@@ -13,7 +13,7 @@ const workspaces = [
     role: 'auditor',
     roleLabel: 'Auditor',
     nav: 'Auditor workspace navigation',
-    tabs: ['Controls audit'],
+    tabs: ['Controls audit', 'Compliance'],
     landingHash: '#/institutional/study-audit',
     landingHeading: 'Controls audit',
   },
@@ -21,7 +21,7 @@ const workspaces = [
     role: 'retail_bank',
     roleLabel: 'Retail Bank',
     nav: 'Retail Bank workspace navigation',
-    tabs: ['Subject approval', 'Business authority', 'Restrictions', 'Reserve and float'],
+    tabs: ['Subject approval', 'Restrictions', 'Reserve and float', 'Compliance'],
     landingHash: '#/institutional/study-approval',
     landingHeading: 'Subject approval',
   },
@@ -37,14 +37,6 @@ const workspaces = [
     role: 'kyc_verified',
     roleLabel: 'Retail Customer',
     nav: 'Retail Customer workspace navigation',
-    tabs: ['Subject onboarding', 'Wallet', 'Pay'],
-    landingHash: '#/retail/study-identity',
-    landingHeading: 'Subject onboarding',
-  },
-  {
-    role: 'merchant',
-    roleLabel: 'Merchant',
-    nav: 'Merchant workspace navigation',
     tabs: ['Subject onboarding', 'Wallet', 'Pay'],
     landingHash: '#/retail/study-identity',
     landingHeading: 'Subject onboarding',
@@ -81,7 +73,7 @@ test('distributor bank has a workspace, not the empty placeholder', async ({ pag
 
   await expect(
     page.getByRole('navigation', { name: 'Retail Bank workspace navigation' }).getByRole('button'),
-  ).toHaveText(['Subject approval', 'Business authority', 'Restrictions', 'Reserve and float'])
+  ).toHaveText(['Subject approval', 'Restrictions', 'Reserve and float', 'Compliance'])
   await expect(page.getByText('This role has no workspace in the demo.', { exact: true })).toHaveCount(0)
 })
 

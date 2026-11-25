@@ -62,8 +62,10 @@ test.describe('compliance study flow', () => {
 
   test('customer creates a pending subject', async ({ browser }) => {
     await asActor(browser, 'customer', async page => {
-      await page.locator('#study-category').selectOption('retail')
       await page.locator('#study-legal-name').fill('Synthetic Customer')
+      await page.locator('#study-address').fill('Jl. Contoh 1, Sleman')
+      await page.locator('#study-birth-place').fill('Sleman')
+      await page.locator('#study-birth-date').fill('2000-01-02')
       await page.locator('#study-document-number').fill(`e2e-doc-${Date.now()}`)
       await page.locator('#study-document').setInputFiles({ name: 'identity.png', mimeType: 'image/png', buffer: identityPNG })
       await act(page, 'Create pending subject', 'Create pending subject completed.')
@@ -88,6 +90,17 @@ test.describe('compliance study flow', () => {
     })
   })
 
+  test('BI sets the CDD ceilings', async ({ browser }) => {
+    await asActor(browser, 'bi', async page => {
+      await page.getByRole('button', { name: 'CDD ceilings', exact: true }).click()
+      await page.locator('#study-ceiling-unverified_holdings').fill('2000000')
+      await page.locator('#study-ceiling-verified_holdings').fill('20000000')
+      await act(page, 'Set ceilings', 'Set ceilings completed.')
+      await act(page, 'Load ceilings', 'Load ceilings completed.')
+      await expect(page.locator('pre')).toContainText('"verified_holdings": "20000000"', slow)
+    })
+  })
+
   test('reviewer protects the subject', async ({ browser }) => {
     await asActor(browser, 'reviewer', async page => {
       await page.locator('#study-subject-id').fill(subjectID)
@@ -108,6 +121,16 @@ test.describe('compliance study flow', () => {
       await page.locator('#study-subject-id').fill(subjectID)
       await act(page, 'Record review', 'Record review completed.')
       await act(page, 'Apply decision', 'Apply decision completed.')
+    })
+  })
+
+  test('reviewer verifies the subject', async ({ browser }) => {
+    await asActor(browser, 'reviewer', async page => {
+      await page.locator('#study-subject-id').fill(subjectID)
+      await page.locator('#study-evidence-ref').fill(releaseEvidenceRef)
+      await act(page, 'Verify subject', 'Verify subject completed.')
+      await act(page, 'Read subject', 'Read subject completed.')
+      await expect(page.getByText('Status: active · Verified: yes')).toBeVisible(slow)
     })
   })
 
@@ -150,6 +173,28 @@ test.describe('compliance study flow', () => {
       await page.locator('#study-subject-id').fill(subjectID)
       await act(page, 'Read subject', 'Read subject completed.')
       await expect(page.locator('pre')).toContainText('"restricted": false', slow)
+    })
+  })
+
+  test('compliance officer and BI load the compliance views', async ({ browser }) => {
+    await asActor(browser, 'compliance', async page => {
+      await page.getByRole('button', { name: 'Compliance', exact: true }).click()
+      await act(page, 'Load alerts', 'Load alerts completed.')
+    })
+    await asActor(browser, 'bi', async page => {
+      await page.getByRole('button', { name: 'Compliance', exact: true }).click()
+      await act(page, 'Load register', 'Load register completed.')
+      await expect(page.locator('pre')).toContainText(subjectID, slow)
+    })
+  })
+
+  test('reviewer closes the subject', async ({ browser }) => {
+    await asActor(browser, 'reviewer', async page => {
+      await page.locator('#study-subject-id').fill(subjectID)
+      await page.locator('#study-close-reason').selectOption('identity_doubtful')
+      await act(page, 'Close subject', 'Close subject completed.')
+      await act(page, 'Read subject', 'Read subject completed.')
+      await expect(page.getByText('Status: closed')).toBeVisible(slow)
     })
   })
 })

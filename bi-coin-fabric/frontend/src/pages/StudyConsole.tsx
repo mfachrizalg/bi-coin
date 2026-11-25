@@ -2,12 +2,17 @@ import { useRef, useState } from 'react'
 import type { Role, Tab } from '../App'
 import {
   approveSubjectRelease,
+  closeStudySubject,
+  confirmMonitoringAlert,
   convertStudyToRetail,
   createStudyStaff,
   createStudySubject,
   decideStudySubject,
   fundStudyWallet,
+  getCddCeilings,
   getErrorMessage,
+  getMonitoringAlerts,
+  getSederhanaRegister,
   getStudyBalance,
   getStudyIdentity,
   getStudySubject,
@@ -21,13 +26,18 @@ import {
   registerStudyDistributor,
   requestSubjectRelease,
   restrictSubject,
-  setStudyBusinessAuthority,
+  revokeStudyLowRisk,
+  setCddCeilings,
   setStudyLimits,
   setStudyStaffRole,
+  studyCloseReasonOptions,
+  studyDttotResultOptions,
   studyRestrictionReasonOptions,
   transferStudyFunds,
+  updateStudySubject,
+  verifyStudySubject,
 } from '../lib/api'
-import type { StudyLimitsInput, StudyRestrictionReason, StudyStaffRole, StudySubjectView } from '../lib/api'
+import type { CddCeilings, MonitoringAlert, SederhanaRegisterRow, StudyCloseReason, StudyDttotResult, StudyLimitsInput, StudyRestrictionReason, StudyStaffRole, StudySubjectView } from '../lib/api'
 
 function StudyAction({ label, working, disabled, onClick }: { label: string; working: boolean; disabled?: boolean; onClick: () => void }) {
   return <button className="primary-button" type="button" disabled={disabled || working} onClick={onClick}>{working ? 'Working…' : label}</button>
@@ -39,18 +49,29 @@ function resultText(value: unknown) {
 
 export default function OrganizationWorkspace({ role, section }: { role: Role; section: Tab }) {
   const [subjectID, setSubjectID] = useState('')
-  const [category, setCategory] = useState<StudySubjectView['category']>('retail')
   const [destinationID, setDestinationID] = useState('')
   const [distributorID, setDistributorID] = useState('')
   const [legalName, setLegalName] = useState('')
   const [documentType, setDocumentType] = useState('ktp')
   const [documentNumber, setDocumentNumber] = useState('')
+  const [address, setAddress] = useState('')
+  const [birthPlace, setBirthPlace] = useState('')
+  const [birthDate, setBirthDate] = useState('')
   const [documentFile, setDocumentFile] = useState<File | null>(null)
   const [amount, setAmount] = useState('')
   const [approved, setApproved] = useState(true)
   const [limits, setLimits] = useState<StudyLimitsInput>({ per_transaction: '', daily: '', monthly: '', holdings: '' })
-  const [representatives, setRepresentatives] = useState('')
-  const [beneficialOwners, setBeneficialOwners] = useState('')
+  const [dttot, setDttot] = useState<StudyDttotResult>('not_listed')
+  const [lowRisk, setLowRisk] = useState(true)
+  const [lowRiskReason, setLowRiskReason] = useState('capped product')
+  const [evidenceRef, setEvidenceRef] = useState('')
+  const [updateFile, setUpdateFile] = useState<File | null>(null)
+  const [updateDttot, setUpdateDttot] = useState<StudyDttotResult>('not_listed')
+  const [closeReason, setCloseReason] = useState<StudyCloseReason>('data_missing')
+  const [subject, setSubject] = useState<StudySubjectView | null>(null)
+  const [alerts, setAlerts] = useState<MonitoringAlert[] | null>(null)
+  const [register, setRegister] = useState<SederhanaRegisterRow[] | null>(null)
+  const [ceilings, setCeilings] = useState<CddCeilings>({ unverified_holdings: '2000000', verified_holdings: '20000000' })
   const [reason, setReason] = useState<StudyRestrictionReason>('dttot')
   const [authorityRef, setAuthorityRef] = useState('')
   const [staffClientID, setStaffClientID] = useState('')
@@ -61,8 +82,8 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const [result, setResult] = useState<unknown>(null)
   const keys = useRef<Record<string, string>>({})
 
-  const customer = role === 'authenticated' || role === 'kyc_verified' || role === 'merchant'
-  const canPay = role === 'kyc_verified' || role === 'merchant'
+  const customer = role === 'authenticated' || role === 'kyc_verified'
+  const canPay = role === 'kyc_verified'
   const distributor = role === 'retail_bank'
   const retailBank = role === 'retail_bank'
   const centralBank = role === 'bank_indonesia'
@@ -70,25 +91,30 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
   const customerWallet = canPay && section === 'study_wallet'
   const customerTransfer = canPay && section === 'study_transfer'
   const distributorApproval = distributor && section === 'study_approval'
-  const distributorBusiness = distributor && section === 'study_business'
   const distributorRestrictions = distributor && section === 'study_restrictions'
   const distributorFunding = distributor && section === 'study_funding'
   const validatorAudit = role === 'auditor' && section === 'study_audit'
+  const complianceView = !customer && section === 'study_compliance'
+  const centralCeilings = centralBank && section === 'study_ceilings'
   const centralMonetary = centralBank && section === 'study_monetary'
   const centralStaff = centralBank && section === 'study_staff'
-  const permitted = customerIdentity || customerWallet || customerTransfer || distributorApproval || distributorBusiness || distributorRestrictions || distributorFunding || validatorAudit || centralMonetary || centralStaff
+  const permitted = customerIdentity || customerWallet || customerTransfer || distributorApproval || distributorRestrictions || distributorFunding || validatorAudit || complianceView || centralCeilings || centralMonetary || centralStaff
   const organization = customer ? 'EndUserMSP' : distributor ? 'DistributorMSP' : centralBank ? 'CentralBankMSP' : 'ValidatorMSP'
   const sectionTitle: Partial<Record<Tab, string>> = {
     study_identity: 'Subject onboarding', study_wallet: 'Wallet', study_transfer: 'Transfer',
-    study_approval: 'Subject approval', study_business: 'Business authority', study_restrictions: 'Restrictions',
+    study_approval: 'Subject approval', study_compliance: 'Compliance', study_ceilings: 'CDD ceilings', study_restrictions: 'Restrictions',
   study_funding: 'Reserve and float', study_monetary: 'Monetary operations', study_audit: 'Controls audit', study_staff: 'Staff roles',
   }
   const hasSubject = subjectID.trim() !== ''
   const hasAmount = /^[0-9]+$/.test(amount)
   const hasStaffClient = staffClientID.trim() !== ''
+  const hasEvidenceRef = /^[0-9a-f]{64}$/i.test(evidenceRef)
+  const subjectStatus = subject && <p>Status: <strong>{subject.status}</strong> · Verified: <strong>{subject.verified ? 'yes' : 'no'}</strong></p>
+  const readSubject = <StudyAction label="Read subject" working={busy === 'Read subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Read subject', async () => { const view = await getStudySubject(subjectID.trim()); setSubject(view); return view })} />
 
   async function run(label: string, action: () => Promise<unknown>, retryKey?: string) {
     setBusy(label)
+    setSubject(null)
     setNotice('')
     setError('')
     try {
@@ -129,7 +155,7 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
 
       <div className="banner">Use synthetic records and pseudonymous subject IDs only. Fabric signers are selected by the server for each username; application roles do not replace chaincode staff-role checks.</div>
 
-      {!centralBank && <section className="surface-card">
+      {(customer || retailBank || validatorAudit) && <section className="surface-card">
         <label className="app-label" htmlFor="study-subject-id">
           <span>Pseudonymous subject ID</span>
           <input id="study-subject-id" className="app-input" value={subjectID} onChange={event => setSubjectID(event.target.value)} placeholder="retail-0001" autoComplete="off" />
@@ -139,21 +165,16 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
       {customerIdentity && <article className="surface-card">
         <h3>End-user identity and onboarding</h3>
         <p className="muted">The identity response comes from this login’s server-managed EndUserMSP certificate.</p>
-        <label className="app-label" htmlFor="study-category">
-          <span>Customer category</span>
-          <select id="study-category" className="app-input" value={category} onChange={event => setCategory(event.target.value as StudySubjectView['category'])}>
-            <option value="retail">Retail individual</option>
-            <option value="merchant">Merchant individual seller</option>
-            <option value="business">Business/company</option>
-          </select>
-        </label>
         <label className="app-label" htmlFor="study-legal-name"><span>Legal name</span><input id="study-legal-name" className="app-input" value={legalName} onChange={event => setLegalName(event.target.value)} autoComplete="off" /></label>
+        <label className="app-label" htmlFor="study-address"><span>Address</span><input id="study-address" className="app-input" value={address} onChange={event => setAddress(event.target.value)} autoComplete="off" /></label>
+        <label className="app-label" htmlFor="study-birth-place"><span>Birth place</span><input id="study-birth-place" className="app-input" value={birthPlace} onChange={event => setBirthPlace(event.target.value)} autoComplete="off" /></label>
+        <label className="app-label" htmlFor="study-birth-date"><span>Birth date</span><input id="study-birth-date" className="app-input" type="date" value={birthDate} onChange={event => setBirthDate(event.target.value)} /></label>
         <label className="app-label" htmlFor="study-document-type"><span>Document type</span><select id="study-document-type" className="app-input" value={documentType} onChange={event => setDocumentType(event.target.value)}><option value="ktp">KTP</option><option value="passport">Passport</option></select></label>
         <label className="app-label" htmlFor="study-document-number"><span>Document number</span><input id="study-document-number" className="app-input" value={documentNumber} onChange={event => setDocumentNumber(event.target.value)} autoComplete="off" /></label>
         <label className="app-label" htmlFor="study-document"><span>Identity document (PNG or JPEG, at most 2 MB)</span><input id="study-document" className="app-input" type="file" accept="image/png,image/jpeg" onChange={event => setDocumentFile(event.target.files?.[0] ?? null)} /></label>
         <div className="button-row">
           <StudyAction label="Check mapped identity" working={busy === 'Check mapped identity'} disabled={Boolean(busy)} onClick={() => void run('Check mapped identity', getStudyIdentity)} />
-          <StudyAction label="Create pending subject" working={busy === 'Create pending subject'} disabled={!legalName.trim() || !documentNumber.trim() || !documentFile || Boolean(busy)} onClick={() => void run('Create pending subject', async () => { if (!documentFile) throw new Error('Choose a PNG or JPEG document first.'); const response = await createStudySubject({ category, legal_name: legalName.trim(), document_type: documentType, document_number: documentNumber.trim(), document: documentFile }); setSubjectID(response.subject_id); return response })} />
+          <StudyAction label="Create pending subject" working={busy === 'Create pending subject'} disabled={!legalName.trim() || !documentNumber.trim() || !address.trim() || !birthPlace.trim() || !birthDate || !documentFile || Boolean(busy)} onClick={() => void run('Create pending subject', async () => { if (!documentFile) throw new Error('Choose a PNG or JPEG document first.'); const response = await createStudySubject({ legal_name: legalName.trim(), document_type: documentType, document_number: documentNumber.trim(), address: address.trim(), birth_place: birthPlace.trim(), birth_date: birthDate, document: documentFile }); setSubjectID(response.subject_id); return response })} />
         </div>
       </article>}
 
@@ -180,10 +201,18 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
       {distributorApproval && <article className="surface-card">
         <h3>Distributor approval</h3>
         <p className="muted">Reviewer and compliance officer actions require separate server-mapped staff identities.</p>
-        <StudyAction label="Read subject" working={busy === 'Read subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Read subject', () => getStudySubject(subjectID.trim()))} />
+        {readSubject}
+        {subjectStatus}
         <StudyAction label="Protect subject" working={busy === 'Protect subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Protect subject', () => protectStudySubject(subjectID.trim()))} />
+        <h4>Review (CDD Sederhana)</h4>
+        <fieldset>
+          <legend>DTTOT result</legend>
+          {studyDttotResultOptions.map(option => <label className="checkbox-label" key={option.value}><input type="radio" name="study-dttot" value={option.value} checked={dttot === option.value} onChange={() => setDttot(option.value)} />{option.label}</label>)}
+        </fieldset>
+        <label className="checkbox-label"><input type="checkbox" checked={lowRisk} onChange={event => setLowRisk(event.target.checked)} />Low risk</label>
+        <label className="app-label" htmlFor="study-low-risk-reason"><span>Low-risk reason</span><input id="study-low-risk-reason" className="app-input" value={lowRiskReason} onChange={event => setLowRiskReason(event.target.value)} autoComplete="off" /></label>
         <div className="button-row">
-          <StudyAction label="Record review" working={busy === 'Record review'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Record review', () => recordStudyReview(subjectID.trim()))} />
+          <StudyAction label="Record review" working={busy === 'Record review'} disabled={!hasSubject || (lowRisk && !lowRiskReason.trim()) || Boolean(busy)} onClick={() => void run('Record review', () => recordStudyReview(subjectID.trim(), { dttot_result: dttot, low_risk: lowRisk, low_risk_reason: lowRiskReason.trim() }))} />
           <label className="app-label" htmlFor="study-decision"><span>Decision</span><select id="study-decision" className="app-input" value={approved ? 'approve' : 'reject'} onChange={event => setApproved(event.target.value === 'approve')}><option value="approve">Approve</option><option value="reject">Reject</option></select></label>
           <StudyAction label="Apply decision" working={busy === 'Apply decision'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Apply decision', () => decideStudySubject(subjectID.trim(), approved))} />
         </div>
@@ -199,15 +228,16 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
         <StudyAction label="Set limits" working={busy === 'Set limits'} disabled={!hasSubject || Object.values(limits).some(value => !/^[0-9]+$/.test(value)) || Boolean(busy)} onClick={() => void run('Set limits', () => setStudyLimits(subjectID.trim(), limits))} />
       </article>}
 
-      {distributorBusiness && <article className="surface-card">
-        <h3>Business authority</h3>
-        <p className="muted">For active business/company subjects. Use pseudonymous IDs and SHA-256 references.</p>
-        <label className="app-label" htmlFor="study-representatives"><span>Representative IDs (comma-separated)</span><textarea id="study-representatives" className="app-textarea" value={representatives} onChange={event => setRepresentatives(event.target.value)} autoComplete="off" /></label>
-        <label className="app-label" htmlFor="study-beneficial-owners"><span>Beneficial-owner references (comma-separated)</span><textarea id="study-beneficial-owners" className="app-textarea" value={beneficialOwners} onChange={event => setBeneficialOwners(event.target.value)} autoComplete="off" /></label>
-        <StudyAction label="Set business authority" working={busy === 'Set business authority'} disabled={!hasSubject || !representatives.split(',').some(value => value.trim()) || Boolean(busy)} onClick={() => void run('Set business authority', () => setStudyBusinessAuthority(subjectID.trim(), {
-          representatives: representatives.split(',').map(value => value.trim()).filter(Boolean),
-          beneficial_owner_refs: beneficialOwners.split(',').map(value => value.trim()).filter(Boolean),
-        }))} />
+      {distributorApproval && <article className="surface-card">
+        <h3>Verification, update and closure</h3>
+        <p className="muted">Verification is the reviewer's manual confirmation. An update resets the subject to unverified. Closure is terminal.</p>
+        <label className="app-label" htmlFor="study-evidence-ref"><span>Verification evidence reference (SHA-256, 64 hex)</span><input id="study-evidence-ref" className="app-input" value={evidenceRef} onChange={event => setEvidenceRef(event.target.value)} autoComplete="off" /></label>
+        <StudyAction label="Verify subject" working={busy === 'Verify subject'} disabled={!hasSubject || !hasEvidenceRef || Boolean(busy)} onClick={() => void run('Verify subject', () => verifyStudySubject(subjectID.trim(), evidenceRef))} />
+        <label className="app-label" htmlFor="study-update-document"><span>New identity document (PNG or JPEG, at most 2 MB)</span><input id="study-update-document" className="app-input" type="file" accept="image/png,image/jpeg" onChange={event => setUpdateFile(event.target.files?.[0] ?? null)} /></label>
+        <label className="app-label" htmlFor="study-update-dttot"><span>DTTOT result</span><select id="study-update-dttot" className="app-input" value={updateDttot} onChange={event => setUpdateDttot(event.target.value as StudyDttotResult)}>{studyDttotResultOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+        <StudyAction label="Update subject" working={busy === 'Update subject'} disabled={!hasSubject || !updateFile || Boolean(busy)} onClick={() => void run('Update subject', async () => { if (!updateFile) throw new Error('Choose a PNG or JPEG document first.'); return updateStudySubject(subjectID.trim(), { document: updateFile, dttot_result: updateDttot }) })} />
+        <label className="app-label" htmlFor="study-close-reason"><span>Closure reason</span><select id="study-close-reason" className="app-input" value={closeReason} onChange={event => setCloseReason(event.target.value as StudyCloseReason)}>{studyCloseReasonOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+        <StudyAction label="Close subject" working={busy === 'Close subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Close subject', () => closeStudySubject(subjectID.trim(), closeReason))} />
       </article>}
 
       {distributorRestrictions && <article className="surface-card">
@@ -235,7 +265,49 @@ export default function OrganizationWorkspace({ role, section }: { role: Role; s
       {validatorAudit && <article className="surface-card">
         <h3>ValidatorMSP read-only audit</h3>
         <p className="muted">This organization can inspect pseudonymous controls records and cannot submit study mutations.</p>
-        <StudyAction label="Read subject" working={busy === 'Read subject'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Read subject', () => getStudySubject(subjectID.trim()))} />
+        {readSubject}
+        {subjectStatus}
+      </article>}
+
+      {complianceView && <article className="surface-card">
+        <h3>Monitoring alerts</h3>
+        <p className="muted">Alerts are for compliance review only. Confirming records an LTKM draft and revokes the low-risk flag. The customer is not notified.</p>
+        <StudyAction label="Load alerts" working={busy === 'Load alerts'} disabled={Boolean(busy)} onClick={() => void run('Load alerts', async () => { const rows = await getMonitoringAlerts(); setAlerts(rows); return rows })} />
+        {alerts && <div className="table-shell"><table className="data-table">
+          <thead><tr><th scope="col">Alert</th><th scope="col">Subject</th><th scope="col">Rule</th><th scope="col">Detail</th><th scope="col">Status</th><th scope="col">Created</th>{retailBank && <th scope="col">Action</th>}</tr></thead>
+          <tbody>{alerts.map(alert => <tr key={alert.alert_id}>
+            <td>{alert.alert_id}</td><td>{alert.subject_id}</td><td>{alert.rule}</td><td>{alert.detail}</td><td>{alert.status}</td><td>{alert.created_at}</td>
+            {retailBank && <td>{alert.status === 'open' && <StudyAction label={'Confirm alert ' + alert.alert_id} working={busy === 'Confirm alert ' + alert.alert_id} disabled={Boolean(busy)} onClick={() => void run('Confirm alert ' + alert.alert_id, async () => { const response = await confirmMonitoringAlert(alert.alert_id); setAlerts(await getMonitoringAlerts()); return response })} />}</td>}
+          </tr>)}</tbody>
+        </table></div>}
+        {retailBank && <StudyAction label="Revoke low-risk" working={busy === 'Revoke low-risk'} disabled={!hasSubject || Boolean(busy)} onClick={() => void run('Revoke low-risk', () => revokeStudyLowRisk(subjectID.trim()))} />}
+      </article>}
+
+      {complianceView && !retailBank && <article className="surface-card">
+        <h3>Sederhana register</h3>
+        <p className="muted">Active low-risk subjects with the reviewer's reason.</p>
+        <StudyAction label="Load register" working={busy === 'Load register'} disabled={Boolean(busy)} onClick={() => void run('Load register', async () => { const rows = await getSederhanaRegister(); setRegister(rows); return rows })} />
+        {register && <div className="table-shell"><table className="data-table">
+          <thead><tr><th scope="col">Subject</th><th scope="col">Low-risk reason</th><th scope="col">Approved</th></tr></thead>
+          <tbody>{register.map(row => <tr key={row.subject_id}><td>{row.subject_id}</td><td>{row.low_risk_reason}</td><td>{row.approved_at}</td></tr>)}</tbody>
+        </table></div>}
+      </article>}
+
+      {centralCeilings && <article className="surface-card">
+        <h3>CDD ceilings</h3>
+        <p className="muted">Holdings ceilings per verification state, in integer rupiah strings.</p>
+        <div className="panel-grid">
+          {(['unverified_holdings', 'verified_holdings'] as const).map(field => (
+            <label className="app-label" htmlFor={'study-ceiling-' + field} key={field}>
+              <span>{field === 'unverified_holdings' ? 'Unverified holdings' : 'Verified holdings'}</span>
+              <input id={'study-ceiling-' + field} className="app-input" value={ceilings[field]} onChange={event => setCeilings(current => ({ ...current, [field]: event.target.value }))} inputMode="numeric" pattern="[0-9]+" />
+            </label>
+          ))}
+        </div>
+        <div className="button-row">
+          <StudyAction label="Load ceilings" working={busy === 'Load ceilings'} disabled={Boolean(busy)} onClick={() => void run('Load ceilings', async () => { const current = await getCddCeilings(); setCeilings(current); return current })} />
+          <StudyAction label="Set ceilings" working={busy === 'Set ceilings'} disabled={Object.values(ceilings).some(value => !/^[1-9][0-9]*$/.test(value)) || Boolean(busy)} onClick={() => void run('Set ceilings', () => setCddCeilings(ceilings))} />
+        </div>
       </article>}
 
       {centralMonetary && <article className="surface-card">

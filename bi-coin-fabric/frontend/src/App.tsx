@@ -5,8 +5,8 @@ import { getErrorMessage, getMe, hasAccessToken, login, onUnauthorized, setAcces
 import LoadingSkeleton from './components/LoadingSkeleton'
 import RequirementRail from './components/RequirementRail'
 
-export type Tab = 'study_identity' | 'study_wallet' | 'study_transfer' | 'study_approval' | 'study_business' | 'study_restrictions' | 'study_funding' | 'study_monetary' | 'study_audit' | 'study_staff'
-export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'retail_bank' | 'bank_indonesia' | 'merchant' | 'auditor'
+export type Tab = 'study_identity' | 'study_wallet' | 'study_transfer' | 'study_approval' | 'study_restrictions' | 'study_funding' | 'study_compliance' | 'study_monetary' | 'study_ceilings' | 'study_audit' | 'study_staff'
+export type Role = 'public' | 'authenticated' | 'kyc_verified' | 'retail_bank' | 'bank_indonesia' | 'auditor'
 
 type Shell = 'institutional' | 'retail'
 
@@ -20,10 +20,9 @@ export const ROLES: Record<Role, RoleConfig> = {
   public: { label: 'Public', shell: 'public', tabs: [] },
   authenticated: { label: 'Retail Customer', shell: 'retail', tabs: ['study_identity'] },
   kyc_verified: { label: 'Retail Customer', shell: 'retail', tabs: ['study_identity', 'study_wallet', 'study_transfer'] },
-  retail_bank: { label: 'Retail Bank', shell: 'institutional', tabs: ['study_approval', 'study_business', 'study_restrictions', 'study_funding'] },
-  bank_indonesia: { label: 'Bank Indonesia', shell: 'institutional', tabs: ['study_staff', 'study_monetary'] },
-  merchant: { label: 'Merchant', shell: 'retail', tabs: ['study_identity', 'study_wallet', 'study_transfer'] },
-  auditor: { label: 'Auditor', shell: 'institutional', tabs: ['study_audit'] },
+  retail_bank: { label: 'Retail Bank', shell: 'institutional', tabs: ['study_approval', 'study_restrictions', 'study_funding', 'study_compliance'] },
+  bank_indonesia: { label: 'Bank Indonesia', shell: 'institutional', tabs: ['study_staff', 'study_ceilings', 'study_monetary', 'study_compliance'] },
+  auditor: { label: 'Auditor', shell: 'institutional', tabs: ['study_audit', 'study_compliance'] },
 }
 
 export const TAB_META: Record<Tab, { label: string }> = {
@@ -31,9 +30,10 @@ export const TAB_META: Record<Tab, { label: string }> = {
   study_wallet: { label: 'Wallet' },
   study_transfer: { label: 'Pay' },
   study_approval: { label: 'Subject approval' },
-  study_business: { label: 'Business authority' },
   study_restrictions: { label: 'Restrictions' },
   study_funding: { label: 'Reserve and float' },
+  study_compliance: { label: 'Compliance' },
+  study_ceilings: { label: 'CDD ceilings' },
   study_monetary: { label: 'Monetary operations' },
   study_audit: { label: 'Controls audit' },
   study_staff: { label: 'Staff roles' },
@@ -43,7 +43,7 @@ function routeFor(shell: Shell, tab: Tab) {
   if (shell === 'retail') {
     return ({ study_identity: 'study-identity', study_wallet: 'study-wallet', study_transfer: 'study-transfer' } as Partial<Record<Tab, string>>)[tab] ?? 'home'
   }
-  return ({ study_approval: 'study-approval', study_business: 'study-business', study_restrictions: 'study-restrictions', study_funding: 'study-funding', study_monetary: 'study-monetary', study_audit: 'study-audit', study_staff: 'study-staff' } as Partial<Record<Tab, string>>)[tab] ?? 'overview'
+  return ({ study_approval: 'study-approval', study_restrictions: 'study-restrictions', study_funding: 'study-funding', study_compliance: 'study-compliance', study_monetary: 'study-monetary', study_ceilings: 'study-ceilings', study_audit: 'study-audit', study_staff: 'study-staff' } as Partial<Record<Tab, string>>)[tab] ?? 'overview'
 }
 
 function navigate(shell: Shell, tab: Tab) {
@@ -56,7 +56,7 @@ function tabFromHash(hash: string): Tab | undefined {
     return ({ 'study-identity': 'study_identity', 'study-wallet': 'study_wallet', 'study-transfer': 'study_transfer' } as Record<string, Tab>)[path[1] ?? '']
   }
   if (path[0] === 'institutional') {
-    return ({ 'study-approval': 'study_approval', 'study-business': 'study_business', 'study-restrictions': 'study_restrictions', 'study-funding': 'study_funding', 'study-monetary': 'study_monetary', 'study-audit': 'study_audit', 'study-staff': 'study_staff' } as Record<string, Tab>)[path[1] ?? '']
+    return ({ 'study-approval': 'study_approval', 'study-restrictions': 'study_restrictions', 'study-funding': 'study_funding', 'study-compliance': 'study_compliance', 'study-monetary': 'study_monetary', 'study-ceilings': 'study_ceilings', 'study-audit': 'study_audit', 'study-staff': 'study_staff' } as Record<string, Tab>)[path[1] ?? '']
   }
   return undefined
 }

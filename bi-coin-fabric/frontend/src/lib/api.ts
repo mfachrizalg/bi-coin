@@ -35,18 +35,65 @@ export const studyRestrictionReasonOptions = [
 
 export type StudyRestrictionReason = typeof studyRestrictionReasonOptions[number]['value']
 
+export const studyDttotResultOptions = [
+  { value: 'not_listed', label: 'Not listed' },
+  { value: 'listed', label: 'Listed' },
+] as const
+
+export type StudyDttotResult = typeof studyDttotResultOptions[number]['value']
+
+export const studyCloseReasonOptions = [
+  { value: 'data_missing', label: 'Data missing' },
+  { value: 'fictitious', label: 'Fictitious identity' },
+  { value: 'identity_doubtful', label: 'Identity doubtful' },
+  { value: 'customer_request', label: 'Customer request' },
+] as const
+
+export type StudyCloseReason = typeof studyCloseReasonOptions[number]['value']
+
 export interface StudySubjectView {
   subject_id: string
-  category: 'retail' | 'merchant' | 'business'
-  status: string
+  category: 'retail'
+  status: 'pending' | 'rejected' | 'active' | 'closed'
   protected: boolean
   restricted: boolean
   restriction_reason: string
   reviewer_id: string
   authority_evidence_ref: string
   limits: { per_transaction: string; daily: string; monthly: string; holdings: string }
-  representatives: string[]
-  beneficial_owner_refs: string[]
+  low_risk: boolean
+  low_risk_reason?: string
+  approved_at?: number
+  verified: boolean
+  verified_at?: number
+  closed_at?: number
+  close_reason?: string
+}
+
+export interface StudyReviewInput {
+  dttot_result: StudyDttotResult
+  low_risk: boolean
+  low_risk_reason: string
+}
+
+export interface CddCeilings {
+  unverified_holdings: string
+  verified_holdings: string
+}
+
+export interface MonitoringAlert {
+  alert_id: string
+  subject_id: string
+  rule: 'R1' | 'R2' | 'R3'
+  detail: string
+  status: 'open' | 'confirmed'
+  created_at: string
+}
+
+export interface SederhanaRegisterRow {
+  subject_id: string
+  low_risk_reason: string
+  approved_at: string | number
 }
 
 export interface StudyLimitsInput {
@@ -110,12 +157,15 @@ function studyPost<T>(path: string, data?: unknown, idempotencyKey?: string) {
 }
 
 export function getStudyIdentity() { return request<string>('/identities/me') }
-export function createStudySubject(data: { category: StudySubjectView['category']; legal_name: string; document_type: string; document_number: string; document: File }) {
+export function createStudySubject(data: { legal_name: string; document_type: string; document_number: string; address: string; birth_place: string; birth_date: string; document: File }) {
   const form = new FormData()
-  form.append('category', data.category)
+  form.append('category', 'retail')
   form.append('legal_name', data.legal_name)
   form.append('document_type', data.document_type)
   form.append('document_number', data.document_number)
+  form.append('address', data.address)
+  form.append('birth_place', data.birth_place)
+  form.append('birth_date', data.birth_date)
   form.append('document', data.document)
   return request<{ status: string; subject_id: string }>('/subjects', { method: 'POST', body: form })
 }
@@ -134,16 +184,26 @@ export function getStudySubject(subjectID: string) {
 export function protectStudySubject(subjectID: string) {
   return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/endorsement-policies')
 }
-export function recordStudyReview(subjectID: string) {
-  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/reviews')
+export function recordStudyReview(subjectID: string, data: StudyReviewInput) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/reviews', data)
+}
+export function verifyStudySubject(subjectID: string, evidence_ref: string) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/verifications', { evidence_ref })
+}
+export function updateStudySubject(subjectID: string, data: { document: File; dttot_result: StudyDttotResult }) {
+  const form = new FormData()
+  form.append('document', data.document)
+  form.append('dttot_result', data.dttot_result)
+  return request<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/updates', { method: 'POST', body: form })
+}
+export function closeStudySubject(subjectID: string, reason: StudyCloseReason) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/closures', { reason })
+}
+export function revokeStudyLowRisk(subjectID: string) {
+  return studyPost<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/low-risk-revocations')
 }
 export function setStudyLimits(subjectID: string, data: StudyLimitsInput) {
   return request<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/limits', {
-    method: 'PUT', body: JSON.stringify(data),
-  })
-}
-export function setStudyBusinessAuthority(subjectID: string, data: { representatives: string[]; beneficial_owner_refs: string[] }) {
-  return request<{ status: string }>('/subjects/' + encodeURIComponent(subjectID) + '/business-authority', {
     method: 'PUT', body: JSON.stringify(data),
   })
 }
@@ -188,4 +248,13 @@ export function issueStudyRupiah(data: { distributor_id: string; amount: string 
 }
 export function redeemStudyReserve(data: { distributor_id: string; amount: string }, idempotencyKey: string) {
   return studyPost<{ status: string }>('/reserve-redemptions', data, idempotencyKey)
+}
+export function getCddCeilings() { return request<CddCeilings>('/cdd-ceilings') }
+export function setCddCeilings(data: CddCeilings) {
+  return request<{ status: string }>('/cdd-ceilings', { method: 'PUT', body: JSON.stringify(data) })
+}
+export function getSederhanaRegister() { return request<SederhanaRegisterRow[]>('/sederhana-register') }
+export function getMonitoringAlerts() { return request<MonitoringAlert[]>('/monitoring-alerts') }
+export function confirmMonitoringAlert(alertID: string) {
+  return studyPost<{ status: string }>('/monitoring-alerts/' + encodeURIComponent(alertID) + '/confirmations')
 }

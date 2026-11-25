@@ -15,7 +15,7 @@ This directory is a React and TypeScript client built with Vite. It presents ins
 
 | Experience | Main routes and screens |
 |---|---|
-| Institutional | Subject approval, Business authority, Restrictions, Reserve and float, Monetary operations, Controls audit, Staff roles (`#/institutional/study-*`) |
+| Institutional | Subject approval (review, Verify, Update, Close), CDD ceilings, Monitoring alerts, Restrictions, Reserve and float, Monetary operations, Controls audit, Staff roles (`#/institutional/study-*`) |
 | Retail | Subject onboarding, Wallet, Pay (`#/retail/study-*`) |
 | Shared or supporting | Login, role profile, demo handoff and prefill |
 
