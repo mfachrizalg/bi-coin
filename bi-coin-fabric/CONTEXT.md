@@ -9,7 +9,7 @@ The monetary authority that governs the system and is the sole issuer of Digital
 _Avoid_: BI, Central Bank, Issuer
 
 **Participant**:
-An institution admitted by Bank Indonesia in exactly one of two roles: Distributor or Observer. Bank Indonesia, Retail Customer, and Merchant are not Participants.
+An institution admitted by Bank Indonesia in exactly one of two roles: Distributor or Observer. Bank Indonesia and Retail Customer are not Participants.
 _Avoid_: Member, Network Member, Node Operator
 
 **Distributor**:
@@ -28,12 +28,8 @@ _Avoid_: Supervisor, Observer, OJK
 An individual end user who holds and uses retail digital rupiah through a Custodian. A Retail Customer is not a Participant.
 _Avoid_: Consumer, Retail Participant, User
 
-**Merchant**:
-A business beneficiary that accepts retail digital rupiah for goods or services through a Custodian. A Merchant is not a Participant.
-_Avoid_: Seller, Merchant Participant, Business User
-
 **Wallet Owner**:
-The Retail Customer or Merchant that benefits from the value held in a Wallet, regardless of which Custodian administers it.
+The Retail Customer that benefits from the value held in a Wallet, regardless of which Custodian administers it.
 _Avoid_: Account Holder, Wallet User, Customer
 
 **Custodian**:
@@ -61,7 +57,7 @@ The r-Rupiah Digital held by a Distributor after Conversion. Wallet funding draw
 _Avoid_: Retail balance, Wallet
 
 **Retail balance**:
-Digital Rupiah held in a customer or merchant Wallet for retail transfers and payments.
+Digital Rupiah held in a Retail Customer's Wallet for retail transfers and payments.
 _Avoid_: Wholesale balance, Distributor reserve
 
 **Wallet funding**:
@@ -88,7 +84,7 @@ An authenticated human who uses the institutional experience on behalf of Bank I
 _Avoid_: Admin, User, Network Member
 
 **Payment Contact**:
-A private shortcut owned by a Retail Customer or Merchant that stores a label, a Wallet ID, and the intended recipient type. A Payment Contact is not proof of identity, ownership, or payment authorization.
+A private shortcut owned by a Retail Customer that stores a label, a Wallet ID, and the intended recipient type. A Payment Contact is not proof of identity, ownership, or payment authorization.
 _Avoid_: Account, Directory Entry, User Profile
 
 **Restriction reason**:
@@ -100,23 +96,59 @@ A reference to the evidence, submitted by a KYC reviewer as part of the release 
 _Avoid_: Evidence document, Evidence proof
 
 **Subject**:
-The party under customer due diligence, in the category retail, merchant, or business.
+A Retail Customer under CDD Sederhana.
 
 **Subject ID**:
 A random pseudonym that identifies a Subject on the ledger. It is never the NIK.
 _Avoid_: NIK, Customer number, Identity number
 
 **Subject record**:
-The CDD record of a Subject. The Distributor, Bank Indonesia, and the Auditor can read it. Other Participants see only its hash.
+The CDD record of a Subject. The Distributor, Bank Indonesia, and the Auditor can read it. Other Participants cannot read it.
 _Avoid_: Customer file, KYC profile
 
 **Document reference**:
 The SHA-256 of an identity document file, stored off chain under that name and recorded in the Subject record.
 _Avoid_: Document link, File path
 
+**CDD Sederhana**:
+The simplified customer due diligence that every Subject goes through. It suits a low-risk product with a limited balance. A Subject is identified and approved before it can transact, may be verified afterwards, and leaves the tier once suspicion arises. Standard CDD and enhanced due diligence are outside the system.
+
+**Low-risk flag**:
+The yes-or-no mark, with a reason, that a KYC reviewer sets to confirm a Subject qualifies for CDD Sederhana. It records the reviewer's judgment about the product and is not a computed risk. A Subject without it cannot transact, and a compliance officer can clear it after a confirmed suspicion.
+_Avoid_: Risk level, Risk score
+
+**DTTOT result**:
+The KYC reviewer's recorded outcome of the manual DTTOT list check, either not listed or listed. A listed result rejects an applicant and restricts an active Subject. It is distinct from the Restriction reason DTTOT, which records why a Restriction exists.
+_Avoid_: Sanctions match
+
+**Verification**:
+The KYC reviewer's manual confirmation, backed by an evidence reference, that a Subject's identity data matches its identity document. It is not a check against population data. It may follow approval, and a data update undoes it.
+
+**Verified Subject**:
+A Subject that has passed Verification and has not since had its data updated. An active Subject without it is unverified.
+
+**CDD ceiling**:
+The cap that Bank Indonesia sets on the Retail balance a Subject may hold. There is one value for an unverified Subject and a higher one for a Verified Subject. The reviewer's holdings limit cannot exceed the higher value, and the cap that applies is the lower of the reviewer's limit and the ceiling of the Subject's state.
+_Avoid_: Tier cap
+
+**Closure**:
+The terminal end of a Subject's relationship, applied for a missing, fictitious, or doubtful identity or at the customer's request. A closed Subject cannot pay or receive, and the customer is told in writing. Unlike a Restriction, it is never lifted.
+_Avoid_: Freeze, Offboarding
+
+**Monitoring alert**:
+A flag raised from observed transfers for compliance review. The triggers are an unverified balance close to its CDD ceiling, many transfers within a day, and repeated transfers just under the per-transaction limit. An alert alone changes nothing on the ledger.
+
+**LTKM draft**:
+A draft Laporan Transaksi Keuangan Mencurigakan, written when a compliance officer confirms a Monitoring alert. The system keeps it and never sends it to PPATK.
+_Avoid_: STR
+
 **Restriction**:
 A subject-level hold, recorded with a Restriction reason. An internal-review hold lapses after 5 days and an authority-order hold after 30 days; a DTTOT hold lasts until an approved release backed by a Release evidence reference.
 _Avoid_: Freeze
+
+**Payee check**:
+The test a transfer applies to the receiving Subject. It passes only if the Subject is active, unrestricted, low risk, has limits set, and would hold no more than its effective holdings limit after the credit. That limit is the lower of its holdings limit and its CDD ceiling. The payer learns only whether the transfer is permitted.
+_Avoid_: Payee record check, Recipient check
 
 **Staff role**:
 A maker-checker role in the compliance study: KYC reviewer or compliance officer. A KYC reviewer and a compliance officer must be different people.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-11-06). Supersedes the "distinct senior identity" clause of ADR 0008. Amended (2026-11-09): each ledger control carries a bank and a non-bank citation (see Amendment).
+Accepted (2026-11-06). Supersedes the "distinct senior identity" clause of ADR 0008. Amended (2026-11-09): each ledger control carries a bank and a non-bank citation (see Amendment). Superseded in part by ADR 0020 (2026-11-25): one low-risk flag returns, and `SetBusinessAuthority` is removed (see the last Amendment).
 
 ## Context
 
@@ -56,3 +56,9 @@ Moved here from ADR 0014, which ADR 0017 supersedes. Restriction periods are sub
 | `dttot` | Until released | UU No. 9 Tahun 2013, Pasal 28 | No |
 
 Calendar days never exceed the working-day maximum, so the chaincode stays within each cited limit. The chaincode map is `restrictionPeriods` in `chaincode/controls/controls.go`. The citations stay unverified until checked against the primary texts.
+
+## Amendment (2026-11-25): superseded in part by ADR 0020
+
+- The decision "The risk level, the PEP flag, the senior approver role, and `DecideHighRisk` are removed" no longer holds for the risk level in one respect. A `kyc_reviewer` records one boolean low-risk flag with a reason through `RecordReview`. It decides whether a Subject stays in CDD Sederhana and is not a risk level. The PEP flag, the senior approver, and `DecideHighRisk` stay removed, and EDD stays future work.
+- The `SetBusinessAuthority` row in the action table and in the dual-citation table is void. The categories `merchant` and `business` are removed, so representatives and beneficial-owner references no longer exist. Subjects are Retail Customers only.
+- The holdings limit now follows two Bank Indonesia ceilings, with PADG 32/2025 Pasal 19(1) as the parameter source. PADG 24/7/PADG/2022 Pasal 22 is no longer cited for ceilings, because ADR 0020 records it as a revoked rule.

@@ -10,7 +10,7 @@
   channel/.style={draw, dashed, rounded corners=4pt, inner sep=0.3cm}
 ]
 \node[app] (users) at (0,6.8)
-  {Customers\\retail individual\\merchant individual seller\\business/company};
+  {Customers\\retail individual};
 \node[app, text width=3.5cm] (api) at (4.8,6.8)
   {Go Backend API\\per-user X.509 signing};
 \node[app, text width=3.5cm] (db) at (9.8,6.8)
@@ -19,9 +19,9 @@
 \draw[<->, thick] (api.east) -- node[above]{off-chain} (db.west);
 
 \node[org] (central) at (0,4.0)
-  {\texttt{CentralBankMSP}\\peer + single orderer};
+  {\texttt{CentralBankMSP}\\peer + three Raft orderers};
 \node[org] (distributor) at (3.6,4.0)
-  {\texttt{DistributorMSP}\\peer + Wholesale Bank dan Retail Bank};
+  {\texttt{DistributorMSP}\\peer + PJSP Distributor};
 \node[org] (validator) at (7.2,4.0)
   {\texttt{ValidatorMSP}\\peer / Observer (baca-saja)};
 \node[org] (enduser) at (10.8,4.0)

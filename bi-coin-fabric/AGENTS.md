@@ -6,7 +6,7 @@ This repository is a local Hyperledger Fabric prototype for a two-tier retail Di
 
 | Part | Responsibility | Integration |
 |---|---|---|
-| frontend/ | React and TypeScript experiences for institutional operators, Retail Customers, and Merchants | Vite serves port 5173 and proxies /api to the Go API on port 8080. |
+| frontend/ | React and TypeScript experiences for institutional operators and Retail Customers | Vite serves port 5173 and proxies /api to the Go API on port 8080. |
 | backend/ | Go REST API, authentication, role checks, request-scoped Fabric access, and off-chain services | Reads PostgreSQL for application data and uses Fabric Gateway to submit or evaluate chaincode transactions. |
 | chaincode/ | Go Fabric contract and authoritative ledger rules | Runs on Fabric peers; checks caller MSP and ledger state for protected operations. |
 | network/, scripts/ | Local four-organization network (CentralBankMSP with three orderers, DistributorMSP, Observer (MSP ID: ValidatorMSP), EndUserMSP), channel, chaincode deployment, and smoke workflows | start.sh starts PostgreSQL, backend, and frontend; scripts/network-up.sh and scripts/deploy-chaincodes.sh set up the network and chaincodes. |

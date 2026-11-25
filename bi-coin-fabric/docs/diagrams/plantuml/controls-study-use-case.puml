@@ -15,15 +15,16 @@ skinparam usecase {
 actor "EndUserMSP\nPengguna" as EndUser
 actor "DistributorMSP\nOperator" as Distributor
 actor "CentralBankMSP\nOperator" as CentralBank
-actor "Observer/Auditor (OJK, PPATK)\nValidatorMSP" as Validator
+actor "Auditor (OJK, PPATK)\nValidatorMSP" as Validator
 actor "KYC Reviewer" as KycReviewer
 actor "Compliance Officer" as ComplianceOfficer
 
 rectangle "Ruang kerja masing-masing organisasi\nkanal bi-coin" {
   usecase "Pendaftaran subjek, dompet,\nsaldo, dan transfer" as EndUserUC
-  usecase "Persetujuan subjek, kewenangan usaha,\ndan pendanaan cadangan" as DistributorUC
-  usecase "Pembatasan dan pembukaan\npembatasan subjek" as RestrictionUC
-  usecase "Pengelolaan staf, operasi moneter,\ndan alokasi cadangan" as CentralBankUC
+  usecase "Peninjauan subjek, keputusan CDD Sederhana,\nverifikasi, pembaruan, penutupan,\ndan pendanaan cadangan" as DistributorUC
+  usecase "Pembatasan, pembukaan pembatasan,\ndan pencabutan status risiko rendah" as RestrictionUC
+  usecase "Peninjauan peringatan pemantauan\ndan draf LTKM" as MonitoringUC
+  usecase "Pengelolaan staf, operasi moneter,\nalokasi cadangan, dan plafon CDD" as CentralBankUC
   usecase "Audit kontrol\nbaca-saja" as ValidatorUC
 }
 
@@ -34,5 +35,6 @@ Validator -- ValidatorUC
 KycReviewer -- DistributorUC
 KycReviewer -- RestrictionUC
 ComplianceOfficer -- RestrictionUC
+ComplianceOfficer -- MonitoringUC
 
 @enduml

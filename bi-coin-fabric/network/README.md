@@ -7,9 +7,9 @@ Peer MSPs:
 - `CentralBankMSP` runs the issuer peer and three ordering nodes, `orderer0`, `orderer1`, and `orderer2`, all on this host (ADR 0017).
 - `DistributorMSP` represents one non-bank Distributor (ADR 0017).
 - Observer (MSP ID: ValidatorMSP) peer (OJK, PPATK) for read-only audit and reports.
-- `EndUserMSP` contains eight generated client identities for retail, merchant, and company representatives.
+- `EndUserMSP` contains eight generated client identities for Retail Customers.
 
-The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for the Distributor. The second-bank identities were removed with the interbank features (ADR 0017). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1` and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer` and `compliance_officer` before running KYC flows. CentralBank identities also include three orderer identities (`orderer0`, `orderer1`, `orderer2`), a peer, an administrator, and two client identities, all under `CentralBankMSP`.
+The Distributor identities `Admin`, `User1`, `User2`, and `User3` act for the Distributor. The second-bank identities were removed with the interbank features (ADR 0017). Each enrollment certificate carries a `distributor_id=<id>:ecert` attribute that chaincode checks. `User1` and `User3` are separate synthetic staff identities. Register their hashed client identities in `rupiah-controls` as `kyc_reviewer` and `compliance_officer` before running KYC flows. The `kyc_reviewer` records the review (DTTOT result and low-risk flag), sets limits, approves or rejects, verifies, updates, and closes a Subject. The `compliance_officer` revokes the low-risk flag and approves a restriction release. A reviewer and a compliance officer must be different people. CentralBank identities also include three orderer identities (`orderer0`, `orderer1`, `orderer2`), a peer, an administrator, and two client identities, all under `CentralBankMSP`.
 
 The first start creates a private, ignored `.env.study` file with random local CA, CouchDB, and PostgreSQL credentials. Keep that file for later restarts.
 
@@ -17,6 +17,8 @@ The first start creates a private, ignored `.env.study` file with random local C
 bash scripts/network-up.sh
 bash scripts/deploy-chaincodes.sh
 ```
+
+After deployment, Bank Indonesia sets the CDD ceilings once with `PUT /cdd-ceilings` (`SetCddCeilings`, CentralBankMSP), for example `{"unverified_holdings":"2000000","verified_holdings":"20000000"}` in Rupiah (ADR 0020). Until they are set, `SetLimits` and `ApproveSubject` refuse, so no Subject can be approved. A network reset clears them, so repeat this step after every reset.
 
 Monetary requires `AND('CentralBankMSP.peer','DistributorMSP.peer')`. Controls and payments require `AND('DistributorMSP.peer','CentralBankMSP.peer')` (ADR 0017). The subject collection `cddCollection` has members DistributorMSP, CentralBankMSP, and ValidatorMSP, and its definition is `network/collections/rupiah-controls.json` (ADR 0018). The subject record's state-based policy, set by `ProtectSubject`, uses the same AND policy.
 
@@ -49,6 +51,6 @@ Each entry has this shape:
 }
 ```
 
-Map the Distributor identity `User1` to its own username. Customer users map to separate `EndUserMSP` identities. `AUTH_BOOTSTRAP_USERS_JSON` assigns application roles such as `retail_bank`, `bank_indonesia`, and `auditor`; it does not assign chaincode staff roles. A CentralBank user provisions each staff certificate's hashed client ID and chaincode role through `POST /staff` and `PUT /staff/{client_id}/role`. The service rejects an identity whose configured MSP does not match the route's required role.
+Map the Distributor identity `User1` to its own username. Customer users map to separate `EndUserMSP` identities. Those identities sign as `EndUserMSP` but must connect through the Distributor peer (`peer_endpoint` `localhost:18051`, `gateway_peer` `peer0.distributor.bi-coin:7051`), because EndUser peers hold no private data collection. Through the EndUser peer, `OpenWallet`, `FundWallet`, and `GetBalance` return HTTP 500. `AUTH_BOOTSTRAP_USERS_JSON` assigns application roles such as `retail_bank`, `bank_indonesia`, and `auditor`; it does not assign chaincode staff roles. A CentralBank user provisions each staff certificate's hashed client ID and chaincode role through `POST /staff` and `PUT /staff/{client_id}/role`. The service rejects an identity whose configured MSP does not match the route's required role.
 
 The API uses unversioned resource routes, including `/subjects`, `/customer-wallets`, `/retail-transfers`, `/distributors`, `/issuances`, `/reserve-redemptions`, `/conversions`, and `/wallet-fundings`. `/conversions` moves a Distributor's reserve into its retail float, and `/wallet-fundings` moves that float into an approved retail wallet. Each call is atomic. These paths avoid the legacy `/wallets` and `/transfers` routes. Without `FABRIC_IDENTITIES_JSON`, these compliance routes are not registered.

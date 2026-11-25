@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-11-09). Its legal citations follow the dual mapping in ADR 0016, as amended on the same date.
+Accepted (2026-11-09). Its legal citations follow the dual mapping in ADR 0016, as amended on the same date. Amended (2026-11-25): record fields and off-chain placement change under ADR 0020 (see Amendment).
 
 ## Context
 
@@ -25,6 +25,14 @@ The backend wrote only `auth_users` to PostgreSQL. The thesis nonetheless said C
 ## Consequences
 
 - `GetSubject` is allowed to member MSPs and to the caller who acts for the subject (`CanActFor`).
-- The access rule for `CanPay` and `GetLimits` is open. Payments calls both for payer and payee, and a creator-based rule would deny the payee check. The rule waits for a decision.
-- `GetSubjectHash` returns the public hash, so any caller can confirm that a record exists and has not changed.
+- The access rule for `CanPay` and `GetLimits` is member-or-actor. Transfer no longer calls them for the payee; `CheckPayee` runs on the endorsing members instead (ADR 0019).
+- `GetSubjectHash` and the public commitment are removed (ADR 0019).
 - Off-chain availability is not tested. Purge is not implemented.
+
+## Amendment (2026-11-25): CDD Sederhana fields (ADR 0020)
+
+- Decision 1 no longer lists representatives or beneficial-owner references. The record in `cddCollection` now holds status, limits, restriction, document reference, salt, the DTTOT result, the low-risk flag and its reason, the approval time, the verification state with its evidence reference and time, and the closure time and reason. Staff records stay public. A new public key `cdd_ceilings` holds the two Bank Indonesia holdings ceilings as integers and no personal data.
+- Address, birth place, and birth date stay off chain. The transient payload of `CreatePending` still carries only the category, the salt, and the document reference. `kyc_profiles` gains `address`, `birth_place`, `birth_date`, `dttot_result`, `low_risk_reason`, `approved_at`, `verified_at`, `closed_at`, and `close_reason`, and its `status` follows the ledger status (`pending`, `rejected`, `active`, `closed`). The individual's identity fields are PBI 10/2024 Pasal 18(1)(a).
+- New PostgreSQL tables: `monitoring_alerts`, `ltkm_drafts`, `customer_notices`, and a monitoring checkpoint table. LTKM drafts are not sent to PPATK. Confirming an alert changes the ledger only through `RevokeLowRisk`, so decision 7 holds: PostgreSQL never authorizes a ledger effect (ADR 0007).
+- Decision 4 holds for the new transactions. `VerifySubject`, `UpdateSubject`, `CloseSubject`, and `RecordReview` send their contents in the transient `payload`. `RevokeLowRisk` and `SetCddCeilings` carry no personal data.
+- Decision 8 stands. The 5-year purge is not implemented and is a Batasan.

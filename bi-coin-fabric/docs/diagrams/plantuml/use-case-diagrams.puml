@@ -15,7 +15,6 @@ left to right direction
 
 actor "Bank Indonesia" as BI
 actor "Distributor Bank" as DB
-actor "Merchant" as M
 actor "Pelanggan\nRitel" as PR
 actor "Observer/Auditor\n(OJK, PPATK)" as OBS
 actor "KYC Reviewer" as KYC
@@ -37,7 +36,6 @@ BI --> UC2
 DB --> UC3
 DB --> UC1
 DB --> UC4
-M --> UC6
 PR --> UC5
 PR --> UC6
 OBS --> UC10
@@ -105,7 +103,6 @@ skinparam arrowColor black
 title <<UC03>> Operasi Retail (Retail Operations)
 
 actor "Pelanggan\nRitel" as PR
-actor "Merchant" as M
 actor "KYC Reviewer" as KYC
 actor "Compliance Officer" as CO
 
@@ -119,7 +116,6 @@ rectangle "Operasi Retail" {
 PR --> UC1
 PR --> UC2
 PR --> UC4
-M --> UC3
 KYC --> UC1
 
 UC4 ..> UC3 : <<include>>
