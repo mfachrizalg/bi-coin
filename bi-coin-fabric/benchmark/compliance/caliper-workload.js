@@ -41,6 +41,7 @@ class ComplianceWorkload extends WorkloadModuleBase {
             channel: this.roundArguments.channel,
             readOnly: fixture.read_only,
             timeout: this.roundArguments.timeoutSeconds,
+            ...(fixture.transient ? { transientMap: fixture.transient } : {}),
         };
 
         try {
@@ -122,13 +123,14 @@ class ComplianceWorkload extends WorkloadModuleBase {
 
 function verifyQuery(transaction, payload) {
     if (transaction === 'GetCallerIdentity') return typeof payload === 'string' && payload.length > 0;
-    if (['CanPay', 'CanActFor', 'CanSend'].includes(transaction)) return payload === 'true' || payload === 'false';
-    if (['GetWholesaleSupply', 'GetRetailSupply', 'GetTotalSupply', 'GetReserve', 'GetRetailFloat', 'GetBalance', 'GetTransferLimit'].includes(transaction)) return Number.isSafeInteger(Number(payload));
+    if (['CanPay', 'CanActFor'].includes(transaction)) return payload === 'true' || payload === 'false';
+    if (['GetWholesaleSupply', 'GetRetailSupply', 'GetTotalSupply', 'GetReserve', 'GetRetailFloat', 'GetBalance'].includes(transaction)) return Number.isSafeInteger(Number(payload));
     if (['GetLimits', 'GetSubject', 'GetReceipt', 'GetParticipant'].includes(transaction)) {
         try {
             const value = JSON.parse(payload);
             if (!value || typeof value !== 'object') return false;
-            if (['GetSubject', 'GetParticipant'].includes(transaction)) return typeof value.status === 'string';
+            if (transaction === 'GetSubject') return typeof value.status === 'string';
+            if (transaction === 'GetParticipant') return typeof value.distributor_id === 'string' && Number.isSafeInteger(value.reserve);
             if (transaction === 'GetReceipt') return typeof value.reference === 'string';
             return true;
         } catch {

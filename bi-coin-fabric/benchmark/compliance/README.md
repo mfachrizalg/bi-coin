@@ -18,21 +18,21 @@ Terms:
 
 ## Workloads and correctness
 
-The catalog covers 40 capacity-measured methods in 42 workloads. `Initialize`, the nested-only `DebitReserveForConversion`, and `ApproveApprovalThreshold` receive correctness checks only; each threshold approval needs a fresh proposal from another officer, so it has no repeatable load. `Transfer` has separate retail and merchant recipient variants, and `TransferReserve` has variants at or below and above the sender's approval threshold. Reads report verified operations per second; writes report verified TPS.
+The catalog covers 40 contract methods. 31 are capacity-measured, one workload each. `Initialize`, the nested-only `DebitReserveForConversion` and `CheckPayee`, and the CDD lifecycle methods `SetCddCeilings`, `GetCddCeilings`, `VerifySubject`, `UpdateSubject`, `CloseSubject` and `RevokeLowRisk` receive correctness checks only. Reads report verified operations per second; writes report verified TPS.
 
-The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers KYC review decisions, distinct staff roles, business representatives, all restriction reasons, fresh release evidence, MSP and endorsement boundaries, transfer categories and replay, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, interbank and cross-bank denials, holdings and reserve limits, redemption replay, supply conservation, participant admission evidence, participant status (suspended, frozen, closed), the interbank transfer limit, four-eyes transfers, and dual-control threshold changes (ADR 0014), receipt read authorization, and maker-checker rejection. The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 296 route-role authorization cells, 28 malformed-JSON validation cases, and 45 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
+The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers staff role separation, authorization and endorsement boundaries, all restriction reasons, fresh release evidence, end-user read denial, the retail transfer and replay, the CDD Sederhana gates (rejection of a DTTOT-listed or not-low-risk subject, the unverified and verified holdings ceilings, verification, the reset after a data update, terminal closure, and low-risk revocation), transaction limits, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, holdings limits, redemption replay and supply conservation, receipt and MSP read authorization, and initialization with the nested debit. The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 222 route-role authorization cells, 20 malformed-JSON validation cases, and 38 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
 
 `correctness.json` lists the observed outcomes. It allows an overall conformance claim only when every catalogued executable correctness scenario passes and every API authorization, validation, and action check is resolved and correct. The method-level `cases` inventory remains a coverage reference and is never counted as executed test evidence.
 
 ## Capacity search
 
-Each of the 42 workloads first runs one Caliper transaction as a readiness check. Caliper round initialization establishes the connection. There is no separate timed warmup.
+Each of the 31 workloads first runs one Caliper transaction as a readiness check. Caliper round initialization establishes the connection. There is no separate timed warmup.
 
 Search spans 0.1–4096 operations per second. Matching historical direct-ledger results provide starting hints for 12 workloads; all other workloads start at 32. The old rates are hints only and are never merged into new measurements. An unbounded passing or failing rate expands by a factor of four. Once a passing and failing rate bracket exists, 10-second midpoint probes continue until the failing rate is within 10% of the passing rate.
 
 The highest passing probe is confirmed with three separate 30-second Caliper rounds grouped in one benchmark configuration. Every confirmation must have verified outcomes, zero unexpected failures, zero timeouts, zero unresolved results, delivered load within 5% of target (allowing one-request rounding), and drain-adjusted verified throughput at least 90% of delivered load. If all confirmation rounds fail, the candidate is lowered and confirmed again. Mixed outcomes at the same candidate are reported as an unstable boundary. A passing ceiling is reported as “at least this measured capacity.”
 
-The confirmation windows total 63 minutes (42 workloads × 3 × 30 seconds), excluding readiness checks, search probes, initialization, fixtures, and drain. Runtime depends on fixture preparation.
+The confirmation windows total 46.5 minutes (31 workloads × 3 × 30 seconds), excluding readiness checks, search probes, initialization, fixtures, and drain. Runtime depends on fixture preparation.
 
 ## Evidence and checkpoints
 
@@ -46,7 +46,7 @@ Run only inside the disposable Docker-in-Docker environment described in [`../is
 
 ```sh
 export BENCHMARK_COMPLIANCE_STAMP=run-20261012-01
-bash scripts/run-compliance-benchmark.sh new        # correctness + 34 Caliper preflight rounds
+bash scripts/run-compliance-benchmark.sh new        # correctness + one Caliper readiness round per workload
 bash scripts/run-compliance-benchmark.sh performance # binary search + confirmation
 ```
 

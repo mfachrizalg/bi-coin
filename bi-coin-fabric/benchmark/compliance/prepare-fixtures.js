@@ -3,26 +3,24 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const zlib = require('node:zlib');
 const { login } = require('./http-access-matrix');
 
-const LIMITS = { per_transaction: '1000000000', daily: '1000000000', monthly: '1000000000', holdings: '1000000000' };
-// A 1-unit wholesale transfer executes at once; every retail-bank transfer waits for a second officer.
-const WHOLESALE_APPROVAL_THRESHOLD = '1000000';
-const RETAIL_APPROVAL_THRESHOLD = '0';
-// SetTransferLimit needs a positive value; this one never binds.
-const NO_TRANSFER_LIMIT = String(Number.MAX_SAFE_INTEGER);
+// Holdings stay at the 20000000 verified CDD ceiling, the highest value SetLimits accepts.
+const LIMITS = { per_transaction: '1000000000', daily: '1000000000', monthly: '1000000000', holdings: '20000000' };
 
 async function createApiClient(api) {
     const tokens = new Map();
     async function request(userKey, method, route, body, idempotencyKey) {
         if (!tokens.has(userKey)) tokens.set(userKey, login(api.baseURL, api.namedUsers[userKey]));
         const headers = { Authorization: `Bearer ${await tokens.get(userKey)}` };
-        if (body !== undefined) headers['Content-Type'] = 'application/json';
+        const form = body instanceof FormData;
+        if (body !== undefined && !form) headers['Content-Type'] = 'application/json';
         if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
         const response = await fetch(new URL(route, api.baseURL), {
             method,
             headers,
-            ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+            ...(body === undefined ? {} : { body: form ? body : JSON.stringify(body) }),
             signal: AbortSignal.timeout(120000),
         });
         const payload = await response.text();
@@ -43,42 +41,84 @@ function subjectID(stamp, attempt, scenario, pathName, index, suffix) {
     return `cf-${crypto.createHash('sha256').update(`${stamp}:${attempt}:${scenario}:${pathName}:${index}:${suffix}`).digest('hex').slice(0, 24)}`;
 }
 
-function admissionRef(distributorID) {
-    return crypto.createHash('sha256').update(`bi-admission:${distributorID}`).digest('hex');
+// Synthetic onboarding document: a solid-colour PNG built with zlib. No real identity document is used.
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
+    let c = n;
+    for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    return c >>> 0;
+});
+
+function crc32(buffer) {
+    let crc = 0xffffffff;
+    for (const byte of buffer) crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+    return (crc ^ 0xffffffff) >>> 0;
 }
 
-async function registerBank(request, distributorID, kind) {
+function pngChunk(type, data) {
+    const body = Buffer.concat([Buffer.from(type, 'latin1'), data]);
+    const length = Buffer.alloc(4);
+    length.writeUInt32BE(data.length);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([length, body, crc]);
+}
+
+// rgb is a 3-byte Buffer. Returns an 8x8 truecolour PNG filled with that colour.
+function solidPNG(rgb) {
+    const size = 8;
+    const row = Buffer.alloc(1 + size * 3); // filter byte 0, then RGB triples
+    for (let x = 0; x < size; x += 1) rgb.copy(row, 1 + x * 3);
+    const header = Buffer.alloc(13);
+    header.writeUInt32BE(size, 0);
+    header.writeUInt32BE(size, 4);
+    header[8] = 8; // bit depth
+    header[9] = 2; // colour type RGB
+    const scanlines = Buffer.concat(Array.from({ length: size }, () => row));
+    return Buffer.concat([PNG_SIGNATURE, pngChunk('IHDR', header), pngChunk('IDAT', zlib.deflateSync(scanlines)), pngChunk('IEND', Buffer.alloc(0))]);
+}
+
+// Fields for the multipart POST /subjects route. Each call gets its own colour, so no two documents share a hash.
+function onboardingFields() {
+    return {
+        category: 'retail',
+        legal_name: 'Synthetic retail subject',
+        address: 'Synthetic address 1',
+        birth_place: 'Yogyakarta',
+        birth_date: '1990-01-01',
+        document_type: 'synthetic-fixture',
+        document_number: crypto.randomBytes(8).toString('hex'),
+        document: { filename: 'fixture.png', type: 'image/png', base64: solidPNG(crypto.randomBytes(3)).toString('base64') },
+    };
+}
+
+function toFormData({ document, ...fields }) {
+    const form = new FormData();
+    for (const [name, value] of Object.entries(fields)) form.append(name, value);
+    form.append('document', new Blob([Buffer.from(document.base64, 'base64')], { type: document.type }), document.filename);
+    return form;
+}
+
+// The server generates the subject ID, so the fixture reads it from the response.
+async function onboardSubject(client, owner) {
+    const response = JSON.parse(await client.request(owner, 'POST', '/subjects', toFormData(onboardingFields())));
+    return response.subject_id;
+}
+
+async function registerBank(request, distributorID) {
     // A repeated registration is rejected; the issuance that follows fails if the bank is still unregistered.
-    await request('bank_indonesia', 'POST', '/distributors', { distributor_id: distributorID, kind, admission_ref: admissionRef(distributorID) }).catch(() => {});
-}
-
-async function setApprovalThreshold(request, distributorID, amount, proposer, approver) {
-    await request(proposer, 'POST', `/distributors/${distributorID}/approval-threshold-proposals`, { amount });
-    await request(approver, 'POST', `/distributors/${distributorID}/approval-threshold-approvals`, { amount });
-}
-
-// Resets participation state that the ledger smoke test and earlier workloads change.
-async function configureParticipants(request) {
-    for (const bank of ['wholesale-bank', 'retail-bank']) {
-        await request('bank_indonesia', 'PUT', `/distributors/${bank}/status`, { status: 'active', reason_code: 'participation_policy' });
-    }
-    await request('bank_indonesia', 'PUT', '/transfer-limit', { amount: NO_TRANSFER_LIMIT });
-    await setApprovalThreshold(request, 'wholesale-bank', WHOLESALE_APPROVAL_THRESHOLD, 'wholesale_bank', 'wholesale_two');
-    await setApprovalThreshold(request, 'retail-bank', RETAIL_APPROVAL_THRESHOLD, 'retail_bank', 'reviewer');
+    await request('bank_indonesia', 'POST', '/distributors', { distributor_id: distributorID }).catch(() => {});
 }
 
 async function topUpReserve(api, stamp) {
     const { request } = await createApiClient(api);
     const topupAmount = '1000000000000';
-    await registerBank(request, 'wholesale-bank', 'wholesale');
-    await registerBank(request, 'retail-bank', 'retail');
-  await request('bank_indonesia', 'POST', '/issuances', { distributor_id: 'wholesale-bank', amount: topupAmount }, `compliance-topup-wholesale-${stamp}`);
-  await request('bank_indonesia', 'POST', '/issuances', { distributor_id: 'retail-bank', amount: topupAmount }, `compliance-topup-retail-${stamp}`);
-    await configureParticipants(request);
+    await registerBank(request, 'retail-bank');
+    await request('bank_indonesia', 'POST', '/issuances', { distributor_id: 'retail-bank', amount: topupAmount }, `compliance-topup-retail-${stamp}`);
 }
 
-async function prepareSubject(client, id, owner, { category = 'retail', active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
-    await client.request(owner, 'POST', '/subjects', { subject_id: id, category });
+async function prepareSubject(client, owner, { active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
+    const id = await onboardSubject(client, owner);
     await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/endorsement-policies`);
     await client.request('reviewer', 'PUT', `/subjects/${encodeURIComponent(id)}/limits`, LIMITS);
     if (recordReview) await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/reviews`, {});
@@ -101,34 +141,16 @@ async function prepareAccessMatrixFixtures(api, subjectID, stamp) {
     const fixtureID = purpose => `matrix-${crypto.createHash('sha256').update(`${stamp}:${subjectID}:${purpose}`).digest('hex').slice(0, 24)}`;
     const protectSubjectByRole = {};
     const releaseDecisionByRole = {};
+    const revokeLowRiskByRole = {};
     for (const role of ['retail_bank']) {
-        const pendingID = fixtureID(`protect-${role}`);
-        await client.request('kyc_verified', 'POST', '/subjects', { subject_id: pendingID, category: 'retail' });
-        protectSubjectByRole[role] = pendingID;
-
-        const releaseID = fixtureID(`release-${role}`);
-        await prepareSubject(client, releaseID, 'kyc_verified', { active: true, restricted: true, releaseRequested: true });
-        releaseDecisionByRole[role] = releaseID;
+        protectSubjectByRole[role] = await onboardSubject(client, 'kyc_verified');
+        releaseDecisionByRole[role] = await prepareSubject(client, 'kyc_verified', { active: true, restricted: true, releaseRequested: true });
+        revokeLowRiskByRole[role] = await prepareSubject(client, 'kyc_verified', { active: true });
     }
     const pendingStaffClientID = fixtureID('pending-staff');
     await client.request('bank_indonesia', 'POST', '/staff', { client_id: pendingStaffClientID });
     await topUpReserve(api, stamp);
-    // Each approving role needs a pending transfer made by another officer of the same bank.
-    const makers = {
-        retail_bank: { maker: 'reviewer', from: 'retail-bank', to: 'wholesale-bank', amount: '1' },
-        wholesale_bank: { maker: 'wholesale_two', from: 'wholesale-bank', to: 'retail-bank', amount: String(Number(WHOLESALE_APPROVAL_THRESHOLD) + 1) },
-    };
-    const pendingTransferByRoute = {};
-    for (const action of ['approval', 'rejection']) {
-        const byRole = {};
-        for (const [role, { maker, from, to, amount }] of Object.entries(makers)) {
-            const transferReference = fixtureID(`${action}-${role}`);
-            await client.request(maker, 'POST', '/interbank-transfers', { from_distributor_id: from, to_distributor_id: to, amount }, transferReference);
-            byRole[role] = transferReference;
-        }
-        pendingTransferByRoute[`/interbank-transfers/{reference}/${action}`] = byRole;
-    }
-    return { protectSubjectByRole, releaseDecisionByRole, pendingStaffClientID, pendingTransferByRoute };
+    return { protectSubjectByRole, releaseDecisionByRole, revokeLowRiskByRole, pendingStaffClientID };
 }
 
 function directIdentity(api, userKey) {
@@ -142,16 +164,22 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
     const method = scenario.api?.split(' ', 1)[0] || (scenario.operation_kind === 'query' ? 'GET' : 'POST');
     let route = scenario.api?.slice(method.length).trim() || '/';
     let body;
+    let multipart;
+    let transient;
     let apiUser = scenario.actor || owner;
     let args;
     const readOnly = scenario.operation_kind === 'query';
-    const businessRepresentative = api.fixtureIds.businessRepresentative || 'synthetic-business-representative';
     const receiptReference = api.fixtureIds.receiptReference;
 
     switch (scenario.id) {
         case 'create-pending':
-            body = { subject_id: id, category: 'retail' };
-            args = [id, 'retail'];
+            multipart = onboardingFields();
+            args = [id];
+            transient = { payload: JSON.stringify({
+                category: 'retail',
+                salt: reference(stamp, attempt, scenario.id, 'caliper', index, 'salt'),
+                documentRef: reference(stamp, attempt, scenario.id, 'caliper', index, 'document'),
+            }) };
             break;
         case 'protect-subject':
             args = [id];
@@ -173,32 +201,32 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             route = `/subjects/${encodeURIComponent(id)}/reviews`;
             body = {};
             args = [id];
+            transient = { payload: JSON.stringify({ dttot_result: 'not_listed', low_risk: true, low_risk_reason: 'capped product' }) };
             break;
         case 'approve-subject':
             route = `/subjects/${encodeURIComponent(id)}/decisions`;
             body = { approved: true };
-            args = [id, 'true'];
+            args = [id];
+            transient = { payload: JSON.stringify(body) };
             break;
         case 'set-limits':
             route = `/subjects/${encodeURIComponent(id)}/limits`;
             body = LIMITS;
-            args = [id, '1000', '5000', '20000', '5000'];
-            break;
-        case 'set-business-authority':
-            route = `/subjects/${encodeURIComponent(id)}/business-authority`;
-            body = { representatives: [businessRepresentative], beneficial_owner_refs: ['synthetic-owner-ref'] };
-            args = [id, JSON.stringify(body.representatives), JSON.stringify(body.beneficial_owner_refs)];
+            args = [id];
+            transient = { payload: JSON.stringify({ per_transaction: 1000, daily: 5000, monthly: 20000, holdings: 5000 }) };
             break;
         case 'freeze-subject':
             route = `/subjects/${encodeURIComponent(id)}/restrictions`;
             body = { reason_code: 'internal_review' };
-            args = [id, 'internal_review'];
+            args = [id];
+            transient = { payload: JSON.stringify({ reason: 'internal_review' }) };
             break;
         case 'request-unfreeze': {
             route = `/subjects/${encodeURIComponent(id)}/restriction-release-requests`;
             const evidence = reference(stamp, attempt, scenario.id, 'caliper', index, 'release');
             body = { authority_evidence_ref: evidence };
-            args = [id, evidence];
+            args = [id];
+            transient = { payload: JSON.stringify(body) };
             break;
         }
         case 'approve-unfreeze':
@@ -216,53 +244,20 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             args = [id];
             break;
         case 'register-distributor':
-            body = { distributor_id: id, kind: 'retail', admission_ref: admissionRef(id) };
-            args = [id, 'retail', admissionRef(id)];
-            break;
-        case 'issue':
-            body = { distributor_id: 'wholesale-bank', amount: '1' };
-            args = ['wholesale-bank', '1', ref];
-            break;
-        case 'redeem-reserve':
-            body = { distributor_id: 'wholesale-bank', amount: '1' };
-            args = ['wholesale-bank', '1', ref];
-            break;
-        case 'interbank-transfer':
-            body = { from_distributor_id: 'wholesale-bank', to_distributor_id: 'retail-bank', amount: '1' };
-            args = ['wholesale-bank', 'retail-bank', '1', ref];
-            break;
-        case 'interbank-transfer-pending':
-            body = { from_distributor_id: 'retail-bank', to_distributor_id: 'wholesale-bank', amount: '1' };
-            args = ['retail-bank', 'wholesale-bank', '1', ref];
-            break;
-        case 'approve-transfer':
-        case 'reject-transfer':
-            route = `/interbank-transfers/${encodeURIComponent(id)}/${scenario.id === 'approve-transfer' ? 'approval' : 'rejection'}`;
+            body = { distributor_id: id };
             args = [id];
             break;
-        case 'propose-approval-threshold':
-            route = '/distributors/wholesale-bank/approval-threshold-proposals';
-            body = { amount: WHOLESALE_APPROVAL_THRESHOLD };
-            args = ['wholesale-bank', WHOLESALE_APPROVAL_THRESHOLD];
+        case 'issue':
+            body = { distributor_id: 'retail-bank', amount: '1' };
+            args = ['retail-bank', '1', ref];
             break;
-        case 'set-participant-status':
-            route = '/distributors/wholesale-bank/status';
-            body = { status: 'active', reason_code: 'participation_policy' };
-            args = ['wholesale-bank', 'active', 'participation_policy'];
-            break;
-        case 'set-transfer-limit':
-            body = { amount: NO_TRANSFER_LIMIT };
-            args = [NO_TRANSFER_LIMIT];
+        case 'redeem-reserve':
+            body = { distributor_id: 'retail-bank', amount: '1' };
+            args = ['retail-bank', '1', ref];
             break;
         case 'read-participant':
-            route = '/distributors/wholesale-bank';
-            args = ['wholesale-bank'];
-            break;
-        case 'can-send':
+            route = '/distributors/retail-bank';
             args = ['retail-bank'];
-            break;
-        case 'read-transfer-limit':
-            args = [];
             break;
         case 'convert-to-retail':
             body = { distributor_id: 'retail-bank', amount: '1' };
@@ -274,7 +269,7 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             args = [];
             break;
         case 'read-reserve':
-            args = ['wholesale-bank'];
+            args = ['retail-bank'];
             break;
         case 'read-retail-float':
             args = ['retail-bank'];
@@ -288,7 +283,6 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             args = [id, 'retail-bank', '1', ref];
             break;
         case 'transfer-retail':
-        case 'transfer-merchant':
             body = { from, to, amount: '1' };
             args = [from, to, '1', ref];
             break;
@@ -303,13 +297,14 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
     const identity = directIdentity(api, apiUser);
     const mspId = api.identities.find(item => item.username === identity)?.msp_id;
     if (!mspId) throw new Error(`missing MSP mapping for Caliper signer ${identity}`);
-    const idempotencyRequired = ['transfer-retail', 'transfer-merchant', 'issue', 'redeem-reserve', 'interbank-transfer', 'interbank-transfer-pending', 'convert-to-retail', 'fund-wallet'].includes(scenario.id);
+    const idempotencyRequired = ['transfer-retail', 'issue', 'redeem-reserve', 'convert-to-retail', 'fund-wallet'].includes(scenario.id);
     return {
         api: {
             user: apiUser,
             method,
             path: route,
             ...(body === undefined ? {} : { body }),
+            ...(multipart === undefined ? {} : { multipart }),
             ...(idempotencyRequired ? { headers: { 'Idempotency-Key': ref } } : {}),
         },
         ledger: {
@@ -320,6 +315,7 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             args,
             read_only: readOnly,
             reference: idempotencyRequired ? ref : null,
+            ...(transient === undefined ? {} : { transient }),
         },
     };
 }
@@ -327,12 +323,12 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
 // Pooled profiles create subjects once per run and reuse them across rounds. A round uses pool entries [0, count) in
 // order, so its entries are distinct; the next round reuses them only after the previous round has ended, so a
 // transaction in flight never shares a key with the next round.
-const POOLED_PROFILES = new Set(['retail-transfer-pair', 'merchant-transfer-pair', 'float-subject']);
-const TOPUP_PROFILES = new Set(['monetary', 'pending-transfer', 'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair']);
+const POOLED_PROFILES = new Set(['retail-transfer-pair', 'float-subject']);
+const TOPUP_PROFILES = new Set(['monetary', 'float-subject', 'retail-transfer-pair']);
 const SETUP_CONCURRENCY = 64;
 const FUNDING_BATCH = 1024;
 const SENDER_FUNDING = 200; // units per sender; each measured transfer moves 1 unit
-const BANK_REFILL_MINIMUM = 10000000; // stays far below the 1e9 holdings and daily-usage limits
+const BANK_REFILL_MINIMUM = 10000000; // needs the verified ceiling, and stays below the 20000000 holdings limit
 const FLOAT_PREFILL = 10000000;
 
 const pools = new Map();
@@ -389,14 +385,15 @@ function fundingSchedule(count) {
 
 async function fundBank(client, state, stamp, units) {
     if (!state.bank) {
-        const id = `pool-bank-${state.token}`;
-        await prepareSubject(client, id, 'kyc_verified', { active: true });
+        const id = await prepareSubject(client, 'kyc_verified', { active: true });
+        // The bank holds more than the unverified ceiling, so its identity is verified first.
+        await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/verifications`, { evidence_ref: reference(stamp, id, 'pool-bank', 'fixture', 0, 'evidence') });
         await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: id });
         state.bank = { id, balance: 0, refills: 0 };
     }
     if (state.bank.balance < units) {
         const amount = Math.max(BANK_REFILL_MINIMUM, units);
-        if (amount > 500000000) throw new Error('pool funding batch exceeds the holdings limit; reduce the pool batch size');
+        if (amount > 20000000) throw new Error('pool funding batch exceeds the holdings limit; reduce the pool batch size');
         const tag = `${stamp}-${state.token}-${state.bank.refills}`;
         await client.request('reviewer', 'POST', '/conversions', { distributor_id: 'retail-bank', amount: String(amount) }, `pool-convert-${tag}`);
         await client.request('reviewer', 'POST', '/wallet-fundings', { subject_id: state.bank.id, distributor_id: 'retail-bank', amount: String(amount) }, `pool-fund-${tag}`);
@@ -420,22 +417,17 @@ async function fundBatch(client, state, stamp, senders, batchTag) {
     }
 }
 
-async function createPoolEntries(client, profile, state, indices) {
-    return mapLimit(indices, SETUP_CONCURRENCY, async index => {
-        const base = `pool-${profile}-${state.token}-${index}`;
+async function createPoolEntries(client, profile, indices) {
+    return mapLimit(indices, SETUP_CONCURRENCY, async () => {
         if (profile === 'float-subject') {
-            const subject = `${base}-f`;
-            await prepareSubject(client, subject, 'kyc_verified', { active: true });
+            const subject = await prepareSubject(client, 'kyc_verified', { active: true });
             await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: subject });
             return { subject, sender: subject, receiver: subject };
         }
-        const sender = `${base}-s`;
-        const receiver = `${base}-r`;
-        const receiverOwner = profile === 'retail-transfer-pair' ? 'retail_two' : 'merchant';
-        await prepareSubject(client, sender, 'kyc_verified', { active: true });
+        const sender = await prepareSubject(client, 'kyc_verified', { active: true });
         await client.request('kyc_verified', 'POST', '/customer-wallets', { subject_id: sender });
-        await prepareSubject(client, receiver, receiverOwner, { active: true });
-        await client.request(receiverOwner, 'POST', '/customer-wallets', { subject_id: receiver });
+        const receiver = await prepareSubject(client, 'retail_two', { active: true });
+        await client.request('retail_two', 'POST', '/customer-wallets', { subject_id: receiver });
         return { subject: sender, sender, receiver };
     });
 }
@@ -444,7 +436,7 @@ async function ensurePool(client, profile, count, stamp) {
     const state = poolState(stamp, profile);
     const start = state.entries.length;
     if (start >= count) return state;
-    const created = await createPoolEntries(client, profile, state, Array.from({ length: count - start }, (_, offset) => start + offset));
+    const created = await createPoolEntries(client, profile, Array.from({ length: count - start }, (_, offset) => start + offset));
     if (profile !== 'float-subject') {
         for (let batch = 0; batch < created.length; batch += FUNDING_BATCH) {
             const senders = created.slice(batch, batch + FUNDING_BATCH).map(entry => entry.sender);
@@ -476,12 +468,7 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
     const smokeIds = api.fixtureIds;
 
     if (reuse) {
-        const id = fixtureProfile === 'reuse-business-subject'
-            ? smokeIds.businessSubject
-            : fixtureProfile === 'reuse-payment-receipt'
-                ? smokeIds.retailSubject
-                : smokeIds.retailSubject;
-        const fixture = operationFixture({ api, scenario: catalogScenario, id, index: 0, stamp, attempt });
+        const fixture = operationFixture({ api, scenario: catalogScenario, id: smokeIds.retailSubject, index: 0, stamp, attempt });
         apiItems.push(fixture.api);
         ledgerItems.push(fixture.ledger);
     } else {
@@ -490,32 +477,30 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
         if (POOLED_PROFILES.has(fixtureProfile)) await ensurePool(client, fixtureProfile, count, stamp);
         const independentSubjectSetup = [
             'protected-pending-subject', 'standard-review-subject',
-            'active-subject', 'active-business-subject', 'restricted-subject', 'release-requested-subject',
-            'float-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-staff', 'protected-staff',
+            'active-subject', 'restricted-subject', 'release-requested-subject',
+            'float-subject', 'retail-transfer-pair', 'pending-staff', 'protected-staff',
         ].includes(fixtureProfile);
-        const sharesReserveKey = ['float-subject', 'retail-transfer-pair', 'merchant-transfer-pair', 'pending-transfer'].includes(fixtureProfile);
+        const sharesReserveKey = ['float-subject', 'retail-transfer-pair'].includes(fixtureProfile);
         const preparationConcurrency = independentSubjectSetup && !sharesReserveKey ? SETUP_CONCURRENCY : 1;
         const prepareOne = async index => {
             if (POOLED_PROFILES.has(fixtureProfile)) {
                 const entry = poolState(stamp, fixtureProfile).entries[index];
                 return operationFixture({ api, scenario: catalogScenario, id: entry.subject, index, stamp, attempt, owner: 'kyc_verified', from: entry.sender, to: entry.receiver });
             }
-            const id = subjectID(stamp, attempt, catalogScenario.id, pathName, index, 'primary');
+            let id = subjectID(stamp, attempt, catalogScenario.id, pathName, index, 'primary');
             let from;
             let to;
             const owner = catalogScenario.actor || 'kyc_verified';
             if (fixtureProfile === 'pending-subject') {
-                await client.request('kyc_verified', 'POST', '/subjects', { subject_id: id, category: 'retail' });
+                id = await onboardSubject(client, 'kyc_verified');
             } else if (fixtureProfile === 'protected-pending-subject') {
-                await prepareSubject(client, id, 'kyc_verified', { recordReview: false });
+                id = await prepareSubject(client, 'kyc_verified', { recordReview: false });
             } else if (fixtureProfile === 'standard-review-subject') {
-                await prepareSubject(client, id, 'kyc_verified');
+                id = await prepareSubject(client, 'kyc_verified');
             } else if (fixtureProfile === 'active-subject') {
-                await prepareSubject(client, id, 'kyc_verified', { active: true });
-            } else if (fixtureProfile === 'active-business-subject') {
-                await prepareSubject(client, id, 'kyc_verified', { category: 'business', active: true });
+                id = await prepareSubject(client, 'kyc_verified', { active: true });
             } else if (fixtureProfile === 'restricted-subject' || fixtureProfile === 'release-requested-subject') {
-                await prepareSubject(client, id, 'kyc_verified', {
+                id = await prepareSubject(client, 'kyc_verified', {
                     active: true,
                     restricted: true,
                     releaseRequested: fixtureProfile === 'release-requested-subject',
@@ -525,11 +510,6 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
                 if (fixtureProfile === 'protected-staff') {
                     await client.request('bank_indonesia', 'POST', `/staff/${encodeURIComponent(id)}/endorsement-policies`);
                 }
-            } else if (fixtureProfile === 'pending-transfer') {
-                // The measured actor (reviewer) is a different retail-bank officer from this maker.
-                await client.request('retail_bank', 'POST', '/interbank-transfers', {
-                    from_distributor_id: 'retail-bank', to_distributor_id: 'wholesale-bank', amount: '1',
-                }, id);
             } else if (!['fresh-subject', 'fresh-staff', 'fresh-distributor', 'monetary', 'none'].includes(fixtureProfile)) {
                 throw new Error(`unsupported fixture profile ${fixtureProfile} for ${catalogScenario.id}`);
             }
@@ -571,4 +551,4 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
     return document.fixtures;
 }
 
-module.exports = { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, SENDER_FUNDING, topUpReserve };
+module.exports = { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, SENDER_FUNDING, solidPNG, topUpReserve };

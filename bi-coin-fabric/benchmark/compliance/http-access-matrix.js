@@ -16,23 +16,22 @@ async function login(baseURL, credentials) {
     return payload.access_token;
 }
 
-function routePath(route, subjectID, fixtureIds, apiFixtures, role) {
-    const routeSubjectID = route.path === '/customer-wallets/{subject_id}/balance' && role === 'merchant'
-        ? fixtureIds.merchantSubject || subjectID
-        : route.path === '/subjects/{subject_id}/endorsement-policies'
-            ? apiFixtures.protectSubjectByRole?.[role] || subjectID
-            : route.path === '/subjects/{subject_id}/restriction-release-decisions'
-                ? apiFixtures.releaseDecisionByRole?.[role] || subjectID
+function routePath(route, subjectID, apiFixtures, role) {
+    const routeSubjectID = route.path === '/subjects/{subject_id}/endorsement-policies'
+        ? apiFixtures.protectSubjectByRole?.[role] || subjectID
+        : route.path === '/subjects/{subject_id}/restriction-release-decisions'
+            ? apiFixtures.releaseDecisionByRole?.[role] || subjectID
+            : route.path === '/subjects/{subject_id}/low-risk-revocations'
+                ? apiFixtures.revokeLowRiskByRole?.[role] || subjectID
                 : subjectID;
     const clientID = route.path === '/staff/{client_id}/endorsement-policies'
         ? apiFixtures.pendingStaffClientID || 'missing-staff-fixture'
         : 'missing-staff-fixture';
-    const transferReference = apiFixtures.pendingTransferByRoute?.[route.path]?.[role] || 'missing-transfer-fixture';
     return route.path
         .replace('{subject_id}', encodeURIComponent(routeSubjectID))
         .replace('{client_id}', encodeURIComponent(clientID))
-        .replace('{distributor_id}', 'retail-bank')
-        .replace('{reference}', encodeURIComponent(transferReference));
+        .replace('{alert_id}', 'missing-alert-fixture')
+        .replace('{distributor_id}', 'retail-bank');
 }
 
 async function readSubjectState(baseURL, token, subjectID) {
@@ -52,7 +51,7 @@ async function verifyStaffProtection(baseURL, token, clientID) {
     return response.status;
 }
 
-async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {}, apiFixtures = {}, outputPath }) {
+async function runAccessMatrix({ baseURL, roleUsers, subjectID, apiFixtures = {}, outputPath }) {
     const tokens = new Map();
     for (const role of catalog.application_roles) {
         if (role === 'public') continue;
@@ -70,7 +69,7 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
             const hasBody = route.json === true;
             if (hasBody) headers['Content-Type'] = 'application/json';
             try {
-                const targetPath = routePath(route, subjectID, fixtureIds, apiFixtures, role);
+                const targetPath = routePath(route, subjectID, apiFixtures, role);
                 let stateBefore;
                 let actionSubjectID;
                 if (allowed && route.path === '/subjects/{subject_id}/endorsement-policies') {
@@ -80,6 +79,10 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
                 } else if (allowed && route.path === '/subjects/{subject_id}/restriction-release-decisions') {
                     actionSubjectID = apiFixtures.releaseDecisionByRole?.[role];
                     if (!actionSubjectID) throw new Error(`missing release-decision fixture for ${role}`);
+                    stateBefore = await readSubjectState(baseURL, tokens.get(role), actionSubjectID);
+                } else if (allowed && route.path === '/subjects/{subject_id}/low-risk-revocations') {
+                    actionSubjectID = apiFixtures.revokeLowRiskByRole?.[role];
+                    if (!actionSubjectID) throw new Error(`missing low-risk-revocation fixture for ${role}`);
                     stateBefore = await readSubjectState(baseURL, tokens.get(role), actionSubjectID);
                 }
                 const response = await fetch(`${baseURL}${targetPath}`, {
@@ -127,6 +130,20 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
                             actionStateEffect = released ? 'restriction-released' : 'release-effect-unverified';
                         }
                         actionEvidence = { restricted_before: stateBefore.restricted, restricted_after: stateAfter.restricted, unchanged };
+                    } else if (route.path === '/subjects/{subject_id}/low-risk-revocations') {
+                        const stateAfter = await readSubjectState(baseURL, tokens.get(role), actionSubjectID);
+                        const unchanged = JSON.stringify(stateBefore) === JSON.stringify(stateAfter);
+                        const deniedWithoutMutation = response.status === 500 && unchanged;
+                        actionExpected = 'staff-role denial leaves the low-risk flag unchanged';
+                        actionClassification = deniedWithoutMutation ? 'pass' : 'violation';
+                        actionStateEffect = deniedWithoutMutation ? 'expected-denial-state-unchanged' : 'denial-state-unverified';
+                        actionEvidence = { low_risk_before: stateBefore.low_risk, low_risk_after: stateAfter.low_risk, unchanged };
+                    } else if (route.path === '/monitoring-alerts/{alert_id}/confirmations') {
+                        // Alerts come only from the transfer monitor, so the matrix confirms an alert that does not exist.
+                        const refused = [400, 404, 409, 422].includes(response.status);
+                        actionExpected = 'unknown alert is refused without effect';
+                        actionClassification = refused ? 'pass' : 'violation';
+                        actionStateEffect = refused ? 'unknown-alert-refused' : 'unknown-alert-unverified';
                     } else if (route.path === '/staff/{client_id}/endorsement-policies') {
                         const verificationStatus = await verifyStaffProtection(baseURL, tokens.get(role), apiFixtures.pendingStaffClientID);
                         const protectedStaff = response.ok && verificationStatus < 400;
@@ -134,15 +151,6 @@ async function runAccessMatrix({ baseURL, roleUsers, subjectID, fixtureIds = {},
                         actionClassification = protectedStaff ? 'pass' : 'violation';
                         actionStateEffect = protectedStaff ? 'staff-protection-verified' : 'staff-protection-unverified';
                         actionEvidence = { verification_status: verificationStatus };
-                    } else if (route.path.startsWith('/interbank-transfers/{reference}/')) {
-                        const expectedStatus = route.path.endsWith('/approval') ? 'executed' : 'rejected';
-                        const receipt = response.ok ? await response.json() : {};
-                        const decided = response.ok && receipt.status === expectedStatus
-                            && Boolean(receipt.checker_id) && receipt.checker_id !== receipt.maker_id;
-                        actionExpected = `a second officer leaves the pending transfer ${expectedStatus}`;
-                        actionClassification = decided ? 'pass' : 'violation';
-                        actionStateEffect = decided ? `transfer-${expectedStatus}` : 'transfer-decision-unverified';
-                        actionEvidence = { status: receipt.status, distinct_officers: decided };
                     } else if (route.path === '/monetary-initializations') {
                         const unchanged = apiFixtures.initializationReplayStateUnchanged === true;
                         const duplicateDeniedWithoutMutation = response.status === 500 && unchanged;
