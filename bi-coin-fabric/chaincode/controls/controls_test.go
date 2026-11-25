@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/cid"
 	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
 	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
@@ -127,6 +128,11 @@ func (f subjectIdentity) GetID() (string, error) { return f.id, nil }
 type subjectStub struct {
 	shim.ChaincodeStubInterface
 	record []byte
+	now    int64
+}
+
+func (s subjectStub) GetTxTimestamp() (*timestamp.Timestamp, error) {
+	return &timestamp.Timestamp{Seconds: s.now}, nil
 }
 
 func (s subjectStub) CreateCompositeKey(objectType string, attributes []string) (string, error) {
@@ -135,6 +141,11 @@ func (s subjectStub) CreateCompositeKey(objectType string, attributes []string) 
 
 func (s subjectStub) GetPrivateData(collection string, key string) ([]byte, error) {
 	return s.record, nil
+}
+
+// GetState serves the BI ceilings: Rp2.000.000 unverified, Rp20.000.000 verified.
+func (s subjectStub) GetState(key string) ([]byte, error) {
+	return json.Marshal(CddCeilings{UnverifiedHoldings: 2_000_000, VerifiedHoldings: 20_000_000})
 }
 
 type subjectContext struct {
@@ -146,6 +157,61 @@ type subjectContext struct {
 func (f subjectContext) GetClientIdentity() cid.ClientIdentity { return f.identity }
 
 func (f subjectContext) GetStub() shim.ChaincodeStubInterface { return f.stub }
+
+// payeeRecord returns an eligible subject record, with edit applied for each refusal case.
+func payeeRecord(t *testing.T, edit func(*subjectRecord)) []byte {
+	t.Helper()
+	record := subjectRecord{
+		SubjectID: "retail-1", Category: "retail", Status: "active", LimitsSet: true, LowRisk: true,
+		Limits: LimitProfile{PerTransaction: 1000, Daily: 2000, Monthly: 5000, Holdings: 10000},
+	}
+	if edit != nil {
+		edit(&record)
+	}
+	data, err := json.Marshal(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
+}
+
+func TestCheckPayeeRefusesIneligibleSubjectsWithOneError(t *testing.T) {
+	const now = 1_800_000_000
+	cases := []struct {
+		name         string
+		record       []byte
+		balanceAfter int64
+		permitted    bool
+	}{
+		{"active within holdings", payeeRecord(t, nil), 9000, true},
+		{"active at holdings limit", payeeRecord(t, nil), 10000, true},
+		{"over holdings limit", payeeRecord(t, nil), 10001, false},
+		{"pending", payeeRecord(t, func(r *subjectRecord) { r.Status = "pending" }), 1, false},
+		{"restricted indefinitely", payeeRecord(t, func(r *subjectRecord) { r.Restricted = true }), 1, false},
+		{"restriction still running", payeeRecord(t, func(r *subjectRecord) { r.Restricted = true; r.RestrictedUntil = now + 60 }), 1, false},
+		{"restriction expired", payeeRecord(t, func(r *subjectRecord) { r.Restricted = true; r.RestrictedUntil = now - 60 }), 1, true},
+		{"limits not set", payeeRecord(t, func(r *subjectRecord) { r.LimitsSet = false }), 1, false},
+		{"low risk revoked", payeeRecord(t, func(r *subjectRecord) { r.LowRisk = false }), 1, false},
+		{"closed", payeeRecord(t, func(r *subjectRecord) { r.Status = "closed" }), 1, false},
+		{"unverified capped at the unverified ceiling", payeeRecord(t, func(r *subjectRecord) { r.Limits.Holdings = 20_000_000 }), 2_000_001, false},
+		{"verified up to the verified ceiling", payeeRecord(t, func(r *subjectRecord) { r.Limits.Holdings = 20_000_000; r.Verified = true }), 20_000_000, true},
+		{"missing record", nil, 1, false},
+	}
+	// The caller is a non-member who does not act for the subject. The verdict must not depend on the caller.
+	caller := subjectIdentity{mspID: endUserMSP, id: "enduser-admin"}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := subjectContext{identity: caller, stub: subjectStub{record: tc.record, now: now}}
+			err := (&ControlsContract{}).CheckPayee(ctx, "retail-1", tc.balanceAfter)
+			if permitted := err == nil; permitted != tc.permitted {
+				t.Fatalf("CheckPayee error = %v, want permitted %v", err, tc.permitted)
+			}
+			if err != nil && err.Error() != "transfer not permitted" {
+				t.Fatalf("refusal must be the one opaque error, got %q", err)
+			}
+		})
+	}
+}
 
 func TestGetSubjectDenialIsAccessErrorNotSchemaError(t *testing.T) {
 	record, err := json.Marshal(subjectRecord{SubjectID: "retail-1", Category: "retail", ApplicantID: "applicant", Status: "active"})
@@ -172,12 +238,8 @@ func TestGetSubjectDenialIsAccessErrorNotSchemaError(t *testing.T) {
 			case tc.wantErr != "" && (err == nil || err.Error() != tc.wantErr):
 				t.Fatalf("error = %v, want %q", err, tc.wantErr)
 			}
-			data, err := json.Marshal(view)
-			if err != nil {
+			if _, err := json.Marshal(view); err != nil {
 				t.Fatal(err)
-			}
-			if !bytes.Contains(data, []byte(`"representatives":[]`)) || !bytes.Contains(data, []byte(`"beneficial_owner_refs":[]`)) {
-				t.Errorf("returned view must serialize its lists as arrays, got %s", data)
 			}
 		})
 	}

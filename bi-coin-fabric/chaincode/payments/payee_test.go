@@ -1,59 +1,64 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"strings"
 	"testing"
+
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
+	"github.com/hyperledger/fabric-protos-go-apiv2/peer"
 )
 
-func payeeHash(raw []byte) string {
-	canonical, err := canonicalJSON(raw)
-	if err != nil {
-		panic(err)
-	}
-	sum := sha256.Sum256(canonical)
-	return hex.EncodeToString(sum[:])
+// payeeStub records the controls call and answers with the configured verdict.
+type payeeStub struct {
+	shim.ChaincodeStubInterface
+	permit    bool
+	chaincode string
+	args      [][]byte
 }
 
-func TestVerifyPayee(t *testing.T) {
-	const now = 1000
-	active := []byte(`{"status":"active","restricted":false,"limits_set":true,"limits":{"per_transaction":100,"daily":100,"monthly":100,"holdings":1000}}`)
-	pending := []byte(`{"status":"pending","restricted":false,"limits_set":true,"limits":{"holdings":1000}}`)
-	unset := []byte(`{"status":"active","restricted":false,"limits_set":false,"limits":{"holdings":1000}}`)
-	restrictedLater := []byte(`{"status":"active","restricted":true,"restricted_until":2000,"limits_set":true,"limits":{"holdings":1000}}`)
-	restrictedExpired := []byte(`{"status":"active","restricted":true,"restricted_until":500,"limits_set":true,"limits":{"holdings":1000}}`)
-	restrictedOpen := []byte(`{"status":"active","restricted":true,"limits_set":true,"limits":{"holdings":1000}}`)
-	altered := []byte(strings.Replace(string(active), `"holdings":1000`, `"holdings":9999`, 1))
-
-	tests := []struct {
-		name    string
-		raw     []byte
-		hash    string
-		balance int64
-		wantErr string
-	}{
-		{"active within holdings", active, payeeHash(active), 1000, ""},
-		{"holdings exceeded", active, payeeHash(active), 1001, "holdings limit exceeded"},
-		{"record altered after hashing", altered, payeeHash(active), 500, "does not match the ledger hash"},
-		{"pending status", pending, payeeHash(pending), 500, "not eligible to receive"},
-		{"limits not set", unset, payeeHash(unset), 500, "not eligible to receive"},
-		{"restricted until later", restrictedLater, payeeHash(restrictedLater), 500, "not eligible to receive"},
-		{"restriction expired", restrictedExpired, payeeHash(restrictedExpired), 500, ""},
-		{"restricted without end", restrictedOpen, payeeHash(restrictedOpen), 500, "not eligible to receive"},
+func (s *payeeStub) InvokeChaincode(chaincodeName string, args [][]byte, channel string) *peer.Response {
+	s.chaincode = chaincodeName
+	s.args = args
+	if s.permit {
+		return shim.Success(nil)
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := verifyPayee(tc.raw, tc.hash, now, tc.balance, "subject-x")
-			if tc.wantErr == "" {
-				if err != nil {
-					t.Fatalf("unexpected error: %v", err)
-				}
-				return
-			}
-			if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
-				t.Fatalf("want error containing %q, got %v", tc.wantErr, err)
-			}
-		})
+	return shim.Error("transfer not permitted")
+}
+
+type payeeContext struct {
+	contractapi.TransactionContextInterface
+	stub shim.ChaincodeStubInterface
+}
+
+func (f payeeContext) GetStub() shim.ChaincodeStubInterface { return f.stub }
+
+func TestCheckPayeeAsksControlsForTheVerdict(t *testing.T) {
+	stub := &payeeStub{permit: true}
+	if err := checkPayee(payeeContext{stub: stub}, "retail-1", 1000); err != nil {
+		t.Fatalf("permitted payee refused: %v", err)
+	}
+	if stub.chaincode != controlsChaincode {
+		t.Fatalf("chaincode = %q, want %q", stub.chaincode, controlsChaincode)
+	}
+	want := []string{"CheckPayee", "retail-1", "1000"}
+	if len(stub.args) != len(want) {
+		t.Fatalf("args = %q, want %q", stub.args, want)
+	}
+	for i := range want {
+		if string(stub.args[i]) != want[i] {
+			t.Fatalf("arg %d = %q, want %q", i, stub.args[i], want[i])
+		}
+	}
+}
+
+// Every refusal reaches the payer as the same error, whatever controls reported.
+func TestCheckPayeeRefusalIsTheOnlyPayerError(t *testing.T) {
+	stub := &payeeStub{permit: false}
+	err := checkPayee(payeeContext{stub: stub}, "retail-1", 1001)
+	if err != errPayeeRejected {
+		t.Fatalf("want errPayeeRejected, got %v", err)
+	}
+	if err.Error() != "transfer not permitted" {
+		t.Fatalf("unexpected text: %q", err.Error())
 	}
 }

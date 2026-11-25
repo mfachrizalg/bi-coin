@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -141,6 +140,14 @@ func (c *PaymentsContract) Transfer(ctx contractapi.TransactionContextInterface,
 		return paymentReceipt{}, err
 	}
 	receipt := paymentReceipt{Reference: reference, From: from, To: to, Amount: amount, Kind: "transfer"}
+	// Fabric delivers an event only when the transaction commits, so a rejected transfer emits nothing.
+	payload, err := json.Marshal(receipt)
+	if err != nil {
+		return paymentReceipt{}, err
+	}
+	if err := stub.SetEvent("TransferReceived", payload); err != nil {
+		return paymentReceipt{}, err
+	}
 	if err := putJSON(stub, walletKey(from), sender); err != nil {
 		return paymentReceipt{}, err
 	}
@@ -331,78 +338,19 @@ func invokeLimits(ctx contractapi.TransactionContextInterface, subjectID string)
 	return limits, nil
 }
 
-func invokeString(ctx contractapi.TransactionContextInterface, chaincode string, transaction string, subjectID string) (string, error) {
-	response := ctx.GetStub().InvokeChaincode(chaincode, [][]byte{[]byte(transaction), []byte(subjectID)}, channelName)
-	if response.Status != shim.OK {
-		return "", fmt.Errorf("%s.%s failed: %s", chaincode, transaction, response.Message)
-	}
-	return string(response.Payload), nil
-}
-
-// checkPayee verifies the payee record supplied in the transient map against the
-// public hash, then applies the payee rules to the receiver's balance after the credit.
+// checkPayee asks the controls chaincode for the payee verdict on the receiver's balance after the credit.
+// The endorsing members run it, so the payee's record never reaches the payer's side.
 func checkPayee(ctx contractapi.TransactionContextInterface, payeeID string, balanceAfter int64) error {
-	transient, err := ctx.GetStub().GetTransient()
-	if err != nil {
-		return err
-	}
-	raw, ok := transient["payee_record"]
-	if !ok {
-		return fmt.Errorf("payee record is required in transient data")
-	}
-	expected, err := invokeString(ctx, controlsChaincode, "GetSubjectHash", payeeID)
-	if err != nil {
-		return err
-	}
-	timestamp, err := ctx.GetStub().GetTxTimestamp()
-	if err != nil {
-		return err
-	}
-	return verifyPayee(raw, expected, timestamp.Seconds, balanceAfter, payeeID)
-}
-
-// canonicalJSON re-encodes JSON with sorted keys and no extra whitespace. The contract API
-// re-encodes string results this way, so the commitment is checked against this form.
-func canonicalJSON(raw []byte) ([]byte, error) {
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.UseNumber()
-	var value interface{}
-	if err := dec.Decode(&value); err != nil {
-		return nil, err
-	}
-	return json.Marshal(value)
-}
-
-// verifyPayee accepts a payee record only when it matches the expected hash and the
-// subject is active, not restricted at now, has limits set, and stays within holdings.
-func verifyPayee(raw []byte, expectedHash string, now int64, balanceAfter int64, payeeID string) error {
-	canonical, err := canonicalJSON(raw)
-	if err != nil {
-		return fmt.Errorf("decode payee record: %w", err)
-	}
-	sum := sha256.Sum256(canonical)
-	if hex.EncodeToString(sum[:]) != expectedHash {
-		return fmt.Errorf("payee record does not match the ledger hash")
-	}
-	var payee struct {
-		Status          string       `json:"status"`
-		Restricted      bool         `json:"restricted"`
-		RestrictedUntil int64        `json:"restricted_until"`
-		LimitsSet       bool         `json:"limits_set"`
-		Limits          limitProfile `json:"limits"`
-	}
-	if err := json.Unmarshal(raw, &payee); err != nil {
-		return fmt.Errorf("decode payee record: %w", err)
-	}
-	restricted := payee.Restricted && (payee.RestrictedUntil == 0 || now < payee.RestrictedUntil)
-	if payee.Status != "active" || restricted || !payee.LimitsSet {
-		return fmt.Errorf("subject %s is not eligible to receive", payeeID)
-	}
-	if balanceAfter > payee.Limits.Holdings {
-		return fmt.Errorf("recipient holdings limit exceeded")
+	args := [][]byte{[]byte("CheckPayee"), []byte(payeeID), []byte(strconv.FormatInt(balanceAfter, 10))}
+	response := ctx.GetStub().InvokeChaincode(controlsChaincode, args, channelName)
+	if response.Status != shim.OK {
+		return errPayeeRejected
 	}
 	return nil
 }
+
+// errPayeeRejected is the only payee-side error a payer sees, whatever the reason for the refusal.
+var errPayeeRejected = errors.New("transfer not permitted")
 
 func addUsage(ctx contractapi.TransactionContextInterface, subjectID string, amount int64, limits limitProfile) error {
 	timestamp, err := ctx.GetStub().GetTxTimestamp()

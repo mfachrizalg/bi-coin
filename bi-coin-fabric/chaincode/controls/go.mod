@@ -3,6 +3,7 @@ module github.com/mfachrizalg/bi-coin-retail-cbdc/chaincode/controls
 go 1.22
 
 require (
+	github.com/golang/protobuf v1.5.3
 	github.com/hyperledger/fabric-chaincode-go/v2 v2.0.0
 	github.com/hyperledger/fabric-contract-api-go/v2 v2.0.0
 )
