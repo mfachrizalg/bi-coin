@@ -23,10 +23,10 @@ sistem, arsitektur jaringan, perancangan use case, dan model data
 
 \subsubsection{Analisis Kebutuhan Sistem}
 
-Analisis kebutuhan mengidentifikasi aktor sistem (Bank Indonesia, bank
-distributor, pedagang, pelanggan ritel, serta pengamat OJK dan PPATK melalui peran Auditor) beserta
-kebutuhan fungsionalnya, yaitu penerbitan langsung ke cadangan bank distributor, transfer antarbank, konversi dan pendanaan dompet ritel,
-transfer antarpelanggan serta pelanggan-ke-pedagang, pengawasan, dan pelaporan.
+Analisis kebutuhan mengidentifikasi aktor sistem (Bank Indonesia,
+\textit{distributor}, pelanggan ritel perorangan, serta pengamat OJK dan PPATK melalui peran auditor) beserta
+kebutuhan fungsionalnya, yaitu penerbitan langsung ke cadangan \textit{distributor}, transfer antarbank, konversi dan pendanaan dompet ritel,
+keputusan CDD sederhana atas subjek pelanggan, transfer antarpelanggan, pemantauan, pengawasan, dan pelaporan.
 Kebutuhan ini menjadi dasar perancangan activity diagram dan arsitektur
 pada subbab berikutnya.
 
@@ -42,9 +42,10 @@ klien, \textit{backend API}, basis data luring PostgreSQL, dan jaringan
 \textit{blockchain} Hyperledger Fabric beserta \textit{chaincode}-nya. Aplikasi klien hanya berfungsi sebagai alat bantu demonstrasi dan tidak termasuk dalam evaluasi penelitian ini.
 
 Pemangku kepentingan utama terdiri atas Bank Indonesia sebagai penerbit dan
-pengawas, bank distributor (\textit{wholesale} dan \textit{retail}) sebagai pemegang cadangan, bank \textit{retail} sebagai kustodian, pedagang dan
-pelanggan ritel sebagai pengguna transaksi, serta pengamat OJK dan PPATK melalui peran Auditor
-sebagai pihak yang membutuhkan fungsi baca dan pelaporan. Setiap pemangku
+pengawas, \textit{distributor} sebagai pemegang cadangan dan kustodian dompet, pelanggan ritel perorangan
+sebagai pengguna transaksi, serta pengamat OJK dan PPATK melalui peran auditor
+sebagai pihak yang membutuhkan fungsi baca dan pelaporan. \textit{Distributor} adalah PJSP, bank atau nonbank, sehingga
+rujukan hukum CDD-nya adalah POJK 8/2023 bagi bank dan pedoman CDD Bank Indonesia bagi nonbank (Bab~II). Purwarupa menjalankan satu \textit{distributor} nonbank. Setiap pemangku
 kepentingan tersebut kemudian diterjemahkan menjadi
 peran akses pada \textit{backend API} dan aturan bisnis pada \textit{chaincode}
 agar kebutuhan operasional dapat ditelusuri secara konsisten.
@@ -58,11 +59,14 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         \toprule
         \textbf{ID} & \textbf{Deskripsi kebutuhan} \\
         \midrule
-        FR-01 & Sistem harus mendukung pendaftaran, persetujuan, pembatasan, pembukaan pembatasan, dan penghentian peserta sesuai peran Bank Indonesia dan bank distributor. \\
-        FR-02 & Sistem harus mendukung penerbitan \textit{w-Rupiah Digital} oleh Bank Indonesia langsung ke cadangan bank distributor, baik bank \textit{wholesale} maupun bank \textit{retail}. \\
+        FR-01 & Sistem harus mendukung pendaftaran \textit{distributor} oleh Bank Indonesia serta pendaftaran, peninjauan, persetujuan, pembatasan, dan pembukaan pembatasan subjek ritel oleh \textit{distributor} sesuai perannya. \\
+        FR-02 & Sistem harus mendukung penerbitan \textit{w-Rupiah Digital} oleh Bank Indonesia langsung ke cadangan \textit{distributor}. \\
         FR-03 & Sistem harus menolak transfer yang tidak diotorisasi, melibatkan dompet yang dibatasi, bernilai tidak valid, atau melebihi saldo pengirim, lalu memperbarui saldo secara atomik. \\
         FR-04 & Sistem harus menyediakan laporan rekonsiliasi, metrik, riwayat transaksi, dan \textit{event} pengawasan bagi peran yang berwenang. \\
-        FR-05 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, bank distributor, merchant, dan Auditor. \\
+        FR-05 & Sistem harus menegakkan pemisahan hak akses pada \textit{backend API} antara peran publik, terautentikasi, \textit{distributor}, Bank Indonesia, dan auditor. \\
+        FR-06 & Sistem harus menegakkan keputusan CDD sederhana pada \textit{ledger}. Subjek hanya menjadi aktif apabila peninjau menyetujuinya, hasil DTTOT berupa tidak terdaftar, subjek ditandai berisiko rendah, dan batas subjek telah ditetapkan. Subjek lain ditolak. \\
+        FR-07 & Sistem harus menegakkan dua batas kepemilikan CDD yang ditetapkan Bank Indonesia menurut status verifikasi subjek, dan mendukung verifikasi, pembaruan data yang mengembalikan subjek menjadi belum terverifikasi, penutupan hubungan usaha, serta pencabutan status risiko rendah. \\
+        FR-08 & Sistem harus memantau transfer yang diterima melalui konsumen peristiwa pada \textit{backend} dengan tiga aturan, menyimpan peringatan, dan membiarkan petugas kepatuhan mengonfirmasi peringatan menjadi draf LTKM dan pencabutan status risiko rendah tanpa pemberitahuan kepada pelanggan. \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -97,6 +101,7 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
         FR-01, FR-02 & Skenario fungsional dan \textit{unit test} \textit{chaincode} & Siklus hidup peserta, penerbitan, konversi, dan pendanaan dompet berjalan sesuai aturan \\
         FR-03 & \textit{Unit test} \textit{backend} dan \textit{chaincode} serta skenario transfer & Otorisasi, status pembatasan, validasi saldo, dan pembaruan atomik ditegakkan konsisten \\
         FR-04, FR-05 & Skenario fungsional, \textit{unit test} \textit{backend}, dan inspeksi rute API & Hak akses, pelaporan, dan \textit{event} pengawasan tersedia bagi peran berwenang \\
+        FR-06, FR-07, FR-08 & Skenario fungsional CDD, \textit{unit test} \textit{chaincode}, dan \textit{unit test} aturan pemantauan pada \textit{backend} & Gerbang persetujuan, batas kepemilikan, penutupan, pencabutan status risiko rendah, dan aturan peringatan berjalan sesuai rancangan \\
         NFR-01, NFR-03, NFR-05 & Inspeksi arsitektur, konfigurasi, dan manifes benchmark & Struktur jaringan, pemisahan lapisan, dan \textit{repeatability} purwarupa terdokumentasi \\
         NFR-02 & Inspeksi model data dan \textit{unit test} terpilih & Keterlacakan audit dan riwayat transaksi dapat dipertahankan \\
         NFR-04 & \textit{Benchmark} Hyperledger Caliper & Nilai \textit{throughput}, latensi, dan tingkat keberhasilan transaksi diperoleh secara kuantitatif \\
@@ -106,11 +111,11 @@ agar kebutuhan operasional dapat ditelusuri secara konsisten.
 
 \subsubsection{Perancangan Activity Diagram}
 
-Setiap proses utama dimodelkan dengan \textit{activity diagram} UML 2 yang digambar menggunakan TikZ. Jumlah jalur (\textit{swimlane}) pada setiap diagram mengikuti aktor atau komponen yang terlibat, yaitu tiga hingga lima jalur. Pendaftaran peserta (Gambar~\ref{fig:ch3-ad-01}) melibatkan lima jalur, yaitu pengguna, sistem, distributor, KYC Reviewer, dan Senior Approver. Penerbitan \textit{w-Rupiah Digital} (Gambar~\ref{fig:ch3-ad-02}) dan pembacaan status oleh auditor (Gambar~\ref{fig:ch3-ad-06}) masing-masing memiliki tiga jalur. Transfer antarbank dengan mekanisme \textit{maker-checker} dibagi menjadi dua diagram agar setiap diagram tetap terbaca pada satu halaman. Gambar~\ref{fig:ch3-ad-03a} memuat transfer antarbank dengan tiga jalur, sedangkan Gambar~\ref{fig:ch3-ad-03b} memuat konversi ke float ritel dan pendanaan dompet dengan empat jalur. Transfer saldo ritel (Gambar~\ref{fig:ch3-ad-04}) dan pembekuan serta pembukaan pembatasan (Gambar~\ref{fig:ch3-ad-05}) masing-masing memiliki empat jalur. Alur studi kontrol yang merangkai onboarding, persetujuan, pendanaan, dan transfer ditunjukkan pada Gambar~\ref{fig:ch3-ad-07} dengan empat jalur.
+Setiap proses utama dimodelkan dengan \textit{activity diagram} UML 2 yang digambar menggunakan TikZ. Jumlah jalur (\textit{swimlane}) pada setiap diagram mengikuti aktor atau komponen yang terlibat, yaitu tiga hingga lima jalur. Pendaftaran peserta (Gambar~\ref{fig:ch3-ad-01}) melibatkan empat jalur, yaitu pengguna, sistem, distributor, dan KYC Reviewer. Penerbitan \textit{w-Rupiah Digital} (Gambar~\ref{fig:ch3-ad-02}) dan pembacaan status oleh auditor (Gambar~\ref{fig:ch3-ad-06}) masing-masing memiliki tiga jalur. Transfer antarbank dengan mekanisme \textit{maker-checker} dibagi menjadi dua diagram agar setiap diagram tetap terbaca pada satu halaman. Gambar~\ref{fig:ch3-ad-03a} memuat transfer antarbank dengan tiga jalur, sedangkan Gambar~\ref{fig:ch3-ad-03b} memuat konversi ke float ritel dan pendanaan dompet dengan empat jalur. Transfer saldo ritel (Gambar~\ref{fig:ch3-ad-04}) memiliki empat jalur, sedangkan pembekuan serta pembukaan pembatasan (Gambar~\ref{fig:ch3-ad-05}) memiliki tiga jalur. Siklus subjek yang sudah aktif, yaitu verifikasi, pembaruan data, penutupan hubungan usaha, dan pencabutan status risiko rendah (Gambar~\ref{fig:ch3-ad-08}), memiliki tiga jalur, demikian pula konsumen pemantauan pada \textit{backend} (Gambar~\ref{fig:ch3-ad-09}). Alur studi kontrol yang merangkai onboarding, persetujuan, pendanaan, dan transfer ditunjukkan pada Gambar~\ref{fig:ch3-ad-07} dengan empat jalur.
 
 \input{contents/figures/activity-diagrams}
 
-Setiap simpul keputusan (\textit{decision}) memiliki dua alur keluar dengan penjaga (\textit{guard}) berupa [ya] atau [tidak]. Simpul penggabung (\textit{merge}) menyatukan kembali alur yang sebelumnya bercabang. Empat keputusan berikut menentukan perilaku sistem. Pemeriksaan token dan peran pada gerbang akses menentukan apakah permintaan diteruskan ke \textit{handler}. Pada pendaftaran peserta, keputusan risiko tinggi atau PEP menentukan jalur persetujuan. Subjek dengan risiko standar disetujui oleh KYC Reviewer yang sama dengan peninjau, sedangkan subjek dengan risiko tinggi atau PEP hanya dapat diputuskan oleh Senior Approver yang berbeda dari peninjau. Pada transfer antarbank, jumlah transfer dibandingkan dengan ambang persetujuan pengirim. Transfer yang tidak melampaui ambang langsung dieksekusi, sedangkan transfer lainnya menunggu persetujuan checker yang identitasnya berbeda dari maker. Pada transfer saldo ritel, kelayakan subjek dan batas transaksi diperiksa lebih dahulu. Saldo pengirim, batas harian dan bulanan, serta batas saldo penerima juga harus terpenuhi sebelum debit dan kredit dilakukan.
+Setiap simpul keputusan (\textit{decision}) memiliki dua alur keluar dengan penjaga (\textit{guard}) berupa [ya] atau [tidak]. Simpul penggabung (\textit{merge}) menyatukan kembali alur yang sebelumnya bercabang. Keputusan berikut menentukan perilaku sistem. Pemeriksaan token dan peran pada gerbang akses menentukan apakah permintaan diteruskan ke \textit{handler}. Pada pendaftaran subjek, persetujuan hanya dapat dilakukan oleh KYC Reviewer yang sama dengan peninjau dan hanya setelah batas ditetapkan. Persetujuan mengaktifkan subjek apabila peninjau menyetujui, hasil DTTOT berupa tidak terdaftar, subjek ditandai berisiko rendah, dan Bank Indonesia telah menetapkan batas kepemilikan CDD. Subjek yang tidak memenuhi salah satu syarat itu berstatus ditolak dan status ini bersifat akhir. Subjek aktif berstatus belum terverifikasi sampai peninjau mencatat verifikasi. Pada transfer antarbank, jumlah transfer dibandingkan dengan ambang persetujuan pengirim. Transfer yang tidak melampaui ambang langsung dieksekusi, sedangkan transfer lainnya menunggu persetujuan checker yang identitasnya berbeda dari maker. Pada transfer saldo ritel, kelayakan subjek, yaitu berstatus aktif, tidak dibatasi, dan berisiko rendah, serta batas transaksi diperiksa lebih dahulu. Saldo pengirim, batas harian dan bulanan, serta batas saldo penerima, yang tidak boleh melampaui batas kepemilikan CDD menurut status verifikasinya, juga harus terpenuhi sebelum debit dan kredit dilakukan. Pada siklus subjek aktif, penutupan bersifat akhir, sehingga subjek yang ditutup tidak dapat diverifikasi, diperbarui, atau ditutup ulang, sedangkan pembaruan data selalu mengembalikan subjek menjadi belum terverifikasi. Pada konsumen pemantauan, aturan yang terpenuhi hanya menghasilkan peringatan dan tidak mengubah \textit{ledger} sebelum petugas kepatuhan mengonfirmasinya.
 
 \subsubsection{Perancangan Arsitektur Sistem Blockchain}
 
@@ -118,19 +123,17 @@ Arsitektur pada subbab ini menjelaskan jaringan studi empat organisasi yang
 digunakan untuk pengukuran kinerja dan pengujian kontrol, yaitu
 \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
 \texttt{EndUserMSP}. Rincian lingkungan studi kontrol dijelaskan pada bagian
-eksperimen kontrol di bawah.
+eksperimen kontrol di bawah. Setiap organisasi menjalankan satu \textit{peer}, dan keempat organisasi tersebut memisahkan peran bank sentral, \textit{distributor}, auditor, dan pengguna akhir pada model dua jenjang.
 
 Secara konseptual, sistem menggunakan model dua jenjang Rupiah Digital
 sebagaimana ditunjukkan pada Gambar~\ref{fig:arsitektur-dua-jenjang}.
 Jenjang institusional menerbitkan \textit{w-Rupiah Digital} langsung dari Bank
-Indonesia selaku penerbit (\texttt{CentralBankMSP}) ke cadangan bank distributor
-(\texttt{DistributorMSP}) melalui jaringan Hyperledger Fabric. Bank \textit{wholesale}
-menerima penerbitan serta melakukan transfer antarbank dan penebusan, sedangkan bank
-\textit{retail} juga melakukan konversi dan pendanaan dompet. Jenjang layanan ritel
-menyediakan pembayaran melalui bank \textit{retail} sebagai kustodian kepada
-pengguna ritel, pedagang, dan pengguna bisnis (\texttt{EndUserMSP}), termasuk
-transfer antarpelanggan,
-transfer pelanggan-ke-pedagang, dan kontrol akses berbasis peran. Instrumen
+Indonesia selaku penerbit (\texttt{CentralBankMSP}) ke cadangan \textit{distributor}
+(\texttt{DistributorMSP}) melalui jaringan Hyperledger Fabric. \textit{Distributor}
+menerima penerbitan serta melakukan penebusan, konversi, dan pendanaan dompet. Jenjang layanan ritel
+menyediakan pembayaran melalui \textit{distributor} sebagai kustodian kepada
+pelanggan ritel perorangan (\texttt{EndUserMSP}), termasuk
+transfer antarpelanggan dan kontrol akses berbasis peran. Instrumen
 \textit{w-Rupiah Digital} dikelola pada chaincode \texttt{rupiah-monetary}, sedangkan
 \textit{r-Rupiah Digital} dikelola pada chaincode \texttt{rupiah-payments}.
 
@@ -151,7 +154,7 @@ Rupiah Digital.
 \begin{figure}[H]
     \centering
     \rotatebox{90}{\includegraphics[width=0.78\textheight]{contents/figures/reference/bi-whitepaper-technology-architecture.png}}
-    \caption{Arsitektur teknologi Rupiah Digital menurut White Paper CBDC Bank Indonesia. Sumber: Bank Indonesia \cite{bi_whitepaper2022}.}
+    \caption[Arsitektur teknologi Rupiah Digital menurut White Paper CBDC Bank Indonesia.]{Arsitektur teknologi Rupiah Digital menurut White Paper CBDC Bank Indonesia (Sumber: Bank Indonesia \cite{bi_whitepaper2022}).}
     \label{fig:bi-whitepaper-technology-architecture}
 \end{figure}
 
@@ -169,7 +172,7 @@ Fabric berdasarkan MSP kustodian pada konteks permintaan. Untuk pengguna ritel,
 backend juga mencocokkan subjek JWT dengan \texttt{owner\_id} dompet pengirim.
 Chaincode memvalidasi MSP pemanggil dan MSP kustodian dompet: mutasi moneter,
 dan siklus hidup peserta hanya menerima MSP yang diizinkan, sedangkan
-MSP Observer (MSP ID: \texttt{ValidatorMSP}) tidak dapat memutasi buku besar. Kepemilikan nasabah tetap menjadi
+MSP Observer (MSP ID: \texttt{ValidatorMSP}) tidak dapat memutasi \textit{ledger}. Kepemilikan nasabah tetap menjadi
 batas kepercayaan backend karena identitas pemilik tidak digantikan oleh
 identitas klien Fabric pada chaincode.
 
@@ -192,7 +195,7 @@ Jaringan studi \textit{blockchain} dirancang dengan empat organisasi, yaitu
 \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
 \texttt{EndUserMSP}. Setiap organisasi memiliki satu \textit{peer} dan satu basis
 data status CouchDB. Keempat organisasi tersebut merepresentasikan peran Bank
-Indonesia, bank distributor, Observer, serta pengguna akhir pada model dua jenjang.
+Indonesia, \textit{distributor}, \textit{observer}, serta pengguna akhir pada model dua jenjang.
 \textit{Orderer} Raft dengan satu node (\texttt{orderer.centralbank.bi-coin})
 diselenggarakan oleh \texttt{CentralBankMSP},
 dengan batas waktu pemotongan blok dua detik dan maksimum sepuluh
@@ -210,10 +213,10 @@ Tabel~\ref{tab:jaringan}.
 	\toprule
 	\textbf{Organisasi} & \textbf{Peran} & \textbf{Peran pada jaringan} & \textbf{MSP} \\
 	\midrule
-	Bank Indonesia & Penerbit dan pengawas & Penerbitan \textit{w-Rupiah Digital} langsung ke cadangan bank distributor; pendaftaran bank distributor; menyelenggarakan \textit{orderer} dan CA sendiri & \texttt{CentralBankMSP} \\
-	Bank distributor (\textit{wholesale} dan \textit{retail}) & Distributor & Penerima penerbitan dari Bank Indonesia; bank \textit{retail} sebagai kustodian; wajib dalam kebijakan \textit{endorsement} default ketiga \textit{chaincode} & \texttt{DistributorMSP} \\
+	Bank Indonesia & Penerbit dan pengawas & Penerbitan \textit{w-Rupiah Digital} langsung ke cadangan \textit{distributor}; pendaftaran \textit{distributor}; menetapkan batas kepemilikan CDD; menyelenggarakan \textit{orderer} dan CA sendiri & \texttt{CentralBankMSP} \\
+	PJSP, bank atau nonbank (satu \textit{distributor} nonbank pada purwarupa) & \textit{Distributor} & Penerima penerbitan dari Bank Indonesia; kustodian dompet; menjalankan CDD sederhana melalui peran peninjau KYC dan petugas kepatuhan; wajib dalam kebijakan \textit{endorsement} default ketiga \textit{chaincode} & \texttt{DistributorMSP} \\
 	OJK dan PPATK melalui peran Auditor & \textit{Observer} & Akses baca untuk audit dan pengawasan; tidak termasuk dalam kebijakan \textit{endorsement} semua \textit{chaincode}, tetapi ikut menyetujui siklus hidup \textit{chaincode} & \texttt{ValidatorMSP} \\
-	Pedagang, pelanggan ritel, dan pengguna bisnis & Pengguna & Pelaku transaksi ritel; ikut memberikan \textit{endorsement} pada pembayaran bersama \texttt{DistributorMSP} & \texttt{EndUserMSP} \\
+	Pelanggan ritel perorangan & Pengguna & Pelaku transaksi ritel; ikut memberikan \textit{endorsement} pada pembayaran bersama \texttt{DistributorMSP} & \texttt{EndUserMSP} \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -234,8 +237,8 @@ organisasi, serta \textit{backend API} yang terhubung ke jaringan melalui
 \input{contents/figures/network-architecture}
 
 Kebutuhan fungsional sistem dimodelkan dengan diagram use case. Aktor sistem
-terdiri atas Bank Indonesia, bank distributor, pedagang (\textit{merchant}),
-pelanggan ritel, serta pengamat OJK dan PPATK melalui peran Auditor. Diagram use case keseluruhan
+terdiri atas Bank Indonesia, \textit{distributor},
+pelanggan ritel perorangan, serta pengamat OJK dan PPATK melalui peran auditor. Diagram use case keseluruhan
 ditunjukkan pada Gambar~\ref{fig:uc01}, sedangkan rincian operasi
 institusional dan ritel ditunjukkan pada Gambar~\ref{fig:uc02} dan
 Gambar~\ref{fig:uc03}.
@@ -245,7 +248,7 @@ Gambar~\ref{fig:uc03}.
 Pemetaan aktor pada diagram tersebut mengikuti kendali peran pada lapisan
 \textit{backend}. Pendaftaran peserta dapat diajukan oleh institusi, sedangkan
 persetujuan, penolakan, dan \textit{offboarding} peserta hanya dapat
-dilakukan oleh Bank Indonesia. Pembatasan subjek dilakukan oleh \textit{compliance officer} distributor, permintaan pembukaan pembatasan diajukan oleh \textit{KYC reviewer}, dan persetujuan pembukaan pembatasan dilakukan oleh \textit{senior approver}. Peran Auditor untuk pengamat OJK dan PPATK hanya memperoleh
+dilakukan oleh Bank Indonesia. Bank Indonesia menetapkan batas kepemilikan CDD. \textit{KYC reviewer} pada \textit{distributor} menetapkan batas subjek, mencatat hasil DTTOT dan status risiko rendah, menyetujui, memverifikasi, memperbarui, dan menutup subjek. Pembatasan subjek dilakukan oleh \textit{compliance officer} \textit{distributor}, permintaan pembukaan pembatasan diajukan oleh \textit{KYC reviewer}, dan persetujuan pembukaan pembatasan dilakukan oleh \textit{compliance officer}. \textit{Compliance officer} juga mencabut status risiko rendah setelah mengonfirmasi peringatan pemantauan. Peran auditor untuk pengamat OJK dan PPATK hanya memperoleh
 jalur baca pengawasan. Status persetujuan peserta menjadi bagian dari siklus
 hidup peserta, bukan bukti alur persetujuan terpisah.
 
@@ -268,21 +271,84 @@ operasi \textit{chaincode}.
 	\endhead
 	\bottomrule
 	\endlastfoot
-	\texttt{Participant}       & Entitas peserta (Distributor Bank/Observer), MSP kustodian,
+	\texttt{Participant}       & Entitas peserta (\textit{distributor} atau \textit{observer}), MSP kustodian,
 	dan BIC opsional beserta status siklus hidup                                           \\
+\texttt{Subject}           & Subjek pelanggan pseudonim pada \textit{private data collection}, dengan status (\texttt{pending}, \texttt{active}, \texttt{rejected}, atau \texttt{closed}), hasil DTTOT, penanda dan alasan risiko rendah, status verifikasi, batas subjek, dan referensi dokumen \\
+\texttt{CddCeilings}       & Dua batas kepemilikan CDD pada \textit{state} publik, tanpa data pribadi \\
 \texttt{Wallet}            & Dompet dengan pemilik, peserta dan MSP kustodian, saldo, dan status pembatasan \\
 \texttt{Transaction\allowbreak Record} & Catatan transaksi untuk audit dan pelaporan  \\
 \end{longtable}
 \endgroup
 
+\subsubsection{Perancangan Keputusan CDD Sederhana}
+
+Perancangan ini menjawab rumusan masalah pertama dengan satu pembagian tugas. \textit{Ledger} menegakkan keputusan CDD, yaitu siapa yang boleh bertransaksi, hingga batas berapa, dan sampai kapan. Pengumpulan bukti tetap dikerjakan peninjau secara manual di luar \textit{ledger}, yaitu pembandingan dokumen identitas dan pencocokan DTTOT. Pembagian ini mengikuti sifat penelitian, yang menguji penegakan dan tidak mengimplementasikan deteksi AML/CFT. Hasil kerja peninjau masuk sebagai masukan transaksi, dan \textit{chaincode} hanya memeriksa apakah masukan itu memenuhi syarat keputusan. Tingkat CDD yang dimodelkan adalah CDD sederhana bagi pelanggan ritel perorangan, karena dompet dengan batas kepemilikan tetap memenuhi ciri produk berisiko rendah pada pedoman (Bab~II).
+
+Tabel~\ref{tab:ch3-cdd-transaksi} merangkum transaksi pada \texttt{rupiah-controls} yang membentuk siklus subjek, beserta pemanggil dan efeknya.
+
+\begin{table}[H]
+    \caption{Transaksi siklus subjek CDD sederhana pada \texttt{rupiah-controls}}
+    \label{tab:ch3-cdd-transaksi}
+    \centering
+    \small
+    \begin{tabular}{@{}p{3.5cm}p{2.5cm}p{7.2cm}@{}}
+        \toprule
+        \textbf{Transaksi} & \textbf{Pemanggil} & \textbf{Efek pada \textit{ledger}} \\
+        \midrule
+        \texttt{CreatePending} & Pengguna & Subjek berstatus \texttt{pending}. Kategori hanya \texttt{retail}. \\
+        \texttt{ProtectSubject} & \textit{Distributor} & Memasang kebijakan \textit{endorsement} pada kunci subjek. \\
+        \texttt{RecordReview} & \textit{KYC reviewer} & Mencatat hasil DTTOT (\texttt{not\_listed} atau \texttt{listed}), penanda risiko rendah, dan alasannya. \\
+        \texttt{SetLimits} & \textit{KYC reviewer} & Menetapkan batas per transaksi, harian, bulanan, dan kepemilikan. Batas kepemilikan tidak melebihi batas CDD terverifikasi. \\
+        \texttt{ApproveSubject} & \textit{KYC reviewer} & Subjek menjadi \texttt{active} hanya jika semua syarat gerbang terpenuhi. Selain itu subjek menjadi \texttt{rejected}, status akhir. \\
+        \texttt{VerifySubject} & \textit{KYC reviewer} & Mencatat referensi bukti dan menandai subjek aktif sebagai terverifikasi. \\
+        \texttt{UpdateSubject} & \textit{KYC reviewer} & Mengganti referensi dokumen dan hasil DTTOT, lalu mengembalikan subjek menjadi belum terverifikasi. Hasil \texttt{listed} membatasi subjek dengan alasan \texttt{dttot}. \\
+        \texttt{CloseSubject} & \textit{KYC reviewer} & Menutup hubungan usaha dengan alasan \texttt{data\_\allowbreak missing}, \texttt{fictitious}, \texttt{identity\_\allowbreak doubtful}, atau \texttt{customer\_\allowbreak request}. Status \texttt{closed} bersifat akhir dan dana tetap tertahan. \\
+        \texttt{RevokeLowRisk} & \textit{Compliance officer} & Mencabut penanda risiko rendah. Subjek tetap \texttt{active} tetapi tidak dapat membayar atau menerima. \\
+        \texttt{SetCddCeilings} & Bank Indonesia & Menetapkan dua batas kepemilikan CDD pada \textit{state} publik. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Gerbang persetujuan pada \texttt{ApproveSubject} mensyaratkan lima hal secara bersamaan, yaitu persetujuan peninjau, hasil DTTOT \texttt{not\_listed}, penanda risiko rendah, batas subjek yang telah ditetapkan, dan batas CDD yang telah ditetapkan Bank Indonesia. Jika salah satunya tidak terpenuhi, subjek berstatus \texttt{rejected}. Kelayakan untuk membayar atau menerima adalah status \texttt{active}, tidak dibatasi, dan berisiko rendah. Satu aturan kelayakan dipakai oleh \texttt{CanPay}, \texttt{GetLimits}, dan \texttt{CheckPayee}, sehingga subjek yang ditolak, ditutup, dibatasi, atau dicabut status risiko rendahnya tidak dapat bertransaksi, dan setiap \textit{peer} yang memberikan \textit{endorsement} menjalankan pemeriksaan penerima yang sama.
+
+Batas kepemilikan efektif subjek adalah $\min(H_{s}, C_{v})$, dengan $H_{s}$ batas kepemilikan yang ditetapkan peninjau dan $C_{v}$ batas CDD menurut status verifikasi. Nilai $C_{v}$ ialah Rp2.000.000 bagi subjek yang belum terverifikasi dan Rp20.000.000 bagi subjek yang sudah terverifikasi. Kedua nilai itu dipilih karena Pasal 19 ayat (1) PADG 32/2025 memuat nilai yang sama untuk uang elektronik \textit{unregistered} dan \textit{registered} \cite{bi2025padg32}, dan pemetaan belum terverifikasi ke \textit{unregistered} serta terverifikasi ke \textit{registered} adalah pilihan rancangan. Rupiah Digital bukan uang elektronik, sehingga nilai itu hanya parameter, dan Bank Indonesia dapat mengubahnya melalui \texttt{SetCddCeilings} tanpa mengubah \textit{chaincode}. Rancangan ini memetakan kewajiban pedoman ke representasi pada purwarupa sebagaimana dirangkum pada Tabel~\ref{tab:ch3-cdd-kewajiban}.
+
+\begin{table}[H]
+    \caption[Pemetaan kewajiban pedoman CDD ke representasi pada purwarupa.]{Pemetaan kewajiban pedoman CDD ke representasi pada purwarupa (Sumber: penulis, berdasarkan \cite{bi2023pedoman}).}
+    \label{tab:ch3-cdd-kewajiban}
+    \centering
+    \small
+    \begin{tabular}{@{}p{4.9cm}p{1.3cm}p{6.9cm}@{}}
+        \toprule
+        \textbf{Kewajiban pedoman} & \textbf{Hlm.} & \textbf{Representasi pada purwarupa} \\
+        \midrule
+        Verifikasi setelah hubungan usaha dibuka dan saat saldo mencapai batas & 38 & \texttt{VerifySubject}, batas CDD belum terverifikasi, dan aturan R1 \\
+        Produk dengan saldo atau batas terbatas termasuk berisiko rendah & 57 & Penanda risiko rendah dan dua batas CDD \\
+        Daftar pengguna CDD sederhana beserta alasannya & 38 & Daftar yang dapat dibaca Bank Indonesia dan auditor, berisi alasan risiko rendah dan waktu persetujuan \\
+        Kecocokan DTTOT mewajibkan pemblokiran dan LTKM & 31 & Subjek terdaftar saat pendaftaran ditolak. Subjek aktif yang kemudian terdaftar dibatasi dengan alasan \texttt{dttot} \\
+        Dugaan pencucian uang meniadakan CDD sederhana dan memerlukan LTKM & 31, 38 & Konfirmasi peringatan, draf LTKM, dan \texttt{RevokeLowRisk} \\
+        Data tidak dipenuhi, identitas fiktif atau diragukan mewajibkan penutupan dan pemberitahuan tertulis & 40 & \texttt{CloseSubject} dan baris \texttt{customer\_notices} \\
+        Larangan \textit{anti tipping-off} & 40, 53 & Konfirmasi peringatan dan pencabutan status risiko rendah tidak menulis pemberitahuan kepada pelanggan \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Pemantauan dijalankan di luar \textit{chaincode} oleh konsumen peristiwa pada \textit{backend}. Konsumen ini mendengarkan peristiwa \texttt{TransferReceived} dari \texttt{rupiah-payments} melalui \textit{Fabric Gateway}, dengan muatan berisi referensi, pengirim, penerima, jumlah, dan jenis. Tiga aturan berupa fungsi murni dengan ambang yang dibaca dari konfigurasi \textit{backend}. Aturan R1 menaikkan peringatan verifikasi ketika saldo subjek belum terverifikasi mencapai 80 persen batas belum terverifikasi. Aturan R2 menaikkan peringatan kecepatan ketika jumlah transfer yang dikirim subjek melebihi N dalam 24 jam. Aturan R3 menaikkan peringatan pemecahan transaksi (\textit{structuring}) ketika sedikitnya tiga transfer dalam 24 jam berada pada rentang 10 persen di bawah batas per transaksi. Peringatan disimpan pada \texttt{monitoring\_alerts} dan tidak mengubah \textit{ledger}. Apabila petugas kepatuhan mengonfirmasi dugaan, \textit{backend} menulis draf LTKM dan memanggil \texttt{RevokeLowRisk}, sehingga subjek keluar dari CDD sederhana sebagaimana disyaratkan pedoman \cite[hlm.~38]{bi2023pedoman}, tanpa pemberitahuan kepada pelanggan \cite[hlm.~53]{bi2023pedoman}.
+
+Dapat dikemukakan bahwa batas Rp2.000.000 tidak memaksa verifikasi, karena subjek yang belum terverifikasi dapat tetap berada di bawah batas tanpa tenggat. Keberatan ini benar. Pedoman mewajibkan verifikasi ketika saldo atau jumlah transaksi mencapai batas tertentu \cite[hlm.~38]{bi2023pedoman}, dan purwarupa menegakkan batas itu sebagai plafon, bukan sebagai tenggat. Aturan R1 hanya menaikkan peringatan agar peninjau memverifikasi. Rancangan ini juga memiliki tiga keterbatasan pada pemantauan dan keterbacaan data. Pertama, R1 membangun ulang saldo dari transfer yang diamati dan pendanaan yang dicatat \textit{backend}, sehingga dompet yang didanai di luar \textit{backend} tidak terhitung. Kedua, tanpa titik pemeriksaan, aliran peristiwa dimulai pada blok berikutnya, sehingga transfer yang dikomit saat \textit{backend} mati tidak teramati pada pemakaian pertama. Ketiga, \texttt{GetSubject} mengembalikan penanda risiko rendah kepada MSP anggota dan kepada pemohon, sehingga pelanggan dapat membaca pencabutan statusnya dan larangan \textit{anti tipping-off} tidak sepenuhnya terpenuhi.
+
 \subsubsection{Perancangan Basis Data Luring}
 
 Selain status \textit{on-chain} pada \textit{world state} yang dirangkum pada
 Tabel~\ref{tab:model-data}, sistem memakai PostgreSQL untuk menyimpan kredensial
-autentikasi portal dan jejak audit yang bersifat \textit{append-only}. Data
-identitas mentah tidak ditempatkan pada \textit{ledger}.
+autentikasi portal, profil KYC, jejak audit yang bersifat \textit{append-only},
+serta data pemantauan. Nama, nomor dokumen, alamat, serta tempat dan tanggal lahir
+tidak ditempatkan pada \textit{ledger}, dan \textit{ledger} hanya memuat referensi
+dokumen berupa \textit{hash}.
 
-Gambar~\ref{fig:ch3-erd-offchain} memperlihatkan delapan tabel PostgreSQL beserta kunci primernya. Dua relasi, yaitu dari \texttt{payment\_contacts} ke \texttt{auth\_users} dan dari \texttt{kyc\_provider\_checks} ke \texttt{kyc\_profiles}, dinyatakan sebagai kendala kunci asing dengan \texttt{ON DELETE CASCADE}. Kolom yang merujuk ke ledger tidak memiliki kendala kunci asing karena ledger berada di luar PostgreSQL.
+Gambar~\ref{fig:ch3-erd-offchain} memperlihatkan lima tabel PostgreSQL untuk identitas dan profil KYC beserta kunci primernya. Relasi dari \texttt{payment\_contacts} ke \texttt{auth\_users} dinyatakan sebagai kendala kunci asing dengan \texttt{ON DELETE CASCADE}, sedangkan \texttt{kyc\_audit\_events} merujuk ke \texttt{kyc\_profiles} tanpa kendala. Tabel \texttt{kyc\_profiles} bertambah kolom untuk CDD sederhana, yaitu alamat serta tempat dan tanggal lahir yang dikumpulkan saat pendaftaran, hasil DTTOT, alasan risiko rendah, serta waktu persetujuan, verifikasi, dan penutupan. Kolom \texttt{status} mengikuti status subjek pada \textit{ledger}, yaitu \texttt{pending}, \texttt{rejected}, \texttt{active}, atau \texttt{closed}, tetapi PostgreSQL tidak pernah menjadi dasar otorisasi suatu efek pada \textit{ledger}. Kolom yang merujuk ke \textit{ledger} tidak memiliki kendala kunci asing karena \textit{ledger} berada di luar PostgreSQL.
+
+Gambar~\ref{fig:ch3-erd-monitoring} memperlihatkan lima tabel untuk pemantauan dan pemberitahuan. Tabel \texttt{ltkm\_drafts} merujuk ke \texttt{monitoring\_alerts} melalui kunci asing, dan draf LTKM tidak dikirim kepada PPATK. Tabel \texttt{customer\_notices} hanya memuat pemberitahuan tertulis penutupan hubungan usaha, karena konfirmasi peringatan dan pencabutan status risiko rendah tidak boleh diberitahukan kepada pelanggan.
 
 \input{contents/figures/erd-offchain}
 
@@ -327,7 +393,7 @@ LevelDB yang hanya mendukung kueri berbasis kunci. Perbandingan kedua pilihan
 tersebut dirangkum pada Tabel~\ref{tab:state-database}.
 
 \begin{table}[H]
-    \caption{Perbandingan basis data status Hyperledger Fabric berdasarkan dokumentasi resmi \cite{hyperledger_fabric_couchdb}.}
+    \caption[Perbandingan basis data status Hyperledger Fabric berdasarkan dokumentasi resmi.]{Perbandingan basis data status Hyperledger Fabric berdasarkan dokumentasi resmi \cite{hyperledger_fabric_couchdb}.}
     \label{tab:state-database}
     \centering
     \small
@@ -403,7 +469,7 @@ PostgreSQL dipilih berdasarkan pertimbangan teknis berikut:
 Pola pemisahan on-chain/off-chain yang diadopsi penelitian ini menempatkan
 kredensial autentikasi dan jejak audit di luar \textit{ledger}, sementara status
 dompet dan transaksi tetap dibukukan pada jaringan Fabric. Pemisahan tersebut
-membatasi data operasional yang disimpan pada buku besar bersama tanpa
+membatasi data operasional yang disimpan pada \textit{ledger} bersama tanpa
 menghilangkan keterlacakan transaksi.
 
 \begin{table}[H]
@@ -453,7 +519,7 @@ Pengujian kinerja mengukur TBD metode kontrak publik dengan Hyperledger Caliper
 dan konektor Fabric. Metode \texttt{Initialize} dan
 \texttt{DebitReserveForConversion} hanya diperiksa secara fungsional karena
 \texttt{DebitReserveForConversion} dipanggil secara internal oleh konversi. Metode
-\texttt{Transfer} diuji dengan variasi penerima ritel dan pedagang sehingga
+\texttt{Transfer} diuji untuk penerima ritel sehingga
 terdapat TBD beban kerja kinerja. Operasi baca dilaporkan sebagai operasi
 terverifikasi per detik, sedangkan transaksi tulis dilaporkan sebagai TPS
 terverifikasi. Semua panggilan kinerja diarahkan langsung ke \textit{chaincode};
@@ -461,8 +527,8 @@ latensi pemrosesan API, PostgreSQL, dan KYC tidak digabungkan ke hasil Fabric.
 
 Seluruh pengujian kinerja memakai satu \textit{worker} lokal. Inisialisasi ronde
 Caliper menyiapkan koneksi; tidak ada ronde pemanasan bertimer. Matriks API
-merupakan pemeriksaan kebenaran yang terpisah: 296 sel peran-rute untuk
-otorisasi, 28 kasus validasi permintaan JSON, dan 45 pemeriksaan hasil aksi.
+merupakan pemeriksaan kebenaran yang terpisah dengan cakupan TBD sel peran-rute untuk
+otorisasi, TBD kasus validasi permintaan JSON, dan TBD pemeriksaan hasil aksi.
 
 Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port pada host luar, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan throughput terverifikasi terhadap durasi ditambah drain mencapai 90 persen laju terkirim, setara dengan drain paling lama sepersembilan durasi probe. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sembilan hingga sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
 
@@ -489,7 +555,7 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 \begingroup
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[H]
-	\caption{Cakupan 30 skenario fungsional dan assertion yang dijalankan}
+	\caption{Cakupan 29 skenario fungsional dan assertion yang dijalankan}
 	\label{tab:uji-fungsional}
 	\centering
 	\footnotesize
@@ -498,10 +564,10 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 	\toprule
 	\textbf{Kelompok skenario} & \textbf{Skenario katalog dan hasil yang diperiksa} \\
 	\midrule
-	KYC, peserta, dan kewenangan & \texttt{participant-admission-evidence}, \allowbreak\texttt{kyc-risk-pep}, \allowbreak\texttt{staff-separation}, \allowbreak\texttt{business-authority}, \allowbreak\texttt{restriction-reasons}, \allowbreak\texttt{fresh-release-evidence}, \allowbreak\texttt{participant-status-matrix}, dan \texttt{participant-closure}; pendaftaran peserta tanpa bukti, keputusan KYC untuk subjek berisiko tinggi dan PEP, pemisahan peninjau, pejabat senior, dan petugas kepatuhan, pergantian perwakilan badan usaha, alasan pembatasan, pelepasan dengan bukti baru, status peserta, serta penutupan peserta diperiksa terhadap keadaan ledger. \\
-	Persetujuan, transfer, dan batas & \texttt{approval-threshold-dual-control}, \allowbreak\texttt{four-eyes-transfer}, \allowbreak\texttt{transfer-limit}, \allowbreak\texttt{insufficient-reserve}, \allowbreak\texttt{cross-bank-debit-denied}, \allowbreak\texttt{transfer-replay-conflict}, \allowbreak\texttt{authorization-endorsement}, \allowbreak\texttt{transfer-category-matrix}, dan \texttt{transaction-limits}; persetujuan ganda di atas ambang batas, transfer empat mata, batas transfer dan kepemilikan, cadangan yang tidak cukup, debit lintas bank, replay dan konflik payload, endorsement, serta kategori pengirim dan penerima diperiksa terhadap keadaan ledger. \\
-	Konversi, dana, dan penebusan & \texttt{wholesale-conversion-denied}, \allowbreak\texttt{conversion-replay-conflict}, \allowbreak\texttt{conversion-insufficient-reserve}, \allowbreak\texttt{insufficient-float},\newline\texttt{wallet-funding-holdings-limit}, \allowbreak\texttt{conversion-failure-atomicity}, \allowbreak\texttt{redemption-replay-conflict}, dan \texttt{redemption-conservation}; konversi wholesale yang tidak diizinkan, replay dan konflik pada konversi serta penebusan, cadangan atau float yang tidak cukup, batas kepemilikan dompet, atomisitas saat gagal, dan konservasi nilai penebusan diperiksa. \\
-	Akses baca, inisialisasi, dan API & \texttt{msp-read-authorization}, \allowbreak\texttt{initialization-and-nested-debit}, \allowbreak\texttt{api-route-authorization-matrix}, \allowbreak\texttt{api-request-validation-matrix}, dan \texttt{api-route-action-outcomes}; otorisasi baca lintas MSP, inisialisasi ulang, dan debit bersarang diperiksa, bersama 296 sel peran-rute, 28 kasus validasi permintaan, dan 45 hasil aksi rute API. \\
+	KYC, kewenangan, dan keputusan CDD & \texttt{staff-separation}, \allowbreak\texttt{restriction-reasons}, \allowbreak\texttt{fresh-release-evidence}, \allowbreak\texttt{cdd-listed-rejected}, \allowbreak\texttt{cdd-not-low-risk-rejected}, \allowbreak\texttt{cdd-unverified-ceiling}, \allowbreak\texttt{cdd-verify-raises-ceiling}, \allowbreak\texttt{cdd-update-resets-verification}, \allowbreak\texttt{cdd-close-terminal}, dan \texttt{cdd-revoke-low-risk}. Skenario ini memeriksa pemisahan peninjau dan petugas kepatuhan, alasan pembatasan, pelepasan dengan bukti baru, penolakan subjek yang terdaftar DTTOT atau tidak berisiko rendah, batas kepemilikan belum terverifikasi dan terverifikasi, pengembalian ke belum terverifikasi setelah pembaruan, penutupan sebagai status akhir, serta pencabutan status risiko rendah terhadap keadaan ledger. \\
+	Transfer, batas, dan otorisasi & \texttt{authorization-endorsement}, \allowbreak\texttt{transaction-limits}, \allowbreak\texttt{transfer-category-matrix}, dan \texttt{transfer-replay-conflict}. Skenario ini memeriksa batas \textit{endorsement}, batas transfer dan kepemilikan, pasangan pengirim dan penerima ritel, serta replay dan konflik payload terhadap keadaan ledger. \\
+	Konversi, dana, dan penebusan & \texttt{conversion-replay-conflict}, \allowbreak\texttt{conversion-insufficient-reserve}, \allowbreak\texttt{insufficient-float},\newline\texttt{wallet-funding-holdings-limit}, \allowbreak\texttt{conversion-failure-atomicity}, \allowbreak\texttt{redemption-replay-conflict}, dan \texttt{redemption-conservation}. Skenario ini memeriksa replay dan konflik pada konversi serta penebusan, cadangan atau float yang tidak cukup, batas kepemilikan dompet, atomisitas saat gagal, dan konservasi nilai penebusan. \\
+	Akses baca, inisialisasi, dan API & \texttt{msp-read-authorization}, \allowbreak\texttt{initialization-and-nested-debit}, \allowbreak\texttt{receipt-read-authorization}, \allowbreak\texttt{enduser-get-subject-denied}, \allowbreak\texttt{enduser-limits-other-subject-denied}, \allowbreak\texttt{api-route-authorization-matrix}, \allowbreak\texttt{api-request-validation-matrix}, dan \texttt{api-route-action-outcomes}. Skenario ini memeriksa otorisasi baca lintas MSP, inisialisasi ulang, debit bersarang, akses kuitansi, serta penolakan pembacaan subjek dan batas subjek lain bagi identitas pengguna akhir, bersama sel peran-rute, kasus validasi permintaan, dan hasil aksi rute API. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -593,8 +659,8 @@ rekayasa, bukan estimasi distribusi pengguna nasional.
 Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
 Digital ritel secara struktural. Setiap fungsi diuji secara terisolasi agar
 throughput, latensi, dan alasan kegagalan dapat diatribusikan pada fungsi yang
-diukur. Transfer antarpelanggan, pembayaran pelanggan--pedagang, penerbitan, transfer antarbank, konversi, pendanaan dompet, penebusan, kueri saldo, serta perubahan status dompet dipisahkan;
-transfer ritel juga memiliki profil kontensi rendah dan kontensi tinggi. Pola
+diukur. Transfer antarpelanggan, penerbitan, transfer antarbank, konversi, pendanaan dompet, penebusan, kueri saldo, serta perubahan status dompet dipisahkan,
+dan transfer ritel juga memiliki profil kontensi rendah dan kontensi tinggi. Pola
 ini dipilih karena CBDC ritel mencakup transaksi pengguna, distribusi, dan
 pengawasan, bukan hanya setelmen antarlembaga. Literatur teknologi CBDC ritel
 menempatkan desain dompet, privasi, dan arsitektur distribusi sebagai elemen
@@ -602,7 +668,7 @@ inti sistem pembayaran publik \cite{Auer2020The}. Oleh karena itu, beban kerja
 yang hanya menguji transfer institusional tidak memadai untuk menjawab rumusan
 masalah purwarupa Rupiah Digital ritel.
 
-Model dua jenjang penerbitan (BI\,→\,bank distributor\,→\,pelanggan ritel) sesuai
+Model dua jenjang penerbitan (BI\,→\,\textit{distributor}\,→\,pelanggan ritel) sesuai
 dengan rancangan Rupiah Digital yang ditetapkan dalam dokumen konsultatif Bank
 Indonesia \cite{bi_consultative, bi_garuda_poc}. Logika bisnis yang diuji bukan
 beban sintetik yang terlepas dari sistem, melainkan \textit{chaincode} aktual
@@ -673,7 +739,7 @@ dukungan, lalu di-\textit{commit} ke kanal.
 
 \subsubsection{Deploy Chaincode}
 
-Logika bisnis Rupiah Digital ditulis dalam bahasa Go menggunakan \textit{Fabric Contract API} v2 dan dikemas dalam tiga \textit{chaincode} dengan domain tersendiri: \texttt{rupiah-monetary} untuk suplai dan cadangan \textit{w-Rupiah Digital}; \texttt{rupiah-controls} untuk subjek, keputusan KYC, risiko, peran staf, dan batas; serta \texttt{rupiah-payments} untuk float ritel, dompet, dan pembayaran \textit{r-Rupiah Digital}. Tabel~\ref{tab:ch3-chaincode-fungsi} merangkum fungsi publik masing-masing \textit{chaincode}. Aturan pemanggil dan batas nilai pada tiap fungsi diuraikan pada Bab~4.
+Logika bisnis Rupiah Digital ditulis dalam bahasa Go menggunakan \textit{Fabric Contract API} v2 dan dikemas dalam tiga \textit{chaincode} dengan domain tersendiri: \texttt{rupiah-monetary} untuk suplai dan cadangan \textit{w-Rupiah Digital}, \texttt{rupiah-controls} untuk subjek, keputusan CDD, peran staf, dan batas, serta \texttt{rupiah-payments} untuk float ritel, dompet, dan pembayaran \textit{r-Rupiah Digital}. Tabel~\ref{tab:ch3-chaincode-fungsi} merangkum fungsi publik masing-masing \textit{chaincode}.
 
 \begin{table}[H]
     \caption{Fungsi publik pada tiga \textit{chaincode} purwarupa}
@@ -684,8 +750,8 @@ Logika bisnis Rupiah Digital ditulis dalam bahasa Go menggunakan \textit{Fabric 
         \toprule
         \textbf{\textit{Chaincode}} & \textbf{Fungsi publik} \\
         \midrule
-        \texttt{rupiah-monetary} & \texttt{Initialize}, \texttt{RegisterDistributor}, \texttt{Issue}, \texttt{RedeemReserve}, \texttt{TransferReserve}, \texttt{DebitReserveForConversion}, \texttt{GetWholesaleSupply}, \texttt{GetRetailSupply}, \texttt{GetTotalSupply}, \texttt{GetReserve} \\
-        \texttt{rupiah-controls} & \texttt{GetCallerIdentity}, \texttt{CreatePending}, \texttt{ProtectSubject}, \texttt{CreateStaffPending}, \texttt{ProtectStaff}, \texttt{SetStaffRole}, \texttt{RecordReview}, \texttt{ApproveStandard}, \texttt{DecideHighRisk}, \texttt{SetLimits}, \texttt{SetBusinessAuthority}, \texttt{FreezeSubject}, \texttt{RequestUnfreeze}, \texttt{ApproveUnfreeze}, \texttt{CanPay}, \texttt{GetLimits}, \texttt{CanActFor}, \texttt{GetSubject} \\
+        \texttt{rupiah-monetary} & \texttt{Initialize}, \texttt{RegisterDistributor}, \texttt{Issue}, \texttt{RedeemReserve}, \texttt{DebitReserveForConversion}, \texttt{GetWholesaleSupply}, \texttt{GetRetailSupply}, \texttt{GetTotalSupply}, \texttt{GetReserve} \\
+        \texttt{rupiah-controls} & \texttt{GetCallerIdentity}, \texttt{CreatePending}, \texttt{ProtectSubject}, \texttt{CreateStaffPending}, \texttt{ProtectStaff}, \texttt{SetStaffRole}, \texttt{RecordReview}, \texttt{ApproveSubject}, \texttt{SetLimits}, \texttt{SetCddCeilings}, \texttt{GetCddCeilings}, \texttt{VerifySubject}, \texttt{UpdateSubject}, \texttt{CloseSubject}, \texttt{RevokeLowRisk}, \texttt{FreezeSubject}, \texttt{RequestUnfreeze}, \texttt{ApproveUnfreeze}, \texttt{CanPay}, \texttt{GetLimits}, \texttt{CheckPayee}, \texttt{CanActFor}, \texttt{GetSubject} \\
         \texttt{rupiah-payments} & \texttt{OpenWallet}, \texttt{Transfer}, \texttt{ConvertToRetail}, \texttt{FundWallet}, \texttt{GetBalance}, \texttt{GetReceipt}, \texttt{GetRetailFloat} \\
         \bottomrule
     \end{tabular}
@@ -744,7 +810,7 @@ kepemilikan dompet ritel ditegakkan sebelum permintaan transfer diteruskan ke
 tidak cocok dengan pemilik dompet pengirim.
 
 Verifikasi lengkap kedua lapisan dijalankan melalui \texttt{go test ./...}
-pada masing-masing modul. Hasil \textit{unit test} tersebut tidak termasuk dalam catatan pemeriksaan kebenaran dan tidak dilaporkan sebagai hasil lulus pada Bab~IV.
+pada masing-masing modul. Hasil \textit{unit test} tersebut tidak termasuk dalam catatan pemeriksaan kebenaran dan tidak dilaporkan sebagai hasil lulus.
 
 \subsubsection{Konfigurasi Hyperledger Caliper}
 
@@ -753,7 +819,7 @@ yang mendeskripsikan topologi \textit{peer}, \textit{orderer}, kanal, dan
 identitas MSP. Modul beban kerja ditulis dalam JavaScript dan mengambil
 identitas penanda tangan serta daftar operasi dari katalog benchmark. Katalog
 mencakup seluruh metode publik tiga \textit{chaincode}; variasi
-\texttt{Transfer} untuk penerima ritel dan pedagang dihitung sebagai dua beban
+\texttt{Transfer} untuk penerima ritel dihitung sebagai satu beban
 kerja, sedangkan \texttt{Initialize} dan debit reserve internal hanya diuji
 secara fungsional.
 
@@ -810,7 +876,7 @@ Gambar~\ref{fig:ch3-study-controls}.
 Tiga \textit{chaincode} memisahkan kepemilikan state dan kebijakan default:
 \texttt{rupiah-monetary} mengelola suplai dan cadangan \textit{w-Rupiah Digital} dengan
 \texttt{AND('CentralBankMSP.peer','DistributorMSP.peer')};
-\texttt{rupiah-controls} mengelola subjek pseudonim, keputusan KYC, risiko,
+\texttt{rupiah-controls} mengelola subjek pseudonim, keputusan CDD,
 peran staf, dan batas dengan kebijakan default
 \texttt{AND(DistributorMSP, OR(CentralBankMSP, EndUserMSP))};
 \texttt{rupiah-payments} mengelola float ritel, dompet, dan transfer dengan
@@ -825,7 +891,8 @@ eksperimental, bukan pernyataan bahwa aturan hukum menetapkan kebijakan
 Identitas klien X.509 dipetakan per nama pengguna dan dikelola oleh layanan
 \textit{backend}; identitas penanda tangan, subjek pelanggan, dan kustodian
 dompet tetap dipisahkan. Uji integrasi menggunakan subjek sintetis untuk
-keputusan KYC berisiko tinggi dengan dua staf berbeda, pembatasan dan pembukaan
+keputusan CDD sederhana (penolakan, batas kepemilikan, verifikasi, pembaruan, penutupan, dan pencabutan status risiko rendah),
+pembatasan dan pembukaan
 pembatasan dengan bukti, pendanaan, pembayaran, pembacaan oleh
 \texttt{ValidatorMSP}, serta transaksi negatif dengan dukungan yang tidak
 mencukupi. Pengujian ini tidak mengukur kinerja tiga \textit{chaincode} dan

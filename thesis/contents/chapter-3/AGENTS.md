@@ -32,12 +32,32 @@ Other labels: `tab:ch3-chaincode-fungsi`, `tab:lingkungan-uji`, `lst:routes`, `f
 Code facts the chapter must match. Read them from the source, not from older specs:
 - Three chaincodes, deployed as `rupiah-monetary`, `rupiah-controls`, `rupiah-payments`. Function names in `tab:ch3-chaincode-fungsi` must match `bi-coin-fabric/chaincode/{monetary,controls,payments}`.
 - Four MSPs: CentralBankMSP, DistributorMSP, ValidatorMSP (human role: Auditor), EndUserMSP. Channel `bi-coin`. Orderer: etcdraft with one consenter. State database: CouchDB.
-- No KYC tiers. Limits are set per subject via `SetLimits` (per_transaction, daily, monthly, holdings). Risk is standard or high, plus a PEP flag.
+- No KYC tiers and no risk level. Limits are set per subject via `SetLimits` (per_transaction, daily, monthly, holdings) by the KYC reviewer.
 - Backend: Go 1.23, gorilla/mux. Role names come from `backend/middleware/auth.go`. Routes have no `/api` prefix.
-- Caliper 0.6.0 with one worker. 43 performance workloads in `bi-coin-fabric/benchmark/compliance/case-catalog.json`. The capacity protocol follows ADR 0015.
+- Caliper 0.6.0 with one worker. 42 performance workloads in `bi-coin-fabric/benchmark/compliance/case-catalog.json`. The capacity protocol follows ADR 0015.
 - Metrics need a formula or an explicit start and end point. Ch4 refers back to these definitions.
 - Do not include Caliper results. Ch4 holds them.
 - Never copy `network/.env.study` values into the thesis or appendix. It holds plaintext credentials.
+
+## Writing guideline
+
+Shared patterns: `../../AGENTS.md` § Reference-thesis patterns. The rules below are for Bab III only (deren p38–66, grandiv p47–75).
+
+- Length: both references give 29 pages. Bi-coin has 43 pages and 7,056 words. Before adding text, check whether figure size or repetition causes the extra pages.
+- Opening: one paragraph names the RM and Tujuan this chapter serves (deren p38, grandiv p47).
+- Method: name the approach in one sentence ("Penelitian ini menggunakan pendekatan eksperimental kuantitatif ...", deren p40). Justify it by elimination: each rejected alternative gets one sentence (grandiv p47: "Pendekatan sains perilaku murni tidak memadai ...; pendekatan rekayasa murni tanpa evaluasi rigor tidak memvalidasinya.").
+- Mapping table: each process step links to the place in the thesis that carries it, with a chapter pointer (grandiv Tabel 3.1, p48).
+- Alat and Bahan: a numbered list, one tool per item, with exact version and role (grandiv p48–49). List only tools that affect a result. Deren lists Zotero and Canva (p38); neither affects a result.
+- Datasets: name the source and say how the datasets are combined and seeded (deren p39, "seeded random number generator").
+- Architecture: one subsection per layer. Each layer lists its roles as bold, numbered items (deren p43). A responsibility table has four columns: Lapisan, Komponen, Tanggung jawab utama, Ancaman yang dimitigasi (grandiv Tabel 3.2, p51). Use it to split "Arsitektur Sistem Blockchain".
+- Architecture figures show horizontal bands with the layer name at the side (deren Gambar 3.6, p43; grandiv Gambar 3.13, p51).
+- Equations: introduce each with a sentence that ends in a colon. The next sentence defines each symbol: "Dalam persamaan di atas, ... merepresentasikan ..., dan ..." (deren p48–49).
+- Algorithms: name each before it appears ("Algoritma 1 mendeskripsikan ...", grandiv p57). Give its Require and Ensure lines, and its complexity when it matters.
+- Evaluation: each dimension is a numbered, bold-labelled item that says what is measured and how (grandiv p72–73). A methodology subsection then gives the timing tool, run structure, statistics, and reliability definition (grandiv §3.4.1, p73).
+- A structural result needs no confidence interval. Say so (grandiv p73: "estimasi interval kepercayaan tidak diperlukan").
+- Flow figures: Mulai and Selesai terminals, decision diamonds with Ya and Tidak branches, and a feedback loop when the process repeats (deren Gambar 3.8, p52).
+- Group flow stages into named phases in dashed frames, and describe each phase in one paragraph (grandiv Gambar 3.20 and text, p75). Bi-coin's "Alur Tugas Akhir" is a bullet list; phase grouping is optional.
+- Not adopted: limitations at the end of Bab III (deren §3.4, p66). Limitations go to Bab IV, as grandiv does (§4.5.2, p92).
 
 ## Supervisor checks
 
@@ -49,7 +69,7 @@ From `thesis_deren.pdf` (Bab III) and `thesis_grandiv.pdf` (Bab III, §3.2–3.4
 - Add an RM ↔ Tujuan ↔ evaluation dimension ↔ result-location table (`thesis_grandiv.pdf`, Tabel 3.10). Missing today.
 - Split "Arsitektur Sistem Blockchain". It currently covers two-tier issuance, access control, the account model, network, use cases, and ledger objects.
 - Two headings cover offline storage: "Perancangan Basis Data Luring" and "Basis Data Luring". Merge them or differentiate them.
-- Scenario count: the thesis says 30 functional scenarios (`tab:uji-fungsional`). `case-catalog.json` lists 32 correctness scenarios. Reconcile before Ch3 or Ch4 cites either.
+- Scenario count: the thesis says 30 functional scenarios (`tab:uji-fungsional`). `case-catalog.json` lists 31 correctness scenarios. Reconcile before Ch3 or Ch4 cites either.
 - Prototype limitations go to Bab IV (Keterbatasan), as in `thesis_grandiv.pdf` §4.5.2. The chapter spec removed the optional Bab III section, and that stays removed.
 
 ## Constraints

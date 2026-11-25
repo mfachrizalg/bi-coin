@@ -2,7 +2,6 @@ sequenceDiagram
     autonumber
     actor CO as Petugas kepatuhan
     actor R as Reviewer
-    actor S as Approver senior
     participant API as Backend API
     participant GW as Fabric Gateway
     participant CC as rupiah-controls
@@ -26,17 +25,17 @@ sequenceDiagram
     GW-->>API: Commit
     API-->>R: Hasil transaksi
 
-    S->>API: POST /subjects/{subject_id}/restriction-release-decisions
+    CO->>API: POST /subjects/{subject_id}/restriction-release-decisions
     API->>GW: Submit ApproveUnfreeze(subject_id)
     GW->>CC: ApproveUnfreeze(subject_id)
-    CC->>CC: Validasi bukti dan identitas approver senior
+    CC->>CC: Validasi bukti dan identitas petugas kepatuhan
     alt Bukti tersedia dan reviewer berbeda dari approver
         CC->>CC: Hapus status terbatas dan data pelepasan
         CC-->>GW: Pelepasan disetujui
         GW-->>API: Commit
-        API-->>S: Pelepasan disetujui
+        API-->>CO: Pelepasan disetujui
     else Bukti tidak ada atau identitas sama
         CC-->>GW: Tolak, subjek tetap terbatas
         GW-->>API: Tidak ada state yang di-commit
-        API-->>S: Pelepasan ditolak
+        API-->>CO: Pelepasan ditolak
     end

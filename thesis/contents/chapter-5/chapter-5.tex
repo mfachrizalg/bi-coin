@@ -5,38 +5,22 @@
 Berdasarkan hasil rancang bangun dan pengujian, kesimpulan penelitian adalah
 sebagai berikut.
 \begin{enumerate}
-    \item Berdasarkan rumusan masalah pertama mengenai perancangan dan pembangunan purwarupa Rupiah Digital ritel berbasis Hyperledger Fabric yang menegakkan kontrol KYC dan AML/CFT terpilih serta memverifikasinya secara fungsional, penelitian ini berhasil merancang dan membangun purwarupa dengan arsitektur dua jenjang. Arsitektur tersebut memisahkan peran Bank Indonesia, bank distributor (\textit{wholesale} dan \textit{retail}), dan pengguna ritel. Implementasi dijalankan pada Hyperledger Fabric 2.5 dengan empat organisasi, \textit{backend} Go, CouchDB, dan PostgreSQL. Pemeriksaan fungsional lulus pada seluruh cakupan: 30 dari 30 skenario fungsional, 296 dari 296 sel peran-rute untuk otorisasi, 28 dari 28 kasus validasi permintaan, dan 45 dari 45 pemeriksaan hasil aksi. Klasifikasi keseluruhan adalah lulus, sehingga klaim konformansi diizinkan untuk cakupan pengujian ini.
-    \item Berdasarkan rumusan masalah kedua mengenai kinerja purwarupa yang diukur dengan Hyperledger Caliper, hasil pengukuran kinerja pada satu worker dan satu host belum tersedia pada naskah ini dan ditandai TBD. Kesimpulan mengenai kinerja, termasuk kapasitas, latensi, dan konsumsi sumber daya, menunggu hasil pengujian tersebut.
+    \item Berdasarkan rumusan masalah 1 mengenai proses CDD yang sulit diverifikasi peserta lain dalam jaringan, penelitian ini berhasil merancang dan membangun purwarupa Rupiah Digital ritel berbasis Hyperledger Fabric yang menegakkan keputusan CDD sederhana pada \textit{ledger} dengan arsitektur dua jenjang. Subjek ritel perorangan hanya menjadi aktif apabila peninjau menyetujuinya, hasil pencocokan DTTOT berupa tidak terdaftar, subjek ditandai berisiko rendah, dan batasnya telah ditetapkan. Batas kepemilikan mengikuti dua plafon yang ditetapkan Bank Indonesia menurut status verifikasi subjek. Arsitektur tersebut memisahkan peran Bank Indonesia, distributor yang berupa penyelenggara jasa sistem pembayaran bank atau nonbank, dan pengguna ritel. Implementasi dijalankan pada Hyperledger Fabric 2.5 dengan empat organisasi, \textit{backend} Go, CouchDB, dan PostgreSQL.
+    % TODO(G-hasil): isi klasifikasi lulus atau gagal dari run kebenaran dengan katalog 29 skenario setelah jaringan dipasang ulang.
+    \item Berdasarkan rumusan masalah 2 mengenai ketepatan penegakan kontrol serta bebannya terhadap \textit{throughput}, latensi, dan keberhasilan transaksi, hasil pemeriksaan kebenaran pada katalog 29 skenario fungsional beserta matriks peran-rute untuk otorisasi, kasus validasi permintaan, dan pemeriksaan hasil aksi belum tersedia pada naskah ini dan ditandai TBD. Hasil pengukuran kinerja pada satu \textit{worker} dan satu host juga ditandai TBD. Kesimpulan mengenai ketepatan penegakan, kapasitas, latensi, dan konsumsi sumber daya menunggu hasil pengujian tersebut.
 \end{enumerate}
 
-Purwarupa ini memiliki tiga keterbatasan. Pertama, tidak tersedia jalur balik dari dompet ke float ritel atau dari float ritel ke cadangan bank; alur hanya bergerak dari cadangan menuju dompet. Kedua, penerbitan oleh Bank Indonesia hanya dimodelkan sebagai satu transaksi yang memuat penerima dan jumlah; pendanaan penerbitan dari saldo giro RTGS sebagai jaminan (\textit{backing}) berada di luar cakupan penelitian. Ketiga, seluruh bank distributor berada pada satu organisasi \texttt{DistributorMSP}, sehingga pemisahan antarbank dan jenis bank ditegakkan melalui atribut identitas yang diperiksa \textit{chaincode}, bukan melalui batas organisasi.
+Purwarupa ini memiliki enam keterbatasan. Pertama, tidak tersedia jalur balik dari dompet ke float ritel atau dari float ritel ke cadangan, sehingga alur hanya bergerak dari cadangan menuju dompet. Kedua, penerbitan oleh Bank Indonesia hanya dimodelkan sebagai satu transaksi yang memuat penerima dan jumlah, dan pendanaan penerbitan dari saldo giro RTGS sebagai jaminan (\textit{backing}) berada di luar cakupan penelitian. Ketiga, seluruh distributor berada pada satu organisasi \texttt{DistributorMSP}, sehingga pemisahan antardistributor ditegakkan melalui atribut identitas yang diperiksa \textit{chaincode}, bukan melalui batas organisasi. Keempat, aturan R1 membangun ulang saldo dari transfer yang diamati dan pendanaan yang dicatat \textit{backend}, sehingga dompet yang didanai di luar \textit{backend} tidak terhitung. Kelima, tanpa titik pemeriksaan, aliran peristiwa pemantauan dimulai pada blok berikutnya, sehingga transfer yang dikomit saat \textit{backend} mati tidak teramati pada pemakaian pertama. Keenam, \texttt{GetSubject} mengembalikan penanda risiko rendah kepada MSP anggota dan kepada pemohon, sehingga pelanggan dapat membaca pencabutan statusnya dan larangan \textit{anti tipping-off} tidak sepenuhnya terpenuhi.
 
 \section{Saran}
 
+Saran berikut disusun dari keterbatasan pada Bab III dan pada Bab V, dan setiap saran menyebut keterbatasan yang dijawabnya.
 \begin{enumerate}
-    \item Menguji sensitivitas kapasitas tulis terhadap \texttt{BatchTimeout} orderer. Perbandingan jumlah \textit{worker} merupakan penelitian lanjutan karena pengukuran pada studi ini dibatasi pada satu \textit{worker} dan satu host.
-    \item Mengulang protokol Caliper pada beberapa perangkat keras dan topologi
-    jaringan, kemudian menjalankan \textit{soak test} berdurasi panjang untuk
-    menguji kestabilan hasil di luar satu inang.
-    \item Menelusuri kegagalan penerbitan, konversi, dan pendanaan dompet serta konflik MVCC dan
-    batas konkurensi gateway dengan instrumentasi tahap \textit{endorsement},
-    validasi, dan pengiriman agar penyebab bisnis dan infrastruktur dapat
-    dipisahkan.
-    \item Memperluas skenario kontensi dompet bersama dan menguji kebijakan
-    \textit{retry} serta \textit{backoff} secara eksplisit terhadap konflik MVCC
-    tanpa mengubah makna idempotensi transaksi.
-    \item Menguji \textit{private data collection} atau teknik kriptografi
-    penjaga privasi untuk mengurangi keterlihatan metadata transaksi tanpa
-    menghilangkan kemampuan pengawasan \cite{Pocher2022Privacy,
-    Soana2024Central, Said2026Designing}.
-    \item Mengembangkan integrasi, interoperabilitas, dan interkoneksi dengan
-    infrastruktur pasar keuangan pada penelitian terpisah setelah kebijakan
-    buku besar ritel tervalidasi \cite{bi_whitepaper2022}.
-    \item Mengembangkan pembayaran tanpa konektivitas sebagai lingkup terpisah
-    yang mencakup perangkat aman, pencegahan \textit{double-spending}, dan
-    rekonsiliasi sesuai Project Polaris \cite{polaris_security,
-    polaris_handbook}.
-    \item Menguji API \textit{backend} secara \textit{end-to-end} dengan basis
-    data studi dan identitas per pengguna, lalu menjalankan Caliper terpisah
-    pada tiga \textit{chaincode} apabila evaluasi kinerjanya diperlukan.
+    \item \textbf{Tingkat CDD di luar sederhana.} Purwarupa hanya menegakkan CDD sederhana, sehingga subjek yang tidak berisiko rendah ditolak. Penelitian selanjutnya dapat menambahkan CDD standar dan \textit{enhanced due diligence} (EDD), yakni tindakan CDD yang lebih mendalam bagi subjek berisiko tinggi, beserta pencatatan pemilik manfaat (\textit{beneficial owner}) dan referensi bukti pemeriksaannya pada \textit{ledger} \cite{ojk2023pojk8, bi2023pedoman}.
+    \item \textbf{Verifikasi identitas dan dokumen.} Keaslian identitas dan pencocokan daftar terduga teroris masih dikerjakan peninjau secara manual. Penelitian selanjutnya dapat mengintegrasikan verifikasi identitas dengan layanan Dukcapil dan tanda tangan elektronik pada dokumen, agar pengumpulan bukti tidak lagi bergantung pada pemeriksaan manual.
+    \item \textbf{Siklus akhir data.} Purwarupa belum menghapus data setelah masa pemeliharaan lima tahun dan belum menyerahkan dana kepada Balai Harta Peninggalan (BHP) setelah penutupan hubungan usaha \cite[hlm.~40 dan 52]{bi2023pedoman}. Penelitian selanjutnya dapat merancang penghapusan data pada \textit{private data collection} dan prosedur penyerahan dana tersebut.
+    \item \textbf{Pemantauan dan pelaporan.} Aturan R1 melewatkan dompet yang didanai di luar \textit{backend}, konsumen peristiwa tidak mengejar transfer yang dikomit saat \textit{backend} mati, dan draf LTKM tidak dikirim ke PPATK. Penelitian selanjutnya dapat menyimpan titik pemeriksaan sejak pemasangan awal, membangun saldo dari sumber yang mencakup seluruh pendanaan, menghubungkan draf LTKM dengan kanal pelaporan PPATK, dan menutup pembacaan penanda risiko rendah oleh pelanggan.
+    \item \textbf{Kinerja dan konkurensi.} Pengukuran dibatasi pada satu \textit{worker} dan satu host. Direkomendasikan untuk menguji sensitivitas kapasitas tulis terhadap \texttt{BatchTimeout} orderer, mengulang protokol Caliper pada beberapa perangkat keras dan topologi jaringan, menjalankan \textit{soak test} berdurasi panjang, serta memperluas skenario kontensi dompet bersama dengan kebijakan \textit{retry} dan \textit{backoff} terhadap konflik MVCC tanpa mengubah makna idempotensi transaksi.
+    \item \textbf{Pemisahan organisasi dan privasi.} Seluruh distributor berada pada satu organisasi, dan metadata transaksi tetap terlihat pada kanal. Penelitian selanjutnya dapat memisahkan distributor ke organisasi masing-masing dan menguji teknik kriptografi penjaga privasi untuk mengurangi keterlihatan metadata tanpa menghilangkan kemampuan pengawasan \cite{Pocher2022Privacy, Soana2024Central, Said2026Designing}.
+    \item \textbf{Jalur balik, interkoneksi, dan pembayaran luring.} Purwarupa tidak memiliki jalur balik dari dompet ke cadangan maupun pendanaan penerbitan dari saldo giro RTGS. Penelitian selanjutnya dapat menambahkan keduanya, mengembangkan interkoneksi dengan infrastruktur pasar keuangan setelah kebijakan \textit{ledger} ritel tervalidasi \cite{bi_whitepaper2022}, dan menggarap pembayaran tanpa konektivitas sebagai lingkup terpisah yang mencakup perangkat aman, pencegahan \textit{double-spending}, dan rekonsiliasi sesuai Project Polaris \cite{polaris_security, polaris_handbook}.
 \end{enumerate}

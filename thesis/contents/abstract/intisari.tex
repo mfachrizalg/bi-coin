@@ -1,15 +1,16 @@
-Penelitian ini bertujuan membangun purwarupa Rupiah Digital ritel berbasis Hyperledger Fabric yang menegakkan kontrol kepatuhan KYC dan AML/CFT terpilih, serta memverifikasi kontrol tersebut secara fungsional. Penelitian ini juga mengukur kinerja purwarupa tersebut menggunakan Hyperledger Caliper. Lingkungan
-studi kontrol menggunakan jaringan terisolasi dengan empat MSP:
+Penelitian ini bertujuan merancang dan mengimplementasikan arsitektur \textit{financial compliance} untuk Rupiah Digital ritel berbasis Hyperledger Fabric yang menegakkan keputusan \textit{customer due diligence} (CDD) sederhana pada \textit{ledger}, beserta kontrol AML/CFT pendukung. Penelitian ini juga menguji arsitektur tersebut secara fungsional dan mengukur kinerjanya menggunakan Hyperledger Caliper, kemudian menginterpretasikan hasilnya. Subjek ritel perorangan menjadi aktif hanya apabila peninjau menyetujuinya, hasil pencocokan daftar terduga teroris dan organisasi teroris (DTTOT) berupa tidak terdaftar, subjek ditandai berisiko rendah, dan batasnya telah ditetapkan. Batas kepemilikan mengikuti dua plafon yang ditetapkan Bank Indonesia menurut status verifikasi subjek. Lingkungan
+studi kontrol menggunakan jaringan terisolasi dengan empat MSP, yaitu
 \texttt{CentralBankMSP}, \texttt{DistributorMSP}, \texttt{ValidatorMSP}, dan
 \texttt{EndUserMSP}. Tiga \textit{chaincode} Go memisahkan operasi moneter,
 kontrol pelanggan, dan pembayaran. Identitas X.509 yang dikelola \textit{backend}
-memisahkan penanda tangan, subjek pelanggan, dan kustodian dompet.
+memisahkan penanda tangan, subjek pelanggan, dan kustodian dompet. Konsumen peristiwa pada \textit{backend} menerapkan tiga aturan pemantauan pada transfer yang diterima. Setelah petugas mengonfirmasi peringatan, konsumen tersebut menulis draf laporan transaksi keuangan mencurigakan (LTKM) dan mencabut status risiko rendah tanpa memberitahu pelanggan.
 
-Pemeriksaan kebenaran lulus pada seluruh 30 skenario fungsional sintetis, 296 sel peran-rute, 28 kasus validasi permintaan, dan 45 pemeriksaan hasil aksi. Skenario tersebut mencakup keputusan KYC berisiko tinggi dengan peninjau dan pejabat senior yang berbeda, pembatasan dan pembukaan pembatasan berbukti, pendanaan cadangan, pembayaran ritel, pembacaan oleh \texttt{ValidatorMSP}, serta penolakan transaksi dengan \textit{endorsement} yang tidak mencukupi. Uji unit tidak termasuk dalam pemeriksaan ini. Hasil ini hanya menunjukkan perilaku pada skenario sintetis yang diuji; penelitian tidak membuktikan keaslian identitas, efektivitas penyaringan, pengiriman laporan kepada PPATK, atau kepatuhan institusional.
+% TODO(G-hasil): ganti TBD dengan hasil run kebenaran pada katalog 29 skenario setelah jaringan dipasang ulang.
+Pemeriksaan kebenaran pada 29 skenario fungsional, matriks peran-rute, kasus validasi permintaan, dan pemeriksaan hasil aksi masih TBD. Setelah tersedia, hasil tersebut hanya akan menunjukkan perilaku pada skenario sintetis yang diuji. Penelitian tidak membuktikan keaslian identitas, efektivitas penyaringan, pengiriman laporan kepada PPATK, atau kepatuhan institusional. Rancangan ini memiliki dua keterbatasan. Aturan saldo melewatkan dompet yang didanai di luar \textit{backend}, dan pembacaan subjek memperlihatkan penanda risiko rendah kepada pemohon, sehingga larangan \textit{anti tipping-off} belum sepenuhnya terpenuhi.
 
 Sebagai bukti kinerja sekunder, pengukuran dengan Hyperledger Caliper pada jaringan kontrol empat organisasi, dengan satu \textit{worker} pada satu \textit{host}, masih TBD. Setelah tersedia, pengukuran tersebut tidak menetapkan kapasitas produksi atau reproduktibilitas lintas mesin.
 
 \vspace{0.5cm}
 
-\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, KYC, AML/CFT,
+\noindent{Kata kunci}: Rupiah Digital, CBDC ritel, CDD, AML/CFT,
 Hyperledger Fabric, \textit{endorsement}, distribusi dua jenjang

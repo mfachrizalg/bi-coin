@@ -4,7 +4,8 @@
 
 - Thesis prose rules apply to manuscript prose under `thesis/`. Root `AGENTS.md` and `CLAUDE.md` also apply, and so does the nearest chapter `AGENTS.md`.
 - The supervisor persona applies repo-wide and always on. See its section below.
-- Shared rules live here, once. Chapter files hold chapter facts, chapter rules, supervisor checks, and constraints only.
+- Shared rules live here, once. Chapter files hold chapter facts, chapter rules, the chapter writing guideline, supervisor checks, and constraints only.
+- Writing guidelines come from `thesis_deren.pdf` and `thesis_grandiv.pdf` (read 2026-11-04). Shared patterns are in § Reference-thesis patterns (shared) and § DTETI template rules below. Chapter patterns are in each chapter's `## Writing guideline`. Page numbers such as "deren p18" are PDF page numbers.
 
 ## Supervisor persona (always on)
 
@@ -84,11 +85,19 @@ For `paper/` tasks, `paper/AGENTS.md` sets the order.
 
 The references contain accepted errors. Never copy them: typos, decimal dots, figure numbers that run across chapters, "kita" or dramatic phrasing, repo links in the body, and references to a non-existent Bab VI.
 
+Further slips found on 2026-11-04. Do not copy these either:
+- English labels in tables and charts: the "Ours" column (deren p37, Tabel 2.2), "Proposed System", "Mean Latency (seconds)", and "206.9s" (deren p87, Gambar 4.9). Write `Penelitian ini`, Indonesian axis labels, and decimal commas.
+- Title Case table captions (grandiv, most tables, for example Tabel 2.1 and 4.3). Deren uses sentence case, as this thesis does.
+- Claiming that results "mendukung hipotesis" when no hypothesis was stated (grandiv p91).
+- A QR code or repository link in the Lampiran (deren p103 L.1; grandiv L.2.7). This conflicts with the no-repo-URL decision.
+- Figures without a source line (deren Bab III and Bab IV).
+- Mixed section terms: both references use "Subbab" and "Subbagian", and deren also "sub-bab". Use "Subbab" for every new cross-reference.
+
 Descriptive statistics are enough. Neither primary reference runs significance tests or states a formal hypothesis, so do not require them.
 
 ### Naming
 
-The domain role is **Auditor** (MSP `ValidatorMSP`). Do not write "supervisor" for it. Older text may say *pengawas*; flag it in chapter checks.
+The domain role is **auditor** in prose (lowercase, user decision 2026-11-10) (MSP `ValidatorMSP`). Do not write "supervisor" for it. Older text may say *pengawas*; flag it in chapter checks.
 
 ### Output
 
@@ -138,8 +147,54 @@ Primary guides: `contents/appendix/appendix-latex.tex` and `contents/appendix/ap
 ### Figures
 - `[htbp]`, or `[p]` for a full-page figure. Keep captions below the figure and within the margins.
 - Labels: lowercase and unique. Existing labels stay as they are. New labels use `fig:chN-...`. Refer as `Gambar \ref{...}`.
-- Every figure states its source: `Sumber: penulis`, or `diadaptasi dari \cite{key}` for adapted or external figures.
-- Diagrams: TikZ, or draw.io or mermaid rendered to PNG.
+- Every figure states its source: `Sumber: penulis`, or `diadaptasi dari \cite{key}` for adapted or external figures. Place it as the last sentence of the caption, in parentheses: "(Sumber: penulis)" or "(Sumber: diadaptasi dari \cite{key})" (grandiv p30, p32). Bi-coin's current captions (chapter-2.tex l.183 and l.215, chapter-3.tex l.154) use the same position without parentheses. Add the parentheses when those captions are next edited.
+- Diagrams: TikZ, or draw.io or mermaid rendered to PNG. Vector output is preferred. Deren has no raster image in Bab I–IV. Grandiv has two raster images in each of Bab III and Bab IV.
+- Diagram style for method and phase-flow figures (grandiv p32 Gambar 2.2, p46 Gambar 2.12, p75 Gambar 3.20):
+  - Use rounded boxes and one light fill colour per layer or phase, and keep that colour meaning the same in every figure.
+  - Use grey arrows, and dashed frames to group the steps of one phase.
+  - Italicize English terms inside the figure, as in the body text.
+- Architecture figures use horizontal layer bands with the layer name at the side (deren p43 Gambar 3.6; grandiv p51 Gambar 3.13).
+- Flow figures use Mulai and Selesai terminals, numbered steps, and decision diamonds with Ya and Tidak branches. Draw the feedback loop when the process iterates (deren p52 Gambar 3.8).
+- Bi-coin rule, not from the references: text inside a figure stays legible at print size, no smaller than footnote size. Split a crowded figure instead of shrinking it. Grandiv Gambar 3.13 (p51) has very small labels; do not copy that.
+- A figure taken from a source is copied, not redrawn (user decision, 2026-11-04). Crop it from the source PDF into `contents/figures/reference/`. Keep vector output when the source is vector: with PyMuPDF, use `out.new_page(width=w, height=h).show_pdf_page(page.rect, src, pno, clip=fig_rect)`. Include it with `\includegraphics` and credit the source in the caption, as `chapter-2.tex` l.182–183 does. Deren redraws instead (p25 Gambar 2.1); do not follow that.
+- Result charts (grandiv p77, p81; deren p87–88):
+  - Put a value label on each bar.
+  - Draw ±1 SD error bars, and state the run count in the text or the caption.
+  - Use a log axis when values span orders of magnitude.
+  - Put the legend inside the plot area.
+  - Write axis labels, legends, and numbers in Bahasa Indonesia, with decimal commas.
+- A Bab IV caption may state the key number it shows (deren p87, Gambar 4.9). The body text still interprets that number.
+
+### Drawing a new figure in TikZ
+Use this method for architecture and interaction figures: actors or systems, and the numbered actions between them. Method and phase-flow figures keep the style in `### Figures`. The method was validated on 2026-11-04 by rebuilding RegKYC Fig. 1 in TikZ.
+
+Style:
+- Draw one rounded box per actor or system: `rounded corners=3pt`, a light fill, and a 0.6 pt stroke in a darker shade of the same hue. A colour keeps one meaning across all figures.
+- Group the actors of one institution in a filled rounded container, with the institution's name in bold.
+- Arrows are black, and the line style carries the meaning: solid for a required action, dashed for a contingent action, dotted for control. A legend box explains the three styles. Use one arrowhead shape for every arrow.
+- Number the actions with circled numbers along the arrows, in execution order. Parallel actions share one number.
+- Optional: a role tag above an actor (blue, bold) and a simple icon.
+
+Steps:
+1. List everything before you draw. That means every actor, plus every action with its number, its type (required, contingent, or control), and its evidence: a `file:line` in `bi-coin-fabric/` or a Bab III subsection. Leave out any action without evidence.
+2. Size the canvas to the print width. The thesis text width is 14.92 cm, about 424 pt (A4 page, left margin 3.54 cm, right margin 2.54 cm; `thesisdtetiugm.cls:163`). Text inside the figure must be at least `\footnotesize`, which is 10 pt in this 12 pt class. Do not shrink the finished figure with `\resizebox`. If it does not fit, split it.
+3. Lay out on a pt grid with `\begin{tikzpicture}[x=1pt, y=-1pt]`. The origin is then top-left and y grows downward, so coordinates read like positions on a page. Flow runs left to right. Put the legend in a free corner.
+4. Define the styles once with `\tikzset`: colours via `\definecolor{name}{HTML}{RRGGBB}`, and one style each for boxes, solid, dashed, and dotted arrows, and step numbers. When two figures share the styles, move them to `contents/figures/<family>-style.tex`, as `activity-style.tex` does.
+5. Draw in layer order:
+   1. containers and boxes;
+   2. icons;
+   3. arrows;
+   4. white masks behind any label that crosses a line;
+   5. circled numbers;
+   6. labels;
+   7. the legend.
+
+   Also:
+   - Circled numbers are `circle` nodes, because pdfTeX has no glyph for ①.
+   - Build icons from simple shapes, such as a circle and an ellipse for a person, or a triangle and columns for a bank. Use an external icon only with its licence and credit.
+   - Italicize English terms. Write the other labels in Bahasa Indonesia.
+6. Test the figure in a `standalone` wrapper. Run `pdflatex`, render with `pdftoppm -png -r 300`, and view the PNG. Fix every label that crosses a line or a box, then repeat.
+7. Save the figure as `contents/figures/<name>.tex`, containing only the `tikzpicture`. Include it with `\input{contents/figures/<name>}` inside `figure[htbp]`, as `activity-diagrams.tex` l.6–10 does, but without its `\resizebox`. End the caption with "(Sumber: penulis)".
 
 ### Tables
 - `table` + `tabular` for one-page tables. Caption above the table, with `\vspace{0.5em}` before `\centering`.
@@ -147,15 +202,39 @@ Primary guides: `contents/appendix/appendix-latex.tex` and `contents/appendix/ap
 - `longtable` only when a table must span pages, with repeated headers.
 - Never extend beyond the text width.
 - Table numbers are explicit (Tabel 2.1, Tabel 2.2), not generic.
+- Rules: use booktabs (`\toprule`, `\midrule`, `\bottomrule`) everywhere. The manuscript has 20 table environments. Bab III mixes three `\hline` lines into its `\toprule` tables; normalize it. Do not mix booktabs and full grids.
+- Comparison tables (grandiv p32 Tabel 2.1, p90 Tabel 4.9; deren p37 Tabel 2.2):
+  - Criteria go in rows and the compared works in columns.
+  - The last column is `Penelitian ini`. Tabel 4.9 bolds its values (grandiv p90).
+  - Cell values are Ya, Tidak, or Parsial, or the symbols ✓, ∼, and ×. When symbols are used, put a legend line under the table ("Simbol: ✓ = ...; Singkatan: ...").
+  - Mark a cell that needs a caveat with † or ‡, and explain the mark in the text right after the table.
+- Numeric tables (grandiv p76 Tabel 4.1; deren p88 Tabel 4.3):
+  - Put the unit in the column header, for example "Rata-rata (ms)".
+  - Right-align numbers and use decimal commas.
+  - State the run count in the caption, for example "..., dirata-ratakan dari 10 \textit{run}".
+  - A change column gives a signed percentage, for example "−21,0%".
 
 ### Equations, lists, algorithms
 - `equation` for numbered display equations, labelled `eq:...`. Inline math uses `$...$`. Multi-letter names use `\mathit{...}`.
 - `align` for sequences. Add `\allowdisplaybreaks` for long ones.
 - `enumerate` for ordered items, `itemize` for unordered.
 - Split a multipage algorithm with `\algstore{name}` and `\algrestore{name}`. Caption and label go only on the first block.
+- The class numbers equations per chapter and prints them as (3-2). Refer to one in the text as `Persamaan~\ref{eq:...}`.
+- Introduce each display equation with a sentence that ends in a colon ("... dihitung menggunakan rumusan berikut:"). After it, define every symbol in one sentence: "Dalam persamaan tersebut, $T_i$ merepresentasikan ..., dan ..." (deren p48–49).
+- Introduce an algorithm before it appears ("Algoritma 1 mendeskripsikan ..."). Give its inputs and outputs (Require and Ensure), and state its complexity when it matters (grandiv p57–58).
+- Code listings are numbered and framed (grandiv p54, Kode 3.1). Bi-coin loads Go source with `\lstinputlisting`: once in Bab III (`lst:routes`) and twice in `contents/appendix/appendix-code.tex`.
+  - Introduce the listing before it, and explain its key lines after it, citing line numbers.
+  - Long source goes to the Lampiran, as grandiv does (L.3). The references set no line threshold.
+  - Grandiv lists its listings in a Daftar Kode (p13). Bi-coin has none. Add one when its listings are numbered as Kode.
+
+### Lampiran
+- The Lampiran holds full parameter tables, extra charts, long code, and measurement evidence (deren L.2–L.4; grandiv L.2–L.3).
+- One sentence introduces each item and points back to the chapter that uses it (grandiv p104: "Tabel L.3 menyajikan seluruh nilai parameter ...").
+- No repository URL, QR code, or run ID (user decision).
 
 ### Citations
 - Numeric IEEE through `\cite{key}` or `\cite{key1,key2}`. `references.bib` is the only database.
+- Captions that cite get a short optional argument without `\cite`: `\caption[Short title.]{Full caption (Sumber: ... \cite{key}).}`. Without it, the list of figures and tables numbers the keys before Latar Belakang, and Bab I does not start at [1] (fixed 2026-11-05).
 - Never invent a key. Cite only entries in `references.bib`, and add a new entry there first.
 - Match fields to source type: books need publisher and year; conference papers need booktitle, year, pages, and DOI when available; online sources need a canonical public URL; theses need degree, department, institution, location, and year.
 - Never store institutional proxy URLs. Prefer a verified DOI, otherwise the publisher, institution, or project canonical URL.
@@ -173,17 +252,60 @@ Global in `main.tex` lines 60–63. No per-chapter action.
 
 ### Cross-references
 - Use the "Bab II" style. Never refer to a chapter filename or to another chapter's section numbers.
+- Inside the same chapter, `Subbab~\ref{...}` is allowed.
+- Write each chapter knowing only the chapters before it (user decision 2026-11-05). Bab N may refer to Bab 1 to N−1, never to Bab N+1 or later. Bab I's Sistematika is the one roadmap exception. Check every chapter edit for forward references.
+- Table, figure, and equation numbers may be cited from an earlier chapter, for example "Persamaan 3-2" or "Tabel 3.10 pada Bab III" from Bab IV (deren p68; grandiv p95).
 - There is no Bab VI. Bab V is the final chapter.
 
 ## Writing style (shared)
 
+- No semicolons (;) and no em dashes (—, ---, or --) in manuscript prose. Use a period, a comma, or a conjunction. En dashes in numeric ranges (15–18) are allowed. Code, TikZ, and bib syntax are exempt (user decision 2026-11-05).
 - Passive for method and setup ("sistem dirancang", "pengujian dilakukan"). Active for findings ("hasil menunjukkan").
 - No first person. Use "penelitian ini", not "penulis".
 - Decimal comma (`50,3`). Thousands dot (`1.000`). State units.
 - One sentence links each section to the next.
 - Captions: sentence case, ending with a period.
 - Formal academic Bahasa Indonesia throughout.
+- No repeated word in a sentence or paragraph. When the referent is clear, replace the repeated noun with a demonstrative pronoun ("ini", "itu", "tersebut"). Compact before adding. User decision 2026-11-10; applies to thesis and paper.
 - Format and tone model: `thesis/thesis_deren.pdf` and `thesis/thesis_grandiv.pdf` (primary). `thesis/thesis_luthfi.pdf` is secondary. Take form and reasoning, not topic.
+
+## Reference-thesis patterns (shared)
+
+These patterns hold in both primary references. Chapter-specific patterns are in each chapter's `## Writing guideline`. The user asked for these on 2026-11-04. Where one conflicts with a user decision or with the Bahasa and DTETI rules above, those rules win.
+
+### Depth reference
+
+Measured with PyMuPDF on 2026-11-04. Word counts include text in tables and figures. Citation counts are bracket markers. Treat the numbers as a range to aim for, not a quota. The bi-coin column comes from `main.pdf` (98 pages, 2026-11-04).
+
+| Bab | deren (pages / words / citations) | grandiv | bi-coin now |
+|---|---|---|---|
+| I | 7 / 2,154 / 26 | 8 / 2,376 / 15 | 5 / 1,331 / 23 |
+| II | 16 / 5,079 / 91 | 22 / 6,569 / 80 | 16 / 3,537 / 58 |
+| III | 29 / 9,415 / 49 | 29 / 8,160 / 31 | 43 / 7,056 / 20 |
+| IV | 30 / 10,968 / 21 | 19 / 5,548 / 14 | 12 / 2,917 / 6 |
+| V | 2 / 523 / 1 | 4 / 1,217 / 3 | 2 / 446 / 3 |
+
+### Openings and transitions
+- Chapter opening: Bab II, Bab III, and Bab IV open with one paragraph before the first section in both references (Bab II: deren p22, grandiv p25; Bab III: deren p38, grandiv p47; Bab IV: deren p67, grandiv p76). The paragraph says what the chapter does. Bab III and Bab IV also name the RM or Tujuan they serve. Bab I and Bab V open directly at the first section (deren p15, p97; grandiv p17, p95).
+- Section lead-in: a section that has subsections opens with one or two sentences naming those subsections in order (deren p38 §3.1; grandiv p25 §2.1, p32 §2.2).
+- Lists: a full sentence that ends in a colon introduces every list ("... sebagai berikut:").
+- Labelled items: when list items are claims, limits, or recommendations, give each a bold label and a colon, `\textbf{Label:} ...` (deren p19 Batasan, p95 Limitasi; grandiv p97 Saran).
+- Points in prose: when several points support one claim, number them inside one paragraph with "Pertama, ... Kedua, ... Ketiga, ..." (grandiv p19 premises, p31 positioning).
+- The chain between paragraphs is carried by connectives: "Namun,", "Akan tetapi,", "Oleh karena itu,", "Dampaknya,", "Untuk mengatasi ...". The last sentence of each paragraph leads into the topic of the next one (deren p15–18).
+
+### Evidence pattern for every table and figure
+1. Announce it before the float appears: "Tabel 4.1 menyajikan ..." (grandiv p76) or "Gambar 3.20 mengilustrasikan ..." (grandiv p75). Deren refers to the float after it instead (p88).
+2. Place the float.
+3. Read it: "Hasil pada Tabel 4.1 menunjukkan bahwa ...", giving the key numbers with units (grandiv p76).
+4. Explain why. Give the mechanism, not a restatement of the numbers (deren p88: "Penurunan ini bukan semata ..., melainkan konsekuensi ...").
+5. Compare or link: to the baseline, to prior work, or to the next section.
+
+For a figure with several panels, say what each panel shows ("Panel kiri ..., sedangkan panel kanan ...", grandiv p77, p81).
+
+### Parameters and reproducibility
+- Every parameter value comes with its reason. A parameter that shapes the results gets its own short paragraph or subsection, with the value in the heading (deren p79–80, "Ukuran Komite (K = 10)"; grandiv §3.3.5.1 "Justifikasi Parameter Sistem").
+- State the exact versions of all tools, the hardware, the run count, and the seed or iteration count wherever a number is reported (deren p38–39; grandiv p48, p73).
+- Numbers: a percent sign attaches to its number (21,0%), and units take a space (22 ms). Both references do this (deren p88; grandiv p76).
 
 ## Bahasa Indonesia authority and precedence
 

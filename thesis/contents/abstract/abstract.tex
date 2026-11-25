@@ -1,20 +1,17 @@
 \textit{
-This thesis aims to build a retail
-Digital Rupiah prototype on Hyperledger Fabric 2.5 that enforces selected KYC and AML/CFT compliance controls, to verify these controls functionally, and to measure the prototype's performance using Hyperledger Caliper. Its controls-study
-extension uses a fresh four-organization network (CentralBankMSP, DistributorMSP,
+This thesis aims to design and implement a financial compliance architecture for retail
+Digital Rupiah on Hyperledger Fabric 2.5 that enforces the simplified customer due diligence (CDD) decision on the ledger, together with supporting AML/CFT controls, and to test that architecture functionally and to measure its performance with Hyperledger Caliper. A retail individual becomes an active subject only if a reviewer approves it, the match against the terrorist list (DTTOT) is negative, the subject is flagged low-risk, and its limits are set. Holdings follow two ceilings set by Bank Indonesia according to the verification status of the subject. The controls-study extension uses a fresh four-organization network (CentralBankMSP, DistributorMSP,
 ValidatorMSP, and EndUserMSP) and three Go chaincodes for monetary operations,
 customer controls, and payments. Server-managed X.509 identities distinguish
-the signing actor, customer subject, and wallet custodian.
+the signing actor, customer subject, and wallet custodian. A backend event consumer applies three monitoring rules to received transfers. Once an officer confirms an alert, it writes a draft suspicious transaction report (LTKM) and revokes the low-risk status without notifying the customer.
 }
 
 \textit{
-The correctness check passed all 30 functional scenarios, 296 API route-role cells, 28 request-validation cells, and 45 action-outcome cells, with no unresolved checks, and the overall classification is pass. The synthetic scenarios cover high-risk KYC
-decisions with distinct reviewer and senior approver, restriction and
-evidence-based release, reserve funding, retail payment, read-only ValidatorMSP
-access, and expected endorsement failures. Unit-test results are not part of this record. These results establish behavior
-only for the tested synthetic scenarios; they do not establish identity
+% TODO(G-hasil): ganti TBD dengan hasil run kebenaran pada katalog 29 skenario setelah jaringan dipasang ulang.
+The correctness check of the 29 functional scenarios, the API route-role matrix, the request-validation cases, and the action-outcome checks is TBD. Once available, these results will establish behavior
+only for the tested synthetic scenarios. They will not establish identity
 authenticity, screening effectiveness, actual PPATK reporting, or institutional
-compliance.
+compliance. The design has two known limits. The balance rule misses wallets funded outside the backend, and the subject read exposes the low-risk flag to the applicant, so the anti tipping-off requirement is not fully met.
 }
 
 \textit{
@@ -23,5 +20,5 @@ As secondary performance evidence, Hyperledger Caliper measurements of the four-
 
 \vspace{0.5cm}
 
-\noindent\textbf{Keywords}: Digital Rupiah, retail CBDC, KYC, AML/CFT,
+\noindent\textbf{Keywords}: Digital Rupiah, retail CBDC, CDD, AML/CFT,
 Hyperledger Fabric, endorsement, two-tier distribution

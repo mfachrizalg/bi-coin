@@ -18,8 +18,8 @@
 %── Jenjang institusional ──────────────────────────────────────────
 
 \node[actor] (bi)          at (0,    0)    {Bank Indonesia\\(Penerbit)\\CentralBankMSP};
-\node[actor] (distributor) at (7.0,  0)    {Distributor Bank\\(wholesale dan retail)\\DistributorMSP};
-\node[actor] (validator)   at (14.0, 0)    {Observer (ValidatorMSP)\\(OJK, PPATK)};
+\node[actor] (distributor) at (7.0,  0)    {Distributor\\(PJSP bank atau nonbank)\\DistributorMSP};
+\node[actor] (validator)   at (14.0, 0)    {Auditor (ValidatorMSP)\\(OJK, PPATK)};
 
 % BI → Distributor (penerbitan w-Rupiah Digital)
 \draw[ar] (bi.east) -- node[pl, above]{Penerbitan w-Rupiah Digital} (distributor.west);
@@ -47,24 +47,20 @@
 
 %── Jenjang 2: Retail ────────────────────────────────────────────────────────
 
-\node[wbox] (customer) at (3.5,  -6.8) {Pelanggan Ritel};
-\node[wbox] (merchant) at (7.0,  -6.8) {Pedagang};
-\node[wbox] (business) at (10.5, -6.8) {Bisnis};
+\node[wbox] (customer) at (7.0,  -6.8) {Pelanggan Ritel};
 
 \draw[ar] (enduser.south) -- (customer.north);
-\draw[ar] (enduser.south) -- (merchant.north);
-\draw[ar] (enduser.south) -- (business.north);
 
 \node[zonebox,
-  fit=(enduser)(customer)(merchant)(business),
+  fit=(enduser)(customer),
   label={[font=\footnotesize\bfseries, anchor=south west]north west:%
     Jenjang 2: Layanan Ritel}] (j2) {};
 
 \node[font=\scriptsize, gray] at (7.0, -8.3)
-  {Transfer P2P/pedagang};
+  {Transfer antarpelanggan};
 
 \end{tikzpicture}%
 }
-\caption{Arsitektur distribusi dua jenjang pada purwarupa Rupiah Digital ritel dengan empat organisasi: Bank Indonesia (CentralBankMSP) menerbitkan w-Rupiah Digital langsung ke reserve Distributor, Distributor (Wholesale Bank dan Retail Bank) mentransfer dan mengonversinya, EndUser (ritel, pedagang, dan bisnis) melayani, dan Observer (ValidatorMSP) dari OJK dan PPATK mengawasi secara baca.}
+\caption{Arsitektur distribusi dua jenjang pada purwarupa Rupiah Digital ritel dengan empat organisasi. Bank Indonesia (CentralBankMSP) menerbitkan w-Rupiah Digital langsung ke reserve Distributor, Distributor sebagai PJSP bank atau nonbank mentransfer dan mengonversinya, EndUser melayani pelanggan ritel perorangan, dan Auditor (ValidatorMSP) dari OJK dan PPATK mengawasi secara baca (Sumber: penulis).}
 \label{fig:arsitektur-dua-jenjang}
 \end{figure}

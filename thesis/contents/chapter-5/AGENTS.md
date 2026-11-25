@@ -25,6 +25,20 @@ Shared rules, Bahasa policy, and the supervisor persona: `../../AGENTS.md`.
 - Kesimpulan uses past tense. Saran uses future or passive recommendation ("penelitian selanjutnya dapat", "direkomendasikan untuk").
 - No new claims, data, or methods beyond Bab IV.
 
+## Writing guideline
+
+Shared patterns: `../../AGENTS.md` § Reference-thesis patterns. The rules below are for Bab V only (deren p97–98, grandiv p95–98).
+
+- Length: deren has 2 pages and 523 words. Grandiv has 4 pages and 1,217 words, including contributions. Bi-coin has 2 pages and 446 words, close to deren.
+- Kesimpulan: the lead-in ends with a colon: "... dapat disimpulkan bahwa:" (deren p97).
+- Each point opens with a bold answer sentence: "Rumusan Masalah 1 terjawab oleh Tujuan 1." (grandiv p95). Bi-coin's "Rumusan Masalah N terjawab ..." matches.
+- Each point then gives its Bab IV numbers with units and the baseline, in past tense: "... dari 86% (baseline) menjadi 88% ..." (deren p97).
+- No citations in Kesimpulan (deren p97, grandiv p95).
+- Saran: the intro enumerates the limitations by number, and the items follow the same numbers: "Bab IV mengidentifikasi lima keterbatasan utama, yaitu: (1) ... (5) ..." (grandiv p96). This is the mapping the chapter spec requires.
+- Each Saran item opens with a bold label that names its limitation, then the next step in future or passive form: "Penelitian lanjutan perlu ..." (grandiv p97), "Penelitian selanjutnya disarankan untuk ..." (deren p98).
+- Saran may cite future-work sources: grandiv p97 cites [6] and [11]; deren p98 cites [18].
+- Not adopted: grandiv's Kontribusi section (§5.2, p95–96). It adds claims beyond Bab IV. Ask the user if they want it.
+
 ## Supervisor checks
 
 From `thesis_deren.pdf` (Bab V, 2 items) and `thesis_grandiv.pdf` (Bab V, 5 numbered points, 7 saran):

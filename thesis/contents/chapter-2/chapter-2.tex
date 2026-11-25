@@ -131,7 +131,7 @@ Garuda baru menjangkau lapisan \textit{wholesale} \cite{bi_garuda_poc}, sedangka
 Rupiah Digital ritel ditempatkan sebagai tahap lanjutan dalam peta jalan dan
 dokumen konsultatif \cite{bi_whitepaper2022, bi_consultative}. Tidak ada rancangan
 publik dalam korpus tersebut yang memperlihatkan kontrol \textit{know your customer}
-(KYC) dan AML/CFT ritel yang ditegakkan dan dapat diverifikasi pada buku besar.
+(KYC) dan AML/CFT ritel yang ditegakkan dan dapat diverifikasi pada \textit{ledger}.
 Penelitian ini menjawab celah tersebut melalui dua pertanyaan penelitian. Pertama,
 bagaimana purwarupa Rupiah Digital ritel di atas Hyperledger Fabric dirancang dan
 dibangun dengan kontrol KYC dan AML/CFT terpilih, serta bagaimana kontrol tersebut
@@ -180,7 +180,7 @@ pada Gambar~\ref{fig:bi-whitepaper-roadmap} \cite{bi_whitepaper2022}.
 \begin{figure}[H]
     \centering
     \rotatebox{90}{\includegraphics[width=0.78\textheight]{contents/figures/reference/bi-whitepaper-roadmap.png}}
-    \caption{Peta jalan pengembangan Rupiah Digital dalam Proyek Garuda. Sumber: Bank Indonesia \cite{bi_whitepaper2022}.}
+    \caption[Peta jalan pengembangan Rupiah Digital dalam Proyek Garuda.]{Peta jalan pengembangan Rupiah Digital dalam Proyek Garuda (Sumber: Bank Indonesia \cite{bi_whitepaper2022}).}
     \label{fig:bi-whitepaper-roadmap}
 \end{figure}
 
@@ -212,7 +212,7 @@ Rupiah Digital \cite{bi_whitepaper2022}.
 \begin{figure}[H]
     \centering
     \rotatebox{90}{\includegraphics[width=0.78\textheight]{contents/figures/reference/bi-whitepaper-design-configuration.png}}
-    \caption{Konfigurasi desain Rupiah Digital menurut White Paper CBDC Bank Indonesia. Sumber: Bank Indonesia \cite{bi_whitepaper2022}.}
+    \caption[Konfigurasi desain Rupiah Digital menurut White Paper CBDC Bank Indonesia.]{Konfigurasi desain Rupiah Digital menurut White Paper CBDC Bank Indonesia (Sumber: Bank Indonesia \cite{bi_whitepaper2022}).}
     \label{fig:bi-whitepaper-design-configuration}
 \end{figure}
 
@@ -244,6 +244,35 @@ kebijakan moneter \cite{SyarifuddinBakhtiar2021Monetary}. Ketiga arsitektur
 tersebut dibandingkan pada Gambar~\ref{fig:arsitektur-cbdc-tipe}.
 
 \input{contents/figures/cbdc-architecture-types}
+
+\subsection{Customer Due Diligence}
+
+\textit{Customer due diligence} (CDD) adalah rangkaian prosedur yang dilakukan penyelenggara terhadap pengguna jasa untuk memastikan efektivitas program anti pencucian uang dan pencegahan pendanaan terorisme. Prosedur ini meliputi identifikasi, verifikasi, pemantauan berkelanjutan, serta pemahaman atas maksud dan tujuan hubungan usaha \cite[hlm.~6]{bi2023pedoman}. Dasar hukumnya bergantung pada jenis penyelenggara. Bank tunduk pada POJK 8/2023 \cite{ojk2023pojk8}, sedangkan penyelenggara jasa sistem pembayaran (PJSP) nonbank tunduk pada PBI 10/2024 yang mencabut PBI 19/10/PBI/2017 \cite{bi2024pbi10}. Pedoman CDD Bank Indonesia tahun 2023 tetap berlaku sepanjang tidak bertentangan, sebagaimana dinyatakan pada Pasal 41 PADG 15/2025 \cite{bi2025padg15}. Karena \textit{distributor} pada purwarupa dapat berupa PJSP bank maupun nonbank, purwarupa memodelkan satu prosedur CDD untuk keduanya, sehingga hanya rujukan hukumnya yang berbeda.
+
+Pedoman tersebut membedakan tiga jenis CDD, yaitu CDD sederhana, CDD standar, dan \textit{enhanced due diligence} (EDD) \cite[hlm.~6]{bi2023pedoman}. Tabel~\ref{tab:ch2-cdd-tiga-jenis} merangkum perbedaan ketiganya menurut kondisi penerapan, kedalaman identifikasi, waktu verifikasi, dan intensitas pemantauan.
+
+\begin{table}[H]
+    \caption[Tiga jenis CDD menurut pedoman CDD Bank Indonesia.]{Tiga jenis CDD menurut pedoman CDD Bank Indonesia (Sumber: diadaptasi dari \cite[hlm.~7]{bi2023pedoman}).}
+    \label{tab:ch2-cdd-tiga-jenis}
+    \centering
+    \small
+    \begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{3.7cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{3.7cm}@{}}
+        \toprule
+        \textbf{Aspek} & \textbf{CDD sederhana} & \textbf{CDD standar} & \textbf{EDD} \\
+        \midrule
+        Kondisi & Berisiko rendah, misalnya produk dengan batas transaksi dan fitur terbatas & Hubungan usaha dalam kondisi standar & Berisiko tinggi, misalnya pengguna jasa berstatus \textit{politically exposed person} (PEP) \\
+        Identifikasi & Permintaan data disederhanakan menjadi nama, nomor identitas, alamat, tempat dan tanggal lahir, serta tanda tangan & Identitas lengkap, termasuk kewarganegaraan, nomor telepon, pekerjaan, dan jenis kelamin & Prosedur standar ditambah informasi lain, misalnya sumber dana atau kekayaan \\
+        Verifikasi & Setelah hubungan usaha dibuka, sepanjang batas transaksi dibatasi & Sebelum hubungan usaha dibuka atau transaksi dilakukan & Sebelum hubungan usaha dibuka, dengan pertemuan langsung \\
+        Pemantauan & Frekuensi pemantauan dan pengkinian data dikurangi & Pemantauan dan pengkinian data berkala & Pemantauan lebih ketat dan pengkinian data lebih sering \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Pedoman membolehkan CDD sederhana bagi pengguna jasa berisiko rendah dan memasukkan produk dengan tujuan, fitur, saldo, atau batas yang terbatas, yang risiko pencucian uang dan pendanaan terorismenya terkendali secara efektif, ke dalam kategori produk berisiko rendah \cite[hlm.~38 dan 57]{bi2023pedoman}. Dompet \textit{retail} yang saldonya dibatasi oleh batas kepemilikan memiliki ciri tersebut, sehingga CDD sederhana sesuai untuknya. Pedoman mengizinkan verifikasi identitas setelah hubungan usaha dibuka dan mewajibkan verifikasi ketika saldo atau jumlah transaksi mencapai batas tertentu \cite[hlm.~38]{bi2023pedoman}. PBI 10/2024 memuat ketentuan setara pada Pasal 31 ayat (3) huruf b dan c \cite{bi2024pbi10}, dan bagi bank CDD sederhana diatur pada Pasal 45 POJK 8/2023 \cite{ojk2023pojk8}. Pedoman juga menyatakan bahwa CDD sederhana tidak berlaku apabila terdapat dugaan pencucian uang atau pendanaan terorisme, dan penyelenggara wajib menatausahakan daftar pengguna jasa yang diberi perlakuan sederhana beserta alasan penetapan risiko rendahnya \cite[hlm.~38]{bi2023pedoman}.
+
+Sejumlah kewajiban lain dalam pedoman tetap berlaku pada CDD sederhana. Kesamaan nama pengguna jasa dengan DTTOT atau daftar proliferasi senjata pemusnah massal mewajibkan pemblokiran serta merta dan pelaporan sebagai Laporan Transaksi Keuangan Mencurigakan (LTKM) \cite[hlm.~31]{bi2023pedoman}. Data yang tidak dipenuhi, identitas yang fiktif, atau identitas yang diragukan mewajibkan penolakan atau penutupan hubungan usaha disertai pemberitahuan tertulis kepada pengguna jasa, dan sisa dana yang tidak diambil diselesaikan menurut peraturan perundang-undangan, termasuk penyerahan kepada Balai Harta Peninggalan \cite[hlm.~40]{bi2023pedoman}. Larangan \textit{anti tipping-off} melarang pegawai penyelenggara memberitahukan pengguna jasa tentang LTKM yang sedang disusun atau telah disampaikan \cite[hlm.~53]{bi2023pedoman}. Seluruh dokumen CDD ditatausahakan paling singkat lima tahun \cite[hlm.~52]{bi2023pedoman}.
+
+Dapat dikemukakan bahwa penetapan risiko rendah pada tingkat produk terlalu longgar, karena pedoman mewajibkan penyelenggara memiliki kebijakan penentuan risiko rendah berdasarkan faktor pengguna jasa, negara atau area geografis, produk atau jasa, serta jalur transaksi \cite[hlm.~38]{bi2023pedoman}. Keberatan ini berlaku bagi purwarupa, yang hanya mencatat satu alasan tingkat produk dan tidak menilai keempat faktor tersebut. Pedoman memang membebaskan penerbit uang elektronik dari identifikasi dan verifikasi apabila nilai nominalnya dibatasi dan penggunanya tidak dapat mentransfer dana \cite[hlm.~38]{bi2023pedoman}, tetapi pengecualian itu tidak mencakup dompet yang dapat mentransfer dana. Karena itu, penelitian ini menerapkan CDD sederhana dan tidak mengklaim bahwa penetapan risiko rendahnya sahih. Yang diuji adalah apakah keputusan tersebut dapat ditegakkan pada \textit{ledger}.
 
 \subsection{Blockchain dan Distributed Ledger Technology}
 
@@ -414,11 +443,11 @@ kelayakan kinerja sistem CBDC \cite{fabric_perf2023}.
 
 \subsection{Transfer Ritel Langsung}
 
-Unit pembayaran pada purwarupa adalah fungsi \texttt{Transfer} yang sama untuk
-transfer antarpelanggan dan pelanggan-ke-pedagang. Penyatuan jalur ini menjaga
-pemeriksaan otorisasi, saldo, dan pencatatan audit tetap deterministik.
+Unit pembayaran pada purwarupa adalah fungsi \texttt{Transfer} yang menangani
+transfer antarpelanggan. Jalur tunggal ini menjaga pemeriksaan otorisasi,
+kelayakan penerima, saldo, dan pencatatan audit tetap deterministik.
 Penelitian tidak memodelkan standar instrumen pembayaran
-atau proses akseptasi eksternal; fokusnya adalah kebijakan buku besar CBDC ritel.
+atau proses akseptasi eksternal, dan fokusnya adalah kebijakan \textit{ledger} CBDC ritel.
 
 \subsection{Application Programming Interface}
 
@@ -519,7 +548,7 @@ organisasi berbasis MSP, model eksekusi modular, dukungan kontrak Go, dan
 integrasi langsung dengan alat uji Caliper. MSP mengautentikasi organisasi
 jaringan. \textit{Channel} dan data privat
 merupakan kapabilitas platform, tetapi purwarupa penelitian memakai satu
-\textit{application channel} dan tidak memisahkan buku besar \textit{wholesale}
+\textit{application channel} dan tidak memisahkan \textit{ledger} \textit{wholesale}
 dan ritel. PoC Proyek Garuda menggunakan Corda dan Hyperledger Besu; laporan itu
 menjadi pembanding kebutuhan Indonesia, bukan bukti penerapan Fabric
 \cite{bi_garuda_poc}.
@@ -534,7 +563,7 @@ membandingkan kinerja keseluruhan dan komponen internal beberapa platform
 Tabel~\ref{tab:caliper-blockbench}.
 
 \begin{table}[H]
-    \caption{Perbandingan Hyperledger Caliper dan BlockBench berdasarkan \cite{hlf_caliper,dinh2017blockbench}.}
+    \caption[Perbandingan Hyperledger Caliper dan BlockBench.]{Perbandingan Hyperledger Caliper dan BlockBench berdasarkan \cite{hlf_caliper,dinh2017blockbench}.}
     \label{tab:caliper-blockbench}
     \centering
     \small

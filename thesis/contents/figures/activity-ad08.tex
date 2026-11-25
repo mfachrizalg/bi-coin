@@ -1,0 +1,49 @@
+% AD08: empat operasi independen pada subjek aktif, yaitu verifikasi, pembaruan, pencabutan risiko rendah, dan penutupan (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (4.967,-13.4);
+\draw[lanebody] (4.967,-0.9) rectangle (9.933,-13.4);
+\draw[lanebody] (9.933,-0.9) rectangle (14.9,-13.4);
+\node[lane, text width=3.4cm] at (2.483,-0.45) {KYC Reviewer};
+\node[lane, text width=3.4cm] at (7.45,-0.45) {Sistem\\(\scriptsize backend dan chaincode)};
+\node[lane, text width=3.4cm] at (12.417,-0.45) {Compliance Officer};
+
+% Operasi 1: verifikasi
+\node[start] (s1) at (2.483,-1.25) {};
+\node[action, text width=3.2cm] (a1) at (2.483,-2.45) {{\scriptsize\texttt{VerifySubject()}}\\[1pt]referensi bukti};
+\node[action, text width=3.2cm] (b1) at (7.45,-2.45) {Status terverifikasi dan batas efektif naik};
+\node[final] (f1) at (12.417,-2.45) {};
+\draw[flow] (s1) -- (a1);
+\draw[flow] (a1.east) -- (b1.west);
+\draw[flow] (b1.east) -- (f1.west);
+
+% Operasi 2: pembaruan data
+\node[start] (s2) at (2.483,-3.65) {};
+\node[action, text width=3.2cm] (a2) at (2.483,-4.85) {{\scriptsize\texttt{UpdateSubject()}}\\[1pt]dokumen baru dan hasil DTTOT};
+\node[action, text width=3.2cm] (b2) at (7.45,-4.85) {Status belum terverifikasi; bila \texttt{listed}, dibatasi (\texttt{dttot})};
+\node[final] (f2) at (12.417,-4.85) {};
+\draw[flow] (s2) -- (a2);
+\draw[flow] (a2.east) -- (b2.west);
+\draw[flow] (b2.east) -- (f2.west);
+
+% Operasi 3: pencabutan status risiko rendah
+\node[start] (s3) at (12.417,-6.05) {};
+\node[action, text width=3.2cm] (a3) at (12.417,-7.25) {{\scriptsize\texttt{RevokeLowRisk()}}\\[1pt]setelah dugaan dikonfirmasi};
+\node[action, text width=3.2cm] (b3) at (7.45,-7.25) {Subjek tidak dapat membayar atau menerima};
+\node[final] (f3) at (2.483,-7.25) {};
+\draw[flow] (s3) -- (a3);
+\draw[flow] (a3.west) -- (b3.east);
+\draw[flow] (b3.west) -- (f3.east);
+
+% Operasi 4: penutupan hubungan usaha
+\node[start] (s4) at (2.483,-8.45) {};
+\node[action, text width=3.2cm] (a4) at (2.483,-9.65) {{\scriptsize\texttt{CloseSubject()}}\\[1pt]alasan penutupan};
+\node[action, text width=3.2cm] (b4) at (7.45,-9.65) {Status \texttt{closed} dan akhir};
+\node[action, text width=3.2cm] (c4) at (7.45,-11.45) {Catat pemberitahuan tertulis kepada pelanggan};
+\node[final] (f4) at (7.45,-12.85) {};
+\draw[flow] (s4) -- (a4);
+\draw[flow] (a4.east) -- (b4.west);
+\draw[flow] (b4.south) -- (c4.north);
+\draw[flow] (c4.south) -- (f4.north);
+
+\node[font=\footnotesize, text width=13.6cm, align=center] at (7.45,-13.95) {Setiap operasi ditolak bila status subjek bukan \texttt{active}.};
+\end{tikzpicture}

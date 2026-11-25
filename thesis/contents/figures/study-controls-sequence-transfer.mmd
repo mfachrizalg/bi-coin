@@ -20,10 +20,12 @@ sequenceDiagram
         API-->>U: Transfer ditolak
     else Reference baru
         Pay->>Ctrl: Periksa CanActFor(sender)
-        Pay->>Ctrl: Periksa CanPay(sender dan recipient)
-        Pay->>Ctrl: Baca batas sender dan recipient
-        Ctrl-->>Pay: Status dan batas kedua subjek
-        Pay->>Pay: Periksa batas transaksi, saldo, dan holdings recipient
+        Pay->>Ctrl: Periksa CanPay(sender)
+        Pay->>Ctrl: Baca batas sender
+        Ctrl-->>Pay: Status dan batas sender
+        Pay->>Pay: Periksa batas transaksi dan saldo sender
+        Pay->>Ctrl: CheckPayee(recipient, saldo setelah kredit)
+        Ctrl-->>Pay: Diizinkan atau ditolak
         alt Kewenangan, kelayakan, saldo, dan batas valid
             Pay->>Ctrl: Tambahkan penggunaan limit sender
             Ctrl-->>Pay: Penggunaan limit diperbarui

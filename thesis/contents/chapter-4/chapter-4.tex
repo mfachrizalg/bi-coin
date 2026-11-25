@@ -2,9 +2,9 @@
 
 Bab ini menyajikan hasil rancang bangun sistem Rupiah Digital ritel berbasis
 Hyperledger Fabric beserta pembahasannya. Bagian pertama memaparkan hasil
-implementasi sistem yang menjawab tujuan pertama, bagian kedua memaparkan hasil
-evaluasi kinerja yang menjawab tujuan kedua, dan bagian
-ketiga membandingkan hasil penelitian dengan penelitian terdahulu.
+implementasi sistem yang menjawab Tujuan 1, bagian kedua memaparkan hasil
+evaluasi kinerja yang menjawab Tujuan 2, dan bagian
+ketiga membandingkan hasil penelitian dengan penelitian terdahulu. Pengujian fungsional, yang juga menjawab Tujuan 2, dilaporkan pada subbab Hasil Pengujian Fungsional dan pada bagian Hasil Uji Kontrol pada Lingkungan Terisolasi.
 
 \section{Hasil Implementasi Sistem}
 
@@ -26,16 +26,15 @@ Setiap organisasi menjalankan \textit{certificate authority} sendiri, yaitu
 melalui Docker Compose, sedangkan materi kriptografi dan artefak kanal
 dibangkitkan melalui skrip sebelum jaringan dinaikkan.
 
-Peran institusional dipetakan ke organisasi studi sebagai berikut: Bank Indonesia
-ke \texttt{CentralBankMSP}, bank distributor ke \texttt{DistributorMSP}, OJK dan PPATK
-ke \texttt{ValidatorMSP}, serta pelanggan ritel, pedagang, dan perwakilan
-perusahaan ke \texttt{EndUserMSP}. \texttt{ValidatorMSP} hanya menyediakan akses
+Peran institusional dipetakan ke organisasi studi. Bank Indonesia dipetakan ke
+\texttt{CentralBankMSP}, distributor yang berupa PJSP bank atau nonbank ke \texttt{DistributorMSP}, OJK dan PPATK
+ke \texttt{ValidatorMSP}, serta pelanggan ritel perorangan ke \texttt{EndUserMSP}. \texttt{ValidatorMSP} hanya menyediakan akses
 baca untuk audit dan pelaporan.
 
 Kebijakan \textit{endorsement} ditetapkan per \textit{chaincode} sesuai domainnya.
 \texttt{rupiah-monetary} mensyaratkan \texttt{CentralBankMSP} dan
-\texttt{DistributorMSP}; \texttt{rupiah-payments} mensyaratkan \texttt{DistributorMSP}
-dan \texttt{EndUserMSP}; sedangkan \texttt{rupiah-controls} mensyaratkan
+\texttt{DistributorMSP}, \texttt{rupiah-payments} mensyaratkan \texttt{DistributorMSP}
+dan \texttt{EndUserMSP}, sedangkan \texttt{rupiah-controls} mensyaratkan
 \texttt{DistributorMSP} dan salah satu dari \texttt{CentralBankMSP} atau
 \texttt{EndUserMSP}. Definisi ketiga \textit{chaincode} disetujui oleh keempat MSP
 sebelum berhasil dikomit pada kanal.
@@ -49,14 +48,14 @@ cadangan \textit{w-Rupiah Digital} melalui fungsi \texttt{RegisterDistributor}, 
 \texttt{RedeemReserve}, dan \texttt{TransferReserve}, serta pembacaan
 \texttt{GetReserve}, \texttt{GetWholesaleSupply}, \texttt{GetRetailSupply}, dan \texttt{GetTotalSupply}. Fungsi \texttt{DebitReserveForConversion} hanya dipanggil secara internal oleh \texttt{ConvertToRetail}.
 \textit{Chaincode} \texttt{rupiah-controls} mengelola subjek pseudonim, keputusan
-KYC, risiko, peran staf, dan batas melalui fungsi seperti \texttt{CreatePending},
-\texttt{ProtectSubject}, \texttt{DecideHighRisk}, \texttt{FreezeSubject},
-\texttt{SetLimits}, dan \texttt{CanPay}. \textit{Chaincode} \texttt{rupiah-payments}
+CDD sederhana, peran staf, dan batas melalui fungsi seperti \texttt{CreatePending},
+\texttt{ProtectSubject}, \texttt{RecordReview}, \texttt{ApproveSubject}, \texttt{VerifySubject}, \texttt{FreezeSubject},
+\texttt{SetLimits}, \texttt{SetCddCeilings}, dan \texttt{CanPay}. \textit{Chaincode} \texttt{rupiah-payments}
 mengelola float ritel, dompet, dan transfer melalui \texttt{OpenWallet}, \texttt{Transfer},
 \texttt{ConvertToRetail}, \texttt{FundWallet}, \texttt{GetBalance}, \texttt{GetReceipt}, dan \texttt{GetRetailFloat}.
 
 Fungsi \texttt{Transfer} hanya menerima pemanggil \texttt{EndUserMSP}, sedangkan
-fungsi yang mendebit cadangan atau float, yaitu \texttt{TransferReserve}, \texttt{ConvertToRetail}, dan \texttt{FundWallet}, hanya menerima pemanggil \texttt{DistributorMSP} dengan atribut \texttt{distributor\_id} yang sesuai, dan konversi hanya dapat dilakukan oleh bank \textit{retail}. \texttt{RedeemReserve} hanya menerima pemanggil \texttt{CentralBankMSP}. Sebelum
+fungsi yang mendebit cadangan atau float, yaitu \texttt{TransferReserve}, \texttt{ConvertToRetail}, dan \texttt{FundWallet}, hanya menerima pemanggil \texttt{DistributorMSP} dengan atribut \texttt{distributor\_id} yang sesuai, dan konversi hanya dapat dilakukan oleh distributor. \texttt{RedeemReserve} hanya menerima pemanggil \texttt{CentralBankMSP}. Sebelum
 saldo diubah, \texttt{Transfer} memeriksa nilai positif, referensi yang tidak kosong,
 batas nilai per transaksi, kecukupan saldo pengirim, dan batas kepemilikan penerima.
 \texttt{OpenWallet} dan \texttt{Transfer} juga memeriksa kelayakan subjek dan
@@ -76,7 +75,7 @@ ditegakkan melalui \textit{middleware} sebagaimana dirangkum pada
 Tabel~\ref{tab:peran}. Pemisahan peran ini memastikan bahwa, misalnya, hanya peran
 \texttt{bank\_indonesia} (CentralBankMSP) yang dapat melakukan penerbitan, sedangkan
 peran \texttt{auditor} (ValidatorMSP) hanya memiliki akses baca terhadap laporan
-pengawasan. Untuk pelanggan ritel dan pedagang (EndUserMSP), backend juga membatasi
+pengawasan. Untuk pelanggan ritel (EndUserMSP), backend juga membatasi
 daftar dompet berdasarkan nama pengguna pada JWT. Pada batas jaringan, kebijakan
 \textit{endorsement} membatasi mutasi moneter pada persetujuan \texttt{CentralBankMSP}
 dan \texttt{DistributorMSP}, sedangkan \texttt{ValidatorMSP} tidak dapat melakukan mutasi.
@@ -93,10 +92,8 @@ dan \texttt{DistributorMSP}, sedangkan \texttt{ValidatorMSP} tidak dapat melakuk
 \midrule
 \texttt{public} & Pemeriksaan kesehatan dan topologi jaringan \\
 \texttt{authen\allowbreak ticated} & Pembacaan daftar dompet \\
-\texttt{retail\_bank} & DistributorMSP: pembuatan dompet, konversi ke float ritel, pendanaan dompet, transfer antarbank, penebusan, dan pengajuan peserta \\
-\texttt{wholesale\allowbreak\_bank} & DistributorMSP: penerimaan penerbitan, transfer antarbank, penebusan, dan pengajuan peserta \\
-\texttt{bank\allowbreak\_indonesia} & CentralBankMSP: penerbitan langsung ke cadangan bank distributor, siklus hidup peserta, dan pengawasan \\
-\texttt{merchant} & EndUserMSP: transfer dan pembacaan saldo pedagang yang telah disetujui \\
+\texttt{retail\_bank} & DistributorMSP: pembuatan dompet, konversi ke float ritel, pendanaan dompet, transfer antarbank, penebusan, pengajuan dan peninjauan subjek, keputusan CDD, verifikasi, pembaruan, penutupan, serta konfirmasi peringatan pemantauan \\
+\texttt{bank\allowbreak\_indonesia} & CentralBankMSP: penerbitan langsung ke cadangan distributor, siklus hidup peserta, penetapan plafon CDD, dan pengawasan \\
 \texttt{auditor} & ValidatorMSP: akses baca laporan dan pengawasan \\
 \bottomrule
 \end{tabular}
@@ -107,27 +104,26 @@ dan \texttt{DistributorMSP}, sedangkan \texttt{ValidatorMSP} tidak dapat melakuk
 
 Pengujian fungsional pada jaringan studi terdiri atas \textit{unit test} pada ketiga
 modul \textit{chaincode} dan seluruh paket \textit{backend}, serta uji integrasi
-sintetis pada jaringan. Uji integrasi tersebut mencakup alur pendaftaran subjek,
-pembukaan dompet dan pembayaran, pendanaan dari cadangan, serta pembatasan dan
-pembukaan pembatasan subjek. Rincian hasil uji integrasi disajikan pada bagian akhir
+sintetis pada jaringan. Uji integrasi tersebut mencakup alur pendaftaran subjek dan gerbang CDD sederhana,
+pembukaan dompet dan pembayaran, pendanaan dari cadangan, verifikasi, pembaruan, dan penutupan subjek, pembatasan dan
+pembukaan pembatasan subjek, serta pencabutan status risiko rendah. Rincian hasil uji integrasi disajikan pada bagian akhir
 bab ini.
 
-Pemeriksaan kebenaran menunjukkan bahwa logika layanan \textit{backend} dan
-aturan bisnis \textit{chaincode} pada purwarupa berperilaku sesuai harapan. Klasifikasi keseluruhan pemeriksaan adalah lulus: 30 dari 30 skenario fungsional, 296 dari 296 sel peran-rute untuk otorisasi, 28 dari 28 kasus validasi permintaan, dan 45 dari 45 pemeriksaan hasil aksi, tanpa pemeriksaan yang tidak terselesaikan. Temuan ini tidak ditafsirkan sebagai
+% TODO(G-hasil): isi klasifikasi lulus/gagal dari run kebenaran yang memakai katalog 29 skenario setelah jaringan dipasang ulang. Jangan memakai angka katalog lama.
+Pemeriksaan kebenaran dijalankan pada katalog 29 skenario fungsional, matriks peran-rute untuk otorisasi, kasus validasi permintaan, dan pemeriksaan hasil aksi. Jumlah skenario yang lulus (TBD dari 29), sel peran-rute yang lulus (TBD), kasus validasi yang lulus (TBD), dan pemeriksaan hasil aksi yang lulus (TBD) belum tersedia pada naskah ini. Setelah hasilnya ada, temuan tersebut tidak ditafsirkan sebagai
 bukti validasi menyeluruh, pembuktian \textit{end-to-end}, atau kesiapan sistem untuk
 lingkungan produksi berskala penuh.
 
 Jika dirujukkan ke SRS pada Tabel~\ref{tab:srs-verifikasi}, hasil pada subbab ini
-memberikan bukti untuk FR-01 sampai FR-03, FR-05, dan NFR-02 dengan cakupan yang
-berbeda-beda. FR-01 didukung oleh uji integrasi sintetis untuk pendaftaran dan
-persetujuan subjek, pembatasan dan pembukaan pembatasan subjek, serta pendanaan dari
-cadangan; penghentian peserta belum tercakup dalam uji integrasi tersebut. FR-02
-belum didukung oleh pengukuran kinerja, karena beban kerja penerbitan (\texttt{issue}) belum diukur. FR-03 didukung oleh uji integrasi sintetis yang menunjukkan penolakan transaksi moneter dan pembayaran
+akan memberikan bukti untuk FR-01, FR-03, FR-05, FR-06, FR-07, dan NFR-02 dengan cakupan yang
+berbeda-beda. FR-01 didukung oleh skenario pendaftaran dan persetujuan subjek, pembatasan dan pembukaan pembatasan subjek, serta pendanaan dari
+cadangan, sedangkan penghentian peserta belum tercakup. FR-02
+belum didukung oleh pengukuran kinerja, karena beban kerja penerbitan (\texttt{issue}) belum diukur. FR-03 didukung oleh skenario yang menunjukkan penolakan transaksi moneter dan pembayaran
 ketika kebijakan yang berlaku tidak terpenuhi. FR-04 hanya didukung sebagian melalui
-pembacaan subjek oleh \texttt{ValidatorMSP}; laporan rekonsiliasi dan metrik belum
+pembacaan subjek oleh \texttt{ValidatorMSP}, dan laporan rekonsiliasi serta metrik belum
 diuji pada jaringan studi. FR-05 didukung oleh matriks otorisasi peran terhadap rute
-API, sedangkan NFR-02 didukung oleh inspeksi model data; \textit{unit test} terpilih tidak termasuk dalam pemeriksaan kebenaran ini.
-Dengan demikian, hasil pengujian fungsional pada bab ini menjadi bukti bahwa kebutuhan perangkat lunak utama purwarupa telah diimplementasikan dan diverifikasi pada tingkat yang sesuai untuk penelitian prototipe. Klaim konformansi keseluruhan diizinkan untuk cakupan pengujian ini. Cakupan FR-04 tetap terbatas.
+API. FR-06 dan FR-07 didukung oleh skenario CDD pada kelompok pertama Tabel~\ref{tab:uji-fungsional}, yaitu gerbang persetujuan, batas kepemilikan menurut status verifikasi, pembaruan data, penutupan, dan pencabutan status risiko rendah. FR-08 didukung oleh \textit{unit test} aturan R1 sampai R3 pada \textit{backend}, tetapi belum oleh uji integrasi pada jaringan, sehingga pembentukan peringatan dari peristiwa \texttt{TransferReceived} pada jaringan yang berjalan belum terbukti. NFR-02 didukung oleh inspeksi model data, dan \textit{unit test} terpilih tidak termasuk dalam pemeriksaan kebenaran ini.
+Seluruh dukungan tersebut baru berlaku setelah hasil pemeriksaan kebenaran tersedia (TBD). Klaim konformansi keseluruhan baru dapat dinyatakan pada saat itu, dan cakupan FR-04 tetap terbatas.
 
 
 \section{Hasil Evaluasi Kinerja Final}
@@ -210,9 +206,9 @@ literatur dan PoC Proyek Garuda pada Rupiah Digital \textit{wholesale}.
         Metodologi & Tinjauan literatur kritis komparatif & PoC dengan 55 skenario bisnis dan teknis & Purwarupa fungsional + Caliper \\
         Platform DLT & Tidak dievaluasi (kutipan dari kasus negara) & R3 Corda + Hyperledger Besu & Hyperledger Fabric \\
         Model jenjang & Dua jenjang secara konseptual & \textit{wholesale} pada PoC & CentralBankMSP ke DistributorMSP ke EndUserMSP \\
-        Transfer ritel & Direkomendasikan secara konseptual & Tidak diuji & Antarpelanggan dan pelanggan--pedagang \\
+        Transfer ritel & Direkomendasikan secara konseptual & Tidak diuji & Antarpelanggan perorangan \\
         Metrik kinerja & Kutipan sekunder; tidak diukur langsung & Corda 37 TPS, Besu 39 TPS (Locust) & Caliper satu worker; TBD \\
-        Lingkup pengujian & Tidak ada pengujian & Penerbitan, penebusan, transfer antarlembaga & Transfer antarpelanggan, pelanggan--pedagang, baca dompet \\
+        Lingkup pengujian & Tidak ada pengujian & Penerbitan, penebusan, transfer antarlembaga & Transfer antarpelanggan, keputusan CDD sederhana, baca dompet \\
         Pembayaran luring & Direkomendasikan untuk \textit{r-Rupiah Digital} & Tidak dibahas & Tidak diuji dalam purwarupa ini \\
         Tokenisasi & Didukung (konseptual) & UTXO (Corda) / ERC-20 + ERC-1400 (Besu) & Transfer berbasis kunci--nilai pada Fabric \\
         \bottomrule
@@ -221,8 +217,8 @@ literatur dan PoC Proyek Garuda pada Rupiah Digital \textit{wholesale}.
 
 Rohmalia dan Nugraha \cite{rohmalia2023retail} juga melaporkan purwarupa CBDC
 ritel berbasis Fabric dengan pembuatan akun dan transfer antarpengguna.
-Implementasi penelitian ini mencakup distribusi melalui DistributorMSP, pembayaran
-pedagang, dan pengawasan, lalu mencatat kinerjanya melalui Caliper. Waktu
+Implementasi penelitian ini mencakup distribusi melalui DistributorMSP, keputusan CDD
+sederhana, pemantauan transfer, dan pengawasan, lalu mencatat kinerjanya melalui Caliper. Waktu
 pengiriman satu dan 50 data yang dilaporkan Rohmalia dan Nugraha tidak
 dibandingkan langsung dengan \textit{throughput} atau latensi penelitian ini
 karena beban dan batas pengukurannya berbeda.
@@ -240,7 +236,7 @@ bukti reproduksibilitas lintas mesin \cite{fabric_perf2023}.
 
 Lingkungan studi kontrol menggunakan jaringan Fabric 2.5 yang terisolasi dengan
 topologi empat organisasi yang sama dengan pengukuran Caliper. Empat \textit{peer}
-bergabung pada kanal \texttt{bi-coin}; tiga \textit{chaincode}, yaitu
+bergabung pada kanal \texttt{bi-coin}, dan tiga \textit{chaincode}, yaitu
 \texttt{rupiah-monetary}, \texttt{rupiah-controls}, dan \texttt{rupiah-payments},
 berhasil dikomit dengan persetujuan definisi dari keempat MSP.
 
@@ -250,20 +246,21 @@ Gambar~\ref{fig:ch3-study-sequence-conversion}, dan
 Gambar~\ref{fig:ch3-study-sequence-transfer}. Hasil pengujian berikut
 mengevaluasi alur kontrol sintetis tersebut.
 
-Uji integrasi sintetis pada jaringan lulus seluruhnya, yaitu 30 dari 30 skenario fungsional, untuk
-pendaftaran subjek, persetujuan risiko tinggi oleh staf berbeda, alur
+% TODO(G-hasil): isi jumlah skenario lulus dari run kebenaran dengan katalog 29 skenario. Tambahkan hasil uji pemantauan (peringatan R1 sampai R3) bila run integrasi memuatnya.
+Uji integrasi sintetis pada jaringan menjalankan 29 skenario fungsional, dan jumlah yang lulus (TBD dari 29) belum tersedia pada naskah ini. Skenario tersebut mencakup pendaftaran subjek dan gerbang CDD sederhana, verifikasi, pembaruan, dan penutupan subjek, pencabutan status risiko rendah, alur
 pembukaan dompet dan pembayaran, pendanaan dari cadangan, pembatasan dan
 pembukaan pembatasan dengan bukti otoritas, serta pembacaan subjek oleh
-\texttt{ValidatorMSP}. Uji tersebut menolak transaksi moneter, pembayaran,
-pendanaan, dan perubahan kontrol ketika organisasi pendukung tidak memenuhi
+\texttt{ValidatorMSP}. Skenario negatif memeriksa bahwa transaksi moneter, pembayaran,
+pendanaan, dan perubahan kontrol ditolak ketika organisasi pendukung tidak memenuhi
 kebijakan yang berlaku. \textit{Unit test} pada ketiga modul \textit{chaincode} dan seluruh paket \textit{backend} tidak termasuk dalam pemeriksaan kebenaran ini.
 
-Hasil ini menunjukkan perilaku fungsional pada skenario sintetis yang diuji,
+Hasil ini hanya akan menunjukkan perilaku fungsional pada skenario sintetis yang diuji,
 bukan kepatuhan hukum menyeluruh, efektivitas deteksi AML/CFT pada populasi
 nyata, atau keberhasilan pengiriman laporan kepada PPATK.
 
-Pengujian kinerja untuk ketiga \textit{chaincode} studi dijalankan dengan satu \textit{worker} Caliper pada satu host lokal. Satuan laju dinyatakan dalam ops/s; untuk operasi tulis, nilai dalam ops/s sama dengan TPS. Hasil pengukuran kinerja belum tersedia pada naskah ini, sehingga seluruh nilai laju, latensi, dan konsumsi sumber daya pada subbab ini ditandai TBD. Batas laju terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
+Pengujian kinerja untuk ketiga \textit{chaincode} studi dijalankan dengan satu \textit{worker} Caliper pada satu host lokal. Satuan laju dinyatakan dalam ops/s, dan untuk operasi tulis nilai dalam ops/s sama dengan TPS. Hasil pengukuran kinerja belum tersedia pada naskah ini, sehingga seluruh nilai laju, latensi, dan konsumsi sumber daya pada subbab ini ditandai TBD. Batas laju terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
 
+% TODO(G-hasil): daftar beban kerja pada tabel kapasitas, latensi, dan sumber daya perlu disamakan dengan katalog beban kerja kinerja yang berlaku setelah perubahan CDD sederhana. Baris set-business-authority dan transfer-merchant sudah dihapus karena fungsinya tidak ada lagi.
 \begin{table}[H]
 \centering
 \caption{Batas bawah laju lulus terkonfirmasi tiga \textit{chaincode} studi pada satu \textit{worker} (ops/s)}
@@ -279,10 +276,8 @@ Beban kerja & \textit{Chaincode} & Jenis & Terkonfirmasi (ops/s) & Gagal pertama
 \texttt{protect-staff} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
 \texttt{set-staff-role} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
 \texttt{record-review} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{approve-standard} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{decide-high-risk} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
+\texttt{approve-subject} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
 \texttt{set-limits} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{set-business-authority} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
 \texttt{freeze-subject} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
 \texttt{request-unfreeze} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
 \texttt{approve-unfreeze} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
@@ -310,7 +305,6 @@ Beban kerja & \textit{Chaincode} & Jenis & Terkonfirmasi (ops/s) & Gagal pertama
 \texttt{read-transfer-limit} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
 \texttt{open-wallet} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
 \texttt{transfer-retail} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
-\texttt{transfer-merchant} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
 \texttt{convert-to-retail} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
 \texttt{fund-wallet} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
 \texttt{read-retail-float} & \texttt{rupiah-payments} & baca & TBD & TBD \\
@@ -339,10 +333,8 @@ Beban kerja & p50 (ms) & Rentang p50 (ms) & p95 (ms) & Rentang p95 (ms) \\
 \texttt{protect-staff} & TBD & TBD & TBD & TBD \\
 \texttt{set-staff-role} & TBD & TBD & TBD & TBD \\
 \texttt{record-review} & TBD & TBD & TBD & TBD \\
-\texttt{approve-standard} & TBD & TBD & TBD & TBD \\
-\texttt{decide-high-risk} & TBD & TBD & TBD & TBD \\
+\texttt{approve-subject} & TBD & TBD & TBD & TBD \\
 \texttt{set-limits} & TBD & TBD & TBD & TBD \\
-\texttt{set-business-authority} & TBD & TBD & TBD & TBD \\
 \texttt{freeze-subject} & TBD & TBD & TBD & TBD \\
 \texttt{request-unfreeze} & TBD & TBD & TBD & TBD \\
 \texttt{approve-unfreeze} & TBD & TBD & TBD & TBD \\
@@ -370,7 +362,6 @@ Beban kerja & p50 (ms) & Rentang p50 (ms) & p95 (ms) & Rentang p95 (ms) \\
 \texttt{read-transfer-limit} & TBD & TBD & TBD & TBD \\
 \texttt{open-wallet} & TBD & TBD & TBD & TBD \\
 \texttt{transfer-retail} & TBD & TBD & TBD & TBD \\
-\texttt{transfer-merchant} & TBD & TBD & TBD & TBD \\
 \texttt{convert-to-retail} & TBD & TBD & TBD & TBD \\
 \texttt{fund-wallet} & TBD & TBD & TBD & TBD \\
 \texttt{read-retail-float} & TBD & TBD & TBD & TBD \\
@@ -380,7 +371,7 @@ Beban kerja & p50 (ms) & Rentang p50 (ms) & p95 (ms) & Rentang p95 (ms) \\
 \end{tabular}%
 \end{table}
 
-Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk TBD beban kerja, yaitu 30 sampel per jendela dan tiga jendela per beban kerja. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai minimum, median, dan maksimum antar jendela konfirmasi untuk CPU rata-rata, puncak CPU, memori puncak, dan delta RX per kelompok komponen. Kelompok dengan beberapa instans, yaitu CouchDB dan kontainer chaincode, digabung seluruh instansnya; baris Klien Caliper hanya mencakup proses klien Caliper. Ruang nama jaringan klien tidak dihitung karena menduplikasi penghitung RX dan TX klien. Puncak CPU dan memori tiap kelompok dijumlahkan dari puncak setiap instans, sehingga merupakan batas atas. Proses \texttt{study-cli} tidak ditampilkan dalam tabel.
+Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk TBD beban kerja, yaitu 30 sampel per jendela dan tiga jendela per beban kerja. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai minimum, median, dan maksimum antar jendela konfirmasi untuk CPU rata-rata, puncak CPU, memori puncak, dan delta RX per kelompok komponen. Kelompok dengan beberapa instans, yaitu CouchDB dan kontainer chaincode, digabung seluruh instansnya, sedangkan baris Klien Caliper hanya mencakup proses klien Caliper. Ruang nama jaringan klien tidak dihitung karena menduplikasi penghitung RX dan TX klien. Puncak CPU dan memori tiap kelompok dijumlahkan dari puncak setiap instans, sehingga merupakan batas atas. Proses \texttt{study-cli} tidak ditampilkan dalam tabel.
 
 \begin{table}[H]
 \centering
@@ -408,7 +399,7 @@ Klien Caliper & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD 
 }
 \end{table}
 
-Nilai konsumsi sumber daya belum tersedia pada naskah ini dan ditandai TBD. Basis persentase CPU (per core atau per host) belum didefinisikan dan perlu ditetapkan sebelum nilai dibaca.Kolom delta menunjukkan median delta RX per jendela konfirmasi (MB); delta I/O disk belum dirangkum pada tabel ini. Nilai tersebut nantinya hanya mewakili pengukuran pada satu host.
+Nilai konsumsi sumber daya belum tersedia pada naskah ini dan ditandai TBD. Basis persentase CPU (per core atau per host) belum didefinisikan dan perlu ditetapkan sebelum nilai dibaca.Kolom delta menunjukkan median delta RX per jendela konfirmasi (MB), sedangkan delta I/O disk belum dirangkum pada tabel ini. Nilai tersebut nantinya hanya mewakili pengukuran pada satu host.
 
 \subsection{Pembahasan}
 

@@ -1,0 +1,38 @@
+% AD09: konsumen pemantauan pada backend, aturan R1 sampai R3, konfirmasi peringatan, dan draf LTKM (UML 2 activity diagram, TikZ).
+\begin{tikzpicture}
+\draw[lanebody] (0,-0.9) rectangle (4.967,-14.2);
+\draw[lanebody] (4.967,-0.9) rectangle (9.933,-14.2);
+\draw[lanebody] (9.933,-0.9) rectangle (14.9,-14.2);
+\node[lane, text width=3.4cm] at (2.483,-0.45) {Chaincode\\(\scriptsize payments dan controls)};
+\node[lane, text width=3.4cm] at (7.45,-0.45) {Konsumen pemantauan\\(\scriptsize backend)};
+\node[lane, text width=3.4cm] at (12.417,-0.45) {Compliance Officer};
+
+\node[start] (s0) at (2.483,-1.2) {};
+\node[action, text width=3.2cm] (a1) at (2.483,-2.4) {Transfer dikomit\\{\scriptsize peristiwa \texttt{TransferReceived}}};
+\node[action, text width=3.2cm] (a2) at (7.45,-2.4) {Catat arus\\{\scriptsize\texttt{monitoring\_flows}}};
+\node[decision, minimum width=2.6cm, minimum height=1.3cm] (d1) at (7.45,-4.5) {R1, R2, atau\\R3 terpenuhi?};
+\node[final] (f1) at (2.483,-4.5) {};
+\node[font=\scriptsize, align=center] at (2.483,-5.1) {Tidak ada\\peringatan};
+\node[action, text width=3.2cm] (a3) at (7.45,-6.6) {Simpan peringatan\\{\scriptsize status \texttt{open}}};
+\node[action, text width=3.2cm] (a4) at (12.417,-6.6) {Tinjau peringatan\\{\scriptsize GET /monitoring-\allowbreak alerts}};
+\node[decision, minimum width=2.6cm, minimum height=1.1cm] (d2) at (12.417,-8.6) {Dugaan\\dikonfirmasi?};
+\node[final] (f2) at (7.45,-8.6) {};
+\node[font=\scriptsize, align=center] at (7.45,-9.2) {Peringatan\\tetap \texttt{open}};
+\node[action, text width=3.2cm] (a5) at (12.417,-10.6) {Konfirmasi\\{\scriptsize POST /monitoring-\allowbreak alerts/\allowbreak\{id\}/\allowbreak confirmations}};
+\node[action, text width=3.2cm] (a6) at (7.45,-12.1) {Tulis draf LTKM\\{\scriptsize tidak dikirim ke PPATK}};
+\node[action, text width=3.2cm] (a7) at (2.483,-12.1) {{\scriptsize\texttt{RevokeLowRisk()}}\\[1pt]tanpa pemberitahuan pelanggan};
+\node[final] (f3) at (2.483,-13.6) {};
+
+\draw[flow] (s0) -- (a1);
+\draw[flow] (a1.east) -- (a2.west);
+\draw[flow] (a2.south) -- (d1.north);
+\draw[flow] (d1.west) -- node[guard, above] {[tidak]} (f1.east);
+\draw[flow] (d1.south) -- node[guard, right] {[ya]} (a3.north);
+\draw[flow] (a3.east) -- (a4.west);
+\draw[flow] (a4.south) -- (d2.north);
+\draw[flow] (d2.west) -- node[guard, above] {[tidak]} (f2.east);
+\draw[flow] (d2.south) -- node[guard, right] {[ya]} (a5.north);
+\draw[flow] (a5.south) |- (a6.east);
+\draw[flow] (a6.west) -- (a7.east);
+\draw[flow] (a7.south) -- (f3.north);
+\end{tikzpicture}
