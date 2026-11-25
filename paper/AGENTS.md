@@ -78,6 +78,10 @@ Read the matching pages before writing or reviewing a section.
 6. Write "Fig. N", "Table N", "Section II", and "Eq. (N)" consistently.
 7. Formal register, confident and direct. Hedge only where the evidence is limited.
 
+## Repetition
+
+- No repeated word in a sentence or paragraph. When the referent is clear, replace the repeated noun with a demonstrative pronoun ("ini", "itu", "tersebut"). Compact before adding. User decision 2026-11-10; applies to paper and thesis.
+
 ## Strong writing
 
 Root `CLAUDE.md` § Strong writing and reasoning holds the 10 rules. This section gives their paper form. It extends Reasoning and Writing style; it does not replace them.
@@ -94,7 +98,7 @@ Root `CLAUDE.md` § Strong writing and reasoning holds the 10 rules. This sectio
 
 ## Layout
 
-1. Architecture figure: full width (`figure*`), layered, near the start of the design section.
+1. Architecture figure: full width (`figure*`), layered, near the start of the design section. Draw it with the method in thesis/AGENTS.md § Drawing a new figure in TikZ; size the canvas to the IEEE \textwidth instead of 424 pt.
 2. Result figures: bar or line charts, grouped in rows of 2–3 panels.
 3. Figure captions below, "Fig. N." plus one to three descriptive sentences.
 4. Table captions above, "TABLE I" with a small-caps title.
