@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"crypto"
 	"crypto/x509"
 	"encoding/pem"
@@ -31,6 +32,7 @@ type FabricContract interface {
 type StudyLedgerService struct {
 	identities map[string]config.FabricStudyIdentity
 	contracts  map[string]map[string]FabricContract
+	networks   map[string]*client.Network
 	closers    []func() error
 }
 
@@ -45,20 +47,22 @@ func NewStudyLedgerService(cfg *config.Config) (*StudyLedgerService, error) {
 	service := &StudyLedgerService{
 		identities: identities,
 		contracts:  make(map[string]map[string]FabricContract, len(identities)),
+		networks:   make(map[string]*client.Network, len(identities)),
 	}
 	for username, studyIdentity := range identities {
-		contracts, closeFn, err := connectStudyContracts(studyIdentity, cfg.StudyChannelName)
+		network, contracts, closeFn, err := connectStudyContracts(studyIdentity, cfg.StudyChannelName)
 		if err != nil {
 			_ = service.Close()
 			return nil, fmt.Errorf("study identity %s: %w", username, err)
 		}
 		service.contracts[username] = contracts
+		service.networks[username] = network
 		service.closers = append(service.closers, closeFn)
 	}
 	return service, nil
 }
 
-func connectStudyContracts(studyIdentity config.FabricStudyIdentity, channelName string) (map[string]FabricContract, func() error, error) {
+func connectStudyContracts(studyIdentity config.FabricStudyIdentity, channelName string) (*client.Network, map[string]FabricContract, func() error, error) {
 	gatewayConfig := config.FabricGateway{
 		MSPID:        studyIdentity.MSPID,
 		PeerEndpoint: studyIdentity.PeerEndpoint,
@@ -69,26 +73,26 @@ func connectStudyContracts(studyIdentity config.FabricStudyIdentity, channelName
 	}
 	creds, err := credentials.NewClientTLSFromFile(gatewayConfig.TLSCertPath, gatewayTLSServerName(gatewayConfig.GatewayPeer))
 	if err != nil {
-		return nil, nil, fmt.Errorf("tls creds: %w", err)
+		return nil, nil, nil, fmt.Errorf("tls creds: %w", err)
 	}
 	clientConn, err := grpc.NewClient(gatewayConfig.PeerEndpoint, grpc.WithTransportCredentials(creds))
 	if err != nil {
-		return nil, nil, fmt.Errorf("grpc tls dial: %w", err)
+		return nil, nil, nil, fmt.Errorf("grpc tls dial: %w", err)
 	}
 	id, err := loadIdentity(gatewayConfig)
 	if err != nil {
 		_ = clientConn.Close()
-		return nil, nil, fmt.Errorf("identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("identity: %w", err)
 	}
 	sign, err := loadStudySigner(gatewayConfig.KeyPath)
 	if err != nil {
 		_ = clientConn.Close()
-		return nil, nil, fmt.Errorf("signer: %w", err)
+		return nil, nil, nil, fmt.Errorf("signer: %w", err)
 	}
 	gw, err := client.Connect(id, client.WithSign(sign), client.WithClientConnection(clientConn))
 	if err != nil {
 		_ = clientConn.Close()
-		return nil, nil, fmt.Errorf("gateway connect: %w", err)
+		return nil, nil, nil, fmt.Errorf("gateway connect: %w", err)
 	}
 	network := gw.GetNetwork(channelName)
 	contracts := map[string]FabricContract{
@@ -96,7 +100,7 @@ func connectStudyContracts(studyIdentity config.FabricStudyIdentity, channelName
 		studyControlsChaincode: network.GetContract(studyControlsChaincode),
 		studyPaymentsChaincode: network.GetContract(studyPaymentsChaincode),
 	}
-	return contracts, func() error {
+	return network, contracts, func() error {
 		gw.Close()
 		return clientConn.Close()
 	}, nil
@@ -132,22 +136,6 @@ func loadStudySigner(keyPath string) (identity.Sign, error) {
 	return identity.NewPrivateKeySign(signer)
 }
 
-// DistributorUsername picks the configured Distributor identity that reads payee
-// records for transfers. The lowest username wins when several are configured.
-func (s *StudyLedgerService) DistributorUsername() (string, error) {
-	var names []string
-	for username, studyIdentity := range s.identities {
-		if studyIdentity.MSPID == "DistributorMSP" {
-			names = append(names, username)
-		}
-	}
-	if len(names) == 0 {
-		return "", Forbidden("study Distributor identity is not configured")
-	}
-	sort.Strings(names)
-	return names[0], nil
-}
-
 func (s *StudyLedgerService) IdentityMSP(username string) (string, error) {
 	identity, ok := s.identities[username]
 	if !ok {
@@ -175,6 +163,31 @@ func (s *StudyLedgerService) SubmitWithTransient(username string, expectedMSP st
 		return nil, Internal("study ledger transaction failed", err)
 	}
 	return result, nil
+}
+
+// UsernameForMSP returns the first configured identity of an organization by username, so the choice is stable.
+func (s *StudyLedgerService) UsernameForMSP(mspID string) (string, bool) {
+	var usernames []string
+	for username, identity := range s.identities {
+		if identity.MSPID == mspID {
+			usernames = append(usernames, username)
+		}
+	}
+	if len(usernames) == 0 {
+		return "", false
+	}
+	sort.Strings(usernames)
+	return usernames[0], true
+}
+
+// ChaincodeEvents streams the committed events of one chaincode through the identity's gateway connection.
+// The channel closes when the stream ends or ctx is cancelled.
+func (s *StudyLedgerService) ChaincodeEvents(ctx context.Context, username string, chaincode string, options ...client.ChaincodeEventsOption) (<-chan *client.ChaincodeEvent, error) {
+	network := s.networks[username]
+	if network == nil {
+		return nil, Forbidden("study Fabric identity is not configured")
+	}
+	return network.ChaincodeEvents(ctx, chaincode, options...)
 }
 
 func (s *StudyLedgerService) Evaluate(username string, expectedMSP string, chaincode string, transaction string, args ...string) ([]byte, error) {

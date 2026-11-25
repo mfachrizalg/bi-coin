@@ -40,10 +40,19 @@ type Config struct {
 	DocumentStoreDir          string
 	ContractSchemaVersion     string
 	MaxBodyBytes              int64
-	ReadTimeout               time.Duration
-	ReadHeaderTimeout         time.Duration
-	WriteTimeout              time.Duration
-	IdleTimeout               time.Duration
+
+	// Monitoring thresholds for rules R1 to R3 (alerts for compliance review only). Environment variables and defaults:
+	// MONITOR_UNVERIFIED_ALERT_PERCENT 80, MONITOR_VELOCITY_MAX_TRANSFERS_24H 10,
+	// MONITOR_STRUCTURING_MIN_TRANSFERS_24H 3, MONITOR_STRUCTURING_BAND_PERCENT 10.
+	MonitorUnverifiedAlertPercent  int
+	MonitorVelocityMaxTransfers    int
+	MonitorStructuringMinTransfers int
+	MonitorStructuringBandPercent  int
+
+	ReadTimeout       time.Duration
+	ReadHeaderTimeout time.Duration
+	WriteTimeout      time.Duration
+	IdleTimeout       time.Duration
 }
 
 func Load() *Config {
@@ -59,10 +68,16 @@ func Load() *Config {
 		DocumentStoreDir:          getEnv("DOCUMENT_STORE_DIR", "backend/data/documents"),
 		ContractSchemaVersion:     getEnv("CONTRACT_SCHEMA_VERSION", ""),
 		MaxBodyBytes:              int64(getEnvInt("HTTP_MAX_BODY_BYTES", 3<<20)),
-		ReadTimeout:               time.Duration(getEnvInt("HTTP_READ_TIMEOUT_SECONDS", 15)) * time.Second,
-		ReadHeaderTimeout:         time.Duration(getEnvInt("HTTP_READ_HEADER_TIMEOUT_SECONDS", 5)) * time.Second,
-		WriteTimeout:              time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT_SECONDS", 30)) * time.Second,
-		IdleTimeout:               time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT_SECONDS", 60)) * time.Second,
+
+		MonitorUnverifiedAlertPercent:  getEnvInt("MONITOR_UNVERIFIED_ALERT_PERCENT", 80),
+		MonitorVelocityMaxTransfers:    getEnvInt("MONITOR_VELOCITY_MAX_TRANSFERS_24H", 10),
+		MonitorStructuringMinTransfers: getEnvInt("MONITOR_STRUCTURING_MIN_TRANSFERS_24H", 3),
+		MonitorStructuringBandPercent:  getEnvInt("MONITOR_STRUCTURING_BAND_PERCENT", 10),
+
+		ReadTimeout:       time.Duration(getEnvInt("HTTP_READ_TIMEOUT_SECONDS", 15)) * time.Second,
+		ReadHeaderTimeout: time.Duration(getEnvInt("HTTP_READ_HEADER_TIMEOUT_SECONDS", 5)) * time.Second,
+		WriteTimeout:      time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT_SECONDS", 30)) * time.Second,
+		IdleTimeout:       time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT_SECONDS", 60)) * time.Second,
 	}
 }
 

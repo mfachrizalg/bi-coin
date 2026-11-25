@@ -14,7 +14,7 @@ import (
 func TestCreateSubjectRejectsNonImageDocument(t *testing.T) {
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
-	for key, value := range map[string]string{"category": "retail", "legal_name": "Test Subject", "document_type": "ktp", "document_number": "0000000000000000"} {
+	for key, value := range onboardingFields() {
 		if err := writer.WriteField(key, value); err != nil {
 			t.Fatal(err)
 		}

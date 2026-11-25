@@ -40,6 +40,12 @@ func newRequestValidator() *validator.Validate {
 	_ = validate.RegisterValidation("restriction_reason", func(field validator.FieldLevel) bool {
 		return models.StudyRestrictionReason(field.Field().String()).Valid()
 	})
+	_ = validate.RegisterValidation("dttot_result", func(field validator.FieldLevel) bool {
+		return models.StudyDttotResult(field.Field().String()).Valid()
+	})
+	_ = validate.RegisterValidation("close_reason", func(field validator.FieldLevel) bool {
+		return models.StudyCloseReason(field.Field().String()).Valid()
+	})
 	return validate
 }
 
@@ -142,6 +148,10 @@ func writeRequestValidationErrors(w http.ResponseWriter, err error) {
 			message = field.Field() + " must be one of: " + strings.ReplaceAll(field.Param(), " ", ", ")
 		case "restriction_reason":
 			message = "reason_code must be dttot, authority_order, or internal_review"
+		case "dttot_result":
+			message = "dttot_result must be not_listed or listed"
+		case "close_reason":
+			message = "reason must be data_missing, fictitious, identity_doubtful, or customer_request"
 		case "positive_int64":
 			message = field.Field() + " must be a positive whole-rupiah integer"
 		case "nonnegative_int64":

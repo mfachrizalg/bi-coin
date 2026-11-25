@@ -84,6 +84,14 @@ func newHTTPServer(cfg *config.Config, authSvc *services.AuthService, store *ser
 		IdleTimeout:       cfg.IdleTimeout,
 	}
 	if studySvc != nil {
+		// The monitor is best effort: a missing identity or an unreachable event stream is logged and never stops the API.
+		if monitor, err := services.NewTransferMonitor(store, studySvc, services.MonitorThresholdsFromConfig(cfg)); err != nil {
+			log.Printf("transfer monitor not started: %v", err)
+		} else {
+			monitorCtx, stopMonitor := context.WithCancel(context.Background())
+			go monitor.Run(monitorCtx)
+			server.RegisterOnShutdown(stopMonitor)
+		}
 		server.RegisterOnShutdown(func() {
 			if err := studySvc.Close(); err != nil {
 				log.Printf("close study Fabric gateways: %v", err)

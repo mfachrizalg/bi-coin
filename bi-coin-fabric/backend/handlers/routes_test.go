@@ -21,10 +21,12 @@ func studyRequest(method, path, body string, role middleware.Role) *http.Request
 }
 
 func TestControlRoutesEnforceRoles(t *testing.T) {
-	router := mux.NewRouter()
-	RegisterStudyRoutes(router, &services.StudyLedgerService{}, nil, "")
+	router := newStudyTestRouter(&fakeLedger{}, &fakeStore{}, "")
 
 	centralBank := []middleware.Role{middleware.RoleBankIndonesia}
+	retailBank := []middleware.Role{middleware.RoleRetailBank}
+	bankAndAuditor := []middleware.Role{middleware.RoleBankIndonesia, middleware.RoleAuditor}
+	signedIn := []middleware.Role{middleware.RoleAuthenticated, middleware.RoleKycVerified}
 	read := []middleware.Role{middleware.RoleRetailBank, middleware.RoleBankIndonesia, middleware.RoleAuditor}
 	allRoles := []middleware.Role{
 		middleware.RoleAuthenticated, middleware.RoleKycVerified, middleware.RoleRetailBank,
@@ -39,6 +41,18 @@ func TestControlRoutesEnforceRoles(t *testing.T) {
 	}{
 		{"compliance.distributors.create", "POST", "/distributors", "/distributors", centralBank},
 		{"compliance.distributors.read", "GET", "/distributors/{distributor_id}", "/distributors/distributor-1", read},
+		{"compliance.subjects.create", "POST", "/subjects", "/subjects", signedIn},
+		{"compliance.retail-transfers.create", "POST", "/retail-transfers", "/retail-transfers", []middleware.Role{middleware.RoleKycVerified}},
+		{"compliance.subjects.reviews.create", "POST", "/subjects/{subject_id}/reviews", "/subjects/s1/reviews", retailBank},
+		{"compliance.subjects.verifications.create", "POST", "/subjects/{subject_id}/verifications", "/subjects/s1/verifications", retailBank},
+		{"compliance.subjects.updates.create", "POST", "/subjects/{subject_id}/updates", "/subjects/s1/updates", retailBank},
+		{"compliance.subjects.closures.create", "POST", "/subjects/{subject_id}/closures", "/subjects/s1/closures", retailBank},
+		{"compliance.subjects.low-risk-revocations.create", "POST", "/subjects/{subject_id}/low-risk-revocations", "/subjects/s1/low-risk-revocations", retailBank},
+		{"compliance.cdd-ceilings.update", "PUT", "/cdd-ceilings", "/cdd-ceilings", centralBank},
+		{"compliance.cdd-ceilings.read", "GET", "/cdd-ceilings", "/cdd-ceilings", read},
+		{"compliance.sederhana-register.read", "GET", "/sederhana-register", "/sederhana-register", bankAndAuditor},
+		{"compliance.monitoring-alerts.read", "GET", "/monitoring-alerts", "/monitoring-alerts", read},
+		{"compliance.monitoring-alerts.confirmations.create", "POST", "/monitoring-alerts/{alert_id}/confirmations", "/monitoring-alerts/a1/confirmations", retailBank},
 	}
 	for _, route := range routes {
 		t.Run(route.name, func(t *testing.T) {
@@ -66,6 +80,7 @@ func TestControlRoutesEnforceRoles(t *testing.T) {
 		})
 	}
 	for _, removed := range []string{
+		"compliance.subjects.business-authority.update",
 		"compliance.interbank-transfers.create",
 		"compliance.distributors.approval-threshold-proposals.create",
 		"compliance.distributors.status.update",
