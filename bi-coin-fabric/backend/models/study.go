@@ -50,12 +50,6 @@ func (reason StudyCloseReason) Valid() bool {
 	}
 }
 
-// Defaults the backend applies to a review that omits a field. The chaincode has no defaults.
-const (
-	StudyDefaultLowRisk       = true
-	StudyDefaultLowRiskReason = "capped product"
-)
-
 // SederhanaRegisterEntry is one row of the register of CDD Sederhana users with the reason (guideline Bab 7).
 type SederhanaRegisterEntry struct {
 	SubjectID     string    `json:"subject_id"`

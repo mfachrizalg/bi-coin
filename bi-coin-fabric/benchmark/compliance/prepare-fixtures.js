@@ -8,6 +8,7 @@ const { login } = require('./http-access-matrix');
 
 // Holdings stay at the 20000000 verified CDD ceiling, the highest value SetLimits accepts.
 const LIMITS = { per_transaction: '1000000000', daily: '1000000000', monthly: '1000000000', holdings: '20000000' };
+const REVIEW = { dttot_result: 'not_listed', low_risk: true, low_risk_reason: 'capped product' };
 
 async function createApiClient(api) {
     const tokens = new Map();
@@ -121,7 +122,7 @@ async function prepareSubject(client, owner, { active = false, restricted = fals
     const id = await onboardSubject(client, owner);
     await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/endorsement-policies`);
     await client.request('reviewer', 'PUT', `/subjects/${encodeURIComponent(id)}/limits`, LIMITS);
-    if (recordReview) await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/reviews`, {});
+    if (recordReview) await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/reviews`, REVIEW);
     if (active) {
         await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/decisions`, { approved: true });
     }
@@ -199,9 +200,9 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             break;
         case 'record-review':
             route = `/subjects/${encodeURIComponent(id)}/reviews`;
-            body = {};
+            body = REVIEW;
             args = [id];
-            transient = { payload: JSON.stringify({ dttot_result: 'not_listed', low_risk: true, low_risk_reason: 'capped product' }) };
+            transient = { payload: JSON.stringify(REVIEW) };
             break;
         case 'approve-subject':
             route = `/subjects/${encodeURIComponent(id)}/decisions`;

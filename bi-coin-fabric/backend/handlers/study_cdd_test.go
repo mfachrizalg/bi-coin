@@ -238,15 +238,14 @@ func TestCreateSubjectRejectsInvalidForms(t *testing.T) {
 	}
 }
 
-func TestRecordReviewAppliesDefaults(t *testing.T) {
+func TestRecordReviewSubmitsExplicitFields(t *testing.T) {
 	tests := []struct {
 		name        string
 		body        string
 		wantPayload string
 		wantStore   []string
 	}{
-		{"all omitted", `{}`, `{"dttot_result":"not_listed","low_risk":true,"low_risk_reason":"capped product"}`, []string{"s1", "not_listed", "capped product"}},
-		{"explicit reason", `{"low_risk_reason":"salary wallet"}`, `{"dttot_result":"not_listed","low_risk":true,"low_risk_reason":"salary wallet"}`, []string{"s1", "not_listed", "salary wallet"}},
+		{"low risk with reason", `{"dttot_result":"not_listed","low_risk":true,"low_risk_reason":" salary wallet "}`, `{"dttot_result":"not_listed","low_risk":true,"low_risk_reason":"salary wallet"}`, []string{"s1", "not_listed", "salary wallet"}},
 		{"listed and not low risk", `{"dttot_result":"listed","low_risk":false}`, `{"dttot_result":"listed","low_risk":false,"low_risk_reason":""}`, []string{"s1", "listed", ""}},
 	}
 	for _, test := range tests {
@@ -267,11 +266,22 @@ func TestRecordReviewAppliesDefaults(t *testing.T) {
 	}
 }
 
-func TestRecordReviewRejectsUnknownDttotResult(t *testing.T) {
-	ledger := &fakeLedger{}
-	response := serve(newStudyTestRouter(ledger, &fakeStore{}, ""), studyRequest("POST", "/subjects/s1/reviews", `{"dttot_result":"maybe"}`, middleware.RoleRetailBank))
-	if response.Code != http.StatusUnprocessableEntity || !strings.Contains(response.Body.String(), "dttot_result") || len(ledger.calls) != 0 {
-		t.Fatalf("status %d body %s calls %+v", response.Code, response.Body.String(), ledger.calls)
+func TestRecordReviewRejectsIncompleteReview(t *testing.T) {
+	tests := []struct{ name, body, want string }{
+		{"empty body", `{}`, "dttot_result"},
+		{"missing low_risk", `{"dttot_result":"not_listed"}`, "low_risk"},
+		{"missing dttot_result", `{"low_risk":false}`, "dttot_result"},
+		{"unknown dttot_result", `{"dttot_result":"maybe","low_risk":false}`, "dttot_result"},
+		{"low risk without reason", `{"dttot_result":"not_listed","low_risk":true,"low_risk_reason":"  "}`, "low_risk_reason"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ledger := &fakeLedger{}
+			response := serve(newStudyTestRouter(ledger, &fakeStore{}, ""), studyRequest("POST", "/subjects/s1/reviews", test.body, middleware.RoleRetailBank))
+			if response.Code != http.StatusUnprocessableEntity || !strings.Contains(response.Body.String(), test.want) || len(ledger.calls) != 0 {
+				t.Fatalf("status %d body %s calls %+v", response.Code, response.Body.String(), ledger.calls)
+			}
+		})
 	}
 }
 

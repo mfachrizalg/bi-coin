@@ -79,7 +79,7 @@ function capacityBoundary(workload) {
 }
 
 function curveRows(capacity) {
-    return (capacity.workloads || []).filter(item => item.load_curve?.levels?.length).flatMap(item => item.load_curve.levels.map(level => ({
+    return (capacity?.workloads || []).filter(item => item.load_curve?.levels?.length).flatMap(item => item.load_curve.levels.map(level => ({
         workload: item.id,
         reference: item.load_curve.reference_ops_per_second,
         ...level,

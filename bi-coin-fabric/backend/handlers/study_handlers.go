@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"cmp"
 	"context"
 	"encoding/json"
 	"io"
@@ -613,25 +612,22 @@ func (h *StudyHandler) DecideSubject(w http.ResponseWriter, r *http.Request) {
 	writeStatus(w, "decided")
 }
 
-// RecordReview stores the reviewer's manual DTTOT result and low-risk decision. Omitted fields take the CDD Sederhana
-// defaults: not_listed, low risk, and the reason "capped product".
+// RecordReview stores the reviewer's manual DTTOT result and low-risk decision. The reviewer states both explicitly,
+// and a low-risk decision carries its reason (guideline Bab 7). Nothing is defaulted.
 func (h *StudyHandler) RecordReview(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		DttotResult   string `json:"dttot_result" validate:"omitempty,dttot_result"`
-		LowRisk       *bool  `json:"low_risk"`
+		DttotResult   string `json:"dttot_result" validate:"required,dttot_result"`
+		LowRisk       *bool  `json:"low_risk" validate:"required"`
 		LowRiskReason string `json:"low_risk_reason"`
 	}
 	if !decodeJSON(w, r, &req) {
 		return
 	}
-	dttotResult := cmp.Or(req.DttotResult, string(models.StudyDttotNotListed))
-	lowRisk := models.StudyDefaultLowRisk
-	if req.LowRisk != nil {
-		lowRisk = *req.LowRisk
-	}
+	dttotResult, lowRisk := req.DttotResult, *req.LowRisk
 	lowRiskReason := strings.TrimSpace(req.LowRiskReason)
 	if lowRisk && lowRiskReason == "" {
-		lowRiskReason = models.StudyDefaultLowRiskReason
+		writeValidationError(w, "low_risk_reason is required when low_risk is true")
+		return
 	}
 	subjectID := mux.Vars(r)["subject_id"]
 	contents := map[string]any{"dttot_result": dttotResult, "low_risk": lowRisk, "low_risk_reason": lowRiskReason}
