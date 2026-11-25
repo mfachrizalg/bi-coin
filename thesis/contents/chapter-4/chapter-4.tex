@@ -109,13 +109,31 @@ pembukaan dompet dan pembayaran, pendanaan dari cadangan, verifikasi, pembaruan,
 pembukaan pembatasan subjek, serta pencabutan status risiko rendah. Rincian hasil uji integrasi disajikan pada bagian akhir
 bab ini.
 
-% TODO(G-hasil): isi klasifikasi lulus/gagal dari run kebenaran yang memakai katalog 29 skenario setelah jaringan dipasang ulang. Jangan memakai angka katalog lama.
-Pemeriksaan kebenaran dijalankan pada katalog 29 skenario fungsional, matriks peran-rute untuk otorisasi, kasus validasi permintaan, dan pemeriksaan hasil aksi. Jumlah skenario yang lulus (TBD dari 29), sel peran-rute yang lulus (TBD), kasus validasi yang lulus (TBD), dan pemeriksaan hasil aksi yang lulus (TBD) belum tersedia pada naskah ini. Setelah hasilnya ada, temuan tersebut tidak ditafsirkan sebagai
+Pemeriksaan kebenaran dijalankan pada katalog 29 skenario fungsional, matriks peran-rute untuk otorisasi, kasus validasi permintaan, dan pemeriksaan hasil aksi. Tabel~\ref{tab:ch4-ringkasan-kebenaran} menyajikan ringkasan hasilnya.
+
+\begin{table}[H]
+\caption{Ringkasan hasil pemeriksaan kebenaran pada jaringan studi.}
+\label{tab:ch4-ringkasan-kebenaran}
+\vspace{0.5em}
+\centering
+\begin{tabular}{lrr}
+\toprule
+Komponen pemeriksaan & Diuji & Lulus \\
+\midrule
+Skenario fungsional & 29 & 29 \\
+Sel peran-rute untuk otorisasi & 222 & 222 \\
+Kasus validasi permintaan & 20 & 20 \\
+Hasil aksi pada rute tanpa isi permintaan & 38 & 38 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hasil pada Tabel~\ref{tab:ch4-ringkasan-kebenaran} menunjukkan bahwa pemeriksaan kebenaran berklasifikasi lulus. Seluruh 29 skenario fungsional dieksekusi dan lulus, dan tidak ada sel peran-rute, kasus validasi, atau pemeriksaan hasil aksi yang tidak terselesaikan. Pada tingkat \textit{ledger}, pemeriksaan mencatat 72 penolakan otorisasi MSP dan empat penolakan terhadap pemanggilan langsung fungsi debit bersarang. Pemanggilan ulang inisialisasi tidak mengubah keadaan \textit{ledger}, dan saldo cadangan sama dengan pasokan grosir sebesar 1.496.569, sehingga pasokan grosir dan ritel berjumlah 3.999.000 sama dengan pasokan total. Hasil ini menunjukkan bahwa pelanggaran terhadap kebijakan yang berlaku ditolak pada lapisan \textit{chaincode} maupun pada lapisan API, dan bahwa rute peninjauan menolak permintaan yang tidak menyatakan hasil DTTOT dan penanda risiko rendah secara eksplisit. Temuan tersebut tidak ditafsirkan sebagai
 bukti validasi menyeluruh, pembuktian \textit{end-to-end}, atau kesiapan sistem untuk
 lingkungan produksi berskala penuh.
 
 Jika dirujukkan ke SRS pada Tabel~\ref{tab:srs-verifikasi}, hasil pada subbab ini
-akan memberikan bukti untuk FR-01, FR-03, FR-05, FR-06, FR-07, dan NFR-02 dengan cakupan yang
+memberikan bukti untuk FR-01, FR-03, FR-05, FR-06, FR-07, dan NFR-02 dengan cakupan yang
 berbeda-beda. FR-01 didukung oleh skenario pendaftaran dan persetujuan subjek, pembatasan dan pembukaan pembatasan subjek, serta pendanaan dari
 cadangan, sedangkan penghentian peserta belum tercakup. FR-02
 belum didukung oleh pengukuran kinerja, karena beban kerja penerbitan (\texttt{issue}) belum diukur. FR-03 didukung oleh skenario yang menunjukkan penolakan transaksi moneter dan pembayaran
@@ -123,7 +141,7 @@ ketika kebijakan yang berlaku tidak terpenuhi. FR-04 hanya didukung sebagian mel
 pembacaan subjek oleh \texttt{ValidatorMSP}, dan laporan rekonsiliasi serta metrik belum
 diuji pada jaringan studi. FR-05 didukung oleh matriks otorisasi peran terhadap rute
 API. FR-06 dan FR-07 didukung oleh skenario CDD pada kelompok pertama Tabel~\ref{tab:uji-fungsional}, yaitu gerbang persetujuan, batas kepemilikan menurut status verifikasi, pembaruan data, penutupan, dan pencabutan status risiko rendah. FR-08 didukung oleh \textit{unit test} aturan R1 sampai R3 pada \textit{backend}, tetapi belum oleh uji integrasi pada jaringan, sehingga pembentukan peringatan dari peristiwa \texttt{TransferReceived} pada jaringan yang berjalan belum terbukti. NFR-02 didukung oleh inspeksi model data, dan \textit{unit test} terpilih tidak termasuk dalam pemeriksaan kebenaran ini.
-Seluruh dukungan tersebut baru berlaku setelah hasil pemeriksaan kebenaran tersedia (TBD). Klaim konformansi keseluruhan baru dapat dinyatakan pada saat itu, dan cakupan FR-04 tetap terbatas.
+Karena klasifikasi pemeriksaan kebenaran adalah lulus, klaim konformansi dapat dinyatakan untuk skenario sintetis yang diuji, sedangkan cakupan FR-04 tetap terbatas.
 
 
 \section{Hasil Evaluasi Kinerja Final}
@@ -246,15 +264,14 @@ Gambar~\ref{fig:ch3-study-sequence-conversion}, dan
 Gambar~\ref{fig:ch3-study-sequence-transfer}. Hasil pengujian berikut
 mengevaluasi alur kontrol sintetis tersebut.
 
-% TODO(G-hasil): isi jumlah skenario lulus dari run kebenaran dengan katalog 29 skenario. Tambahkan hasil uji pemantauan (peringatan R1 sampai R3) bila run integrasi memuatnya.
-Uji integrasi sintetis pada jaringan menjalankan 29 skenario fungsional, dan jumlah yang lulus (TBD dari 29) belum tersedia pada naskah ini. Skenario tersebut mencakup pendaftaran subjek dan gerbang CDD sederhana, verifikasi, pembaruan, dan penutupan subjek, pencabutan status risiko rendah, alur
+Uji integrasi sintetis pada jaringan menjalankan 29 skenario fungsional, dan seluruhnya lulus (29 dari 29). Skenario tersebut mencakup pendaftaran subjek dan gerbang CDD sederhana, verifikasi, pembaruan, dan penutupan subjek, pencabutan status risiko rendah, alur
 pembukaan dompet dan pembayaran, pendanaan dari cadangan, pembatasan dan
 pembukaan pembatasan dengan bukti otoritas, serta pembacaan subjek oleh
 \texttt{ValidatorMSP}. Skenario negatif memeriksa bahwa transaksi moneter, pembayaran,
 pendanaan, dan perubahan kontrol ditolak ketika organisasi pendukung tidak memenuhi
-kebijakan yang berlaku. \textit{Unit test} pada ketiga modul \textit{chaincode} dan seluruh paket \textit{backend} tidak termasuk dalam pemeriksaan kebenaran ini.
+kebijakan yang berlaku. \textit{Unit test} pada ketiga modul \textit{chaincode} dan seluruh paket \textit{backend}, serta aturan pemantauan R1 sampai R3, tidak termasuk dalam pemeriksaan kebenaran ini.
 
-Hasil ini hanya akan menunjukkan perilaku fungsional pada skenario sintetis yang diuji,
+Hasil ini hanya menunjukkan perilaku fungsional pada skenario sintetis yang diuji,
 bukan kepatuhan hukum menyeluruh, efektivitas deteksi AML/CFT pada populasi
 nyata, atau keberhasilan pengiriman laporan kepada PPATK.
 
