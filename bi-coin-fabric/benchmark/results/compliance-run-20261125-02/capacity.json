@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "worker_count": 1,
+  "performance_method_count": 31,
+  "performance_workload_count": 31,
+  "protocol": {
+    "worker_count": 1,
+    "measurement_mode": "binary-search-and-confirmation",
+    "minimum_rate_ops_per_second": 0.1,
+    "maximum_rate_ops_per_second": 4096,
+    "initial_rate_ops_per_second": 32,
+    "unbounded_rate_expansion_factor": 4,
+    "probe_duration_seconds": 10,
+    "boundary_tolerance_percent": 10,
+    "confirmation_repetitions": 3,
+    "confirmation_duration_seconds": 30,
+    "delivered_load_tolerance_percent": 5,
+    "max_drain_seconds": 3,
+    "load_curve": {
+      "workloads": [
+        "create-pending",
+        "transfer-retail",
+        "issue",
+        "fund-wallet",
+        "read-balance"
+      ],
+      "levels": [
+        0.25,
+        0.5,
+        0.75,
+        1,
+        1.25,
+        1.5
+      ],
+      "duration_seconds": 60,
+      "reference": "confirmed passing rate, or client-bound delivered rate"
+    },
+    "resource_sample_interval_ms": 1000,
+    "performance_method_count": 31,
+    "performance_workload_count": 31,
+    "search_hint_source": "compliance-20261010-controls-v16 direct-ledger sweep; hints only",
+    "search_hints_ops_per_second": {
+      "create-pending": 64,
+      "record-review": 32,
+      "approve-subject": 32,
+      "open-wallet": 128,
+      "freeze-subject": 32,
+      "request-unfreeze": 32,
+      "approve-unfreeze": 32,
+      "issue": 32,
+      "redeem-reserve": 32
+    }
+  },
+  "workloads": [],
+  "scenario_filter": null,
+  "preflight_complete": true,
+  "preflight_passed": 31,
+  "preflight_failed": 0,
+  "updated_at": "2026-11-25T12:49:44.408Z"
+}

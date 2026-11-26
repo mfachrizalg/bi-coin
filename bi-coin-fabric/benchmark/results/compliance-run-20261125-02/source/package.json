@@ -1,0 +1,24 @@
+{
+  "name": "bi-coin-fabric",
+  "version": "1.0.0",
+  "private": true,
+  "description": "bi-coin Digital Rupiah \u2014 Hyperledger Fabric CBDC Implementation",
+  "scripts": {
+    "test:benchmarks": "node --test benchmark/workloads/*.test.js benchmark/observers/*.test.js benchmark/compliance/*.test.js scripts/*.test.js",
+    "benchmark:compliance": "bash scripts/run-compliance-benchmark.sh",
+    "benchmark:analyze": "node scripts/analyze-benchmark-results.js",
+    "benchmark:compress": "node scripts/compress-study-metrics.js",
+    "benchmark:validate": "node scripts/validate-study-artifacts.js",
+    "benchmark:manifest": "node scripts/write-study-manifest.js",
+    "benchmark:metrics:up": "docker compose -f benchmark/monitoring/docker-compose.yaml up -d --wait",
+    "benchmark:metrics:down": "docker compose -f benchmark/monitoring/docker-compose.yaml down"
+  },
+  "devDependencies": {
+    "@hyperledger/caliper-cli": "^0.6.0",
+    "@hyperledger/caliper-fabric": "^0.6.0"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.10.3",
+    "@hyperledger/fabric-gateway": "^1.5.0"
+  }
+}

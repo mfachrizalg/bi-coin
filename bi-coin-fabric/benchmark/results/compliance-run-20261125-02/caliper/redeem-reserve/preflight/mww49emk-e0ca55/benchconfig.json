@@ -1,0 +1,48 @@
+{
+  "test": {
+    "name": "Compliance redeem-reserve preflight",
+    "workers": {
+      "type": "local",
+      "number": 1
+    },
+    "rounds": [
+      {
+        "label": "preflight-redeem-reserve",
+        "txNumber": 1,
+        "rateControl": {
+          "type": "fixed-rate",
+          "opts": {
+            "tps": 1
+          }
+        },
+        "workload": {
+          "module": "benchmark/compliance/caliper-workload.js",
+          "arguments": {
+            "operationId": "redeem-reserve",
+            "channel": "bi-coin",
+            "fixturePath": "/workspace/benchmark/results/compliance-run-20261125-02/fixtures/redeem-reserve/preflight/rate-1-rep-1.json",
+            "identityMapPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/identity-map.json",
+            "eventsPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/redeem-reserve/preflight/mww49emk-e0ca55/events/preflight-redeem-reserve.jsonl",
+            "roundLabel": "preflight-redeem-reserve",
+            "durationSeconds": null,
+            "timeoutSeconds": 30
+          }
+        }
+      }
+    ]
+  },
+  "observer": {
+    "type": "local",
+    "interval": 1
+  },
+  "monitors": {
+    "transaction": [
+      {
+        "module": "./benchmark/observers/jsonl-transaction-observer.js",
+        "options": {
+          "traceDir": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/redeem-reserve/preflight/mww49emk-e0ca55/caliper-trace"
+        }
+      }
+    ]
+  }
+}

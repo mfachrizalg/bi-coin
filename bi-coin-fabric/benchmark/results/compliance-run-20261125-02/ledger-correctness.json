@@ -1,0 +1,269 @@
+{
+  "status": "passed",
+  "classification": "pass",
+  "case_results": [
+    {
+      "id": "staff-separation",
+      "status": "pass",
+      "evidence": {
+        "reviewer": "User1",
+        "compliance": "User3"
+      }
+    },
+    {
+      "id": "transfer-replay-conflict",
+      "status": "pass",
+      "evidence": {
+        "replay_state_unchanged": true,
+        "payload_conflict_state_unchanged": true,
+        "transaction_id": "payment-mww3q5j8"
+      }
+    },
+    {
+      "id": "authorization-endorsement",
+      "status": "pass",
+      "evidence": {
+        "wrong_msp_denials": 72,
+        "underendorsed_operations": 4
+      }
+    },
+    {
+      "id": "restriction-reasons",
+      "status": "pass",
+      "evidence": {
+        "tested": [
+          "dttot",
+          "authority_order",
+          "internal_review"
+        ]
+      }
+    },
+    {
+      "id": "fresh-release-evidence",
+      "status": "pass",
+      "evidence": {
+        "old_evidence_cleared": true,
+        "fresh_request_required": true,
+        "repeated_reason_checked": true
+      }
+    },
+    {
+      "id": "enduser-get-subject-denied",
+      "status": "pass",
+      "evidence": {
+        "denied_on_member_peer": "DistributorMSP",
+        "denied_identity": "EndUserMSP",
+        "state_unchanged": true
+      }
+    },
+    {
+      "id": "enduser-limits-other-subject-denied",
+      "status": "pass",
+      "evidence": {
+        "caller": "EndUser applicant for another subject",
+        "denied_on_member_peer": "DistributorMSP",
+        "state_unchanged": true
+      }
+    },
+    {
+      "id": "transfer-category-matrix",
+      "status": "pass",
+      "evidence": {
+        "sender_recipient_category_pairs": 1,
+        "balances_conserved": true
+      }
+    },
+    {
+      "id": "cdd-listed-rejected",
+      "status": "pass",
+      "evidence": {
+        "approved_by_reviewer": true,
+        "status": "rejected"
+      }
+    },
+    {
+      "id": "cdd-not-low-risk-rejected",
+      "status": "pass",
+      "evidence": {
+        "approved_by_reviewer": true,
+        "status": "rejected"
+      }
+    },
+    {
+      "id": "cdd-unverified-ceiling",
+      "status": "pass",
+      "evidence": {
+        "effective_holdings": 2000000,
+        "one_unit_over_refused_unchanged": true,
+        "exact_ceiling_accepted": true
+      }
+    },
+    {
+      "id": "cdd-verify-raises-ceiling",
+      "status": "pass",
+      "evidence": {
+        "effective_holdings": 20000000,
+        "balance_above_unverified_ceiling": 2000001
+      }
+    },
+    {
+      "id": "cdd-update-resets-verification",
+      "status": "pass",
+      "evidence": {
+        "verified_after_update": false,
+        "effective_holdings": 2000000,
+        "payment_above_ceiling_refused_unchanged": true
+      }
+    },
+    {
+      "id": "cdd-close-terminal",
+      "status": "pass",
+      "evidence": {
+        "cannot_pay": true,
+        "cannot_receive": true,
+        "close_update_verify_refused": true,
+        "state_unchanged": true
+      }
+    },
+    {
+      "id": "cdd-revoke-low-risk",
+      "status": "pass",
+      "evidence": {
+        "payee_check_refused": true,
+        "sender_refused": true,
+        "status_still_active": true,
+        "state_unchanged": true
+      }
+    },
+    {
+      "id": "transaction-limits",
+      "status": "pass",
+      "evidence": {
+        "per_transaction_exact": true,
+        "per_transaction_excess_unchanged": true,
+        "daily_exact": true,
+        "daily_excess_unchanged": true,
+        "holdings_exact": true,
+        "holdings_excess_unchanged": true
+      }
+    },
+    {
+      "id": "conversion-replay-conflict",
+      "status": "pass",
+      "evidence": {
+        "exact_replay_state_unchanged": true,
+        "payload_conflict_state_unchanged": true,
+        "receipt_reference": "fund-conversion-replay-mww3q5j8"
+      }
+    },
+    {
+      "id": "conversion-insufficient-reserve",
+      "status": "pass",
+      "evidence": {
+        "rejected_amount": 1497671,
+        "wallet_and_reserve_unchanged": true
+      }
+    },
+    {
+      "id": "insufficient-float",
+      "status": "pass",
+      "evidence": {
+        "rejected_amount": 1,
+        "float_and_wallet_unchanged": true
+      }
+    },
+    {
+      "id": "wallet-funding-holdings-limit",
+      "status": "pass",
+      "evidence": {
+        "holdings_exact": true,
+        "one_unit_over_unchanged": true
+      }
+    },
+    {
+      "id": "conversion-failure-atomicity",
+      "status": "pass",
+      "evidence": {
+        "incomplete_endorsement_left_float_and_reserve_unchanged": true
+      }
+    },
+    {
+      "id": "redemption-replay-conflict",
+      "status": "pass",
+      "evidence": {
+        "exact_replay_state_unchanged": true,
+        "payload_conflict_state_unchanged": true,
+        "insufficient_reserve_state_unchanged": true
+      }
+    },
+    {
+      "id": "redemption-conservation",
+      "status": "pass",
+      "evidence": {
+        "reserve_delta": -1000,
+        "wholesale_supply_delta": -1000,
+        "supply_delta": -1000,
+        "retail_supply": 2502431
+      }
+    },
+    {
+      "id": "receipt-read-authorization",
+      "status": "pass",
+      "evidence": {
+        "party_read": true,
+        "unrelated_party_denied": true,
+        "validator_supervision_read": true,
+        "non_validator_denied": true
+      }
+    },
+    {
+      "id": "msp-read-authorization",
+      "status": "pass",
+      "evidence": {
+        "msp_read_matrix_cells": 40,
+        "unrelated_receipt_denied": true,
+        "enduser_get_subject_denied": true
+      }
+    },
+    {
+      "id": "initialization-and-nested-debit",
+      "status": "pass",
+      "evidence": {
+        "initialization_checked": true,
+        "initialization_replay_state_unchanged": true,
+        "direct_internal_debit_denied_for_msps": 4
+      }
+    }
+  ],
+  "missing_scenarios": [],
+  "peers": [
+    "CentralBankMSP",
+    "DistributorMSP",
+    "ValidatorMSP",
+    "EndUserMSP"
+  ],
+  "msp_authorization_denials": 72,
+  "nested_debit_direct_denials": 4,
+  "initialization_replay_state_unchanged": true,
+  "read_msp_matrix_cells": 40,
+  "enduser_get_subject_denial": "rupiah-controls.GetSubject query failed: Error: endorsement failure during query. response: status:500 message:\"access denied for subject retail-mww3q5j8-001\"",
+  "policies": {
+    "monetary": "AND(CentralBankMSP, DistributorMSP)",
+    "controls": "AND(DistributorMSP, CentralBankMSP)",
+    "payments": "AND(DistributorMSP, CentralBankMSP)"
+  },
+  "fixtures": {
+    "retailSubject": "retail-mww3q5j8-001",
+    "secondRetailSubject": "retail-mww3q5j8-002",
+    "rejectedSubject": "rejected-mww3q5j8-001",
+    "receiptReference": "payment-mww3q5j8"
+  },
+  "receipt_read_by_unrelated_end_user": false,
+  "retailBalance": 899,
+  "secondRetailBalance": 1101,
+  "reserve": 1496569,
+  "wholesale_supply": 1496569,
+  "retail_supply": 2502431,
+  "supply": 3999000,
+  "process_exit_status": 0
+}

@@ -1,0 +1,65 @@
+{
+  "name": "study-DistributorMSP",
+  "version": "1.0.0",
+  "client": {
+    "organization": "DistributorMSP"
+  },
+  "organizations": {
+    "EndUserMSP": {
+      "mspid": "EndUserMSP",
+      "peers": [
+        "peer0.distributor.bi-coin"
+      ]
+    },
+    "DistributorMSP": {
+      "mspid": "DistributorMSP",
+      "peers": [
+        "peer0.distributor.bi-coin"
+      ]
+    },
+    "CentralBankMSP": {
+      "mspid": "CentralBankMSP",
+      "peers": [
+        "peer0.centralbank.bi-coin"
+      ]
+    },
+    "ValidatorMSP": {
+      "mspid": "ValidatorMSP",
+      "peers": [
+        "peer0.validator.bi-coin"
+      ]
+    }
+  },
+  "peers": {
+    "peer0.distributor.bi-coin": {
+      "url": "grpcs://127.0.0.1:18051",
+      "tlsCACerts": {
+        "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/peers/peer0.distributor.bi-coin/tls/ca.crt"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.distributor.bi-coin",
+        "hostnameOverride": "peer0.distributor.bi-coin"
+      }
+    },
+    "peer0.centralbank.bi-coin": {
+      "url": "grpcs://127.0.0.1:17051",
+      "tlsCACerts": {
+        "path": "/workspace/network/organizations/peerOrganizations/centralbank.bi-coin/peers/peer0.centralbank.bi-coin/tls/ca.crt"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.centralbank.bi-coin",
+        "hostnameOverride": "peer0.centralbank.bi-coin"
+      }
+    },
+    "peer0.validator.bi-coin": {
+      "url": "grpcs://127.0.0.1:19051",
+      "tlsCACerts": {
+        "path": "/workspace/network/organizations/peerOrganizations/validator.bi-coin/peers/peer0.validator.bi-coin/tls/ca.crt"
+      },
+      "grpcOptions": {
+        "ssl-target-name-override": "peer0.validator.bi-coin",
+        "hostnameOverride": "peer0.validator.bi-coin"
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "test": {
+    "name": "Compliance read-limits preflight",
+    "workers": {
+      "type": "local",
+      "number": 1
+    },
+    "rounds": [
+      {
+        "label": "preflight-read-limits",
+        "txNumber": 1,
+        "rateControl": {
+          "type": "fixed-rate",
+          "opts": {
+            "tps": 1
+          }
+        },
+        "workload": {
+          "module": "benchmark/compliance/caliper-workload.js",
+          "arguments": {
+            "operationId": "read-limits",
+            "channel": "bi-coin",
+            "fixturePath": "/workspace/benchmark/results/compliance-run-20261125-02/fixtures/read-limits/preflight/rate-1-rep-1.json",
+            "identityMapPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/identity-map.json",
+            "eventsPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/read-limits/preflight/mww47sg2-07449c/events/preflight-read-limits.jsonl",
+            "roundLabel": "preflight-read-limits",
+            "durationSeconds": null,
+            "timeoutSeconds": 30
+          }
+        }
+      }
+    ]
+  },
+  "observer": {
+    "type": "local",
+    "interval": 1
+  },
+  "monitors": {
+    "transaction": [
+      {
+        "module": "./benchmark/observers/jsonl-transaction-observer.js",
+        "options": {
+          "traceDir": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/read-limits/preflight/mww47sg2-07449c/caliper-trace"
+        }
+      }
+    ]
+  }
+}

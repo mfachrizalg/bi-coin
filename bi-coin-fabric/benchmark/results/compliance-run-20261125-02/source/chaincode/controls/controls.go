@@ -1,0 +1,945 @@
+package main
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/hyperledger/fabric-chaincode-go/v2/pkg/statebased"
+	"github.com/hyperledger/fabric-chaincode-go/v2/shim"
+	"github.com/hyperledger/fabric-contract-api-go/v2/contractapi"
+)
+
+const (
+	cddCollection  = "cddCollection"
+	centralBankMSP = "CentralBankMSP"
+	distributorMSP = "DistributorMSP"
+	endUserMSP     = "EndUserMSP"
+	validatorMSP   = "ValidatorMSP"
+)
+
+type ControlsContract struct{ contractapi.Contract }
+
+const (
+	RestrictionReasonDTTOT          = "dttot"
+	RestrictionReasonAuthorityOrder = "authority_order"
+	RestrictionReasonInternalReview = "internal_review"
+)
+
+// Maximum restriction periods. UU No. 8 Tahun 2010 allows an internal hold of
+// at most 5 working days (Pasal 26 ayat (1)) and an authority-ordered block of
+// at most 30 working days (Pasal 71 ayat (3)). A DTTOT restriction lasts until
+// it is lifted (UU No. 9 Tahun 2013 Pasal 28).
+// ponytail: calendar days, always within the working-day maximum; a holiday calendar would allow the full period.
+var restrictionPeriods = map[string]time.Duration{
+	RestrictionReasonInternalReview: 5 * 24 * time.Hour,
+	RestrictionReasonAuthorityOrder: 30 * 24 * time.Hour,
+}
+
+// DTTOT results recorded by the reviewer's manual list match (CDD Sederhana still screens DTTOT).
+const (
+	DttotNotListed = "not_listed"
+	DttotListed    = "listed"
+)
+
+// Closure reasons: missing, fictitious or doubtful identity must close the relationship (guideline Bab 8).
+var closeReasons = []string{"data_missing", "fictitious", "identity_doubtful", "customer_request"}
+
+// cddCeilingsKey holds the BI holdings ceilings in public state. They carry no personal data.
+const cddCeilingsKey = "cdd_ceilings"
+
+type subjectRecord struct {
+	SubjectID               string       `json:"subject_id"`
+	Category                string       `json:"category"`
+	ApplicantID             string       `json:"applicant_id"`
+	Protected               bool         `json:"protected"`
+	ReviewerID              string       `json:"reviewer_id,omitempty"`
+	Status                  string       `json:"status"`
+	Restricted              bool         `json:"restricted"`
+	RestrictionReason       string       `json:"restriction_reason,omitempty"`
+	RestrictedUntil         int64        `json:"restricted_until,omitempty"`
+	UnfreezeReviewerID      string       `json:"unfreeze_reviewer_id,omitempty"`
+	UnfreezeApproverID      string       `json:"unfreeze_approver_id,omitempty"`
+	AuthorityEvidenceRef    string       `json:"authority_evidence_ref,omitempty"`
+	DttotResult             string       `json:"dttot_result,omitempty"`
+	LowRisk                 bool         `json:"low_risk"`
+	LowRiskReason           string       `json:"low_risk_reason,omitempty"`
+	ApprovedAt              int64        `json:"approved_at,omitempty"`
+	Verified                bool         `json:"verified"`
+	VerificationEvidenceRef string       `json:"verification_evidence_ref,omitempty"`
+	VerifiedAt              int64        `json:"verified_at,omitempty"`
+	ClosedAt                int64        `json:"closed_at,omitempty"`
+	CloseReason             string       `json:"close_reason,omitempty"`
+	Limits                  LimitProfile `json:"limits"`
+	LimitsSet               bool         `json:"limits_set"`
+	Salt                    string       `json:"salt"`
+	DocumentRef             string       `json:"document_ref"`
+}
+
+// CddCeilings are the BI holdings ceilings per verification state (PADG 32/2025 Pasal 19(1) values as parameters).
+type CddCeilings struct {
+	UnverifiedHoldings int64 `json:"unverified_holdings"`
+	VerifiedHoldings   int64 `json:"verified_holdings"`
+}
+
+type LimitProfile struct {
+	PerTransaction int64 `json:"per_transaction"`
+	Daily          int64 `json:"daily"`
+	Monthly        int64 `json:"monthly"`
+	Holdings       int64 `json:"holdings"`
+}
+
+type SubjectView struct {
+	SubjectID            string       `json:"subject_id"`
+	Category             string       `json:"category"`
+	Status               string       `json:"status"`
+	Protected            bool         `json:"protected"`
+	Restricted           bool         `json:"restricted"`
+	RestrictionReason    string       `json:"restriction_reason"`
+	RestrictedUntil      int64        `json:"restricted_until"`
+	ReviewerID           string       `json:"reviewer_id"`
+	UnfreezeApproverID   string       `json:"unfreeze_approver_id"`
+	AuthorityEvidenceRef string       `json:"authority_evidence_ref"`
+	Limits               LimitProfile `json:"limits"`
+	LowRisk              bool         `json:"low_risk"`
+	LowRiskReason        string       `json:"low_risk_reason"`
+	ApprovedAt           int64        `json:"approved_at"`
+	Verified             bool         `json:"verified"`
+	VerifiedAt           int64        `json:"verified_at"`
+	ClosedAt             int64        `json:"closed_at"`
+	CloseReason          string       `json:"close_reason"`
+}
+
+type staffRecord struct {
+	ClientID  string `json:"client_id"`
+	Protected bool   `json:"protected"`
+	Role      string `json:"role,omitempty"`
+}
+
+func (c *ControlsContract) GetCallerIdentity(ctx contractapi.TransactionContextInterface) (string, error) {
+	return callerID(ctx)
+}
+
+// CreatePending stores only a pseudonymous subject identifier and a denied-by-default status.
+func (c *ControlsContract) CreatePending(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if err := requireMSP(ctx, endUserMSP); err != nil {
+		return err
+	}
+	var payload struct {
+		Category    string `json:"category"`
+		Salt        string `json:"salt"`
+		DocumentRef string `json:"documentRef"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	if err := validCreatePayload(payload.Category, payload.Salt, payload.DocumentRef); err != nil {
+		return err
+	}
+	category, salt, documentRef := payload.Category, payload.Salt, payload.DocumentRef
+	if strings.TrimSpace(subjectID) == "" || category != "retail" {
+		return fmt.Errorf("subject_id and a supported category are required")
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if key == "" {
+		return fmt.Errorf("cannot create subject key")
+	}
+	if current, err := ctx.GetStub().GetPrivateData(cddCollection, key); err != nil {
+		return err
+	} else if current != nil {
+		return fmt.Errorf("subject %s already exists", subjectID)
+	}
+	id, err := callerID(ctx)
+	if err != nil {
+		return err
+	}
+	return putSubject(ctx.GetStub(), key, subjectRecord{SubjectID: subjectID, Category: category, ApplicantID: id, Status: "pending", Salt: salt, DocumentRef: documentRef})
+}
+
+// ProtectSubject installs the fixed CentralBankMSP + DistributorMSP policy without activating the subject.
+func (c *ControlsContract) ProtectSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if err := requireMSP(ctx, distributorMSP); err != nil {
+		return err
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	if record.Status != "pending" || record.Protected {
+		return fmt.Errorf("subject is not awaiting protection")
+	}
+	policy, err := controlPolicy()
+	if err != nil {
+		return err
+	}
+	if err := ctx.GetStub().SetPrivateDataValidationParameter(cddCollection, key, policy); err != nil {
+		return err
+	}
+	record.Protected = true
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+func (c *ControlsContract) CreateStaffPending(ctx contractapi.TransactionContextInterface, clientID string) error {
+	if err := requireMSP(ctx, centralBankMSP); err != nil {
+		return err
+	}
+	if strings.TrimSpace(clientID) == "" {
+		return fmt.Errorf("client_id is required")
+	}
+	key := staffKey(ctx.GetStub(), clientID)
+	if current, err := ctx.GetStub().GetState(key); err != nil {
+		return err
+	} else if current != nil {
+		return fmt.Errorf("staff identity already exists")
+	}
+	return putJSON(ctx.GetStub(), key, staffRecord{ClientID: clientID})
+}
+
+func (c *ControlsContract) ProtectStaff(ctx contractapi.TransactionContextInterface, clientID string) error {
+	if err := requireMSP(ctx, centralBankMSP); err != nil {
+		return err
+	}
+	key := staffKey(ctx.GetStub(), clientID)
+	var staff staffRecord
+	if err := getJSON(ctx.GetStub(), key, &staff); err != nil {
+		return err
+	}
+	if staff.Protected {
+		return fmt.Errorf("staff identity is already protected")
+	}
+	policy, err := controlPolicy()
+	if err != nil {
+		return err
+	}
+	if err := ctx.GetStub().SetStateValidationParameter(key, policy); err != nil {
+		return err
+	}
+	staff.Protected = true
+	return putJSON(ctx.GetStub(), key, staff)
+}
+
+func (c *ControlsContract) SetStaffRole(ctx contractapi.TransactionContextInterface, clientID string, role string) error {
+	if err := requireMSP(ctx, centralBankMSP); err != nil {
+		return err
+	}
+	if !oneOf(role, "kyc_reviewer", "compliance_officer") {
+		return fmt.Errorf("unsupported staff role")
+	}
+	key := staffKey(ctx.GetStub(), clientID)
+	if policy, err := ctx.GetStub().GetStateValidationParameter(key); err != nil {
+		return err
+	} else if len(policy) == 0 {
+		return fmt.Errorf("staff identity is not protected")
+	}
+	var staff staffRecord
+	if err := getJSON(ctx.GetStub(), key, &staff); err != nil {
+		return err
+	}
+	staff.Role = role
+	return putJSON(ctx.GetStub(), key, staff)
+}
+
+// RecordReview stores the reviewer's manual evidence: the DTTOT list match and the low-risk decision (CDD Sederhana).
+func (c *ControlsContract) RecordReview(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
+	if err != nil {
+		return err
+	}
+	var payload struct {
+		DttotResult   string `json:"dttot_result"`
+		LowRisk       bool   `json:"low_risk"`
+		LowRiskReason string `json:"low_risk_reason"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	lowRiskReason := strings.TrimSpace(payload.LowRiskReason)
+	if !oneOf(payload.DttotResult, DttotNotListed, DttotListed) {
+		return fmt.Errorf("dttot_result must be not_listed or listed")
+	}
+	if payload.LowRisk && lowRiskReason == "" {
+		return fmt.Errorf("a low-risk reason is required")
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	if record.Status != "pending" || record.ReviewerID != "" {
+		return fmt.Errorf("subject is not awaiting review")
+	}
+	record.ReviewerID = reviewerID
+	record.DttotResult = payload.DttotResult
+	record.LowRisk = payload.LowRisk
+	record.LowRiskReason = lowRiskReason
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+// ApproveSubject activates a subject only when the review is not_listed and low risk and the BI ceilings are set.
+// A listed or not low-risk subject can only end rejected, whatever the reviewer passes.
+func (c *ControlsContract) ApproveSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
+	if err != nil {
+		return err
+	}
+	var payload struct {
+		Approved bool `json:"approved"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	approved := payload.Approved
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	if record.Status != "pending" || record.ReviewerID != reviewerID || !record.LimitsSet {
+		return fmt.Errorf("subject is not eligible for approval")
+	}
+	if approved {
+		if _, err := getCddCeilings(ctx.GetStub()); err != nil {
+			return err
+		}
+		approved = record.DttotResult == DttotNotListed && record.LowRisk
+	}
+	if !approved {
+		record.Status = "rejected"
+		return putSubject(ctx.GetStub(), key, record)
+	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return err
+	}
+	record.Status = "active"
+	record.ApprovedAt = now.Unix()
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+func (c *ControlsContract) SetLimits(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
+		return err
+	}
+	var payload struct {
+		PerTransaction int64 `json:"per_transaction"`
+		Daily          int64 `json:"daily"`
+		Monthly        int64 `json:"monthly"`
+		Holdings       int64 `json:"holdings"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	perTransaction, daily, monthly, holdings := payload.PerTransaction, payload.Daily, payload.Monthly, payload.Holdings
+	if !validLimits(perTransaction, daily, monthly, holdings) {
+		return fmt.Errorf("limits must be positive and ordered per-transaction <= daily <= monthly")
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	if record.Status != "pending" && record.Status != "active" {
+		return fmt.Errorf("limits can only be set for a pending or active subject")
+	}
+	ceilings, err := getCddCeilings(ctx.GetStub())
+	if err != nil {
+		return err
+	}
+	if holdings > ceilings.VerifiedHoldings {
+		return fmt.Errorf("holdings exceed the verified CDD ceiling")
+	}
+	record.Limits = LimitProfile{PerTransaction: perTransaction, Daily: daily, Monthly: monthly, Holdings: holdings}
+	record.LimitsSet = true
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+// SetCddCeilings sets the BI holdings ceilings per verification state. Public state, no personal data.
+func (c *ControlsContract) SetCddCeilings(ctx contractapi.TransactionContextInterface, unverifiedHoldings int64, verifiedHoldings int64) error {
+	if err := requireMSP(ctx, centralBankMSP); err != nil {
+		return err
+	}
+	if unverifiedHoldings <= 0 || verifiedHoldings < unverifiedHoldings {
+		return fmt.Errorf("ceilings must be positive and unverified <= verified")
+	}
+	return putJSON(ctx.GetStub(), cddCeilingsKey, CddCeilings{UnverifiedHoldings: unverifiedHoldings, VerifiedHoldings: verifiedHoldings})
+}
+
+func (c *ControlsContract) GetCddCeilings(ctx contractapi.TransactionContextInterface) (CddCeilings, error) {
+	return getCddCeilings(ctx.GetStub())
+}
+
+// VerifySubject records the reviewer's manual identity verification, which raises the holdings ceiling.
+func (c *ControlsContract) VerifySubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
+		return err
+	}
+	var payload struct {
+		EvidenceRef string `json:"evidence_ref"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	if !isOpaqueReference(payload.EvidenceRef) {
+		return fmt.Errorf("verification evidence must be a SHA-256 reference")
+	}
+	key, record, err := activeSubject(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+	if record.Verified {
+		return fmt.Errorf("subject is already verified")
+	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return err
+	}
+	record.Verified = true
+	record.VerificationEvidenceRef = payload.EvidenceRef
+	record.VerifiedAt = now.Unix()
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+// UpdateSubject replaces the identity document after a data update and returns the subject to unverified.
+// A listed result restricts the subject as DTTOT, the same as FreezeSubject.
+func (c *ControlsContract) UpdateSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
+		return err
+	}
+	var payload struct {
+		DocumentRef string `json:"documentRef"`
+		DttotResult string `json:"dttot_result"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	if !isOpaqueReference(payload.DocumentRef) {
+		return fmt.Errorf("document_ref must be a SHA-256 reference")
+	}
+	if !oneOf(payload.DttotResult, DttotNotListed, DttotListed) {
+		return fmt.Errorf("dttot_result must be not_listed or listed")
+	}
+	key, record, err := activeSubject(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+	if payload.DttotResult == DttotListed {
+		now, err := txTime(ctx)
+		if err != nil {
+			return err
+		}
+		restrict(&record, RestrictionReasonDTTOT, now)
+	}
+	record.DocumentRef = payload.DocumentRef
+	record.DttotResult = payload.DttotResult
+	record.Verified = false
+	record.VerificationEvidenceRef = ""
+	record.VerifiedAt = 0
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+// CloseSubject ends the relationship for a missing, fictitious or doubtful identity (guideline Bab 8). Closed is terminal.
+func (c *ControlsContract) CloseSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if _, err := requireStaffRole(ctx, "kyc_reviewer"); err != nil {
+		return err
+	}
+	var payload struct {
+		Reason string `json:"reason"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	if !oneOf(payload.Reason, closeReasons...) {
+		return fmt.Errorf("unsupported close reason code")
+	}
+	key, record, err := activeSubject(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return err
+	}
+	record.Status = "closed"
+	record.ClosedAt = now.Unix()
+	record.CloseReason = payload.Reason
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+// RevokeLowRisk takes a subject out of CDD Sederhana after a confirmed suspicion (guideline Bab 7).
+// The subject stays active but is no longer eligible to pay or receive.
+func (c *ControlsContract) RevokeLowRisk(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if _, err := requireStaffRole(ctx, "compliance_officer"); err != nil {
+		return err
+	}
+	key, record, err := activeSubject(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+	if !record.LowRisk {
+		return fmt.Errorf("subject is already outside CDD Sederhana")
+	}
+	record.LowRisk = false
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+// activeSubject loads a protected subject and requires status active.
+func activeSubject(ctx contractapi.TransactionContextInterface, subjectID string) (string, subjectRecord, error) {
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return "", subjectRecord{}, err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return "", subjectRecord{}, err
+	}
+	if record.Status != "active" {
+		return "", subjectRecord{}, fmt.Errorf("subject is not active")
+	}
+	return key, record, nil
+}
+
+func (c *ControlsContract) FreezeSubject(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if _, err := requireStaffRole(ctx, "compliance_officer"); err != nil {
+		return err
+	}
+	var payload struct {
+		Reason string `json:"reason"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	reason := payload.Reason
+	if !oneOf(reason, RestrictionReasonDTTOT, RestrictionReasonAuthorityOrder, RestrictionReasonInternalReview) {
+		return fmt.Errorf("unsupported restriction reason code")
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return err
+	}
+	restrict(&record, reason, now)
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+func (c *ControlsContract) RequestUnfreeze(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	reviewerID, err := requireStaffRole(ctx, "kyc_reviewer")
+	if err != nil {
+		return err
+	}
+	var payload struct {
+		AuthorityEvidenceRef string `json:"authority_evidence_ref"`
+	}
+	if err := readPayload(ctx, &payload); err != nil {
+		return err
+	}
+	authorityEvidenceRef := payload.AuthorityEvidenceRef
+	if !isOpaqueReference(authorityEvidenceRef) {
+		return fmt.Errorf("authority release evidence must be a SHA-256 reference")
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	if !record.Restricted {
+		return fmt.Errorf("subject is not restricted")
+	}
+	record.UnfreezeReviewerID = reviewerID
+	record.AuthorityEvidenceRef = authorityEvidenceRef
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+func (c *ControlsContract) ApproveUnfreeze(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	complianceID, err := requireStaffRole(ctx, "compliance_officer")
+	if err != nil {
+		return err
+	}
+	key := subjectKey(ctx.GetStub(), subjectID)
+	if err := requireProtected(ctx.GetStub(), key); err != nil {
+		return err
+	}
+	record, err := getSubject(ctx, key)
+	if err != nil {
+		return err
+	}
+	if !record.Restricted || record.AuthorityEvidenceRef == "" || record.UnfreezeReviewerID == "" || record.UnfreezeReviewerID == complianceID {
+		return fmt.Errorf("unfreeze requires authority evidence and two distinct approvers")
+	}
+	record.Restricted = false
+	record.RestrictionReason = ""
+	record.RestrictedUntil = 0
+	record.UnfreezeApproverID = complianceID
+	return putSubject(ctx.GetStub(), key, record)
+}
+
+func (c *ControlsContract) CanPay(ctx contractapi.TransactionContextInterface, subjectID string) (bool, error) {
+	if err := requireMemberOrActor(ctx, subjectID); err != nil {
+		return false, err
+	}
+	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return false, err
+	}
+	return eligible(ctx, record)
+}
+
+// GetLimits returns the reviewer limits with Holdings capped by the BI ceiling of the subject's verification state.
+func (c *ControlsContract) GetLimits(ctx contractapi.TransactionContextInterface, subjectID string) (LimitProfile, error) {
+	if err := requireMemberOrActor(ctx, subjectID); err != nil {
+		return LimitProfile{}, err
+	}
+	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return LimitProfile{}, err
+	}
+	ok, err := eligible(ctx, record)
+	if err != nil {
+		return LimitProfile{}, err
+	}
+	if !ok || !record.LimitsSet {
+		return LimitProfile{}, fmt.Errorf("subject has no active payment limits")
+	}
+	limits := record.Limits
+	if limits.Holdings, err = effectiveHoldings(ctx, record); err != nil {
+		return LimitProfile{}, err
+	}
+	return limits, nil
+}
+
+// errPayeeNotPermitted is the only refusal CheckPayee returns, so the payer cannot tell why a payee was refused.
+var errPayeeNotPermitted = errors.New("transfer not permitted")
+
+// CheckPayee is the payee verdict for Transfer. It has no access check: Fabric passes the
+// payer's creator into this nested call, so a member-only rule would refuse every transfer.
+// shortcut: any caller can learn a subject's status and probe its holdings limit by varying balanceAfter, upgrade by binding CheckPayee to the payer.
+func (c *ControlsContract) CheckPayee(ctx contractapi.TransactionContextInterface, subjectID string, balanceAfter int64) error {
+	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return errPayeeNotPermitted
+	}
+	ok, err := eligible(ctx, record)
+	if err != nil || !ok || !record.LimitsSet {
+		return errPayeeNotPermitted
+	}
+	holdings, err := effectiveHoldings(ctx, record)
+	if err != nil || balanceAfter > holdings {
+		return errPayeeNotPermitted
+	}
+	return nil
+}
+
+func (c *ControlsContract) CanActFor(ctx contractapi.TransactionContextInterface, subjectID string) (bool, error) {
+	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return false, err
+	}
+	id, err := callerID(ctx)
+	if err != nil {
+		return false, err
+	}
+	return record.ApplicantID == id, nil
+}
+
+func (c *ControlsContract) GetSubject(ctx contractapi.TransactionContextInterface, subjectID string) (SubjectView, error) {
+	if err := requireMemberOrActor(ctx, subjectID); err != nil {
+		return SubjectView{}, err
+	}
+	record, err := getSubject(ctx, subjectKey(ctx.GetStub(), subjectID))
+	if err != nil {
+		return SubjectView{}, err
+	}
+	restricted, err := restrictionActive(ctx, record)
+	if err != nil {
+		return SubjectView{}, err
+	}
+	return SubjectView{
+		SubjectID: record.SubjectID, Category: record.Category, Status: record.Status,
+		Protected:  record.Protected,
+		Restricted: restricted, RestrictionReason: record.RestrictionReason, RestrictedUntil: record.RestrictedUntil,
+		ReviewerID: record.ReviewerID, UnfreezeApproverID: record.UnfreezeApproverID,
+		AuthorityEvidenceRef: record.AuthorityEvidenceRef, Limits: record.Limits,
+		LowRisk: record.LowRisk, LowRiskReason: record.LowRiskReason, ApprovedAt: record.ApprovedAt,
+		Verified: record.Verified, VerifiedAt: record.VerifiedAt,
+		ClosedAt: record.ClosedAt, CloseReason: record.CloseReason,
+	}, nil
+}
+
+// eligible is the one rule for who may transact: active, not restricted, and still low risk under CDD Sederhana.
+func eligible(ctx contractapi.TransactionContextInterface, record subjectRecord) (bool, error) {
+	restricted, err := restrictionActive(ctx, record)
+	if err != nil {
+		return false, err
+	}
+	return record.Status == "active" && !restricted && record.LowRisk, nil
+}
+
+// effectiveHoldings is the reviewer's holdings limit capped by the BI ceiling for the subject's verification state.
+func effectiveHoldings(ctx contractapi.TransactionContextInterface, record subjectRecord) (int64, error) {
+	ceilings, err := getCddCeilings(ctx.GetStub())
+	if err != nil {
+		return 0, err
+	}
+	ceiling := ceilings.UnverifiedHoldings
+	if record.Verified {
+		ceiling = ceilings.VerifiedHoldings
+	}
+	return min(record.Limits.Holdings, ceiling), nil
+}
+
+func getCddCeilings(stub shim.ChaincodeStubInterface) (CddCeilings, error) {
+	var ceilings CddCeilings
+	if err := getJSON(stub, cddCeilingsKey, &ceilings); err != nil {
+		return CddCeilings{}, fmt.Errorf("cdd ceilings are not set")
+	}
+	return ceilings, nil
+}
+
+// restrict applies a restriction and clears any earlier unfreeze evidence.
+func restrict(record *subjectRecord, reason string, now time.Time) {
+	record.Restricted = true
+	record.RestrictionReason = reason
+	record.RestrictedUntil = 0
+	if period, limited := restrictionPeriods[reason]; limited {
+		record.RestrictedUntil = now.Add(period).Unix()
+	}
+	record.UnfreezeReviewerID = ""
+	record.AuthorityEvidenceRef = ""
+}
+
+func requireStaffRole(ctx contractapi.TransactionContextInterface, role string) (string, error) {
+	if err := requireMSP(ctx, distributorMSP); err != nil {
+		return "", err
+	}
+	id, err := callerID(ctx)
+	if err != nil {
+		return "", err
+	}
+	var staff staffRecord
+	if err := getJSON(ctx.GetStub(), staffKey(ctx.GetStub(), id), &staff); err != nil {
+		return "", fmt.Errorf("staff identity is not registered")
+	}
+	if !staff.Protected || staff.Role != role {
+		return "", fmt.Errorf("staff identity lacks role %s", role)
+	}
+	return id, nil
+}
+
+func requireMSP(ctx contractapi.TransactionContextInterface, allowed ...string) error {
+	identity := ctx.GetClientIdentity()
+	if identity == nil {
+		return fmt.Errorf("client identity unavailable")
+	}
+	mspID, err := identity.GetMSPID()
+	if err != nil {
+		return err
+	}
+	for _, candidate := range allowed {
+		if mspID == candidate {
+			return nil
+		}
+	}
+	return fmt.Errorf("access denied for MSP %s", mspID)
+}
+
+func callerID(ctx contractapi.TransactionContextInterface) (string, error) {
+	identity := ctx.GetClientIdentity()
+	if identity == nil {
+		return "", fmt.Errorf("client identity unavailable")
+	}
+	rawID, err := identity.GetID()
+	if err != nil {
+		return "", err
+	}
+	digest := sha256.Sum256([]byte(rawID))
+	return hex.EncodeToString(digest[:]), nil
+}
+
+func controlPolicy() ([]byte, error) {
+	policy, err := statebased.NewStateEP(nil)
+	if err != nil {
+		return nil, err
+	}
+	if err := policy.AddOrgs(statebased.RoleTypePeer, centralBankMSP, distributorMSP); err != nil {
+		return nil, err
+	}
+	return policy.Policy()
+}
+
+func requireProtected(stub shim.ChaincodeStubInterface, key string) error {
+	policy, err := stub.GetPrivateDataValidationParameter(cddCollection, key)
+	if err != nil {
+		return err
+	}
+	if len(policy) == 0 {
+		return fmt.Errorf("effective control record is not protected")
+	}
+	return nil
+}
+
+func subjectKey(stub shim.ChaincodeStubInterface, subjectID string) string {
+	key, err := stub.CreateCompositeKey("control", []string{subjectID})
+	if err != nil {
+		return ""
+	}
+	return key
+}
+
+func staffKey(stub shim.ChaincodeStubInterface, clientID string) string {
+	key, err := stub.CreateCompositeKey("staff", []string{clientID})
+	if err != nil {
+		return ""
+	}
+	return key
+}
+
+func getJSON(stub shim.ChaincodeStubInterface, key string, target any) error {
+	data, err := stub.GetState(key)
+	if err != nil {
+		return err
+	}
+	if data == nil {
+		return fmt.Errorf("state not found")
+	}
+	return json.Unmarshal(data, target)
+}
+
+func putJSON(stub shim.ChaincodeStubInterface, key string, value any) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return stub.PutState(key, data)
+}
+
+func oneOf(value string, allowed ...string) bool {
+	for _, candidate := range allowed {
+		if value == candidate {
+			return true
+		}
+	}
+	return false
+}
+
+// restrictionActive treats a time-limited restriction as lifted once its period ends.
+func restrictionActive(ctx contractapi.TransactionContextInterface, record subjectRecord) (bool, error) {
+	if !record.Restricted || record.RestrictedUntil == 0 {
+		return record.Restricted, nil
+	}
+	now, err := txTime(ctx)
+	if err != nil {
+		return false, err
+	}
+	return restrictedAt(record, now), nil
+}
+
+func restrictedAt(record subjectRecord, now time.Time) bool {
+	return record.Restricted && (record.RestrictedUntil == 0 || now.Unix() < record.RestrictedUntil)
+}
+
+func txTime(ctx contractapi.TransactionContextInterface) (time.Time, error) {
+	timestamp, err := ctx.GetStub().GetTxTimestamp()
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Unix(timestamp.Seconds, int64(timestamp.Nanos)).UTC(), nil
+}
+
+func isOpaqueReference(value string) bool {
+	decoded, err := hex.DecodeString(value)
+	return err == nil && len(decoded) == sha256.Size
+}
+
+func validLimits(perTransaction int64, daily int64, monthly int64, holdings int64) bool {
+	return perTransaction > 0 && daily >= perTransaction && monthly >= daily && holdings > 0
+}
+
+// readPayload decodes CDD contents from the transient map under "payload" (D8).
+func readPayload(ctx contractapi.TransactionContextInterface, target any) error {
+	transient, err := ctx.GetStub().GetTransient()
+	if err != nil {
+		return err
+	}
+	data, found := transient["payload"]
+	if !found {
+		return fmt.Errorf("transient payload is required")
+	}
+	if err := json.Unmarshal(data, target); err != nil {
+		return fmt.Errorf("decode transient payload: %w", err)
+	}
+	return nil
+}
+
+func validCreatePayload(category string, salt string, documentRef string) error {
+	if category != "retail" {
+		return fmt.Errorf("a supported category is required")
+	}
+	if !isOpaqueReference(salt) {
+		return fmt.Errorf("salt must be 32 random bytes in hex")
+	}
+	if !isOpaqueReference(documentRef) {
+		return fmt.Errorf("document_ref must be a SHA-256 reference")
+	}
+	return nil
+}
+
+func putSubject(stub shim.ChaincodeStubInterface, key string, record subjectRecord) error {
+	data, err := json.Marshal(record)
+	if err != nil {
+		return err
+	}
+	return stub.PutPrivateData(cddCollection, key, data)
+}
+
+func getSubject(ctx contractapi.TransactionContextInterface, key string) (subjectRecord, error) {
+	data, err := ctx.GetStub().GetPrivateData(cddCollection, key)
+	if err != nil {
+		return subjectRecord{}, err
+	}
+	if data == nil {
+		return subjectRecord{}, fmt.Errorf("subject not found")
+	}
+	var record subjectRecord
+	if err := json.Unmarshal(data, &record); err != nil {
+		return subjectRecord{}, err
+	}
+	return record, nil
+}
+
+// requireMemberOrActor admits member MSPs and the caller who acts for the subject.
+func requireMemberOrActor(ctx contractapi.TransactionContextInterface, subjectID string) error {
+	if requireMSP(ctx, centralBankMSP, distributorMSP, validatorMSP) == nil {
+		return nil
+	}
+	actor, err := (&ControlsContract{}).CanActFor(ctx, subjectID)
+	if err != nil {
+		return err
+	}
+	if !actor {
+		return fmt.Errorf("access denied for subject %s", subjectID)
+	}
+	return nil
+}

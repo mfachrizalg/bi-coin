@@ -1,0 +1,48 @@
+{
+  "test": {
+    "name": "Compliance convert-to-retail preflight",
+    "workers": {
+      "type": "local",
+      "number": 1
+    },
+    "rounds": [
+      {
+        "label": "preflight-convert-to-retail",
+        "txNumber": 1,
+        "rateControl": {
+          "type": "fixed-rate",
+          "opts": {
+            "tps": 1
+          }
+        },
+        "workload": {
+          "module": "benchmark/compliance/caliper-workload.js",
+          "arguments": {
+            "operationId": "convert-to-retail",
+            "channel": "bi-coin",
+            "fixturePath": "/workspace/benchmark/results/compliance-run-20261125-02/fixtures/convert-to-retail/preflight/rate-1-rep-1.json",
+            "identityMapPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/identity-map.json",
+            "eventsPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/convert-to-retail/preflight/mww4d9w8-6d0753/events/preflight-convert-to-retail.jsonl",
+            "roundLabel": "preflight-convert-to-retail",
+            "durationSeconds": null,
+            "timeoutSeconds": 30
+          }
+        }
+      }
+    ]
+  },
+  "observer": {
+    "type": "local",
+    "interval": 1
+  },
+  "monitors": {
+    "transaction": [
+      {
+        "module": "./benchmark/observers/jsonl-transaction-observer.js",
+        "options": {
+          "traceDir": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/convert-to-retail/preflight/mww4d9w8-6d0753/caliper-trace"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "test": {
+    "name": "Compliance issue preflight",
+    "workers": {
+      "type": "local",
+      "number": 1
+    },
+    "rounds": [
+      {
+        "label": "preflight-issue",
+        "txNumber": 1,
+        "rateControl": {
+          "type": "fixed-rate",
+          "opts": {
+            "tps": 1
+          }
+        },
+        "workload": {
+          "module": "benchmark/compliance/caliper-workload.js",
+          "arguments": {
+            "operationId": "issue",
+            "channel": "bi-coin",
+            "fixturePath": "/workspace/benchmark/results/compliance-run-20261125-02/fixtures/issue/preflight/rate-1-rep-1.json",
+            "identityMapPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/identity-map.json",
+            "eventsPath": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/issue/preflight/mww492if-986e05/events/preflight-issue.jsonl",
+            "roundLabel": "preflight-issue",
+            "durationSeconds": null,
+            "timeoutSeconds": 30
+          }
+        }
+      }
+    ]
+  },
+  "observer": {
+    "type": "local",
+    "interval": 1
+  },
+  "monitors": {
+    "transaction": [
+      {
+        "module": "./benchmark/observers/jsonl-transaction-observer.js",
+        "options": {
+          "traceDir": "/workspace/benchmark/results/compliance-run-20261125-02/caliper/issue/preflight/mww492if-986e05/caliper-trace"
+        }
+      }
+    ]
+  }
+}

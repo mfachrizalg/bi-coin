@@ -1,0 +1,137 @@
+{
+  "name": "Retail Rupiah Compliance Study",
+  "version": "2.0.0",
+  "caliper": {
+    "blockchain": "fabric"
+  },
+  "channels": [
+    {
+      "channelName": "bi-coin",
+      "contracts": [
+        {
+          "id": "rupiah-controls"
+        },
+        {
+          "id": "rupiah-monetary"
+        },
+        {
+          "id": "rupiah-payments"
+        }
+      ]
+    }
+  ],
+  "organizations": [
+    {
+      "mspid": "EndUserMSP",
+      "identities": {
+        "certificates": [
+          {
+            "name": "c80ff412b2b-authenticated",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/enduser.bi-coin/users/User3@enduser.bi-coin/msp/keystore/cacfccb8261c8b19da0329659efa5fd59f3eded3486bb7a5b8d12f69d0a09915_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/enduser.bi-coin/users/User3@enduser.bi-coin/msp/signcerts/cert.pem"
+            }
+          },
+          {
+            "name": "c80ff412b2b-kyc_verified",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/enduser.bi-coin/users/User1@enduser.bi-coin/msp/keystore/cb7f9e0b0fe78308f35269415ed61cee1d0811c7f82eb9102cd77c1028ec7b55_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/enduser.bi-coin/users/User1@enduser.bi-coin/msp/signcerts/cert.pem"
+            }
+          },
+          {
+            "name": "c80ff412b2b-retail_two",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/enduser.bi-coin/users/User5@enduser.bi-coin/msp/keystore/21c2a2928aad334e7691bc1aec22f151d51749d0245483b640482b81e9c9759e_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/enduser.bi-coin/users/User5@enduser.bi-coin/msp/signcerts/cert.pem"
+            }
+          }
+        ]
+      },
+      "connectionProfile": {
+        "path": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/connection-profiles/EndUserMSP.json"
+      }
+    },
+    {
+      "mspid": "DistributorMSP",
+      "identities": {
+        "certificates": [
+          {
+            "name": "c80ff412b2b-retail_bank",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/users/Admin@distributor.bi-coin/msp/keystore/1548594c6776311f7dc5d5bfbc2f261a3cbebcc0a021aba5e38316161e03dc13_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/users/Admin@distributor.bi-coin/msp/signcerts/cert.pem"
+            }
+          },
+          {
+            "name": "c80ff412b2b-reviewer",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/users/User1@distributor.bi-coin/msp/keystore/0385c68d817ba3c3769889d1a980da79cd73b148c2e2f40d0764acd6bc6f5c38_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/users/User1@distributor.bi-coin/msp/signcerts/cert.pem"
+            }
+          },
+          {
+            "name": "c80ff412b2b-compliance",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/users/User3@distributor.bi-coin/msp/keystore/d5cdfe7012ede2c51ff3b1843f421e0bb9159e7ea3d8c9787ff3dceafdea3676_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/distributor.bi-coin/users/User3@distributor.bi-coin/msp/signcerts/cert.pem"
+            }
+          }
+        ]
+      },
+      "connectionProfile": {
+        "path": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/connection-profiles/DistributorMSP.json"
+      }
+    },
+    {
+      "mspid": "CentralBankMSP",
+      "identities": {
+        "certificates": [
+          {
+            "name": "c80ff412b2b-bank_indonesia",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/centralbank.bi-coin/users/Admin@centralbank.bi-coin/msp/keystore/5fb2e20f713a2c6d2d08f41232bac1127297bbbfac1e8d9f001981931b729bd8_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/centralbank.bi-coin/users/Admin@centralbank.bi-coin/msp/signcerts/cert.pem"
+            }
+          }
+        ]
+      },
+      "connectionProfile": {
+        "path": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/connection-profiles/CentralBankMSP.json"
+      }
+    },
+    {
+      "mspid": "ValidatorMSP",
+      "identities": {
+        "certificates": [
+          {
+            "name": "c80ff412b2b-auditor",
+            "clientPrivateKey": {
+              "path": "/workspace/network/organizations/peerOrganizations/validator.bi-coin/users/Admin@validator.bi-coin/msp/keystore/df5bba142047694d4721ff6be03cf904b3d95b4c6d43241db0887426f0325dbf_sk"
+            },
+            "clientSignedCert": {
+              "path": "/workspace/network/organizations/peerOrganizations/validator.bi-coin/users/Admin@validator.bi-coin/msp/signcerts/cert.pem"
+            }
+          }
+        ]
+      },
+      "connectionProfile": {
+        "path": "/workspace/benchmark/results/compliance-run-20261125-02/caliper-network/connection-profiles/ValidatorMSP.json"
+      }
+    }
+  ]
+}
