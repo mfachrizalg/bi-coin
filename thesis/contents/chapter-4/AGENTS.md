@@ -19,9 +19,9 @@ Shared rules, Bahasa policy, and the supervisor persona: `../../AGENTS.md`.
    - Chaincode Studi Rupiah Digital
    - Backend API (`tab:peran`: role access table)
    - Hasil Pengujian Fungsional (30/30 scenarios, 296/296 API cells, 28/28 validation, 45/45 actions; SRS mapping FR-01..05, NFR-02)
-2. `\section{Hasil Evaluasi Kinerja Final}`: environment (`tab:lingkungan-kinerja-final`), binary-search protocol, NFR-04 (TBD), NFR-05 (manifest only).
-3. `\section{Perbandingan Hasil Penelitian dengan Hasil Terdahulu}`: `tab:perbandingan-cbdc` (Aryani 2023, PoC Proyek Garuda 2024, Penelitian ini), Rohmalia paragraph, scope caveat.
-4. `\section{Hasil Uji Kontrol pada Lingkungan Terisolasi}`: test conditions; `tab:ch4-kapasitas-kontrol` (42 workloads), `tab:ch4-latensi-kinerja` (42 rows), `tab:ch4-sumber-daya-kontrol`. Subsection `Pembahasan`.
+2. `\section{Hasil Evaluasi Kinerja Final}`: environment (`tab:lingkungan-kinerja-final`), binary-search protocol on the 4 CDD-path workloads, 3 repeats, NFR-04 (TBD), NFR-05 (manifest plus repeat range).
+3. `\section{Perbandingan Hasil Penelitian dengan Hasil Terdahulu}`: `tab:perbandingan-cbdc` (Aryani 2023, PoC Proyek Garuda 2024, Penelitian ini), scope only, no performance row and no TPS from other systems (ADR 0021), Rohmalia paragraph, scope caveat.
+4. `\section{Hasil Uji Kontrol pada Lingkungan Terisolasi}`: test conditions; `tab:ch4-kapasitas-kontrol` (4 workloads, median and range), `tab:ch4-sebab-gagal`, `tab:ch4-latensi-kinerja` (4 rows, min/median/p95/max), `tab:ch4-kurva-beban` (25 to 150%), `tab:ch4-sumber-daya-kontrol`. Subsection `Pembahasan`, which states the no-CDD-free-baseline limitation.
 
 Ch4 refers to `fig:ch3-study-sequence-*`, which live in Bab III. This chapter has no figure environments of its own.
 
@@ -65,7 +65,8 @@ From `thesis_deren.pdf` and `thesis_grandiv.pdf`, Bab IV:
 - Unit tests vs correctness: the functional section counts unit tests (around line 108), but a later section excludes them (around lines 129 and 259). Pick one definition.
 - Scenario count: "30 dari 30 skenario fungsional" against 31 correctness scenarios in `case-catalog.json`. Reconcile.
 - Environment: `tab:lingkungan-kinerja-final` says the patch was not recorded. Record the Fabric patch (ADR 0012 pins 2.5.16).
-- Performance tables are TBD: `tab:ch4-kapasitas-kontrol`, `tab:ch4-latensi-kinerja`, `tab:ch4-sumber-daya-kontrol`, and the TBD row of `tab:perbandingan-cbdc`. Leave them until the canonical run.
+- Performance tables are TBD: `tab:ch4-kapasitas-kontrol`, `tab:ch4-sebab-gagal`, `tab:ch4-latensi-kinerja`, `tab:ch4-kurva-beban`, `tab:ch4-sumber-daya-kontrol`. Fill them from `aggregate-repeats.json` (3 repeats) after the evidence run. Add the load-curve figure then.
+- No performance comparison with other systems, Garuda included (ADR 0021, user decision 2026-11-26).
 - If code listings are added, explain each line or move the listing to the Lampiran.
 
 ## Constraints

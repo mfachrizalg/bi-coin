@@ -34,7 +34,7 @@ Code facts the chapter must match. Read them from the source, not from older spe
 - Four MSPs: CentralBankMSP, DistributorMSP, ValidatorMSP (human role: Auditor), EndUserMSP. Channel `bi-coin`. Orderer: etcdraft with one consenter. State database: CouchDB.
 - No KYC tiers and no risk level. Limits are set per subject via `SetLimits` (per_transaction, daily, monthly, holdings) by the KYC reviewer.
 - Backend: Go 1.23, gorilla/mux. Role names come from `backend/middleware/auth.go`. Routes have no `/api` prefix.
-- Caliper 0.6.0 with one worker. 42 performance workloads in `bi-coin-fabric/benchmark/compliance/case-catalog.json`. The capacity protocol follows ADR 0015.
+- Caliper 0.6.0 with one worker. 4 CDD-path performance workloads (`transfer-retail`, `can-pay`, `approve-subject`, `verify-subject`) in `bi-coin-fabric/benchmark/compliance/case-catalog.json`, 3 repeats, median and min-max. The capacity protocol follows ADR 0015 as amended by ADR 0021.
 - Metrics need a formula or an explicit start and end point. Ch4 refers back to these definitions.
 - Do not include Caliper results. Ch4 holds them.
 - Never copy `network/.env.study` values into the thesis or appendix. It holds plaintext credentials.

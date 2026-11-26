@@ -515,22 +515,30 @@ transaksi dan dampak yang diharapkan pada ledger. Penolakan hanya dinilai benar
 jika keadaan ledger sebelum dan sesudah transaksi tetap sama.
 
 % TBD: hasil kinerja menunggu pengujian
-Pengujian kinerja mengukur TBD metode kontrak publik dengan Hyperledger Caliper
-dan konektor Fabric. Metode \texttt{Initialize} dan
-\texttt{DebitReserveForConversion} hanya diperiksa secara fungsional karena
-\texttt{DebitReserveForConversion} dipanggil secara internal oleh konversi. Metode
-\texttt{Transfer} diuji untuk penerima ritel sehingga
-terdapat TBD beban kerja kinerja. Operasi baca dilaporkan sebagai operasi
-terverifikasi per detik, sedangkan transaksi tulis dilaporkan sebagai TPS
-terverifikasi. Semua panggilan kinerja diarahkan langsung ke \textit{chaincode};
-latensi pemrosesan API, PostgreSQL, dan KYC tidak digabungkan ke hasil Fabric.
+Pengujian kinerja hanya mengukur jalur CDD, karena kontribusi penelitian ini
+adalah keputusan CDD yang ditegakkan pada ledger. Empat beban kerja diukur
+dengan Hyperledger Caliper dan konektor Fabric. Beban kerja
+\texttt{transfer-retail} memanggil \texttt{Transfer}, yang menjalankan lima
+pemeriksaan CDD sebelum menulis, yaitu \texttt{CanActFor}, \texttt{CanPay},
+batas per transaksi dari \texttt{GetLimits}, status dan batas kepemilikan
+penerima pada \texttt{CheckPayee}, serta batas harian dan bulanan. Beban kerja
+\texttt{can-pay} mengukur gerbang pembayar sebagai operasi baca. Beban kerja
+\texttt{approve-subject} mengukur keputusan penerimaan subjek, sedangkan
+\texttt{verify-subject} mengukur perpindahan subjek dari batas kepemilikan
+belum terverifikasi ke batas terverifikasi. Metode kontrak lain hanya diperiksa
+secara fungsional. Operasi baca dilaporkan sebagai operasi terverifikasi per
+detik, sedangkan transaksi tulis dilaporkan sebagai TPS terverifikasi. Semua
+panggilan kinerja diarahkan langsung ke \textit{chaincode}, sehingga latensi
+pemrosesan API, PostgreSQL, dan KYC tidak digabungkan ke hasil Fabric.
+Pengujian tidak memuat konfigurasi tanpa CDD sebagai pembanding, sehingga beban
+pemeriksaan CDD tidak dapat dipisahkan dari biaya Fabric itu sendiri.
 
 Seluruh pengujian kinerja memakai satu \textit{worker} lokal. Inisialisasi ronde
 Caliper menyiapkan koneksi; tidak ada ronde pemanasan bertimer. Matriks API
 merupakan pemeriksaan kebenaran yang terpisah dengan cakupan TBD sel peran-rute untuk
 otorisasi, TBD kasus validasi permintaan JSON, dan TBD pemeriksaan hasil aksi.
 
-Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port pada host luar, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik; laju lulus hanya jika semua hasil terverifikasi dan throughput terverifikasi terhadap durasi ditambah drain mencapai 90 persen laju terkirim, setara dengan drain paling lama sepersembilan durasi probe. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sembilan hingga sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
+Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pertama, jaringan studi dibuat dari awal pada lingkungan Docker-in-Docker yang terisolasi tanpa port pada host luar, lalu sumber kode diambil sebagai \textit{snapshot} dan diperiksa hash-nya; pada pemulihan, jaringan dinaikkan kembali dengan materi identitas yang sudah ada. Kedua, setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik. Laju lulus hanya jika semua hasil terverifikasi, tanpa kegagalan dan waktu habis, dan drain paling lama 3 detik, yaitu \textit{BatchTimeout} \textit{orderer} 2 detik ditambah 1 detik. Ketiga, pencarian biner mempersempit braket hingga selisih relatif 10\%. Keempat, laju lulus tertinggi dikonfirmasi tiga kali, masing-masing 30 detik, lalu kurva beban diukur pada 25, 50, 75, 100, 125, dan 150\% laju terkonfirmasi, masing-masing 60 detik. Kelima, sampel sumber daya dicatat setiap detik untuk setiap komponen selama jendela ukur, yaitu sembilan hingga sepuluh sampel per probe 10 detik dan 30 sampel per jendela konfirmasi 30 detik. Seluruh prosedur diulang tiga kali secara independen, masing-masing pada jaringan baru, dan hasilnya dilaporkan sebagai median beserta rentang minimum hingga maksimum. Setiap percobaan yang terhenti, gagal, atau tidak lengkap dipertahankan sebagai catatan terpisah. Galat pengambilan pada harness diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa percobaan ulang otomatis. Pelanjutan ulang hanya diperbolehkan dengan \textit{stamp} dan sumber yang sama, sehingga percobaan awal tidak tertimpa. Tahap dan kriteria pengukuran dirangkum pada Tabel~\ref{tab:skenario}; batas antara pengukuran kinerja dan pemeriksaan fungsional dirangkum pada Tabel~\ref{tab:uji-fungsional}.
 
 \begingroup
 \renewcommand{\arraystretch}{1.3}
@@ -546,7 +554,8 @@ Prosedur pengujian kinerja kapasitas berjalan dalam lima langkah berurutan. Pert
 	Braket & Gunakan hasil terdahulu hanya sebagai petunjuk laju awal; bila tidak tersedia, mulai pada 32 operasi/detik. Tetapkan rentang 0,1--4.096 operasi/detik. Jika laju awal lulus tetapi belum ada batas gagal, kalikan laju dengan empat; jika laju awal gagal tetapi belum ada batas lulus, bagi laju dengan empat sampai braket terbentuk. \\
 	Pencarian biner & Uji titik tengah braket dalam ronde 10 detik sampai selisih relatif laju gagal terhadap laju lulus paling besar 10\%. Kesalahan konfigurasi atau data uji menghentikan pencarian beban kerja tersebut untuk diagnosis. \\
 	Konfirmasi & Jalankan tiga ronde terpisah yang dikelompokkan untuk satu beban kerja, masing-masing 30 detik, pada laju lulus tertinggi. Jika konfirmasi gagal, turunkan kandidat dan ulangi konfirmasi; hasil campuran dilaporkan sebagai batas tidak stabil. Galat penyiapan fixture tidak dihitung sebagai kegagalan konfirmasi; percobaan tersebut diarsipkan dan pencarian beban kerja diulang. \\
-	Interpretasi & Kelulusan pada batas atas rentang pencarian, 4.096 operasi/detik, dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Durasi konfirmasi minimum seluruh TBD beban kerja adalah TBD menit, di luar penyiapan, pencarian, dan verifikasi. \\
+	Kurva beban & Jalankan enam laju tetap, yaitu 25, 50, 75, 100, 125, dan 150\% laju terkonfirmasi, masing-masing 60 detik. Kurva ini bersifat deskriptif, tanpa kriteria lulus. \\
+	Interpretasi & Kelulusan pada batas atas rentang pencarian, 4.096 operasi/detik, atau pada laju yang dibatasi satu \textit{worker} dilaporkan sebagai kapasitas sekurang-kurangnya sebesar laju terukur. Laju gagal pertama dilaporkan bersama sebabnya. Per ulangan, durasi konfirmasi seluruh empat beban kerja adalah 6 menit dan durasi kurva beban 24 menit, di luar penyiapan, pencarian, dan verifikasi. \\
 	\bottomrule
 	\end{tabular}
 \end{table}
@@ -590,8 +599,7 @@ terselesaikan, serta dengan jejak transaksi dan jendela sumber daya yang lengkap
 Penolakan yang diharapkan hanya dihitung benar apabila assertion
 memastikan keadaan ledger tidak berubah. Jumlah operasi yang terkirim harus
 berada dalam toleransi 5\% dari target dengan pembulatan satu permintaan, dan
-laju terverifikasi setelah drain harus mencapai sedikitnya 90\% dari laju
-terkirim. Dengan demikian, 100\% merupakan ketepatan yang diamati hanya untuk
+drain tidak boleh melebihi 3 detik. Dengan demikian, 100\% merupakan ketepatan yang diamati hanya untuk
 beban kerja dan durasi yang diuji; skenario fungsional yang belum terselesaikan
 menghalangi klaim konformansi keseluruhan.
 
@@ -656,17 +664,17 @@ sebagai penelitian lanjutan. Saldo awal dan populasi fixture merupakan pilihan
 rekayasa, bukan estimasi distribusi pengguna nasional.
 
 \paragraph{Kesesuaian dengan skenario CBDC ritel.}
-Beban kerja pengujian dirancang untuk merepresentasikan alur transaksi Rupiah
-Digital ritel secara struktural. Setiap fungsi diuji secara terisolasi agar
-throughput, latensi, dan alasan kegagalan dapat diatribusikan pada fungsi yang
-diukur. Transfer antarpelanggan, penerbitan, transfer antarbank, konversi, pendanaan dompet, penebusan, kueri saldo, serta perubahan status dompet dipisahkan,
-dan transfer ritel juga memiliki profil kontensi rendah dan kontensi tinggi. Pola
-ini dipilih karena CBDC ritel mencakup transaksi pengguna, distribusi, dan
-pengawasan, bukan hanya setelmen antarlembaga. Literatur teknologi CBDC ritel
-menempatkan desain dompet, privasi, dan arsitektur distribusi sebagai elemen
-inti sistem pembayaran publik \cite{Auer2020The}. Oleh karena itu, beban kerja
-yang hanya menguji transfer institusional tidak memadai untuk menjawab rumusan
-masalah purwarupa Rupiah Digital ritel.
+Beban kerja pengujian dipilih menurut rumusan masalah, bukan menurut daftar
+fungsi. Keempat beban kerja berada pada jalur yang dilalui setiap pelanggan
+ritel, yaitu penerimaan subjek, verifikasi identitas, pemeriksaan kelayakan
+membayar, dan transfer. Setiap fungsi diuji secara terisolasi agar throughput,
+latensi, dan alasan kegagalan dapat diatribusikan pada fungsi yang diukur.
+Fungsi penerbitan, konversi, penebusan, dan kueri pasokan tidak melalui
+gerbang CDD, sehingga hanya diperiksa secara fungsional. Literatur teknologi
+CBDC ritel menempatkan desain dompet, privasi, dan arsitektur distribusi
+sebagai elemen inti sistem pembayaran publik \cite{Auer2020The}. Oleh karena
+itu, beban kerja yang menguji jalur pelanggan ritel lebih relevan bagi rumusan
+masalah daripada beban kerja transfer institusional.
 
 Model dua jenjang penerbitan (BI\,→\,\textit{distributor}\,→\,pelanggan ritel) sesuai
 dengan rancangan Rupiah Digital yang ditetapkan dalam dokumen konsultatif Bank
@@ -818,10 +826,9 @@ Hyperledger Caliper dikonfigurasi dengan file jaringan (\textit{network config})
 yang mendeskripsikan topologi \textit{peer}, \textit{orderer}, kanal, dan
 identitas MSP. Modul beban kerja ditulis dalam JavaScript dan mengambil
 identitas penanda tangan serta daftar operasi dari katalog benchmark. Katalog
-mencakup seluruh metode publik tiga \textit{chaincode}; variasi
-\texttt{Transfer} untuk penerima ritel dihitung sebagai satu beban
-kerja, sedangkan \texttt{Initialize} dan debit reserve internal hanya diuji
-secara fungsional.
+kinerja memuat empat beban kerja jalur CDD, yaitu \texttt{Transfer} untuk
+penerima ritel, \texttt{CanPay}, \texttt{ApproveSubject}, dan
+\texttt{VerifySubject}. Metode publik lainnya hanya diuji secara fungsional.
 
 Nilai \texttt{version: "2.0.0"} pada tingkat teratas konfigurasi jaringan
 menyatakan versi skema konfigurasi Caliper, bukan versi Hyperledger Fabric atau

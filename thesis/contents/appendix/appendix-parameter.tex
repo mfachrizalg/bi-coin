@@ -1,0 +1,57 @@
+\section{Parameter Pengujian Kinerja}
+
+Tabel~\ref{tab:lamp-parameter-kinerja} menyajikan seluruh nilai parameter pengujian kinerja yang digunakan pada Bab~III dan Bab~IV. Dengan parameter ini, pengujian dapat diulang pada perangkat keras lain tanpa merujuk kode sumber.
+
+\begingroup
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{p{5.2cm} p{8.8cm}}
+\caption{Parameter pengujian kinerja jalur CDD}
+\label{tab:lamp-parameter-kinerja} \\
+\toprule
+\textbf{Parameter} & \textbf{Nilai} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Parameter} & \textbf{Nilai} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\multicolumn{2}{l}{\textit{Perangkat lunak}} \\
+Hyperledger Fabric & 2.5.16 (\textit{peer}, \textit{orderer}, dan \textit{tools}) \\
+Fabric CA & 1.5.9, satu CA per organisasi \\
+Basis data keadaan & CouchDB 3.3, satu per \textit{peer} \\
+Hyperledger Caliper & 0.6.0 dengan konektor Fabric \\
+Fabric Gateway & 1.5 \\
+\midrule
+\multicolumn{2}{l}{\textit{Jaringan}} \\
+Organisasi dan \textit{peer} & Empat MSP, satu \textit{peer} per MSP, kanal \texttt{bi-coin} \\
+\textit{Orderer} & Tiga \textit{orderer} Raft \\
+\textit{BatchTimeout} & 2 detik \\
+Ukuran blok & \textit{MaxMessageCount} 10, \textit{PreferredMaxBytes} 2 MB, \textit{AbsoluteMaxBytes} 10 MB \\
+\midrule
+\multicolumn{2}{l}{\textit{Beban kerja}} \\
+Beban kerja & \texttt{transfer-retail}, \texttt{can-pay}, \texttt{approve-subject}, dan \texttt{verify-subject} \\
+\textit{Worker} Caliper & Satu \textit{worker} lokal \\
+Kendali laju & \textit{fixed-rate} \\
+Batas waktu transaksi & 30 detik \\
+Nominal transfer & 1 unit per transaksi \\
+Saldo awal pengirim & 200 unit per pengirim \\
+Batas subjek & Per transaksi, harian, dan bulanan 1.000.000.000, kepemilikan 20.000.000. Pengirim dalam \textit{pool} belum terverifikasi sehingga kepemilikannya dibatasi Rp2.000.000 \\
+Jumlah \textit{fixture} per ronde & $\lceil r \times d \times 1{,}05 \rceil + 1$, dengan $r$ laju dan $d$ durasi ronde \\
+\midrule
+\multicolumn{2}{l}{\textit{Pencarian dan konfirmasi}} \\
+Rentang laju & 0,1 hingga 4.096 operasi/detik \\
+Laju awal & 32 operasi/detik \\
+Faktor perluasan & 4 \\
+Durasi probe & 10 detik \\
+Toleransi braket & 10\% \\
+Konfirmasi & Tiga ronde, masing-masing 30 detik \\
+Toleransi laju terkirim & 5\% dari target, minimal satu permintaan \\
+Batas drain & 3 detik \\
+Kurva beban & 25, 50, 75, 100, 125, dan 150\% laju terkonfirmasi, masing-masing 60 detik \\
+Interval sampel sumber daya & 1 detik \\
+Ulangan & Tiga ulangan independen, masing-masing pada jaringan baru \\
+Agregasi & Median dan rentang minimum hingga maksimum antarulangan \\
+\end{longtable}
+\endgroup

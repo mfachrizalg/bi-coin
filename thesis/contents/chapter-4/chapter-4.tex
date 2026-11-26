@@ -175,16 +175,20 @@ Worker Caliper & Satu \textit{worker} pada satu host \\
 \end{tabular}
 \end{table}
 
-Setiap beban kerja diuji pada laju tertentu dengan ronde Caliper 10 detik. Laju
-lulus hanya ditetapkan jika seluruh hasil terverifikasi dan throughput terverifikasi
-terhadap durasi ditambah drain mencapai 90 persen laju terkirim, yang setara dengan
-drain paling lama sepersembilan durasi probe. Pencarian biner mempersempit braket
-hingga selisih relatif 10 persen. Laju lulus tertinggi kemudian dikonfirmasi tiga
-kali, masing-masing dengan jendela ukur 30 detik, dan sampel sumber daya dicatat
-setiap detik selama jendela tersebut. Galat pengambilan pada harness diklasifikasikan
-sebagai tidak terselesaikan dan menghentikan pencarian beban kerja tersebut tanpa
-percobaan ulang otomatis. Hasil pengukuran disajikan pada bagian Hasil Uji Kontrol
-pada Lingkungan Terisolasi di akhir bab ini.
+Pengukuran mencakup empat beban kerja jalur CDD sesuai Bab~III, yaitu
+\texttt{transfer-retail}, \texttt{can-pay}, \texttt{approve-subject}, dan
+\texttt{verify-subject}. Setiap beban kerja diuji pada laju tertentu dengan
+ronde Caliper 10 detik. Laju lulus hanya ditetapkan jika seluruh hasil
+terverifikasi, tanpa kegagalan dan waktu habis, dan drain paling lama 3 detik.
+Pencarian biner mempersempit braket hingga selisih relatif 10 persen. Laju
+lulus tertinggi kemudian dikonfirmasi tiga kali, masing-masing dengan jendela
+ukur 30 detik, lalu kurva beban diukur pada enam laju tetap. Sampel sumber daya
+dicatat setiap detik selama jendela tersebut. Galat pengambilan pada harness
+diklasifikasikan sebagai tidak terselesaikan dan menghentikan pencarian beban
+kerja tersebut tanpa percobaan ulang otomatis. Seluruh prosedur dijalankan tiga
+kali pada jaringan baru, dan hasil pengukuran disajikan sebagai median beserta
+rentangnya pada bagian Hasil Uji Kontrol pada Lingkungan Terisolasi di akhir
+bab ini.
 
 
 
@@ -193,8 +197,8 @@ pada Lingkungan Terisolasi di akhir bab ini.
 
 
 Dalam konteks SRS pada Bab~III, hasil kinerja akan memberikan bukti untuk NFR-04 (TBD).
-Keterulangan (NFR-05) hanya didukung oleh manifes konfigurasi, karena belum tersedia
-pengulangan lintas run yang konsisten. Hasil kinerja pada subbab ini masih TBD dan tidak
+Keterulangan (NFR-05) didukung oleh manifes konfigurasi dan oleh rentang hasil
+tiga ulangan independen pada mesin yang sama (TBD). Hasil kinerja pada subbab ini masih TBD dan tidak
 ditafsirkan sebagai kapasitas nasional, jaminan produksi, atau reproduktibilitas
 lintas mesin.
 
@@ -204,9 +208,9 @@ Penelitian ini dibandingkan dengan tinjauan literatur Aryani
 \cite{aryani2023critlit} dan PoC Proyek Garuda \cite{bi_garuda_poc} karena
 keduanya membahas kebutuhan CBDC Indonesia dari sisi kebijakan dan pembuktian
 teknologi. Tabel~\ref{tab:perbandingan-cbdc} membandingkan jenis artefak,
-lingkup bukti, dan posisi kontribusi. Jika angka kinerja disebutkan, angka
-tersebut hanya menjelaskan konfigurasi masing-masing artefak dan tidak
-dimaksudkan sebagai peringkat langsung antarsistem. Dalam kerangka itu,
+lingkup bukti, dan posisi kontribusi. Angka kinerja tidak dibandingkan, karena
+platform, \textit{harness}, komposisi beban, dan perangkat keras setiap artefak
+berbeda sehingga angka tersebut tidak setara. Dalam kerangka itu,
 penelitian ini menyajikan purwarupa CBDC ritel berbasis Hyperledger Fabric
 dengan pengawasan dan tolok ukur Caliper, sedangkan Aryani berfokus pada kajian
 literatur dan PoC Proyek Garuda pada Rupiah Digital \textit{wholesale}.
@@ -225,7 +229,6 @@ literatur dan PoC Proyek Garuda pada Rupiah Digital \textit{wholesale}.
         Platform DLT & Tidak dievaluasi (kutipan dari kasus negara) & R3 Corda + Hyperledger Besu & Hyperledger Fabric \\
         Model jenjang & Dua jenjang secara konseptual & \textit{wholesale} pada PoC & CentralBankMSP ke DistributorMSP ke EndUserMSP \\
         Transfer ritel & Direkomendasikan secara konseptual & Tidak diuji & Antarpelanggan perorangan \\
-        Metrik kinerja & Kutipan sekunder; tidak diukur langsung & Corda 37 TPS, Besu 39 TPS (Locust) & Caliper satu worker; TBD \\
         Lingkup pengujian & Tidak ada pengujian & Penerbitan, penebusan, transfer antarlembaga & Transfer antarpelanggan, keputusan CDD sederhana, baca dompet \\
         Pembayaran luring & Direkomendasikan untuk \textit{r-Rupiah Digital} & Tidak dibahas & Tidak diuji dalam purwarupa ini \\
         Tokenisasi & Didukung (konseptual) & UTXO (Corda) / ERC-20 + ERC-1400 (Besu) & Transfer berbasis kunci--nilai pada Fabric \\
@@ -244,11 +247,11 @@ karena beban dan batas pengukurannya berbeda.
 Perbandingan ini terbatas pada posisi kontribusi dan ruang lingkup teknis.
 Pengukuran menggunakan satu \textit{worker} Caliper pada satu host dengan jaringan
 empat organisasi, sehingga hasilnya hanya berlaku untuk topologi, jumlah peserta,
-dan skenario beban purwarupa. Pembandingan angka kinerja terhadap PoC Proyek Garuda
-(Corda 37 TPS dan Besu 39 TPS) menunggu hasil pengukuran purwarupa (TBD), dan selisih yang muncul perlu dibaca dengan mempertimbangkan perbedaan platform, \textit{harness},
-tujuan pengujian, dan komposisi beban. Hasil pengukuran purwarupa, setelah tersedia,
-merupakan garis dasar lokal dan bukan kapasitas maksimum Hyperledger Fabric atau
-bukti reproduksibilitas lintas mesin \cite{fabric_perf2023}.
+dan skenario beban purwarupa. Hasil pengukuran purwarupa merupakan data kinerja
+awal arsitektur CBDC ritel yang menegakkan keputusan CDD, sehingga dapat dirujuk
+atau dioptimalkan oleh penelitian lain dengan parameter pada Lampiran. Hasil
+tersebut bukan kapasitas maksimum Hyperledger Fabric atau bukti
+reproduksibilitas lintas mesin \cite{fabric_perf2023}.
 
 \section{Hasil Uji Kontrol pada Lingkungan Terisolasi}
 
@@ -275,124 +278,94 @@ Hasil ini hanya menunjukkan perilaku fungsional pada skenario sintetis yang diuj
 bukan kepatuhan hukum menyeluruh, efektivitas deteksi AML/CFT pada populasi
 nyata, atau keberhasilan pengiriman laporan kepada PPATK.
 
-Pengujian kinerja untuk ketiga \textit{chaincode} studi dijalankan dengan satu \textit{worker} Caliper pada satu host lokal. Satuan laju dinyatakan dalam ops/s, dan untuk operasi tulis nilai dalam ops/s sama dengan TPS. Hasil pengukuran kinerja belum tersedia pada naskah ini, sehingga seluruh nilai laju, latensi, dan konsumsi sumber daya pada subbab ini ditandai TBD. Batas laju terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
+Pengujian kinerja untuk empat beban kerja jalur CDD dijalankan dengan satu \textit{worker} Caliper pada satu host lokal. Satuan laju dinyatakan dalam ops/s, dan untuk operasi tulis nilai dalam ops/s sama dengan TPS. Setiap nilai merupakan median tiga ulangan independen, dan angka dalam kurung merupakan rentang minimum hingga maksimum antarulangan. Hasil pengukuran kinerja belum tersedia pada naskah ini, sehingga seluruh nilai laju, latensi, dan konsumsi sumber daya pada subbab ini ditandai TBD. Batas laju terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-kapasitas-kontrol}.
 
-% TODO(G-hasil): daftar beban kerja pada tabel kapasitas, latensi, dan sumber daya perlu disamakan dengan katalog beban kerja kinerja yang berlaku setelah perubahan CDD sederhana. Baris set-business-authority dan transfer-merchant sudah dihapus karena fungsinya tidak ada lagi.
 \begin{table}[H]
 \centering
-\caption{Batas bawah laju lulus terkonfirmasi tiga \textit{chaincode} studi pada satu \textit{worker} (ops/s)}
+\caption{Laju lulus terkonfirmasi dan laju gagal pertama empat beban kerja jalur CDD pada satu \textit{worker}, median dan rentang tiga ulangan (ops/s)}
 \label{tab:ch4-kapasitas-kontrol}
 \scriptsize
 \begin{tabular}{lllrr}
 \toprule
 Beban kerja & \textit{Chaincode} & Jenis & Terkonfirmasi (ops/s) & Gagal pertama (ops/s) \\
 \midrule
-\texttt{create-pending} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{protect-subject} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{create-staff-pending} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{protect-staff} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{set-staff-role} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{record-review} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{approve-subject} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{set-limits} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{freeze-subject} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{request-unfreeze} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{approve-unfreeze} & \texttt{rupiah-controls} & tulis & TBD & TBD \\
-\texttt{read-caller-identity} & \texttt{rupiah-controls} & baca & TBD & TBD \\
-\texttt{can-pay} & \texttt{rupiah-controls} & baca & TBD & TBD \\
-\texttt{read-limits} & \texttt{rupiah-controls} & baca & TBD & TBD \\
-\texttt{can-act-for} & \texttt{rupiah-controls} & baca & TBD & TBD \\
-\texttt{validator-read-subject} & \texttt{rupiah-controls} & baca & TBD & TBD \\
-\texttt{register-distributor} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{issue} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{interbank-transfer} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{interbank-transfer-pending} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{approve-transfer} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{reject-transfer} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{propose-approval-threshold} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{set-participant-status} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{set-transfer-limit} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{redeem-reserve} & \texttt{rupiah-monetary} & tulis & TBD & TBD \\
-\texttt{read-supply} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{read-wholesale-supply} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{read-retail-supply} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{read-reserve} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{read-participant} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{can-send} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{read-transfer-limit} & \texttt{rupiah-monetary} & baca & TBD & TBD \\
-\texttt{open-wallet} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
-\texttt{transfer-retail} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
-\texttt{convert-to-retail} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
-\texttt{fund-wallet} & \texttt{rupiah-payments} & tulis & TBD & TBD \\
-\texttt{read-retail-float} & \texttt{rupiah-payments} & baca & TBD & TBD \\
-\texttt{read-balance} & \texttt{rupiah-payments} & baca & TBD & TBD \\
-\texttt{read-receipt} & \texttt{rupiah-payments} & baca & TBD & TBD \\
+\texttt{transfer-retail} & \texttt{rupiah-payments} & tulis & TBD (TBD--TBD) & TBD (TBD--TBD) \\
+\texttt{can-pay} & \texttt{rupiah-controls} & baca & TBD (TBD--TBD) & TBD (TBD--TBD) \\
+\texttt{approve-subject} & \texttt{rupiah-controls} & tulis & TBD (TBD--TBD) & TBD (TBD--TBD) \\
+\texttt{verify-subject} & \texttt{rupiah-controls} & tulis & TBD (TBD--TBD) & TBD (TBD--TBD) \\
 \bottomrule
 \end{tabular}%
 \end{table}
 
-Batas laju baca dan tulis terkonfirmasi belum tersedia pada naskah ini dan ditandai TBD. Setelah pengukuran selesai, nilai tersebut berlaku untuk satu \textit{worker}, satu host, dan durasi konfirmasi 30 detik, sehingga tidak dimaksudkan sebagai kapasitas produksi.
+Batas laju baca dan tulis terkonfirmasi belum tersedia pada naskah ini dan ditandai TBD. Setelah pengukuran selesai, nilai tersebut berlaku untuk satu \textit{worker}, satu host, dan durasi konfirmasi 30 detik, sehingga tidak dimaksudkan sebagai kapasitas produksi. Beban kerja yang dibatasi oleh satu \textit{worker} dilaporkan sebagai sekurang-kurangnya laju terukur.
 
-Latensi per beban kerja pada laju terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-latensi-kinerja}. Angka latensi p50 dan p95 belum tersedia pada naskah ini dan ditandai TBD. Nilai p50 dan p95 pada tabel adalah median tiga ronde konfirmasi dengan rentang antar-ronde, tidak digabungkan dari seluruh sampel.
+Sebab kegagalan pada laju gagal pertama setiap ulangan disajikan pada Tabel~\ref{tab:ch4-sebab-gagal}. Sebab diambil dari kode validasi atau kelas kegagalan yang paling sering muncul pada probe tersebut, yaitu konflik MVCC, kegagalan \textit{endorsement}, waktu habis, atau antrean yang melampaui batas drain.
 
 \begin{table}[H]
 \centering
-\caption{Latensi p50 dan p95 per beban kerja pada laju terkonfirmasi (ms)}
+\caption{Sebab kegagalan pada laju gagal pertama per ulangan}
+\label{tab:ch4-sebab-gagal}
+\scriptsize
+\begin{tabular}{llll}
+\toprule
+Beban kerja & Ulangan 1 & Ulangan 2 & Ulangan 3 \\
+\midrule
+\texttt{transfer-retail} & TBD & TBD & TBD \\
+\texttt{can-pay} & TBD & TBD & TBD \\
+\texttt{approve-subject} & TBD & TBD & TBD \\
+\texttt{verify-subject} & TBD & TBD & TBD \\
+\bottomrule
+\end{tabular}%
+\end{table}
+
+Latensi per beban kerja pada laju terkonfirmasi disajikan pada Tabel~\ref{tab:ch4-latensi-kinerja}. Angka latensi belum tersedia pada naskah ini dan ditandai TBD. Dalam satu ulangan, setiap nilai adalah median tiga ronde konfirmasi, lalu median dan rentang diambil dari tiga ulangan.
+
+\begin{table}[H]
+\centering
+\caption{Latensi minimum, median, p95, dan maksimum per beban kerja pada laju terkonfirmasi, median dan rentang tiga ulangan (ms)}
 \label{tab:ch4-latensi-kinerja}
 \scriptsize
 \begin{tabular}{lrrrr}
 \toprule
-Beban kerja & p50 (ms) & Rentang p50 (ms) & p95 (ms) & Rentang p95 (ms) \\
+Beban kerja & Minimum (ms) & Median (ms) & p95 (ms) & Maksimum (ms) \\
 \midrule
-\texttt{create-pending} & TBD & TBD & TBD & TBD \\
-\texttt{protect-subject} & TBD & TBD & TBD & TBD \\
-\texttt{create-staff-pending} & TBD & TBD & TBD & TBD \\
-\texttt{protect-staff} & TBD & TBD & TBD & TBD \\
-\texttt{set-staff-role} & TBD & TBD & TBD & TBD \\
-\texttt{record-review} & TBD & TBD & TBD & TBD \\
-\texttt{approve-subject} & TBD & TBD & TBD & TBD \\
-\texttt{set-limits} & TBD & TBD & TBD & TBD \\
-\texttt{freeze-subject} & TBD & TBD & TBD & TBD \\
-\texttt{request-unfreeze} & TBD & TBD & TBD & TBD \\
-\texttt{approve-unfreeze} & TBD & TBD & TBD & TBD \\
-\texttt{read-caller-identity} & TBD & TBD & TBD & TBD \\
-\texttt{can-pay} & TBD & TBD & TBD & TBD \\
-\texttt{read-limits} & TBD & TBD & TBD & TBD \\
-\texttt{can-act-for} & TBD & TBD & TBD & TBD \\
-\texttt{validator-read-subject} & TBD & TBD & TBD & TBD \\
-\texttt{register-distributor} & TBD & TBD & TBD & TBD \\
-\texttt{issue} & TBD & TBD & TBD & TBD \\
-\texttt{interbank-transfer} & TBD & TBD & TBD & TBD \\
-\texttt{interbank-transfer-pending} & TBD & TBD & TBD & TBD \\
-\texttt{approve-transfer} & TBD & TBD & TBD & TBD \\
-\texttt{reject-transfer} & TBD & TBD & TBD & TBD \\
-\texttt{propose-approval-threshold} & TBD & TBD & TBD & TBD \\
-\texttt{set-participant-status} & TBD & TBD & TBD & TBD \\
-\texttt{set-transfer-limit} & TBD & TBD & TBD & TBD \\
-\texttt{redeem-reserve} & TBD & TBD & TBD & TBD \\
-\texttt{read-supply} & TBD & TBD & TBD & TBD \\
-\texttt{read-wholesale-supply} & TBD & TBD & TBD & TBD \\
-\texttt{read-retail-supply} & TBD & TBD & TBD & TBD \\
-\texttt{read-reserve} & TBD & TBD & TBD & TBD \\
-\texttt{read-participant} & TBD & TBD & TBD & TBD \\
-\texttt{can-send} & TBD & TBD & TBD & TBD \\
-\texttt{read-transfer-limit} & TBD & TBD & TBD & TBD \\
-\texttt{open-wallet} & TBD & TBD & TBD & TBD \\
-\texttt{transfer-retail} & TBD & TBD & TBD & TBD \\
-\texttt{convert-to-retail} & TBD & TBD & TBD & TBD \\
-\texttt{fund-wallet} & TBD & TBD & TBD & TBD \\
-\texttt{read-retail-float} & TBD & TBD & TBD & TBD \\
-\texttt{read-balance} & TBD & TBD & TBD & TBD \\
-\texttt{read-receipt} & TBD & TBD & TBD & TBD \\
+\texttt{transfer-retail} & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) \\
+\texttt{can-pay} & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) \\
+\texttt{approve-subject} & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) \\
+\texttt{verify-subject} & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD (TBD--TBD) \\
 \bottomrule
 \end{tabular}%
 \end{table}
 
-Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk TBD beban kerja, yaitu 30 sampel per jendela dan tiga jendela per beban kerja. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai minimum, median, dan maksimum antar jendela konfirmasi untuk CPU rata-rata, puncak CPU, memori puncak, dan delta RX per kelompok komponen. Kelompok dengan beberapa instans, yaitu CouchDB dan kontainer chaincode, digabung seluruh instansnya, sedangkan baris Klien Caliper hanya mencakup proses klien Caliper. Ruang nama jaringan klien tidak dihitung karena menduplikasi penghitung RX dan TX klien. Puncak CPU dan memori tiap kelompok dijumlahkan dari puncak setiap instans, sehingga merupakan batas atas. Proses \texttt{study-cli} tidak ditampilkan dalam tabel.
+Kurva beban pada Tabel~\ref{tab:ch4-kurva-beban} menunjukkan laju terverifikasi dan latensi p95 ketika laju yang ditawarkan berada di bawah dan di atas laju terkonfirmasi. Kurva ini bersifat deskriptif dan menunjukkan titik ketika laju terverifikasi mulai tertinggal dari laju yang ditawarkan.
+
+% TODO(G-hasil): setelah pengukuran selesai, tambahkan gambar kurva beban (laju terverifikasi dan p95 terhadap persentase laju terkonfirmasi) dari aggregate-repeats.json.
+\begin{table}[H]
+\centering
+\caption{Kurva beban empat beban kerja jalur CDD, median tiga ulangan}
+\label{tab:ch4-kurva-beban}
+\scriptsize
+\begin{tabular}{rrrrrrrrr}
+\toprule
+ & \multicolumn{2}{c}{\texttt{transfer-retail}} & \multicolumn{2}{c}{\texttt{can-pay}} & \multicolumn{2}{c}{\texttt{approve-subject}} & \multicolumn{2}{c}{\texttt{verify-subject}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+Laju (\%) & ops/s & p95 (ms) & ops/s & p95 (ms) & ops/s & p95 (ms) & ops/s & p95 (ms) \\
+\midrule
+25 & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD \\
+50 & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD \\
+75 & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD \\
+100 & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD \\
+125 & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD \\
+150 & TBD & TBD & TBD & TBD & TBD & TBD & TBD & TBD \\
+\bottomrule
+\end{tabular}%
+\end{table}
+
+Konsumsi sumber daya dicatat setiap detik selama jendela konfirmasi 30 detik untuk empat beban kerja, yaitu 30 sampel per jendela, tiga jendela per beban kerja, dan tiga ulangan. Tabel~\ref{tab:ch4-sumber-daya-kontrol} merangkum nilai minimum, median, dan maksimum antar jendela konfirmasi untuk CPU rata-rata, puncak CPU, memori puncak, dan delta RX per kelompok komponen. Kelompok dengan beberapa instans, yaitu CouchDB dan kontainer chaincode, digabung seluruh instansnya, sedangkan baris Klien Caliper hanya mencakup proses klien Caliper. Ruang nama jaringan klien tidak dihitung karena menduplikasi penghitung RX dan TX klien. Puncak CPU dan memori tiap kelompok dijumlahkan dari puncak setiap instans, sehingga merupakan batas atas. Proses \texttt{study-cli} tidak ditampilkan dalam tabel.
 
 \begin{table}[H]
 \centering
-\caption{Konsumsi sumber daya komponen pada jendela konfirmasi 30 detik (TBD beban kerja)}
+\caption{Konsumsi sumber daya komponen pada jendela konfirmasi 30 detik (empat beban kerja, tiga ulangan)}
 \label{tab:ch4-sumber-daya-kontrol}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrrrrrrrr}
@@ -424,3 +397,5 @@ Hasil pengukuran tidak dimaksudkan sebagai kapasitas produksi. Pembahasan angka 
 Pertama, seluruh komponen berjalan pada satu mesin dengan prosesor empat inti dan memori 15,52 GiB, yaitu empat \textit{peer}, satu \textit{orderer}, empat CouchDB, empat CA, PostgreSQL, dan klien Caliper. Komponen tersebut berbagi CPU dan I/O, sehingga persaingan sumber daya dapat memengaruhi laju yang diperoleh. Kedua, pengukuran menggunakan satu \textit{worker} Caliper, sehingga kapasitas klien ikut menjadi faktor yang perlu diperiksa. Ketiga, setiap jendela konfirmasi berdurasi 30 detik dan tidak mencerminkan operasi berkelanjutan.
 
 Keempat, jaringan terdiri atas satu \textit{orderer} dengan konfigurasi \texttt{BatchTimeout} dan seluruh komponen berada pada satu host, tanpa latensi antarlokasi, sehingga tidak menggambarkan jaringan produksi lintas institusi. Penelitian terdahulu menunjukkan bahwa validasi transaksi membatasi throughput Hyperledger Fabric \cite{thakkar2018}, dan overhead pada tahap pemesanan dan validasi menghambat throughput \cite{gorenflo2019fastfabric}. Pengaruh masing-masing faktor tersebut belum diuji secara terpisah. Pengujian dengan jumlah \textit{worker}, mesin, dan topologi yang berbeda diperlukan sebelum hasil ini dapat dibandingkan dengan lingkungan produksi.
+
+Kelima, pengujian tidak memuat konfigurasi tanpa pemeriksaan CDD sebagai pembanding. Karena itu, angka pada subbab ini menggambarkan kinerja arsitektur dengan CDD yang ditegakkan, tetapi tidak memisahkan beban pemeriksaan CDD dari biaya Fabric itu sendiri.

@@ -107,8 +107,8 @@ two-tier model~\cite{sethaput2025,aryani2023critlit}.
 
 The compliance study is the main study of this paper. It tests whether selected
 customer controls and organizational endorsement boundaries behave as designed
-in synthetic scenarios. It also measures the throughput and latency of the same
-three chaincodes with a Hyperledger Caliper benchmark (Section~\ref{sec:eval}).
+in synthetic scenarios. It also measures the throughput and latency of the four
+workloads on the CDD path with a Hyperledger Caliper benchmark (Section~\ref{sec:eval}).
 
 To address this gap, we implement a Digital Rupiah prototype on a permissioned
 Hyperledger Fabric network~\cite{androulaki2018}. The prototype maps Bank
@@ -129,9 +129,11 @@ Indonesia's business processes to chaincode transactions. This paper contributes
 	      multi-version concurrency control (MVCC), and atomic wallet updates. The
 	      protocol lets endorsing organizations apply the same state-transition
 	      rules independently.
-	\item A Hyperledger Caliper~\cite{hlf_caliper} benchmark of the compliance
-	      study. It documents the testbed, the workload catalog, and the functional
-	      checks for authorization, validation, and action outcomes. Its throughput and latency results are pending under a single-host, one-worker scope.
+	\item A Hyperledger Caliper~\cite{hlf_caliper} benchmark of the four CDD-path
+	      workloads: retail transfer, payer eligibility, subject approval, and identity
+	      verification. Each yields a confirmed maximum rate, the first failing rate
+	      with its cause, and a load curve, over three independent repeats. Its
+	      throughput and latency results are pending under a single-host, one-worker scope.
 \end{enumerate}
 
 \section{Background and Related Work}
@@ -692,12 +694,18 @@ chaincode. Fabric MVCC validates the wallet versions before commit.}
 \label{sec:eval}
 
 \subsection{Methodology}
-The compliance benchmark runs Hyperledger Caliper 0.6.0 with one worker on one
-host, against the four-organization network and its three chaincodes. Each
-workload is confirmed over three 30-second rounds, and its verified throughput is
-the mean of the three rounds. A probe exceeds the drain limit when verified
-throughput over the probe duration plus drain falls below 90 percent of the
-delivered rate. The testbed has four peer organizations, one peer per organization,
+The benchmark runs Hyperledger Caliper 0.6.0 with one worker on one host,
+against the four-organization network. It measures only the CDD path, because the
+ledger-enforced CDD gates are the contribution. \texttt{Transfer} runs five CDD
+checks before it writes: \texttt{CanActFor}, \texttt{CanPay}, the per-transaction
+limit, the payee status and holdings ceiling in \texttt{CheckPayee}, and the daily
+and monthly usage. The other three workloads are \texttt{CanPay} as a read,
+\texttt{ApproveSubject}, and \texttt{VerifySubject}. A binary search over
+0.1 to 4096\,ops/s with 10\,s probes finds the highest rate with no failures, no
+timeouts, and a drain of at most 3\,s (the 2\,s batch timeout plus 1\,s). Three
+30\,s rounds confirm that rate. A load curve then runs 60\,s at 25 to 150\% of
+it. The whole procedure is repeated three times, each on a fresh network, and we
+report the median and the min-max range. The testbed has four peer organizations, one peer per organization,
 a three-node Raft ordering service on the same host, and one CouchDB instance per organization.
 
 \begin{table}[!t]
@@ -733,110 +741,45 @@ these checks.
 Performance results pending.
 
 \begin{table}[!t]
-\caption{Confirmed capacity and nearest measured failure per workload (writes in TPS, reads in ops/s)}
+\caption{Confirmed maximum and first failing rate per CDD-path workload (writes in TPS, reads in ops/s), median and range of three repeats}
 \label{tab:capacity}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}lrrl@{}}
 \toprule
-\textbf{Workload} & \textbf{Confirmed} & \textbf{Nearest failing} \\
+\textbf{Workload} & \textbf{Confirmed} & \textbf{First failing} & \textbf{Cause} \\
 \midrule
-\multicolumn{3}{@{}l}{\textit{rupiah-monetary}} \\
-register-distributor & TBD & TBD \\
-issue & TBD & TBD \\
-redeem-reserve & TBD & TBD \\
-read-supply & TBD & TBD \\
-read-wholesale-supply & TBD & TBD \\
-read-retail-supply & TBD & TBD \\
-read-reserve & TBD & TBD \\
-read-participant & TBD & TBD \\
-\midrule
-\multicolumn{3}{@{}l}{\textit{rupiah-controls}} \\
-create-pending & TBD & TBD \\
-protect-subject & TBD & TBD \\
-create-staff-pending & TBD & TBD \\
-protect-staff & TBD & TBD \\
-set-staff-role & TBD & TBD \\
-record-review & TBD & TBD \\
-approve-subject & TBD & TBD \\
-set-limits & TBD & TBD \\
-freeze-subject & TBD & TBD \\
-request-unfreeze & TBD & TBD \\
-approve-unfreeze & TBD & TBD \\
-read-caller-identity & TBD & TBD \\
-can-pay & TBD & TBD \\
-read-limits & TBD & TBD \\
-can-act-for & TBD & TBD \\
-validator-read-subject & TBD & TBD \\
-\midrule
-\multicolumn{3}{@{}l}{\textit{rupiah-payments}} \\
-open-wallet & TBD & TBD \\
-transfer-retail & TBD & TBD \\
-convert-to-retail & TBD & TBD \\
-fund-wallet & TBD & TBD \\
-read-retail-float & TBD & TBD \\
-read-balance & TBD & TBD \\
-read-receipt & TBD & TBD \\
+transfer-retail & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD \\
+can-pay & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD \\
+approve-subject & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD \\
+verify-subject & TBD (TBD--TBD) & TBD (TBD--TBD) & TBD \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
-{\scriptsize Nearest failing is the nearest measured failing probe rate. TBD marks workloads
-awaiting the new benchmark run.}
+{\scriptsize Range in parentheses is min--max over three repeats. Cause is the most frequent validation code or failure class at the first failing rate. TBD marks values awaiting the benchmark run.}
 \end{table}
 
 \begin{table}[!t]
-\caption{Latency per workload at its confirmed rate (median of three rounds)}
+\caption{Latency per CDD-path workload at its confirmed rate, median and range of three repeats}
 \label{tab:latency}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-\textbf{Workload} & \textbf{p50 (ms)} & \textbf{p95 (ms)} \\
+\textbf{Workload} & \textbf{Min (ms)} & \textbf{p50 (ms)} & \textbf{p95 (ms)} & \textbf{Max (ms)} \\
 \midrule
-\multicolumn{3}{@{}l}{\textit{rupiah-monetary}} \\
-register-distributor & TBD & TBD \\
-issue & TBD & TBD \\
-redeem-reserve & TBD & TBD \\
-read-supply & TBD & TBD \\
-read-wholesale-supply & TBD & TBD \\
-read-retail-supply & TBD & TBD \\
-read-reserve & TBD & TBD \\
-read-participant & TBD & TBD \\
-\midrule
-\multicolumn{3}{@{}l}{\textit{rupiah-controls}} \\
-create-pending & TBD & TBD \\
-protect-subject & TBD & TBD \\
-create-staff-pending & TBD & TBD \\
-protect-staff & TBD & TBD \\
-set-staff-role & TBD & TBD \\
-record-review & TBD & TBD \\
-approve-subject & TBD & TBD \\
-set-limits & TBD & TBD \\
-freeze-subject & TBD & TBD \\
-request-unfreeze & TBD & TBD \\
-approve-unfreeze & TBD & TBD \\
-read-caller-identity & TBD & TBD \\
-can-pay & TBD & TBD \\
-read-limits & TBD & TBD \\
-can-act-for & TBD & TBD \\
-validator-read-subject & TBD & TBD \\
-\midrule
-\multicolumn{3}{@{}l}{\textit{rupiah-payments}} \\
-open-wallet & TBD & TBD \\
-transfer-retail & TBD & TBD \\
-convert-to-retail & TBD & TBD \\
-fund-wallet & TBD & TBD \\
-read-retail-float & TBD & TBD \\
-read-balance & TBD & TBD \\
-read-receipt & TBD & TBD \\
+transfer-retail & TBD & TBD & TBD & TBD \\
+can-pay & TBD & TBD & TBD & TBD \\
+approve-subject & TBD & TBD & TBD & TBD \\
+verify-subject & TBD & TBD & TBD & TBD \\
 \bottomrule
 \end{tabular}
 
 \vspace{2pt}
-{\scriptsize TBD marks workloads awaiting the new benchmark run.}
+{\scriptsize Within a repeat, each value is the median of its three confirmation rounds. TBD marks values awaiting the benchmark run.}
 \end{table}
 
 \section{Limitations and Future Work}
@@ -902,8 +845,11 @@ The compliance study is limited to synthetic chaincode integration scenarios. It
 does not use live identity verification or screening feeds, submit reports to
 PPATK, or establish the effectiveness of institutional compliance.
 Its backend HTTP path is exercised by functional tests but has not been
-load-measured. Performance results for the three chaincodes are limited to one
-Caliper worker on one host with 30-second confirmation windows. The current harness
+load-measured. Performance results for the four CDD-path workloads are limited to one
+Caliper worker on one host with 30-second confirmation windows. One may argue that
+the numbers show the cost of Fabric, not of CDD. The benchmark has no CDD-free
+configuration, so it cannot separate the two. It reports how the architecture
+performs with CDD enforced, which is the configuration a retail CBDC would run. The current harness
 stops a search on a transport error as inconclusive, without automatic retry.
 
 \section{Conclusion}
@@ -917,7 +863,7 @@ eligibility, limit, and balance checks with Fabric MVCC.
 The compliance study is the main study of this paper. Its synthetic integration
 scenarios passed for distinct compliance officer approval, restriction evidence, reserve funding,
 retail payment, read-only ValidatorMSP access, and expected endorsement failures. Its
-throughput and latency results for the same three chaincodes on a single host are
+throughput and latency results for the four CDD-path workloads on a single host are
 pending. This functional evidence does not depend on the Caliper results in
 Section~\ref{sec:eval}.
 
