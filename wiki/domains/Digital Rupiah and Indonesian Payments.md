@@ -17,8 +17,8 @@ sources:
   - "[[20200306-FAQ Blueprint SPI-2025]]"
   - "[[ADVANCING FUTURISTIC DIGITAL BANKING- STRATEGIC ENHANCEMENT AND A ROADMAP FOR EXCELLENCE]]"
   - "[[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[Central bank digital currency and systemic risk]]"
@@ -54,8 +54,8 @@ sources:
 - [[20200306-FAQ Blueprint SPI-2025]]
 - [[ADVANCING FUTURISTIC DIGITAL BANKING- STRATEGIC ENHANCEMENT AND A ROADMAP FOR EXCELLENCE]]
 - [[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]]
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]]
-- [[Blueprint Sistem Pembayaran Indonesia 2025]]
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]
 - [[BSPI-Presentasi]]
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]
 - [[Central bank digital currency and systemic risk]]

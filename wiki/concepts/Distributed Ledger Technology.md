@@ -21,7 +21,7 @@ related:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
   - "[[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]]"
@@ -42,7 +42,7 @@ sources:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
   - "[[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]]"
@@ -100,7 +100,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]] — PDF p. 1
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 5
 - [[Blockchain CBDC Security Threats Using STRIDE]] — PDF p. 3
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 5
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 5
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 3
 - [[Central Bank Digital Currencies (CBDCs) and democratic values]] — PDF p. 10
 - [[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]] — PDF p. 5

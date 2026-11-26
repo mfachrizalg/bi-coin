@@ -2,7 +2,7 @@
 type: source
 title: "Relasi Kelembagaan Kementerian Keuangan, Bank Indonesia, dan PERURI"
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-11-23
 tags:
   - "source"
   - "research"
@@ -58,6 +58,7 @@ sources:
 
 ## Concepts
 
+- No existing concept page matched the raw extraction; absence here is not evidence that the source covers no concepts.
 
 ## Entities
 

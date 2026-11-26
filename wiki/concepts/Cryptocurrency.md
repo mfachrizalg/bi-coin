@@ -26,7 +26,7 @@ related:
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -47,7 +47,7 @@ sources:
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -110,7 +110,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 7
 - [[Blockchain Based Architecture and Solution for Secure Digital Payment System]] — PDF p. 1
 - [[Blockchain CBDC Security Threats Using STRIDE]] — PDF p. 5
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 23
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 23
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]] — PDF p. 1
 - [[CBDC uncertainty- Financial market implications]] — PDF p. 2
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 13

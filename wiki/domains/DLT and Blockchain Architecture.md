@@ -35,7 +35,7 @@ sources:
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -134,7 +134,7 @@ sources:
 - [[Blockchain Based Architecture and Solution for Secure Digital Payment System]]
 - [[Blockchain CBDC Security Threats Using STRIDE]]
 - [[Blockchain Platforms- A Compendium]]
-- [[Blueprint Sistem Pembayaran Indonesia 2025]]
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]
 - [[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]
 - [[CBDC uncertainty- Financial market implications]]
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]

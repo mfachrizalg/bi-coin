@@ -18,7 +18,7 @@ related:
   - "[[bBench A Comprehensive Performance Benchmark for Blockchain Applications]]"
   - "[[Block-PAD- A blockchain-enabled framework for resilient and flexible CBDC transactions leveraging digital identity]]"
   - "[[Blockchain open-source software comparison]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[Central bank digital currency- Central banking for all-]]"
   - "[[Data Trust Framework Using Blockchain Technology and Adaptive Transaction Validation]]"
@@ -38,7 +38,7 @@ sources:
   - "[[bBench A Comprehensive Performance Benchmark for Blockchain Applications]]"
   - "[[Block-PAD- A blockchain-enabled framework for resilient and flexible CBDC transactions leveraging digital identity]]"
   - "[[Blockchain open-source software comparison]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[Central bank digital currency- Central banking for all-]]"
   - "[[Data Trust Framework Using Blockchain Technology and Adaptive Transaction Validation]]"
@@ -65,7 +65,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[bBench A Comprehensive Performance Benchmark for Blockchain Applications]] — PDF p. 1
 - [[Block-PAD- A blockchain-enabled framework for resilient and flexible CBDC transactions leveraging digital identity]] — PDF p. 2
 - [[Blockchain open-source software comparison]] — PDF p. 13
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]] — PDF p. 13
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]] — PDF p. 13
 - [[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]] — PDF p. 2
 - [[Central bank digital currency- Central banking for all-]] — PDF p. 5
 - [[Data Trust Framework Using Blockchain Technology and Adaptive Transaction Validation]] — PDF p. 9

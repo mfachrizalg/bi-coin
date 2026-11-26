@@ -2,7 +2,7 @@
 type: meta
 title: "Operations Log"
 created: 2026-07-21
-updated: 2026-07-23
+updated: 2026-11-23
 tags:
   - meta
 status: seed
@@ -11,6 +11,30 @@ status: seed
 # Log
 
 New entries go at the TOP. Never edit past entries.
+
+## 2026-11-23 update | Hot cache refresh
+- Trigger: the claude-obsidian SessionStart hook now loads [[wiki/hot|Hot Cache]] every session. The cache was dated 2026-11-11 and named the retired `compliance-run-20261014-01` as the benchmark source.
+- Changed: [[wiki/hot|Hot Cache]] rewritten from project memory, `bi-coin-fabric/network/configtx.yaml`, git log, and a vault page count.
+- Not changed: [[thesis]] still lists retired TPS at `wiki/domains/thesis.md:25`.
+
+## 2026-11-23 lint-fix | Frontmatter gaps and empty source sections
+
+- Trigger: `claude-obsidian lint` (engine 1.2.0) reported 2 missing_frontmatter and 12 empty_sections. 0 dead links, 0 ambiguous targets, 0 stale index entries.
+- Frontmatter: [[wiki/hot|Hot Cache]] gained `created`, `tags`, `status`. `created: 2026-07-28` is the first git commit date (no earlier evidence). [[full-corpus-ingest-report]] gained full frontmatter. `created: 2026-07-23` is the file birth time, the full-corpus ingest day.
+- Empty sections: 8 source pages. [[20200306-FAQ Blueprint SPI-2025]] Concepts now links [[Know Your Customer]] (raw extraction PDF p. 2, "Know Your Customer (KYC)"). The other 7 had no concept or entity page title or alias in their raw extraction, so the section now says so instead of staying blank.
+- Not changed: the 4 `wiki/_templates/*` orphans and `{{title}}` empty sections (templates by design), and the 959 links into `.raw/` (policy question, targets exist).
+- Not changed: [[Know Your Customer]] concept page does not list the FAQ source in its own `related`; the Obsidian backlink covers it.
+
+## 2026-11-11 ingest | Reference swap: 2030 Blueprints in, 2025 Blueprints superseded
+
+- Source: `thesis/reference/` changes. 11 PDFs were extracted to `.raw/papers/` with page anchors. Centralized and LimboCoin already had wiki pages.
+- Pages created: [[Blueprint-Pengembangan-Pasar-Uang-2030]], [[Blueprint-Sistem-Pembayaran-Indonesia-2030]], [[Tanya-Jawab-BSPI-2030]], [[Blockchain-Based-KYC-CDD-and-Identity-Verification]], [[RegKYC-Supporting-Privacy-and-Compliance-Enforcement-for-KYC-in-Blockchains]], [[Central-Bank-Digital-Currencies-What-Are-They-Good-For]], [[Pedoman-CDD-PJSP-Selain-Bank-KUPVA-BB-2023]], [[Addressing-Legal-Risks-CBDC-Indonesia]].
+- Pages superseded: [[Blueprint-Pengembangan-Pasar-Uang-2025]] and [[Blueprint Sistem Pembayaran Indonesia 2025]]. Status set to superseded. Raw extractions kept in place.
+- Citations: 2025 links in wiki pages now carry the "(superseded)" label. Claims from the 2025 editions are NOT re-verified against the 2030 editions.
+- Manifest: 2025 keys in `.raw/.manifest.json` have `status: retired`. Backup at `/home/mfachrizalg/wiki-ingest-20261111/manifest.before.json`.
+- Limits: summaries come from heading and keyword excerpts and abstracts, not full reads. Pedoman A_B page 1 has no text. CBDC proceedings page 1 has no text. The 2023 Pedoman cites PBI 19/10/PBI/2017, which project memory says PBI 10/2024 revokes. Verify.
+- Not changed: `thesis/reference/categories.md` still names the removed 2025 PDFs (user folder).
+- Graphify: the semantic pass for this reference set is blocked (subagent calls denied by a hook). `graph.json` is unchanged.
 
 ## 2026-10-17 update | Consistency fix Phase 7: memory and bi-coin-fabric wiki
 

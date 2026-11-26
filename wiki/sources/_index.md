@@ -44,8 +44,8 @@ status: developing
 - [[Blockchain Platforms- A Compendium]]
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]
 - [[Blueprint for the future monetary system]]
-- [[Blueprint Sistem Pembayaran Indonesia 2025]]
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]]
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]
 - [[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]
 - [[BSPI-Presentasi]]
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]
@@ -195,3 +195,16 @@ status: developing
 - [[User adoption of digital currency- A systematic review and future agenda using TCCM approach]]
 - [[White-Paper-CBDC-2022 en]]
 - [[Whitepaper IDRX]]
+
+## Added 2026-11-11: reference swap
+
+- [[Blueprint-Pengembangan-Pasar-Uang-2030]]
+- [[Blueprint-Sistem-Pembayaran-Indonesia-2030]]
+- [[Tanya-Jawab-BSPI-2030]]
+- [[Blockchain-Based-KYC-CDD-and-Identity-Verification]]
+- [[RegKYC-Supporting-Privacy-and-Compliance-Enforcement-for-KYC-in-Blockchains]]
+- [[Central-Bank-Digital-Currencies-What-Are-They-Good-For]]
+- [[Pedoman-CDD-PJSP-Selain-Bank-KUPVA-BB-2023]]
+- [[Addressing-Legal-Risks-CBDC-Indonesia]]
+
+Superseded: [[Blueprint-Pengembangan-Pasar-Uang-2025]], [[Blueprint Sistem Pembayaran Indonesia 2025]].

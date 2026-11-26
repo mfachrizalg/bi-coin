@@ -33,8 +33,8 @@ sources:
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CBDC uncertainty- Financial market implications]]"
@@ -116,8 +116,8 @@ sources:
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]
 - [[Blockchain Based Architecture and Solution for Secure Digital Payment System]]
 - [[Blockchain Platforms- A Compendium]]
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]]
-- [[Blueprint Sistem Pembayaran Indonesia 2025]]
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]
 - [[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]
 - [[CBDC uncertainty- Financial market implications]]

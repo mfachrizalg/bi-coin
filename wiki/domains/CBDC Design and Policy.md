@@ -32,8 +32,8 @@ sources:
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CBDC uncertainty- Financial market implications]]"
@@ -136,8 +136,8 @@ sources:
 - [[Blockchain Based Architecture and Solution for Secure Digital Payment System]]
 - [[Blockchain CBDC Security Threats Using STRIDE]]
 - [[Blockchain Platforms- A Compendium]]
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]]
-- [[Blueprint Sistem Pembayaran Indonesia 2025]]
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]
 - [[BSPI-Presentasi]]
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]
 - [[CBDC uncertainty- Financial market implications]]

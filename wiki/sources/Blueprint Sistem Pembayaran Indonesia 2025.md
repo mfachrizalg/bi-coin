@@ -7,7 +7,7 @@ tags:
   - "source"
   - "research"
   - "full-text"
-status: developing
+status: superseded
 source_type: paper
 source_availability: full-text
 author: "Bank Indonesia"
@@ -47,6 +47,10 @@ sources:
 ---
 
 # Blueprint Sistem Pembayaran Indonesia 2025
+
+> [!warning] Superseded on 2026-11-11
+> The 2025 edition was removed from `thesis/reference/`. Successor: [[Blueprint-Sistem-Pembayaran-Indonesia-2030]]. The 2030 Indonesian edition says its vision is substantively unchanged from BSPI 2025 (PDF p. 9). This is not a claim-by-claim check.
+
 
 ## Source
 

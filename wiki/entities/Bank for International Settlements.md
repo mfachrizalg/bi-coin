@@ -22,8 +22,8 @@ related:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
@@ -43,8 +43,8 @@ sources:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
@@ -117,8 +117,8 @@ sources:
 - [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]] — PDF p. 2
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 20
 - [[Blockchain CBDC Security Threats Using STRIDE]] — PDF p. 7
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]] — PDF p. 7
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 5
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]] — PDF p. 7
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 5
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]] — PDF p. 14
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 3
 - [[Central Bank Digital Currencies (CBDCs) and democratic values]] — PDF p. 5

@@ -11,7 +11,7 @@ status: developing
 related:
   - "[[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]]"
   - "[[Blockchain open-source software comparison]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
   - "[[Central bank digital currencies foundational principles and core features]]"
@@ -24,7 +24,7 @@ related:
 sources:
   - "[[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]]"
   - "[[Blockchain open-source software comparison]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
   - "[[Central bank digital currencies foundational principles and core features]]"
@@ -44,7 +44,7 @@ Sparse and image-heavy pages were rendered individually and checked with PaddleO
 |---|---:|---:|---:|---|
 | [[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]] | 5 | — | 5 | No OCR text detected |
 | [[Blockchain open-source software comparison]] | 2, 4, 6, 10, 18, 20, 48, 56, 88, 90, 100 | — | 2, 4, 6, 10, 18, 20, 48, 56, 88, 90, 100 | No OCR text detected |
-| [[Blueprint Sistem Pembayaran Indonesia 2025]] | 80 | — | 80 | No OCR text detected |
+| [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] | 80 | — | 80 | No OCR text detected |
 | [[BSPI-Presentasi]] | 1, 2, 4, 11, 13 | 2, 4, 11, 13 | 1 | Low-confidence OCR rejected |
 | [[Central Bank Digital Currencies (CBDCs) and democratic values]] | 33 | — | 33 | No OCR text detected |
 | [[Central bank digital currencies foundational principles and core features]] | 3, 5 | — | 3, 5 | No OCR text detected |

@@ -12,8 +12,8 @@ role: "Research-corpus entity"
 first_mentioned: "[[20200306-FAQ Blueprint SPI-2025]]"
 related:
   - "[[20200306-FAQ Blueprint SPI-2025]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]]"
   - "[[Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review]]"
@@ -21,8 +21,8 @@ related:
   - "[[White-Paper-CBDC-2022 en]]"
 sources:
   - "[[20200306-FAQ Blueprint SPI-2025]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]]"
   - "[[Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review]]"
@@ -35,8 +35,8 @@ sources:
 ## Source mentions
 
 - [[20200306-FAQ Blueprint SPI-2025]] — PDF p. 3
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]] — PDF p. 7
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 4
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]] — PDF p. 7
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 4
 - [[BSPI-Presentasi]] — PDF p. 2
 - [[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]] — PDF p. 3
 - [[Designing Central Bank Digital Currency in Indonesia- A Critical Literature Review]] — PDF p. 43

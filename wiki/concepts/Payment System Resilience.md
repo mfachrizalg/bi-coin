@@ -28,7 +28,7 @@ related:
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
@@ -49,7 +49,7 @@ sources:
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Based Architecture and Solution for Secure Digital Payment System]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
@@ -111,7 +111,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 1
 - [[Blockchain Based Architecture and Solution for Secure Digital Payment System]] — PDF p. 1
 - [[Blockchain Platforms- A Compendium]] — PDF p. 4
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 54
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 54
 - [[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]] — PDF p. 9
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 11
 - [[Central Bank Digital Currencies (CBDCs) and democratic values]] — PDF p. 3

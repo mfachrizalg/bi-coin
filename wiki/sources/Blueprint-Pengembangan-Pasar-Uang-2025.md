@@ -7,7 +7,7 @@ tags:
   - "source"
   - "research"
   - "full-text"
-status: developing
+status: superseded
 source_type: paper
 source_availability: full-text
 author: ""
@@ -40,6 +40,10 @@ sources:
 ---
 
 # Blueprint-Pengembangan-Pasar-Uang-2025
+
+> [!warning] Superseded on 2026-11-11
+> The 2025 edition was removed from `thesis/reference/`. Successor: [[Blueprint-Pengembangan-Pasar-Uang-2030]]. Claims below are not re-verified against the 2030 edition.
+
 
 ## Source
 

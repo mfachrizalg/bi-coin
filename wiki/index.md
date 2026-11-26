@@ -2,7 +2,7 @@
 type: meta
 title: "Wiki Index"
 created: 2026-07-23
-updated: 2026-10-17
+updated: 2026-11-11
 tags:
   - "index"
 status: developing
@@ -33,6 +33,7 @@ status: developing
 ## Sources
 
 - [[wiki/sources/_index|Sources Index]]
+- 2026-11-11 reference swap: [[Blueprint-Pengembangan-Pasar-Uang-2030]], [[Blueprint-Sistem-Pembayaran-Indonesia-2030]] (2030 successors; 2025 editions superseded), [[Tanya-Jawab-BSPI-2030]], [[Blockchain-Based-KYC-CDD-and-Identity-Verification]], [[RegKYC-Supporting-Privacy-and-Compliance-Enforcement-for-KYC-in-Blockchains]], [[Central-Bank-Digital-Currencies-What-Are-They-Good-For]], [[Pedoman-CDD-PJSP-Selain-Bank-KUPVA-BB-2023]], [[Addressing-Legal-Risks-CBDC-Indonesia]]
 
 ## Meta
 

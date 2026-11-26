@@ -2,7 +2,7 @@
 type: source
 title: "20200306-FAQ Blueprint SPI-2025"
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-11-23
 tags:
   - "source"
   - "research"
@@ -27,6 +27,7 @@ related:
   - "[[Bank Indonesia]]"
   - "[[QRIS]]"
   - "[[BI-FAST]]"
+  - "[[Know Your Customer]]"
 sources:
   - "[[.raw/papers/20200306-faq-blueprint-spi-2025|Raw extraction]]"
 ---
@@ -59,6 +60,7 @@ sources:
 
 ## Concepts
 
+- [[Know Your Customer]] — first matched on PDF p. 2
 
 ## Entities
 

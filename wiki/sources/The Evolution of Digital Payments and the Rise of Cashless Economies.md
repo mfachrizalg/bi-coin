@@ -2,7 +2,7 @@
 type: source
 title: "The Evolution of Digital Payments and the Rise of Cashless Economies"
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-11-23
 tags:
   - "source"
   - "research"
@@ -81,6 +81,7 @@ sources:
 
 ## Entities
 
+- No existing entity page matched the raw extraction; absence here is not evidence that the source names no entities.
 
 ## Research domains
 

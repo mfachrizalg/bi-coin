@@ -23,7 +23,7 @@ related:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
@@ -44,7 +44,7 @@ sources:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain CBDC Security Threats Using STRIDE]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs) and democratic values]]"
@@ -97,7 +97,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]] — PDF p. 11
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 5
 - [[Blockchain CBDC Security Threats Using STRIDE]] — PDF p. 3
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 14
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 14
 - [[CBDC uncertainty- Financial market implications]] — PDF p. 14
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 18
 - [[Central Bank Digital Currencies (CBDCs) and democratic values]] — PDF p. 8

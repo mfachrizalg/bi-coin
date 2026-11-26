@@ -15,8 +15,8 @@ related:
   - "[[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]]"
   - "[[Blockchain and central bank digital currency]]"
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -36,8 +36,8 @@ sources:
   - "[[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]]"
   - "[[Blockchain and central bank digital currency]]"
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CBDC uncertainty- Financial market implications]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -90,8 +90,8 @@ sources:
 - [[Behind the Scenes of Central Bank Digital Currency Emerging Trends, Insights, and Policy Lessons]] — PDF p. 3
 - [[Blockchain and central bank digital currency]] — PDF p. 1
 - [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]] — PDF p. 10
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]] — PDF p. 7
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 5
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]] — PDF p. 7
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 5
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]] — PDF p. 2
 - [[CBDC uncertainty- Financial market implications]] — PDF p. 14
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 3

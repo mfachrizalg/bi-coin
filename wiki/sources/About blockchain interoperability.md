@@ -2,7 +2,7 @@
 type: source
 title: "About blockchain interoperability"
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-11-23
 tags:
   - "source"
   - "research"
@@ -69,6 +69,7 @@ sources:
 
 ## Entities
 
+- No existing entity page matched the raw extraction; absence here is not evidence that the source names no entities.
 
 ## Research domains
 

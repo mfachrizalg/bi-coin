@@ -23,7 +23,7 @@ related:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain in operations management and manufacturing- Potential and barriers]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -44,7 +44,7 @@ sources:
   - "[[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]]"
   - "[[Blockchain in operations management and manufacturing- Potential and barriers]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
@@ -103,7 +103,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[SoK- Blockchain Applications in Central Bank Digital Currencies (CBDCs)]] — PDF p. 2
 - [[Blockchain in operations management and manufacturing- Potential and barriers]] — PDF p. 2
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 1
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 12
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 12
 - [[BPO-CBS A Data-Driven Blockchain Performance Optimization Framework for Cloud Blockchain Services]] — PDF p. 3
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]] — PDF p. 1
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 6

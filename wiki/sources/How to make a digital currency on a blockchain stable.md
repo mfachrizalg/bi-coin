@@ -2,7 +2,7 @@
 type: source
 title: "How to make a digital currency on a blockchain stable"
 created: 2026-07-23
-updated: 2026-07-23
+updated: 2026-11-23
 tags:
   - "source"
   - "research"
@@ -66,6 +66,7 @@ sources:
 
 ## Entities
 
+- No existing entity page matched the raw extraction; absence here is not evidence that the source names no entities.
 
 ## Research domains
 

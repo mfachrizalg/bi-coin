@@ -1,3 +1,14 @@
+---
+type: meta
+title: "Full Corpus Ingest Report"
+created: 2026-07-23
+updated: 2026-07-23
+tags:
+  - "meta"
+  - "ingest-report"
+status: developing
+---
+
 # Full Corpus Ingest Report
 
 ```json

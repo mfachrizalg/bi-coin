@@ -14,8 +14,8 @@ related:
   - "[[20200306-FAQ Blueprint SPI-2025]]"
   - "[[ADVANCING FUTURISTIC DIGITAL BANKING- STRATEGIC ENHANCEMENT AND A ROADMAP FOR EXCELLENCE]]"
   - "[[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]]"
@@ -35,8 +35,8 @@ sources:
   - "[[20200306-FAQ Blueprint SPI-2025]]"
   - "[[ADVANCING FUTURISTIC DIGITAL BANKING- STRATEGIC ENHANCEMENT AND A ROADMAP FOR EXCELLENCE]]"
   - "[[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]]"
-  - "[[Blueprint-Pengembangan-Pasar-Uang-2025]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[BSPI-Presentasi]]"
   - "[[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]]"
   - "[[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]]"
@@ -68,8 +68,8 @@ sources:
 - [[20200306-FAQ Blueprint SPI-2025]] — PDF p. 1
 - [[ADVANCING FUTURISTIC DIGITAL BANKING- STRATEGIC ENHANCEMENT AND A ROADMAP FOR EXCELLENCE]] — PDF p. 1
 - [[An Estimated Open-Economy DSGE Model for The Evaluation of Central Bank Policy Mix]] — PDF p. 1
-- [[Blueprint-Pengembangan-Pasar-Uang-2025]] — PDF p. 1
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 2
+- [[Blueprint-Pengembangan-Pasar-Uang-2025|Blueprint Pengembangan Pasar Uang 2025 (superseded)]] — PDF p. 1
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 2
 - [[BSPI-Presentasi]] — PDF p. 12
 - [[CBDC ADOPTION- ALIGNING MODEL TECHNOSTRESS INHIBITORS AND PERCEIVED VALUE AMONG INDONESIAN GENERATION Z]] — PDF p. 1
 - [[Central Bank Digital Currency, Monetary Policy, And Macroeconomy- Evidence From Indonesia Macroeconomy]] — PDF p. 3

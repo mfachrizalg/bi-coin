@@ -26,7 +26,7 @@ related:
   - "[[Blockchain in operations management and manufacturing- Potential and barriers]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]]"
   - "[[Central bank digital currencies- A critical review]]"
@@ -47,7 +47,7 @@ sources:
   - "[[Blockchain in operations management and manufacturing- Potential and barriers]]"
   - "[[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]]"
   - "[[Blockchain Platforms- A Compendium]]"
-  - "[[Blueprint Sistem Pembayaran Indonesia 2025]]"
+  - "[[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]]"
   - "[[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]]"
   - "[[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]]"
   - "[[Central bank digital currencies- A critical review]]"
@@ -101,7 +101,7 @@ This page maps where the concept appears; it does not merge incompatible definit
 - [[Blockchain in operations management and manufacturing- Potential and barriers]] — PDF p. 1
 - [[Blockchain-Based Central Bank Digital Currency Empowering Centralized Oversight With Decentralized Transactions]] — PDF p. 6
 - [[Blockchain Platforms- A Compendium]] — PDF p. 4
-- [[Blueprint Sistem Pembayaran Indonesia 2025]] — PDF p. 41
+- [[Blueprint Sistem Pembayaran Indonesia 2025|Blueprint Sistem Pembayaran Indonesia 2025 (superseded)]] — PDF p. 41
 - [[CEMLA’s survey on central bank digital currencies in Latin America and the Caribbean]] — PDF p. 2
 - [[Central Bank Digital Currencies (CBDCs)- a countermeasure to Anti‑Money Laundering (AML) challenges posed by cryptocurrencies-]] — PDF p. 6
 - [[Central bank digital currencies- A critical review]] — PDF p. 4
