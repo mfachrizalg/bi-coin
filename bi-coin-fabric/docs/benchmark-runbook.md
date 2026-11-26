@@ -32,7 +32,7 @@ $FABRIC_SAMPLES/bin/peer version | grep Version               # Version: v2.5.16
 $FABRIC_SAMPLES/bin/fabric-ca-client version | grep Version   # Version: v1.5.9
 ```
 
-Catalog counts. Expected: `42 42 40 40`.
+Catalog counts. Expected: `4 4 4 4` (ADR 0021).
 
 ```sh
 node -e 'const c=require("./benchmark/compliance/case-catalog.json"); console.log(c.performance_scenarios.length, c.protocol.performance_workload_count, new Set(c.performance_scenarios.map(p=>p.chaincode+":"+p.transaction)).size, c.protocol.performance_method_count)'

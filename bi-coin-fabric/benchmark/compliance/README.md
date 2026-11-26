@@ -4,10 +4,11 @@ This benchmark evaluates the four-MSP `bi-coin` channel and its three chaincodes
 
 ## Capacity and load test ("uji kapasitas dan beban")
 
-RQ2 uses this test on one Caliper worker and one host (ADR 0015).
+RQ2 uses this test on one Caliper worker and one host (ADR 0015, scope amended by ADR 0021).
 
-- **Capacity boundary.** Search every catalogued workload: 10 s probes, then three 30 s confirmation rounds at the highest passing rate.
-- **Load curve.** Six levels (25–150% of the confirmed reference, 60 s each) on six representative workloads: where delivered load, verified throughput, and latency depart from offered load.
+- **Capacity boundary.** Search the four CDD-path workloads (`transfer-retail`, `can-pay`, `approve-subject`, `verify-subject`): 10 s probes, then three 30 s confirmation rounds at the highest passing rate.
+- **Load curve.** Six levels (25–150% of the confirmed reference, 60 s each) on the same four workloads: where delivered load, verified throughput, and latency depart from offered load.
+- **Repeats.** Three independent runs, each on a fresh network with its own stamp. `aggregate-repeats.js` reports the median and min-max per workload.
 
 Terms:
 - **Drain:** seconds from the window end to the last commit. A rate passes only if drain ≤ 3 s (orderer BatchTimeout 2 s plus 1 s).
@@ -18,7 +19,7 @@ Terms:
 
 ## Workloads and correctness
 
-The catalog covers 40 contract methods. 31 are capacity-measured, one workload each. `Initialize`, the nested-only `DebitReserveForConversion` and `CheckPayee`, and the CDD lifecycle methods `SetCddCeilings`, `GetCddCeilings`, `VerifySubject`, `UpdateSubject`, `CloseSubject` and `RevokeLowRisk` receive correctness checks only. Reads report verified operations per second; writes report verified TPS.
+The catalog covers 40 contract methods. Four are capacity-measured, one workload each, because they lie on the CDD path (ADR 0021): `Transfer`, `CanPay`, `ApproveSubject`, and `VerifySubject`. The other 36 receive correctness checks only. Reads report verified operations per second; writes report verified TPS.
 
 The ledger smoke test records an outcome for every `correctness_scenarios` ID. It covers staff role separation, authorization and endorsement boundaries, all restriction reasons, fresh release evidence, end-user read denial, the retail transfer and replay, the CDD Sederhana gates (rejection of a DTTOT-listed or not-low-risk subject, the unverified and verified holdings ceilings, verification, the reset after a data update, terminal closure, and low-risk revocation), transaction limits, conversion and wallet-funding replay and failure atomicity, insufficient reserve and float, holdings limits, redemption replay and supply conservation, receipt and MSP read authorization, and initialization with the nested debit. The monetary, replay, and limit denials compare before/after ledger state. The API checks separately exercise 222 route-role authorization cells, 20 malformed-JSON validation cases, and 38 bodyless action outcomes. They use fresh subject/staff fixtures; an expected denial passes only when a follow-up ledger read confirms that state did not change. Backend validation, authorization, and action checks are excluded from performance measurements.
 
@@ -26,13 +27,13 @@ The ledger smoke test records an outcome for every `correctness_scenarios` ID. I
 
 ## Capacity search
 
-Each of the 31 workloads first runs one Caliper transaction as a readiness check. Caliper round initialization establishes the connection. There is no separate timed warmup.
+Each of the 4 workloads first runs one Caliper transaction as a readiness check. Caliper round initialization establishes the connection. There is no separate timed warmup.
 
-Search spans 0.1–4096 operations per second. Matching historical direct-ledger results provide starting hints for 12 workloads; all other workloads start at 32. The old rates are hints only and are never merged into new measurements. An unbounded passing or failing rate expands by a factor of four. Once a passing and failing rate bracket exists, 10-second midpoint probes continue until the failing rate is within 10% of the passing rate.
+Search spans 0.1–4096 operations per second. A matching historical direct-ledger result provides the starting hint for `approve-subject`; all other workloads start at 32. The old rates are hints only and are never merged into new measurements. An unbounded passing or failing rate expands by a factor of four. Once a passing and failing rate bracket exists, 10-second midpoint probes continue until the failing rate is within 10% of the passing rate.
 
-The highest passing probe is confirmed with three separate 30-second Caliper rounds grouped in one benchmark configuration. Every confirmation must have verified outcomes, zero unexpected failures, zero timeouts, zero unresolved results, delivered load within 5% of target (allowing one-request rounding), and drain-adjusted verified throughput at least 90% of delivered load. If all confirmation rounds fail, the candidate is lowered and confirmed again. Mixed outcomes at the same candidate are reported as an unstable boundary. A passing ceiling is reported as “at least this measured capacity.”
+The highest passing probe is confirmed with three separate 30-second Caliper rounds grouped in one benchmark configuration. Every confirmation must have verified outcomes, zero unexpected failures, zero timeouts, zero unresolved results, delivered load within 5% of target (allowing one-request rounding), and drain ≤ 3 s. If all confirmation rounds fail, the candidate is lowered and confirmed again. Mixed outcomes at the same candidate are reported as an unstable boundary. A passing ceiling is reported as “at least this measured capacity.”
 
-The confirmation windows total 46.5 minutes (31 workloads × 3 × 30 seconds), excluding readiness checks, search probes, initialization, fixtures, and drain. Runtime depends on fixture preparation.
+Per repeat, the confirmation windows total 6 minutes (4 workloads × 3 × 30 seconds) and the load curves 24 minutes (4 workloads × 6 levels × 60 seconds), excluding readiness checks, search probes, initialization, fixtures, and drain. Runtime depends on fixture preparation.
 
 ## Evidence and checkpoints
 

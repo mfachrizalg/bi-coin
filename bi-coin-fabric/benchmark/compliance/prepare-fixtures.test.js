@@ -64,30 +64,20 @@ test('every Caliper workload maps to its exact chaincode method and signer MSP',
             assert.ok(fixture.ledger.args.at(-1), `${scenario.id} requires a ledger reference`);
         }
     }
-    assert.equal(catalog.performance_scenarios.length, 31);
+    assert.equal(catalog.performance_scenarios.length, 4);
 });
 
 test('controls writes carry the transient keys the chaincode reads, and transfers carry none', () => {
     const api = ledgerAPI();
     const fixtureFor = id => operationFixture({ api, scenario: scenarioFor(id), id: 'subject-1', index: 0, stamp: 'test-stamp', attempt: 'attempt' });
-    const create = JSON.parse(fixtureFor('create-pending').ledger.transient.payload);
-    assert.deepEqual(Object.keys(create).sort(), ['category', 'documentRef', 'salt']);
-    assert.match(create.salt, /^[0-9a-f]{64}$/);
-    assert.match(create.documentRef, /^[0-9a-f]{64}$/);
     assert.deepEqual(JSON.parse(fixtureFor('approve-subject').ledger.transient.payload), { approved: true });
-    assert.deepEqual(JSON.parse(fixtureFor('set-limits').ledger.transient.payload), { per_transaction: 1000, daily: 5000, monthly: 20000, holdings: 5000 });
-    assert.deepEqual(JSON.parse(fixtureFor('record-review').ledger.transient.payload), { dttot_result: 'not_listed', low_risk: true, low_risk_reason: 'capped product' });
-    assert.deepEqual(JSON.parse(fixtureFor('freeze-subject').ledger.transient.payload), { reason: 'internal_review' });
-    assert.match(JSON.parse(fixtureFor('request-unfreeze').ledger.transient.payload).authority_evidence_ref, /^[0-9a-f]{64}$/);
-    for (const id of ['create-pending', 'approve-subject', 'set-limits', 'freeze-subject', 'request-unfreeze']) {
+    const verify = fixtureFor('verify-subject');
+    assert.match(JSON.parse(verify.ledger.transient.payload).evidence_ref, /^[0-9a-f]{64}$/, 'VerifySubject needs a SHA-256 evidence reference');
+    assert.deepEqual(JSON.parse(verify.ledger.transient.payload), verify.api.body, 'the API body and the transient payload match');
+    assert.equal(verify.api.path, '/subjects/subject-1/verifications');
+    for (const id of ['approve-subject', 'verify-subject']) {
         assert.deepEqual(fixtureFor(id).ledger.args, ['subject-1'], `${id} takes the subject ID only`);
     }
-    for (const id of ['protect-subject', 'approve-unfreeze']) {
-        assert.equal(fixtureFor(id).ledger.transient, undefined, `${id} takes no transient input`);
-    }
-    const onboarding = fixtureFor('create-pending').api.multipart;
-    assert.equal(onboarding.document.type, 'image/png');
-    assert.deepEqual(Buffer.from(onboarding.document.base64, 'base64').subarray(0, 8), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
 
     const transfer = operationFixture({ api, scenario: scenarioFor('transfer-retail'), id: 'subject-1', index: 0, stamp: 'test-stamp', attempt: 'attempt', from: 'sender-1', to: 'receiver-1' });
     assert.equal(transfer.ledger.transient, undefined, 'transfer takes no transient input');
@@ -152,7 +142,7 @@ test('reserve-backed fixture setup serializes debits to the shared distributor r
     };
 
     try {
-        for (const id of ['fund-wallet', 'transfer-retail']) {
+        for (const id of ['transfer-retail']) {
             await prepareFixturePool({
                 api,
                 catalogScenario: scenarioFor(id),

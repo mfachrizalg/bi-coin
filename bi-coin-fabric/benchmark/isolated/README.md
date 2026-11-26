@@ -14,7 +14,7 @@ The source tree and transaction amount are frozen at study creation. Resumed att
 4. In the runner, set `BENCHMARK_DISPOSABLE_DAEMON_ID` to that verified ID and `BENCHMARK_SOURCE_COMMIT` to the source copy's base commit. Also set `BENCHMARK_SOURCE_DIRTY=true` if the copy has uncommitted changes. Then start the compliance run described below.
 5. Preserve the resulting `compliance-<stamp>` directories, and check `correctness.json` and `manifest.json` in each, before removing only this disposable Compose project's containers and volumes. Keep historical results intact.
 
-The revised compliance study uses the current 31-workload catalog. After the disposable workspace contains the current `bi-coin-fabric/` source, use one stamp for both commands:
+The revised compliance study uses the current 4-workload CDD-path catalog (ADR 0021). After the disposable workspace contains the current `bi-coin-fabric/` source, use one stamp for both commands:
 
 ```sh
 export BENCHMARK_COMPLIANCE_STAMP=run-20261012-01

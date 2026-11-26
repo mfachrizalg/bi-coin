@@ -210,6 +210,12 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
             args = [id];
             transient = { payload: JSON.stringify(body) };
             break;
+        case 'verify-subject':
+            route = `/subjects/${encodeURIComponent(id)}/verifications`;
+            body = { evidence_ref: reference(stamp, attempt, scenario.id, 'caliper', index, 'evidence') };
+            args = [id];
+            transient = { payload: JSON.stringify(body) };
+            break;
         case 'set-limits':
             route = `/subjects/${encodeURIComponent(id)}/limits`;
             body = LIMITS;

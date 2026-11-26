@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-10-26). Supersedes the pass rule of the 2026-10-15 compliance protocol (drain-adjusted throughput ≥ 90% of delivered rate).
+Accepted (2026-10-26). Supersedes the pass rule of the 2026-10-15 compliance protocol (drain-adjusted throughput ≥ 90% of delivered rate). Amended by ADR 0021 (2026-11-26): the search and the load curve run on four CDD-path workloads only.
 
 ## Context
 
@@ -18,7 +18,7 @@ RQ2 asks for the behaviour of the study network under increasing load. The proto
 1. **Pass rule.** A probe at rate R over window D passes if: delivered count within max(5% of R·D, 1) of the target; zero failed, timeout, and unresolved events; and drain ≤ `max_drain_seconds` (3 s = BatchTimeout 2 s + 1 s). The 90% throughput test is removed. Verified throughput is still reported as verified ÷ (D + drain).
 2. **Client-bound.** Zero failures, drain within the cap, but delivered below target beyond tolerance: classified `client-bound`. This is a lower bound set by the single Caliper client, not a ledger failure. The search records it as the boundary and stops expanding.
 3. **Probes and confirmations** keep 10 s probes and 3 × 30 s confirmations at the highest passing rate.
-4. **Load curve.** For six representative workloads (create-pending, transfer-retail, transfer-merchant, issue, fund-wallet, read-balance) run six fixed-rate levels (25, 50, 75, 100, 125, 150% of the confirmed reference), 60 s each, in one Caliper launch. Levels are descriptive, not pass/fail.
+4. **Load curve.** For the four CDD-path workloads of ADR 0021 (transfer-retail, can-pay, approve-subject, verify-subject) run six fixed-rate levels (25, 50, 75, 100, 125, 150% of the confirmed reference), 60 s each, in one Caliper launch. Levels are descriptive, not pass/fail.
 5. **Latency** reports minimum, median, p95, maximum, and sample count.
 6. **Setup.**
    - Reserve top-up and participant configuration run once per run.

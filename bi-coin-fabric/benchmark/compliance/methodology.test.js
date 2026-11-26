@@ -4,11 +4,11 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const catalog = require('./case-catalog.json');
 
-test('confirmation windows total 46.5 minutes across the 31 operation workloads', () => {
+test('confirmation windows total 6 minutes across the 4 CDD-path workloads', () => {
     const seconds = catalog.performance_scenarios.length
         * catalog.protocol.confirmation_repetitions
         * catalog.protocol.confirmation_duration_seconds;
-    assert.equal(seconds, 2790);
+    assert.equal(seconds, 360);
 });
 
 test('protocol selects one worker, ten-second probes, and no separate timed warmup', () => {

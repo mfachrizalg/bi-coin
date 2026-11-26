@@ -43,10 +43,10 @@ test('catalog covers every public study transaction and route role cell', () => 
     assert.deepEqual(expectedRoutes, actualRoutes, 'API catalog must match registered study routes');
 });
 
-test('performance catalog covers all 31 public performance methods in 31 workloads', () => {
-    assert.equal(catalog.performance_scenarios.length, 31);
-    assert.equal(catalog.protocol.performance_workload_count, 31);
-    assert.equal(catalog.protocol.performance_method_count, 31);
+test('performance catalog covers the four CDD-path methods in four workloads (ADR 0021)', () => {
+    assert.deepEqual(catalog.performance_scenarios.map(item => item.id), ['approve-subject', 'verify-subject', 'can-pay', 'transfer-retail']);
+    assert.equal(catalog.protocol.performance_workload_count, 4);
+    assert.equal(catalog.protocol.performance_method_count, 4);
     const publicMethods = new Set(catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`));
     for (const scenario of catalog.performance_scenarios) {
         assert.ok(publicMethods.has(`${scenario.chaincode}.${scenario.transaction}`), scenario.id);
@@ -55,13 +55,11 @@ test('performance catalog covers all 31 public performance methods in 31 workloa
         assert.ok(['query', 'write'].includes(scenario.operation_kind), `${scenario.id} has no operation kind`);
     }
     const performanceMethods = new Set(catalog.performance_scenarios.map(item => `${item.chaincode}.${item.transaction}`));
-    // CheckPayee runs inside Transfer and has no load of its own.
-    // The CDD Sederhana transactions get correctness checks only. Their capacity run is deferred.
-    const excluded = new Set(['rupiah-monetary.Initialize', 'rupiah-monetary.DebitReserveForConversion', 'rupiah-controls.CheckPayee',
-        ...['SetCddCeilings', 'GetCddCeilings', 'VerifySubject', 'UpdateSubject', 'CloseSubject', 'RevokeLowRisk'].map(method => `rupiah-controls.${method}`)]);
-    assert.equal(performanceMethods.size, 31);
+    // Only the CDD path is load-tested; every other method gets correctness checks only.
+    const measured = new Set(['rupiah-controls.ApproveSubject', 'rupiah-controls.VerifySubject', 'rupiah-controls.CanPay', 'rupiah-payments.Transfer']);
+    assert.equal(performanceMethods.size, 4);
     for (const method of catalog.contract_methods.map(item => `${item.chaincode}.${item.method}`)) {
-        assert.equal(performanceMethods.has(method), !excluded.has(method), method);
+        assert.equal(performanceMethods.has(method), measured.has(method), method);
     }
     assert.equal(catalog.performance_scenarios.filter(item => item.transaction === 'Transfer').length, 1);
 });
@@ -78,17 +76,7 @@ test('protocol uses bounded binary search and three grouped confirmations', () =
     assert.equal(catalog.protocol.confirmation_repetitions, 3);
     assert.equal(catalog.protocol.confirmation_duration_seconds, 30);
     assert.equal(catalog.protocol.resource_sample_interval_ms, 1000);
-    assert.deepEqual(catalog.protocol.search_hints_ops_per_second, {
-        'create-pending': 64,
-        'record-review': 32,
-        'approve-subject': 32,
-        'open-wallet': 128,
-        'freeze-subject': 32,
-        'request-unfreeze': 32,
-        'approve-unfreeze': 32,
-        issue: 32,
-        'redeem-reserve': 32,
-    });
+    assert.deepEqual(catalog.protocol.search_hints_ops_per_second, { 'approve-subject': 32 });
 });
 
 test('each functional correctness scenario has one executable runner', () => {
@@ -112,6 +100,5 @@ test('protocol sets the drain cap and a load curve over catalogued write and que
     const curve = catalog.protocol.load_curve;
     assert.deepEqual(curve.levels, [0.25, 0.5, 0.75, 1, 1.25, 1.5]);
     assert.equal(curve.duration_seconds, 60);
-    const ids = new Set(catalog.performance_scenarios.map(item => item.id));
-    assert.ok(curve.workloads.every(id => ids.has(id)), 'every curve workload is a catalogued performance scenario');
+    assert.deepEqual(curve.workloads, catalog.performance_scenarios.map(item => item.id), 'every performance workload runs the curve');
 });
