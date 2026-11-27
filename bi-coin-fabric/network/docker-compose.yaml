@@ -55,6 +55,8 @@ x-peer-environment: &peer-environment
   CORE_PEER_CHAINCODEADDRESS: peer0:7052
   CORE_PEER_CHAINCODELISTENADDRESS: 0.0.0.0:7052
   CORE_LEDGER_STATE_STATEDATABASE: CouchDB
+  # Fabric default gatewayService is 500; 2500 matches the endorser and deliver defaults.
+  CORE_PEER_LIMITS_CONCURRENCY_GATEWAYSERVICE: "2500"
 
 services:
   ca.centralbank:
