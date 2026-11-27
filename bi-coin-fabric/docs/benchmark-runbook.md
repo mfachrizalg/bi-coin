@@ -13,7 +13,7 @@ Read `docs/adr/0013-benchmark-integrity-and-change-impact.md` first. This file i
 
 ```sh
 cd bi-coin-fabric
-git status --porcelain            # must print nothing
+git status --porcelain -- . ':(exclude)benchmark/results'   # must print nothing (repo-wide status lists root graph output)
 export COMMIT=$(git rev-parse HEAD)
 ```
 
