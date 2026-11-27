@@ -3,7 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const catalog = require('./case-catalog.json');
-const { createSearch, nextProbeRate, recordProbe } = require('./capacity-search');
+const { createSearch, nextProbeRate, recordConfirmationFailure, recordProbe } = require('./capacity-search');
 const { classifyFailure } = require('./failure-classifier');
 const { evaluateWindow } = require('./outcome-analysis');
 const { prepareFixturePool } = require('./prepare-fixtures');
@@ -256,12 +256,7 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
             checkpoint('confirmation', scenario, candidate);
             if (['pass', 'client-bound', 'unstable-boundary', 'inconclusive', 'configuration-error', 'fixture-error'].includes(confirmation.classification)) break;
 
-            search.failing_rate = Math.min(search.failing_rate ?? candidate, candidate);
-            const lowerPass = search.probes.filter(item => item.classification === 'pass' && item.rate < candidate)
-                .reduce((max, item) => Math.max(max, item.rate), null);
-            search.passing_rate = lowerPass;
-            search.bounds = { passing: search.passing_rate, failing: search.failing_rate };
-            search.boundary = null;
+            recordConfirmationFailure(search, candidate);
             while (search.passing_rate === null || search.failing_rate === null
                 || (search.failing_rate - search.passing_rate) / search.passing_rate > catalog.protocol.boundary_tolerance_percent / 100) {
                 const rate = nextProbeRate(search);
@@ -282,7 +277,7 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
                 checkpoint('binary-search-after-confirmation-failure', scenario, rate);
                 if (search.stop_reason) break;
             }
-            if (search.stop_reason || search.passing_rate === null) candidate = null;
+            if ((search.stop_reason && search.stop_reason !== 'client-bound') || search.passing_rate === null) candidate = null;
             else candidate = search.passing_rate;
         }
 

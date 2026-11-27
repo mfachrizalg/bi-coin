@@ -69,6 +69,17 @@ function recordProbe(search, probe) {
     search.bounds = { passing: search.passing_rate, failing: search.failing_rate };
 }
 
+function recordConfirmationFailure(search, candidate) {
+    search.failing_rate = Math.min(search.failing_rate ?? candidate, candidate);
+    search.passing_rate = search.probes
+        .filter(item => item.classification === 'pass' && item.rate < candidate)
+        .reduce((max, item) => Math.max(max, item.rate), null);
+    search.bounds = { passing: search.passing_rate, failing: search.failing_rate };
+    search.boundary = null;
+    // The failed confirmation withdraws a client-bound lower bound so bisection can continue below it.
+    if (search.stop_reason === 'client-bound') search.stop_reason = null;
+}
+
 function nextProbeRate(search) {
     if (search.stop_reason || search.boundary) return null;
 
@@ -106,4 +117,4 @@ function roundedMidpoint(passing, failing) {
     return midpoint;
 }
 
-module.exports = { DEFAULTS, createSearch, nextProbeRate, recordProbe };
+module.exports = { DEFAULTS, createSearch, nextProbeRate, recordConfirmationFailure, recordProbe };

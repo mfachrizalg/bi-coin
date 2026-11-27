@@ -73,3 +73,16 @@ test('a client-bound probe is a lower bound at its delivered rate and stops the 
     assert.equal(search.passing_rate, 296.3);
     assert.equal(nextProbeRate(search), null);
 });
+
+test('a failed confirmation below a client-bound ceiling keeps bisecting the ledger bracket', () => {
+    const { createSearch, recordProbe, nextProbeRate, recordConfirmationFailure } = require('./capacity-search');
+    const search = createSearch({ hint: 32 });
+    recordProbe(search, { rate: 32, classification: 'pass', offered_ops_per_second: 32 });
+    assert.equal(nextProbeRate(search), 128);
+    recordProbe(search, { rate: 128, classification: 'client-bound', offered_ops_per_second: 77.5 });
+    recordConfirmationFailure(search, 77.5);
+    assert.equal(search.passing_rate, 32);
+    assert.equal(search.failing_rate, 77.5);
+    assert.equal(search.stop_reason, null);
+    assert.equal(nextProbeRate(search), 54.75);
+});
