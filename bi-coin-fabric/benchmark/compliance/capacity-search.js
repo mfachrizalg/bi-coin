@@ -117,4 +117,10 @@ function roundedMidpoint(passing, failing) {
     return midpoint;
 }
 
-module.exports = { DEFAULTS, createSearch, nextProbeRate, recordConfirmationFailure, recordProbe };
+// A client-bound stop limits the lower bound to the client, not the ledger ceiling.
+function passingBoundary(search) {
+    if (search.boundary === 'client-bound') return 'client-bound';
+    return search.failing_rate === null ? 'at-least-ceiling' : 'bracketed';
+}
+
+module.exports = { DEFAULTS, createSearch, nextProbeRate, passingBoundary, recordConfirmationFailure, recordProbe };

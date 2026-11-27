@@ -28,15 +28,25 @@ function transactionStatus(tx) {
     return String(value || '').toLowerCase();
 }
 
+// String() renders Fabric SDK error objects as "[object Object]"; keep their fields, including nested details.
+function describeValue(value) {
+    if (typeof value === 'string') return value;
+    try {
+        return JSON.stringify(value, (key, item) => (item instanceof Error ? { message: item.message, ...item } : item)) ?? String(value);
+    } catch {
+        return String(value);
+    }
+}
+
 function transactionDiagnostic(tx) {
     if (!tx) return 'missing transaction result';
     const parts = [];
     for (const key of ['error', 'message', 'status']) {
-        if (tx[key]) parts.push(String(tx[key]));
+        if (tx[key]) parts.push(describeValue(tx[key]));
     }
     if (typeof tx.GetErrMsg === 'function') {
         try {
-            parts.push(...tx.GetErrMsg().filter(Boolean).map(String));
+            parts.push(...tx.GetErrMsg().filter(Boolean).map(describeValue));
         } catch {
             // Caliper result objects may omit error messages for transport failures.
         }
@@ -46,7 +56,7 @@ function transactionDiagnostic(tx) {
             const result = tx.GetResult();
             if (result) parts.push(Buffer.isBuffer(result) ? result.toString('utf8') : typeof result === 'object' ? JSON.stringify(result) : String(result));
         } catch (error) {
-            parts.push(String(error));
+            parts.push(describeValue(error));
         }
     }
     return parts.join(' | ') || 'transaction failed without diagnostic';

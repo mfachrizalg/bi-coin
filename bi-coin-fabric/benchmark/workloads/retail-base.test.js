@@ -45,6 +45,20 @@ test('transactionDiagnostic includes Caliper error-message fields', () => {
     assert.match(transactionDiagnostic(tx), /per-transaction limit exceeded/);
 });
 
+test('transactionDiagnostic keeps fields of Fabric error objects instead of [object Object]', () => {
+    const tx = {
+        GetStatus: () => 'failed',
+        GetErrMsg: () => [
+            Object.assign(new Error('endorsement failed'), { code: 10 }),
+            { details: [{ message: 'transaction invalid with validation code MVCC_READ_CONFLICT' }] },
+        ],
+    };
+    const diagnostic = transactionDiagnostic(tx);
+    assert.doesNotMatch(diagnostic, /\[object Object\]/);
+    assert.match(diagnostic, /"code":10/);
+    assert.match(diagnostic, /MVCC_READ_CONFLICT/);
+});
+
 test('transactionPayload decodes typed byte arrays returned by Caliper', () => {
     const payload = new TextEncoder().encode('{"balance":42000}');
     assert.equal(transactionPayload({ GetResult: () => payload }), '{"balance":42000}');

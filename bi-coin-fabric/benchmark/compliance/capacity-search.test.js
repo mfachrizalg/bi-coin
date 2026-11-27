@@ -86,3 +86,15 @@ test('a failed confirmation below a client-bound ceiling keeps bisecting the led
     assert.equal(search.stop_reason, null);
     assert.equal(nextProbeRate(search), 54.75);
 });
+
+test('a client-bound lower bound is labeled client-bound, and only a reached ceiling is at-least-ceiling', () => {
+    const { createSearch, passingBoundary, recordProbe } = require('./capacity-search');
+    const client = createSearch({ hint: 32 });
+    recordProbe(client, { rate: 32, classification: 'pass', offered_ops_per_second: 32 });
+    recordProbe(client, { rate: 128, classification: 'client-bound', offered_ops_per_second: 90.7 });
+    assert.equal(passingBoundary(client), 'client-bound');
+
+    const ceiling = createSearch({ hint: 4096 });
+    recordProbe(ceiling, { rate: 4096, classification: 'pass' });
+    assert.equal(passingBoundary(ceiling), 'at-least-ceiling');
+});

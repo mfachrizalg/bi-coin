@@ -3,7 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const catalog = require('./case-catalog.json');
-const { createSearch, nextProbeRate, recordConfirmationFailure, recordProbe } = require('./capacity-search');
+const { createSearch, nextProbeRate, passingBoundary, recordConfirmationFailure, recordProbe } = require('./capacity-search');
 const { classifyFailure } = require('./failure-classifier');
 const { evaluateWindow } = require('./outcome-analysis');
 const { prepareFixturePool } = require('./prepare-fixtures');
@@ -293,7 +293,7 @@ const scenarios = selectScenarios(catalog.performance_scenarios, scenarioFilter)
             workload.highest_confirmed_passing_rate_ops_per_second = candidate;
             workload.first_failing_rate_ops_per_second = search.failing_rate;
             workload.remaining_interval_ops_per_second = search.failing_rate === null ? null : search.failing_rate - candidate;
-            workload.capacity_boundary = search.failing_rate === null ? 'at-least-ceiling' : 'bracketed';
+            workload.capacity_boundary = passingBoundary(search);
         } else if (confirmation?.classification === 'unstable-boundary') {
             workload.capacity_boundary = 'unstable';
         } else if (confirmation?.classification === 'inconclusive' || confirmation?.classification === 'configuration-error' || confirmation?.classification === 'fixture-error') {
