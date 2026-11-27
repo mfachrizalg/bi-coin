@@ -7,7 +7,7 @@ const path = require('node:path');
 const test = require('node:test');
 const zlib = require('node:zlib');
 const catalog = require('./case-catalog.json');
-const { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, SENDER_FUNDING, solidPNG } = require('./prepare-fixtures');
+const { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, retrySetup, SENDER_FUNDING, solidPNG } = require('./prepare-fixtures');
 
 const userMSPs = {
     kyc_verified: 'EndUserMSP', retail_two: 'EndUserMSP', reviewer: 'DistributorMSP',
@@ -41,6 +41,19 @@ function loginReply(init) {
     const { username } = JSON.parse(init.body);
     return { ok: true, status: 200, json: async () => ({ access_token: `token-${username}` }) };
 }
+
+test('setup retries only HTTP 500 failures, up to the attempt limit', async () => {
+    const http500 = () => new Error('fixture setup POST /subjects/x/limits failed with HTTP 500: {}');
+    let calls = 0;
+    assert.equal(await retrySetup(async () => { calls += 1; if (calls < 2) throw http500(); return 'ok'; }, { delayMs: 0 }), 'ok');
+    assert.equal(calls, 2);
+    calls = 0;
+    await assert.rejects(retrySetup(async () => { calls += 1; throw new Error('fixture setup POST /x failed with HTTP 422: {}'); }, { delayMs: 0 }), /HTTP 422/);
+    assert.equal(calls, 1);
+    calls = 0;
+    await assert.rejects(retrySetup(async () => { calls += 1; throw http500(); }, { attempts: 3, delayMs: 0 }), /HTTP 500/);
+    assert.equal(calls, 3);
+});
 
 test('every Caliper workload maps to its exact chaincode method and signer MSP', () => {
     const api = ledgerAPI();

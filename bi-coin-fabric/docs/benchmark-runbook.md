@@ -38,10 +38,10 @@ Catalog counts. Expected: `4 4 4 4` (ADR 0021).
 node -e 'const c=require("./benchmark/compliance/case-catalog.json"); console.log(c.performance_scenarios.length, c.protocol.performance_workload_count, new Set(c.performance_scenarios.map(p=>p.chaincode+":"+p.transaction)).size, c.protocol.performance_method_count)'
 ```
 
-Identity attributes. Expected: `User1`–`User3` and `Admin` are `retail-bank`; `User4` and `User5` are `wholesale-bank`. Four-eyes approval needs two officers per bank (ADR 0014).
+Identity attributes. Expected: `User1`–`User3` and `Admin` are `retail-bank`. The wholesale identities no longer exist after the retail-only revision. Four-eyes approval needs two officers per bank (ADR 0014).
 
 ```sh
-for u in User1 User2 User3 User4 User5 Admin; do openssl x509 -in "network/organizations/peerOrganizations/distributor.bi-coin/users/$u@distributor.bi-coin/msp/signcerts/cert.pem" -outform DER | strings | /usr/bin/grep -o 'distributor_id.\{0,28\}'; done
+for u in User1 User2 User3 Admin; do openssl x509 -in "network/organizations/peerOrganizations/distributor.bi-coin/users/$u@distributor.bi-coin/msp/signcerts/cert.pem" -outform DER | strings | /usr/bin/grep -o 'distributor_id.\{0,28\}'; done
 ```
 
 Repeat this check inside the runner after `new` brings the network up. The network material is regenerated there.

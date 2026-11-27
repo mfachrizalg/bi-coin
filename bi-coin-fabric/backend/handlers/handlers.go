@@ -47,6 +47,9 @@ func decodeJSON(w http.ResponseWriter, r *http.Request, target interface{}) bool
 func writeServiceError(w http.ResponseWriter, err error) {
 	var appError *services.AppError
 	if errors.As(err, &appError) {
+		if appError.Status >= http.StatusInternalServerError && appError.Cause != nil {
+			log.Printf("%s: %v", appError.Message, appError.Cause)
+		}
 		writeJSON(w, appError.Status, models.ErrorResponse{Code: string(appError.Code), Message: appError.Message})
 		return
 	}

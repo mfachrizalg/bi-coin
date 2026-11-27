@@ -118,7 +118,23 @@ async function topUpReserve(api, stamp) {
     await request('bank_indonesia', 'POST', '/issuances', { distributor_id: 'retail-bank', amount: topupAmount }, `compliance-topup-retail-${stamp}`);
 }
 
-async function prepareSubject(client, owner, { active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
+// Gateway endorsement timeouts surface as HTTP 500 during setup (seen in a pilot run). Each retry onboards a new subject, so an abandoned attempt is never used.
+async function retrySetup(task, { attempts = 3, delayMs = 5000 } = {}) {
+    for (let attempt = 1; ; attempt += 1) {
+        try {
+            return await task();
+        } catch (error) {
+            if (attempt >= attempts || !/failed with HTTP 500/.test(error.message)) throw error;
+            await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        }
+    }
+}
+
+async function prepareSubject(client, owner, options = {}) {
+    return retrySetup(() => prepareSubjectOnce(client, owner, options));
+}
+
+async function prepareSubjectOnce(client, owner, { active = false, restricted = false, releaseRequested = false, recordReview = true } = {}) {
     const id = await onboardSubject(client, owner);
     await client.request('reviewer', 'POST', `/subjects/${encodeURIComponent(id)}/endorsement-policies`);
     await client.request('reviewer', 'PUT', `/subjects/${encodeURIComponent(id)}/limits`, LIMITS);
@@ -332,7 +348,7 @@ function operationFixture({ api, scenario, id, index, stamp, attempt, owner = 'k
 // transaction in flight never shares a key with the next round.
 const POOLED_PROFILES = new Set(['retail-transfer-pair', 'float-subject']);
 const TOPUP_PROFILES = new Set(['monetary', 'float-subject', 'retail-transfer-pair']);
-const SETUP_CONCURRENCY = 64;
+const SETUP_CONCURRENCY = 32;
 const FUNDING_BATCH = 1024;
 const SENDER_FUNDING = 200; // units per sender; each measured transfer moves 1 unit
 const BANK_REFILL_MINIMUM = 10000000; // needs the verified ceiling, and stays below the 20000000 holdings limit
@@ -558,4 +574,4 @@ async function prepareFixturePool({ api, catalogScenario, count, stamp, outputPa
     return document.fixtures;
 }
 
-module.exports = { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, SENDER_FUNDING, solidPNG, topUpReserve };
+module.exports = { fundingSchedule, operationFixture, prepareAccessMatrixFixtures, prepareFixturePool, retrySetup, SENDER_FUNDING, solidPNG, topUpReserve };
