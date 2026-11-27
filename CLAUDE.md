@@ -228,3 +228,10 @@ The five default triage roles are recorded as local status strings. See `docs/ag
 ### Domain docs
 
 Single-context layout, with existing Fabric context and ADRs read for Fabric work. See `docs/agents/domain.md`.
+
+## Go and Fabric work (always)
+
+- Go code (`*.go`, `go.mod`): before writing, reviewing, or testing Go, load the matching `cc-skills-golang:golang-*` skill and follow it. Start with `golang-code-style`, `golang-error-handling`, and `golang-testing`.
+- Hyperledger Fabric work (chaincode, channel, network, Gateway SDK, Fabric errors, benchmark Fabric behavior): query through the `fabric-*` MCP tools before guessing from files or shell output. For bi-coin, use `fabric-bicoin-monetary`, `fabric-bicoin-controls`, and `fabric-bicoin-payments`. `fabric-commercial`, `fabric-himbara`, and `fabric-pjp` target other networks.
+- These tools are deferred. Load their schemas with ToolSearch before the first call.
+- Applies to all Go and Fabric work in this repo, including thesis code and the benchmark. Do not skip it because a change looks small.
